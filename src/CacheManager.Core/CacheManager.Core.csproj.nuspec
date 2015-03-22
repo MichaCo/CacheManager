@@ -16,7 +16,7 @@
       You may also want to install one of the other CacheManager packages to get other cache handle implementations etc.
     </description>
     <language>en-US</language>
-    <projectUrl>https://github.com/MichaCo/CacheManager</projectUrl>
+    <projectUrl>http://michaco.github.io/CacheManager/</projectUrl>
     <licenseUrl>https://github.com/MichaCo/CacheManager/blob/master/LICENSE</licenseUrl>
     <dependencies>
     </dependencies>
