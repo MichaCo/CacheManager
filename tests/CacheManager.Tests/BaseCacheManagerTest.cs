@@ -140,7 +140,6 @@ namespace CacheManager.Tests
                         .EnableStatistics();
                 });
 
-                cache.Clear();
                 return cache;
             }
         }
@@ -166,14 +165,8 @@ namespace CacheManager.Tests
                             ))
                         .WithHandle<RedisCacheHandle<object>>("redisCache")
                         .EnableStatistics();
-
-                    settings
-                        .WithUpdateMode(CacheUpdateMode.Up)
-                        .WithHandle<MemoryCacheHandle>("cache2")
-                            .EnableStatistics();
                 });
 
-                cache.Clear();
                 return cache;
             }
         }

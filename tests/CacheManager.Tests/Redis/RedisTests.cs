@@ -77,7 +77,7 @@ namespace CacheManager.Tests.Redis
             (cache) =>
             {
                 cache.Get(item.Key).Should().BeNull();
-            }, 100, this.WithSystemAndRedisCache, this.WithSystemAndRedisCache, this.WithRedisCache, this.WithSystemAndRedisCache);
+            }, 10, this.WithSystemAndRedisCache, this.WithSystemAndRedisCache, this.WithRedisCache, this.WithSystemAndRedisCache);
         }
 
         [Fact]
@@ -144,7 +144,7 @@ namespace CacheManager.Tests.Redis
         public void Redis_Absolute_DoesExpire()
         {
             // arrange
-            var item = new CacheItem<object>("key", "something", ExpirationMode.Absolute, TimeSpan.FromMilliseconds(200));
+            var item = new CacheItem<object>("key", "something", ExpirationMode.Absolute, TimeSpan.FromMilliseconds(50));
             var cache = this.WithRedisCache;
 
             // act/assert
@@ -159,11 +159,11 @@ namespace CacheManager.Tests.Redis
 
                     // assert
                     result.Should().BeTrue();
-                    Thread.Sleep(10);
+                    Thread.Sleep(30);
                     var value = cache.GetCacheItem(item.Key);
                     value.Should().NotBeNull();
 
-                    Thread.Sleep(500);
+                    Thread.Sleep(30);
                     var valueExpired = cache.GetCacheItem(item.Key);
                     valueExpired.Should().BeNull();
                 }
@@ -175,8 +175,8 @@ namespace CacheManager.Tests.Redis
         public void Redis_Sliding_DoesExpire()
         {
             // arrange
-            var item = new CacheItem<object>("key", "something", ExpirationMode.Sliding, TimeSpan.FromMilliseconds(200));
-            var cache = this.WithRedisCache;
+            var item = new CacheItem<object>("key", "something", ExpirationMode.Sliding, TimeSpan.FromMilliseconds(50));
+            var cache = this.WithSystemAndRedisCache;
 
             // act/assert
             using (cache)
@@ -194,12 +194,12 @@ namespace CacheManager.Tests.Redis
                     // 450ms added so absolute would be expired on the 2nd go
                     for (int s = 0; s < 3; s++)
                     {
-                        Thread.Sleep(150);
+                        Thread.Sleep(30);
                         var value = cache.GetCacheItem(item.Key);
                         value.Should().NotBeNull();
                     }
 
-                    Thread.Sleep(300);
+                    Thread.Sleep(60);
                     var valueExpired = cache.GetCacheItem(item.Key);
                     valueExpired.Should().BeNull();
                 }
@@ -211,8 +211,8 @@ namespace CacheManager.Tests.Redis
         public void Redis_Sliding_DoesExpire_WithRegion()
         {
             // arrange
-            var item = new CacheItem<object>("key", "something", "region", ExpirationMode.Sliding, TimeSpan.FromMilliseconds(200));
-            var cache = this.WithRedisCache;
+            var item = new CacheItem<object>("key", "something", "region", ExpirationMode.Sliding, TimeSpan.FromMilliseconds(50));
+            var cache = this.WithSystemAndRedisCache;
 
             // act/assert
             using (cache)
@@ -230,12 +230,12 @@ namespace CacheManager.Tests.Redis
                     // 450ms added so absolute would be expired on the 2nd go
                     for (int s = 0; s < 3; s++)
                     {
-                        Thread.Sleep(150);
+                        Thread.Sleep(30);
                         var value = cache.GetCacheItem(item.Key, item.Region);
                         value.Should().NotBeNull();
                     }
 
-                    Thread.Sleep(300);
+                    Thread.Sleep(60);
                     var valueExpired = cache.GetCacheItem(item.Key, item.Region);
                     valueExpired.Should().BeNull();
                 }
@@ -244,7 +244,83 @@ namespace CacheManager.Tests.Redis
 
         [Fact]
         [Trait("IntegrationTest", "Redis")]
-        public void Redis_RaceCondition_WithoutCasHandling()
+        public void Redis_Sliding_DoesExpire_MultiClients()
+        {
+            // arrange
+            var item = new CacheItem<object>("key", "something", ExpirationMode.Sliding, TimeSpan.FromMilliseconds(50));
+            var cacheA = this.WithSystemAndRedisCache;
+            var cacheB = this.WithSystemAndRedisCache;
+
+            // act/assert
+            using (cacheA)
+            using (cacheB)
+            {
+                cacheA.Clear();
+                cacheB.Clear();
+
+                // act
+                var result = cacheA.Add(item);
+
+                var valueB = cacheB.Get(item.Key);
+
+                // assert
+                result.Should().BeTrue();
+                item.Value.Should().Be(valueB);
+
+                // 450ms added so absolute would be expired on the 2nd go
+                for (int s = 0; s < 3; s++)
+                {
+                    Thread.Sleep(40);
+                    cacheA.GetCacheItem(item.Key).Should().NotBeNull();
+                    cacheB.GetCacheItem(item.Key).Should().NotBeNull();
+                }
+
+                Thread.Sleep(100);
+                cacheA.GetCacheItem(item.Key).Should().BeNull();
+                cacheB.GetCacheItem(item.Key).Should().BeNull();                
+            }
+        }
+        
+        [Fact]
+        [Trait("IntegrationTest", "Redis")]
+        public void Redis_Absolute_DoesExpire_MultiClients()
+        {
+            // arrange
+            var cacheA = this.WithSystemAndRedisCache;
+            var cacheB = this.WithSystemAndRedisCache;
+
+            // act/assert
+            using (cacheA)
+            using (cacheB)
+            {
+                cacheA.Clear();
+                cacheB.Clear();
+
+                // act
+                var item = new CacheItem<object>("key", "something", ExpirationMode.Absolute, TimeSpan.FromMilliseconds(50));
+            
+                var result = cacheA.Add(item);
+
+                var itemB = cacheB.GetCacheItem(item.Key);
+
+                // assert
+                result.Should().BeTrue();
+                item.Value.Should().Be(itemB.Value);
+
+                Thread.Sleep(30);
+                cacheA.GetCacheItem(item.Key).Should().NotBeNull();
+                cacheB.GetCacheItem(item.Key).Should().NotBeNull();
+
+                // after 210ms both it should be expired
+                Thread.Sleep(30);
+                cacheA.GetCacheItem(item.Key).Should().BeNull();
+                cacheB.GetCacheItem(item.Key).Should().BeNull();
+            }
+        }
+
+        [Fact]
+        [Trait("IntegrationTest", "Redis")]
+        public void Redis_RaceCondition_WithoutUpdate()
         {
             using (var cache = CacheFactory.Build<RaceConditionTestElement>("myCache", settings =>
             {
@@ -288,7 +364,7 @@ namespace CacheManager.Tests.Redis
 
         [Fact]
         [Trait("IntegrationTest", "Redis")]
-        public void Redis_NoRaceCondition_WithCasHandling()
+        public void Redis_NoRaceCondition_WithUpdate()
         {
             using (var cache = CacheFactory.Build<RaceConditionTestElement>("myCache", settings =>
             {

@@ -33,11 +33,11 @@ namespace CacheManager.Config.Tests
                     //    //.WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1))
                     //;
 
-                    //cfg.WithHandle<MemoryCacheHandle<int>>("default")
-                    //    //.DisableStatistics()
-                    //    .EnablePerformanceCounters()
-                    //    //.WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMilliseconds(20)
-                    //;
+                    cfg.WithHandle<MemoryCacheHandle<int>>("default")
+                        //.DisableStatistics()
+                        //.EnablePerformanceCounters()
+                        //.WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMilliseconds(20)
+                    ;
 
                     cfg.WithHandle<RedisCacheHandle<int>>("redis")
                         //.EnablePerformanceCounters()
@@ -85,7 +85,7 @@ namespace CacheManager.Config.Tests
             var threads = 500;
             var items = 100;
             var ops = 1 /* add ,update*2, get in our test method */
-                * threads * items + 1;
+                * threads * items + (items);
 
             var rand = new Random();
             var key = "key";
@@ -101,6 +101,7 @@ namespace CacheManager.Config.Tests
                 for (var ta = 0; ta < items; ta++)
                 {
                     var v = cache.Get(key + ta);
+                    //cache.Put(key + ta, 1111);
                 }
 
                 Thread.Sleep(0);

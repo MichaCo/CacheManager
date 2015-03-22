@@ -136,7 +136,7 @@ namespace CacheManager.Core
 
         public TimeSpan ExpirationTimeout { get; internal set; }
 
-        public DateTime CreatedUtc { get; private set; }
+        public DateTime CreatedUtc { get; set; }
 
         public DateTime LastAccessedUtc { get; set; }
     }

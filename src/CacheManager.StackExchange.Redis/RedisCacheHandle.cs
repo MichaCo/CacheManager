@@ -33,6 +33,7 @@ namespace CacheManager.StackExchange.Redis
 
         // expiration timeout stored as long
         private const string HashFieldExpirationTimeout = "timeout";
+        private const string HashFieldCreated = "created";
 
         private static readonly IRedisValueConverter<TCacheValue> valueConverter = new RedisValueConverter() as IRedisValueConverter<TCacheValue>;
         private StackRedis.ConnectionMultiplexer connection = null;
@@ -251,15 +252,17 @@ namespace CacheManager.StackExchange.Redis
 
 
                 StackRedis.HashEntry[] metaValues = null;
-                if (item.ExpirationMode == ExpirationMode.Sliding)
+                if (item.ExpirationMode != ExpirationMode.None)
                 {
                     metaValues = new[]
                     {
                         new StackRedis.HashEntry(HashFieldExpirationMode, (int)item.ExpirationMode),
-                        new StackRedis.HashEntry(HashFieldExpirationTimeout, item.ExpirationTimeout.Ticks)
+                        new StackRedis.HashEntry(HashFieldExpirationTimeout, item.ExpirationTimeout.Ticks),
+                        new StackRedis.HashEntry(HashFieldCreated, item.CreatedUtc.Ticks)
                     };
                 }
 
+                // update region lookup
                 if (!string.IsNullOrWhiteSpace(item.Region))
                 {
                     this.Database.HashSet(item.Region, item.Key, "regionKey", when, StackRedis.CommandFlags.FireAndForget);
@@ -350,10 +353,18 @@ namespace CacheManager.StackExchange.Redis
 
                 // getting both, the value and, if exists, the expiration mode. 
                 // if that one is set and it is sliding, we also retrieve the timeout later
-                var hash = this.Database.HashGet(fullKey, new StackRedis.RedisValue[] { HashFieldValue, HashFieldExpirationMode });
+                var values = this.Database.HashGet(fullKey, new StackRedis.RedisValue[] { 
+                    HashFieldValue, 
+                    HashFieldExpirationMode,
+                    HashFieldExpirationTimeout,
+                    HashFieldCreated
+                });
 
                 // the first item stores the value
-                var item = hash[0];
+                var item = values[0]; 
+                var expirationModeItem = values[1];
+                var timeoutItem = values[2];
+                var createdItem = values[3];
                 
                 if (!item.HasValue || item.IsNullOrEmpty || item.IsNull)
                 {
@@ -361,37 +372,30 @@ namespace CacheManager.StackExchange.Redis
                 }
 
                 var expirationMode = ExpirationMode.None;
-                var expirationTimeout = TimeSpan.Zero;
+                var expirationTimeout = default(TimeSpan);
 
                 // checking if the expiration mode is set on the hash
-                var expirationModeItem = hash[1];
-                if (expirationModeItem.HasValue)
+                
+                if (expirationModeItem.HasValue && timeoutItem.HasValue)
                 {
                     expirationMode = (ExpirationMode)(int)expirationModeItem;
-
-                    // only sliding will be handled on get because we have to extend via EXPIRE
-                    if (expirationMode == ExpirationMode.Sliding)
-                    {
-                        var timeoutItem = this.Database.HashGet(fullKey, HashFieldExpirationTimeout);
-                        if (timeoutItem.HasValue)
-                        {
-                            expirationTimeout = TimeSpan.FromTicks((long)timeoutItem);
-                        }
-                    }
+                    expirationTimeout = TimeSpan.FromTicks((long)timeoutItem);
                 }
 
                 var value = FromRedisValue(item);
-                
-                var cacheItem = string.IsNullOrWhiteSpace(region) ?
-                    new CacheItem<TCacheValue>(key, value) : 
-                    new CacheItem<TCacheValue>(key, value, region);
 
-                if (expirationMode == ExpirationMode.Sliding && expirationTimeout != default(TimeSpan))
-                {
-                    cacheItem = string.IsNullOrWhiteSpace(region) ?
-                        new CacheItem<TCacheValue>(key, value, expirationMode, expirationTimeout) : 
+                var cacheItem = string.IsNullOrWhiteSpace(region) ?
+                        new CacheItem<TCacheValue>(key, value, expirationMode, expirationTimeout) :
                         new CacheItem<TCacheValue>(key, value, region, expirationMode, expirationTimeout);
 
+                if (createdItem.HasValue)
+                {
+                    cacheItem.CreatedUtc = new DateTime((long)createdItem);
+                }
+
+                // update sliding
+                if (expirationMode == ExpirationMode.Sliding && expirationTimeout != default(TimeSpan))
+                {
                     this.Database.KeyExpire(fullKey, cacheItem.ExpirationTimeout, StackRedis.CommandFlags.FireAndForget);
                 }
 
@@ -580,11 +584,15 @@ namespace CacheManager.StackExchange.Redis
                 {
                     Task.Delay(this.Manager.Configuration.RetryTimeout).Wait();
                 }
+                catch (System.TimeoutException)
+                {
+                    Task.Delay(this.Manager.Configuration.RetryTimeout).Wait();
+                }
                 catch (AggregateException ag)
                 {
                     ag.Handle(e =>
                     {
-                        if (e is StackRedis.RedisConnectionException)
+                        if (e is StackRedis.RedisConnectionException || e is System.TimeoutException)
                         {
                             Task.Delay(this.Manager.Configuration.RetryTimeout).Wait();
                             return true;
