@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>$id$</id>
+    <title>$id$</title>
+    <version>$version$</version>
+    <authors>$author$</authors>
+    <owners>$author$</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <summary>
+      CacheManager is a common interface and abstraction layer for caching.
+      It supports various cache providers / clients and includes advanced features.
+    </summary>
+    <description>
+      $description$
+      This package contains the specific cache handle for AppFabric 1.1.
+      
+      Do not install both, AppFabric and WindowsAzure CacheManager Nugets!
+    </description>
+    <language>en-US</language>
+    <projectUrl>http://cachemanager.codeplex.com</projectUrl>
+    <licenseUrl>http://cachemanager.codeplex.com/license</licenseUrl>
+    <dependencies>
+      <dependency id="CacheManager.Core"  version="$version$"/>
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="app.config.transform" target="content/app.config.transform" />
+    <file src="app.config.transform" target="content/web.config.transform" />
+  </files>
+</package>

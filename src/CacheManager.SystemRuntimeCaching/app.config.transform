@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+<cacheManager xmlns="http://tempuri.org/CacheManagerCfg.xsd">
+<cacheHandles>
+<handleDef id="sysCache" type="CacheManager.SystemRuntimeCaching.MemoryCacheHandle`1, CacheManager.SystemRuntimeCaching" />
+</cacheHandles>
+</cacheManager>
+</configuration>

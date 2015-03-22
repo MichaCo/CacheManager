@@ -1,0 +1,111 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema id="CacheManagerCfg"
+    targetNamespace="http://tempuri.org/CacheManagerCfg.xsd"
+    elementFormDefault="qualified"
+    xmlns="http://tempuri.org/CacheManagerCfg.xsd"
+    xmlns:mstns="http://tempuri.org/CacheManagerCfg.xsd"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+>
+  <xs:element name="handle">
+    <xs:complexType>
+      <xs:attribute name="name" use="required" type="xs:string"/>
+      <xs:attribute name="ref" use="required" type="xs:string"/>
+      <xs:attribute name="timeout" use="optional" type="xs:string"/>
+      <xs:attribute name="expirationMode" use="optional" type="expirationMode"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="cache">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="handle" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attribute name="name" use="required" type="xs:string"/>
+      <xs:attribute name="updateMode" use="optional" type="updateMode"/>
+      <xs:attribute name="enablePerformanceCounters" use="optional" type="xs:boolean"/>
+      <xs:attribute name="enableStatistics" use="optional" type="xs:boolean"/>
+      <xs:attribute name="maxRetries" use="optional" type="xs:integer" />
+      <xs:attribute name="retryTimeout" use="optional" type="xs:integer" />
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="handleDef">
+    <xs:complexType>
+      <xs:attribute name="id" use="required" type="xs:string"/>
+      <xs:attribute name="type" use="required" type="xs:string"/>
+      <xs:attribute name="defaultTimeout" use="optional" type="xs:string"/>
+      <xs:attribute name="defaultExpirationMode" use="optional" type="expirationMode"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="managers">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="cache" minOccurs="0" maxOccurs="unbounded" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="cacheHandles">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="handleDef" minOccurs="0" maxOccurs="unbounded" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="endpoint">
+    <xs:complexType>
+      <xs:attribute name="host" use="required" type="xs:string" />
+      <xs:attribute name="port" use="required" type="xs:integer" />
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="endpoints">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="endpoint" minOccurs="1" maxOccurs="unbounded" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="redisOption">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="endpoints" />
+      </xs:sequence>
+      <xs:attribute name="id" use="required" type="xs:string" />
+      <xs:attribute name="connectionString" use="optional" type="xs:string" />
+      <xs:attribute name="connectionTimeout" use="optional" type="xs:integer" default="5000" />
+      <xs:attribute name="allowAdmin" use="optional" type="xs:boolean" default="false"/>
+      <xs:attribute name="password" use="optional" type="xs:string" />
+      <xs:attribute name="ssl" use="optional" type="xs:string" />
+      <xs:attribute name="sslHost" use="optional" type="xs:string" />
+      <xs:attribute name="database" use="optional" type="xs:integer" default="0" />
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="redis">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="redisOption" minOccurs="0" maxOccurs="unbounded">
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="cacheManager">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="redis" minOccurs="0" maxOccurs="1" />
+        <xs:element ref="managers" minOccurs="0" maxOccurs="1" />
+        <xs:element ref="cacheHandles" minOccurs="0" maxOccurs="1" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:simpleType name="expirationMode">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="None" />
+      <xs:enumeration value="Sliding" />
+      <xs:enumeration value="Absolute" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="updateMode">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="None" />
+      <xs:enumeration value="Up" />
+      <xs:enumeration value="Full" />
+    </xs:restriction>
+  </xs:simpleType>
+</xs:schema>

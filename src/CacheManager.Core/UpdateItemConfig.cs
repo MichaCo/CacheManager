@@ -1,0 +1,78 @@
+﻿using System;
+
+namespace CacheManager.Core
+{
+    /// <summary>
+    /// Defines the options for handling version conflicts during update operations.
+    /// </summary>
+    public enum VersionConflictHandling
+    {
+        /// <summary>
+        /// Instructs the cache manager to remove the item on all other cache handles,
+        /// if a version conflict occurs.
+        /// </summary>
+        EvictItemFromOtherCaches,
+
+        /// <summary>
+        /// Instructs the cache manager to update the other cache handles with the 
+        /// updated item, if a version conflict occurs.
+        /// </summary>
+        UpdateOtherCaches,
+
+        /// <summary>
+        /// Instructs the cache manager to ignore conflicts.
+        /// </summary>
+        Ignore
+    }
+
+    /// <summary>
+    /// The object is used to specify the update operations of the cache manager.
+    /// </summary>
+    public class UpdateItemConfig
+    {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="UpdateItemConfig"/> class with default values.
+        /// </summary>
+        public UpdateItemConfig()
+        {
+            this.MaxRetries = int.MaxValue;
+            this.VersionConflictOperation = VersionConflictHandling.EvictItemFromOtherCaches;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="UpdateItemConfig"/> class with default value for max retries.
+        /// </summary>
+        public UpdateItemConfig(VersionConflictHandling conflictHandling)
+            :this()
+        {
+            this.VersionConflictOperation = conflictHandling;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="UpdateItemConfig"/> class with the specified values.
+        /// </summary>
+        public UpdateItemConfig(int maxRetries, VersionConflictHandling conflictHandling)
+        {
+            if (maxRetries < 0)
+            {
+                throw new ArgumentException("maxRetries must be greater than or equal to 0.");
+            }
+
+            this.MaxRetries = maxRetries;
+
+            this.VersionConflictOperation = conflictHandling;
+        }
+
+        /// <summary>
+        /// Gets the number of retries the update operation is allowed to make.
+        /// <para>Default are <see cref="int.MaxValue"/></para>
+        /// </summary>
+        public int MaxRetries { get; private set; }
+
+        /// <summary>
+        /// Gets the <see cref="VersionConflictHandling"/> which drives the cache manager if a
+        /// version conflict occurs.
+        /// </summary>
+        public VersionConflictHandling VersionConflictOperation { get; private set; }
+    }
+}

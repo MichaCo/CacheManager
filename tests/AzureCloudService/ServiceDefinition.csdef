@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ServiceDefinition name="AzureCloudService" xmlns="http://schemas.microsoft.com/ServiceHosting/2008/10/ServiceDefinition" schemaVersion="2014-06.2.4">
+  <WorkerRole name="AzureCacheWorker" vmsize="Small">
+    <Endpoints>
+      <InputEndpoint name="default" protocol="tcp" port="24233" />
+      <InputEndpoint name="Endpoint1" protocol="tcp" port="10100" localPort="8088" />
+    </Endpoints>
+    <Imports>
+      <Import moduleName="Caching" />
+    </Imports>
+    <LocalResources>
+      <LocalStorage name="DiagnosticStore" sizeInMB="20000" cleanOnRoleRecycle="false" />
+    </LocalResources>
+  </WorkerRole>
+</ServiceDefinition>
