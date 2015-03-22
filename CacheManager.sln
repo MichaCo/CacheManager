@@ -16,8 +16,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "common", "common", "{A8DA8B
 		COPYRIGHT.txt = COPYRIGHT.txt
 		CREDITS.txt = CREDITS.txt
 		common\GlobalAssemblyInfo.cs = common\GlobalAssemblyInfo.cs
-		Local.testsettings = Local.testsettings
 		LICENSE = LICENSE
+		Local.testsettings = Local.testsettings
 		README.md = README.md
 		common\Settings.StyleCop = common\Settings.StyleCop
 	EndProjectSection
