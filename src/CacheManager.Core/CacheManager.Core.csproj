@@ -36,10 +36,11 @@
     <DocumentationFile>bin\Release\CacheManager.Core.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup>
-    <SignAssembly>true</SignAssembly>
+    <SignAssembly>false</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
-    <AssemblyOriginatorKeyFile>CacheManager.pfx</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <PropertyGroup>
     <DelaySign>false</DelaySign>
@@ -92,7 +93,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="CacheManager.Core.csproj.nuspec" />
-    <None Include="CacheManager.pfx" />
     <None Include="CacheManagerCfg.xsd">
       <SubType>Designer</SubType>
     </None>

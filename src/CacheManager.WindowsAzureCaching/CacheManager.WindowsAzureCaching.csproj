@@ -41,10 +41,11 @@
     <StartupObject />
   </PropertyGroup>
   <PropertyGroup>
-    <SignAssembly>true</SignAssembly>
+    <SignAssembly>false</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
-    <AssemblyOriginatorKeyFile>CacheManager.pfx</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.ApplicationServer.Caching.AzureClientHelper, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -90,7 +91,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config.transform" />
-    <None Include="CacheManager.pfx" />
     <None Include="CacheManager.WindowsAzureCaching.csproj.nuspec" />
     <None Include="Microsoft.WindowsAzure.Caching\ClientPerfCountersInstaller.exe.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

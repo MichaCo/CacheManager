@@ -16,8 +16,8 @@
       This package contains the specific cache handle for System.Runtime.Caching.MemoryCache.
     </description>
     <language>en-US</language>
-    <projectUrl>http://cachemanager.codeplex.com</projectUrl>
-    <licenseUrl>http://cachemanager.codeplex.com/license</licenseUrl>
+    <projectUrl>https://github.com/MichaCo/CacheManager</projectUrl>
+    <licenseUrl>https://github.com/MichaCo/CacheManager/blob/master/LICENSE</licenseUrl>
     <frameworkAssemblies>
       <frameworkAssembly assemblyName="System.Runtime.Caching"/>
     </frameworkAssemblies>

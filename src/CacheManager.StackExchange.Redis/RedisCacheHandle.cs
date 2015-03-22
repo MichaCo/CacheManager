@@ -141,7 +141,7 @@ namespace CacheManager.StackExchange.Redis
         {
             if (disposeManaged)
             {
-                this.Connection.Dispose();
+                this.connection.Dispose();
             }
 
             base.Dispose(disposeManaged);

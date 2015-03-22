@@ -13,12 +13,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CacheManager.Tests", "tests
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "common", "common", "{A8DA8B90-61EA-43AB-AD71-22C248780401}"
 	ProjectSection(SolutionItems) = preProject
-		common\CacheManager.pfx = common\CacheManager.pfx
 		COPYRIGHT.txt = COPYRIGHT.txt
 		CREDITS.txt = CREDITS.txt
 		common\GlobalAssemblyInfo.cs = common\GlobalAssemblyInfo.cs
-		LICENSE.txt = LICENSE.txt
 		Local.testsettings = Local.testsettings
+		LICENSE = LICENSE
+		README.md = README.md
 		common\Settings.StyleCop = common\Settings.StyleCop
 	EndProjectSection
 EndProject

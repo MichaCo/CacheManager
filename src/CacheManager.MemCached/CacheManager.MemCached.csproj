@@ -34,10 +34,11 @@
     <DocumentationFile>bin\Release\CacheManager.Memcached.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup>
-    <SignAssembly>true</SignAssembly>
+    <SignAssembly>false</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
-    <AssemblyOriginatorKeyFile>CacheManager.pfx</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Enyim.Caching">
@@ -72,7 +73,6 @@
     <None Include="app.config" />
     <None Include="app.config.transform" />
     <None Include="CacheManager.Memcached.csproj.nuspec" />
-    <None Include="CacheManager.pfx" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
