@@ -17,7 +17,7 @@ namespace CacheManager.Tests
     /// </remarks>
     /// </summary>
     [ExcludeFromCodeCoverage]
-    public class CacheManagerTestData : IEnumerable<object[]>
+    public class BaseCacheManagerTest
     {
         public ICacheManager<object> WithOneMemoryCacheHandleSliding
         {
@@ -126,7 +126,7 @@ namespace CacheManager.Tests
         {
             get
             {
-                return CacheFactory.Build("cache", settings =>
+                var cache = CacheFactory.Build("cache", settings =>
                 {
                     settings
                         .WithMaxRetries(100)
@@ -139,6 +139,9 @@ namespace CacheManager.Tests
                         .WithHandle<RedisCacheHandle<object>>("redisCache")
                         .EnableStatistics();
                 });
+
+                cache.Clear();
+                return cache;
             }
         }
 
@@ -146,7 +149,7 @@ namespace CacheManager.Tests
         {
             get
             {
-                return CacheFactory.Build("cache", settings =>
+                var cache = CacheFactory.Build("cache", settings =>
                 {
                     settings
                         .WithUpdateMode(CacheUpdateMode.Up)
@@ -158,8 +161,7 @@ namespace CacheManager.Tests
                         .WithRedisConfiguration(new RedisConfiguration(
                             "redisCache",
                             new List<ServerEndPoint>() { new ServerEndPoint("127.0.0.1", 6379) },
-                            allowAdmin: true, 
-                            database: 1
+                            allowAdmin: true
                         //, connectionTimeout: 0 /*<- for testing connection timeout this is handy*/
                             ))
                         .WithHandle<RedisCacheHandle<object>>("redisCache")
@@ -170,6 +172,9 @@ namespace CacheManager.Tests
                         .WithHandle<MemoryCacheHandle>("cache2")
                             .EnableStatistics();
                 });
+
+                cache.Clear();
+                return cache;
             }
         }
 
@@ -189,22 +194,18 @@ namespace CacheManager.Tests
             }
         }
 
-        public IEnumerator<object[]> GetEnumerator()
+        public static IEnumerable<object[]> GetCacheManagers()
         {
-            yield return new object[] { WithOneMemoryCacheHandleSliding };
-            yield return new object[] { WithOneDicCacheHandle };
-            yield return new object[] { WithOneMemoryCacheHandle };
-            yield return new object[] { WithMemoryAndDictionaryHandles };
-            yield return new object[] { WithManyDictionaryHandles };
-            yield return new object[] { WithTwoNamedMemoryCaches };
-            yield return new object[] { WithRedisCache };
-            yield return new object[] { WithSystemAndRedisCache };
-            //yield return new object[] { WithMemcached };
-        }
-
-        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
+            var data = new BaseCacheManagerTest();
+            yield return new object[] { data.WithOneMemoryCacheHandleSliding };
+            yield return new object[] { data.WithOneDicCacheHandle };
+            yield return new object[] { data.WithOneMemoryCacheHandle };
+            yield return new object[] { data.WithMemoryAndDictionaryHandles };
+            yield return new object[] { data.WithManyDictionaryHandles };
+            yield return new object[] { data.WithTwoNamedMemoryCaches };
+            // yield return new object[] { data.WithRedisCache };
+            yield return new object[] { data.WithSystemAndRedisCache };
+            // yield return new object[] { WithMemcached };
         }
     }
 }

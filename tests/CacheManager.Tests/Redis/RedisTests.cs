@@ -17,13 +17,12 @@ namespace CacheManager.Tests.Redis
     /// To run the memcached test, run the bat files under /memcached before executing the tests!
     /// </summary>
     [ExcludeFromCodeCoverage]
-    public class RedisTests
+    public class RedisTests : BaseCacheManagerTest
     {
         [Fact]
         [Trait("IntegrationTest", "Redis")]
         public void Redis_Multiple_PubSub_Remove()
         {
-            var data = new CacheManagerTestData();
             // arrange
             var item = new CacheItem<object>("key", "something");
             
@@ -37,14 +36,13 @@ namespace CacheManager.Tests.Redis
             (cache) =>
             {
                 cache.GetCacheItem(item.Key).Should().BeNull();
-            }, 10, data.WithSystemAndRedisCache, data.WithSystemAndRedisCache, data.WithRedisCache, data.WithSystemAndRedisCache);
+            }, 10, this.WithSystemAndRedisCache, this.WithSystemAndRedisCache, this.WithRedisCache, this.WithSystemAndRedisCache);
         }
 
         [Fact]
         [Trait("IntegrationTest", "Redis")]
         public void Redis_Multiple_PubSub_Change()
         {
-            var data = new CacheManagerTestData();
             // arrange
             var item = new CacheItem<object>("key", "something");
 
@@ -59,14 +57,13 @@ namespace CacheManager.Tests.Redis
             {
                 var val = cache.Get(item.Key);
                 cache.Get(item.Key).Should().Be("new value");
-            }, 10, data.WithSystemAndRedisCache, data.WithSystemAndRedisCache, data.WithRedisCache, data.WithSystemAndRedisCache);
+            }, 10, this.WithSystemAndRedisCache, this.WithSystemAndRedisCache, this.WithRedisCache, this.WithSystemAndRedisCache);
         }
 
         [Fact]
         [Trait("IntegrationTest", "Redis")]
         public void Redis_Multiple_PubSub_Clear()
         {
-            var data = new CacheManagerTestData();
             // arrange
             var item = new CacheItem<object>("key", "something");
 
@@ -80,14 +77,13 @@ namespace CacheManager.Tests.Redis
             (cache) =>
             {
                 cache.Get(item.Key).Should().BeNull();
-            }, 100, data.WithSystemAndRedisCache, data.WithSystemAndRedisCache, data.WithRedisCache, data.WithSystemAndRedisCache);
+            }, 100, this.WithSystemAndRedisCache, this.WithSystemAndRedisCache, this.WithRedisCache, this.WithSystemAndRedisCache);
         }
 
         [Fact]
         [Trait("IntegrationTest", "Redis")]
         public void Redis_Multiple_PubSub_ClearRegion()
         {
-            var data = new CacheManagerTestData();
             // arrange
             var item = new CacheItem<object>("key", "something", "regionA");
 
@@ -101,7 +97,7 @@ namespace CacheManager.Tests.Redis
             (cache) =>
             {
                 cache.Get(item.Key, item.Region).Should().BeNull();
-            }, 10, data.WithSystemAndRedisCache, data.WithSystemAndRedisCache, data.WithRedisCache, data.WithSystemAndRedisCache);
+            }, 10, this.WithSystemAndRedisCache, this.WithSystemAndRedisCache, this.WithRedisCache, this.WithSystemAndRedisCache);
         }
 
         private static void RunMultipleCaches<TCache>(
@@ -149,7 +145,7 @@ namespace CacheManager.Tests.Redis
         {
             // arrange
             var item = new CacheItem<object>("key", "something", ExpirationMode.Absolute, TimeSpan.FromMilliseconds(200));
-            var cache = new CacheManagerTestData().WithRedisCache;
+            var cache = this.WithRedisCache;
 
             // act/assert
             using (cache)
@@ -180,7 +176,7 @@ namespace CacheManager.Tests.Redis
         {
             // arrange
             var item = new CacheItem<object>("key", "something", ExpirationMode.Sliding, TimeSpan.FromMilliseconds(200));
-            var cache = new CacheManagerTestData().WithRedisCache;
+            var cache = this.WithRedisCache;
 
             // act/assert
             using (cache)
@@ -216,7 +212,7 @@ namespace CacheManager.Tests.Redis
         {
             // arrange
             var item = new CacheItem<object>("key", "something", "region", ExpirationMode.Sliding, TimeSpan.FromMilliseconds(200));
-            var cache = new CacheManagerTestData().WithRedisCache;
+            var cache = this.WithRedisCache;
 
             // act/assert
             using (cache)
@@ -335,52 +331,6 @@ namespace CacheManager.Tests.Redis
                 result.Counter.Should().Be(numThreads * numInnerIterations * iterations, "counter should be exactly the expected value");
                 countCasModifyCalls.Should().BeGreaterThan((int)result.Counter, "we expect many version collisions, so cas calls should be way higher then the count result");
             }
-        }
-
-        [Fact]
-        [Trait("IntegrationTest", "Redis")]
-        public void Redis_NoRaceCondition_WithCasButTooFiewRetries()
-        {
-            // arrange
-            //using (var cache = CacheFactory.Build<RaceConditionTestElement>("myCache", settings =>
-            //{
-            //    settings.WithUpdateMode(CacheUpdateMode.Full)
-            //        .WithHandle<MemcachedCacheHandle<RaceConditionTestElement>>("default")
-            //            .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromHours(10));
-            //}))
-            //{
-            //    cache.Remove("myCounter");
-            //    cache.Add("myCounter", new RaceConditionTestElement() { Counter = 0 });
-            //    int numThreads = 5;
-            //    int iterations = 10;
-            //    int numInnerIterations = 10;
-            //    int countCasModifyCalls = 0;
-            //    int retries = 0;
-
-            //    // act
-            //ThreadTestHelper.Run(() =>
-            //{
-            //    for (int i = 0; i < numInnerIterations; i++)
-            //    {
-            //        cache.Update("myCounter", (value) =>
-            //        {
-            //            value.Counter++;
-            //            Interlocked.Increment(ref countCasModifyCalls);
-            //            return value;
-            //        }, new UpdateItemConfig(retries, VersionConflictHandling.EvictItemFromOtherCaches));
-            //    }
-            //}, numThreads, iterations);
-
-            //    // assert
-            //    Thread.Sleep(10);
-            //    var result = cache.Get("myCounter");
-            //    result.Should().NotBeNull();
-            //    Trace.TraceInformation("Counter increased to " + result.Counter + " cas calls needed " + countCasModifyCalls);
-            //    result.Counter.Should().BeLessThan(numThreads * numInnerIterations * iterations, 
-            //        "counter should NOT be exactly the expected value");
-            //    countCasModifyCalls.Should().Be(numThreads * numInnerIterations * iterations, 
-            //        "with one try, we exactly one update call per iteration");
-            //}
         }
     }
 

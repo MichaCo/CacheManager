@@ -4,7 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using CacheManager.Core;
 using FluentAssertions;
-using Xunit.Extensions;
+using Xunit;
 
 namespace CacheManager.Tests.Core
 {
@@ -13,10 +13,10 @@ namespace CacheManager.Tests.Core
     /// Validates that remove removes an item from all handles defined.
     /// </summary>
     [ExcludeFromCodeCoverage]
-    public class CacheManagerRegionTests
+    public class CacheManagerRegionTests : BaseCacheManagerTest
     {
         [Theory]
-        [ClassData(typeof(CacheManagerTestData))]
+        [MemberData("GetCacheManagers")]
         public void CacheManager_Region_AddItems_UseSameKeys<T>(T cache) where T : ICacheManager<object>
         {
             using (cache)
@@ -55,7 +55,7 @@ namespace CacheManager.Tests.Core
         }
 
         [Theory]
-        [ClassData(typeof(CacheManagerTestData))]
+        [MemberData("GetCacheManagers")]
         public void CacheManager_Region_AddItems_UseDifferentKeys<T>(T cache) where T : ICacheManager<object>
         {
             using (cache)
@@ -87,7 +87,7 @@ namespace CacheManager.Tests.Core
         }
 
         [Theory]
-        [ClassData(typeof(CacheManagerTestData))]
+        [MemberData("GetCacheManagers")]
         public void CacheManager_Region_ClearRegion<T>(T cache) where T : ICacheManager<object>
         {
             using (cache)
@@ -127,7 +127,7 @@ namespace CacheManager.Tests.Core
         }
 
         [Theory]
-        [ClassData(typeof(CacheManagerTestData))]
+        [MemberData("GetCacheManagers")]
         public void CacheManager_Region_Put_ModifySomeItems<T>(T cache) where T : ICacheManager<object>
         {
             using (cache)
@@ -179,7 +179,7 @@ namespace CacheManager.Tests.Core
         }
 
         [Theory]
-        [ClassData(typeof(CacheManagerTestData))]
+        [MemberData("GetCacheManagers")]
         public void CacheManager_Region_RemoveItem_RandomRemoveSomeItems<T>(T cache) where T : ICacheManager<object>
         {
             using (cache)

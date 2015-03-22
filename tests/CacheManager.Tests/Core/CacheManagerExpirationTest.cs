@@ -9,7 +9,6 @@ using CacheManager.Core.Configuration;
 using CacheManager.Tests.TestCommon;
 using FluentAssertions;
 using Xunit;
-using Xunit.Extensions;
 
 namespace CacheManager.Tests.Core
 {

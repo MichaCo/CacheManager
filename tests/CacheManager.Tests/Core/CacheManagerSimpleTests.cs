@@ -11,7 +11,6 @@ using CacheManager.Core.Configuration;
 using CacheManager.Tests.TestCommon;
 using FluentAssertions;
 using Xunit;
-using Xunit.Extensions;
 
 namespace CacheManager.Tests.Core
 {
@@ -20,7 +19,7 @@ namespace CacheManager.Tests.Core
     /// Validates that remove removes an item from all handles defined.
     /// </summary>
     [ExcludeFromCodeCoverage]
-    public class CacheManagerSimpleTests
+    public class CacheManagerSimpleTests : BaseCacheManagerTest
     {
         #region general
 
@@ -46,7 +45,7 @@ namespace CacheManager.Tests.Core
         public void CacheManager_AddCacheItem_WithExpMode_ButWithoutTimeout()
         {
             // arrange
-            using (var cache = new CacheManagerTestData().WithManyDictionaryHandles)
+            using (var cache = this.WithManyDictionaryHandles)
             {
                 var key = "key";
 
@@ -939,7 +938,7 @@ namespace CacheManager.Tests.Core
         #endregion indexer
 
         [Theory]
-        [ClassData(typeof(CacheManagerTestData))]
+        [MemberData("GetCacheManagers")]
         [ReplaceCulture]
         public void CacheManager_CastGet_Region<T>(T cache) where T : ICacheManager<object>
         {
@@ -957,7 +956,7 @@ namespace CacheManager.Tests.Core
         }
 
         [Theory]
-        [ClassData(typeof(CacheManagerTestData))]
+        [MemberData("GetCacheManagers")]
         [ReplaceCulture]
         public void CacheManager_CastGet<T>(T cache) where T : ICacheManager<object>
         {
@@ -998,7 +997,7 @@ namespace CacheManager.Tests.Core
         }
 
         [Theory]
-        [ClassData(typeof(CacheManagerTestData))]
+        [MemberData("GetCacheManagers")]
         [ReplaceCulture]
         public void CacheManager_CastGet_InvalidTypeThrows<T>(T cache) where T : ICacheManager<object>
         {
@@ -1016,7 +1015,7 @@ namespace CacheManager.Tests.Core
         }
 
         [Theory]
-        [ClassData(typeof(CacheManagerTestData))]
+        [MemberData("GetCacheManagers")]
         [ReplaceCulture]
         public void CacheManager_SimplePut<T>(T cache) where T : ICacheManager<object>
         {
@@ -1040,7 +1039,7 @@ namespace CacheManager.Tests.Core
         }
         
         [Theory]
-        [ClassData(typeof(CacheManagerTestData))]
+        [MemberData("GetCacheManagers")]
         public void CacheManager_SimpleAdd<T>(T cache) where T : ICacheManager<object>
         {
             using (cache)
@@ -1063,7 +1062,7 @@ namespace CacheManager.Tests.Core
         }
 
         [Theory]
-        [ClassData(typeof(CacheManagerTestData))]
+        [MemberData("GetCacheManagers")]
         public void CacheManager_SimpleIndexPut<T>(T cache) where T : ICacheManager<object>
         {
             using (cache)
@@ -1086,7 +1085,7 @@ namespace CacheManager.Tests.Core
         }
 
         [Theory]
-        [ClassData(typeof(CacheManagerTestData))]
+        [MemberData("GetCacheManagers")]
         public void CacheManager_SimpleRemove<T>(T cache) where T : ICacheManager<object>
         {
             using (cache)
@@ -1110,7 +1109,7 @@ namespace CacheManager.Tests.Core
         }
 
         [Theory]
-        [ClassData(typeof(CacheManagerTestData))]
+        [MemberData("GetCacheManagers")]
         public void CacheManager_Clear_AllItemsRemoved<T>(T cache) where T : ICacheManager<object>
         {
             // arrange
@@ -1129,7 +1128,7 @@ namespace CacheManager.Tests.Core
         }
 
         [Theory]
-        [ClassData(typeof(CacheManagerTestData))]
+        [MemberData("GetCacheManagers")]
         public void CacheManager_SimpleUpdate<T>(T cache) where T : ICacheManager<object>
         {
             using (cache)

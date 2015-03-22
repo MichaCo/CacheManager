@@ -11,7 +11,7 @@ namespace CacheManager.Tests.TestCommon
     /// </summary>
     [ExcludeFromCodeCoverage]
     [AttributeUsage(AttributeTargets.Method)]
-    public class ReplaceCultureAttribute : Xunit.BeforeAfterTestAttribute
+    public class ReplaceCultureAttribute : Xunit.Sdk.BeforeAfterTestAttribute
     {
         private CultureInfo _originalCulture;
         private CultureInfo _originalUICulture;

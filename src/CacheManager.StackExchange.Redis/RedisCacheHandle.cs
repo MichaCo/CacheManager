@@ -15,6 +15,14 @@ using StackRedis = StackExchange.Redis;
 
 namespace CacheManager.StackExchange.Redis
 {
+    public class RedisCacheHandle : RedisCacheHandle<object>
+    {
+        public RedisCacheHandle(ICacheManager<object> manager, ICacheHandleConfiguration configuration)
+            : base(manager, configuration)
+        {
+        }
+    }
+
     public class RedisCacheHandle<TCacheValue> : BaseCacheHandle<TCacheValue>
     {
         // the object value
@@ -141,6 +149,7 @@ namespace CacheManager.StackExchange.Redis
         {
             if (disposeManaged)
             {
+                this.Subscriber.Unsubscribe(this.channelName);
                 this.connection.Dispose();
             }
 
@@ -190,14 +199,18 @@ namespace CacheManager.StackExchange.Redis
                 // we are storing all keys stored in the region in the hash for key=region
                 var hashKeys = this.Database.HashKeys(region);
 
-                // lets remove all keys which where in the region
-                var keys = hashKeys.Where(p => p.HasValue).Select(p => (StackRedis.RedisKey)GetKey(p, region)).ToArray();
-                var delKeysResult = this.Database.KeyDelete(keys);
-                
-                // now delete the region
-                var delRegion = this.Database.KeyDelete(region);
+                if (hashKeys.Length > 0)
+                {
+                    // lets remove all keys which where in the region
+                    var keys = hashKeys.Where(p => p.HasValue).Select(p => (StackRedis.RedisKey)GetKey(p, region)).ToArray();
+                    var delKeysResult = this.Database.KeyDelete(keys);
+                }
 
-                this.NotifyChannel(ChannelAction.ClearRegion, null, region);
+                // now delete the region
+                if (this.Database.KeyDelete(region))
+                {
+                    this.NotifyChannel(ChannelAction.ClearRegion, null, region);
+                }
             });
         }
         

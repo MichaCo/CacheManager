@@ -8,8 +8,7 @@
     <owners>$author$</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <summary>
-      CacheManager is a common interface and abstraction layer for caching.
-      It supports various cache providers / clients and includes advanced features.
+      CacheManager is a common interface and abstraction layer for caching. It supports various cache providers and implements many advanced features.
     </summary>
     <description>
       $description$

@@ -5,15 +5,15 @@ using System.Threading;
 using CacheManager.Core;
 using CacheManager.Core.Configuration;
 using CacheManager.Tests.TestCommon;
-using Xunit.Extensions;
+using Xunit;
 
 namespace CacheManager.Tests.Core
 {
     [ExcludeFromCodeCoverage]
-    public class ThreadRandomReadWriteTestBase
+    public class ThreadRandomReadWriteTestBase : BaseCacheManagerTest
     {
         [Theory]
-        [ClassData(typeof(CacheManagerTestData))]
+        [MemberData("GetCacheManagers")]
         public void Thread_RandomAccess(ICacheManager<object> cache)
         {
             foreach (var handle in cache.CacheHandles)

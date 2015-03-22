@@ -4,7 +4,7 @@ using CacheManager.Core;
 using CacheManager.Core.Cache;
 using CacheManager.Tests.TestCommon;
 using FluentAssertions;
-using Xunit.Extensions;
+using Xunit;
 
 namespace CacheManager.Tests.Core
 {
@@ -12,10 +12,10 @@ namespace CacheManager.Tests.Core
     ///
     /// </summary>
     [ExcludeFromCodeCoverage]
-    public class CacheManagerStatsTest
+    public class CacheManagerStatsTest : BaseCacheManagerTest
     {
         [Theory]
-        [ClassData(typeof(CacheManagerTestData))]
+        [MemberData("GetCacheManagers")]
         [ReplaceCulture]
         public void CacheManager_Stats_AddGet<T>(T cache) where T : ICacheManager<object>
         {
@@ -67,7 +67,7 @@ namespace CacheManager.Tests.Core
         }
 
         [Theory]
-        [ClassData(typeof(CacheManagerTestData))]
+        [MemberData("GetCacheManagers")]
         [ReplaceCulture]
         public void CacheManager_Stats_Clear<T>(T cache) where T : ICacheManager<object>
         {
@@ -92,7 +92,7 @@ namespace CacheManager.Tests.Core
         }
 
         [Theory]
-        [ClassData(typeof(CacheManagerTestData))]
+        [MemberData("GetCacheManagers")]
         [ReplaceCulture]
         public void CacheManager_Stats_ClearRegion<T>(T cache) where T : ICacheManager<object>
         {
@@ -118,7 +118,7 @@ namespace CacheManager.Tests.Core
         }
 
         [Theory]
-        [ClassData(typeof(CacheManagerTestData))]
+        [MemberData("GetCacheManagers")]
         [ReplaceCulture]
         public void CacheManager_Stats_Put<T>(T cache) where T : ICacheManager<object>
         {
@@ -141,7 +141,7 @@ namespace CacheManager.Tests.Core
         }
 
         [Theory]
-        [ClassData(typeof(CacheManagerTestData))]
+        [MemberData("GetCacheManagers")]
         [ReplaceCulture]
         public void CacheManager_Stats_Update<T>(T cache) where T : ICacheManager<object>
         {
@@ -170,7 +170,7 @@ namespace CacheManager.Tests.Core
         }
 
         [Theory]
-        [ClassData(typeof(CacheManagerTestData))]
+        [MemberData("GetCacheManagers")]
         [ReplaceCulture]
         public void CacheManager_Stats_Remove<T>(T cache) where T : ICacheManager<object>
         {
@@ -211,7 +211,7 @@ namespace CacheManager.Tests.Core
         }
                 
         [Theory]
-        [ClassData(typeof(CacheManagerTestData))]
+        [MemberData("GetCacheManagers")]
         [ReplaceCulture]
         public void CacheManager_Stats_Threaded<T>(T cache) where T : ICacheManager<object>
         {

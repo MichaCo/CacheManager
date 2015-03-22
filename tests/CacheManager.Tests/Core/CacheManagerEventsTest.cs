@@ -7,7 +7,6 @@ using CacheManager.Core.Cache;
 using CacheManager.Tests.TestCommon;
 using FluentAssertions;
 using Xunit;
-using Xunit.Extensions;
 
 namespace CacheManager.Tests.Core
 {
@@ -15,7 +14,7 @@ namespace CacheManager.Tests.Core
     ///
     /// </summary>
     [ExcludeFromCodeCoverage]
-    public class CacheManagerEventsTest
+    public class CacheManagerEventsTest : BaseCacheManagerTest
     {
         private class EventCallbackData
         {
@@ -136,7 +135,7 @@ namespace CacheManager.Tests.Core
         }
 
         [Theory]
-        [ClassData(typeof(CacheManagerTestData))]
+        [MemberData("GetCacheManagers")]
         [ReplaceCulture]
         public void CacheManager_Events_OnGet<T>(T cache) where T : ICacheManager<object>
         {
@@ -163,7 +162,7 @@ namespace CacheManager.Tests.Core
         }
 
         [Theory]
-        [ClassData(typeof(CacheManagerTestData))]
+        [MemberData("GetCacheManagers")]
         [ReplaceCulture]
         public void CacheManager_Events_OnGetWithRegion<T>(T cache) where T : ICacheManager<object>
         {
@@ -190,7 +189,7 @@ namespace CacheManager.Tests.Core
         }
 
         [Theory]
-        [ClassData(typeof(CacheManagerTestData))]
+        [MemberData("GetCacheManagers")]
         [ReplaceCulture]
         public void CacheManager_Events_OnGetMiss<T>(T cache) where T : ICacheManager<object>
         {
@@ -215,7 +214,7 @@ namespace CacheManager.Tests.Core
         }
 
         [Theory]
-        [ClassData(typeof(CacheManagerTestData))]
+        [MemberData("GetCacheManagers")]
         [ReplaceCulture]
         public void CacheManager_Events_OnGetManyHandles<T>(T cache) where T : ICacheManager<object>
         {
@@ -250,7 +249,7 @@ namespace CacheManager.Tests.Core
         /// Validates that it works with and without region
         /// </summary>
         [Theory]
-        [ClassData(typeof(CacheManagerTestData))]
+        [MemberData("GetCacheManagers")]
         [ReplaceCulture]
         public void CacheManager_Events_OnRemoveMany<T>(T cache) where T : ICacheManager<object>
         {
@@ -298,7 +297,7 @@ namespace CacheManager.Tests.Core
         /// Validates that it works with and without region
         /// </summary>
         [Theory]
-        [ClassData(typeof(CacheManagerTestData))]
+        [MemberData("GetCacheManagers")]
         [ReplaceCulture]
         public void CacheManager_Events_OnAddMany<T>(T cache) where T : ICacheManager<object>
         {
@@ -351,7 +350,7 @@ namespace CacheManager.Tests.Core
         /// Validates that it works with and without region
         /// </summary>
         [Theory]
-        [ClassData(typeof(CacheManagerTestData))]
+        [MemberData("GetCacheManagers")]
         [ReplaceCulture]
         public void CacheManager_Events_OnPutMany<T>(T cache) where T : ICacheManager<object>
         {
@@ -401,7 +400,7 @@ namespace CacheManager.Tests.Core
         /// Validates that it works with and without region
         /// </summary>
         [Theory]
-        [ClassData(typeof(CacheManagerTestData))]
+        [MemberData("GetCacheManagers")]
         [ReplaceCulture]
         public void CacheManager_Events_OnUpdate<T>(T cache) where T : ICacheManager<object>
         {
@@ -453,7 +452,7 @@ namespace CacheManager.Tests.Core
         /// Validates that it works with and without region
         /// </summary>
         [Theory]
-        [ClassData(typeof(CacheManagerTestData))]
+        [MemberData("GetCacheManagers")]
         [ReplaceCulture]
         public void CacheManager_Events_OnClearRegion<T>(T cache) where T : ICacheManager<object>
         {
@@ -500,7 +499,7 @@ namespace CacheManager.Tests.Core
         /// Validates that it works with and without region
         /// </summary>
         [Theory]
-        [ClassData(typeof(CacheManagerTestData))]
+        [MemberData("GetCacheManagers")]
         [ReplaceCulture]
         public void CacheManager_Events_OnClear<T>(T cache) where T : ICacheManager<object>
         {
