@@ -1,6 +1,4 @@
 # CacheManager
-CacheManager is a common interface and abstraction layer for caching. It supports various cache providers and implements many advanced features.
-
 The purpose of this project is 
 
 * to define a common interface for different cache providers and techniques
