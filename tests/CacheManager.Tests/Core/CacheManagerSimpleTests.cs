@@ -964,8 +964,9 @@ namespace CacheManager.Tests.Core
             {
                 // arrange
                 var keys = new List<string>() { "key1", "key2", "key3", "key4", "key5", "key6", "key7", "key8" };
-                var values = new List<object>() {
-                    "string", 33293L, 0.123f, 0.324d, 123311L, true,
+                var values = new List<object>() 
+                {
+                    "string", 33293, 0.123f, 0.324d, 123311L, true,
                     new ComplexType(){ Name="name", SomeBool=false, SomeId= 213},
                     new DateTime(2014,1,3)
                 };

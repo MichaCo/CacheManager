@@ -408,8 +408,133 @@ namespace CacheManager.Tests.Redis
                 countCasModifyCalls.Should().BeGreaterThan((int)result.Counter, "we expect many version collisions, so cas calls should be way higher then the count result");
             }
         }
+
+        [Fact]
+        [Trait("IntegrationTest", "Redis")]
+        public void Redis_ValueConverter_ObjectCacheTypeConversion_Bytes()
+        {
+            var cache = this.WithRedisCache;
+            
+            // act/assert
+            using (cache)
+            {
+                cache.Clear();
+                var value = new byte[] { 0, 1, 2, 3 };
+                cache.Add("bytes", value);
+                var result = cache.Get("bytes") as byte[];
+                value.Should().BeEquivalentTo(result);
+            }
+        }
+
+        [Fact]
+        [Trait("IntegrationTest", "Redis")]
+        public void Redis_ValueConverter_ObjectCacheTypeConversion_String()
+        {
+            var cache = this.WithRedisCache;
+
+            // act/assert
+            using (cache)
+            {
+                cache.Clear();
+                var value = "some string";
+                cache.Add("bytes", value);
+                var result = cache.Get("bytes") as string;
+                value.Should().Be(result);
+            }
+        }
+
+        [Fact]
+        [Trait("IntegrationTest", "Redis")]
+        public void Redis_ValueConverter_ObjectCacheTypeConversion_Int32()
+        {
+            var cache = this.WithRedisCache;
+
+            // act/assert
+            using (cache)
+            {
+                cache.Clear();
+                var value = 1234;
+                cache.Add("bytes", value);
+                var result = (int)cache.Get("bytes");
+                value.Should().Be(result);
+            }
+        }
+
+        [Fact]
+        [Trait("IntegrationTest", "Redis")]
+        public void Redis_ValueConverter_ObjectCacheTypeConversion_Bool()
+        {
+            var cache = this.WithRedisCache;
+
+            // act/assert
+            using (cache)
+            {
+                cache.Clear();
+                var value = true;
+                cache.Add("bytes", value);
+                var result = (bool)cache.Get("bytes");
+                value.Should().Be(result);
+            }
+        }
+
+        [Fact]
+        [Trait("IntegrationTest", "Redis")]
+        public void Redis_ValueConverter_ObjectCacheTypeConversion_Double()
+        {
+            var cache = this.WithRedisCache;
+
+            // act/assert
+            using (cache)
+            {
+                cache.Clear();
+                var value = 0231.2d;
+                cache.Add("bytes", value);
+                var result = (double)cache.Get("bytes");
+                value.Should().Be(result);
+            }
+        }
+
+        [Fact]
+        [Trait("IntegrationTest", "Redis")]
+        public void Redis_ValueConverter_ObjectCacheTypeConversion_Long()
+        {
+            var cache = this.WithRedisCache;
+
+            // act/assert
+            using (cache)
+            {
+                cache.Clear();
+                var value = 123456L;
+                cache.Add("bytes", value);
+                var result = (long)cache.Get("bytes");
+                value.Should().Be(result);
+            }
+        }
+
+        [Fact]
+        [Trait("IntegrationTest", "Redis")]
+        public void Redis_ValueConverter_ObjectCacheTypeConversion_Poco()
+        {
+            var cache = this.WithRedisCache;
+
+            // act/assert
+            using (cache)
+            {
+                cache.Clear();
+                var value = new Poco() { Id = 23, Something = "§asdad" };
+                cache.Add("bytes", value);
+                var result = (Poco)cache.Get("bytes");
+                value.ShouldBeEquivalentTo(result);
+            }
+        }
     }
 
+    [Serializable]
+    class Poco
+    {
+        public int Id { get; set; }
+        public string Something { get; set; }
+    }
 
     [Serializable]
     [ExcludeFromCodeCoverage]

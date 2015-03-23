@@ -3,7 +3,7 @@
 <cacheManager xmlns="http://tempuri.org/CacheManagerCfg.xsd">
 <cacheHandles>
 <handleDef id="memcachedHandle" type="CacheManager.Memcached.MemcachedCacheHandle`1, CacheManager.Memcached"/>
-<handleDef id="couchbaseHandle" type="CacheManager.Memcached.CouchbaseCacheHandle`1, CacheManager.Memcached"/>
+<handleDef id="memcachedObjectHandle" type="CacheManager.Memcached.MemcachedCacheHandle, CacheManager.Memcached"/>
 </cacheHandles>
 </cacheManager>
 </configuration>

@@ -436,12 +436,8 @@ namespace CacheManager.Core.Cache
             {
                 return (TOut)value;
             }
-
-            object changed = Convert.ChangeType(value, typeof(TOut), CultureInfo.InvariantCulture);
+            object changed = Convert.ChangeType(value, typeof(TOut), CultureInfo.InvariantCulture);            
             return changed == null ? (TOut)value : (TOut)changed;
-            //// alternatively we could use return (TOut)Convert.ChangeType(value, typeof(TOut));
-            //// but this would lead to unexpected results because the ChangeType method returns null or default<T>
-            //// if the conversion was not possible...
         }
 
         /// <summary>

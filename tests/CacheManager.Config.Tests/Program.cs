@@ -39,7 +39,7 @@ namespace CacheManager.Config.Tests
                     //    //.WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMilliseconds(20)
                     //;
 
-                    cfg.WithHandle<RedisCacheHandle<object>>("redis")
+                    cfg.WithHandle<RedisCacheHandle>("redis")
                         //.EnablePerformanceCounters()
                         //.EnablePerformanceCounters()
                         //.WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(30))
