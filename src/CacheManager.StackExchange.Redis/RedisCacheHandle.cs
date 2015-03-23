@@ -15,6 +15,64 @@ using StackRedis = StackExchange.Redis;
 
 namespace CacheManager.StackExchange.Redis
 {
+    internal class RedisConnectionPool
+    {
+        // connection string to connection multiplexer
+        private static object connectLock = new object();
+        private static IDictionary<string, StackRedis.ConnectionMultiplexer> connections;
+
+        static RedisConnectionPool()
+        {
+            connections = new Dictionary<string, StackRedis.ConnectionMultiplexer>();
+        }
+
+        public static StackRedis.ConnectionMultiplexer Connect(RedisConfiguration configuration)
+        {
+            string connectionString = configuration.ConnectionString;
+
+            if (string.IsNullOrWhiteSpace(configuration.ConnectionString))
+            {
+                var options = CreateConfigurationOptions(configuration);
+                connectionString = options.ToString();
+            }
+
+            StackRedis.ConnectionMultiplexer connection;
+            lock (connectLock)
+            {
+                if (!connections.TryGetValue(connectionString, out connection))
+                {
+                    connection = StackRedis.ConnectionMultiplexer.Connect(connectionString);
+
+                    connection.PreserveAsyncOrder = false;
+                    connections.Add(connectionString, connection);
+                }
+            }
+
+            return connection;
+        }
+
+        private static StackRedis.ConfigurationOptions CreateConfigurationOptions(RedisConfiguration configuration)
+        {
+            var configurationOptions = new StackRedis.ConfigurationOptions()
+            {
+                AllowAdmin = configuration.AllowAdmin,
+                ConnectTimeout = configuration.ConnectionTimeout,
+                Password = configuration.Password,
+                Ssl = configuration.IsSsl,
+                SslHost = configuration.SslHost,
+                ConnectRetry = 100,
+                AbortOnConnectFail = false,
+            };
+
+            foreach (var endpoint in configuration.Endpoints)
+            {
+                configurationOptions.EndPoints.Add(endpoint.Host, endpoint.Port);
+            }
+
+            return configurationOptions;
+        }
+    }
+
     public class RedisCacheHandle : RedisCacheHandle<object>
     {
         public RedisCacheHandle(ICacheManager<object> manager, ICacheHandleConfiguration configuration)
@@ -37,11 +95,11 @@ namespace CacheManager.StackExchange.Redis
         private const string HashFieldType = "type";
 
         private static readonly IRedisValueConverter<TCacheValue> valueConverter = new RedisValueConverter() as IRedisValueConverter<TCacheValue>;
-        private StackRedis.ConnectionMultiplexer connection = null;
         private StackRedis.IDatabase databaseBack = null;
         private StackRedis.ISubscriber subscriber = null;
         private readonly string Identifier = Guid.NewGuid().ToString();
         private RedisConfiguration redisConfiguration = null;
+        private string channelName = string.Empty;
 
         private RedisConfiguration RedisConfiguration
         {
@@ -70,12 +128,7 @@ namespace CacheManager.StackExchange.Redis
         {
             get
             {
-                if (connection == null)
-                {
-                    this.Connect();
-                }
-
-                return connection;
+                return RedisConnectionPool.Connect(this.RedisConfiguration);
             }
         }
 
@@ -105,7 +158,6 @@ namespace CacheManager.StackExchange.Redis
                 {
                     Retry(() =>
                     {
-                        Connection.PreserveAsyncOrder = false;
                         subscriber = Connection.GetSubscriber();
                     });
                 }
@@ -114,19 +166,11 @@ namespace CacheManager.StackExchange.Redis
             }
         }
 
-        private readonly string channelName = string.Empty;
-
         public RedisCacheHandle(ICacheManager<TCacheValue> manager, ICacheHandleConfiguration configuration)
             : base(manager, configuration)
         {
             // default should be enabled, although this costs some performance
             this.EnableBackPlateUpdates();
-
-            this.channelName = string.Format(
-                CultureInfo.InvariantCulture, 
-                "CacheManager_{0}_{1}", 
-                this.Manager.Configuration.Name, 
-                configuration.HandleName);
         }
 
         /// <summary>
@@ -139,12 +183,20 @@ namespace CacheManager.StackExchange.Redis
         /// </summary>
         public void EnableBackPlateUpdates()
         {
+            this.channelName = string.Format(
+                CultureInfo.InvariantCulture,
+                "CacheManager_{0}_{1}",
+                this.Manager.Configuration.Name,
+                this.Configuration.HandleName);
+
             this.BackPlate = new CacheBackPlate();
+            this.Subscribe();
         }
 
         public void DisableBackPlateUpdates()
         {
             this.BackPlate = null;
+            this.Subscriber.Unsubscribe(this.channelName);
         }
 
         protected override void Dispose(bool disposeManaged)
@@ -152,7 +204,7 @@ namespace CacheManager.StackExchange.Redis
             if (disposeManaged)
             {
                 this.Subscriber.Unsubscribe(this.channelName);
-                this.connection.Dispose();
+                // this.connection.Dispose();
             }
 
             base.Dispose(disposeManaged);
@@ -453,43 +505,6 @@ namespace CacheManager.StackExchange.Redis
 
             return fullKey;
         }
-
-        private void Connect()
-        {
-            if (string.IsNullOrWhiteSpace(this.RedisConfiguration.ConnectionString))
-            {
-                var options = this.CreateTargetOptions();
-                this.connection = StackRedis.ConnectionMultiplexer.Connect(options);
-            }
-            else
-            {
-                this.connection = StackRedis.ConnectionMultiplexer.Connect(this.RedisConfiguration.ConnectionString);
-            }
-            
-            this.Subscribe();
-        }
-
-        private StackRedis.ConfigurationOptions CreateTargetOptions()
-        {
-            var redisConfiguration = this.RedisConfiguration;
-            var configurationOptions = new StackRedis.ConfigurationOptions()
-            {
-                AllowAdmin = redisConfiguration.AllowAdmin,
-                ConnectTimeout = redisConfiguration.ConnectionTimeout,
-                Password = redisConfiguration.Password,
-                Ssl = redisConfiguration.IsSsl,
-                SslHost = redisConfiguration.SslHost,
-                ConnectRetry = 100,
-                AbortOnConnectFail = false,
-            };
-
-            foreach (var endpoint in redisConfiguration.Endpoints)
-            {
-                configurationOptions.EndPoints.Add(endpoint.Host, endpoint.Port);
-            }
-
-            return configurationOptions;
-        }
         
         private void Subscribe()
         {
@@ -716,7 +731,6 @@ namespace CacheManager.StackExchange.Redis
             if (this.Action == ChannelAction.Clear)
             {
                 return this.IdentityOwner + ":" + action;
-
             }
             else if (this.Action == ChannelAction.ClearRegion)
             {
@@ -728,29 +742,6 @@ namespace CacheManager.StackExchange.Redis
             }
 
             return this.IdentityOwner + ":" + action + ":" + Encode(this.Key) + ":" + Encode(this.Region);
-            //if (this.Action == ChannelAction.Clear)
-            //{
-            //    return string.Format(
-            //        CultureInfo.InvariantCulture,
-            //        "{0}:{1}", this.IdentOwner.ToString(), action); 
-
-            //}
-            //else if (this.Action == ChannelAction.ClearRegion)
-            //{
-            //    return string.Format(
-            //        CultureInfo.InvariantCulture,
-            //        "{0}:{1}:{2}", this.IdentOwner.ToString(), action, Encode(this.Region)); 
-            //}
-            //else if (string.IsNullOrWhiteSpace(this.Region))
-            //{
-            //    return string.Format(
-            //        CultureInfo.InvariantCulture,
-            //        "{0}:{1}:{2}", this.IdentOwner.ToString(), action, Encode(this.Key));
-            //}
-
-            //return string.Format(
-            //        CultureInfo.InvariantCulture,
-            //        "{0}:{1}:{2}:{3}", this.IdentOwner.ToString(), action, Encode(this.Key), Encode(this.Region));
         }
 
         private static string Encode(string value)
