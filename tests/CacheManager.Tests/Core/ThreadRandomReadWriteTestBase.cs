@@ -25,6 +25,8 @@ namespace CacheManager.Tests.Core
 
             using (cache)
             {
+                cache.Clear();
+
                 Action test = () =>
                 {
                     var hits = 0;

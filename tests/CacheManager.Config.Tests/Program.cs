@@ -18,13 +18,13 @@ namespace CacheManager.Config.Tests
     {
         static void Main(string[] args)
         {
-            ICacheManager<int> cache = null;
+            ICacheManager<object> cache = null;
             try
             {
                 var swatch = Stopwatch.StartNew();
                 int iterations = int.MaxValue;
                 swatch.Restart();
-                cache = CacheFactory.Build<int>("myCache", cfg =>
+                cache = CacheFactory.Build<object>("myCache", cfg =>
                 {
                     cfg.WithUpdateMode(CacheUpdateMode.Up);
 
@@ -33,13 +33,13 @@ namespace CacheManager.Config.Tests
                     //    //.WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1))
                     //;
 
-                    cfg.WithHandle<MemoryCacheHandle<int>>("default")
-                        //.DisableStatistics()
-                        //.EnablePerformanceCounters()
-                        //.WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMilliseconds(20)
-                    ;
+                    //cfg.WithHandle<MemoryCacheHandle<int>>("default")
+                    //    //.DisableStatistics()
+                    //    //.EnablePerformanceCounters()
+                    //    //.WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMilliseconds(20)
+                    //;
 
-                    cfg.WithHandle<RedisCacheHandle<int>>("redis")
+                    cfg.WithHandle<RedisCacheHandle<object>>("redis")
                         //.EnablePerformanceCounters()
                         //.EnablePerformanceCounters()
                         //.WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(30))
@@ -79,7 +79,7 @@ namespace CacheManager.Config.Tests
             Console.ReadKey();
         }
 
-        public static void SimpleAddGetTest(ICacheManager<int> cache)
+        public static void SimpleAddGetTest(ICacheManager<object> cache)
         {
             var swatch = Stopwatch.StartNew();
             var threads = 500;
@@ -90,23 +90,22 @@ namespace CacheManager.Config.Tests
             var rand = new Random();
             var key = "key";
 
-            var value = 3322;
-            for (var ta = 0; ta < items; ta++)
-            {
-                cache.Put(key + ta, value + ta);
-            }
+            //for (var ta = 0; ta < items; ta++)
+            //{
+            //    cache.Put(key + ta, value + ta);
+            //}
 
             for (var t = 0; t < threads; t++)
             {
                 for (var ta = 0; ta < items; ta++)
                 {
-                    var v = cache.Get(key + ta);
-                    //cache.Put(key + ta, 1111);
+                    //var v = cache.Get(key + ta);
+                    cache.Put(key + ta, false);
                 }
 
                 Thread.Sleep(0);
 
-                cache.Put("key" + rand.Next(0, items - 1), 1111);
+                cache.Put("key" + rand.Next(0, items - 1), "222");
             }
 
             var item = cache.Get(key);

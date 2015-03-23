@@ -34,12 +34,13 @@ namespace CacheManager.StackExchange.Redis
         // expiration timeout stored as long
         private const string HashFieldExpirationTimeout = "timeout";
         private const string HashFieldCreated = "created";
+        private const string HashFieldType = "type";
 
         private static readonly IRedisValueConverter<TCacheValue> valueConverter = new RedisValueConverter() as IRedisValueConverter<TCacheValue>;
         private StackRedis.ConnectionMultiplexer connection = null;
         private StackRedis.IDatabase databaseBack = null;
         private StackRedis.ISubscriber subscriber = null;
-        private readonly Guid Identifier = Guid.NewGuid();
+        private readonly string Identifier = Guid.NewGuid().ToString();
         private RedisConfiguration redisConfiguration = null;
 
         private RedisConfiguration RedisConfiguration
@@ -251,44 +252,51 @@ namespace CacheManager.StackExchange.Redis
                 var value = ToRedisValue(item.Value);
 
 
-                StackRedis.HashEntry[] metaValues = null;
+                StackRedis.HashEntry[] metaValues = new[]
+                {
+                    new StackRedis.HashEntry(HashFieldType, item.ValueType.FullName)
+                };
+
                 if (item.ExpirationMode != ExpirationMode.None)
                 {
                     metaValues = new[]
                     {
                         new StackRedis.HashEntry(HashFieldExpirationMode, (int)item.ExpirationMode),
                         new StackRedis.HashEntry(HashFieldExpirationTimeout, item.ExpirationTimeout.Ticks),
-                        new StackRedis.HashEntry(HashFieldCreated, item.CreatedUtc.Ticks)
+                        new StackRedis.HashEntry(HashFieldCreated, item.CreatedUtc.Ticks),
+                        new StackRedis.HashEntry(HashFieldType, item.ValueType.FullName)
                     };
                 }
-
-                // update region lookup
-                if (!string.IsNullOrWhiteSpace(item.Region))
-                {
-                    this.Database.HashSet(item.Region, item.Key, "regionKey", when, StackRedis.CommandFlags.FireAndForget);
-                }
-                
+                               
                 var flags = sync ? StackRedis.CommandFlags.None : StackRedis.CommandFlags.FireAndForget;
 
-                var result = this.Database.HashSet(fullKey, HashFieldValue, value, when, flags);
+                var setResult = this.Database.HashSet(fullKey, HashFieldValue, value, when, flags);
 
-                // result from fire and forget is alwys false, this would leed to bad processing up the chain if we return false...
-                result = flags == StackRedis.CommandFlags.FireAndForget ? true : result;
+                // setResult from fire and forget is alwys false, so we have to assume it works...
+                setResult = flags == StackRedis.CommandFlags.FireAndForget ? true : setResult;
 
-                // set the additional fields in case sliding expiration should be used
-                // in this case we have to store the expiration mode and timeout on the hash, too
-                // so that we can extend the expiration period every time we do a get
-                if (result && metaValues != null)
+                if (setResult)
                 {
-                    this.Database.HashSet(fullKey, metaValues, flags);
-                }
+                    // update region lookup
+                    if (!string.IsNullOrWhiteSpace(item.Region))
+                    {
+                        this.Database.HashSet(item.Region, item.Key, "regionKey", when, StackRedis.CommandFlags.FireAndForget);
+                    }
 
-                if (item.ExpirationMode != ExpirationMode.None)
-                {
-                    this.Database.KeyExpire(fullKey, item.ExpirationTimeout, StackRedis.CommandFlags.FireAndForget);
-                }
+                    // set the additional fields in case sliding expiration should be used
+                    // in this case we have to store the expiration mode and timeout on the hash, too
+                    // so that we can extend the expiration period every time we do a get
+                    if (metaValues != null)
+                    {
+                        this.Database.HashSet(fullKey, metaValues, flags);
+                    }
 
-                return result;
+                    if (item.ExpirationMode != ExpirationMode.None)
+                    {
+                        this.Database.KeyExpire(fullKey, item.ExpirationTimeout, StackRedis.CommandFlags.FireAndForget);
+                    }
+                }
+                return setResult;
             });
         }
 
@@ -357,7 +365,8 @@ namespace CacheManager.StackExchange.Redis
                     HashFieldValue, 
                     HashFieldExpirationMode,
                     HashFieldExpirationTimeout,
-                    HashFieldCreated
+                    HashFieldCreated,
+                    HashFieldType
                 });
 
                 // the first item stores the value
@@ -365,8 +374,10 @@ namespace CacheManager.StackExchange.Redis
                 var expirationModeItem = values[1];
                 var timeoutItem = values[2];
                 var createdItem = values[3];
+                var valueTypeItem = values[4];
                 
-                if (!item.HasValue || item.IsNullOrEmpty || item.IsNull)
+                if (!item.HasValue || !valueTypeItem.HasValue /* partially removed? */
+                    || item.IsNullOrEmpty || item.IsNull)
                 {
                     return null;
                 }
@@ -382,7 +393,7 @@ namespace CacheManager.StackExchange.Redis
                     expirationTimeout = TimeSpan.FromTicks((long)timeoutItem);
                 }
 
-                var value = FromRedisValue(item);
+                var value = FromRedisValue(item, (string)valueTypeItem);
 
                 var cacheItem = string.IsNullOrWhiteSpace(region) ?
                         new CacheItem<TCacheValue>(key, value, expirationMode, expirationTimeout) :
@@ -489,20 +500,20 @@ namespace CacheManager.StackExchange.Redis
                     return;
                 }
 
-                if (((string)msg).StartsWith(this.Identifier.ToString()))
+                string messageStr = (string)msg;
+
+                if (messageStr.StartsWith(this.Identifier))
                 {
                     // do not notify ourself (might be faster than the second method?
                     return;
                 }
 
-                var message = ChannelMessage.FromMsg(msg);
-                if (message.IdentOwner == this.Identifier)
-                {
-                    // do not notify ourself
-                    return;
-                }
-
-                //Trace.WriteLine(this.Identifier + " receiving: " + msg);
+                var message = ChannelMessage.FromMsg(messageStr);
+                //if (message.IdentityOwner == this.Identifier)
+                //{
+                //    // do not notify ourself
+                //    return;
+                //}
 
                 switch (message.Action)
                 {
@@ -618,10 +629,10 @@ namespace CacheManager.StackExchange.Redis
                 return valueConverter.ToRedisValue(value);
             }
             
-            return (StackRedis.RedisValue)ToBytes(value);
+            return (StackRedis.RedisValue)RedisValueConverter.ToBytes(value);
         }
 
-        private static TCacheValue FromRedisValue(StackRedis.RedisValue value)
+        private static TCacheValue FromRedisValue(StackRedis.RedisValue value, string valueType)
         {
             if (value.IsNull || value.IsNullOrEmpty || !value.HasValue)
             {
@@ -630,10 +641,10 @@ namespace CacheManager.StackExchange.Redis
                         
             if(valueConverter != null)
             {
-                return valueConverter.FromRedisValue(value);
+                return valueConverter.FromRedisValue(value, valueType);
             }
 
-            return FromBytes(value);
+            return RedisValueConverter.FromBytes<TCacheValue>(value);
         }
 
         //private static string ToJson(TCacheValue value)
@@ -646,36 +657,6 @@ namespace CacheManager.StackExchange.Redis
         //    return JsonConvert.DeserializeObject<TCacheValue>(
         //        jsonString, new CacheItemConverter<TCacheValue>());
         //}
-
-        private static byte[] ToBytes(object obj)
-        {
-            if (obj == null)
-            {
-                return null;
-            }
-
-            BinaryFormatter binaryFormatter = new BinaryFormatter();
-            using (MemoryStream memoryStream = new MemoryStream())
-            {
-                binaryFormatter.Serialize(memoryStream, obj);
-                byte[] objectDataAsStream = memoryStream.ToArray();
-                return objectDataAsStream;
-            }
-        }
-
-        private static TCacheValue FromBytes(byte[] stream)
-        {
-            if (stream == null)
-            {
-                return default(TCacheValue);
-            }
-
-            BinaryFormatter binaryFormatter = new BinaryFormatter();
-            using (MemoryStream memoryStream = new MemoryStream(stream))
-            {
-                return (TCacheValue)binaryFormatter.Deserialize(memoryStream);
-            }
-        }
     }
     
     internal enum ChannelAction
@@ -688,19 +669,19 @@ namespace CacheManager.StackExchange.Redis
 
     internal class ChannelMessage
     {
-        public ChannelMessage(Guid owner, ChannelAction action)
+        public ChannelMessage(string owner, ChannelAction action)
         {
-            this.IdentOwner = owner;
+            this.IdentityOwner = owner;
             this.Action = action;
         }
 
-        public ChannelMessage(Guid owner, ChannelAction action, string key)
+        public ChannelMessage(string owner, ChannelAction action, string key)
             : this(owner, action)
         {
             this.Key = key;
         }
 
-        public ChannelMessage(Guid owner, ChannelAction action, string key, string region)
+        public ChannelMessage(string owner, ChannelAction action, string key, string region)
             : this(owner, action, key)
         {
             this.Region = region;
@@ -710,8 +691,8 @@ namespace CacheManager.StackExchange.Redis
         {
             var tokens = msg.Split(new[] { ":" }, StringSplitOptions.RemoveEmptyEntries);
 
-            var ident = Guid.Parse(tokens[0]);
-            var action = (ChannelAction)Enum.Parse(typeof(ChannelAction), tokens[1]);
+            var ident = tokens[0];
+            var action = (ChannelAction)Int32.Parse(tokens[1]);
 
             if (action == ChannelAction.Clear)
             {
@@ -731,30 +712,45 @@ namespace CacheManager.StackExchange.Redis
 
         public string ToMsg()
         {
-            var action = Enum.GetName(typeof(ChannelAction), this.Action);
+            var action = (int)this.Action;
             if (this.Action == ChannelAction.Clear)
             {
-                return string.Format(
-                    CultureInfo.InvariantCulture,
-                    "{0}:{1}", this.IdentOwner.ToString(), action); 
+                return this.IdentityOwner + ":" + action;
 
             }
             else if (this.Action == ChannelAction.ClearRegion)
             {
-                return string.Format(
-                    CultureInfo.InvariantCulture,
-                    "{0}:{1}:{2}", this.IdentOwner.ToString(), action, Encode(this.Region)); 
+                return this.IdentityOwner + ":" + action + ":" + Encode(this.Region);
             }
             else if (string.IsNullOrWhiteSpace(this.Region))
             {
-                return string.Format(
-                    CultureInfo.InvariantCulture,
-                    "{0}:{1}:{2}", this.IdentOwner.ToString(), action, Encode(this.Key));
+                return this.IdentityOwner + ":" + action + ":" + Encode(this.Key);
             }
 
-            return string.Format(
-                    CultureInfo.InvariantCulture,
-                    "{0}:{1}:{2}:{3}", this.IdentOwner.ToString(), action, Encode(this.Key), Encode(this.Region));
+            return this.IdentityOwner + ":" + action + ":" + Encode(this.Key) + ":" + Encode(this.Region);
+            //if (this.Action == ChannelAction.Clear)
+            //{
+            //    return string.Format(
+            //        CultureInfo.InvariantCulture,
+            //        "{0}:{1}", this.IdentOwner.ToString(), action); 
+
+            //}
+            //else if (this.Action == ChannelAction.ClearRegion)
+            //{
+            //    return string.Format(
+            //        CultureInfo.InvariantCulture,
+            //        "{0}:{1}:{2}", this.IdentOwner.ToString(), action, Encode(this.Region)); 
+            //}
+            //else if (string.IsNullOrWhiteSpace(this.Region))
+            //{
+            //    return string.Format(
+            //        CultureInfo.InvariantCulture,
+            //        "{0}:{1}:{2}", this.IdentOwner.ToString(), action, Encode(this.Key));
+            //}
+
+            //return string.Format(
+            //        CultureInfo.InvariantCulture,
+            //        "{0}:{1}:{2}:{3}", this.IdentOwner.ToString(), action, Encode(this.Key), Encode(this.Region));
         }
 
         private static string Encode(string value)
@@ -767,7 +763,7 @@ namespace CacheManager.StackExchange.Redis
             return Encoding.UTF8.GetString(Convert.FromBase64String(value));
         }
 
-        public Guid IdentOwner { get; set; }
+        public string IdentityOwner { get; set; }
 
         public ChannelAction Action { get; set; }
 
@@ -789,7 +785,7 @@ namespace CacheManager.StackExchange.Redis
     internal interface IRedisValueConverter<T>
     {
         StackRedis.RedisValue ToRedisValue(T value);
-        T FromRedisValue(StackRedis.RedisValue value);
+        T FromRedisValue(StackRedis.RedisValue value, string valueType);
     }
 
     internal class RedisValueConverter : 
@@ -802,14 +798,27 @@ namespace CacheManager.StackExchange.Redis
         IRedisValueConverter<bool>,
         IRedisValueConverter<bool?>,
         IRedisValueConverter<long>,
-        IRedisValueConverter<long?>
+        IRedisValueConverter<long?>,
+        IRedisValueConverter<object>
     {
+
+        private static readonly Type byteArrayType = typeof(byte[]);
+        private static readonly Type stringType = typeof(string);
+        private static readonly Type intType = typeof(int);
+        private static readonly Type nullableIntType = typeof(int?);
+        private static readonly Type doubleType = typeof(double);
+        private static readonly Type nullableDoubleType = typeof(double?);
+        private static readonly Type boolType = typeof(bool);
+        private static readonly Type nullableBoolType = typeof(bool?);
+        private static readonly Type longType = typeof(long);
+        private static readonly Type nullableLongType = typeof(long?);
+
         StackRedis.RedisValue IRedisValueConverter<byte[]>.ToRedisValue(byte[] value)
         {
             return value;
         }
 
-        byte[] IRedisValueConverter<byte[]>.FromRedisValue(StackRedis.RedisValue value)
+        byte[] IRedisValueConverter<byte[]>.FromRedisValue(StackRedis.RedisValue value, string valueType)
         {
             return value;
         }
@@ -819,7 +828,7 @@ namespace CacheManager.StackExchange.Redis
             return value;
         }
 
-        string IRedisValueConverter<string>.FromRedisValue(StackRedis.RedisValue value)
+        string IRedisValueConverter<string>.FromRedisValue(StackRedis.RedisValue value, string valueType)
         {
             return value;
         }
@@ -829,7 +838,7 @@ namespace CacheManager.StackExchange.Redis
             return value;
         }
 
-        int IRedisValueConverter<int>.FromRedisValue(StackRedis.RedisValue value)
+        int IRedisValueConverter<int>.FromRedisValue(StackRedis.RedisValue value, string valueType)
         {
             return (int)value;
         }
@@ -839,7 +848,7 @@ namespace CacheManager.StackExchange.Redis
             return value;
         }
 
-        int? IRedisValueConverter<int?>.FromRedisValue(StackRedis.RedisValue value)
+        int? IRedisValueConverter<int?>.FromRedisValue(StackRedis.RedisValue value, string valueType)
         {
             return (int?)value;
         }
@@ -849,7 +858,7 @@ namespace CacheManager.StackExchange.Redis
             return value;
         }
 
-        double IRedisValueConverter<double>.FromRedisValue(StackRedis.RedisValue value)
+        double IRedisValueConverter<double>.FromRedisValue(StackRedis.RedisValue value, string valueType)
         {
             return (double)value;
         }
@@ -859,7 +868,7 @@ namespace CacheManager.StackExchange.Redis
             return value;
         }
 
-        double? IRedisValueConverter<double?>.FromRedisValue(StackRedis.RedisValue value)
+        double? IRedisValueConverter<double?>.FromRedisValue(StackRedis.RedisValue value, string valueType)
         {
             return (double?)value;
         }
@@ -869,7 +878,7 @@ namespace CacheManager.StackExchange.Redis
             return value;
         }
 
-        bool IRedisValueConverter<bool>.FromRedisValue(StackRedis.RedisValue value)
+        bool IRedisValueConverter<bool>.FromRedisValue(StackRedis.RedisValue value, string valueType)
         {
             return (bool)value;
         }
@@ -879,7 +888,7 @@ namespace CacheManager.StackExchange.Redis
             return value;
         }
 
-        bool? IRedisValueConverter<bool?>.FromRedisValue(StackRedis.RedisValue value)
+        bool? IRedisValueConverter<bool?>.FromRedisValue(StackRedis.RedisValue value, string valueType)
         {
             return (bool?)value;
         }
@@ -889,7 +898,7 @@ namespace CacheManager.StackExchange.Redis
             return value;
         }
 
-        long IRedisValueConverter<long>.FromRedisValue(StackRedis.RedisValue value)
+        long IRedisValueConverter<long>.FromRedisValue(StackRedis.RedisValue value, string valueType)
         {
             return (long)value;
         }
@@ -899,9 +908,156 @@ namespace CacheManager.StackExchange.Redis
             return value;
         }
 
-        long? IRedisValueConverter<long?>.FromRedisValue(StackRedis.RedisValue value)
+        long? IRedisValueConverter<long?>.FromRedisValue(StackRedis.RedisValue value, string valueType)
         {
             return (long?)value;
+        }
+        
+        // for object this could be epcial because the value could be any of the supported values
+        // or any king of object...
+        // to also have the performance benefit from the known types, lets try to use it for 
+        // object based cache, too
+        StackRedis.RedisValue IRedisValueConverter<object>.ToRedisValue(object value)
+        {
+            var valueType = value.GetType();
+            if (valueType == byteArrayType)
+            {
+                var converter = (IRedisValueConverter<byte[]>)this;
+                return converter.ToRedisValue((byte[])value);
+            }
+            else if (valueType == stringType)
+            {
+                var converter = (IRedisValueConverter<string>)this;
+                return converter.ToRedisValue((string)value);
+            }
+            else if (valueType == intType)
+            {
+                var converter = (IRedisValueConverter<int>)this;
+                return converter.ToRedisValue((int)value);
+            }
+            else if (valueType == nullableIntType)
+            {
+                var converter = (IRedisValueConverter<int?>)this;
+                return converter.ToRedisValue((int?)value);
+            }
+            else if (valueType == doubleType)
+            {
+                var converter = (IRedisValueConverter<double>)this;
+                return converter.ToRedisValue((double)value);
+            }
+            else if (valueType == nullableDoubleType)
+            {
+                var converter = (IRedisValueConverter<double?>)this;
+                return converter.ToRedisValue((double?)value);
+            }
+            else if (valueType == boolType)
+            {
+                var converter = (IRedisValueConverter<bool>)this;
+                return converter.ToRedisValue((bool)value);
+            }
+            else if (valueType == nullableBoolType)
+            {
+                var converter = (IRedisValueConverter<bool?>)this;
+                return converter.ToRedisValue((bool?)value);
+            }
+            else if (valueType == longType)
+            {
+                var converter = (IRedisValueConverter<long>)this;
+                return converter.ToRedisValue((long)value);
+            }
+            else if (valueType == nullableLongType)
+            {
+                var converter = (IRedisValueConverter<long?>)this;
+                return converter.ToRedisValue((long?)value);
+            }
+
+            return ToBytes(value);
+        }
+
+        object IRedisValueConverter<object>.FromRedisValue(StackRedis.RedisValue value, string valueType)
+        {
+            if (valueType == byteArrayType.FullName)
+            {
+                var converter = (IRedisValueConverter<byte[]>)this;
+                return converter.FromRedisValue(value, valueType);
+            }
+            else if (valueType == stringType.FullName)
+            {
+                var converter = (IRedisValueConverter<string>)this;
+                return converter.FromRedisValue(value, valueType);
+            }
+            else if (valueType == intType.FullName)
+            {
+                var converter = (IRedisValueConverter<int>)this;
+                return converter.FromRedisValue(value, valueType);
+            }
+            else if (valueType == nullableIntType.FullName)
+            {
+                var converter = (IRedisValueConverter<int?>)this;
+                return converter.FromRedisValue(value, valueType);
+            }
+            else if (valueType == doubleType.FullName)
+            {
+                var converter = (IRedisValueConverter<double>)this;
+                return converter.FromRedisValue(value, valueType);
+            }
+            else if (valueType == nullableDoubleType.FullName)
+            {
+                var converter = (IRedisValueConverter<double?>)this;
+                return converter.FromRedisValue(value, valueType);
+            }
+            else if (valueType == boolType.FullName)
+            {
+                var converter = (IRedisValueConverter<bool>)this;
+                return converter.FromRedisValue(value, valueType);
+            }
+            else if (valueType == nullableBoolType.FullName)
+            {
+                var converter = (IRedisValueConverter<bool?>)this;
+                return converter.FromRedisValue(value, valueType);
+            }
+            else if (valueType == longType.FullName)
+            {
+                var converter = (IRedisValueConverter<long>)this;
+                return converter.FromRedisValue(value, valueType);
+            }
+            else if (valueType == nullableLongType.FullName)
+            {
+                var converter = (IRedisValueConverter<long?>)this;
+                return converter.FromRedisValue(value, valueType);
+            }            
+
+            return FromBytes<object>(value);
+        }
+
+        public static byte[] ToBytes(object obj)
+        {
+            if (obj == null)
+            {
+                return null;
+            }
+
+            BinaryFormatter binaryFormatter = new BinaryFormatter();
+            using (MemoryStream memoryStream = new MemoryStream())
+            {
+                binaryFormatter.Serialize(memoryStream, obj);
+                byte[] objectDataAsStream = memoryStream.ToArray();
+                return objectDataAsStream;
+            }
+        }
+
+        public static T FromBytes<T>(byte[] stream)
+        {
+            if (stream == null)
+            {
+                return default(T);
+            }
+
+            BinaryFormatter binaryFormatter = new BinaryFormatter();
+            using (MemoryStream memoryStream = new MemoryStream(stream))
+            {
+                return (T)binaryFormatter.Deserialize(memoryStream);
+            }
         }
     }
 }
