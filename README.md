@@ -14,6 +14,7 @@ A common scenario would be using a distributed cache, and to make read access fa
 Download latest packages from
 
 https://www.nuget.org/packages/CacheManager.Core 
+https://www.nuget.org/packages/CacheManager.StackExchange.Redis
 https://www.nuget.org/packages/CacheManager.SystemRuntimeCaching 
 https://www.nuget.org/packages/CacheManager.AppFabricCache 
 https://www.nuget.org/packages/CacheManager.WindowsAzureCaching 
