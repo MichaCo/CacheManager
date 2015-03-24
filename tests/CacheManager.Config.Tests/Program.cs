@@ -8,6 +8,7 @@ using CacheManager.AppFabricCache;
 using CacheManager.Core;
 using CacheManager.Core.Cache;
 using CacheManager.Core.Configuration;
+using CacheManager.Memcached;
 using CacheManager.StackExchange.Redis;
 using CacheManager.SystemRuntimeCaching;
 using ProtoBuf;
@@ -39,11 +40,13 @@ namespace CacheManager.Config.Tests
                     //    //.WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMilliseconds(20)
                     //;
 
-                    cfg.WithHandle<RedisCacheHandle>("redis")
-                        //.EnablePerformanceCounters()
-                        //.EnablePerformanceCounters()
-                        //.WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(30))
-                    ;
+                    //cfg.WithHandle<RedisCacheHandle>("redis")
+                    //    //.EnablePerformanceCounters()
+                    //    //.EnablePerformanceCounters()
+                    //    //.WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(30))
+                    //;
+
+                    cfg.WithHandle<MemcachedCacheHandle<object>>("enyim.com/local-memcached");
 
                     //managerConfiguration.WithHandle<AppFabricCacheHandle<string>>("default")
                     //    .DisableStatistics()
@@ -90,17 +93,20 @@ namespace CacheManager.Config.Tests
             var rand = new Random();
             var key = "key";
 
-            //for (var ta = 0; ta < items; ta++)
-            //{
-            //    cache.Put(key + ta, value + ta);
-            //}
+            cache.Put("key", "value");
+            var obj = cache.Get("key");
+
+            for (var ta = 0; ta < items; ta++)
+            {
+                cache.Put(key + ta, "val" + ta);
+            }
 
             for (var t = 0; t < threads; t++)
             {
                 for (var ta = 0; ta < items; ta++)
                 {
-                    //var v = cache.Get(key + ta);
-                    cache.Put(key + ta, false);
+                    var v = cache.Get(key + ta);
+                    //cache.Put(key + ta, false);
                 }
 
                 Thread.Sleep(0);

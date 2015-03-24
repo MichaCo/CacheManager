@@ -3,7 +3,6 @@
 <cacheManager xmlns="http://tempuri.org/CacheManagerCfg.xsd">
 <cacheHandles>
 <handleDef id="azureCache" type="CacheManager.AppFabricCache.AppFabricCacheHandle`1, CacheManager.WindowsAzureCaching"/>
-<handleDef id="azureObjectCache" type="CacheManager.AppFabricCache.AppFabricCacheHandle, CacheManager.WindowsAzureCaching"/>
 </cacheHandles>
 </cacheManager>
 </configuration>

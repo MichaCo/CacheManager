@@ -981,7 +981,7 @@ namespace CacheManager.Tests.Core
                 bool bSomething = cache.Get<bool>("key6");
                 ComplexType obj = cache.Get<ComplexType>("key7");
                 DateTime date = cache.Get<DateTime>("key8");
-                object o = cache.Get<object>("something which does not exist");
+                object o = cache.Get<object>("nonexistent");
 
                 // assert
                 ValidateCacheValues(cache, keys, values);
@@ -1005,10 +1005,10 @@ namespace CacheManager.Tests.Core
             using (cache)
             {
                 // arrange
-                cache.Add("some int", 123456);
+                cache.Add("someint", 123456);
 
                 // act
-                Action act = () => cache.Get<string>("some int");
+                Action act = () => cache.Get<string>("someint");
 
                 // assert
                 act.ShouldThrow<InvalidCastException>();

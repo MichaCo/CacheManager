@@ -179,7 +179,8 @@ namespace CacheManager.Tests
                 {
                     settings.WithUpdateMode(CacheUpdateMode.Full)
                         .WithHandle<MemcachedCacheHandle<object>>("enyim.com/memcached")
-                        .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(100));
+                            .EnableStatistics()
+                            .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(100));
                 });
 
                 cache.Clear();
@@ -198,7 +199,7 @@ namespace CacheManager.Tests
             yield return new object[] { data.WithTwoNamedMemoryCaches };
             // yield return new object[] { data.WithRedisCache };
             yield return new object[] { data.WithSystemAndRedisCache };
-            // yield return new object[] { WithMemcached };
+            //yield return new object[] { data.WithMemcached };
         }
     }
 }

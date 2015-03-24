@@ -211,7 +211,7 @@ namespace CacheManager.Tests.SystemRuntimeCaching
                 Thread.Sleep(10);
                 var result = cache.Get("myCounter");
                 result.Should().NotBeNull();
-                Trace.TraceInformation("Counter increased to " + result.Counter + " cas calls needed " + countCasModifyCalls);
+                Trace.WriteLine("Counter increased to " + result.Counter + " cas calls needed " + countCasModifyCalls);
                 result.Counter.Should().Be(numThreads * numInnerIterations * iterations, "counter should be exactly the expected value");
                 countCasModifyCalls.Should().BeGreaterThan((int)result.Counter, "we expect many version collisions, so cas calls should be way higher then the count result");
             }

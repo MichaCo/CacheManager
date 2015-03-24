@@ -3,7 +3,6 @@
 <cacheManager xmlns="http://tempuri.org/CacheManagerCfg.xsd">
 <cacheHandles>
 <handleDef id="appFabricCache" type="CacheManager.AppFabricCache.AppFabricCacheHandle`1, CacheManager.AppFabricCache"/>
-<handleDef id="appFabricObjectCache" type="CacheManager.AppFabricCache.AppFabricCacheHandle, CacheManager.AppFabricCache"/>
 </cacheHandles>
 </cacheManager>
 </configuration>

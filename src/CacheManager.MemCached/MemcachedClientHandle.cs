@@ -57,8 +57,8 @@ namespace CacheManager.Memcached
         public override void ClearRegion(string region)
         {
             // not supported, clearing all instead 
-            //TODO: find workaround
-            this.Clear();
+            // TODO: find workaround
+            // this.Clear();
         }
 
         protected override bool AddInternalPrepared(CacheItem<TCacheValue> item)

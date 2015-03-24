@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Threading;
 using CacheManager.Core;
 using FluentAssertions;
 using Xunit;
@@ -92,8 +93,8 @@ namespace CacheManager.Tests.Core
         {
             using (cache)
             {
-                cache.Clear();
-
+                // cache.Clear();
+                // Thread.Sleep(1000);
                 // arrange
                 List<Tuple<string, string, string>> keys;
                 List<string> regions;
