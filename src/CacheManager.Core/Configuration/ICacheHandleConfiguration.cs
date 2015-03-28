@@ -14,5 +14,7 @@ namespace CacheManager.Core.Configuration
         TimeSpan ExpirationTimeout { get; }
 
         string HandleName { get; }
+
+        bool IsBackPlateSource { get; }
     }
 }

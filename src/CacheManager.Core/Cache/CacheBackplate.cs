@@ -1,8 +1,9 @@
 ﻿namespace CacheManager.Core.Cache
 {
     using System;
+    using CacheManager.Core.Configuration;
 
-    public sealed class CacheBackPlate : ICacheBackPlate
+    public abstract class CacheBackPlate : ICacheBackPlate
     {
         private Action<string> onRemoveKey;
         private Action<string, string> onRemoveKeyRegion;
@@ -10,6 +11,32 @@
         private Action<string, string> onChangeKeyRegion;
         private Action<string> onClearRegion;
         private Action onClear;
+        
+        public string Name { get; private set; }
+
+        public ICacheManagerConfiguration Configuration { get; private set; }
+
+        public CacheBackPlate(string name, ICacheManagerConfiguration configuration)
+        {
+            this.Name = name;
+            this.Configuration = configuration;
+        }
+
+        ~CacheBackPlate()
+        {
+            this.Dispose(false);
+        }
+
+        public void Dispose()
+        {
+            this.Dispose(true);
+
+            GC.SuppressFinalize(this);
+        }
+
+        public virtual void Dispose(bool managed)
+        {
+        }
 
         public void SubscribeRemove(Action<string> remove)
         {
@@ -71,7 +98,7 @@
             this.onClearRegion = clearRegion;
         }
         
-        public void NotifyRemove(string key)
+        public void OnRemove(string key)
         {
             if (string.IsNullOrWhiteSpace(key))
             {
@@ -81,7 +108,7 @@
             this.onRemoveKey(key);
         }
 
-        public void NotifyRemove(string key, string region)
+        public void OnRemove(string key, string region)
         {
             if (string.IsNullOrWhiteSpace(key))
             {
@@ -95,7 +122,7 @@
             this.onRemoveKeyRegion(key, region);
         }
 
-        public void NotifyChange(string key)
+        public void OnChange(string key)
         {
             if (string.IsNullOrWhiteSpace(key))
             {
@@ -105,7 +132,7 @@
             this.onChangeKey(key);
         }
 
-        public void NotifyChange(string key, string region)
+        public void OnChange(string key, string region)
         {
             if (string.IsNullOrWhiteSpace(key))
             {
@@ -119,12 +146,12 @@
             this.onChangeKeyRegion(key, region);
         }
         
-        public void NotifyClear()
+        public void OnClear()
         {
             this.onClear();
         }
 
-        public void NotifyClearRegion(string region)
+        public void OnClearRegion(string region)
         {
             if (string.IsNullOrWhiteSpace(region))
             {
@@ -133,5 +160,17 @@
 
             this.onClearRegion(region);
         }
+
+        public abstract void NotifyClear();
+
+        public abstract void NotifyClearRegion(string region);
+
+        public abstract void NotifyChange(string key);
+
+        public abstract void NotifyChange(string key, string region);
+
+        public abstract void NotifyRemove(string key);
+
+        public abstract void NotifyRemove(string key, string region);  
     }
 }

@@ -148,6 +148,22 @@ namespace CacheManager.Tests.Configuration
                 .ShouldAllBeEquivalentTo(Enumerable.Repeat(false, cache.CacheHandles.Count));
         }
 
+        [Fact]
+        [Trait("IntegrationTest", "Redis")]
+        public void Cfg_Valid_CfgFile_LoadWithRedisBackPlate()
+        {
+            // arrange
+            string fileName = GetCfgFileName(@"\Configuration\configuration.valid.allFeatures.config");
+            string cacheName = "redisWithBackPlate";
+
+            // act
+            var cfg = ConfigurationBuilder.LoadConfigurationFile<object>(fileName, cacheName);
+            var cache = CacheFactory.FromConfiguration(cfg);
+
+            // assert
+            cache.CacheHandles.Any(p => p.Configuration.IsBackPlateSource).Should().BeTrue();
+        }
+
         private static string GetCfgFileName(string fileName)
         {
             return AppDomain.CurrentDomain.BaseDirectory + (fileName.StartsWith("\\") ? fileName : "\\" + fileName);

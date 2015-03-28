@@ -12,6 +12,7 @@
       <xs:attribute name="ref" use="required" type="xs:string"/>
       <xs:attribute name="timeout" use="optional" type="xs:string"/>
       <xs:attribute name="expirationMode" use="optional" type="expirationMode"/>
+      <xs:attribute name="isBackPlateSource" use="optional" type="xs:boolean"/>
     </xs:complexType>
   </xs:element>
   <xs:element name="cache">
@@ -25,6 +26,8 @@
       <xs:attribute name="enableStatistics" use="optional" type="xs:boolean"/>
       <xs:attribute name="maxRetries" use="optional" type="xs:integer" />
       <xs:attribute name="retryTimeout" use="optional" type="xs:integer" />
+      <xs:attribute name="backPlateType" use="optional" type="xs:string" />
+      <xs:attribute name="backPlateName" use="optional" type="xs:string" />
     </xs:complexType>
   </xs:element>
   <xs:element name="handleDef">

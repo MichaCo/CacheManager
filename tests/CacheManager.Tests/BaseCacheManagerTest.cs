@@ -136,7 +136,8 @@ namespace CacheManager.Tests
                             new List<ServerEndPoint>() { new ServerEndPoint("127.0.0.1", 6379) },
                             allowAdmin: true
                             ))
-                        .WithHandle<RedisCacheHandle<object>>("redisCache")
+                        .WithBackPlate<RedisCacheBackPlate>("redisCache")
+                        .WithHandle<RedisCacheHandle<object>>("redisCache", true)
                         .EnableStatistics();
                 });
 
@@ -163,7 +164,8 @@ namespace CacheManager.Tests
                             allowAdmin: true
                         //, connectionTimeout: 0 /*<- for testing connection timeout this is handy*/
                             ))
-                        .WithHandle<RedisCacheHandle<object>>("redisCache")
+                        .WithBackPlate<RedisCacheBackPlate>("redisCache")
+                        .WithHandle<RedisCacheHandle<object>>("redisCache", true)
                         .EnableStatistics();
                 });
 

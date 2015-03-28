@@ -60,5 +60,9 @@ namespace CacheManager.Core.Configuration
         /// <para>Default is 10.</para>
         /// </summary>
         public int RetryTimeout { get; set; }
+
+        internal Type BackPlateType { get; set; }
+
+        public string BackPlateName { get; internal set; }
     }
 }

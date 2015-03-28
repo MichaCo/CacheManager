@@ -89,75 +89,13 @@ namespace CacheManager.StackExchange.Redis
             }
         }
 
-        private StackRedis.ISubscriber Subscriber
-        {
-            get
-            {
-                if (subscriber == null)
-                {
-                    Retry(() =>
-                    {
-                        subscriber = Connection.GetSubscriber();
-                    });
-                }
-
-                return subscriber;
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the <see cref="ICacheBackPlate"/> for this cache handle.
-        /// <para>
-        /// The redis cache handle actually supports this feature with an implementation using pub/sub.
-        /// </para>
-        /// </summary>
-        public override ICacheBackPlate BackPlate
-        {
-            get;
-            set;
-        }
-
         public RedisCacheHandle(ICacheManager<TCacheValue> manager, ICacheHandleConfiguration configuration)
             : base(manager, configuration)
         {
-            // default should be enabled, although this costs some performance
-            this.EnableBackPlateUpdates();
-        }
-
-        /// <summary>
-        /// Enables the back plate feature based on redis pub/sub in this case.
-        /// <para>
-        /// It will cost a little bit write performance, but only this way, multiple cache instances with
-        /// another in process cache infront of the redis cache will work correctly (e.g. keys will get removed on all servers, 
-        /// not only locally...).
-        /// </para>
-        /// </summary>
-        public void EnableBackPlateUpdates()
-        {
-            this.channelName = string.Format(
-                CultureInfo.InvariantCulture,
-                "CacheManager_{0}_{1}",
-                this.Manager.Configuration.Name,
-                this.Configuration.HandleName);
-
-            this.BackPlate = new CacheBackPlate();
-            this.Subscribe();
-        }
-
-        public void DisableBackPlateUpdates()
-        {
-            this.BackPlate = null;
-            this.Subscriber.Unsubscribe(this.channelName);
         }
 
         protected override void Dispose(bool disposeManaged)
         {
-            if (disposeManaged)
-            {
-                this.Subscriber.Unsubscribe(this.channelName);
-                // this.connection.Dispose();
-            }
-
             base.Dispose(disposeManaged);
         }
 
@@ -183,8 +121,6 @@ namespace CacheManager.StackExchange.Redis
             {
                 server.FlushDatabase(this.RedisConfiguration.Database);
             }
-
-            this.NotifyChannel(ChannelAction.Clear, null, null);
         }
 
         public IEnumerable<StackRedis.IServer> GetServers(StackRedis.ConnectionMultiplexer muxer)
@@ -212,10 +148,7 @@ namespace CacheManager.StackExchange.Redis
                 }
 
                 // now delete the region
-                if (this.Database.KeyDelete(region))
-                {
-                    this.NotifyChannel(ChannelAction.ClearRegion, null, region);
-                }
+                this.Database.KeyDelete(region);
             });
         }
         
@@ -241,7 +174,6 @@ namespace CacheManager.StackExchange.Redis
             if (!result)
             {
                 this.Set(item, StackRedis.When.Always, false);
-                this.NotifyChannel(ChannelAction.Changed, item.Key, item.Region);
             }
         }
 
@@ -346,8 +278,6 @@ namespace CacheManager.StackExchange.Redis
 
                     if (committed)
                     {
-                        this.NotifyChannel(ChannelAction.Changed, key, region);
-                        
                         return new UpdateItemResult(tries > 1, true, tries);
                     }
                 } while (committed == false && tries <= config.MaxRetries);
@@ -441,11 +371,6 @@ namespace CacheManager.StackExchange.Redis
                 var fullKey = this.GetKey(key, region);
                 var result = this.Database.KeyDelete(fullKey);
                 
-                if (result)
-                {
-                    this.NotifyChannel(ChannelAction.Removed, key, region);
-                }
-
                 return result;
             });
         }
@@ -461,131 +386,10 @@ namespace CacheManager.StackExchange.Redis
 
             return fullKey;
         }
-        
-        private void Subscribe()
-        {
-            this.Subscriber.Subscribe(this.channelName, (channel, msg) =>
-            {
-                if (this.BackPlate == null)
-                {
-                    return;
-                }
-
-                string messageStr = (string)msg;
-
-                if (messageStr.StartsWith(this.Identifier))
-                {
-                    // do not notify ourself (might be faster than the second method?
-                    return;
-                }
-
-                var message = ChannelMessage.FromMsg(messageStr);
-                //if (message.OwnerIdentity == this.Identifier)
-                //{
-                //    // do not notify ourself
-                //    return;
-                //}
-
-                switch (message.Action)
-                {
-                    case ChannelAction.Clear:
-                        this.BackPlate.NotifyClear();
-                        break;
-                    case ChannelAction.ClearRegion:
-                        this.BackPlate.NotifyClearRegion(message.Region);
-                        break;
-                    case ChannelAction.Changed:
-                        if (string.IsNullOrWhiteSpace(message.Region))
-                        {
-                            this.BackPlate.NotifyChange(message.Key);
-                        }
-                        else
-                        {
-                            this.BackPlate.NotifyChange(message.Key, message.Region);
-                        }
-                        break;
-                    case ChannelAction.Removed:
-                        if (string.IsNullOrWhiteSpace(message.Region))
-                        {
-                            this.BackPlate.NotifyRemove(message.Key);
-                        }
-                        else
-                        {
-                            this.BackPlate.NotifyRemove(message.Key, message.Region);
-                        }
-                        break;
-                }
-
-            }, StackRedis.CommandFlags.FireAndForget);
-        }
-
-        private void NotifyChannel(ChannelAction action, string key, string region)
-        {
-            if (this.BackPlate == null)
-            {
-                return;
-            }
-
-            ChannelMessage message;
-            if (action == ChannelAction.Clear)
-            {
-                message = new ChannelMessage(this.Identifier, ChannelAction.Clear);
-            }
-            else if (action == ChannelAction.ClearRegion)
-            {
-                message = new ChannelMessage(this.Identifier, ChannelAction.ClearRegion)
-                {
-                    Region = region
-                };
-            }
-            else if (string.IsNullOrWhiteSpace(region))
-            {
-                message = new ChannelMessage(this.Identifier, action, key);
-            }
-            else
-            {
-                message = new ChannelMessage(this.Identifier, action, key, region);
-            }
-
-            var msg = message.ToMsg();
-            //Trace.WriteLine(this.Identifier + " sending: " + msg);
-
-            this.Subscriber.Publish(this.channelName, msg, StackRedis.CommandFlags.FireAndForget);
-        }
 
         private T Retry<T>(Func<T> retryme)
         {
-            var tries = 0;
-            do
-            {
-                try
-                {
-                    return retryme();
-                }
-                catch (StackRedis.RedisConnectionException)
-                {
-                    Task.Delay(this.Manager.Configuration.RetryTimeout).Wait();
-                }
-                catch (System.TimeoutException)
-                {
-                    Task.Delay(this.Manager.Configuration.RetryTimeout).Wait();
-                }
-                catch (AggregateException ag)
-                {
-                    ag.Handle(e =>
-                    {
-                        if (e is StackRedis.RedisConnectionException || e is System.TimeoutException)
-                        {
-                            Task.Delay(this.Manager.Configuration.RetryTimeout).Wait();
-                            return true;
-                        }
-
-                        return false;
-                    });
-                }
-            } while (tries < this.Manager.Configuration.MaxRetries);
-
-            return default(T);
+            return RetryHelper.Retry(retryme, this.Manager.Configuration.RetryTimeout, this.Manager.Configuration.MaxRetries);
         }
 
         private void Retry(Action retryme)

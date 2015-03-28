@@ -121,7 +121,9 @@ namespace CacheManager.Core.Configuration
         private const string EnableStatisticsKey = "enableStatistics";
         private const string MaxRetriesKey = "maxRetries";
         private const string RetryTimeoutKey = "retryTimeout";
-
+        private const string BackPlateTypeKey = "backPlateType";
+        private const string BackPlateNameKey = "backPlateName";
+      
         public CacheManagerHandleCollection()
         {
             AddElementName = "handle";
@@ -202,6 +204,32 @@ namespace CacheManager.Core.Configuration
             set
             {
                 this[RetryTimeoutKey] = value;
+            }
+        }
+
+        [ConfigurationProperty(BackPlateTypeKey, IsRequired = false)]
+        public string BackPlateType
+        {
+            get
+            {
+                return (string)base[BackPlateTypeKey];
+            }
+            set
+            {
+                this[BackPlateTypeKey] = value;
+            }
+        }
+        
+        [ConfigurationProperty(BackPlateNameKey, IsRequired = false)]
+        public string BackPlateName
+        {
+            get
+            {
+                return (string)base[BackPlateNameKey];
+            }
+            set
+            {
+                this[BackPlateNameKey] = value;
             }
         }
 
@@ -286,6 +314,19 @@ namespace CacheManager.Core.Configuration
             set
             {
                 this["expirationMode"] = value;
+            }
+        }
+
+        [ConfigurationProperty("isBackPlateSource", IsRequired = false, DefaultValue = false)]
+        public bool IsBackPlateSource
+        {
+            get
+            {
+                return (bool)this["isBackPlateSource"];
+            }
+            set
+            {
+                this["isBackPlateSource"] = value;
             }
         }
     }

@@ -45,6 +45,8 @@ namespace CacheManager.Core.Configuration
 
         public bool EnableStatistics { get; internal set; }
 
+        public bool IsBackPlateSource { get; internal set; }
+
         internal Type HandleType { get; set; }
     }
 }

@@ -35,15 +35,6 @@ namespace CacheManager.Core
         CacheStats<TCacheValue> Stats { get; }
 
         /// <summary>
-        /// Gets the instance of <see cref="ICacheBackPlate"/>.
-        /// <para>
-        /// Should be null unless the implementing cache system supports messaging and can implement the 
-        /// back plate.
-        /// </para>
-        /// </summary>
-        ICacheBackPlate BackPlate { get; }
-
-        /// <summary>
         /// Updates an existing key in the cache.
         /// <para>
         /// The cache manager will make sure the update will always happen on the most recent version.

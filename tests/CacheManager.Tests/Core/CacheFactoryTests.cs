@@ -5,6 +5,8 @@ using System.Linq;
 using CacheManager.Core;
 using CacheManager.Core.Cache;
 using CacheManager.Core.Configuration;
+using CacheManager.StackExchange.Redis;
+using CacheManager.SystemRuntimeCaching;
 using CacheManager.Tests.TestCommon;
 using FluentAssertions;
 using Xunit;
@@ -220,6 +222,73 @@ namespace CacheManager.Tests.Core
             // assert
             act.ShouldThrow<InvalidOperationException>()
                 .WithMessage("Retry timeout must be greater*");
+        }
+        
+        [Fact]
+        [ReplaceCulture]
+        public void CacheFactory_Build_WithRedisBackPlateNoBackplateSource()
+        {
+            // arrange
+            // act
+            Action act = () => CacheFactory.Build<object>("cacheName", settings =>
+            {
+                settings.WithBackPlate<RedisCacheBackPlate>("redis");
+            });
+
+            // assert
+            act.ShouldThrow<InvalidOperationException>()
+                .WithMessage("*At least one cache handle must be*");
+        }
+
+        [Fact]
+        [ReplaceCulture]
+        public void CacheFactory_Build_WithRedisBackPlateTooManyBackplateSources()
+        {
+            // arrange
+            // act
+            Action act = () => CacheFactory.Build<object>("cacheName", settings =>
+            {
+                settings.WithBackPlate<RedisCacheBackPlate>("redis");
+                settings.WithHandle<MemoryCacheHandle>("h1", true);
+                settings.WithHandle<MemoryCacheHandle>("h2", true);
+            });
+
+            // assert
+            act.ShouldThrow<InvalidOperationException>()
+                .WithMessage("*Only one cache handle can be *");
+        }
+        
+        [Fact]
+        [ReplaceCulture]
+        public void CacheFactory_Build_WithRedisBackPlateNoRedisConfig()
+        {
+            // arrange
+            // act
+            Action act = () => CacheFactory.Build<object>("cacheName", settings =>
+            {
+                settings.WithBackPlate<RedisCacheBackPlate>("redis");
+                settings.WithHandle<MemoryCacheHandle>("h1", true);
+            });
+
+            // assert
+            act.ShouldThrow<InvalidOperationException>()
+                .WithMessage("*No redis configuration found *");
+        }
+
+        [Fact]
+        [ReplaceCulture]
+        public void CacheFactory_Build_WithRedisBackPlateNoName()
+        {
+            // arrange
+            // act
+            Action act = () => CacheFactory.Build<object>("cacheName", settings =>
+            {
+                settings.WithBackPlate<RedisCacheBackPlate>("");                
+            });
+
+            // assert
+            act.ShouldThrow<ArgumentNullException>()
+                .WithMessage("*Parameter name: name*");
         }
 
         [Fact]

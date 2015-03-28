@@ -37,12 +37,13 @@ namespace CacheManager.Config.Tests
                     //.WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMilliseconds(20)
                 ;
 
-                cfg.WithHandle<RedisCacheHandle>("redis")
+                cfg.WithHandle<RedisCacheHandle>("redis", true)
                     .DisableStatistics()
                     //.EnablePerformanceCounters()
                     //.WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(30))
                 ;
 
+                cfg.WithBackPlate<RedisCacheBackPlate>("redis");
                 // cfg.WithHandle<MemcachedCacheHandle<object>>("enyim.com/local-memcached");
 
                 //managerConfiguration.WithHandle<AppFabricCacheHandle<string>>("default")

@@ -226,6 +226,26 @@ namespace CacheManager.Core.Configuration
             var cfg = new CacheManagerConfiguration<TCacheValue>(configName, maxRetries.HasValue ? maxRetries.Value : int.MaxValue, retryTimeout.HasValue ? retryTimeout.Value : 10);
             cfg.CacheUpdateMode = managerCfg.UpdateMode;
 
+            // name can be null
+            cfg.BackPlateName = managerCfg.BackPlateName;
+
+            if (string.IsNullOrWhiteSpace(managerCfg.BackPlateType))
+            {
+                if (!string.IsNullOrWhiteSpace(managerCfg.BackPlateName))
+                {
+                    throw new InvalidOperationException("BackPlateType cannot be null if BackPlateName is specified.");
+                }
+            }
+            else
+            {
+                if (string.IsNullOrWhiteSpace(cfg.BackPlateName))
+                {
+                    throw new InvalidOperationException("BackPlateName cannot be null if BackPlateType is specified.");
+                }
+
+                cfg.BackPlateType = Type.GetType(managerCfg.BackPlateType);
+            }
+
             foreach (CacheManagerHandle handleItem in managerCfg)
             {
                 var normRefId = handleItem.RefHandleId.ToUpper(CultureInfo.InvariantCulture);
@@ -243,7 +263,8 @@ namespace CacheManager.Core.Configuration
                     ExpirationMode = handleDef.ExpirationMode,
                     ExpirationTimeout = handleDef.ExpirationTimeout,
                     EnableStatistics = managerCfg.EnableStatistics,
-                    EnablePerformanceCounters = managerCfg.EnablePerformanceCounters
+                    EnablePerformanceCounters = managerCfg.EnablePerformanceCounters,
+                    IsBackPlateSource = handleItem.IsBackPlateSource
                 };
 
                 // override default timeout if it is defined in this section.
@@ -300,6 +321,7 @@ namespace CacheManager.Core.Configuration
 
             return cfg;
         }
+
         //// Parses the timespan setting from configuration.
         //// Cfg value can be suffixed with s|h|m for seconds hours or minutes...
         //// Depending on the suffix we have to construct the returned TimeSpan.
@@ -461,15 +483,61 @@ namespace CacheManager.Core.Configuration
         /// <exception cref="ArgumentNullException">Thrown if handleName or handleType are null.</exception>
         public ConfigurationBuilderCacheHandlePart<TCacheValue> WithHandle<TCacheHandle>(string handleName) where TCacheHandle : ICacheHandle<TCacheValue>
         {
+            return this.WithHandle<TCacheHandle>(handleName, false);
+        }
+
+        /// <summary>
+        /// Add a cache handle configuration with the required name and type attributes.
+        /// </summary>
+        /// <param name="handleName">The name to be used for the cache handle.</param>
+        /// <param name="isBackPlateSource">Set this to true if this cache handle should be the source of the back plate.
+        /// <para>This setting will be ignored if no back plate is configured.</para>
+        /// </param>
+        /// <typeparam name="TCacheHandle">The type of the cache handle implementation</typeparam>
+        /// <exception cref="ArgumentNullException">Thrown if handleName or handleType are null.</exception>
+        public ConfigurationBuilderCacheHandlePart<TCacheValue> WithHandle<TCacheHandle>(string handleName, bool isBackPlateSource) where TCacheHandle : ICacheHandle<TCacheValue>
+        {
             if (string.IsNullOrWhiteSpace(handleName))
             {
                 throw new ArgumentNullException("handleName");
             }
 
             var handleCfg = CacheHandleConfiguration<TCacheValue>.Create<TCacheHandle>(this.Configuration.Name, handleName);
+            handleCfg.IsBackPlateSource = isBackPlateSource;
+
+            if (this.Configuration.CacheHandles.Any(p => p.IsBackPlateSource))
+            {
+                throw new InvalidOperationException("Only one cache handle can be the backplate's source.");
+            }
+
             this.Configuration.CacheHandles.Add(handleCfg);
             var part = new ConfigurationBuilderCacheHandlePart<TCacheValue>(handleCfg, this);
             return part;
+        }
+
+        /// <summary>
+        /// Configures the back plate for the cache manager.
+        /// <para>This is an optional feature. If specified, see the documentation for the <typeparamref name="TBackPlate"/>.
+        /// The <paramref name="name"/> might be used to reference another configuration item.
+        /// </para>
+        /// <para>
+        /// If a back plate is defined, at least one cache handle must be marked as back plate source.
+        /// The cache manager then will try to synchronize multiple instances of the same configuration.
+        /// </para>
+        /// </summary>
+        /// <typeparam name="TBackPlate">The type of the back plate implementation.</typeparam>
+        /// <param name="name">The name.</param>
+        /// <returns>The builder instance.</returns>
+        public ConfigurationBuilderCachePart<TCacheValue> WithBackPlate<TBackPlate>(string name) where TBackPlate : ICacheBackPlate
+        {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                throw new ArgumentNullException("name");
+            }
+
+            this.Configuration.BackPlateName = name;
+            this.Configuration.BackPlateType = typeof(TBackPlate);
+            return this;
         }
 
         /// <summary>

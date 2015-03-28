@@ -9,6 +9,8 @@ namespace CacheManager.Core.Cache
     {
         private ICacheHandle<TCacheValue>[] cacheHandles = new ICacheHandle<TCacheValue>[] { };
 
+        private ICacheBackPlate cacheBackPlate = null;
+
         public event EventHandler<CacheActionEventArgs> OnRemove;
 
         public event EventHandler<CacheActionEventArgs> OnAdd;
@@ -74,6 +76,59 @@ namespace CacheManager.Core.Cache
             }
         }
 
+        internal void SetCacheBackPlate(ICacheBackPlate backPlate)
+        {
+            if (backPlate == null)
+            {
+                throw new ArgumentNullException("backPlate");
+            }
+            
+            this.cacheBackPlate = backPlate;
+
+            var handles = new Func<ICacheHandle<TCacheValue>[]>(() =>
+            {
+                var handleList = new List<ICacheHandle<TCacheValue>>();
+                foreach (var handle in this.cacheHandles)
+                {
+                    if (!handle.Configuration.IsBackPlateSource)
+                    {
+                        handleList.Add(handle);
+                    }
+                }
+                return handleList.ToArray();
+            });
+
+            backPlate.SubscribeChanged((key) =>
+            {
+                this.EvictFromHandles(key, null, handles());
+            });
+
+            backPlate.SubscribeChanged((key, region) =>
+            {
+                this.EvictFromHandles(key, region, handles());
+            });
+
+            backPlate.SubscribeRemove((key) =>
+            {
+                this.EvictFromHandles(key, null, handles());
+            });
+
+            backPlate.SubscribeRemove((key, region) =>
+            {
+                this.EvictFromHandles(key, region, handles());
+            });
+
+            backPlate.SubscribeClear(() =>
+            {
+                this.ClearHandles(handles());
+            });
+
+            backPlate.SubscribeClearRegion((region) =>
+            {
+                this.ClearRegionHandles(region, handles());
+            });
+        }
+
         /// <summary>
         /// Adds a cache handle to the cache manager instance.
         /// </summary>
@@ -85,41 +140,6 @@ namespace CacheManager.Core.Cache
                 throw new ArgumentNullException("handle");
             }
 
-            var currentIndex = this.cacheHandles.Length;
-            
-            var backPlate = handle.BackPlate;
-            if (backPlate != null)
-            {
-                backPlate.SubscribeChanged((key) =>
-                {
-                    this.UpdateEvictFromOtherHandles(key, null, currentIndex);
-                });
-
-                backPlate.SubscribeChanged((key, region) =>
-                {
-                    this.UpdateEvictFromOtherHandles(key, region, currentIndex);
-                });
-
-                backPlate.SubscribeRemove((key) =>
-                {
-                    this.UpdateEvictFromOtherHandles(key, null, currentIndex);
-                });
-
-                backPlate.SubscribeRemove((key, region) =>
-                {
-                    this.UpdateEvictFromOtherHandles(key, region, currentIndex);
-                });
-
-                backPlate.SubscribeClear(() =>
-                {
-                    this.ClearOtherHandles(currentIndex);
-                });
-
-                backPlate.SubscribeClearRegion((region) =>
-                {
-                    this.ClearRegionOtherHandles(region, currentIndex);
-                });
-            }
             var handleList = new List<ICacheHandle<TCacheValue>>(this.cacheHandles);
             handleList.Add(handle);
             this.cacheHandles = handleList.ToArray();
@@ -175,6 +195,19 @@ namespace CacheManager.Core.Cache
                 handle.Put(item);
             }
 
+            // update back plate
+            if (this.cacheBackPlate != null)
+            {
+                if (string.IsNullOrWhiteSpace(item.Region))
+                {
+                    this.cacheBackPlate.NotifyChange(item.Key);
+                }
+                else
+                {
+                    this.cacheBackPlate.NotifyChange(item.Key, item.Region);
+                }
+            }
+
             this.TriggerOnPut(item.Key, item.Region);
         }
 
@@ -203,6 +236,19 @@ namespace CacheManager.Core.Cache
                 {
                     result = true;
                     handle.Stats.OnRemove(region);
+                }
+            }
+
+            // update back plate
+            if (this.cacheBackPlate != null)
+            {
+                if (string.IsNullOrWhiteSpace(region))
+                {
+                    this.cacheBackPlate.NotifyRemove(key);
+                }
+                else
+                {
+                    this.cacheBackPlate.NotifyRemove(key, region);
                 }
             }
 
@@ -356,7 +402,7 @@ namespace CacheManager.Core.Cache
                     switch (config.VersionConflictOperation)
                     {
                         case VersionConflictHandling.EvictItemFromOtherCaches:
-                            this.UpdateEvictFromOtherHandles(key, region, handleIndex);
+                            this.EvictFromOtherHandles(key, region, handleIndex);
                             break;
                         case VersionConflictHandling.UpdateOtherCaches:
                             CacheItem<TCacheValue> item;
@@ -378,6 +424,19 @@ namespace CacheManager.Core.Cache
                 }
             }
 
+            // update back plate
+            if (overallResult && this.cacheBackPlate != null)
+            {
+                if (string.IsNullOrWhiteSpace(region))
+                {
+                    this.cacheBackPlate.NotifyChange(key);
+                }
+                else
+                {
+                    this.cacheBackPlate.NotifyChange(key, region);
+                }
+            }
+
             TriggerOnUpdate(key, region, config, new UpdateItemResult(overallVersionConflictOccurred, overallResult, overallTries));
 
             return overallResult;
@@ -389,6 +448,11 @@ namespace CacheManager.Core.Cache
             {
                 handle.Clear();
                 handle.Stats.OnClear();
+            } 
+            
+            if (this.cacheBackPlate != null)
+            {
+                this.cacheBackPlate.NotifyClear();
             }
 
             this.TriggerOnClear();
@@ -414,6 +478,17 @@ namespace CacheManager.Core.Cache
             this.TriggerOnClear();
         }
 
+        private void ClearHandles(ICacheHandle<TCacheValue>[] handles)
+        {
+            foreach (var handle in handles)
+            {
+                handle.Clear();
+                handle.Stats.OnClear();
+            }
+
+            this.TriggerOnClear();
+        }
+
         public override void ClearRegion(string region)
         {
             if (string.IsNullOrWhiteSpace(region))
@@ -425,6 +500,11 @@ namespace CacheManager.Core.Cache
             {
                 handle.ClearRegion(region);
                 handle.Stats.OnClearRegion(region);
+            }
+
+            if (this.cacheBackPlate != null)
+            {
+                this.cacheBackPlate.NotifyClearRegion(region);
             }
 
             this.TriggerOnClearRegion(region);
@@ -445,6 +525,17 @@ namespace CacheManager.Core.Cache
                     handle.ClearRegion(region);
                     handle.Stats.OnClearRegion(region);
                 }
+            }
+
+            this.TriggerOnClearRegion(region);
+        }
+
+        private void ClearRegionHandles(string region, ICacheHandle<TCacheValue>[] handles)
+        {
+            foreach (var handle in handles)
+            {
+                handle.ClearRegion(region);
+                handle.Stats.OnClearRegion(region);
             }
 
             this.TriggerOnClearRegion(region);
@@ -545,7 +636,7 @@ namespace CacheManager.Core.Cache
             }
         }
 
-        private void UpdateEvictFromOtherHandles(string key, string region, int excludeIndex)
+        private void EvictFromOtherHandles(string key, string region, int excludeIndex)
         {
             if (excludeIndex < 0 || excludeIndex >= this.cacheHandles.Length)
             {
@@ -574,7 +665,28 @@ namespace CacheManager.Core.Cache
                 }
             }
         }
-        
+
+        private void EvictFromHandles(string key, string region, ICacheHandle<TCacheValue>[] handles)
+        {
+            foreach (var handle in handles)
+            {
+                bool result;
+                if (string.IsNullOrWhiteSpace(region))
+                {
+                    result = handle.Remove(key);
+                }
+                else
+                {
+                    result = handle.Remove(key, region);
+                }
+
+                if (result)
+                {
+                    handle.Stats.OnRemove(region);
+                }
+            }
+        }
+
         private void AddToHandles(CacheItem<TCacheValue> item, int foundIndex)
         {
             switch (this.Configuration.CacheUpdateMode)

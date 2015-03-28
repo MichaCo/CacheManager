@@ -34,7 +34,7 @@ namespace CacheManager.Core
         /// </summary>
         /// <value>The configuration.</value>
         ICacheManagerConfiguration Configuration { get; }
-        
+
         /// <summary>
         /// Updates an existing key in the cache.
         /// <para>

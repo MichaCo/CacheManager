@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Globalization;
 using System.Linq;
+using System.Reflection;
 using CacheManager.Core.Configuration;
 
 namespace CacheManager.Core.Cache
@@ -39,6 +41,28 @@ namespace CacheManager.Core.Cache
                 var instance = handleInstance as BaseCacheHandle<TCacheValue>;
 
                 manager.AddCacheHandle(instance);
+            }
+
+            if (managerConfiguration.BackPlateType != null)
+            {
+                if (!manager.CacheHandles.Any(p => p.Configuration.IsBackPlateSource))
+                {
+                    throw new InvalidOperationException("At least one cache handle must be marked as the backplate's source.");
+                }
+                try
+                {
+                    var backPlate = (ICacheBackPlate)Activator.CreateInstance(managerConfiguration.BackPlateType, new object[] 
+                    { 
+                        managerConfiguration.BackPlateName, 
+                        managerConfiguration 
+                    });
+
+                    manager.SetCacheBackPlate(backPlate);
+                }
+                catch(TargetInvocationException e)
+                {
+                    throw e.InnerException;
+                }
             }
 
             return manager;

@@ -54,7 +54,8 @@
     <Compile Include="..\..\common\GlobalAssemblyInfo.cs">
       <Link>Properties\GlobalAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="Cache\CacheBackplate.cs" />
+    <Compile Include="Cache\BackPlateMessage.cs" />
+    <Compile Include="Cache\CacheBackPlate.cs" />
     <Compile Include="Cache\CachePerformanceCounterType.cs" />
     <Compile Include="CacheFactory.cs" />
     <Compile Include="Cache\BaseCacheHandle.cs" />
@@ -70,7 +71,7 @@
     <Compile Include="Cache\DictionaryCacheHandle.cs" />
     <Compile Include="Cache\DictionaryCacheHandle`1.cs" />
     <Compile Include="Configuration\RedisConfiguration.cs" />
-    <Compile Include="ICacheBackplate.cs" />
+    <Compile Include="ICacheBackPlate.cs" />
     <Compile Include="UpdateItemResult.cs">
       <SubType>Code</SubType>
     </Compile>

@@ -4,6 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using CacheManager.Core;
 using CacheManager.Core.Configuration;
+using CacheManager.StackExchange.Redis;
 using CacheManager.Tests.TestCommon;
 using FluentAssertions;
 using Xunit;
@@ -518,6 +519,36 @@ namespace CacheManager.Tests.Configuration
 
         [Fact]
         [ReplaceCulture]
+        public void Cfg_InvalidCfgFile_BackPlateNameButNoType()
+        {
+            // arrange
+            string fileName = GetCfgFileName(@"\Configuration\configuration.invalid.backPlateNameNoType.config");
+
+            // act
+            Action act = () => ConfigurationBuilder.LoadConfigurationFile<object>(fileName, "c1");
+
+            // assert
+            act.ShouldThrow<InvalidOperationException>()
+                .WithMessage("BackPlateType cannot be null if BackPlateName is specified.");
+        }
+
+        [Fact]
+        [ReplaceCulture]
+        public void Cfg_InvalidCfgFile_BackPlateTypeButNoName()
+        {
+            // arrange
+            string fileName = GetCfgFileName(@"\Configuration\configuration.invalid.backPlateTypeNoName.config");
+
+            // act
+            Action act = () => ConfigurationBuilder.LoadConfigurationFile<object>(fileName, "c1");
+
+            // assert
+            act.ShouldThrow<InvalidOperationException>()
+                .WithMessage("BackPlateName cannot be null if BackPlateType is specified.");
+        }
+
+        [Fact]
+        [ReplaceCulture]
         public void Cfg_CreateConfig_CacheManagerHandleCollection()
         {
             // arrange
@@ -529,11 +560,15 @@ namespace CacheManager.Tests.Configuration
                 EnablePerformanceCounters = true,
                 EnableStatistics = true, 
                 MaximumRetries = 10012,
-                RetryTimeout = 234
+                RetryTimeout = 234, 
+                BackPlateName = "backPlate",
+                BackPlateType = typeof(string).FullName
             };
 
             // assert
             col.Name.Should().Be("name");
+            col.BackPlateName.Should().Be("backPlate");
+            col.BackPlateType.Should().Be(typeof(string).FullName);
             col.UpdateMode.Should().Be(CacheUpdateMode.Up);
             col.EnablePerformanceCounters.Should().BeTrue();
             col.EnableStatistics.Should().BeTrue();
@@ -549,6 +584,7 @@ namespace CacheManager.Tests.Configuration
             // act
             var col = new CacheManagerHandle()
             {
+                IsBackPlateSource = true,
                 Name = "name",
                 ExpirationMode = ExpirationMode.Absolute,
                 Timeout = "22m",
@@ -560,6 +596,7 @@ namespace CacheManager.Tests.Configuration
             col.ExpirationMode.Should().Be(ExpirationMode.Absolute);
             col.Timeout.Should().Be("22m");
             col.RefHandleId.Should().Be("ref");
+            col.IsBackPlateSource.Should().BeTrue();
         }
 
         [Fact]
