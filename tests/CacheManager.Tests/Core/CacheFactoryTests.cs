@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using CacheManager.Core;
 using CacheManager.Core.Cache;
 using CacheManager.Core.Configuration;
@@ -119,8 +120,8 @@ namespace CacheManager.Tests.Core
             });
 
             // assert
-            act().CacheHandles[0].Configuration.EnablePerformanceCounters.Should().BeFalse();
-            act().CacheHandles[0].Configuration.EnableStatistics.Should().BeFalse("this is the default value");
+            act().CacheHandles.ElementAt(0).Configuration.EnablePerformanceCounters.Should().BeFalse();
+            act().CacheHandles.ElementAt(0).Configuration.EnableStatistics.Should().BeFalse("this is the default value");
         }
 
         [Fact]
@@ -137,8 +138,8 @@ namespace CacheManager.Tests.Core
             });
 
             // assert
-            act().CacheHandles[0].Configuration.EnablePerformanceCounters.Should().BeTrue();
-            act().CacheHandles[0].Configuration.EnableStatistics.Should().BeTrue("is required for perf counters");
+            act().CacheHandles.ElementAt(0).Configuration.EnablePerformanceCounters.Should().BeTrue();
+            act().CacheHandles.ElementAt(0).Configuration.EnableStatistics.Should().BeTrue("is required for perf counters");
         }
 
         [Fact]
@@ -154,8 +155,8 @@ namespace CacheManager.Tests.Core
             });
 
             // assert
-            act().CacheHandles[0].Configuration.EnablePerformanceCounters.Should().BeFalse("is default");
-            act().CacheHandles[0].Configuration.EnableStatistics.Should().BeTrue();
+            act().CacheHandles.ElementAt(0).Configuration.EnablePerformanceCounters.Should().BeFalse("is default");
+            act().CacheHandles.ElementAt(0).Configuration.EnableStatistics.Should().BeTrue();
         }
 
         [Fact]
@@ -170,8 +171,8 @@ namespace CacheManager.Tests.Core
             });
 
             // assert
-            act().CacheHandles[0].Configuration.EnablePerformanceCounters.Should().BeFalse("is default");
-            act().CacheHandles[0].Configuration.EnableStatistics.Should().BeFalse("is default");
+            act().CacheHandles.ElementAt(0).Configuration.EnablePerformanceCounters.Should().BeFalse("is default");
+            act().CacheHandles.ElementAt(0).Configuration.EnableStatistics.Should().BeFalse("is default");
         }
 
         [Fact]
@@ -249,26 +250,26 @@ namespace CacheManager.Tests.Core
             act.Configuration.RedisConfigurations.Count.Should().Be(1);
             act.Configuration.MaxRetries.Should().Be(22);
             act.Configuration.RetryTimeout.Should().Be(2223);
-            act.CacheHandles[0].Configuration.CacheName.Should().Be("stringCache");
-            act.CacheHandles[0].Configuration.HandleName.Should().Be("h1");
-            act.CacheHandles[0].Configuration.EnablePerformanceCounters.Should().BeTrue();
-            act.CacheHandles[0].Configuration.EnableStatistics.Should().BeTrue();
-            act.CacheHandles[0].Configuration.ExpirationMode.Should().Be(ExpirationMode.Absolute);
-            act.CacheHandles[0].Configuration.ExpirationTimeout.Should().Be(new TimeSpan(12, 0, 0));
+            act.CacheHandles.ElementAt(0).Configuration.CacheName.Should().Be("stringCache");
+            act.CacheHandles.ElementAt(0).Configuration.HandleName.Should().Be("h1");
+            act.CacheHandles.ElementAt(0).Configuration.EnablePerformanceCounters.Should().BeTrue();
+            act.CacheHandles.ElementAt(0).Configuration.EnableStatistics.Should().BeTrue();
+            act.CacheHandles.ElementAt(0).Configuration.ExpirationMode.Should().Be(ExpirationMode.Absolute);
+            act.CacheHandles.ElementAt(0).Configuration.ExpirationTimeout.Should().Be(new TimeSpan(12, 0, 0));
 
-            act.CacheHandles[1].Configuration.CacheName.Should().Be("stringCache");
-            act.CacheHandles[1].Configuration.HandleName.Should().Be("h2");
-            act.CacheHandles[1].Configuration.EnablePerformanceCounters.Should().BeFalse();
-            act.CacheHandles[1].Configuration.EnableStatistics.Should().BeFalse();
-            act.CacheHandles[1].Configuration.ExpirationMode.Should().Be(ExpirationMode.None);
-            act.CacheHandles[1].Configuration.ExpirationTimeout.Should().Be(new TimeSpan(0, 0, 0));
+            act.CacheHandles.ElementAt(1).Configuration.CacheName.Should().Be("stringCache");
+            act.CacheHandles.ElementAt(1).Configuration.HandleName.Should().Be("h2");
+            act.CacheHandles.ElementAt(1).Configuration.EnablePerformanceCounters.Should().BeFalse();
+            act.CacheHandles.ElementAt(1).Configuration.EnableStatistics.Should().BeFalse();
+            act.CacheHandles.ElementAt(1).Configuration.ExpirationMode.Should().Be(ExpirationMode.None);
+            act.CacheHandles.ElementAt(1).Configuration.ExpirationTimeout.Should().Be(new TimeSpan(0, 0, 0));
 
-            act.CacheHandles[2].Configuration.CacheName.Should().Be("stringCache");
-            act.CacheHandles[2].Configuration.HandleName.Should().Be("h3");
-            act.CacheHandles[2].Configuration.EnablePerformanceCounters.Should().BeFalse();
-            act.CacheHandles[2].Configuration.EnableStatistics.Should().BeTrue();
-            act.CacheHandles[2].Configuration.ExpirationMode.Should().Be(ExpirationMode.Sliding);
-            act.CacheHandles[2].Configuration.ExpirationTimeout.Should().Be(new TimeSpan(0, 0, 231));
+            act.CacheHandles.ElementAt(2).Configuration.CacheName.Should().Be("stringCache");
+            act.CacheHandles.ElementAt(2).Configuration.HandleName.Should().Be("h3");
+            act.CacheHandles.ElementAt(2).Configuration.EnablePerformanceCounters.Should().BeFalse();
+            act.CacheHandles.ElementAt(2).Configuration.EnableStatistics.Should().BeTrue();
+            act.CacheHandles.ElementAt(2).Configuration.ExpirationMode.Should().Be(ExpirationMode.Sliding);
+            act.CacheHandles.ElementAt(2).Configuration.ExpirationTimeout.Should().Be(new TimeSpan(0, 0, 231));
         }
     }
 }

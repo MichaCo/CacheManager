@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Collections.ObjectModel;
 using CacheManager.Core.Configuration;
 
 namespace CacheManager.Core.Cache
 {
     public sealed class BaseCacheManager<TCacheValue> : BaseCache<TCacheValue>, ICacheManager<TCacheValue>
     {
-        private IDictionary<int, ICacheHandle<TCacheValue>> cacheHandles;
+        private ICacheHandle<TCacheValue>[] cacheHandles = new ICacheHandle<TCacheValue>[] { };
 
         public event EventHandler<CacheActionEventArgs> OnRemove;
 
@@ -29,9 +29,12 @@ namespace CacheManager.Core.Cache
             private set;
         }
 
-        public IList<ICacheHandle<TCacheValue>> CacheHandles
+        public IReadOnlyCollection<ICacheHandle<TCacheValue>> CacheHandles
         {
-            get { return cacheHandles.OrderBy(p => p.Key).Select(p => p.Value).ToList(); }
+            get
+            {
+                return new ReadOnlyCollection<ICacheHandle<TCacheValue>>(new List<ICacheHandle<TCacheValue>>(cacheHandles));
+            }
         }
 
         private BaseCacheManager(ICacheManagerConfiguration configuration)
@@ -41,7 +44,6 @@ namespace CacheManager.Core.Cache
                 throw new ArgumentNullException("configuration");
             }
 
-            this.cacheHandles = new Dictionary<int, ICacheHandle<TCacheValue>>();
             this.Configuration = configuration;
         }
 
@@ -83,7 +85,7 @@ namespace CacheManager.Core.Cache
                 throw new ArgumentNullException("handle");
             }
 
-            var currentIndex = this.cacheHandles.Count;
+            var currentIndex = this.cacheHandles.Length;
             
             var backPlate = handle.BackPlate;
             if (backPlate != null)
@@ -118,8 +120,9 @@ namespace CacheManager.Core.Cache
                     this.ClearRegionOtherHandles(region, currentIndex);
                 });
             }
-
-            this.cacheHandles.Add(currentIndex, handle);
+            var handleList = new List<ICacheHandle<TCacheValue>>(this.cacheHandles);
+            handleList.Add(handle);
+            this.cacheHandles = handleList.ToArray();
         }
 
         protected internal override bool AddInternal(CacheItem<TCacheValue> item)
@@ -130,7 +133,7 @@ namespace CacheManager.Core.Cache
             }
 
             var result = false;
-            foreach (var handle in cacheHandles.Values)
+            foreach (var handle in cacheHandles)
             {
                 if (handle.Add(item))
                 {
@@ -155,7 +158,7 @@ namespace CacheManager.Core.Cache
                 throw new ArgumentNullException("item");
             }
 
-            foreach (var handle in cacheHandles.Values)
+            foreach (var handle in cacheHandles)
             {
                 if (handle.Configuration.EnableStatistics)
                 {
@@ -189,17 +192,17 @@ namespace CacheManager.Core.Cache
                 var handleResult = false;
                 if (!string.IsNullOrWhiteSpace(region))
                 {
-                    handleResult = handle.Value.Remove(key, region);
+                    handleResult = handle.Remove(key, region);
                 }
                 else
                 {
-                    handleResult = handle.Value.Remove(key);
+                    handleResult = handle.Remove(key);
                 }
 
                 if (handleResult)
                 {
                     result = true;
-                    handle.Value.Stats.OnRemove(region);
+                    handle.Stats.OnRemove(region);
                 }
             }
 
@@ -221,18 +224,19 @@ namespace CacheManager.Core.Cache
         {
             CacheItem<TCacheValue> cacheItem = null;
 
-            foreach (var handle in cacheHandles)
+            for (int handleIndex = 0; handleIndex < this.cacheHandles.Length; handleIndex++)
             {
+                var handle = cacheHandles[handleIndex];
                 if (string.IsNullOrWhiteSpace(region))
                 {
-                    cacheItem = handle.Value.GetCacheItem(key);
+                    cacheItem = handle.GetCacheItem(key);
                 }
                 else
                 {
-                    cacheItem = handle.Value.GetCacheItem(key, region);
+                    cacheItem = handle.GetCacheItem(key, region);
                 }
 
-                handle.Value.Stats.OnGet(region);
+                handle.Stats.OnGet(region);
 
                 if (cacheItem != null)
                 {
@@ -240,14 +244,14 @@ namespace CacheManager.Core.Cache
                     cacheItem.LastAccessedUtc = DateTime.UtcNow;
 
                     // update other handles if needed
-                    this.AddToHandles(cacheItem, handle.Key);
-                    handle.Value.Stats.OnHit(region);
+                    this.AddToHandles(cacheItem, handleIndex);
+                    handle.Stats.OnHit(region);
                     this.TriggerOnGet(key, region);
                     break;
                 }
                 else
                 {
-                    handle.Value.Stats.OnMiss(region);
+                    handle.Stats.OnMiss(region);
                 }
             }
 
@@ -315,22 +319,23 @@ namespace CacheManager.Core.Cache
             bool overallVersionConflictOccurred = false;
             int overallTries = 1;
 
-            foreach (var handle in cacheHandles)
+            for (int handleIndex = 0; handleIndex < this.cacheHandles.Length; handleIndex++)
             {
+                var handle = this.cacheHandles[handleIndex];
                 UpdateItemResult result;
                 if (string.IsNullOrWhiteSpace(region))
                 {
-                    result = handle.Value.Update(key, updateValue, config);
+                    result = handle.Update(key, updateValue, config);
                 }
                 else
                 {
-                    result = handle.Value.Update(key, region, updateValue, config);
+                    result = handle.Update(key, region, updateValue, config);
                 }
 
                 if (result.Success)
                 {
                     overallResult = true;
-                    handle.Value.Stats.OnUpdate(key, region, result);
+                    handle.Stats.OnUpdate(key, region, result);
                 }
 
                 if (result.VersionConflictOccurred)
@@ -351,20 +356,20 @@ namespace CacheManager.Core.Cache
                     switch (config.VersionConflictOperation)
                     {
                         case VersionConflictHandling.EvictItemFromOtherCaches:
-                            this.UpdateEvictFromOtherHandles(key, region, handle.Key);
+                            this.UpdateEvictFromOtherHandles(key, region, handleIndex);
                             break;
                         case VersionConflictHandling.UpdateOtherCaches:
                             CacheItem<TCacheValue> item;
                             if (string.IsNullOrWhiteSpace(region))
                             {
-                                item = handle.Value.GetCacheItem(key);
+                                item = handle.GetCacheItem(key);
                             }
                             else
                             {
-                                item = handle.Value.GetCacheItem(key, region);
+                                item = handle.GetCacheItem(key, region);
                             }
 
-                            this.UpdateOtherHandles(item, handle.Key);
+                            this.UpdateOtherHandles(item, handleIndex);
                             break;
                     }
 
@@ -380,10 +385,8 @@ namespace CacheManager.Core.Cache
         
         public override void Clear()
         {
-            foreach (var handleItem in cacheHandles)
+            foreach (var handle in this.cacheHandles)
             {
-                ICacheHandle<TCacheValue> handle = handleItem.Value;
-
                 handle.Clear();
                 handle.Stats.OnClear();
             }
@@ -393,15 +396,19 @@ namespace CacheManager.Core.Cache
 
         private void ClearOtherHandles(int excludeIndex)
         {
-            if (excludeIndex < 0 || excludeIndex >= this.cacheHandles.Count)
+            if (excludeIndex < 0 || excludeIndex >= this.cacheHandles.Length)
             {
                 throw new ArgumentOutOfRangeException("excludeIndex");
             }
 
-            foreach (var handle in cacheHandles.Where(p => p.Key != excludeIndex).Select(p => p.Value))
+            for (int handleIndex = 0; handleIndex < this.cacheHandles.Length; handleIndex++)
             {
-                handle.Clear();
-                handle.Stats.OnClear();
+                if (handleIndex != excludeIndex)
+                {
+                    var handle = this.cacheHandles[handleIndex];
+                    handle.Clear();
+                    handle.Stats.OnClear();
+                }
             }
 
             this.TriggerOnClear();
@@ -416,8 +423,8 @@ namespace CacheManager.Core.Cache
 
             foreach (var handle in this.cacheHandles)
             {
-                handle.Value.ClearRegion(region);
-                handle.Value.Stats.OnClearRegion(region);
+                handle.ClearRegion(region);
+                handle.Stats.OnClearRegion(region);
             }
 
             this.TriggerOnClearRegion(region);
@@ -425,15 +432,19 @@ namespace CacheManager.Core.Cache
 
         private void ClearRegionOtherHandles(string region, int excludeIndex)
         {
-            if (excludeIndex < 0 || excludeIndex >= this.cacheHandles.Count)
+            if (excludeIndex < 0 || excludeIndex >= this.cacheHandles.Length)
             {
                 throw new ArgumentOutOfRangeException("excludeIndex");
             }
 
-            foreach (var handle in cacheHandles.Where(p => p.Key != excludeIndex).Select(p => p.Value))
+            for (int handleIndex = 0; handleIndex < this.cacheHandles.Length; handleIndex++)
             {
-                handle.ClearRegion(region);
-                handle.Stats.OnClearRegion(region);
+                if (handleIndex != excludeIndex)
+                {
+                    var handle = this.cacheHandles[handleIndex];
+                    handle.ClearRegion(region);
+                    handle.Stats.OnClearRegion(region);
+                }
             }
 
             this.TriggerOnClearRegion(region);
@@ -454,11 +465,6 @@ namespace CacheManager.Core.Cache
 
         private void TriggerOnAdd(string key, string region)
         {
-            if (string.IsNullOrWhiteSpace(key))
-            {
-                throw new ArgumentNullException("key");
-            }
-
             if (OnAdd != null)
             {
                 this.OnAdd(this, new CacheActionEventArgs(key, region));
@@ -467,11 +473,6 @@ namespace CacheManager.Core.Cache
 
         private void TriggerOnPut(string key, string region)
         {
-            if (string.IsNullOrWhiteSpace(key))
-            {
-                throw new ArgumentNullException("key");
-            }
-
             if (OnPut != null)
             {
                 this.OnPut(this, new CacheActionEventArgs(key, region));
@@ -480,11 +481,6 @@ namespace CacheManager.Core.Cache
 
         private void TriggerOnUpdate(string key, string region, UpdateItemConfig config, UpdateItemResult result)
         {
-            if (string.IsNullOrWhiteSpace(key))
-            {
-                throw new ArgumentNullException("key");
-            }
-
             if (OnUpdate != null)
             {
                 this.OnUpdate(this, new CacheUpdateEventArgs(key, region, config, result));
@@ -493,11 +489,6 @@ namespace CacheManager.Core.Cache
 
         private void TriggerOnGet(string key, string region)
         {
-            if (string.IsNullOrWhiteSpace(key))
-            {
-                throw new ArgumentNullException("key");
-            }
-
             if (OnGet != null)
             {
                 this.OnGet(this, new CacheActionEventArgs(key, region));
@@ -514,11 +505,6 @@ namespace CacheManager.Core.Cache
 
         private void TriggerOnClearRegion(string region)
         {
-            if (string.IsNullOrWhiteSpace(region))
-            {
-                throw new ArgumentNullException("region");
-            }
-
             if (OnClearRegion != null)
             {
                 this.OnClearRegion(this, new CacheClearRegionEventArgs(region));
@@ -529,9 +515,9 @@ namespace CacheManager.Core.Cache
         {
             if (disposeManaged)
             {
-                foreach (var handle in cacheHandles)
+                foreach (var handle in this.cacheHandles)
                 {
-                    handle.Value.Dispose();
+                    handle.Dispose();
                 }
             }
 
@@ -545,43 +531,46 @@ namespace CacheManager.Core.Cache
                 return;
             }
 
-            foreach (var handle in cacheHandles.Where(p => p.Key != excludeIndex).Select(p => p.Value))
+            // .Where(p => p.Key != excludeIndex).Select(p => p.Value)
+            for (int handleIndex = 0; handleIndex < this.cacheHandles.Length; handleIndex++)
             {
-                handle.Put(item);
-                //// handle.Stats.OnPut(item); don't update, 
-                //// we expect the item to be in the cache already at this point, so we should not increase the count...
+                if (handleIndex != excludeIndex)
+                {
+                    this.cacheHandles[handleIndex].Put(item);
+                    //// handle.Stats.OnPut(item); don't update, 
+                    //// we expect the item to be in the cache already at this point, so we should not increase the count...
 
-                this.TriggerOnPut(item.Key, item.Region);
+                    this.TriggerOnPut(item.Key, item.Region);
+                }
             }
         }
 
         private void UpdateEvictFromOtherHandles(string key, string region, int excludeIndex)
         {
-            if (string.IsNullOrWhiteSpace(key))
-            {
-                throw new ArgumentNullException("key");
-            }
-            if (excludeIndex < 0 || excludeIndex >= this.cacheHandles.Count)
+            if (excludeIndex < 0 || excludeIndex >= this.cacheHandles.Length)
             {
                 throw new ArgumentOutOfRangeException("excludeIndex");
             }
 
-            foreach (var handle in cacheHandles.Where(p => p.Key != excludeIndex).Select(p => p.Value))
+            for (int handleIndex = 0; handleIndex < this.cacheHandles.Length; handleIndex++)
             {
-                bool result;
-                if (string.IsNullOrWhiteSpace(region))
+                if (handleIndex != excludeIndex)
                 {
-                    result = handle.Remove(key);
-                }
-                else
-                {
-                    result = handle.Remove(key, region);
-                }
+                    var handle = this.cacheHandles[handleIndex];
+                    bool result;
+                    if (string.IsNullOrWhiteSpace(region))
+                    {
+                        result = handle.Remove(key);
+                    }
+                    else
+                    {
+                        result = handle.Remove(key, region);
+                    }
 
-                if (result)
-                {
-                    handle.Stats.OnRemove(region);
-                    //this.TriggerOnRemove(key, region);
+                    if (result)
+                    {
+                        handle.Stats.OnRemove(region);
+                    }
                 }
             }
         }
@@ -596,32 +585,33 @@ namespace CacheManager.Core.Cache
 
                 case CacheUpdateMode.Full:
                     // update all cache handles except the one where we found the item
-                    AddToHandles(cacheHandles
-                        .Where(p => p.Key != foundIndex)
-                        .Select(p => p.Value),
-                        item);
-
+                    for (int handleIndex = 0; handleIndex < this.cacheHandles.Length; handleIndex++)
+                    {
+                        if (handleIndex != foundIndex)
+                        {
+                            this.cacheHandles[handleIndex].Add(item);
+                        }
+                    }
+                    
                     break;
 
                 case CacheUpdateMode.Up:
+                    // optimizing so we don't even have to iterate
+                    if (foundIndex == 0)
+                    {
+                        break;
+                    }
+
                     // update all cache handles with lower order, up the list
-                    AddToHandles(cacheHandles
-                        .OrderBy(p => p.Key)
-                        .Where(p => p.Key < foundIndex)
-                        .Select(p => p.Value),
-                        item);
-
+                    for (int handleIndex = 0; handleIndex < this.cacheHandles.Length; handleIndex++)
+                    {
+                        if (handleIndex < foundIndex)
+                        {
+                            this.cacheHandles[handleIndex].Add(item);
+                        }
+                    }
+                    
                     break;
-            }
-        }
-
-        private static void AddToHandles(IEnumerable<ICacheHandle<TCacheValue>> handles, CacheItem<TCacheValue> item)
-        {
-            foreach (var handle in handles)
-            {
-                // use Add because we expect the handle should be updated cuz it doesn't contain the item.
-                handle.Add(item);
-                // stats update should happen in Add method handle.Stats.OnAdd(item);
             }
         }
     }

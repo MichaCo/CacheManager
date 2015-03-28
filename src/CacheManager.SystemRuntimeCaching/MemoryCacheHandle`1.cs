@@ -233,7 +233,7 @@ namespace CacheManager.SystemRuntimeCaching
             }
 
             key = key.Replace("@", "!!").Replace(":", "!!");
-            return string.Concat(instanceKey, "@", region, ":", key);
+            return instanceKey + "@" + region + ":" + key;
         }
 
         private void CreateInstanceToken()

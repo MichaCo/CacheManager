@@ -40,7 +40,17 @@ namespace CacheManager.Core.Cache
 
         public ICacheManager<TCacheValue> Manager { get; private set; }
 
-        public ICacheBackPlate BackPlate { get; protected set; }
+        public virtual ICacheBackPlate BackPlate
+        {
+            get
+            {
+                return null;
+            }
+            set
+            {
+                throw new NotSupportedException("This cache handle doesn't support triggering the back plate.");
+            }
+        }
 
         public CacheStats<TCacheValue> Stats { get; private set; }
 

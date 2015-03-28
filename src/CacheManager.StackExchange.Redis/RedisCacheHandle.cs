@@ -105,6 +105,18 @@ namespace CacheManager.StackExchange.Redis
             }
         }
 
+        /// <summary>
+        /// Gets or sets the <see cref="ICacheBackPlate"/> for this cache handle.
+        /// <para>
+        /// The redis cache handle actually supports this feature with an implementation using pub/sub.
+        /// </para>
+        /// </summary>
+        public override ICacheBackPlate BackPlate
+        {
+            get;
+            set;
+        }
+
         public RedisCacheHandle(ICacheManager<TCacheValue> manager, ICacheHandleConfiguration configuration)
             : base(manager, configuration)
         {
@@ -222,9 +234,13 @@ namespace CacheManager.StackExchange.Redis
 
         protected override void PutInternalPrepared(CacheItem<TCacheValue> item)
         {
-            var result = this.Set(item, StackRedis.When.Always);
-            if (result)
+            // try to set the item
+            var result = this.Set(item, StackRedis.When.NotExists, true);
+
+            // it it does exist, lets try to modify it
+            if (!result)
             {
+                this.Set(item, StackRedis.When.Always, false);
                 this.NotifyChannel(ChannelAction.Changed, item.Key, item.Region);
             }
         }
@@ -287,6 +303,7 @@ namespace CacheManager.StackExchange.Redis
                         this.Database.KeyExpire(fullKey, item.ExpirationTimeout, StackRedis.CommandFlags.FireAndForget);
                     }
                 }
+
                 return setResult;
             });
         }
@@ -463,7 +480,7 @@ namespace CacheManager.StackExchange.Redis
                 }
 
                 var message = ChannelMessage.FromMsg(messageStr);
-                //if (message.IdentityOwner == this.Identifier)
+                //if (message.OwnerIdentity == this.Identifier)
                 //{
                 //    // do not notify ourself
                 //    return;

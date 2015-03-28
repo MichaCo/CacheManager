@@ -15,7 +15,7 @@ namespace CacheManager.StackExchange.Redis
     {
         public ChannelMessage(string owner, ChannelAction action)
         {
-            this.IdentityOwner = owner;
+            this.OwnerIdentity = owner;
             this.Action = action;
         }
 
@@ -59,18 +59,18 @@ namespace CacheManager.StackExchange.Redis
             var action = (int)this.Action;
             if (this.Action == ChannelAction.Clear)
             {
-                return this.IdentityOwner + ":" + action;
+                return this.OwnerIdentity + ":" + action;
             }
             else if (this.Action == ChannelAction.ClearRegion)
             {
-                return this.IdentityOwner + ":" + action + ":" + Encode(this.Region);
+                return this.OwnerIdentity + ":" + action + ":" + Encode(this.Region);
             }
             else if (string.IsNullOrWhiteSpace(this.Region))
             {
-                return this.IdentityOwner + ":" + action + ":" + Encode(this.Key);
+                return this.OwnerIdentity + ":" + action + ":" + Encode(this.Key);
             }
 
-            return this.IdentityOwner + ":" + action + ":" + Encode(this.Key) + ":" + Encode(this.Region);
+            return this.OwnerIdentity + ":" + action + ":" + Encode(this.Key) + ":" + Encode(this.Region);
         }
 
         private static string Encode(string value)
@@ -83,7 +83,7 @@ namespace CacheManager.StackExchange.Redis
             return Encoding.UTF8.GetString(Convert.FromBase64String(value));
         }
 
-        public string IdentityOwner { get; set; }
+        public string OwnerIdentity { get; set; }
 
         public ChannelAction Action { get; set; }
 

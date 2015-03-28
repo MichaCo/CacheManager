@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Threading;
 using CacheManager.Core;
 using CacheManager.Core.Configuration;
@@ -41,7 +42,7 @@ namespace CacheManager.Tests.SystemRuntimeCaching
             using (var act = GetHandle("Default"))
             {
                 // arrange
-                var settings = ((MemoryCacheHandle)act.CacheHandles[0]).CacheSettings;
+                var settings = ((MemoryCacheHandle)act.CacheHandles.ElementAt(0)).CacheSettings;
                 // act
                 // assert
                 settings["CacheMemoryLimitMegabytes"].Should().Be("42");
@@ -56,7 +57,7 @@ namespace CacheManager.Tests.SystemRuntimeCaching
             using (var act = GetHandle("NamedTest"))
             {
                 // arrange
-                var settings = ((MemoryCacheHandle)act.CacheHandles[0]).CacheSettings;
+                var settings = ((MemoryCacheHandle)act.CacheHandles.ElementAt(0)).CacheSettings;
                 // act
                 // assert
                 settings["CacheMemoryLimitMegabytes"].Should().Be("12");

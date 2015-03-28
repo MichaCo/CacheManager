@@ -19,62 +19,57 @@ namespace CacheManager.Config.Tests
     {
         static void Main(string[] args)
         {
-            ICacheManager<object> cache = null;
-            try
+            var swatch = Stopwatch.StartNew();
+            int iterations = int.MaxValue;
+            swatch.Restart();
+            var cacheConfiguration = ConfigurationBuilder.BuildConfiguration<object>("myCache", cfg =>
             {
-                var swatch = Stopwatch.StartNew();
-                int iterations = int.MaxValue;
-                swatch.Restart();
-                cache = CacheFactory.Build<object>("myCache", cfg =>
-                {
-                    cfg.WithUpdateMode(CacheUpdateMode.Up);
+                cfg.WithUpdateMode(CacheUpdateMode.Up);
 
-                    //managerConfiguration.WithHandle<DictionaryCacheHandle<int>>("default")
-                    //    .EnablePerformanceCounters()
-                    //    //.WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1))
-                    //;
+                //managerConfiguration.WithHandle<DictionaryCacheHandle<int>>("default")
+                //    .EnablePerformanceCounters()
+                //    //.WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1))
+                //;
 
-                    //cfg.WithHandle<MemoryCacheHandle<int>>("default")
-                    //    //.DisableStatistics()
-                    //    //.EnablePerformanceCounters()
-                    //    //.WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMilliseconds(20)
-                    //;
+                cfg.WithHandle<MemoryCacheHandle>("default")
+                    .DisableStatistics()
+                    //.EnablePerformanceCounters()
+                    //.WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMilliseconds(20)
+                ;
 
-                    //cfg.WithHandle<RedisCacheHandle>("redis")
-                    //    //.EnablePerformanceCounters()
-                    //    //.EnablePerformanceCounters()
-                    //    //.WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(30))
-                    //;
+                cfg.WithHandle<RedisCacheHandle>("redis")
+                    .DisableStatistics()
+                    //.EnablePerformanceCounters()
+                    //.WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(30))
+                ;
 
-                    cfg.WithHandle<MemcachedCacheHandle<object>>("enyim.com/local-memcached");
+                // cfg.WithHandle<MemcachedCacheHandle<object>>("enyim.com/local-memcached");
 
-                    //managerConfiguration.WithHandle<AppFabricCacheHandle<string>>("default")
-                    //    .DisableStatistics()
-                    //    ;
+                //managerConfiguration.WithHandle<AppFabricCacheHandle<string>>("default")
+                //    .DisableStatistics()
+                //    ;
                         
-                    cfg.WithRedisConfiguration(new RedisConfiguration(
-                        "redis",
-                        new List<ServerEndPoint>() { new ServerEndPoint("127.0.0.1", 6379) },
-                        allowAdmin: true
-                        , connectionTimeout: 10000 /*<- for testing connection timeout this is handy*/
-                        ));
-                });
+                cfg.WithRedisConfiguration(new RedisConfiguration(
+                    "redis",
+                    new List<ServerEndPoint>() { new ServerEndPoint("127.0.0.1", 6379) },
+                    allowAdmin: true
+                    , connectionTimeout: 10000 /*<- for testing connection timeout this is handy*/
+                    ));
+            });
 
-                cache.Clear();
-                for (int i = 0; i < iterations; i++)
-                {
-                   // CacheThreadTest(cache, i + 10);
-                    SimpleAddGetTest(cache);
-                    //CacheUpdateTest(cache);
-
-                    //Console.WriteLine(string.Format("Iterations ended after {0}ms.", swatch.ElapsedMilliseconds));
-                    Console.WriteLine("---------------------------------------------------------");
-                    swatch.Restart();
-                }
-            }
-            finally
+            for (int i = 0; i < iterations; i++)
             {
-                cache.Dispose();
+                // CacheThreadTest(cache, i + 10);
+                SimpleAddGetTest(
+                    CacheFactory.FromConfiguration(cacheConfiguration),
+                    CacheFactory.FromConfiguration(cacheConfiguration));
+                //CacheUpdateTest(cache);
+
+                //Console.WriteLine(string.Format("Iterations ended after {0}ms.", swatch.ElapsedMilliseconds));
+                Console.WriteLine("---------------------------------------------------------");
+                swatch.Restart();
+
+                GC.Collect();
             }
 
             Console.ForegroundColor = ConsoleColor.DarkGreen;
@@ -82,43 +77,42 @@ namespace CacheManager.Config.Tests
             Console.ReadKey();
         }
 
-        public static void SimpleAddGetTest(ICacheManager<object> cache)
+        public static void SimpleAddGetTest(params ICacheManager<object>[] caches)
         {
             var swatch = Stopwatch.StartNew();
             var threads = 500;
-            var items = 100;
-            var ops = 1 /* add ,update*2, get in our test method */
-                * threads * items + (items);
+            var items = 1000;
+            var ops = ((items) + (threads * items) + 1 + (threads * 2) + 1) * caches.Length;
 
             var rand = new Random();
             var key = "key";
 
-            cache.Put("key", "value");
-            var obj = cache.Get("key");
-
-            for (var ta = 0; ta < items; ta++)
-            {
-                cache.Put(key + ta, "val" + ta);
-            }
-
-            for (var t = 0; t < threads; t++)
-            {
+            foreach (var cache in caches)
+            {                
                 for (var ta = 0; ta < items; ta++)
                 {
-                    var v = cache.Get(key + ta);
-                    //cache.Put(key + ta, false);
+                    cache.Add(key + ta, "val" + ta);
                 }
 
-                Thread.Sleep(0);
+                for (var t = 0; t < threads; t++)
+                {
+                    for (var ta = 0; ta < items; ta++)
+                    {
+                        var x = cache.Get(key + ta);
+                        //cache.Put(key + ta, false);
+                    }
 
-                cache.Put("key" + rand.Next(0, items - 1), "222");
+                    Thread.Sleep(0);
+
+                    cache.Update("key" + rand.Next(0, items - 1), v => "222");
+                }
+
+                var item = cache.Get(key);
             }
-
-            var item = cache.Get(key);
 
             var elapsed = swatch.ElapsedMilliseconds;
             var opsPerSec = Math.Round(ops / swatch.Elapsed.TotalSeconds, 0);
-            Console.WriteLine("SimpleAddGetTest completed \tafter: {0:C} ms. \twith {1:C0} ops. \tResult is {2}.", elapsed, opsPerSec, item);
+            Console.WriteLine("SimpleAddGetTest completed \tafter: {0:C} ms. \twith {1:C0} Ops/s.", elapsed, opsPerSec);
         }
 
         public static void CacheUpdateTest(ICacheManager<int> cache)

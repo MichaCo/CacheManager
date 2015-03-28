@@ -280,7 +280,7 @@ namespace CacheManager.Tests.Core
                     .EnableStatistics();
             }))
             {
-                var handle1 = cache.CacheHandles[0];
+                var handle1 = cache.CacheHandles.ElementAt(0);
                 foreach (var handle in handles)
                 {
                     cache.AddCacheHandle(handle);

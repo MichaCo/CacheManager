@@ -25,9 +25,9 @@ namespace CacheManager.Tests.Configuration
             // assert
             cache.Configuration.CacheUpdateMode.Should().Be(CacheUpdateMode.Up);
             cache.CacheHandles.Count.Should().Be(3);
-            AssertCacheHandleConfig(cache.CacheHandles[0], "h1", ExpirationMode.None, new TimeSpan(0, 0, 50));
-            AssertCacheHandleConfig(cache.CacheHandles[1], "h2", ExpirationMode.Absolute, new TimeSpan(0, 20, 0));
-            AssertCacheHandleConfig(cache.CacheHandles[2], "h3", ExpirationMode.Sliding, new TimeSpan(20, 0, 0));
+            AssertCacheHandleConfig(cache.CacheHandles.ElementAt(0), "h1", ExpirationMode.None, new TimeSpan(0, 0, 50));
+            AssertCacheHandleConfig(cache.CacheHandles.ElementAt(1), "h2", ExpirationMode.Absolute, new TimeSpan(0, 20, 0));
+            AssertCacheHandleConfig(cache.CacheHandles.ElementAt(2), "h3", ExpirationMode.Sliding, new TimeSpan(20, 0, 0));
         }
 
         [Fact]
@@ -42,9 +42,9 @@ namespace CacheManager.Tests.Configuration
             // assert
             cache.Configuration.CacheUpdateMode.Should().Be(CacheUpdateMode.Up);
             cache.CacheHandles.Count.Should().Be(3);
-            AssertCacheHandleConfig(cache.CacheHandles[0], "h1", ExpirationMode.None, new TimeSpan(0, 0, 50));
-            AssertCacheHandleConfig(cache.CacheHandles[1], "h2", ExpirationMode.Absolute, new TimeSpan(0, 20, 0));
-            AssertCacheHandleConfig(cache.CacheHandles[2], "h3", ExpirationMode.Sliding, new TimeSpan(20, 0, 0));
+            AssertCacheHandleConfig(cache.CacheHandles.ElementAt(0), "h1", ExpirationMode.None, new TimeSpan(0, 0, 50));
+            AssertCacheHandleConfig(cache.CacheHandles.ElementAt(1), "h2", ExpirationMode.Absolute, new TimeSpan(0, 20, 0));
+            AssertCacheHandleConfig(cache.CacheHandles.ElementAt(2), "h3", ExpirationMode.Sliding, new TimeSpan(20, 0, 0));
         }
 
         [Fact]
@@ -61,10 +61,10 @@ namespace CacheManager.Tests.Configuration
             // assert
             cache.Configuration.CacheUpdateMode.Should().Be(CacheUpdateMode.Full);
             cache.CacheHandles.Count.Should().Be(4);
-            AssertCacheHandleConfig(cache.CacheHandles[0], "h1", ExpirationMode.None, new TimeSpan(0, 0, 50));
-            AssertCacheHandleConfig(cache.CacheHandles[1], "h2", ExpirationMode.Sliding, new TimeSpan(0, 5, 0));
-            AssertCacheHandleConfig(cache.CacheHandles[2], "h3", ExpirationMode.None, new TimeSpan(0, 0, 0));
-            AssertCacheHandleConfig(cache.CacheHandles[3], "h4", ExpirationMode.Absolute, new TimeSpan(0, 20, 0));
+            AssertCacheHandleConfig(cache.CacheHandles.ElementAt(0), "h1", ExpirationMode.None, new TimeSpan(0, 0, 50));
+            AssertCacheHandleConfig(cache.CacheHandles.ElementAt(1), "h2", ExpirationMode.Sliding, new TimeSpan(0, 5, 0));
+            AssertCacheHandleConfig(cache.CacheHandles.ElementAt(2), "h3", ExpirationMode.None, new TimeSpan(0, 0, 0));
+            AssertCacheHandleConfig(cache.CacheHandles.ElementAt(3), "h4", ExpirationMode.Absolute, new TimeSpan(0, 20, 0));
         }
 
         [Fact]
@@ -78,7 +78,7 @@ namespace CacheManager.Tests.Configuration
             var cfg = ConfigurationBuilder.LoadConfigurationFile<object>(fileName, cacheName);
             var cache = CacheFactory.FromConfiguration(cfg);
 
-            var memHandle = cache.CacheHandles[0] as MemoryCacheHandle<object>;
+            var memHandle = cache.CacheHandles.ElementAt(0) as MemoryCacheHandle<object>;
 
             memHandle.CacheSettings.Get(0).Should().Be("42");
             memHandle.CacheSettings.Get(1).Should().Be("69");
@@ -87,7 +87,7 @@ namespace CacheManager.Tests.Configuration
             // assert
             cache.Configuration.CacheUpdateMode.Should().Be(CacheUpdateMode.None);
             cache.CacheHandles.Count.Should().Be(1);
-            AssertCacheHandleConfig(cache.CacheHandles[0], "default", ExpirationMode.Sliding, new TimeSpan(0, 5, 0));
+            AssertCacheHandleConfig(cache.CacheHandles.ElementAt(0), "default", ExpirationMode.Sliding, new TimeSpan(0, 5, 0));
         }
 
         [Fact]

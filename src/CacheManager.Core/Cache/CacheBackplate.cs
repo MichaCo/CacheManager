@@ -53,31 +53,69 @@
 
         public void SubscribeClear(Action clear)
         {
+            if (clear == null)
+            {
+                throw new ArgumentNullException("clear");
+            }
+
             this.onClear = clear;
         }
 
         public void SubscribeClearRegion(Action<string> clearRegion)
         {
+            if (clearRegion == null)
+            {
+                throw new ArgumentNullException("clearRegion");
+            }
+
             this.onClearRegion = clearRegion;
         }
         
         public void NotifyRemove(string key)
         {
+            if (string.IsNullOrWhiteSpace(key))
+            {
+                throw new ArgumentNullException("key");
+            }
+
             this.onRemoveKey(key);
         }
 
         public void NotifyRemove(string key, string region)
         {
+            if (string.IsNullOrWhiteSpace(key))
+            {
+                throw new ArgumentNullException("key");
+            } 
+            if (string.IsNullOrWhiteSpace(region))
+            {
+                throw new ArgumentNullException("region");
+            }
+
             this.onRemoveKeyRegion(key, region);
         }
 
         public void NotifyChange(string key)
         {
+            if (string.IsNullOrWhiteSpace(key))
+            {
+                throw new ArgumentNullException("key");
+            }
+
             this.onChangeKey(key);
         }
 
         public void NotifyChange(string key, string region)
         {
+            if (string.IsNullOrWhiteSpace(key))
+            {
+                throw new ArgumentNullException("key");
+            }
+            if (string.IsNullOrWhiteSpace(region))
+            {
+                throw new ArgumentNullException("region");
+            }
+
             this.onChangeKeyRegion(key, region);
         }
         
@@ -88,6 +126,11 @@
 
         public void NotifyClearRegion(string region)
         {
+            if (string.IsNullOrWhiteSpace(region))
+            {
+                throw new ArgumentNullException("region");
+            }
+
             this.onClearRegion(region);
         }
     }

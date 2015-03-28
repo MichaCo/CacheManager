@@ -21,7 +21,7 @@ namespace CacheManager.Core
         /// state of the cache manager instance!
         /// </remarks>
         /// <value>The cache handles.</value>
-        IList<ICacheHandle<TCacheValue>> CacheHandles { get; }
+        IReadOnlyCollection<ICacheHandle<TCacheValue>> CacheHandles { get; }
 
         /// <summary>
         /// Adds a cache handle to the cache manager instance.
