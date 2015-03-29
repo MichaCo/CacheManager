@@ -55,6 +55,7 @@
     <Compile Include="..\..\common\GlobalAssemblyInfo.cs">
       <Link>Properties\GlobalAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="ConfigurationBuilderExtensions.cs" />
     <Compile Include="CouchbaseCacheHandle`1.cs" />
     <Compile Include="MemcachedCacheHandle`1.cs" />
     <Compile Include="MemcachedClientHandle.cs">

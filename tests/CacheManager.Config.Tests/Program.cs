@@ -26,29 +26,17 @@ namespace CacheManager.Config.Tests
             {
                 cfg.WithUpdateMode(CacheUpdateMode.Up);
 
-                //managerConfiguration.WithHandle<DictionaryCacheHandle<int>>("default")
-                //    .EnablePerformanceCounters()
-                //    //.WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1))
-                //;
-
-                cfg.WithHandle<MemoryCacheHandle>("default")
+                cfg.WithSystemRuntimeCacheHandle("default")
                     .DisableStatistics()
                     //.EnablePerformanceCounters()
                     //.WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMilliseconds(20)
                 ;
 
-                cfg.WithHandle<RedisCacheHandle>("redis", true)
+                cfg.WithRedisCacheHandle("redis", true)
                     .DisableStatistics()
-                    //.EnablePerformanceCounters()
-                    //.WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(30))
                 ;
 
-                cfg.WithBackPlate<RedisCacheBackPlate>("redis");
-                // cfg.WithHandle<MemcachedCacheHandle<object>>("enyim.com/local-memcached");
-
-                //managerConfiguration.WithHandle<AppFabricCacheHandle<string>>("default")
-                //    .DisableStatistics()
-                //    ;
+                cfg.WithRedisBackPlate("redis");
                         
                 cfg.WithRedisConfiguration(new RedisConfiguration(
                     "redis",

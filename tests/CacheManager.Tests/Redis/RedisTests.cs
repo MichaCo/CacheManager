@@ -152,21 +152,18 @@ namespace CacheManager.Tests.Redis
             {
                 cache.Clear();
 
-                for (int i = 0; i < 3; i++)
-                {
-                    // act
-                    var result = cache.Add(item);
+                // act
+                var result = cache.Add(item);
 
-                    // assert
-                    result.Should().BeTrue();
-                    Thread.Sleep(30);
-                    var value = cache.GetCacheItem(item.Key);
-                    value.Should().NotBeNull();
+                // assert
+                result.Should().BeTrue();
+                Thread.Sleep(30);
+                var value = cache.GetCacheItem(item.Key);
+                value.Should().NotBeNull();
 
-                    Thread.Sleep(30);
-                    var valueExpired = cache.GetCacheItem(item.Key);
-                    valueExpired.Should().BeNull();
-                }
+                Thread.Sleep(30);
+                var valueExpired = cache.GetCacheItem(item.Key);
+                valueExpired.Should().BeNull();                
             }
         }
         
@@ -182,27 +179,24 @@ namespace CacheManager.Tests.Redis
             using (cache)
             {
                 cache.Clear();
+                
+                // act
+                var result = cache.Add(item);
 
-                for (int i = 0; i < 3; i++)
+                // assert
+                result.Should().BeTrue();
+
+                // 450ms added so absolute would be expired on the 2nd go
+                for (int s = 0; s < 3; s++)
                 {
-                    // act
-                    var result = cache.Add(item);
-
-                    // assert
-                    result.Should().BeTrue();
-
-                    // 450ms added so absolute would be expired on the 2nd go
-                    for (int s = 0; s < 3; s++)
-                    {
-                        Thread.Sleep(30);
-                        var value = cache.GetCacheItem(item.Key);
-                        value.Should().NotBeNull();
-                    }
-
-                    Thread.Sleep(60);
-                    var valueExpired = cache.GetCacheItem(item.Key);
-                    valueExpired.Should().BeNull();
+                    Thread.Sleep(30);
+                    var value = cache.GetCacheItem(item.Key);
+                    value.Should().NotBeNull();
                 }
+
+                Thread.Sleep(60);
+                var valueExpired = cache.GetCacheItem(item.Key);
+                valueExpired.Should().BeNull();                
             }
         }
 
@@ -219,26 +213,23 @@ namespace CacheManager.Tests.Redis
             {
                 cache.Clear();
 
-                for (int i = 0; i < 3; i++)
+                // act
+                var result = cache.Add(item);
+
+                // assert
+                result.Should().BeTrue();
+
+                // 450ms added so absolute would be expired on the 2nd go
+                for (int s = 0; s < 3; s++)
                 {
-                    // act
-                    var result = cache.Add(item);
-
-                    // assert
-                    result.Should().BeTrue();
-
-                    // 450ms added so absolute would be expired on the 2nd go
-                    for (int s = 0; s < 3; s++)
-                    {
-                        Thread.Sleep(30);
-                        var value = cache.GetCacheItem(item.Key, item.Region);
-                        value.Should().NotBeNull();
-                    }
-
-                    Thread.Sleep(60);
-                    var valueExpired = cache.GetCacheItem(item.Key, item.Region);
-                    valueExpired.Should().BeNull();
+                    Thread.Sleep(30);
+                    var value = cache.GetCacheItem(item.Key, item.Region);
+                    value.Should().NotBeNull();
                 }
+
+                Thread.Sleep(60);
+                var valueExpired = cache.GetCacheItem(item.Key, item.Region);
+                valueExpired.Should().BeNull();                
             }
         }
 

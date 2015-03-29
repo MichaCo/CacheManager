@@ -86,6 +86,9 @@
     <Compile Include="..\CacheManager.AppFabricCache\AppFabricCacheHandle`1.cs">
       <Link>AppFabricCacheHandle`1.cs</Link>
     </Compile>
+    <Compile Include="..\CacheManager.AppFabricCache\ConfigurationBuilderExtensions.cs">
+      <Link>ConfigurationBuilderExtensions.cs</Link>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ProtoBufDataCacheObjectSerializer.cs" />
   </ItemGroup>

@@ -10,6 +10,14 @@ using Enyim.Caching.Configuration;
 
 namespace CacheManager.Memcached
 {
+    public class MemcachedCacheHandle : MemcachedCacheHandle<object>
+    {
+        public MemcachedCacheHandle(ICacheManager<object> manager, ICacheHandleConfiguration configuration)
+            : base(manager, configuration)
+        {
+        }
+    }
+
     public class MemcachedCacheHandle<TCacheValue> : MemcachedClientHandle<TCacheValue>
     {
         private static readonly string DefaultSectionName = "default";

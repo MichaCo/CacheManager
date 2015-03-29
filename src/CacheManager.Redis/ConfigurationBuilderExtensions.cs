@@ -6,10 +6,7 @@ namespace CacheManager.Redis
     public static class ConfigurationBuilderExtensions
     {
         /// <summary>
-        /// Defines a redis configuration.
-        /// <para>
-        /// This will only be used and is only needed if the redis cache handle implementation will be used.
-        /// </para>
+        /// Adds a redis configuration.
         /// </summary>
         /// <param name="config">The redis configuration object.</param>
         /// <returns>The configuration builder.</returns>

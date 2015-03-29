@@ -312,6 +312,7 @@ namespace CacheManager.Tests.SystemRuntimeCaching
         }
 
         [Fact]
+        [Trait("IntegrationTest", "Memcached")]
         public void Memcached_Update_ItemNotAdded()
         {
             // arrange
