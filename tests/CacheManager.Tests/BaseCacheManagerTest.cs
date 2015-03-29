@@ -167,7 +167,7 @@ namespace CacheManager.Tests
                         //, connectionTimeout: 0 /*<- for testing connection timeout this is handy*/
                             ))
                         .WithBackPlate<RedisCacheBackPlate>("redisCache")
-                        .WithHandle<RedisCacheHandle<object>>("redisCache", true)
+                        .WithRedisCacheHandle("redisCache", true)
                         .EnableStatistics();
                 });
 
@@ -196,7 +196,7 @@ namespace CacheManager.Tests
         {
             get
             {
-                CouchbaseConfigurationManager.AddConfiguration("defaultBucket", new ClientConfiguration()
+                var clientConfiguration = new ClientConfiguration()
                 {
                     Servers = new List<Uri>()
                     {
@@ -205,9 +205,9 @@ namespace CacheManager.Tests
                     UseSsl = false,
                     BucketConfigs = new Dictionary<string, BucketConfiguration>
                       {
-                        {"default", new BucketConfiguration
+                        {"no", new BucketConfiguration
                         {
-                          BucketName = "default",
+                          BucketName = "blabla",
                           UseSsl = false,
                           PoolConfiguration = new PoolConfiguration
                           {
@@ -217,14 +217,14 @@ namespace CacheManager.Tests
                         }}
                       }
 
-                });
+                };
 
                 var cache = CacheFactory.Build("myCache", settings =>
                 {
-                    settings.WithUpdateMode(CacheUpdateMode.Full)
-                        .WithHandle<BucketCacheHandle<object>>("defaultBucket")
-                            .EnableStatistics()
-                            .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(100));
+                    settings
+                        .WithCouchbaseConfiguration("couchbase", clientConfiguration)
+                        .WithCouchbaseCacheHandle("couchbase", "no")
+                            .EnableStatistics();
                 });
 
                 return cache;

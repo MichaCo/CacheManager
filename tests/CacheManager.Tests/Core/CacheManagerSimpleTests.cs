@@ -944,11 +944,12 @@ namespace CacheManager.Tests.Core
         {
             using (cache)
             {
+                cache.Clear();
                 // arrange
                 // act
                 Func<bool> actA = () => cache.Add("key", "some value", "region");
                 Func<string> act = () => cache.Get<string>("key", "region");
-
+                
                 // assert
                 actA().Should().BeTrue();
                 act().Should().Be("some value");

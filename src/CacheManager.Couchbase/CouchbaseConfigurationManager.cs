@@ -59,7 +59,7 @@ namespace CacheManager.Couchbase
             BucketConfiguration configuration;
             if (!clientConfiguration.BucketConfigs.TryGetValue(bucketName, out configuration))
             {
-                throw new InvalidOperationException("Not bucket with bucket name " + bucketName + " found. (We support default only atm).");
+                throw new InvalidOperationException("Not bucket with bucket name " + bucketName + " found.");
             }
 
             return configuration;

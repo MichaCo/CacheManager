@@ -36,7 +36,6 @@ namespace CacheManager.Redis
             return part.WithHandle<RedisCacheHandle<TCacheValue>>(redisConfigurationId, isBackPlateSource);
         }
 
-
         /// <summary>
         /// Configures the back plate for the cache manager.
         /// <para>This is an optional feature. If specified, see the documentation for the <typeparamref name="TBackPlate"/>.</para>

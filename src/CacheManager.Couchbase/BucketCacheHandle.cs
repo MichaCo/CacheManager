@@ -8,6 +8,7 @@ using CacheManager.Core.Configuration;
 using Couchbase;
 using Couchbase.Configuration.Client;
 using Couchbase.Core;
+using Newtonsoft.Json.Linq;
 
 namespace CacheManager.Couchbase
 {
@@ -21,17 +22,32 @@ namespace CacheManager.Couchbase
 
     public class BucketCacheHandle<TCacheValue> : BaseCacheHandle<TCacheValue>
     {
-        private IBucket bucket;
-        private BucketConfiguration bucketConfiguration;
-        private ClientConfiguration configuration;
-        private string bucketName = "default";
+        private readonly IBucket bucket;
+        private readonly BucketConfiguration bucketConfiguration;
+        private readonly ClientConfiguration configuration;
+        private readonly string bucketName = "default";
+        private readonly string configurationName = string.Empty;
 
         public BucketCacheHandle(ICacheManager<TCacheValue> manager, ICacheHandleConfiguration configuration)
             : base(manager, configuration)
         {
-            this.configuration = CouchbaseConfigurationManager.GetConfiguration(configuration.HandleName);
-            this.bucketConfiguration = CouchbaseConfigurationManager.GetBucketConfiguration(this.configuration, this.bucketName);            
-            this.bucket = CouchbaseConfigurationManager.GetBucket(this.configuration, configuration.HandleName, this.bucketName);
+            // we can configure the bucket name by having "<configKey>:<bucketName>" as handle's name value
+            var nameParts = configuration.HandleName.Split(new[] { ":" }, StringSplitOptions.RemoveEmptyEntries);
+            if (nameParts.Length == 0)
+            {
+                throw new InvalidOperationException("Configuration error with the handle name " + configuration.HandleName);
+            }
+
+            this.configurationName = nameParts[0];
+            
+            if (nameParts.Length == 2)
+            {
+                this.bucketName = nameParts[1];
+            }
+
+            this.configuration = CouchbaseConfigurationManager.GetConfiguration(this.configurationName);
+            this.bucketConfiguration = CouchbaseConfigurationManager.GetBucketConfiguration(this.configuration, this.bucketName);
+            this.bucket = CouchbaseConfigurationManager.GetBucket(this.configuration, this.configurationName, this.bucketName);
         }
 
         protected override void Dispose(bool disposeManaged)
@@ -51,18 +67,30 @@ namespace CacheManager.Couchbase
         protected override bool AddInternalPrepared(CacheItem<TCacheValue> item)
         {
             var fullKey = this.GetKey(item.Key, item.Region);
-            var result = this.bucket.Insert(fullKey, item);
-            return result.Success;
+            if (item.ExpirationMode != ExpirationMode.None)
+            {
+                return this.bucket.Insert(fullKey, item, item.ExpirationTimeout).Success;
+            }
+
+            return this.bucket.Insert(fullKey, item).Success;
         }
 
         protected override void PutInternalPrepared(CacheItem<TCacheValue> item)
         {
             var fullKey = this.GetKey(item.Key, item.Region);
-            var result = this.bucket.Upsert(fullKey, item);
+            if (item.ExpirationMode != ExpirationMode.None)
+            {
+                this.bucket.Upsert(fullKey, item, item.ExpirationTimeout);
+            }
+            else
+            {
+                this.bucket.Upsert(fullKey, item);
+            }            
         }
 
         public override void Clear()
         {
+            // warning: takes ~20seconds to flush the bucket... thats rigged
             var manager = this.bucket.CreateManager(this.bucketConfiguration.Username, this.bucketConfiguration.Password);
             if (manager != null)
             {
@@ -85,9 +113,24 @@ namespace CacheManager.Couchbase
         {
             var fullkey = this.GetKey(key, region);
             var result = this.bucket.Get<CacheItem<TCacheValue>>(fullkey);
+            
+            //TODO: implement sliding expiration whenever the guys from couchbase actually implement that feature into that client...
+
             if (result.Success)
             {
-                return result.Value;
+                var cacheItem = result.Value;
+                if (cacheItem.Value.GetType() == typeof(JValue))
+                {
+                    var value = cacheItem.Value as JValue;
+                    cacheItem = cacheItem.WithValue((TCacheValue)value.ToObject(cacheItem.ValueType));
+                } 
+                else if (cacheItem.Value.GetType() == typeof(JObject))
+                {
+                    var value = cacheItem.Value as JObject;
+                    cacheItem = cacheItem.WithValue((TCacheValue)value.ToObject(cacheItem.ValueType));
+                }
+
+                return cacheItem;
             }
 
             return null;

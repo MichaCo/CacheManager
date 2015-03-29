@@ -26,6 +26,7 @@ namespace CacheManager.Core
             this.Key = key;
             this.Region = region;
             this.Value = value;
+            this.ValueType = value.GetType();
             this.CreatedUtc = created;
             this.LastAccessedUtc = lastAccess;
             this.ExpirationMode = expiration;
@@ -46,6 +47,7 @@ namespace CacheManager.Core
 
             this.Key = key;
             this.Value = value;
+            this.ValueType = value.GetType();
             this.CreatedUtc = DateTime.UtcNow;
             this.LastAccessedUtc = DateTime.UtcNow;
         }
@@ -84,6 +86,7 @@ namespace CacheManager.Core
 
             Key = info.GetString("Key");
             Value = (T)info.GetValue("Value", typeof(T));
+            ValueType = (Type)info.GetValue("ValueType", typeof(Type));
             Region = info.GetString("Region");
             ExpirationMode = (ExpirationMode)info.GetValue("ExpirationMode", typeof(ExpirationMode));
             ExpirationTimeout = (TimeSpan)info.GetValue("ExpirationTimeout", typeof(TimeSpan));
@@ -122,10 +125,8 @@ namespace CacheManager.Core
 
         public Type ValueType
         {
-            get
-            {
-                return this.Value.GetType();
-            }
+            get;
+            private set;
         }
 
         public string Key { get; private set; }
