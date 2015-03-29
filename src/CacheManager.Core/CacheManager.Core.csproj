@@ -55,13 +55,13 @@
       <Link>Properties\GlobalAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="Cache\BackPlateMessage.cs" />
-    <Compile Include="Cache\CacheBackPlate.cs" />
-    <Compile Include="Cache\CachePerformanceCounterType.cs" />
     <Compile Include="CacheFactory.cs" />
     <Compile Include="Cache\BaseCacheHandle.cs" />
     <Compile Include="Cache\BaseCacheManager.cs" />
     <Compile Include="Cache\BaseCache.cs" />
+    <Compile Include="Cache\CacheBackPlate.cs" />
     <Compile Include="Cache\CacheEventArgs.cs" />
+    <Compile Include="Cache\CachePerformanceCounterType.cs" />
     <Compile Include="Cache\CacheReflectionHelper.cs" />
     <Compile Include="Cache\CacheStats.cs">
       <SubType>Code</SubType>
