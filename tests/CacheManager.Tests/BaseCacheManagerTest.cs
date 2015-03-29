@@ -200,8 +200,8 @@ namespace CacheManager.Tests
             yield return new object[] { data.WithManyDictionaryHandles };
             yield return new object[] { data.WithTwoNamedMemoryCaches };
             // yield return new object[] { data.WithRedisCache };
-            yield return new object[] { data.WithSystemAndRedisCache };
-            //yield return new object[] { data.WithMemcached };
+            // yield return new object[] { data.WithSystemAndRedisCache };
+            // yield return new object[] { data.WithMemcached };
         }
     }
 }
