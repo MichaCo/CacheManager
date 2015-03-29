@@ -1,2 +1,8 @@
 language: csharp
 solution: CacheManager.sln
+install:
+  - nuget restore CacheManager.sln
+  - nuget install xunit.runner.console -Version 2.0.0 -OutputDirectory testrunner
+script:
+  - xbuild /p:Configuration=Release solution-name.sln
+  - mono ./testrunner/xunit.runner.console.2.0.0/tools/xunit.console.exe ./CacheManager.Tests/bin/Release/CacheManager.Tests.dll -notrait "IntegrationTest"
