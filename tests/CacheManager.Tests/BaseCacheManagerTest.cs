@@ -4,9 +4,11 @@ using System.Diagnostics.CodeAnalysis;
 using CacheManager.Core;
 using CacheManager.Core.Cache;
 using CacheManager.Core.Configuration;
+using CacheManager.Couchbase;
 using CacheManager.Memcached;
 using CacheManager.Redis;
 using CacheManager.SystemRuntimeCaching;
+using Couchbase.Configuration.Client;
 
 namespace CacheManager.Tests
 {
@@ -190,6 +192,45 @@ namespace CacheManager.Tests
             }
         }
 
+        public ICacheManager<object> WithCouchbaseMemcached
+        {
+            get
+            {
+                CouchbaseConfigurationManager.AddConfiguration("defaultBucket", new ClientConfiguration()
+                {
+                    Servers = new List<Uri>()
+                    {
+                        new Uri("http://192.168.178.27:8091/pools")
+                    },
+                    UseSsl = false,
+                    BucketConfigs = new Dictionary<string, BucketConfiguration>
+                      {
+                        {"default", new BucketConfiguration
+                        {
+                          BucketName = "default",
+                          UseSsl = false,
+                          PoolConfiguration = new PoolConfiguration
+                          {
+                            MaxSize = 10,
+                            MinSize = 5
+                          }
+                        }}
+                      }
+
+                });
+
+                var cache = CacheFactory.Build("myCache", settings =>
+                {
+                    settings.WithUpdateMode(CacheUpdateMode.Full)
+                        .WithHandle<BucketCacheHandle<object>>("defaultBucket")
+                            .EnableStatistics()
+                            .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(100));
+                });
+
+                return cache;
+            }
+        }
+
         public static IEnumerable<object[]> GetCacheManagers()
         {
             var data = new BaseCacheManagerTest();
@@ -202,6 +243,7 @@ namespace CacheManager.Tests
             // yield return new object[] { data.WithRedisCache };
             // yield return new object[] { data.WithSystemAndRedisCache };
             // yield return new object[] { data.WithMemcached };
+            // yield return new object[] { data.WithCouchbaseMemcached };            
         }
     }
 }

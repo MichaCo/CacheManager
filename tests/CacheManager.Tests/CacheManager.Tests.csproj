@@ -35,6 +35,15 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Common.Logging">
+      <HintPath>..\..\packages\Common.Logging.3.0.0\lib\net40\Common.Logging.dll</HintPath>
+    </Reference>
+    <Reference Include="Common.Logging.Core">
+      <HintPath>..\..\packages\Common.Logging.Core.3.0.0\lib\net40\Common.Logging.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Couchbase.NetClient">
+      <HintPath>..\..\packages\CouchbaseNetClient.2.0.3.1\lib\net45\Couchbase.NetClient.dll</HintPath>
+    </Reference>
     <Reference Include="Enyim.Caching">
       <HintPath>..\..\packages\EnyimMemcached.2.13\lib\net35\Enyim.Caching.dll</HintPath>
       <Private>True</Private>
@@ -49,6 +58,10 @@
     <Reference Include="Moq, Version=4.2.1502.911, Culture=neutral, PublicKeyToken=69f491c39445e920, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\packages\Moq.4.2.1502.0911\lib\net40\Moq.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\Newtonsoft.Json.6.0.8\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="Ploeh.AutoFixture, Version=3.24.3.0, Culture=neutral, PublicKeyToken=b24654c590009d4f, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -192,6 +205,10 @@
     <ProjectReference Include="..\..\src\CacheManager.Core\CacheManager.Core.csproj">
       <Project>{701df657-8670-4313-a06b-63d8485b18f9}</Project>
       <Name>CacheManager.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\CacheManager.Couchbase\CacheManager.Couchbase.csproj">
+      <Project>{4f3c4713-183e-4181-8b1a-e4192d964894}</Project>
+      <Name>CacheManager.Couchbase</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\src\CacheManager.MemCached\CacheManager.Memcached.csproj">
       <Project>{680ff75c-6eeb-4eb6-bb46-b6e465f3edbf}</Project>
