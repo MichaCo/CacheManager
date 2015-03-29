@@ -5,7 +5,7 @@ using CacheManager.Core;
 using CacheManager.Core.Cache;
 using CacheManager.Core.Configuration;
 using CacheManager.Memcached;
-using CacheManager.StackExchange.Redis;
+using CacheManager.Redis;
 using CacheManager.SystemRuntimeCaching;
 
 namespace CacheManager.Tests

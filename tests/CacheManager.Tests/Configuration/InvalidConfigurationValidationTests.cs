@@ -4,7 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using CacheManager.Core;
 using CacheManager.Core.Configuration;
-using CacheManager.StackExchange.Redis;
+using CacheManager.Redis;
 using CacheManager.Tests.TestCommon;
 using FluentAssertions;
 using Xunit;

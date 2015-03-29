@@ -5,7 +5,7 @@ using System.Linq;
 using CacheManager.Core;
 using CacheManager.Core.Cache;
 using CacheManager.Core.Configuration;
-using CacheManager.StackExchange.Redis;
+using CacheManager.Redis;
 using CacheManager.SystemRuntimeCaching;
 using CacheManager.Tests.TestCommon;
 using FluentAssertions;
@@ -272,7 +272,7 @@ namespace CacheManager.Tests.Core
 
             // assert
             act.ShouldThrow<InvalidOperationException>()
-                .WithMessage("*No redis configuration found *");
+                .WithMessage("*No configuration added for id redis*");
         }
 
         [Fact]
@@ -315,8 +315,8 @@ namespace CacheManager.Tests.Core
             });
 
             // assert
+            RedisConfigurations.GetConfiguration("myRedis").Should().NotBeNull();
             act.Configuration.CacheUpdateMode.Should().Be(CacheUpdateMode.Full);
-            act.Configuration.RedisConfigurations.Count.Should().Be(1);
             act.Configuration.MaxRetries.Should().Be(22);
             act.Configuration.RetryTimeout.Should().Be(2223);
             act.CacheHandles.ElementAt(0).Configuration.CacheName.Should().Be("stringCache");

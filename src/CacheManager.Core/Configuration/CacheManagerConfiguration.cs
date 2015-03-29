@@ -14,7 +14,6 @@ namespace CacheManager.Core.Configuration
 
             this.Name = cacheName;
             this.CacheHandles = new List<CacheHandleConfiguration<TCacheValue>>();
-            this.RedisConfigurations = new List<RedisConfiguration>();
             this.MaxRetries = int.MaxValue;
             this.RetryTimeout = 10;
             this.CacheUpdateMode = CacheUpdateMode.Up;
@@ -45,8 +44,6 @@ namespace CacheManager.Core.Configuration
         /// <para>Internally used only.</para>
         /// </summary>
         internal IList<CacheHandleConfiguration<TCacheValue>> CacheHandles { get; private set; }
-
-        public IList<RedisConfiguration> RedisConfigurations { get; private set; }
 
         /// <summary>
         /// Gets or sets the limit of the number of retry operations per action.

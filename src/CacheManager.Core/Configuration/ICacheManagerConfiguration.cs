@@ -5,10 +5,13 @@ namespace CacheManager.Core.Configuration
     {
         CacheUpdateMode CacheUpdateMode { get; }
 
+        /// <summary>
+        /// Gets the name the cache will be using.
+        /// <para>
+        /// The name might be used by several components as an identifier or display name.
+        /// </para>
+        /// </summary>
         string Name { get; }
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Redis")]
-        IList<RedisConfiguration> RedisConfigurations { get; }
 
         /// <summary>
         /// Gets or sets the limit of the number of retry operations per action.

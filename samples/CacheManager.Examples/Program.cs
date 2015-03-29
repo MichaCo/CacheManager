@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using CacheManager.Core;
 using CacheManager.Core.Cache;
 using CacheManager.Core.Configuration;
-using CacheManager.StackExchange.Redis;
+using CacheManager.Redis;
 using Microsoft.Practices.Unity;
 
 namespace CacheManager.Examples

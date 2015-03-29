@@ -70,7 +70,6 @@
     <Compile Include="Cache\CacheStatsCounterType.cs" />
     <Compile Include="Cache\DictionaryCacheHandle.cs" />
     <Compile Include="Cache\DictionaryCacheHandle`1.cs" />
-    <Compile Include="Configuration\RedisConfiguration.cs" />
     <Compile Include="ICacheBackPlate.cs" />
     <Compile Include="UpdateItemResult.cs">
       <SubType>Code</SubType>
@@ -94,9 +93,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="CacheManager.Core.csproj.nuspec" />
-    <None Include="CacheManagerCfg.xsd">
-      <SubType>Designer</SubType>
-    </None>
     <None Include="app.config.transform" />
     <None Include="Settings.StyleCop" />
   </ItemGroup>

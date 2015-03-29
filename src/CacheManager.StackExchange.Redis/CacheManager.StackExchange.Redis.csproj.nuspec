@@ -22,6 +22,9 @@
     </dependencies>
   </metadata>
   <files>
+    <file src="bin\release\CacheManager.Redis.dll" target="lib\net45\CacheManager.Redis.dll" />
+    <file src="bin\release\CacheManager.Redis.xml" target="lib\net45\CacheManager.Redis.xml" />
+    <file src="..\..\RedisCfg.xsd" target="RedisCfg.xsd" />
     <file src="app.config.transform" target="content/app.config.transform" />
     <file src="app.config.transform" target="content/web.config.transform" />
   </files>

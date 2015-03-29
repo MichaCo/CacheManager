@@ -110,6 +110,10 @@
       <Project>{680ff75c-6eeb-4eb6-bb46-b6e465f3edbf}</Project>
       <Name>CacheManager.Memcached</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\src\CacheManager.Redis\CacheManager.Redis.csproj">
+      <Project>{202ee263-a422-4a99-b2f1-d64343c1ea29}</Project>
+      <Name>CacheManager.Redis</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\src\CacheManager.Serialization\CacheManager.Serialization.csproj">
       <Project>{8b2f185d-f20e-4c74-b4aa-76ac7074f9b1}</Project>
       <Name>CacheManager.Serialization</Name>

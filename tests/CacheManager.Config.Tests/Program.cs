@@ -9,7 +9,7 @@ using CacheManager.Core;
 using CacheManager.Core.Cache;
 using CacheManager.Core.Configuration;
 using CacheManager.Memcached;
-using CacheManager.StackExchange.Redis;
+using CacheManager.Redis;
 using CacheManager.SystemRuntimeCaching;
 using ProtoBuf;
 
@@ -62,7 +62,7 @@ namespace CacheManager.Config.Tests
             {
                 // CacheThreadTest(cache, i + 10);
                 SimpleAddGetTest(
-                    CacheFactory.FromConfiguration(cacheConfiguration),
+                   // CacheFactory.FromConfiguration(cacheConfiguration),
                     CacheFactory.FromConfiguration(cacheConfiguration));
                 //CacheUpdateTest(cache);
 

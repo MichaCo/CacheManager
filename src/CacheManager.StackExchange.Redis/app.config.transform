@@ -1,8 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
-<configuration>
+<configuration><configSections><section name="cacheManager.Redis" type="CacheManager.Redis.RedisConfigurationSection, CacheManager.Redis" /></configSections>
 <cacheManager xmlns="http://tempuri.org/CacheManagerCfg.xsd">
 <cacheHandles>
-<handleDef id="redisCache" type="CacheManager.StackExchange.Redis.RedisCacheHandle`1, CacheManager.StackExchange.Redis" />
+<handleDef id="redisCache" type="CacheManager.Redis.RedisCacheHandle`1, CacheManager.StackExchange.Redis" />
 </cacheHandles>
 </cacheManager>
+<cacheManager.Redis xmlns="http://tempuri.org/RedisCfg.xsd">
+<connections>
+<connection id="redis" allowAdmin="true">
+<endpoints>
+<endpoint host="127.0.0.1" port="6379"/>
+</endpoints>
+</connection>
+</connections>
+</cacheManager.Redis>
 </configuration>

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using CacheManager.Core.Configuration;
 using StackRedis = StackExchange.Redis;
 
-namespace CacheManager.StackExchange.Redis
+namespace CacheManager.Redis
 {
     internal class RedisConnectionPool
     {

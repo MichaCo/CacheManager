@@ -10,7 +10,7 @@ using CacheManager.Core.Cache;
 using CacheManager.Core.Configuration;
 using StackRedis = StackExchange.Redis;
 
-namespace CacheManager.StackExchange.Redis
+namespace CacheManager.Redis
 {
     public class RedisCacheHandle : RedisCacheHandle<object>
     {
@@ -46,17 +46,8 @@ namespace CacheManager.StackExchange.Redis
             {
                 if (redisConfiguration == null)
                 {
-                    redisConfiguration = this.Manager.Configuration.RedisConfigurations
-                                                .FirstOrDefault(p => p.Id == this.Configuration.HandleName);
-
-                    if (redisConfiguration == null)
-                    {
-                        throw new ConfigurationException(
-                            string.Format(
-                                CultureInfo.InvariantCulture,
-                                "No redis configuration for handle name {0} found. The id of the redisOption and the handle name must match.",
-                                this.Configuration.HandleName));
-                    }
+                    // throws an exception if not found for the name
+                    redisConfiguration = RedisConfigurations.GetConfiguration(this.Configuration.HandleName);
                 }
 
                 return redisConfiguration;

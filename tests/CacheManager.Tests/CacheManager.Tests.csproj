@@ -197,6 +197,10 @@
       <Project>{680ff75c-6eeb-4eb6-bb46-b6e465f3edbf}</Project>
       <Name>CacheManager.Memcached</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\src\CacheManager.Redis\CacheManager.Redis.csproj">
+      <Project>{202ee263-a422-4a99-b2f1-d64343c1ea29}</Project>
+      <Name>CacheManager.Redis</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\src\CacheManager.StackExchange.Redis\CacheManager.StackExchange.Redis.csproj">
       <Project>{3930c89d-c16b-4c88-b946-0c22e10cd263}</Project>
       <Name>CacheManager.StackExchange.Redis</Name>

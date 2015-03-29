@@ -18,11 +18,9 @@
     <language>en-US</language>
     <projectUrl>http://michaco.github.io/CacheManager/</projectUrl>
     <licenseUrl>https://github.com/MichaCo/CacheManager/blob/master/LICENSE</licenseUrl>
-    <dependencies>
-    </dependencies>
   </metadata>
   <files>
-    <file src="CacheManagerCfg.xsd" target="CacheManagerCfg.xsd" />
+    <file src="..\..\CacheManagerCfg.xsd" target="CacheManagerCfg.xsd" />
     <file src="app.config.transform" target="content/app.config.transform" />
     <file src="app.config.transform" target="content/web.config.transform" />
   </files>

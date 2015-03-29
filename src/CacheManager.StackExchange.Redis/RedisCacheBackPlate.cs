@@ -8,7 +8,7 @@ using CacheManager.Core.Cache;
 using CacheManager.Core.Configuration;
 using StackRedis = StackExchange.Redis;
 
-namespace CacheManager.StackExchange.Redis
+namespace CacheManager.Redis
 {
     public sealed class RedisCacheBackPlate : CacheBackPlate
     {
@@ -28,12 +28,9 @@ namespace CacheManager.StackExchange.Redis
 
             RetryHelper.Retry(() =>
             {
-                var cfg = configuration.RedisConfigurations.FirstOrDefault(p => p.Id == name);
-                if (cfg == null)
-                {
-                    throw new InvalidOperationException("No redis configuration found for name " + name);
-                }
-
+                // throws an exception if not found for the name
+                var cfg = RedisConfigurations.GetConfiguration(name);
+                
                 var connection = RedisConnectionPool.Connect(cfg);
                 
                 this.redisSubscriper = connection.GetSubscriber();

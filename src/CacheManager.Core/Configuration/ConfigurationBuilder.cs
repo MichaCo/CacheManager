@@ -18,7 +18,6 @@ namespace CacheManager.Core.Configuration
     /// <see cref="CacheFactory"/>
     public static class ConfigurationBuilder
     {
-        private const string ConfigurationSectionName = "cacheManager";
         private const string Hours = "h";
         private const string Minutes = "m";
         private const string Seconds = "s";
@@ -60,7 +59,7 @@ namespace CacheManager.Core.Configuration
         /// <see cref="CacheManagerConfiguration{T}"/>
         public static CacheManagerConfiguration<TCacheValue> LoadConfiguration<TCacheValue>(string configName)
         {
-            return LoadConfiguration<TCacheValue>(ConfigurationSectionName, configName);
+            return LoadConfiguration<TCacheValue>(CacheManagerSection.DefaultSectionName, configName);
         }
 
         /// <summary>
@@ -108,7 +107,7 @@ namespace CacheManager.Core.Configuration
         /// <see cref="CacheManagerConfiguration{T}"/>
         public static CacheManagerConfiguration<TCacheValue> LoadConfigurationFile<TCacheValue>(string configFileName, string configName)
         {
-            return LoadConfigurationFile<TCacheValue>(configFileName, ConfigurationSectionName, configName);
+            return LoadConfigurationFile<TCacheValue>(configFileName, CacheManagerSection.DefaultSectionName, configName);
         }
 
         /// <summary>
@@ -295,28 +294,6 @@ namespace CacheManager.Core.Configuration
             {
                 throw new InvalidOperationException(
                     string.Format(CultureInfo.InvariantCulture, "There are no valid cache handles linked to the cache manager configuration [{0}]", configName));
-            }
-
-            // load redis options
-            foreach (var redisOption in section.RedisOptions)
-            {
-                var endpoints = new List<ServerEndPoint>();
-                foreach (var endpoint in redisOption.Endpoints)
-                {
-                    endpoints.Add(new ServerEndPoint(endpoint.Host, endpoint.Port));
-                }
-
-                cfg.RedisConfigurations.Add(
-                    new RedisConfiguration(
-                        id: redisOption.Id,
-                        database: redisOption.Database,
-                        endpoints: endpoints,
-                        connectionString: redisOption.ConnectionString,
-                        password: redisOption.Password,
-                        isSsl: redisOption.Ssl,
-                        sslHost: redisOption.SslHost,
-                        connectionTimeout: redisOption.ConnectionTimeout == 0 ? 5000 : redisOption.ConnectionTimeout,
-                        allowAdmin: redisOption.AllowAdmin));
             }
 
             return cfg;
@@ -587,26 +564,6 @@ namespace CacheManager.Core.Configuration
             }
 
             this.Configuration.RetryTimeout = timeoutMillis;
-            return this;
-        }
-
-        /// <summary>
-        /// Defines a redis configuration.
-        /// <para>
-        /// This will only be used and is only needed if the redis cache handle implementation will be used.
-        /// </para>
-        /// </summary>
-        /// <param name="config">The redis configuration object.</param>
-        /// <returns>The configuration builder.</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Redis")]
-        public ConfigurationBuilderCachePart<TCacheValue> WithRedisConfiguration(RedisConfiguration config)
-        {
-            if (config == null)
-            {
-                throw new ArgumentNullException("config");
-            }
-
-            this.Configuration.RedisConfigurations.Add(config);
             return this;
         }
     }

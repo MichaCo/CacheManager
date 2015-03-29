@@ -3,7 +3,7 @@ using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using StackRedis = StackExchange.Redis;
 
-namespace CacheManager.StackExchange.Redis
+namespace CacheManager.Redis
 {
     // this looks strange but yes it has a reason.
     // I could use a serializer to get and set values from redis
