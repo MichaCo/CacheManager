@@ -58,7 +58,7 @@ Project("{CC5FD16D-436D-48AD-A40C-5A424C6E3E79}") = "AzureCloudService", "tests\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CacheManager.Redis", "src\CacheManager.Redis\CacheManager.Redis.csproj", "{202EE263-A422-4A99-B2F1-D64343C1EA29}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CacheManager.Memcached", "src\CacheManager.Memcached\CacheManager.Memcached.csproj", "{680FF75C-6EEB-4EB6-BB46-B6E465F3EDBF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CacheManager.Memcached", "src\CacheManager.MemCached\CacheManager.Memcached.csproj", "{680FF75C-6EEB-4EB6-BB46-B6E465F3EDBF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
