@@ -130,10 +130,6 @@
       <Project>{7a2d1cdf-1c90-47fd-bcf2-2a9649131e2d}</Project>
       <Name>CacheManager.WindowsAzureCaching</Name>
     </ProjectReference>
-    <ProjectReference Include="..\AzureCacheWorker\AzureCacheWorker.csproj">
-      <Project>{6d794fc5-a243-4af8-bba4-6f6792857541}</Project>
-      <Name>AzureCacheWorker</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="Microsoft.WindowsAzure.Caching\ClientPerfCountersInstaller.exe">
