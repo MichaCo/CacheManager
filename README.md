@@ -1,4 +1,7 @@
 # CacheManager
+
+[![Build Status](https://travis-ci.org/MichaCo/CacheManager.svg?branch=master)](https://travis-ci.org/MichaCo/CacheManager)
+
 The purpose of this project is 
 
 * to define a common interface for different cache providers and techniques
