@@ -205,9 +205,9 @@ namespace CacheManager.Tests
                     UseSsl = false,
                     BucketConfigs = new Dictionary<string, BucketConfiguration>
                       {
-                        {"no", new BucketConfiguration
+                        {"default", new BucketConfiguration
                         {
-                          BucketName = "blabla",
+                          BucketName = "default",
                           UseSsl = false,
                           PoolConfiguration = new PoolConfiguration
                           {
@@ -223,7 +223,7 @@ namespace CacheManager.Tests
                 {
                     settings
                         .WithCouchbaseConfiguration("couchbase", clientConfiguration)
-                        .WithCouchbaseCacheHandle("couchbase", "no")
+                        .WithCouchbaseCacheHandle("couchbase")
                             .EnableStatistics();
                 });
 

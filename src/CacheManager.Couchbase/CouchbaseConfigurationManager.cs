@@ -92,7 +92,17 @@ namespace CacheManager.Couchbase
             }
             else
             {
-                bucket = GetCluster(clientConfiguration).OpenBucket();
+                // todo: is this correct/needed?
+                var bucketConfig = GetBucketConfiguration(clientConfiguration, bucketName);
+                if (!string.IsNullOrWhiteSpace(bucketConfig.Password))
+                {
+                    bucket = GetCluster(clientConfiguration).OpenBucket(bucketName, bucketConfig.Password);
+                }
+                else
+                {
+                    bucket = GetCluster(clientConfiguration).OpenBucket(bucketName);
+                }
+
                 buckets.Add(bucketKey, bucket);
             }
 
