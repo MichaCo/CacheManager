@@ -133,11 +133,12 @@ namespace CacheManager.Tests
                     settings
                         .WithMaxRetries(100)
                         .WithRetryTimeout(1000)
-                        .WithRedisConfiguration(new RedisConfiguration(
-                            "redisCache",
-                            new List<ServerEndPoint>() { new ServerEndPoint("127.0.0.1", 6379) },
-                            allowAdmin: true
-                            ))
+                        .WithRedisConfiguration("redisCache", config =>
+                        {
+                            config.WithAllowAdmin()
+                                .WithDatabase(0)
+                                .WithEndpoint("localhost", 6379);
+                        })
                         .WithBackPlate<RedisCacheBackPlate>("redisCache")
                         .WithHandle<RedisCacheHandle<object>>("redisCache", true)
                         .EnableStatistics();
@@ -160,12 +161,12 @@ namespace CacheManager.Tests
                     settings
                         .WithMaxRetries(100)
                         .WithRetryTimeout(1000)
-                        .WithRedisConfiguration(new RedisConfiguration(
-                            "redisCache",
-                            new List<ServerEndPoint>() { new ServerEndPoint("127.0.0.1", 6379) },
-                            allowAdmin: true
-                        //, connectionTimeout: 0 /*<- for testing connection timeout this is handy*/
-                            ))
+                        .WithRedisConfiguration("redisCache", config =>
+                        {
+                            config.WithAllowAdmin()
+                                .WithDatabase(0)
+                                .WithEndpoint("localhost", 6379);
+                        })
                         .WithBackPlate<RedisCacheBackPlate>("redisCache")
                         .WithRedisCacheHandle("redisCache", true)
                         .EnableStatistics();

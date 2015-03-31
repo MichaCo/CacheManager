@@ -318,11 +318,12 @@ namespace CacheManager.Tests.Redis
                 settings.WithUpdateMode(CacheUpdateMode.Full)
                     .WithHandle<RedisCacheHandle<RaceConditionTestElement>>("default")
                     .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMinutes(20));
-                settings.WithRedisConfiguration(new RedisConfiguration(
-                       "default",
-                       new List<ServerEndPoint>() { new ServerEndPoint("localhost", 6379) },
-                       allowAdmin: true
-                    ));
+                settings.WithRedisConfiguration("default", config =>
+                {
+                    config.WithAllowAdmin()
+                        .WithDatabase(0)
+                        .WithEndpoint("localhost", 6379);
+                });
             }))
             {
                 cache.Clear();
@@ -362,11 +363,12 @@ namespace CacheManager.Tests.Redis
                 settings.WithUpdateMode(CacheUpdateMode.Full)
                     .WithHandle<RedisCacheHandle<RaceConditionTestElement>>("default")
                     .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMinutes(20));
-                settings.WithRedisConfiguration(new RedisConfiguration(
-                       "default",
-                       new List<ServerEndPoint>() { new ServerEndPoint("localhost", 6379) },
-                       allowAdmin: true
-                    ));
+                settings.WithRedisConfiguration("default", config =>
+                {
+                    config.WithAllowAdmin()
+                        .WithDatabase(0)
+                        .WithEndpoint("localhost", 6379);
+                });
             }))
             {
                 cache.Remove("myCounter");

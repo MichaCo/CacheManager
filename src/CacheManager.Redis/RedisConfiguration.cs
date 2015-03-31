@@ -8,17 +8,16 @@ namespace CacheManager.Redis
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed")]
         public RedisConfiguration(
-            string id, 
+            string key, 
             IList<ServerEndPoint> endpoints,
             int database = 0,
-            string connectionString = null,
             string password = null,
             bool isSsl = false,
             string sslHost = null,
             int connectionTimeout = 5000,
             bool allowAdmin = false)
         {
-            if (string.IsNullOrWhiteSpace(id))
+            if (string.IsNullOrWhiteSpace(key))
             {
                 throw new ArgumentNullException("id");
             }
@@ -33,10 +32,9 @@ namespace CacheManager.Redis
                 throw new InvalidOperationException("List of endpoints must not be empty.");
             }
 
-            this.Id = id;
+            this.Key = key;
             this.Database = database;
             this.Endpoints = endpoints;
-            this.ConnectionString = connectionString;
             this.Password = password;
             this.IsSsl = isSsl;
             this.SslHost = sslHost;
@@ -44,10 +42,17 @@ namespace CacheManager.Redis
             this.AllowAdmin = allowAdmin;
         }
 
+        public RedisConfiguration(
+            string key,
+            string connectionString)
+        {
+            this.Key = key;
+            this.ConnectionString = connectionString;
+        }
         /// <summary>
         /// Gets the identifier for the redis options.
         /// </summary>
-        public string Id { get; private set; }
+        public string Key { get; private set; }
 
         /// <summary>
         /// Gets the connection string. Will be used by some redis clients (Stackexchange.Redis).
@@ -75,7 +80,7 @@ namespace CacheManager.Redis
         {
             if (string.IsNullOrWhiteSpace(host))
             {
-                throw new ArgumentException("Host should not be empty.", "host");
+                throw new ArgumentNullException("host");
             }
 
             this.Host = host;

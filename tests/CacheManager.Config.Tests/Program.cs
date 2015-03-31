@@ -37,13 +37,13 @@ namespace CacheManager.Config.Tests
                 ;
 
                 cfg.WithRedisBackPlate("redis");
-                        
-                cfg.WithRedisConfiguration(new RedisConfiguration(
-                    "redis",
-                    new List<ServerEndPoint>() { new ServerEndPoint("127.0.0.1", 6379) },
-                    allowAdmin: true
-                    , connectionTimeout: 10000 /*<- for testing connection timeout this is handy*/
-                    ));
+
+                cfg.WithRedisConfiguration("redis", config =>
+                {
+                    config.WithAllowAdmin()
+                        .WithDatabase(0)
+                        .WithEndpoint("localhost", 6379);
+                });
             });
 
             for (int i = 0; i < iterations; i++)

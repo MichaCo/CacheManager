@@ -27,9 +27,9 @@ namespace CacheManager.Redis
                 throw new ArgumentNullException("configuration");
             }
 
-            if (!configurations.ContainsKey(configuration.Id))
+            if (!configurations.ContainsKey(configuration.Key))
             {
-                configurations.Add(configuration.Id, configuration);
+                configurations.Add(configuration.Key, configuration);
             }
         }
 
@@ -97,17 +97,26 @@ namespace CacheManager.Redis
                     endpoints.Add(new ServerEndPoint(endpoint.Host, endpoint.Port));
                 }
 
-                AddConfiguration(
-                    new RedisConfiguration(
-                        id: redisOption.Id,
-                        database: redisOption.Database,
-                        endpoints: endpoints,
-                        connectionString: redisOption.ConnectionString,
-                        password: redisOption.Password,
-                        isSsl: redisOption.Ssl,
-                        sslHost: redisOption.SslHost,
-                        connectionTimeout: redisOption.ConnectionTimeout == 0 ? 5000 : redisOption.ConnectionTimeout,
-                        allowAdmin: redisOption.AllowAdmin));
+                if (string.IsNullOrWhiteSpace(redisOption.ConnectionString))
+                {
+                    AddConfiguration(
+                        new RedisConfiguration(
+                            key: redisOption.Id,
+                            database: redisOption.Database,
+                            endpoints: endpoints,
+                            password: redisOption.Password,
+                            isSsl: redisOption.Ssl,
+                            sslHost: redisOption.SslHost,
+                            connectionTimeout: redisOption.ConnectionTimeout == 0 ? 5000 : redisOption.ConnectionTimeout,
+                            allowAdmin: redisOption.AllowAdmin));
+                }
+                else
+                {
+                    AddConfiguration(
+                        new RedisConfiguration(
+                            key: redisOption.Id,
+                            connectionString: redisOption.ConnectionString));
+                }
             }
         }
 

@@ -125,10 +125,12 @@ namespace CacheManager.Examples
             var cache = CacheFactory.Build<int>("myCache", settings =>
             {
                 settings.WithHandle<RedisCacheHandle<int>>("redis");
-                settings.WithRedisConfiguration(
-                    new RedisConfiguration(
-                        "redis",
-                        new List<ServerEndPoint>() { new ServerEndPoint("127.0.0.1", 6379) }));
+                settings.WithRedisConfiguration("redis", config =>
+                {
+                    config.WithAllowAdmin()
+                        .WithDatabase(0)
+                        .WithEndpoint("localhost", 6379);
+                });
 
                 settings.WithMaxRetries(1000);
                 settings.WithRetryTimeout(100);

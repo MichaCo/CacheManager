@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using CacheManager.Core;
@@ -293,13 +292,117 @@ namespace CacheManager.Tests.Core
 
         [Fact]
         [ReplaceCulture]
+        public void CacheFactory_Build_WithRedisConfigurationNoKeyA()
+        {
+            // arrange
+            // act
+            Action act = () => CacheFactory.Build<object>("cacheName", settings =>
+            {
+                settings.WithRedisConfiguration("", "");
+            });
+
+            // assert
+            act.ShouldThrow<ArgumentNullException>()
+                .WithMessage("*Parameter name: configurationKey*");
+        }
+
+        [Fact]
+        [ReplaceCulture]
+        public void CacheFactory_Build_WithRedisConfigurationNoKeyB()
+        {
+            // arrange
+            // act
+            Action act = () => CacheFactory.Build<object>("cacheName", settings =>
+            {
+                settings.WithRedisConfiguration("", config => { });
+            });
+
+            // assert
+            act.ShouldThrow<ArgumentNullException>()
+                .WithMessage("*Parameter name: configurationKey*");
+        }
+
+        [Fact]
+        [ReplaceCulture]
+        public void CacheFactory_Build_WithRedisConfigurationInvalidEndpoint()
+        {
+            // arrange
+            // act
+            Action act = () => CacheFactory.Build<object>("cacheName", settings =>
+            {
+                settings.WithRedisConfiguration("redis", config => config.WithEndpoint("", 0));
+            });
+
+            // assert
+            act.ShouldThrow<ArgumentNullException>()
+                .WithMessage("*Parameter name: host*");
+        }
+
+        [Fact]
+        [ReplaceCulture]
+        public void CacheFactory_Build_WithRedisConfigurationConnectionString()
+        {
+            // arrange
+            var connection = "localhost:8080,allowAdmin=true,name=myName,ssl=true";
+            // act
+            CacheFactory.Build<object>("cacheName", settings =>
+            {
+                settings.WithRedisConfiguration("redisWithConnectionString", connection);
+            });
+
+            var config = RedisConfigurations.GetConfiguration("redisWithConnectionString");
+            
+            // assert
+            config.ConnectionString.Should().Be(connection);
+            config.Key.Should().Be("redisWithConnectionString");
+        }
+
+        [Fact]
+        [ReplaceCulture]
+        public void CacheFactory_Build_WithRedisConfigurationValidateBuilder()
+        {
+            // arrange
+            // act
+            CacheFactory.Build<object>("cacheName", settings =>
+            {
+                settings.WithRedisConfiguration("redisBuildUpConfiguration", config =>
+                {
+                    config.WithAllowAdmin()
+                        .WithConnectionTimeout(221113)
+                        .WithDatabase(22)
+                        .WithEndpoint("localhost", 2323)
+                        .WithEndpoint("nohost", 99999)
+                        .WithPassword("secret")
+                        .WithSsl("mySslHost");
+                });
+            });
+
+            var configuration = RedisConfigurations.GetConfiguration("redisBuildUpConfiguration");
+
+            // assert
+            configuration.Key.Should().Be("redisBuildUpConfiguration");
+            configuration.ConnectionTimeout.Should().Be(221113);
+            configuration.Database.Should().Be(22);
+            configuration.Password.Should().Be("secret");
+            configuration.IsSsl.Should().BeTrue();
+            configuration.SslHost.Should().Be("mySslHost");
+            configuration.Endpoints.ShouldBeEquivalentTo(new[] { new ServerEndPoint("localhost", 2323), new ServerEndPoint("nohost", 99999) });
+        }
+
+        [Fact]
+        [ReplaceCulture]
         public void CacheFactory_Build_ValidateSettings()
         {
             // act
             var act = CacheFactory.Build<string>("stringCache", settings =>
             {
                 settings
-                    .WithRedisConfiguration(new RedisConfiguration("myRedis", new List<ServerEndPoint>() { new ServerEndPoint("host", 101) }))
+                    .WithRedisConfiguration("myRedis", config =>
+                    {
+                        config.WithAllowAdmin()
+                            .WithDatabase(0)
+                            .WithEndpoint("localhost", 6379);
+                    })
                     .WithMaxRetries(22)
                     .WithRetryTimeout(2223)
                     .WithUpdateMode(CacheUpdateMode.Full)
