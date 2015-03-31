@@ -19,8 +19,9 @@ https://www.nuget.org/packages/CacheManager.StackExchange.Redis
 https://www.nuget.org/packages/CacheManager.SystemRuntimeCaching 
 https://www.nuget.org/packages/CacheManager.AppFabricCache 
 https://www.nuget.org/packages/CacheManager.WindowsAzureCaching 
-https://www.nuget.org/packages/CacheManager.Memcached 
-https://www.nuget.org/packages/CacheManager.Web 
+https://www.nuget.org/packages/CacheManager.Memcached  
+https://www.nuget.org/packages/CacheManager.Web  
+https://www.nuget.org/packages/CacheManager.Couchbase  
 
 ## Getting Started
 The easiest way to get started is to
@@ -52,6 +53,7 @@ As you can see, the name of the cacheManager/managers/cache element within app.c
 	* **MemoryCache** (System.Runtime.Caching)
 	* **Redis** using [StackExchange.Redis](https://github.com/StackExchange/StackExchange.Redis)
 	* **Memcached** using [Enyim.Memcached](https://github.com/enyim/EnyimMemcached)
+	* **Couchbase** using [Couchbase.Net.Client v2](https://github.com/couchbase/couchbase-net-client)
 	* AppFabric cache (might get descoped)
 	* Azure cache (might get descoped)
 * **Update values with lock or transaction** for distributed caches. 
