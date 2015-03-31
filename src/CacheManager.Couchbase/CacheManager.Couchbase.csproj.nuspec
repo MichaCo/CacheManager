@@ -12,7 +12,7 @@
     </summary>
     <description>
       $description$
-      This package contains the specific Memcached and Couchbase handles.
+      This package contains the specific cache handle for Couchbase using .Net API 2.x.
     </description>
     <language>en-US</language>
     <projectUrl>http://michaco.github.io/CacheManager/</projectUrl>

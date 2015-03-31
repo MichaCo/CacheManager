@@ -21,7 +21,7 @@
   </metadata>
   <files>
     <file src="..\..\CacheManagerCfg.xsd" target="CacheManagerCfg.xsd" />
-    <file src="app.config.transform" target="content/app.config.transform" />
-    <file src="app.config.transform" target="content/web.config.transform" />
+    <!--<file src="app.config.transform" target="content/app.config.transform" />
+    <file src="app.config.transform" target="content/web.config.transform" />-->
   </files>
 </package>

@@ -1,7 +1,8 @@
 ﻿using System;
+using CacheManager.AppFabricCache;
 using CacheManager.Core.Configuration;
 
-namespace CacheManager.AppFabricCache
+namespace CacheManager.Core
 {
     public static class ConfigurationBuilderExtensions
     {

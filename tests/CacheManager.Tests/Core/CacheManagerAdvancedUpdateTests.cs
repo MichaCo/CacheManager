@@ -5,7 +5,6 @@ using System.Linq;
 using CacheManager.Core;
 using CacheManager.Core.Cache;
 using CacheManager.Core.Configuration;
-using CacheManager.SystemRuntimeCaching;
 using CacheManager.Tests.TestCommon;
 using FluentAssertions;
 using Moq;
@@ -276,7 +275,7 @@ namespace CacheManager.Tests.Core
             // act
             using (var cache = CacheFactory.Build<string>("myCache", settings =>
             {
-                settings.WithHandle<MemoryCacheHandle<string>>("default")
+                settings.WithSystemRuntimeCacheHandle("default")
                     .EnableStatistics();
             }))
             {

@@ -6,5 +6,6 @@ rem .nuget\NuGet Update -self
 .nuget\nuget.exe pack src\CacheManager.AppFabricCache\CacheManager.AppFabricCache.csproj -o D:\_Nuget -Prop Configuration=Release -verbosity detailed 
 .nuget\nuget.exe pack src\CacheManager.Memcached\CacheManager.Memcached.csproj -o D:\_Nuget -Prop Configuration=Release -verbosity detailed 
 .nuget\nuget.exe pack src\CacheManager.StackExchange.Redis\CacheManager.StackExchange.Redis.csproj -o D:\_Nuget -Prop Configuration=Release -verbosity detailed 
+.nuget\nuget.exe pack src\CacheManager.Couchbase\CacheManager.Couchbase.csproj -o D:\_Nuget -Prop Configuration=Release -verbosity detailed 
 
 @PAUSE

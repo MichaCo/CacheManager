@@ -42,7 +42,7 @@ namespace CacheManager.Tests.SystemRuntimeCaching
             using (var act = GetHandle("Default"))
             {
                 // arrange
-                var settings = ((MemoryCacheHandle)act.CacheHandles.ElementAt(0)).CacheSettings;
+                var settings = ((MemoryCacheHandle<object>)act.CacheHandles.ElementAt(0)).CacheSettings;
                 // act
                 // assert
                 settings["CacheMemoryLimitMegabytes"].Should().Be("42");
@@ -57,7 +57,7 @@ namespace CacheManager.Tests.SystemRuntimeCaching
             using (var act = GetHandle("NamedTest"))
             {
                 // arrange
-                var settings = ((MemoryCacheHandle)act.CacheHandles.ElementAt(0)).CacheSettings;
+                var settings = ((MemoryCacheHandle<object>)act.CacheHandles.ElementAt(0)).CacheSettings;
                 // act
                 // assert
                 settings["CacheMemoryLimitMegabytes"].Should().Be("12");
@@ -131,7 +131,7 @@ namespace CacheManager.Tests.SystemRuntimeCaching
         {
             return CacheFactory.Build("cache1", settings =>
             {
-                settings.WithHandle<MemoryCacheHandle>(name);
+                settings.WithSystemRuntimeCacheHandle(name);
             });
         }
     }

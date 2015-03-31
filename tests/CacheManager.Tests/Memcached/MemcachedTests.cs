@@ -4,12 +4,8 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
-using System.Threading.Tasks;
 using CacheManager.Core;
-using CacheManager.Core.Cache;
 using CacheManager.Core.Configuration;
-using CacheManager.Memcached;
-using CacheManager.SystemRuntimeCaching;
 using CacheManager.Tests.TestCommon;
 using FluentAssertions;
 using Xunit;
@@ -30,7 +26,7 @@ namespace CacheManager.Tests.SystemRuntimeCaching
             Action act = () => CacheFactory.Build<IAmNotSerializable>("myCache", settings =>
                             {
                                 settings.WithUpdateMode(CacheUpdateMode.Full)
-                                    .WithHandle<MemcachedCacheHandle<IAmNotSerializable>>("default")
+                                    .WithMemcachedCacheHandle("default")
                                     .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1));
                             });
             // assert
@@ -50,7 +46,7 @@ namespace CacheManager.Tests.SystemRuntimeCaching
             var cache = CacheFactory.Build<string>("myCache", settings =>
             {
                 settings.WithUpdateMode(CacheUpdateMode.Full)
-                    .WithHandle<MemcachedCacheHandle<string>>("default")
+                    .WithMemcachedCacheHandle("default")
                     .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1));
             });
 
@@ -78,7 +74,7 @@ namespace CacheManager.Tests.SystemRuntimeCaching
             var cache = CacheFactory.Build<string>("myCache", settings =>
             {
                 settings.WithUpdateMode(CacheUpdateMode.Full)
-                    .WithHandle<MemcachedCacheHandle<string>>("default")
+                    .WithMemcachedCacheHandle("default")
                     .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMinutes(1));
             });
 
@@ -105,7 +101,7 @@ namespace CacheManager.Tests.SystemRuntimeCaching
             var cache = CacheFactory.Build("myCache", settings =>
             {
                 settings.WithUpdateMode(CacheUpdateMode.Full)
-                    .WithHandle<MemcachedCacheHandle<object>>("default")
+                    .WithMemcachedCacheHandle("default")
                     .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1));
             });
 
@@ -139,7 +135,7 @@ namespace CacheManager.Tests.SystemRuntimeCaching
             using (var cache = CacheFactory.Build<RaceConditionTestElement>("myCache", settings =>
             {
                 settings.WithUpdateMode(CacheUpdateMode.Full)
-                    .WithHandle<MemcachedCacheHandle<RaceConditionTestElement>>("default")
+                    .WithMemcachedCacheHandle("default")
                     .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMinutes(20));
             }))
             {
@@ -179,10 +175,10 @@ namespace CacheManager.Tests.SystemRuntimeCaching
             using (var cache = CacheFactory.Build<RaceConditionTestElement>("myCache", settings =>
             {
                 settings.WithUpdateMode(CacheUpdateMode.Full)
-                    .WithHandle<MemoryCacheHandle<RaceConditionTestElement>>("default")
+                    .WithSystemRuntimeCacheHandle("default")
                         .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMilliseconds(1))
                     .And
-                    .WithHandle<MemcachedCacheHandle<RaceConditionTestElement>>("default")
+                    .WithMemcachedCacheHandle("default")
                         .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(10));
             }))
             {
@@ -228,7 +224,7 @@ namespace CacheManager.Tests.SystemRuntimeCaching
                     //.WithHandle<MemoryCacheHandle<RaceConditionTestElement>>("default")
                     //    .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1))
                     //.And
-                    .WithHandle<MemcachedCacheHandle<RaceConditionTestElement>>("default")
+                    .WithMemcachedCacheHandle("default")
                         .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMinutes(10));
             }))
             {
@@ -273,7 +269,7 @@ namespace CacheManager.Tests.SystemRuntimeCaching
             using (var cache = CacheFactory.Build<RaceConditionTestElement>("myCache", settings =>
             {
                 settings.WithUpdateMode(CacheUpdateMode.Full)
-                    .WithHandle<MemcachedCacheHandle<RaceConditionTestElement>>("default")
+                    .WithMemcachedCacheHandle("default")
                         .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromHours(10));
             }))
             {
@@ -319,7 +315,7 @@ namespace CacheManager.Tests.SystemRuntimeCaching
             using (var cache = CacheFactory.Build<RaceConditionTestElement>("myCache", settings =>
             {
                 settings.WithUpdateMode(CacheUpdateMode.Full)
-                    .WithHandle<MemcachedCacheHandle<RaceConditionTestElement>>("default")
+                    .WithMemcachedCacheHandle("default")
                     .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMinutes(20));
             }))
             {

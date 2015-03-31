@@ -1,8 +1,9 @@
 ﻿using System;
 using CacheManager.Core.Configuration;
+using CacheManager.Couchbase;
 using Couchbase.Configuration.Client;
 
-namespace CacheManager.Couchbase
+namespace CacheManager.Core
 {
     public static class ConfigurationBuilderExtensions
     {

@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
-using System.Threading.Tasks;
 using CacheManager.Core;
 using CacheManager.Core.Configuration;
-using CacheManager.Redis;
 using CacheManager.Tests.TestCommon;
 using FluentAssertions;
 using Xunit;
@@ -316,7 +313,7 @@ namespace CacheManager.Tests.Redis
             using (var cache = CacheFactory.Build<RaceConditionTestElement>("myCache", settings =>
             {
                 settings.WithUpdateMode(CacheUpdateMode.Full)
-                    .WithHandle<RedisCacheHandle<RaceConditionTestElement>>("default")
+                    .WithRedisCacheHandle("default")
                     .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMinutes(20));
                 settings.WithRedisConfiguration("default", config =>
                 {
@@ -361,7 +358,7 @@ namespace CacheManager.Tests.Redis
             using (var cache = CacheFactory.Build<RaceConditionTestElement>("myCache", settings =>
             {
                 settings.WithUpdateMode(CacheUpdateMode.Full)
-                    .WithHandle<RedisCacheHandle<RaceConditionTestElement>>("default")
+                    .WithRedisCacheHandle("default")
                     .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMinutes(20));
                 settings.WithRedisConfiguration("default", config =>
                 {

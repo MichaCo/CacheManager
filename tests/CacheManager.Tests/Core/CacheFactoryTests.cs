@@ -5,7 +5,6 @@ using CacheManager.Core;
 using CacheManager.Core.Cache;
 using CacheManager.Core.Configuration;
 using CacheManager.Redis;
-using CacheManager.SystemRuntimeCaching;
 using CacheManager.Tests.TestCommon;
 using FluentAssertions;
 using Xunit;
@@ -231,7 +230,7 @@ namespace CacheManager.Tests.Core
             // act
             Action act = () => CacheFactory.Build<object>("cacheName", settings =>
             {
-                settings.WithBackPlate<RedisCacheBackPlate>("redis");
+                settings.WithRedisBackPlate("redis");
             });
 
             // assert
@@ -247,9 +246,9 @@ namespace CacheManager.Tests.Core
             // act
             Action act = () => CacheFactory.Build<object>("cacheName", settings =>
             {
-                settings.WithBackPlate<RedisCacheBackPlate>("redis");
-                settings.WithHandle<MemoryCacheHandle>("h1", true);
-                settings.WithHandle<MemoryCacheHandle>("h2", true);
+                settings.WithRedisBackPlate("redis");
+                settings.WithSystemRuntimeCacheHandle("h1", true);
+                settings.WithSystemRuntimeCacheHandle("h2", true);
             });
 
             // assert
@@ -265,8 +264,8 @@ namespace CacheManager.Tests.Core
             // act
             Action act = () => CacheFactory.Build<object>("cacheName", settings =>
             {
-                settings.WithBackPlate<RedisCacheBackPlate>("redis");
-                settings.WithHandle<MemoryCacheHandle>("h1", true);
+                settings.WithRedisBackPlate("redis");
+                settings.WithSystemRuntimeCacheHandle("h1", true);
             });
 
             // assert
@@ -282,7 +281,7 @@ namespace CacheManager.Tests.Core
             // act
             Action act = () => CacheFactory.Build<object>("cacheName", settings =>
             {
-                settings.WithBackPlate<RedisCacheBackPlate>("");                
+                settings.WithRedisBackPlate("");                
             });
 
             // assert

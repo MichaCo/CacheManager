@@ -1,7 +1,8 @@
 ﻿using System;
 using CacheManager.Core.Configuration;
+using CacheManager.SystemRuntimeCaching;
 
-namespace CacheManager.SystemRuntimeCaching
+namespace CacheManager.Core
 {
     public static class ConfigurationBuilderExtensions
     {

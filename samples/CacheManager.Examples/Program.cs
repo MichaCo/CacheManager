@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using CacheManager.Core;
-using CacheManager.Core.Cache;
 using CacheManager.Core.Configuration;
-using CacheManager.Redis;
 using Microsoft.Practices.Unity;
 
 namespace CacheManager.Examples
@@ -17,6 +14,7 @@ namespace CacheManager.Examples
 			AppConfigLoadInstalledCacheCfg();
 			SimpleCustomBuildConfigurationUsingConfigBuilder();
 			SimpleCustomBuildConfigurationUsingFactory();
+            RedisSample();
 
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Press any key to exit...");
@@ -95,7 +93,7 @@ namespace CacheManager.Examples
 			{
 				settings
 					.WithUpdateMode(CacheUpdateMode.Up)
-					.WithHandle<DictionaryCacheHandle>("handle1")
+					.WithSystemRuntimeCacheHandle("handle1")
 						.EnablePerformanceCounters()
 						.WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(10));
 			});
@@ -110,7 +108,7 @@ namespace CacheManager.Examples
 			CacheManagerConfiguration<object> cfg = ConfigurationBuilder.BuildConfiguration<object>("myCacheName", settings =>
 			 {
 				 settings.WithUpdateMode(CacheUpdateMode.Up)
-					 .WithHandle<DictionaryCacheHandle<object>>("handle1")
+                     .WithSystemRuntimeCacheHandle("handle1")
 						 .EnablePerformanceCounters()
 						 .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(10));
 			 });
@@ -124,16 +122,17 @@ namespace CacheManager.Examples
         {
             var cache = CacheFactory.Build<int>("myCache", settings =>
             {
-                settings.WithHandle<RedisCacheHandle<int>>("redis");
-                settings.WithRedisConfiguration("redis", config =>
-                {
-                    config.WithAllowAdmin()
-                        .WithDatabase(0)
-                        .WithEndpoint("localhost", 6379);
-                });
-
-                settings.WithMaxRetries(1000);
-                settings.WithRetryTimeout(100);
+                settings
+                    .WithRedisConfiguration("redis", config =>
+                    {
+                        config.WithAllowAdmin()
+                            .WithDatabase(0)
+                            .WithEndpoint("localhost", 6379);
+                    })
+                    .WithMaxRetries(1000)
+                    .WithRetryTimeout(100)
+                    .WithRedisBackPlate("redis")
+                    .WithRedisCacheHandle("redis", true);
             });
 
             cache.Add("test", 123456);

@@ -4,10 +4,6 @@ using System.Diagnostics.CodeAnalysis;
 using CacheManager.Core;
 using CacheManager.Core.Cache;
 using CacheManager.Core.Configuration;
-using CacheManager.Couchbase;
-using CacheManager.Memcached;
-using CacheManager.Redis;
-using CacheManager.SystemRuntimeCaching;
 using Couchbase.Configuration.Client;
 
 namespace CacheManager.Tests
@@ -27,7 +23,7 @@ namespace CacheManager.Tests
             {
                 return CacheFactory.Build("cache", settings => settings
                     .WithUpdateMode(CacheUpdateMode.Up)
-                    .WithHandle<MemoryCacheHandle>("h1")
+                    .WithSystemRuntimeCacheHandle("h1")
                         .EnableStatistics()
                         .EnablePerformanceCounters()
                     .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(10)));
@@ -50,7 +46,7 @@ namespace CacheManager.Tests
         {
             get
             {
-                return CacheFactory.Build("cache", settings => settings.WithHandle<MemoryCacheHandle>("h1").EnableStatistics());
+                return CacheFactory.Build("cache", settings => settings.WithSystemRuntimeCacheHandle("h1").EnableStatistics());
             }
         }
 
@@ -62,9 +58,9 @@ namespace CacheManager.Tests
                 {
                     settings
                         .WithUpdateMode(CacheUpdateMode.None)
-                        .WithHandle<MemoryCacheHandle>("h1")
+                        .WithSystemRuntimeCacheHandle("h1")
                             .EnableStatistics()
-                        .And.WithHandle<MemoryCacheHandle>("h2")
+                        .And.WithSystemRuntimeCacheHandle("h2")
                             .EnableStatistics()
                             .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(10))
                         .And.WithHandle<DictionaryCacheHandle>("h3")
@@ -116,9 +112,9 @@ namespace CacheManager.Tests
                 {
                     settings
                         .WithUpdateMode(CacheUpdateMode.Full)
-                        .WithHandle<MemoryCacheHandle>("cache1")
+                        .WithSystemRuntimeCacheHandle("cache1")
                             .EnableStatistics()
-                        .And.WithHandle<MemoryCacheHandle>("cache2")
+                        .And.WithSystemRuntimeCacheHandle("cache2")
                             .EnableStatistics();
                 });
             }
@@ -139,8 +135,8 @@ namespace CacheManager.Tests
                                 .WithDatabase(0)
                                 .WithEndpoint("localhost", 6379);
                         })
-                        .WithBackPlate<RedisCacheBackPlate>("redisCache")
-                        .WithHandle<RedisCacheHandle<object>>("redisCache", true)
+                        .WithRedisBackPlate("redisCache")
+                        .WithRedisCacheHandle("redisCache", true)
                         .EnableStatistics();
                 });
 
@@ -156,7 +152,7 @@ namespace CacheManager.Tests
                 {
                     settings
                         .WithUpdateMode(CacheUpdateMode.Up)
-                        .WithHandle<MemoryCacheHandle>("cache1")
+                        .WithSystemRuntimeCacheHandle("cache1")
                             .EnableStatistics();
                     settings
                         .WithMaxRetries(100)
@@ -167,7 +163,7 @@ namespace CacheManager.Tests
                                 .WithDatabase(0)
                                 .WithEndpoint("localhost", 6379);
                         })
-                        .WithBackPlate<RedisCacheBackPlate>("redisCache")
+                        .WithRedisBackPlate("redisCache")
                         .WithRedisCacheHandle("redisCache", true)
                         .EnableStatistics();
                 });
@@ -183,7 +179,7 @@ namespace CacheManager.Tests
                 var cache = CacheFactory.Build("myCache", settings =>
                 {
                     settings.WithUpdateMode(CacheUpdateMode.Full)
-                        .WithHandle<MemcachedCacheHandle<object>>("enyim.com/memcached")
+                        .WithMemcachedCacheHandle("enyim.com/memcached")
                             .EnableStatistics()
                             .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(100));
                 });
@@ -224,7 +220,7 @@ namespace CacheManager.Tests
                 {
                     settings
                         .WithCouchbaseConfiguration("couchbase", clientConfiguration)
-                        .WithCouchbaseCacheHandle("couchbase")
+                        .WithCouchbaseCacheHandle("couchbase", "default")
                             .EnableStatistics();
                 });
 
@@ -241,7 +237,7 @@ namespace CacheManager.Tests
             yield return new object[] { data.WithMemoryAndDictionaryHandles };
             yield return new object[] { data.WithManyDictionaryHandles };
             yield return new object[] { data.WithTwoNamedMemoryCaches };
-            // yield return new object[] { data.WithRedisCache };
+             yield return new object[] { data.WithRedisCache };
             // yield return new object[] { data.WithSystemAndRedisCache };
             // yield return new object[] { data.WithMemcached };
             // yield return new object[] { data.WithCouchbaseMemcached };            

@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using CacheManager.Core.Configuration;
+using CacheManager.Redis;
 
-namespace CacheManager.Redis
+namespace CacheManager.Core
 {
     public static class ConfigurationBuilderExtensions
     {

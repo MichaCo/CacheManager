@@ -4,13 +4,9 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using CacheManager.AppFabricCache;
 using CacheManager.Core;
 using CacheManager.Core.Cache;
 using CacheManager.Core.Configuration;
-using CacheManager.Memcached;
-using CacheManager.Redis;
-using CacheManager.SystemRuntimeCaching;
 using ProtoBuf;
 
 namespace CacheManager.Config.Tests

@@ -93,7 +93,7 @@ namespace CacheManager.Tests.Core
         {
             using (cache)
             {
-                // cache.Clear();
+                cache.Clear();
                 // Thread.Sleep(1000);
                 // arrange
                 List<Tuple<string, string, string>> keys;
