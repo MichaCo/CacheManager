@@ -12,7 +12,7 @@
     </summary>
     <description>
       $description$
-      This package contains cache implementation and helpers for System.Web, for example an OutputCacheProvider.
+      This package contains an System.Web.Caching.OutputCacheProvider which uses cache manager.
     </description>
     <language>en-US</language>
     <projectUrl>http://michaco.github.io/CacheManager/</projectUrl>

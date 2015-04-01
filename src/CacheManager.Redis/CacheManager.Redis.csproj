@@ -40,6 +40,7 @@
     <Compile Include="..\..\common\GlobalAssemblyInfo.cs">
       <Link>Properties\GlobalAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="RedisConfigurationBuilder.cs" />
     <Compile Include="RedisConfigurationSection.cs" />
     <Compile Include="ConfigurationBuilderExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
