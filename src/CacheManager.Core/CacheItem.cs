@@ -7,32 +7,6 @@ namespace CacheManager.Core
     [Serializable]
     public class CacheItem<T> : ISerializable
     {
-        protected CacheItem()
-        {
-        }
-
-        private CacheItem(string key, string region, T value, DateTime created, DateTime lastAccess, ExpirationMode expiration, TimeSpan timeout)
-        {
-            if (string.IsNullOrWhiteSpace(key))
-            {
-                throw new ArgumentNullException("key");
-            }
-
-            if (value == null)
-            {
-                throw new ArgumentNullException("value");
-            }
-
-            this.Key = key;
-            this.Region = region;
-            this.Value = value;
-            this.ValueType = value.GetType();
-            this.CreatedUtc = created;
-            this.LastAccessedUtc = lastAccess;
-            this.ExpirationMode = expiration;
-            this.ExpirationTimeout = timeout;
-        }
-
         public CacheItem(string key, T value)
         {
             if (string.IsNullOrWhiteSpace(key))
@@ -77,6 +51,10 @@ namespace CacheManager.Core
             this.ExpirationTimeout = timeout;
         }
 
+        protected CacheItem()
+        {
+        }
+
         protected CacheItem(SerializationInfo info, StreamingContext context)
         {
             if (info == null)
@@ -92,6 +70,48 @@ namespace CacheManager.Core
             ExpirationTimeout = (TimeSpan)info.GetValue("ExpirationTimeout", typeof(TimeSpan));
             CreatedUtc = info.GetDateTime("CreatedUtc");
             LastAccessedUtc = info.GetDateTime("LastAccessedUtc");
+        }
+
+        private CacheItem(string key, string region, T value, DateTime created, DateTime lastAccess, ExpirationMode expiration, TimeSpan timeout)
+        {
+            if (string.IsNullOrWhiteSpace(key))
+            {
+                throw new ArgumentNullException("key");
+            }
+
+            if (value == null)
+            {
+                throw new ArgumentNullException("value");
+            }
+
+            this.Key = key;
+            this.Region = region;
+            this.Value = value;
+            this.ValueType = value.GetType();
+            this.CreatedUtc = created;
+            this.LastAccessedUtc = lastAccess;
+            this.ExpirationMode = expiration;
+            this.ExpirationTimeout = timeout;
+        }
+
+        public DateTime CreatedUtc { get; set; }
+
+        public ExpirationMode ExpirationMode { get; internal set; }
+
+        public TimeSpan ExpirationTimeout { get; internal set; }
+
+        public string Key { get; private set; }
+
+        public DateTime LastAccessedUtc { get; set; }
+
+        public string Region { get; private set; }
+
+        public T Value { get; private set; }
+
+        public Type ValueType
+        {
+            get;
+            private set;
         }
 
         public virtual void GetObjectData(SerializationInfo info, StreamingContext context)
@@ -111,34 +131,14 @@ namespace CacheManager.Core
             info.AddValue("LastAccessedUtc", LastAccessedUtc);
         }
 
-        public CacheItem<T> WithValue(T value)
-        {
-            return new CacheItem<T>(this.Key, this.Region, value, this.CreatedUtc, this.LastAccessedUtc, this.ExpirationMode, this.ExpirationTimeout);
-        }
-
         public CacheItem<T> WithExpiration(ExpirationMode mode, TimeSpan timeout)
         {
             return new CacheItem<T>(this.Key, this.Region, this.Value, this.CreatedUtc, this.LastAccessedUtc, mode, timeout);
         }
 
-        public T Value { get; private set; }
-
-        public Type ValueType
+        public CacheItem<T> WithValue(T value)
         {
-            get;
-            private set;
+            return new CacheItem<T>(this.Key, this.Region, value, this.CreatedUtc, this.LastAccessedUtc, this.ExpirationMode, this.ExpirationTimeout);
         }
-
-        public string Key { get; private set; }
-
-        public string Region { get; private set; }
-
-        public ExpirationMode ExpirationMode { get; internal set; }
-
-        public TimeSpan ExpirationTimeout { get; internal set; }
-
-        public DateTime CreatedUtc { get; set; }
-
-        public DateTime LastAccessedUtc { get; set; }
     }
 }

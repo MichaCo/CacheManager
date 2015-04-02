@@ -8,14 +8,14 @@ namespace CacheManager.Core
     public enum VersionConflictHandling
     {
         /// <summary>
-        /// Instructs the cache manager to remove the item on all other cache handles,
-        /// if a version conflict occurs.
+        /// Instructs the cache manager to remove the item on all other cache handles, if a version
+        /// conflict occurs.
         /// </summary>
         EvictItemFromOtherCaches,
 
         /// <summary>
-        /// Instructs the cache manager to update the other cache handles with the 
-        /// updated item, if a version conflict occurs.
+        /// Instructs the cache manager to update the other cache handles with the updated item, if
+        /// a version conflict occurs.
         /// </summary>
         UpdateOtherCaches,
 
@@ -40,17 +40,24 @@ namespace CacheManager.Core
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="UpdateItemConfig"/> class with default value for max retries.
+        /// Initializes a new instance of the <see cref="UpdateItemConfig"/> class with default
+        /// value for max retries.
         /// </summary>
+        /// <param name="conflictHandling">The conflict handling which should be used.</param>
         public UpdateItemConfig(VersionConflictHandling conflictHandling)
-            :this()
+            : this()
         {
             this.VersionConflictOperation = conflictHandling;
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="UpdateItemConfig"/> class with the specified values.
+        /// Initializes a new instance of the <see cref="UpdateItemConfig"/> class with the
+        /// specified values.
         /// </summary>
+        /// <param name="maxRetries">
+        /// The maximum number of retries the update operation should make.
+        /// </param>
+        /// <param name="conflictHandling">The conflict handling which should be used.</param>
         public UpdateItemConfig(int maxRetries, VersionConflictHandling conflictHandling)
         {
             if (maxRetries < 0)

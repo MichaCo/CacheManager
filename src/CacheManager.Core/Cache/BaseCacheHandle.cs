@@ -30,76 +30,17 @@ namespace CacheManager.Core.Cache
             this.Stats = new CacheStats<TCacheValue>(
                 this.Configuration.CacheName,
                 this.Configuration.HandleName,
-                this.Configuration.EnableStatistics, 
+                this.Configuration.EnableStatistics,
                 this.Configuration.EnablePerformanceCounters);
         }
 
-        public abstract int Count { get; }
-
         public ICacheHandleConfiguration Configuration { get; private set; }
+
+        public abstract int Count { get; }
 
         public ICacheManager<TCacheValue> Manager { get; private set; }
 
         public CacheStats<TCacheValue> Stats { get; private set; }
-
-        protected override void Dispose(bool disposeManaged)
-        {
-            if (disposeManaged)
-            {
-                Stats.Dispose();
-            }
-
-            base.Dispose(disposeManaged);
-        }
-
-        protected internal override bool AddInternal(CacheItem<TCacheValue> item)
-        {
-            GetItemExpiration(item);
-            return this.AddInternalPrepared(item);
-        }
-
-        protected abstract bool AddInternalPrepared(CacheItem<TCacheValue> item);
-
-        protected internal override void PutInternal(CacheItem<TCacheValue> item)
-        {
-            GetItemExpiration(item);
-            this.PutInternalPrepared(item);
-        }
-
-        protected abstract void PutInternalPrepared(CacheItem<TCacheValue> item);
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "1#"), System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "2#")]
-        protected void GetItemExpiration(CacheItem<TCacheValue> item)
-        {
-            if (item == null)
-            {
-                throw new ArgumentNullException("item");
-            }
-
-            // logic should be that the item setting overrules the handle setting
-            // if the item doesn't define a mode (value is None) it should use the handle's setting.
-            // if the handle also doesn't define a mode (value is None), we use None.
-            var expirationMode = ExpirationMode.None;
-            var expirationTimeout = TimeSpan.Zero;
-
-            if (item.ExpirationMode != ExpirationMode.None || this.Configuration.ExpirationMode != ExpirationMode.None)
-            {
-                expirationMode = item.ExpirationMode != ExpirationMode.None ? item.ExpirationMode : this.Configuration.ExpirationMode;
-
-                // if a mode is defined, the item or the fallback (handle config) must have a timeout defined.
-                // ToDo: this check is pretty late, but the user can configure the CacheItem explicitly, so we have to catch it at this point.
-                if (item.ExpirationTimeout == TimeSpan.Zero && this.Configuration.ExpirationTimeout == TimeSpan.Zero)
-                {
-                    throw new InvalidOperationException("Expiration mode defined without timeout.");
-                }
-
-                expirationTimeout = item.ExpirationTimeout != TimeSpan.Zero ? item.ExpirationTimeout : this.Configuration.ExpirationTimeout;
-            }
-
-            // Fix issue 2: updating the item exp timeout and mode:
-            item.ExpirationMode = expirationMode;
-            item.ExpirationTimeout = expirationTimeout;
-        }
 
         public virtual UpdateItemResult Update(string key, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config)
         {
@@ -135,5 +76,66 @@ namespace CacheManager.Core.Cache
             this.Put(key, value, region);
             return new UpdateItemResult(false, true, 1);
         }
+
+        protected internal override bool AddInternal(CacheItem<TCacheValue> item)
+        {
+            GetItemExpiration(item);
+            return this.AddInternalPrepared(item);
+        }
+
+        protected internal override void PutInternal(CacheItem<TCacheValue> item)
+        {
+            GetItemExpiration(item);
+            this.PutInternalPrepared(item);
+        }
+
+        protected abstract bool AddInternalPrepared(CacheItem<TCacheValue> item);
+
+        protected override void Dispose(bool disposeManaged)
+        {
+            if (disposeManaged)
+            {
+                Stats.Dispose();
+            }
+
+            base.Dispose(disposeManaged);
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "1#"), System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "2#")]
+        protected void GetItemExpiration(CacheItem<TCacheValue> item)
+        {
+            if (item == null)
+            {
+                throw new ArgumentNullException("item");
+            }
+
+            // logic should be that the item setting overrules the handle setting if the item
+            // doesn't define a mode (value is None) it should use the handle's setting. if the
+            // handle also doesn't define a mode (value is None), we use None.
+            var expirationMode = ExpirationMode.None;
+            var expirationTimeout = TimeSpan.Zero;
+
+            if (item.ExpirationMode != ExpirationMode.None || this.Configuration.ExpirationMode != ExpirationMode.None)
+            {
+                expirationMode = item.ExpirationMode != ExpirationMode.None ? item.ExpirationMode : this.Configuration.ExpirationMode;
+
+                // if a mode is defined, the item or the fallback (handle config) must have a
+                // timeout defined.
+                // ToDo: this check is pretty late, but the user can configure the CacheItem
+                //       explicitly, so we have to catch it at this point.
+                if (item.ExpirationTimeout == TimeSpan.Zero && this.Configuration.ExpirationTimeout == TimeSpan.Zero)
+                {
+                    throw new InvalidOperationException("Expiration mode defined without timeout.");
+                }
+
+                expirationTimeout = item.ExpirationTimeout != TimeSpan.Zero ? item.ExpirationTimeout : this.Configuration.ExpirationTimeout;
+            }
+
+            // Fix issue 2: updating the item exp timeout and mode:
+            item.ExpirationMode = expirationMode;
+            item.ExpirationTimeout = expirationTimeout;
+        }
+
+        protected abstract void PutInternalPrepared(CacheItem<TCacheValue> item);
     }
 }

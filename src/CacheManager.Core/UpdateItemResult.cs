@@ -6,7 +6,8 @@
     public class UpdateItemResult
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="UpdateItemResult"/> class with the specified properties.
+        /// Initializes a new instance of the <see cref="UpdateItemResult"/> class with the
+        /// specified properties.
         /// </summary>
         /// <param name="conflictOccurred">Must be <c>True</c> if a conflict occurred.</param>
         /// <param name="success">Must be <c>True</c> only if the item got updated.</param>
@@ -19,9 +20,9 @@
         }
 
         /// <summary>
-        /// Gets a value indicating whether a version conflict occurred during an update operation.
+        /// Gets the number of tries the cache needed to update the item.
         /// </summary>
-        public bool VersionConflictOccurred { get; private set; }
+        public int NumberOfRetriesNeeded { get; private set; }
 
         /// <summary>
         /// Gets a value indicating whether the update operation was successful or not.
@@ -29,8 +30,8 @@
         public bool Success { get; private set; }
 
         /// <summary>
-        /// Gets the number of tries the cache needed to update the item.
+        /// Gets a value indicating whether a version conflict occurred during an update operation.
         /// </summary>
-        public int NumberOfRetriesNeeded { get; private set; }
+        public bool VersionConflictOccurred { get; private set; }
     }
 }

@@ -4,4 +4,16 @@
     <StringProperty Name="MergeSettingsFiles">Linked</StringProperty>
     <BooleanProperty Name="AutoCheckForUpdate">False</BooleanProperty>
   </GlobalSettings>
+  <Analyzers>
+    <Analyzer AnalyzerId="StyleCop.CSharp.LayoutRules">
+      <Rules>
+        <Rule Name="ClosingCurlyBracketMustBeFollowedByBlankLine">
+          <RuleSettings>
+            <BooleanProperty Name="Enabled">False</BooleanProperty>
+          </RuleSettings>
+        </Rule>
+      </Rules>
+      <AnalyzerSettings />
+    </Analyzer>
+  </Analyzers>
 </StyleCopSettings>

@@ -5,16 +5,12 @@
 
     public abstract class CacheBackPlate : ICacheBackPlate
     {
-        private Action<string> onRemoveKey;
-        private Action<string, string> onRemoveKeyRegion;
         private Action<string> onChangeKey;
         private Action<string, string> onChangeKeyRegion;
-        private Action<string> onClearRegion;
         private Action onClear;
-        
-        public string Name { get; private set; }
-
-        public ICacheManagerConfiguration Configuration { get; private set; }
+        private Action<string> onClearRegion;
+        private Action<string> onRemoveKey;
+        private Action<string, string> onRemoveKeyRegion;
 
         public CacheBackPlate(string name, ICacheManagerConfiguration configuration)
         {
@@ -27,6 +23,10 @@
             this.Dispose(false);
         }
 
+        public ICacheManagerConfiguration Configuration { get; private set; }
+
+        public string Name { get; private set; }
+
         public void Dispose()
         {
             this.Dispose(true);
@@ -38,24 +38,79 @@
         {
         }
 
-        public void SubscribeRemove(Action<string> remove)
+        public abstract void NotifyChange(string key);
+
+        public abstract void NotifyChange(string key, string region);
+
+        public abstract void NotifyClear();
+
+        public abstract void NotifyClearRegion(string region);
+
+        public abstract void NotifyRemove(string key);
+
+        public abstract void NotifyRemove(string key, string region);
+
+        public void OnChange(string key)
         {
-            if (remove == null)
+            if (string.IsNullOrWhiteSpace(key))
             {
-                throw new ArgumentNullException("remove");
+                throw new ArgumentNullException("key");
             }
 
-            this.onRemoveKey = remove;
+            this.onChangeKey(key);
         }
 
-        public void SubscribeRemove(Action<string, string> remove)
+        public void OnChange(string key, string region)
         {
-            if (remove == null)
+            if (string.IsNullOrWhiteSpace(key))
             {
-                throw new ArgumentNullException("remove");
+                throw new ArgumentNullException("key");
+            }
+            if (string.IsNullOrWhiteSpace(region))
+            {
+                throw new ArgumentNullException("region");
             }
 
-            this.onRemoveKeyRegion = remove;
+            this.onChangeKeyRegion(key, region);
+        }
+
+        public void OnClear()
+        {
+            this.onClear();
+        }
+
+        public void OnClearRegion(string region)
+        {
+            if (string.IsNullOrWhiteSpace(region))
+            {
+                throw new ArgumentNullException("region");
+            }
+
+            this.onClearRegion(region);
+        }
+
+        public void OnRemove(string key)
+        {
+            if (string.IsNullOrWhiteSpace(key))
+            {
+                throw new ArgumentNullException("key");
+            }
+
+            this.onRemoveKey(key);
+        }
+
+        public void OnRemove(string key, string region)
+        {
+            if (string.IsNullOrWhiteSpace(key))
+            {
+                throw new ArgumentNullException("key");
+            }
+            if (string.IsNullOrWhiteSpace(region))
+            {
+                throw new ArgumentNullException("region");
+            }
+
+            this.onRemoveKeyRegion(key, region);
         }
 
         public void SubscribeChanged(Action<string> change)
@@ -97,80 +152,25 @@
 
             this.onClearRegion = clearRegion;
         }
-        
-        public void OnRemove(string key)
+
+        public void SubscribeRemove(Action<string> remove)
         {
-            if (string.IsNullOrWhiteSpace(key))
+            if (remove == null)
             {
-                throw new ArgumentNullException("key");
+                throw new ArgumentNullException("remove");
             }
 
-            this.onRemoveKey(key);
+            this.onRemoveKey = remove;
         }
 
-        public void OnRemove(string key, string region)
+        public void SubscribeRemove(Action<string, string> remove)
         {
-            if (string.IsNullOrWhiteSpace(key))
+            if (remove == null)
             {
-                throw new ArgumentNullException("key");
-            } 
-            if (string.IsNullOrWhiteSpace(region))
-            {
-                throw new ArgumentNullException("region");
+                throw new ArgumentNullException("remove");
             }
 
-            this.onRemoveKeyRegion(key, region);
+            this.onRemoveKeyRegion = remove;
         }
-
-        public void OnChange(string key)
-        {
-            if (string.IsNullOrWhiteSpace(key))
-            {
-                throw new ArgumentNullException("key");
-            }
-
-            this.onChangeKey(key);
-        }
-
-        public void OnChange(string key, string region)
-        {
-            if (string.IsNullOrWhiteSpace(key))
-            {
-                throw new ArgumentNullException("key");
-            }
-            if (string.IsNullOrWhiteSpace(region))
-            {
-                throw new ArgumentNullException("region");
-            }
-
-            this.onChangeKeyRegion(key, region);
-        }
-        
-        public void OnClear()
-        {
-            this.onClear();
-        }
-
-        public void OnClearRegion(string region)
-        {
-            if (string.IsNullOrWhiteSpace(region))
-            {
-                throw new ArgumentNullException("region");
-            }
-
-            this.onClearRegion(region);
-        }
-
-        public abstract void NotifyClear();
-
-        public abstract void NotifyClearRegion(string region);
-
-        public abstract void NotifyChange(string key);
-
-        public abstract void NotifyChange(string key, string region);
-
-        public abstract void NotifyRemove(string key);
-
-        public abstract void NotifyRemove(string key, string region);  
     }
 }

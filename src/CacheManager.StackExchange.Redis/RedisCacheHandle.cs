@@ -34,11 +34,8 @@ namespace CacheManager.Redis
         private const string HashFieldType = "type";
 
         private static readonly IRedisValueConverter<TCacheValue> valueConverter = new RedisValueConverter() as IRedisValueConverter<TCacheValue>;
-        private StackRedis.IDatabase databaseBack = null;
-        private StackRedis.ISubscriber subscriber = null;
-        private readonly string Identifier = Guid.NewGuid().ToString();
+        private StackRedis.IDatabase database = null;
         private RedisConfiguration redisConfiguration = null;
-        private string channelName = string.Empty;
 
         private RedisConfiguration RedisConfiguration
         {
@@ -66,17 +63,17 @@ namespace CacheManager.Redis
         {
             get
             {
-                if (databaseBack == null)
+                if (database == null)
                 {
                     Retry(() =>
                     {
-                        databaseBack = Connection.GetDatabase(this.RedisConfiguration.Database);
+                        database = Connection.GetDatabase(this.RedisConfiguration.Database);
 
-                        databaseBack.Ping();
+                        database.Ping();
                     });
                 }
 
-                return databaseBack;
+                return database;
             }
         }
 
@@ -108,7 +105,7 @@ namespace CacheManager.Redis
         public override void Clear()
         {
             foreach (var server in this.GetServers(Connection)
-                .Where(p=>!p.IsSlave))
+                .Where(p => !p.IsSlave))
             {
                 server.FlushDatabase(this.RedisConfiguration.Database);
             }
@@ -197,7 +194,7 @@ namespace CacheManager.Redis
                         new StackRedis.HashEntry(HashFieldType, item.ValueType.FullName)
                     };
                 }
-                               
+
                 var flags = sync ? StackRedis.CommandFlags.None : StackRedis.CommandFlags.FireAndForget;
 
                 var setResult = this.Database.HashSet(fullKey, HashFieldValue, value, when, flags);

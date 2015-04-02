@@ -9,10 +9,11 @@ using System.Text.RegularExpressions;
 namespace CacheManager.Core.Configuration
 {
     /// <summary>
-    /// Helper class to load cache manager configurations from file or to build new configurations in a fluent way.
+    /// Helper class to load cache manager configurations from file or to build new configurations
+    /// in a fluent way.
     /// <para>
-    /// This only loads configurations. To build a cache manager instance, use <c>CacheFactory</c> and pass in the
-    /// configuration. Or use the <c>Build</c> methods of <c>CacheFactory</c>!
+    /// This only loads configurations. To build a cache manager instance, use <c>CacheFactory</c>
+    /// and pass in the configuration. Or use the <c>Build</c> methods of <c>CacheFactory</c>!
     /// </para>
     /// </summary>
     /// <see cref="CacheFactory"/>
@@ -23,13 +24,16 @@ namespace CacheManager.Core.Configuration
         private const string Seconds = "s";
 
         /// <summary>
-        /// Builds a <c>CacheManagerConfiguration</c> which can be used to create a new cache manager instance.
+        /// Builds a <c>CacheManagerConfiguration</c> which can be used to create a new cache
+        /// manager instance.
         /// <para>
         /// Pass the configuration to <c>CacheFactory.FromConfiguration</c> to create a valid cache manager.
         /// </para>
         /// </summary>
         /// <param name="cacheName">The cache manager's name.</param>
-        /// <param name="settings">The configuration settings to define the cache handles and other properties.</param>
+        /// <param name="settings">
+        /// The configuration settings to define the cache handles and other properties.
+        /// </param>
         /// <returns>The <c>CacheManagerConfiguration</c>.</returns>
         public static CacheManagerConfiguration<TCacheValue> BuildConfiguration<TCacheValue>(string cacheName, Action<ConfigurationBuilderCachePart<TCacheValue>> settings)
         {
@@ -51,7 +55,8 @@ namespace CacheManager.Core.Configuration
         /// <summary>
         /// Loads a configuration from web.config or app.config.
         /// <para>
-        /// The <paramref name="configName"/> must match with the name attribute of one of the configured cache elements.
+        /// The <paramref name="configName"/> must match with the name attribute of one of the
+        /// configured cache elements.
         /// </para>
         /// </summary>
         /// <param name="configName">The name of the cache element within the config file.</param>
@@ -65,7 +70,8 @@ namespace CacheManager.Core.Configuration
         /// <summary>
         /// Loads a configuration from web.config or app.config, by section and config name.
         /// <para>
-        /// The <paramref name="configName"/> must match with the name attribute of one of the configured cache elements.
+        /// The <paramref name="configName"/> must match with the name attribute of one of the
+        /// configured cache elements.
         /// </para>
         /// </summary>
         /// <param name="sectionName">The name of the section.</param>
@@ -88,21 +94,20 @@ namespace CacheManager.Core.Configuration
         }
 
         /// <summary>
-        /// Loads a configuration from the given <paramref name="configFileName" />.
+        /// Loads a configuration from the given <paramref name="configFileName"/>.
         /// <para>
-        /// The <paramref name="configName" /> must match with the name attribute of one of the
-        /// configured cache elements.</para>
+        /// The <paramref name="configName"/> must match with the name attribute of one of the
+        /// configured cache elements.
+        /// </para>
         /// </summary>
-        /// <param name="configFileName">
-        /// The full path of the file to load the configuration from.
-        /// </param>
+        /// <param name="configFileName">The full path of the file to load the configuration from.</param>
         /// <param name="configName">The name of the cache element within the config file.</param>
         /// <returns>The <c>CacheManagerConfiguration</c></returns>
         /// <exception cref="ArgumentNullException">
-        /// If <paramref name="configFileName" /> or <paramref name="configName" /> are null.
+        /// If <paramref name="configFileName"/> or <paramref name="configName"/> are null.
         /// </exception>
         /// <exception cref="InvalidOperationException">
-        /// If the file specified by <paramref name="configFileName" /> does not exist.
+        /// If the file specified by <paramref name="configFileName"/> does not exist.
         /// </exception>
         /// <see cref="CacheManagerConfiguration{T}"/>
         public static CacheManagerConfiguration<TCacheValue> LoadConfigurationFile<TCacheValue>(string configFileName, string configName)
@@ -111,22 +116,21 @@ namespace CacheManager.Core.Configuration
         }
 
         /// <summary>
-        /// Loads a configuration from the given <paramref name="configFileName" /> and <paramref name="sectionName"/>.
+        /// Loads a configuration from the given <paramref name="configFileName"/> and <paramref name="sectionName"/>.
         /// <para>
-        /// The <paramref name="configName" /> must match with the name attribute of one of the
-        /// configured cache elements.</para>
+        /// The <paramref name="configName"/> must match with the name attribute of one of the
+        /// configured cache elements.
+        /// </para>
         /// </summary>
-        /// <param name="configFileName">
-        /// The full path of the file to load the configuration from.
-        /// </param>
+        /// <param name="configFileName">The full path of the file to load the configuration from.</param>
         /// <param name="sectionName">The name of the configuration section.</param>
         /// <param name="configName">The name of the cache element within the config file.</param>
         /// <returns>The <c>CacheManagerConfiguration</c></returns>
         /// <exception cref="ArgumentNullException">
-        /// If <paramref name="configFileName" /> or <paramref name="configName" /> are null.
+        /// If <paramref name="configFileName"/> or <paramref name="configName"/> are null.
         /// </exception>
         /// <exception cref="InvalidOperationException">
-        /// If the file specified by <paramref name="configFileName" /> does not exist.
+        /// If the file specified by <paramref name="configFileName"/> does not exist.
         /// </exception>
         /// <see cref="CacheManagerConfiguration{T}"/>
         public static CacheManagerConfiguration<TCacheValue> LoadConfigurationFile<TCacheValue>(string configFileName, string sectionName, string configName)
@@ -191,7 +195,7 @@ namespace CacheManager.Core.Configuration
 
                 var normId = def.Id.ToUpper(CultureInfo.InvariantCulture);
                 handleDefs.Add(
-                    normId, 
+                    normId,
                     new CacheHandleConfiguration<TCacheValue>(configName, def.Id)
                     {
                         HandleType = def.HandleType,
@@ -220,7 +224,7 @@ namespace CacheManager.Core.Configuration
             {
                 throw new InvalidOperationException("Retry timeout must be greater than or equal to zero.");
             }
-            
+
             // build configuration
             var cfg = new CacheManagerConfiguration<TCacheValue>(configName, maxRetries.HasValue ? maxRetries.Value : int.MaxValue, retryTimeout.HasValue ? retryTimeout.Value : 10);
             cfg.CacheUpdateMode = managerCfg.UpdateMode;
@@ -424,7 +428,9 @@ namespace CacheManager.Core.Configuration
         /// </summary>
         /// <param name="expirationMode">The expiration mode.</param>
         /// <param name="timeout">The timeout.</param>
-        /// <exception cref="InvalidOperationException">Thrown if expiration mode is not 'None' and timeout is zero.</exception>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown if expiration mode is not 'None' and timeout is zero.
+        /// </exception>
         /// <seealso cref="ExpirationMode"/>
         public ConfigurationBuilderCacheHandlePart<TCacheValue> WithExpiration(ExpirationMode expirationMode, TimeSpan timeout)
         {
@@ -453,11 +459,40 @@ namespace CacheManager.Core.Configuration
         internal CacheManagerConfiguration<TCacheValue> Configuration { get; private set; }
 
         /// <summary>
+        /// Configures the back plate for the cache manager.
+        /// <para>
+        /// This is an optional feature. If specified, see the documentation for the
+        /// <typeparamref name="TBackPlate"/>. The <paramref name="name"/> might be used to
+        /// reference another configuration item.
+        /// </para>
+        /// <para>
+        /// If a back plate is defined, at least one cache handle must be marked as back plate
+        /// source. The cache manager then will try to synchronize multiple instances of the same configuration.
+        /// </para>
+        /// </summary>
+        /// <typeparam name="TBackPlate">The type of the back plate implementation.</typeparam>
+        /// <param name="name">The name.</param>
+        /// <returns>The builder instance.</returns>
+        public ConfigurationBuilderCachePart<TCacheValue> WithBackPlate<TBackPlate>(string name) where TBackPlate : ICacheBackPlate
+        {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                throw new ArgumentNullException("name");
+            }
+
+            this.Configuration.BackPlateName = name;
+            this.Configuration.BackPlateType = typeof(TBackPlate);
+            return this;
+        }
+
+        /// <summary>
         /// Add a cache handle configuration with the required name and type attributes.
         /// </summary>
         /// <param name="handleName">The name to be used for the cache handle.</param>
         /// <typeparam name="TCacheHandle">The type of the cache handle implementation</typeparam>
-        /// <exception cref="ArgumentNullException">Thrown if handleName or handleType are null.</exception>
+        /// <exception cref="ArgumentNullException">
+        /// Thrown if handleName or handleType are null.
+        /// </exception>
         public ConfigurationBuilderCacheHandlePart<TCacheValue> WithHandle<TCacheHandle>(string handleName) where TCacheHandle : ICacheHandle<TCacheValue>
         {
             return this.WithHandle<TCacheHandle>(handleName, false);
@@ -467,11 +502,14 @@ namespace CacheManager.Core.Configuration
         /// Add a cache handle configuration with the required name and type attributes.
         /// </summary>
         /// <param name="handleName">The name to be used for the cache handle.</param>
-        /// <param name="isBackPlateSource">Set this to true if this cache handle should be the source of the back plate.
+        /// <param name="isBackPlateSource">
+        /// Set this to true if this cache handle should be the source of the back plate.
         /// <para>This setting will be ignored if no back plate is configured.</para>
         /// </param>
         /// <typeparam name="TCacheHandle">The type of the cache handle implementation</typeparam>
-        /// <exception cref="ArgumentNullException">Thrown if handleName or handleType are null.</exception>
+        /// <exception cref="ArgumentNullException">
+        /// Thrown if handleName or handleType are null.
+        /// </exception>
         public ConfigurationBuilderCacheHandlePart<TCacheValue> WithHandle<TCacheHandle>(string handleName, bool isBackPlateSource) where TCacheHandle : ICacheHandle<TCacheValue>
         {
             if (string.IsNullOrWhiteSpace(handleName))
@@ -493,48 +531,11 @@ namespace CacheManager.Core.Configuration
         }
 
         /// <summary>
-        /// Configures the back plate for the cache manager.
-        /// <para>This is an optional feature. If specified, see the documentation for the <typeparamref name="TBackPlate"/>.
-        /// The <paramref name="name"/> might be used to reference another configuration item.
-        /// </para>
-        /// <para>
-        /// If a back plate is defined, at least one cache handle must be marked as back plate source.
-        /// The cache manager then will try to synchronize multiple instances of the same configuration.
-        /// </para>
-        /// </summary>
-        /// <typeparam name="TBackPlate">The type of the back plate implementation.</typeparam>
-        /// <param name="name">The name.</param>
-        /// <returns>The builder instance.</returns>
-        public ConfigurationBuilderCachePart<TCacheValue> WithBackPlate<TBackPlate>(string name) where TBackPlate : ICacheBackPlate
-        {
-            if (string.IsNullOrWhiteSpace(name))
-            {
-                throw new ArgumentNullException("name");
-            }
-
-            this.Configuration.BackPlateName = name;
-            this.Configuration.BackPlateType = typeof(TBackPlate);
-            return this;
-        }
-
-        /// <summary>
-        /// Sets the update mode of the cache.
-        /// <para>
-        /// If nothing is set, the default will be <c>CacheUpdateMode.None</c>.
-        /// </para>
-        /// </summary>
-        /// <param name="updateMode">The update mode.</param>
-        /// <seealso cref="CacheUpdateMode"/>
-        public ConfigurationBuilderCachePart<TCacheValue> WithUpdateMode(CacheUpdateMode updateMode)
-        {
-            this.Configuration.CacheUpdateMode = updateMode;
-            return this;
-        }
-
-        /// <summary>
         /// Sets the maximum number of retries per action.
         /// <para>Default is <see cref="int.MaxValue"/>.</para>
-        /// <para>Not every cache handle implements this, usually only distributed caches will use it.</para>
+        /// <para>
+        /// Not every cache handle implements this, usually only distributed caches will use it.
+        /// </para>
         /// </summary>
         /// <param name="retries">The maximum number of retries.</param>
         /// <returns>The configuration builder.</returns>
@@ -552,7 +553,9 @@ namespace CacheManager.Core.Configuration
         /// <summary>
         /// Sets the timeout between each retry of an action in milliseconds.
         /// <para>Default is 10.</para>
-        /// <para>Not every cache handle implements this, usually only distributed caches will use it.</para>
+        /// <para>
+        /// Not every cache handle implements this, usually only distributed caches will use it.
+        /// </para>
         /// </summary>
         /// <param name="timeoutMillis">The timeout in milliseconds.</param>
         /// <returns>The configuration builder.</returns>
@@ -564,6 +567,18 @@ namespace CacheManager.Core.Configuration
             }
 
             this.Configuration.RetryTimeout = timeoutMillis;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the update mode of the cache.
+        /// <para>If nothing is set, the default will be <c>CacheUpdateMode.None</c>.</para>
+        /// </summary>
+        /// <param name="updateMode">The update mode.</param>
+        /// <seealso cref="CacheUpdateMode"/>
+        public ConfigurationBuilderCachePart<TCacheValue> WithUpdateMode(CacheUpdateMode updateMode)
+        {
+            this.Configuration.CacheUpdateMode = updateMode;
             return this;
         }
     }

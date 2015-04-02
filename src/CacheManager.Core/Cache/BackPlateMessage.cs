@@ -46,43 +46,13 @@ namespace CacheManager.Core.Cache
             this.Region = region;
         }
 
-        public static BackPlateMessage ForClear(string owner)
-        {
-            return new BackPlateMessage(owner, BackPlateAction.Clear);
-        }
+        public BackPlateAction Action { get; set; }
 
-        public static BackPlateMessage ForClearRegion(string owner, string region)
-        {
-            if (string.IsNullOrWhiteSpace(region))
-            {
-                throw new ArgumentNullException("region");
-            }
+        public string Key { get; set; }
 
-            return new BackPlateMessage(owner, BackPlateAction.ClearRegion)
-            {
-                Region = region
-            };
-        }
+        public string OwnerIdentity { get; set; }
 
-        public static BackPlateMessage ForChanged(string owner, string key)
-        {
-            return new BackPlateMessage(owner, BackPlateAction.Changed, key);
-        }
-
-        public static BackPlateMessage ForChanged(string owner, string key, string region)
-        {
-            return new BackPlateMessage(owner, BackPlateAction.Changed, key, region);
-        }
-
-        public static BackPlateMessage ForRemoved(string owner, string key)
-        {
-            return new BackPlateMessage(owner, BackPlateAction.Removed, key);
-        }
-
-        public static BackPlateMessage ForRemoved(string owner, string key, string region)
-        {
-            return new BackPlateMessage(owner, BackPlateAction.Removed, key, region);
-        }
+        public string Region { get; set; }
 
         public static BackPlateMessage Deserialize(string msg)
         {
@@ -107,6 +77,44 @@ namespace CacheManager.Core.Cache
             return new BackPlateMessage(ident, action, Decode(tokens[2]), Decode(tokens[3]));
         }
 
+        public static BackPlateMessage ForChanged(string owner, string key)
+        {
+            return new BackPlateMessage(owner, BackPlateAction.Changed, key);
+        }
+
+        public static BackPlateMessage ForChanged(string owner, string key, string region)
+        {
+            return new BackPlateMessage(owner, BackPlateAction.Changed, key, region);
+        }
+
+        public static BackPlateMessage ForClear(string owner)
+        {
+            return new BackPlateMessage(owner, BackPlateAction.Clear);
+        }
+
+        public static BackPlateMessage ForClearRegion(string owner, string region)
+        {
+            if (string.IsNullOrWhiteSpace(region))
+            {
+                throw new ArgumentNullException("region");
+            }
+
+            return new BackPlateMessage(owner, BackPlateAction.ClearRegion)
+            {
+                Region = region
+            };
+        }
+
+        public static BackPlateMessage ForRemoved(string owner, string key)
+        {
+            return new BackPlateMessage(owner, BackPlateAction.Removed, key);
+        }
+
+        public static BackPlateMessage ForRemoved(string owner, string key, string region)
+        {
+            return new BackPlateMessage(owner, BackPlateAction.Removed, key, region);
+        }
+
         public string Serialize()
         {
             var action = (int)this.Action;
@@ -126,22 +134,14 @@ namespace CacheManager.Core.Cache
             return this.OwnerIdentity + ":" + action + ":" + Encode(this.Key) + ":" + Encode(this.Region);
         }
 
-        private static string Encode(string value)
-        {
-            return Convert.ToBase64String(Encoding.UTF8.GetBytes(value));
-        }
-
         private static string Decode(string value)
         {
             return Encoding.UTF8.GetString(Convert.FromBase64String(value));
         }
 
-        public string OwnerIdentity { get; set; }
-
-        public BackPlateAction Action { get; set; }
-
-        public string Key { get; set; }
-
-        public string Region { get; set; }
+        private static string Encode(string value)
+        {
+            return Convert.ToBase64String(Encoding.UTF8.GetBytes(value));
+        }
     }
 }

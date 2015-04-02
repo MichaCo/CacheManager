@@ -5,15 +5,13 @@ using System.Collections.Generic;
 namespace CacheManager.Core.Cache
 {
     /// <summary>
+    /// <para>Stores statistical information for a <see cref="BaseCacheHandle{TCacheValue}"/>.</para>
     /// <para>
-    /// Stores statistical information for a <see cref="BaseCacheHandle{TCacheValue}"/>.
+    /// Statistical counters are stored globally for the <see cref="BaseCacheHandle{TCacheValue}"/>
+    /// and for each cache region!
     /// </para>
     /// <para>
-    /// Statistical counters are stored globally for the <see cref="BaseCacheHandle{TCacheValue}"/> and for each cache region!
-    /// </para>
-    /// <para>
-    /// To retrieve a counter for a region only, specify the optional region attribute
-    /// of GetStatistics.
+    /// To retrieve a counter for a region only, specify the optional region attribute of GetStatistics.
     /// </para>
     /// </summary>
     /// <remarks>
@@ -24,15 +22,10 @@ namespace CacheManager.Core.Cache
     public sealed class CacheStats<T> : IDisposable
     {
         private static readonly string NullRegionKey = Guid.NewGuid().ToString();
-
         private readonly ConcurrentDictionary<string, CacheStatsCounter> counters;
-
-        private readonly bool isStatsEnabled;
-
         private readonly bool isPerformanceCounterEnabled;
-
+        private readonly bool isStatsEnabled;
         private readonly object lockObject;
-
         private readonly CachePerformanceCounters<T> performanceCounters;
 
         public CacheStats(string cacheName, string handleName, bool enabled = true, bool enablePerformanceCounters = false)
@@ -63,6 +56,12 @@ namespace CacheManager.Core.Cache
         ~CacheStats()
         {
             this.Dispose(false);
+        }
+
+        public void Dispose()
+        {
+            this.Dispose(true);
+            GC.SuppressFinalize(this);
         }
 
         /// <summary>
@@ -183,65 +182,40 @@ namespace CacheManager.Core.Cache
             }
         }
 
-        public void OnPut(CacheItem<T> item, bool itemAdded)
+        public void OnClear()
         {
-            if (!isStatsEnabled)
-            {
-                return;
-            }
+            if (!isStatsEnabled) { return; }
 
-            if (item == null)
+            // clear needs a lock, otherwise we might mess up the overall counts
+            lock (lockObject)
             {
-                throw new ArgumentNullException("item");
-            }
-
-            foreach (var counter in GetWorkingCounters(item.Region))
-            {
-                counter.Increment(CacheStatsCounterType.PutCalls);
-                
-                if (itemAdded)
+                foreach (var key in counters.Keys)
                 {
-                    counter.Increment(CacheStatsCounterType.Items);
+                    CacheStatsCounter counter = null;
+                    if (counters.TryGetValue(key, out counter))
+                    {
+                        counter.Set(CacheStatsCounterType.Items, 0L);
+                        counter.Increment(CacheStatsCounterType.ClearCalls);
+                    }
                 }
             }
         }
 
-        public void OnUpdate(string key, string region, UpdateItemResult result)
+        public void OnClearRegion(string region)
         {
-            if (!isStatsEnabled)
-            {
-                return;
-            }
+            if (!isStatsEnabled) { return; }
 
-            if (string.IsNullOrWhiteSpace(key))
+            // clear needs a lock, otherwise we might mess up the overall counts
+            lock (lockObject)
             {
-                throw new ArgumentNullException("key");
-            }
+                var regionCounter = GetCounter(region);
+                var itemCount = regionCounter.Get(CacheStatsCounterType.Items);
+                regionCounter.Increment(CacheStatsCounterType.ClearRegionCalls);
+                regionCounter.Set(CacheStatsCounterType.Items, 0L);
 
-            if (result == null)
-            {
-                throw new ArgumentNullException("result");
-            }
-            
-            foreach (var counter in GetWorkingCounters(region))
-            {
-                counter.Add(CacheStatsCounterType.GetCalls, result.NumberOfRetriesNeeded);
-                counter.Add(CacheStatsCounterType.Hits, result.NumberOfRetriesNeeded);
-                counter.Increment(CacheStatsCounterType.PutCalls);
-            }
-        }
-
-        public void OnRemove(string region = null)
-        {
-            if (!isStatsEnabled)
-            {
-                return;
-            }
-
-            foreach (var counter in GetWorkingCounters(region))
-            {
-                counter.Increment(CacheStatsCounterType.RemoveCalls);
-                counter.Decrement(CacheStatsCounterType.Items);
+                var defaultCounter = GetCounter(NullRegionKey);
+                defaultCounter.Increment(CacheStatsCounterType.ClearRegionCalls);
+                defaultCounter.Add(CacheStatsCounterType.Items, itemCount * -1);
             }
         }
 
@@ -281,47 +255,66 @@ namespace CacheManager.Core.Cache
             }
         }
 
-        public void OnClear()
+        public void OnPut(CacheItem<T> item, bool itemAdded)
         {
-            if (!isStatsEnabled) { return; }
-
-            // clear needs a lock, otherwise we might mess up the overall counts
-            lock (lockObject)
+            if (!isStatsEnabled)
             {
-                foreach (var key in counters.Keys)
+                return;
+            }
+
+            if (item == null)
+            {
+                throw new ArgumentNullException("item");
+            }
+
+            foreach (var counter in GetWorkingCounters(item.Region))
+            {
+                counter.Increment(CacheStatsCounterType.PutCalls);
+
+                if (itemAdded)
                 {
-                    CacheStatsCounter counter = null;
-                    if (counters.TryGetValue(key, out counter))
-                    {
-                        counter.Set(CacheStatsCounterType.Items, 0L);
-                        counter.Increment(CacheStatsCounterType.ClearCalls);
-                    }
+                    counter.Increment(CacheStatsCounterType.Items);
                 }
             }
         }
 
-        public void OnClearRegion(string region)
+        public void OnRemove(string region = null)
         {
-            if (!isStatsEnabled) { return; }
-
-            // clear needs a lock, otherwise we might mess up the overall counts
-            lock (lockObject)
+            if (!isStatsEnabled)
             {
-                var regionCounter = GetCounter(region);
-                var itemCount = regionCounter.Get(CacheStatsCounterType.Items);
-                regionCounter.Increment(CacheStatsCounterType.ClearRegionCalls);
-                regionCounter.Set(CacheStatsCounterType.Items, 0L);
+                return;
+            }
 
-                var defaultCounter = GetCounter(NullRegionKey);
-                defaultCounter.Increment(CacheStatsCounterType.ClearRegionCalls);
-                defaultCounter.Add(CacheStatsCounterType.Items, itemCount * -1);
+            foreach (var counter in GetWorkingCounters(region))
+            {
+                counter.Increment(CacheStatsCounterType.RemoveCalls);
+                counter.Decrement(CacheStatsCounterType.Items);
             }
         }
 
-        public void Dispose()
+        public void OnUpdate(string key, string region, UpdateItemResult result)
         {
-            this.Dispose(true);
-            GC.SuppressFinalize(this);
+            if (!isStatsEnabled)
+            {
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(key))
+            {
+                throw new ArgumentNullException("key");
+            }
+
+            if (result == null)
+            {
+                throw new ArgumentNullException("result");
+            }
+
+            foreach (var counter in GetWorkingCounters(region))
+            {
+                counter.Add(CacheStatsCounterType.GetCalls, result.NumberOfRetriesNeeded);
+                counter.Add(CacheStatsCounterType.Hits, result.NumberOfRetriesNeeded);
+                counter.Increment(CacheStatsCounterType.PutCalls);
+            }
         }
 
         private void Dispose(bool disposeManaged)
@@ -345,9 +338,9 @@ namespace CacheManager.Core.Cache
             CacheStatsCounter counter = null;
             if (!counters.TryGetValue(key, out counter))
             {
-                // because of the lazy initialization of region counters, we
-                // have to lock at this point even though the counters dictionary is thread safe
-                // the method gets called so frequently that this is a real performance improvement...
+                // because of the lazy initialization of region counters, we have to lock at this
+                // point even though the counters dictionary is thread safe the method gets called
+                // so frequently that this is a real performance improvement...
                 lock (lockObject)
                 {
                     // check again after pooling threads on the lock

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
@@ -27,7 +26,8 @@ namespace CacheManager.Core.Cache
 
                 ValidateCacheHandleGenericTypeArguments(handleType, typeof(TCacheValue));
 
-                // if the configured type doesn't have a generic type definition ( <T> is not defined )
+                // if the configured type doesn't have a generic type definition ( <T> is not
+                // defined )
                 if (handleType.IsGenericTypeDefinition)
                 {
                     instanceType = handleType.MakeGenericType(new Type[] { typeof(TCacheValue) });
@@ -51,21 +51,30 @@ namespace CacheManager.Core.Cache
                 }
                 try
                 {
-                    var backPlate = (ICacheBackPlate)Activator.CreateInstance(managerConfiguration.BackPlateType, new object[] 
-                    { 
-                        managerConfiguration.BackPlateName, 
-                        managerConfiguration 
+                    var backPlate = (ICacheBackPlate)Activator.CreateInstance(managerConfiguration.BackPlateType, new object[]
+                    {
+                        managerConfiguration.BackPlateName,
+                        managerConfiguration
                     });
 
                     manager.SetCacheBackPlate(backPlate);
                 }
-                catch(TargetInvocationException e)
+                catch (TargetInvocationException e)
                 {
                     throw e.InnerException;
                 }
             }
 
             return manager;
+        }
+
+        public static IEnumerable<Type> GetGenericBaseTypes(this Type type)
+        {
+            if (!type.BaseType.IsGenericType) return Enumerable.Empty<Type>();
+
+            var genericBaseType = type.BaseType.IsGenericTypeDefinition ? type.BaseType : type.BaseType.GetGenericTypeDefinition();
+            return Enumerable.Repeat(genericBaseType, 1)
+                             .Concat(type.BaseType.GetGenericBaseTypes());
         }
 
         public static void ValidateCacheHandleGenericTypeArguments(Type handle, Type arg)
@@ -101,15 +110,6 @@ namespace CacheManager.Core.Cache
                                 "Configured cache handle does not implement BaseCacheHandle<> [{0}].",
                                 handle.ToString()));
             }
-        }
-
-        public static IEnumerable<Type> GetGenericBaseTypes(this Type type)
-        {
-            if (!type.BaseType.IsGenericType) return Enumerable.Empty<Type>();
-
-            var genericBaseType = type.BaseType.IsGenericTypeDefinition ? type.BaseType : type.BaseType.GetGenericTypeDefinition();
-            return Enumerable.Repeat(genericBaseType, 1)
-                             .Concat(type.BaseType.GetGenericBaseTypes());
         }
     }
 }

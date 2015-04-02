@@ -20,25 +20,6 @@ namespace CacheManager.Core.Cache
         public string Region { get; private set; }
     }
 
-    public sealed class CacheUpdateEventArgs : EventArgs
-    {
-        public CacheUpdateEventArgs(string key, string region, UpdateItemConfig config, UpdateItemResult result)
-        {
-            this.Key = key;
-            this.Region = region;
-            this.Result = result;
-            this.Config = config;
-        }
-
-        public string Key { get; private set; }
-
-        public string Region { get; private set; }
-
-        public UpdateItemResult Result { get; private set; }
-
-        public UpdateItemConfig Config { get; private set; }
-    }
-
     public sealed class CacheClearEventArgs : EventArgs { }
 
     public sealed class CacheClearRegionEventArgs : EventArgs
@@ -54,5 +35,24 @@ namespace CacheManager.Core.Cache
         }
 
         public string Region { get; private set; }
+    }
+
+    public sealed class CacheUpdateEventArgs : EventArgs
+    {
+        public CacheUpdateEventArgs(string key, string region, UpdateItemConfig config, UpdateItemResult result)
+        {
+            this.Key = key;
+            this.Region = region;
+            this.Result = result;
+            this.Config = config;
+        }
+
+        public UpdateItemConfig Config { get; private set; }
+
+        public string Key { get; private set; }
+
+        public string Region { get; private set; }
+
+        public UpdateItemResult Result { get; private set; }
     }
 }
