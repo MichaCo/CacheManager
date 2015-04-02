@@ -3,6 +3,10 @@ using System.Collections.Generic;
 
 namespace CacheManager.Core.Configuration
 {
+    /// <summary>
+    /// The basic cache manager configuration class.
+    /// </summary>
+    /// <typeparam name="TCacheValue">The type of the cache value.</typeparam>
     public sealed class CacheManagerConfiguration<TCacheValue> : ICacheManagerConfiguration
     {
         internal CacheManagerConfiguration(string cacheName)
@@ -26,6 +30,10 @@ namespace CacheManager.Core.Configuration
             this.RetryTimeout = retryTimeout;
         }
 
+        /// <summary>
+        /// Gets the name of the back plate.
+        /// </summary>
+        /// <value>The name of the back plate.</value>
         public string BackPlateName { get; internal set; }
 
         /// <summary>
@@ -55,6 +63,10 @@ namespace CacheManager.Core.Configuration
         /// </summary>
         public int RetryTimeout { get; set; }
 
+        /// <summary>
+        /// Gets or sets the type of the back plate.
+        /// </summary>
+        /// <value>The type of the back plate.</value>
         internal Type BackPlateType { get; set; }
 
         /// <summary>

@@ -28,6 +28,21 @@ namespace CacheManager.Core.Cache
         private readonly object lockObject;
         private readonly CachePerformanceCounters<T> performanceCounters;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CacheStats{T}"/> class.
+        /// </summary>
+        /// <param name="cacheName">Name of the cache.</param>
+        /// <param name="handleName">Name of the handle.</param>
+        /// <param name="enabled">
+        /// if set to <c>true</c> the stats are enabled. Otherwise any statitics and performance
+        /// counters will be disabled.
+        /// </param>
+        /// <param name="enablePerformanceCounters">
+        /// if set to <c>true</c> performance counters and statistics will be enabled.
+        /// </param>
+        /// <exception cref="System.ArgumentNullException">
+        /// If cacheName or handleName are null.
+        /// </exception>
         public CacheStats(string cacheName, string handleName, bool enabled = true, bool enablePerformanceCounters = false)
         {
             if (string.IsNullOrWhiteSpace(cacheName))
@@ -53,11 +68,18 @@ namespace CacheManager.Core.Cache
             }
         }
 
+        /// <summary>
+        /// Finalizes an instance of the <see cref="CacheStats{T}"/> class.
+        /// </summary>
         ~CacheStats()
         {
             this.Dispose(false);
         }
 
+        /// <summary>
+        /// Performs application-defined tasks associated with freeing, releasing, or resetting
+        /// unmanaged resources.
+        /// </summary>
         public void Dispose()
         {
             this.Dispose(true);
@@ -66,21 +88,22 @@ namespace CacheManager.Core.Cache
 
         /// <summary>
         /// <para>
-        /// Returns the corresponding statistical information of the <see cref="CacheStatsCounterType"/> type.
+        /// Returns the corresponding statistical information of the
+        /// <see cref="CacheStatsCounterType"/> type.
         /// </para>
         /// <para>
         /// If the cache handles is configured to disable statistics, the method will always return zero.
         /// </para>
         /// </summary>
         /// <remarks>
-        /// In multi threaded environments the counters can be changed while reading.
-        /// Do not rely on those counters as they might not be 100% accurate!
+        /// In multi threaded environments the counters can be changed while reading. Do not rely on
+        /// those counters as they might not be 100% accurate!
         /// </remarks>
         /// <example>
         /// <code>
         /// <![CDATA[
         /// var cache = CacheFactory.FromConfiguration("myCache");
-        ///
+        /// 
         /// foreach (var handle in cache.CacheHandles)
         /// {
         ///    var stats = handle.Stats;
@@ -97,16 +120,21 @@ namespace CacheManager.Core.Cache
         ///                stats.GetStatistic(CacheStatsCounterType.PutCalls, region),
         ///                stats.GetStatistic(CacheStatsCounterType.GetCalls, region)
         ///            ));
-        ///}
+        /// }
         /// ]]>
         /// </code>
         /// </example>
         /// <param name="type">The stats type to retrieve the number for.</param>
-        /// <param name="region">The region. The returned value will represent the counter of the region only.</param>
-        /// <returns>A number representing the counts for the specified <see cref="CacheStatsCounterType"/> and region.</returns>
+        /// <param name="region">
+        /// The region. The returned value will represent the counter of the region only.
+        /// </param>
+        /// <returns>
+        /// A number representing the counts for the specified <see cref="CacheStatsCounterType"/>
+        /// and region.
+        /// </returns>
         public long GetStatistic(CacheStatsCounterType type, string region)
         {
-            if (!isStatsEnabled)
+            if (!this.isStatsEnabled)
             {
                 return 0L;
             }
@@ -122,21 +150,22 @@ namespace CacheManager.Core.Cache
 
         /// <summary>
         /// <para>
-        /// Returns the corresponding statistical information of the <see cref="CacheStatsCounterType"/> type.
+        /// Returns the corresponding statistical information of the
+        /// <see cref="CacheStatsCounterType"/> type.
         /// </para>
         /// <para>
         /// If the cache handles is configured to disable statistics, the method will always return zero.
         /// </para>
         /// </summary>
         /// <remarks>
-        /// In multithreaded environments the counters can be changed while reading.
-        /// Do not rely on those counters as they might not be 100% accurate!
+        /// In multithreaded environments the counters can be changed while reading. Do not rely on
+        /// those counters as they might not be 100% accurate!
         /// </remarks>
         /// <example>
         /// <code>
         /// <![CDATA[
         /// var cache = CacheFactory.FromConfiguration("myCache");
-        ///
+        /// 
         /// foreach (var handle in cache.CacheHandles)
         /// {
         ///    var stats = handle.Stats;
@@ -152,7 +181,7 @@ namespace CacheManager.Core.Cache
         ///                stats.GetStatistic(CacheStatsCounterType.PutCalls),
         ///                stats.GetStatistic(CacheStatsCounterType.GetCalls)
         ///            ));
-        ///}
+        /// }
         /// ]]>
         /// </code>
         /// </example>
@@ -163,9 +192,14 @@ namespace CacheManager.Core.Cache
             return this.GetStatistic(type, NullRegionKey);
         }
 
+        /// <summary>
+        /// Called when an item gets added to the cache.
+        /// </summary>
+        /// <param name="item">The item.</param>
+        /// <exception cref="System.ArgumentNullException">item</exception>
         public void OnAdd(CacheItem<T> item)
         {
-            if (!isStatsEnabled)
+            if (!this.isStatsEnabled)
             {
                 return;
             }
@@ -182,17 +216,23 @@ namespace CacheManager.Core.Cache
             }
         }
 
+        /// <summary>
+        /// Called when the cache got cleared.
+        /// </summary>
         public void OnClear()
         {
-            if (!isStatsEnabled) { return; }
+            if (!this.isStatsEnabled)
+            {
+                return;
+            }
 
             // clear needs a lock, otherwise we might mess up the overall counts
-            lock (lockObject)
+            lock (this.lockObject)
             {
-                foreach (var key in counters.Keys)
+                foreach (var key in this.counters.Keys)
                 {
                     CacheStatsCounter counter = null;
-                    if (counters.TryGetValue(key, out counter))
+                    if (this.counters.TryGetValue(key, out counter))
                     {
                         counter.Set(CacheStatsCounterType.Items, 0L);
                         counter.Increment(CacheStatsCounterType.ClearCalls);
@@ -201,63 +241,91 @@ namespace CacheManager.Core.Cache
             }
         }
 
+        /// <summary>
+        /// Called when a cache region got cleared.
+        /// </summary>
+        /// <param name="region">The region.</param>
         public void OnClearRegion(string region)
         {
-            if (!isStatsEnabled) { return; }
+            if (!this.isStatsEnabled)
+            {
+                return;
+            }
 
             // clear needs a lock, otherwise we might mess up the overall counts
-            lock (lockObject)
+            lock (this.lockObject)
             {
-                var regionCounter = GetCounter(region);
+                var regionCounter = this.GetCounter(region);
                 var itemCount = regionCounter.Get(CacheStatsCounterType.Items);
                 regionCounter.Increment(CacheStatsCounterType.ClearRegionCalls);
                 regionCounter.Set(CacheStatsCounterType.Items, 0L);
 
-                var defaultCounter = GetCounter(NullRegionKey);
+                var defaultCounter = this.GetCounter(NullRegionKey);
                 defaultCounter.Increment(CacheStatsCounterType.ClearRegionCalls);
                 defaultCounter.Add(CacheStatsCounterType.Items, itemCount * -1);
             }
         }
 
+        /// <summary>
+        /// Called when cache Get got invoked.
+        /// </summary>
+        /// <param name="region">The region.</param>
         public void OnGet(string region = null)
         {
-            if (!isStatsEnabled)
+            if (!this.isStatsEnabled)
             {
                 return;
             }
 
-            foreach (var counter in GetWorkingCounters(region))
+            foreach (var counter in this.GetWorkingCounters(region))
             {
                 counter.Increment(CacheStatsCounterType.GetCalls);
             }
         }
 
+        /// <summary>
+        /// Called when a Get was successfull.
+        /// </summary>
+        /// <param name="region">The region.</param>
         public void OnHit(string region = null)
         {
-            if (!isStatsEnabled)
+            if (!this.isStatsEnabled)
             {
                 return;
             }
 
-            foreach (var counter in GetWorkingCounters(region))
+            foreach (var counter in this.GetWorkingCounters(region))
             {
                 counter.Increment(CacheStatsCounterType.Hits);
             }
         }
 
+        /// <summary>
+        /// Called when a Get was not successfull.
+        /// </summary>
+        /// <param name="region">The region.</param>
         public void OnMiss(string region = null)
         {
-            if (!isStatsEnabled) { return; }
+            if (!this.isStatsEnabled)
+            {
+                return;
+            }
 
-            foreach (var counter in GetWorkingCounters(region))
+            foreach (var counter in this.GetWorkingCounters(region))
             {
                 counter.Increment(CacheStatsCounterType.Misses);
             }
         }
 
+        /// <summary>
+        /// Called when an item got updated.
+        /// </summary>
+        /// <param name="item">The item.</param>
+        /// <param name="itemAdded">If <c>true</c> the item didn't exist and has been added.</param>
+        /// <exception cref="System.ArgumentNullException">If item is null.</exception>
         public void OnPut(CacheItem<T> item, bool itemAdded)
         {
-            if (!isStatsEnabled)
+            if (!this.isStatsEnabled)
             {
                 return;
             }
@@ -267,7 +335,7 @@ namespace CacheManager.Core.Cache
                 throw new ArgumentNullException("item");
             }
 
-            foreach (var counter in GetWorkingCounters(item.Region))
+            foreach (var counter in this.GetWorkingCounters(item.Region))
             {
                 counter.Increment(CacheStatsCounterType.PutCalls);
 
@@ -278,23 +346,34 @@ namespace CacheManager.Core.Cache
             }
         }
 
+        /// <summary>
+        /// Called when an item has been removed from the cache.
+        /// </summary>
+        /// <param name="region">The region.</param>
         public void OnRemove(string region = null)
         {
-            if (!isStatsEnabled)
+            if (!this.isStatsEnabled)
             {
                 return;
             }
 
-            foreach (var counter in GetWorkingCounters(region))
+            foreach (var counter in this.GetWorkingCounters(region))
             {
                 counter.Increment(CacheStatsCounterType.RemoveCalls);
                 counter.Decrement(CacheStatsCounterType.Items);
             }
         }
 
+        /// <summary>
+        /// Called when an item has been updated.
+        /// </summary>
+        /// <param name="key">The key.</param>
+        /// <param name="region">The region.</param>
+        /// <param name="result">The result.</param>
+        /// <exception cref="System.ArgumentNullException">If key or result are null.</exception>
         public void OnUpdate(string key, string region, UpdateItemResult result)
         {
-            if (!isStatsEnabled)
+            if (!this.isStatsEnabled)
             {
                 return;
             }
@@ -309,7 +388,7 @@ namespace CacheManager.Core.Cache
                 throw new ArgumentNullException("result");
             }
 
-            foreach (var counter in GetWorkingCounters(region))
+            foreach (var counter in this.GetWorkingCounters(region))
             {
                 counter.Add(CacheStatsCounterType.GetCalls, result.NumberOfRetriesNeeded);
                 counter.Add(CacheStatsCounterType.Hits, result.NumberOfRetriesNeeded);
@@ -321,7 +400,7 @@ namespace CacheManager.Core.Cache
         {
             if (disposeManaged)
             {
-                if (isPerformanceCounterEnabled)
+                if (this.isPerformanceCounterEnabled)
                 {
                     this.performanceCounters.Dispose();
                 }
@@ -336,18 +415,18 @@ namespace CacheManager.Core.Cache
             }
 
             CacheStatsCounter counter = null;
-            if (!counters.TryGetValue(key, out counter))
+            if (!this.counters.TryGetValue(key, out counter))
             {
                 // because of the lazy initialization of region counters, we have to lock at this
                 // point even though the counters dictionary is thread safe the method gets called
                 // so frequently that this is a real performance improvement...
-                lock (lockObject)
+                lock (this.lockObject)
                 {
                     // check again after pooling threads on the lock
-                    if (!counters.TryGetValue(key, out counter))
+                    if (!this.counters.TryGetValue(key, out counter))
                     {
                         counter = new CacheStatsCounter();
-                        if (!counters.TryAdd(key, counter))
+                        if (!this.counters.TryAdd(key, counter))
                         {
                             throw new InvalidOperationException("Failed to initialize counter.");
                         }
@@ -360,11 +439,11 @@ namespace CacheManager.Core.Cache
 
         private IEnumerable<CacheStatsCounter> GetWorkingCounters(string region)
         {
-            yield return GetCounter(NullRegionKey);
+            yield return this.GetCounter(NullRegionKey);
 
             if (!string.IsNullOrWhiteSpace(region))
             {
-                var counter = GetCounter(region);
+                var counter = this.GetCounter(region);
                 if (counter != null)
                 {
                     yield return counter;

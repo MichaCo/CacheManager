@@ -47,7 +47,7 @@ namespace CacheManager.Core.Cache
 
             foreach (var ichar in invalidInstanceChars)
             {
-                this.instanceName = this.instanceName.Replace(ichar, "");
+                this.instanceName = this.instanceName.Replace(ichar, string.Empty);
             }
 
             if (this.instanceName.Length > 128)
@@ -96,8 +96,7 @@ namespace CacheManager.Core.Cache
         {
             if (PerformanceCounterCategory.Exists(Category))
             {
-                //PerformanceCounterCategory.Delete(Category); // testing only,
-                return; // TODO: comment out deleting and return if exists.
+                return;
             }
 
             PerformanceCounterCategory.Create(
@@ -105,61 +104,61 @@ namespace CacheManager.Core.Cache
                 "CacheManager counters per handle",
                 PerformanceCounterCategoryType.MultiInstance,
                 new CounterCreationDataCollection
-				{
-					new CounterCreationData
-					{
-						CounterName = Entries,
-						CounterHelp = "Current number of cache items stored within the cache handle",
-						CounterType = PerformanceCounterType.NumberOfItems64
-					},
-					new CounterCreationData
-					{
-						CounterName = HitRatio,
-						CounterHelp = "Cache hit ratio of the cache handle",
-						CounterType = PerformanceCounterType.AverageCount64
-					},
-					new CounterCreationData
-					{
-					    CounterName = HitRatioBase,
+                {
+                    new CounterCreationData
+                    {
+                        CounterName = Entries,
+                        CounterHelp = "Current number of cache items stored within the cache handle",
+                        CounterType = PerformanceCounterType.NumberOfItems64
+                    },
+                    new CounterCreationData
+                    {
+                        CounterName = HitRatio,
+                        CounterHelp = "Cache hit ratio of the cache handle",
+                        CounterType = PerformanceCounterType.AverageCount64
+                    },
+                    new CounterCreationData
+                    {
+                        CounterName = HitRatioBase,
                         CounterHelp = HitRatioBase,
                         CounterType = PerformanceCounterType.AverageBase
-					},
-					new CounterCreationData
-					{
-						CounterName = Hits,
+                    },
+                    new CounterCreationData
+                    {
+                        CounterName = Hits,
                         CounterHelp = "Total number of cache hits of the cache handle",
                         CounterType = PerformanceCounterType.NumberOfItems64
-					},
-					new CounterCreationData
-					{
+                    },
+                    new CounterCreationData
+                    {
                         CounterName = Misses,
                         CounterHelp = "Total number of cache misses of the cache handle",
                         CounterType = PerformanceCounterType.NumberOfItems64
-					},
-					new CounterCreationData
-					{
+                    },
+                    new CounterCreationData
+                    {
                         CounterName = Writes,
                         CounterHelp = "Total number of cache writes (add,put,remove) of the cache handle",
                         CounterType = PerformanceCounterType.NumberOfItems64
-					},
-					new CounterCreationData
-					{
+                    },
+                    new CounterCreationData
+                    {
                         CounterName = WritesPerSecond,
                         CounterHelp = WritesPerSecond,
                         CounterType = PerformanceCounterType.RateOfCountsPerSecond64
-					},
-					new CounterCreationData
-					{
+                    },
+                    new CounterCreationData
+                    {
                         CounterName = ReadsPerSecond,
                         CounterHelp = ReadsPerSecond,
                         CounterType = PerformanceCounterType.RateOfCountsPerSecond64
-					},
-					new CounterCreationData
-					{
+                    },
+                    new CounterCreationData
+                    {
                         CounterName = HitsPerSecond,
                         CounterHelp = HitsPerSecond,
                         CounterType = PerformanceCounterType.RateOfCountsPerSecond64
-					},
+                    },
                 });
         }
 
@@ -172,9 +171,11 @@ namespace CacheManager.Core.Cache
 
                 try
                 {
-                    ResetCounters();
+                    this.ResetCounters();
                 }
-                catch { }
+                catch
+                {
+                }
                 finally
                 {
                     foreach (var counter in this.counters)
@@ -210,10 +211,10 @@ namespace CacheManager.Core.Cache
             this.ResetCounters();
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "Is just fine at that point.")]
         private void PerformanceCounterWorker(object state)
         {
-            if (enabled && Monitor.TryEnter(updateLock))
+            if (this.enabled && Monitor.TryEnter(this.updateLock))
             {
                 try
                 {
@@ -242,12 +243,12 @@ namespace CacheManager.Core.Cache
                 }
                 catch (Exception e)
                 {
-                    enabled = false;
+                    this.enabled = false;
                     Trace.TraceError(e.Message + "\n" + e.StackTrace);
                 }
                 finally
                 {
-                    Monitor.Exit(updateLock);
+                    Monitor.Exit(this.updateLock);
                 }
             }
         }

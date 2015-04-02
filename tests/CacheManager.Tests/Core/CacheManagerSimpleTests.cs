@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using CacheManager.Core;
 using CacheManager.Core.Cache;
 using CacheManager.Core.Configuration;
@@ -15,8 +13,8 @@ using Xunit;
 namespace CacheManager.Tests.Core
 {
     /// <summary>
-    /// Validates that add and put adds a new item to all handles defined.
-    /// Validates that remove removes an item from all handles defined.
+    /// Validates that add and put adds a new item to all handles defined. Validates that remove
+    /// removes an item from all handles defined.
     /// </summary>
     [ExcludeFromCodeCoverage]
     public class CacheManagerSimpleTests : BaseCacheManagerTest
@@ -53,7 +51,7 @@ namespace CacheManager.Tests.Core
                 Action act = () => cache.Add(new CacheItem<object>(key, "something", ExpirationMode.Absolute, default(TimeSpan)));
 
                 act.ShouldThrow<InvalidOperationException>()
-                    .WithMessage("Expiration mode defined without timeout.");
+                    .WithMessage("Expiration mode is defined without timeout.");
             }
         }
 
@@ -102,7 +100,7 @@ namespace CacheManager.Tests.Core
                     .WithMessage("*Parameter name: handles");
         }
 
-        #endregion
+        #endregion general
 
         #region put params validation
 
@@ -115,8 +113,7 @@ namespace CacheManager.Tests.Core
                 settings.WithHandle<DictionaryCacheHandle>("h1");
             }))
             {
-                // arrange
-                // act
+                // arrange act
                 Action act = () => cache.Put(null, null);
                 Action actR = () => cache.Put(null, null, null);
 
@@ -128,7 +125,7 @@ namespace CacheManager.Tests.Core
                     .WithMessage("*Parameter name: key");
             }
         }
-        
+
         [Fact]
         [ReplaceCulture]
         public void CacheManager_Put_InvalidValue()
@@ -138,8 +135,7 @@ namespace CacheManager.Tests.Core
                     settings.WithHandle<DictionaryCacheHandle>("h1");
                 }))
             {
-                // arrange
-                // act
+                // arrange act
                 Action act = () => cache.Put("key", null);
                 Action actR = () => cache.Put("key", null, null);
 
@@ -243,7 +239,7 @@ namespace CacheManager.Tests.Core
                 cache.Get(key, "region").Should().Be(value);
             }
         }
-        
+
         #endregion put params validation
 
         #region update call validation
@@ -257,8 +253,7 @@ namespace CacheManager.Tests.Core
                 settings.WithHandle<DictionaryCacheHandle>("h1");
             }))
             {
-                // arrange
-                // act
+                // arrange act
                 Action act = () => cache.Update(null, null);
                 Action actR = () => cache.Update(null, "r", null);
                 Action actU = () => cache.Update(null, (o) => o, null);
@@ -288,8 +283,7 @@ namespace CacheManager.Tests.Core
                 settings.WithHandle<DictionaryCacheHandle>("h1");
             }))
             {
-                // arrange
-                // act
+                // arrange act
                 Action act = () => cache.Update("key", null);
                 Action actR = () => cache.Update("key", "region", null);
                 Action actU = () => cache.Update("key", null, new UpdateItemConfig());
@@ -319,8 +313,7 @@ namespace CacheManager.Tests.Core
                 settings.WithHandle<DictionaryCacheHandle>("h1");
             }))
             {
-                // arrange
-                // act
+                // arrange act
                 Action actR = () => cache.Update("key", null, a => a);
                 Action actRU = () => cache.Update("key", null, a => a, new UpdateItemConfig());
 
@@ -342,8 +335,7 @@ namespace CacheManager.Tests.Core
                 settings.WithHandle<DictionaryCacheHandle>("h1");
             }))
             {
-                // arrange
-                // act
+                // arrange act
                 Action act = () => cache.Update("key", a => a, null);
                 Action actR = () => cache.Update("key", "region", a => a, null);
 
@@ -364,8 +356,7 @@ namespace CacheManager.Tests.Core
                 settings.WithHandle<DictionaryCacheHandle>("h1");
             }))
             {
-                // arrange
-                // act
+                // arrange act
                 Func<bool> act = () => cache.Update("key", item => item);
 
                 // assert
@@ -392,8 +383,8 @@ namespace CacheManager.Tests.Core
                 act2().Should().Be("something awesome");
             }
         }
-        
-        #endregion
+
+        #endregion update call validation
 
         #region Add validation
 
@@ -419,13 +410,13 @@ namespace CacheManager.Tests.Core
                     .WithMessage("*Parameter name: key");
             }
         }
-        
+
         [Fact]
         [ReplaceCulture]
         public void CacheManager_Add_InvalidValue()
         {
             // arrange
-            using (var cache = CacheFactory.Build("cache", 
+            using (var cache = CacheFactory.Build("cache",
                 settings =>
                 {
                     settings.WithHandle<DictionaryCacheHandle>("h1");
@@ -443,7 +434,7 @@ namespace CacheManager.Tests.Core
                     .WithMessage("*Parameter name: value");
             }
         }
-        
+
         [Fact]
         [ReplaceCulture]
         public void CacheManager_Add_InvalidRegion()
@@ -619,7 +610,7 @@ namespace CacheManager.Tests.Core
                     .WithMessage("*Parameter name: region");
             }
         }
-        
+
         [Fact]
         [ReplaceCulture]
         public void CacheManager_GetT_InvalideKey()
@@ -642,7 +633,7 @@ namespace CacheManager.Tests.Core
                     .WithMessage("*Parameter name: key");
             }
         }
-        
+
         [Fact]
         [ReplaceCulture]
         public void CacheManager_GetT_InvalideRegion()
@@ -661,7 +652,7 @@ namespace CacheManager.Tests.Core
                     .WithMessage("*Parameter name: region");
             }
         }
-        
+
         [Fact]
         [ReplaceCulture]
         public void CacheManager_Get_KeyNotAvailable()
@@ -728,7 +719,7 @@ namespace CacheManager.Tests.Core
                 actAdd().Should().BeTrue("the cache should add the key/value");
                 actGet().Should()
                     .NotBeNull("object was added")
-                    .And.ShouldBeEquivalentTo(new { Key = key, Value = value }, p => p.ExcludingMissingProperties());
+                    .And.ShouldBeEquivalentTo(new { Key = key, Value = value }, p => p.ExcludingMissingMembers());
             }
         }
 
@@ -777,7 +768,7 @@ namespace CacheManager.Tests.Core
                     .WithMessage("*Parameter name: region");
             }
         }
-        
+
         [Fact]
         [ReplaceCulture]
         public void CacheManager_Remove_KeyEmpty()
@@ -945,11 +936,10 @@ namespace CacheManager.Tests.Core
             using (cache)
             {
                 cache.Clear();
-                // arrange
-                // act
+                // arrange act
                 Func<bool> actA = () => cache.Add("key", "some value", "region");
                 Func<string> act = () => cache.Get<string>("key", "region");
-                
+
                 // assert
                 actA().Should().BeTrue();
                 act().Should().Be("some value");
@@ -965,7 +955,7 @@ namespace CacheManager.Tests.Core
             {
                 // arrange
                 var keys = new List<string>() { "key1", "key2", "key3", "key4", "key5", "key6", "key7", "key8" };
-                var values = new List<object>() 
+                var values = new List<object>()
                 {
                     "string", 33293, 0.123f, 0.324d, 123311L, true,
                     new ComplexType(){ Name="name", SomeBool=false, SomeId= 213},
@@ -1039,7 +1029,7 @@ namespace CacheManager.Tests.Core
                 ValidateCacheValues(cache, keys, values);
             }
         }
-        
+
         [Theory]
         [MemberData("GetCacheManagers")]
         public void CacheManager_SimpleAdd<T>(T cache) where T : ICacheManager<object>
@@ -1049,7 +1039,7 @@ namespace CacheManager.Tests.Core
                 cache.Clear();
                 // arrange
                 var keys = new List<string>() { "key1", "key2", "key3", "key4" };
-                var values = new List<object>() { new DateTime(2014, 1, 1), 234, "test string"};
+                var values = new List<object>() { new DateTime(2014, 1, 1), 234, "test string" };
 
                 // act
                 Action actSet = () =>
@@ -1114,8 +1104,7 @@ namespace CacheManager.Tests.Core
         [MemberData("GetCacheManagers")]
         public void CacheManager_Clear_AllItemsRemoved<T>(T cache) where T : ICacheManager<object>
         {
-            // arrange
-            // act
+            // arrange act
             using (cache)
             {
                 // act
@@ -1162,7 +1151,7 @@ namespace CacheManager.Tests.Core
                 ValidateCacheValues(cache, keys, newValues);
             }
         }
-        
+
         private void PopulateCache<T>(ICacheManager<T> cache, IList<string> keys, IList<T> values, int mode)
         {
             cache.Clear();

@@ -94,7 +94,6 @@
   <ItemGroup>
     <None Include="CacheManager.Core.csproj.nuspec" />
     <None Include="app.config.transform" />
-    <None Include="Settings.StyleCop" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />

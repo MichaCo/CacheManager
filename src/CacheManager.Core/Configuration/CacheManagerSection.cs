@@ -74,7 +74,7 @@ namespace CacheManager.Core.Configuration
     {
         public CacheHandleDefinitionCollection()
         {
-            AddElementName = "handleDef";
+            this.AddElementName = "handleDef";
         }
 
         public new IEnumerator<CacheHandleDefinition> GetEnumerator()
@@ -211,7 +211,7 @@ namespace CacheManager.Core.Configuration
 
         public CacheManagerHandleCollection()
         {
-            AddElementName = "handle";
+            this.AddElementName = "handle";
         }
 
         [ConfigurationProperty(BackPlateNameKey, IsRequired = false)]

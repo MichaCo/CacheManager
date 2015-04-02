@@ -10,35 +10,31 @@ namespace CacheManager.Core
     public static class CacheFactory
     {
         /// <summary>
-        /// <para>
-        /// Instantiates a cache manager using the inline configuration defined by <paramref name="settings"/>.
-        /// </para>
-        /// <para>
-        /// This Build method returns a <c>ICacheManager</c> with cache item type being <c>System.Object</c>.
-        /// </para>
+        /// <para>Instantiates a cache manager using the inline configuration defined by <paramref name="settings"/>.</para>
+        /// <para>This Build method returns a <c>ICacheManager</c> with cache item type being <c>System.Object</c>.</para>
         /// </summary>
         /// <example>
-        /// The following example show how to build a <c>CacheManagerConfiguration</c>
-        /// and then using the <c>CacheFactory</c> to create a new cache manager instance.
-        /// <code><![CDATA[
-        ///var cache = CacheFactory.Build("myCacheName", settings =>
-        ///{
+        /// The following example show how to build a <c>CacheManagerConfiguration</c> and then
+        /// using the <c>CacheFactory</c> to create a new cache manager instance.
+        /// <code>
+        /// <![CDATA[
+        /// var cache = CacheFactory.Build("myCacheName", settings =>
+        /// {
         ///    settings
         ///        .WithUpdateMode(CacheUpdateMode.Up)
         ///        .WithHandle<DictionaryCacheHandle>("handle1")
         ///            .EnablePerformanceCounters()
         ///            .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(10));
-        ///});
-        ///
-        ///cache.Add("key", "value");
-        /// ]]></code>
+        /// });
+        /// 
+        /// cache.Add("key", "value");
+        /// ]]>
+        /// </code>
         /// </example>
-        /// <param name="cacheName">
-        /// The name of the cache manager instance.
-        /// </param>
+        /// <param name="cacheName">The name of the cache manager instance.</param>
         /// <param name="settings">
-        /// The configuration. Use the settings element to configure the cache manager instance,
-        /// add cache handles and also to configure the cache handles in a fluent way.
+        /// The configuration. Use the settings element to configure the cache manager instance, add
+        /// cache handles and also to configure the cache handles in a fluent way.
         /// </param>
         /// <returns>The cache manager instance with cache item type being <c>System.Object</c>.</returns>
         /// <seealso cref="ICacheManager{TCacheValue}"/>
@@ -54,32 +50,30 @@ namespace CacheManager.Core
         }
 
         /// <summary>
-        /// <para>
-        /// Instantiates a cache manager using the inline configuration defined by <paramref name="settings"/>.
-        /// </para>
+        /// <para>Instantiates a cache manager using the inline configuration defined by <paramref name="settings"/>.</para>
         /// </summary>
         /// <example>
-        /// The following example show how to build a <c>CacheManagerConfiguration</c>
-        /// and then using the <c>CacheFactory</c> to create a new cache manager instance.
-        /// <code><![CDATA[
-        ///var cache = CacheFactory.Build("myCacheName", settings =>
-        ///{
+        /// The following example show how to build a <c>CacheManagerConfiguration</c> and then
+        /// using the <c>CacheFactory</c> to create a new cache manager instance.
+        /// <code>
+        /// <![CDATA[
+        /// var cache = CacheFactory.Build("myCacheName", settings =>
+        /// {
         ///    settings
         ///        .WithUpdateMode(CacheUpdateMode.Up)
         ///        .WithHandle<DictionaryCacheHandle>("handle1")
         ///            .EnablePerformanceCounters()
         ///            .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(10));
-        ///});
-        ///
-        ///cache.Add("key", "value");
-        /// ]]></code>
+        /// });
+        /// 
+        /// cache.Add("key", "value");
+        /// ]]>
+        /// </code>
         /// </example>
-        /// <param name="cacheName">
-        /// The name of the cache manager instance.
-        /// </param>
+        /// <param name="cacheName">The name of the cache manager instance.</param>
         /// <param name="settings">
-        /// The configuration. Use the settings element to configure the cache manager instance,
-        /// add cache handles and also to configure the cache handles in a fluent way.
+        /// The configuration. Use the settings element to configure the cache manager instance, add
+        /// cache handles and also to configure the cache handles in a fluent way.
         /// </param>
         /// <typeparam name="TCacheValue">The type of the cache item value.</typeparam>
         /// <returns>The cache manager instance with cache item type being <c>TCacheValue</c>.</returns>
@@ -138,25 +132,25 @@ namespace CacheManager.Core
         }
 
         /// <summary>
-        /// <para>
-        /// Instantiates a cache manager using the given <paramref name="configuration"/>.
-        /// </para>
+        /// <para>Instantiates a cache manager using the given <paramref name="configuration"/>.</para>
         /// </summary>
         /// <example>
-        /// The following example show how to build a <c>CacheManagerConfiguration</c>
-        /// and then using the <c>CacheFactory</c> to create a new cache manager instance.
-        /// <code><![CDATA[
-        ///CacheManagerConfiguration<object> managerConfiguration = ConfigurationBuilder.BuildConfiguration<object>("myCacheName", settings =>
+        /// The following example show how to build a <c>CacheManagerConfiguration</c> and then
+        /// using the <c>CacheFactory</c> to create a new cache manager instance.
+        /// <code>
+        /// <![CDATA[
+        /// CacheManagerConfiguration<object> managerConfiguration = ConfigurationBuilder.BuildConfiguration<object>("myCacheName", settings =>
         /// {
         ///     settings.WithUpdateMode(CacheUpdateMode.Up)
         ///         .WithHandle<DictionaryCacheHandle<object>>("handle1")
         ///             .EnablePerformanceCounters()
         ///             .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(10));
         /// });
-        ///
+        /// 
         /// var cache = CacheFactory.FromConfiguration<object>(managerConfiguration);
         /// cache.Add("key", "value");
-        /// ]]></code>
+        /// ]]>
+        /// </code>
         /// </example>
         /// <param name="configuration">
         /// The configured which will be used to configure the cache manager instance.

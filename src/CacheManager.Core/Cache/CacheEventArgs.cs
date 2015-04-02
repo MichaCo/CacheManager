@@ -20,7 +20,9 @@ namespace CacheManager.Core.Cache
         public string Region { get; private set; }
     }
 
-    public sealed class CacheClearEventArgs : EventArgs { }
+    public sealed class CacheClearEventArgs : EventArgs
+    {
+    }
 
     public sealed class CacheClearRegionEventArgs : EventArgs
     {

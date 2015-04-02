@@ -51,11 +51,13 @@ namespace CacheManager.Core.Cache
                 }
                 try
                 {
-                    var backPlate = (ICacheBackPlate)Activator.CreateInstance(managerConfiguration.BackPlateType, new object[]
-                    {
-                        managerConfiguration.BackPlateName,
-                        managerConfiguration
-                    });
+                    var backPlate = (ICacheBackPlate)Activator.CreateInstance(
+                        managerConfiguration.BackPlateType,
+                        new object[]
+                        {
+                            managerConfiguration.BackPlateName,
+                            managerConfiguration
+                        });
 
                     manager.SetCacheBackPlate(backPlate);
                 }
@@ -70,7 +72,10 @@ namespace CacheManager.Core.Cache
 
         public static IEnumerable<Type> GetGenericBaseTypes(this Type type)
         {
-            if (!type.BaseType.IsGenericType) return Enumerable.Empty<Type>();
+            if (!type.BaseType.IsGenericType)
+            {
+                return Enumerable.Empty<Type>();
+            }
 
             var genericBaseType = type.BaseType.IsGenericTypeDefinition ? type.BaseType : type.BaseType.GetGenericTypeDefinition();
             return Enumerable.Repeat(genericBaseType, 1)
@@ -82,7 +87,9 @@ namespace CacheManager.Core.Cache
             if (handle.IsInterface)
             {
                 throw new InvalidOperationException(
-                    string.Format(CultureInfo.InvariantCulture, "Interfaces are not allowed as handle type, try change the type of handle [{0}]",
+                    string.Format(
+                        CultureInfo.InvariantCulture,
+                        "Interfaces are not allowed as handle type, try change the type of handle [{0}]",
                         handle.ToString()));
             }
 
@@ -91,13 +98,17 @@ namespace CacheManager.Core.Cache
                 if (handle.GenericTypeArguments.Count() != 1)
                 {
                     throw new InvalidOperationException(
-                        string.Format(CultureInfo.InvariantCulture, "Invalid number of generic type arguments found for handle [{0}].",
+                        string.Format(
+                            CultureInfo.InvariantCulture,
+                            "Invalid number of generic type arguments found for handle [{0}].",
                             handle.ToString()));
                 }
                 if (!handle.GenericTypeArguments.First().Equals(arg))
                 {
                     throw new InvalidOperationException(
-                        string.Format(CultureInfo.InvariantCulture, "Item value type configured [{0}] does not match with the requested generic type argument [{1}]",
+                        string.Format(
+                            CultureInfo.InvariantCulture,
+                            "Item value type configured [{0}] does not match with the requested generic type argument [{1}]",
                             handle.ToString(),
                             arg.ToString()));
                 }
@@ -106,9 +117,10 @@ namespace CacheManager.Core.Cache
             if (!handle.GetGenericBaseTypes().Any(p => p == typeof(BaseCacheHandle<>)))
             {
                 throw new InvalidOperationException(
-                    string.Format(CultureInfo.InvariantCulture,
-                                "Configured cache handle does not implement BaseCacheHandle<> [{0}].",
-                                handle.ToString()));
+                    string.Format(
+                        CultureInfo.InvariantCulture,
+                        "Configured cache handle does not implement BaseCacheHandle<> [{0}].",
+                        handle.ToString()));
             }
         }
     }
