@@ -22,16 +22,19 @@
         /// <summary>
         /// Gets the number of tries the cache needed to update the item.
         /// </summary>
+        /// <value>The number of retries needed.</value>
         public int NumberOfRetriesNeeded { get; private set; }
 
         /// <summary>
         /// Gets a value indicating whether the update operation was successful or not.
         /// </summary>
+        /// <value><c>true</c> if success; otherwise, <c>false</c>.</value>
         public bool Success { get; private set; }
 
         /// <summary>
         /// Gets a value indicating whether a version conflict occurred during an update operation.
         /// </summary>
+        /// <value><c>true</c> if a version conflict occurred; otherwise, <c>false</c>.</value>
         public bool VersionConflictOccurred { get; private set; }
     }
 }

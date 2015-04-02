@@ -49,6 +49,7 @@ namespace CacheManager.Core.Cache
                 {
                     throw new InvalidOperationException("At least one cache handle must be marked as the backplate's source.");
                 }
+
                 try
                 {
                     var backPlate = (ICacheBackPlate)Activator.CreateInstance(

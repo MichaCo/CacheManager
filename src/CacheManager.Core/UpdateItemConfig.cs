@@ -74,12 +74,14 @@ namespace CacheManager.Core
         /// Gets the number of retries the update operation is allowed to make.
         /// <para>Default are <see cref="int.MaxValue"/></para>
         /// </summary>
+        /// <value>The maximum retries.</value>
         public int MaxRetries { get; private set; }
 
         /// <summary>
         /// Gets the <see cref="VersionConflictHandling"/> which drives the cache manager if a
         /// version conflict occurs.
         /// </summary>
+        /// <value>The version conflict operation.</value>
         public VersionConflictHandling VersionConflictOperation { get; private set; }
     }
 }

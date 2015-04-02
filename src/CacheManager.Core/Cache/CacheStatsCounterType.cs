@@ -1,7 +1,7 @@
 ﻿namespace CacheManager.Core.Cache
 {
     /// <summary>
-    /// Definds the different counter types the cache manager supports.
+    /// Defines the different counter types the cache manager supports.
     /// </summary>
     public enum CacheStatsCounterType
     {

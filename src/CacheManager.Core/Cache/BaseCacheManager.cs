@@ -40,7 +40,7 @@ namespace CacheManager.Core.Cache
         /// <exception cref="System.ArgumentNullException">When handles is null.</exception>
         /// <remarks>
         /// This constructor is primarily used for unit testing. To construct a cache manager, use
-        /// the <see cref="CacheFactory"/>!
+        /// the <see cref="CacheFactory"/>.
         /// </remarks>
         public BaseCacheManager(ICacheManagerConfiguration configuration, params ICacheHandle<TCacheValue>[] handles)
             : this(configuration)
@@ -114,7 +114,7 @@ namespace CacheManager.Core.Cache
         /// <value>The cache handles.</value>
         /// <remarks>
         /// This list is read only, any changes to the returned list instance will not affect the
-        /// state of the cache manager instance!
+        /// state of the cache manager instance.
         /// </remarks>
         public IReadOnlyCollection<ICacheHandle<TCacheValue>> CacheHandles
         {
@@ -220,7 +220,7 @@ namespace CacheManager.Core.Cache
         /// <param name="updateValue">The function to perform the update.</param>
         /// <returns><c>True</c> if the update operation was successfully, <c>False</c> otherwise.</returns>
         /// <exception cref="System.ArgumentNullException">
-        /// If <paramref name="key"/> or <paramref name="updateValue"/> is null
+        /// If <paramref name="key"/> or <paramref name="updateValue"/> is null.
         /// </exception>
         public bool Update(string key, Func<TCacheValue, TCacheValue> updateValue)
         {
@@ -252,7 +252,7 @@ namespace CacheManager.Core.Cache
         /// <returns><c>True</c> if the update operation was successfully, <c>False</c> otherwise.</returns>
         /// <exception cref="System.ArgumentNullException">
         /// If <paramref name="key"/> or <paramref name="region"/> or <paramref name="updateValue"/>
-        /// is null
+        /// is null.
         /// </exception>
         public bool Update(string key, string region, Func<TCacheValue, TCacheValue> updateValue)
         {
@@ -284,7 +284,7 @@ namespace CacheManager.Core.Cache
         /// <returns><c>True</c> if the update operation was successfully, <c>False</c> otherwise.</returns>
         /// <exception cref="System.ArgumentNullException">
         /// If <paramref name="key"/> or <paramref name="updateValue"/> or <paramref name="config"/>
-        /// is null
+        /// is null.
         /// </exception>
         public bool Update(string key, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config)
         {
@@ -422,7 +422,7 @@ namespace CacheManager.Core.Cache
         /// <returns>
         /// <c>true</c> if the key was not already added to the cache, <c>false</c> otherwise.
         /// </returns>
-        /// <exception cref="System.ArgumentNullException">If item is null</exception>
+        /// <exception cref="System.ArgumentNullException">If item is null.</exception>
         protected internal override bool AddInternal(CacheItem<TCacheValue> item)
         {
             if (item == null)
@@ -453,7 +453,7 @@ namespace CacheManager.Core.Cache
         /// Puts a value into all cache handles. Triggers OnPut.
         /// </summary>
         /// <param name="item">The <c>CacheItem</c> to be added to the cache.</param>
-        /// <exception cref="System.ArgumentNullException">If item is null</exception>
+        /// <exception cref="System.ArgumentNullException">If item is null.</exception>
         protected internal override void PutInternal(CacheItem<TCacheValue> item)
         {
             if (item == null)
@@ -748,7 +748,7 @@ namespace CacheManager.Core.Cache
         /// <param name="key">The key.</param>
         /// <param name="region">The region.</param>
         /// <param name="excludeIndex">Index of the exclude.</param>
-        /// <exception cref="System.ArgumentOutOfRangeException">if excludeIndex is not valid</exception>
+        /// <exception cref="System.ArgumentOutOfRangeException">If excludeIndex is not valid.</exception>
         private void EvictFromOtherHandles(string key, string region, int excludeIndex)
         {
             if (excludeIndex < 0 || excludeIndex >= this.cacheHandles.Length)
@@ -846,7 +846,7 @@ namespace CacheManager.Core.Cache
         /// </summary>
         /// <param name="key">The key.</param>
         /// <param name="region">The region.</param>
-        /// <exception cref="System.ArgumentNullException">if key is null.</exception>
+        /// <exception cref="System.ArgumentNullException">If key is null.</exception>
         private void TriggerOnRemove(string key, string region)
         {
             if (string.IsNullOrWhiteSpace(key))
@@ -888,7 +888,7 @@ namespace CacheManager.Core.Cache
         }
 
         /// <summary>
-        /// Private implementation of Update
+        /// Private implementation of Update.
         /// </summary>
         /// <param name="key">The key.</param>
         /// <param name="region">The region.</param>

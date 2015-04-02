@@ -158,7 +158,7 @@ namespace CacheManager.Core.Cache
         /// <param name="owner">The owner.</param>
         /// <param name="region">The region.</param>
         /// <returns>The new <see cref="BackPlateMessage"/> instance.</returns>
-        /// <exception cref="System.ArgumentNullException">If region is null</exception>
+        /// <exception cref="System.ArgumentNullException">If region is null.</exception>
         public static BackPlateMessage ForClearRegion(string owner, string region)
         {
             if (string.IsNullOrWhiteSpace(region))

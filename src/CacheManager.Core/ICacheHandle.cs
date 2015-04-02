@@ -18,16 +18,19 @@ namespace CacheManager.Core
         /// <summary>
         /// Gets the cache handle configuration.
         /// </summary>
+        /// <value>The configuration.</value>
         ICacheHandleConfiguration Configuration { get; }
 
         /// <summary>
         /// Gets the number of items the cache handle currently maintains.
         /// </summary>
+        /// <value>The count.</value>
         int Count { get; }
 
         /// <summary>
         /// Gets the cache stats object.
         /// </summary>
+        /// <value>The stats.</value>
         CacheStats<TCacheValue> Stats { get; }
 
         /// <summary>

@@ -53,11 +53,11 @@ namespace CacheManager.Core
         /// <summary>
         /// Gets a list of cache handles currently registered within the cache manager.
         /// </summary>
+        /// <value>The cache handles.</value>
         /// <remarks>
         /// This list is read only, any changes to the returned list instance will not affect the
-        /// state of the cache manager instance!
+        /// state of the cache manager instance.
         /// </remarks>
-        /// <value>The cache handles.</value>
         IReadOnlyCollection<ICacheHandle<TCacheValue>> CacheHandles { get; }
 
         /// <summary>
@@ -95,7 +95,7 @@ namespace CacheManager.Core
         /// <param name="updateValue">The function to perform the update.</param>
         /// <returns><c>True</c> if the update operation was successfully, <c>False</c> otherwise.</returns>
         /// <exception cref="System.ArgumentNullException">
-        /// If <paramref name="key"/> or <paramref name="updateValue"/> is null
+        /// If <paramref name="key"/> or <paramref name="updateValue"/> are null.
         /// </exception>
         bool Update(string key, Func<TCacheValue, TCacheValue> updateValue);
 
@@ -124,7 +124,7 @@ namespace CacheManager.Core
         /// <returns><c>True</c> if the update operation was successfully, <c>False</c> otherwise.</returns>
         /// <exception cref="System.ArgumentNullException">
         /// If <paramref name="key"/> or <paramref name="region"/> or <paramref name="updateValue"/>
-        /// is null
+        /// are null.
         /// </exception>
         bool Update(string key, string region, Func<TCacheValue, TCacheValue> updateValue);
 
@@ -153,7 +153,7 @@ namespace CacheManager.Core
         /// <returns><c>True</c> if the update operation was successfully, <c>False</c> otherwise.</returns>
         /// <exception cref="System.ArgumentNullException">
         /// If <paramref name="key"/> or <paramref name="updateValue"/> or <paramref name="config"/>
-        /// is null
+        /// are null.
         /// </exception>
         bool Update(string key, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config);
 
@@ -183,7 +183,7 @@ namespace CacheManager.Core
         /// <returns><c>True</c> if the update operation was successfully, <c>False</c> otherwise.</returns>
         /// <exception cref="System.ArgumentNullException">
         /// If <paramref name="key"/> or <paramref name="region"/> or <paramref name="updateValue"/>
-        /// or <paramref name="config"/> is null.
+        /// or <paramref name="config"/> are null.
         /// </exception>
         bool Update(string key, string region, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config);
     }

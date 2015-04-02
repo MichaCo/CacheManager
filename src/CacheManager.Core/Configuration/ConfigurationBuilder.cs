@@ -90,6 +90,7 @@ namespace CacheManager.Core.Configuration
             {
                 throw new InvalidOperationException("No section defined with name " + sectionName);
             }
+
             return LoadFromSection<TCacheValue>(section, configName);
         }
 
@@ -139,10 +140,12 @@ namespace CacheManager.Core.Configuration
             {
                 throw new ArgumentNullException("configFileName");
             }
+
             if (string.IsNullOrWhiteSpace(sectionName))
             {
                 throw new ArgumentNullException("sectionName");
             }
+
             if (string.IsNullOrWhiteSpace(configName))
             {
                 throw new ArgumentNullException("configName");
@@ -358,6 +361,7 @@ namespace CacheManager.Core.Configuration
     /// <summary>
     /// Used to build a <c>CacheHandleConfiguration</c>.
     /// </summary>
+    /// <typeparam name="TCacheValue">The type of the cache value.</typeparam>
     /// <see cref="CacheManagerConfiguration{T}"/>
     public sealed class ConfigurationBuilderCacheHandlePart<TCacheValue>
     {
@@ -370,8 +374,10 @@ namespace CacheManager.Core.Configuration
         }
 
         /// <summary>
-        /// Adds another cache configuration. Can be used to add multiple cache handles.
+        /// Gets the parent builder part to add another cache configuration. Can be used to add
+        /// multiple cache handles.
         /// </summary>
+        /// <value>The parent builder part.</value>
         public ConfigurationBuilderCachePart<TCacheValue> And
         {
             get
@@ -385,6 +391,7 @@ namespace CacheManager.Core.Configuration
         /// <summary>
         /// Disables performance counters for this cache handle.
         /// </summary>
+        /// <returns>The builder part.</returns>
         public ConfigurationBuilderCacheHandlePart<TCacheValue> DisablePerformanceCounters()
         {
             this.Configuration.EnablePerformanceCounters = false;
@@ -395,6 +402,7 @@ namespace CacheManager.Core.Configuration
         /// Disables statistic gathering for this cache handle.
         /// <para>This also disables performance counters as statistics are required for the counters.</para>
         /// </summary>
+        /// <returns>The builder part.</returns>
         public ConfigurationBuilderCacheHandlePart<TCacheValue> DisableStatistics()
         {
             this.Configuration.EnableStatistics = false;
@@ -406,6 +414,7 @@ namespace CacheManager.Core.Configuration
         /// Enables performance counters for this cache handle.
         /// <para>This also enables statistics, as this is required for performance counters.</para>
         /// </summary>
+        /// <returns>The builder part.</returns>
         public ConfigurationBuilderCacheHandlePart<TCacheValue> EnablePerformanceCounters()
         {
             this.Configuration.EnablePerformanceCounters = true;
@@ -417,6 +426,7 @@ namespace CacheManager.Core.Configuration
         /// Enables statistic gathering for this cache handle.
         /// <para>The statistics can be accessed via cacheHandle.Stats.GetStatistic.</para>
         /// </summary>
+        /// <returns>The builder part.</returns>
         public ConfigurationBuilderCacheHandlePart<TCacheValue> EnableStatistics()
         {
             this.Configuration.EnableStatistics = true;
@@ -428,6 +438,10 @@ namespace CacheManager.Core.Configuration
         /// </summary>
         /// <param name="expirationMode">The expiration mode.</param>
         /// <param name="timeout">The timeout.</param>
+        /// <returns>The builder part.</returns>
+        /// <exception cref="System.InvalidOperationException">
+        /// If expiration mode is not set to 'None', timeout cannot be zero.
+        /// </exception>
         /// <exception cref="InvalidOperationException">
         /// Thrown if expiration mode is not 'None' and timeout is zero.
         /// </exception>
@@ -451,11 +465,20 @@ namespace CacheManager.Core.Configuration
     /// <see cref="CacheManagerConfiguration{T}"/>
     public sealed class ConfigurationBuilderCachePart<TCacheValue>
     {
+        /// <summary>
+        /// Initializes a new instance of the
+        /// <see cref="ConfigurationBuilderCachePart{TCacheValue}"/> class.
+        /// </summary>
+        /// <param name="cacheName">Name of the cache.</param>
         internal ConfigurationBuilderCachePart(string cacheName)
         {
             this.Configuration = new CacheManagerConfiguration<TCacheValue>(cacheName);
         }
 
+        /// <summary>
+        /// Gets the configuration.
+        /// </summary>
+        /// <value>The configuration.</value>
         internal CacheManagerConfiguration<TCacheValue> Configuration { get; private set; }
 
         /// <summary>
@@ -473,6 +496,7 @@ namespace CacheManager.Core.Configuration
         /// <typeparam name="TBackPlate">The type of the back plate implementation.</typeparam>
         /// <param name="name">The name.</param>
         /// <returns>The builder instance.</returns>
+        /// <exception cref="System.ArgumentNullException">If name is null.</exception>
         public ConfigurationBuilderCachePart<TCacheValue> WithBackPlate<TBackPlate>(string name) where TBackPlate : ICacheBackPlate
         {
             if (string.IsNullOrWhiteSpace(name))
@@ -488,8 +512,9 @@ namespace CacheManager.Core.Configuration
         /// <summary>
         /// Add a cache handle configuration with the required name and type attributes.
         /// </summary>
+        /// <typeparam name="TCacheHandle">The type of the cache handle implementation.</typeparam>
         /// <param name="handleName">The name to be used for the cache handle.</param>
-        /// <typeparam name="TCacheHandle">The type of the cache handle implementation</typeparam>
+        /// <returns>The builder part.</returns>
         /// <exception cref="ArgumentNullException">
         /// Thrown if handleName or handleType are null.
         /// </exception>
@@ -501,12 +526,17 @@ namespace CacheManager.Core.Configuration
         /// <summary>
         /// Add a cache handle configuration with the required name and type attributes.
         /// </summary>
+        /// <typeparam name="TCacheHandle">The type of the cache handle implementation.</typeparam>
         /// <param name="handleName">The name to be used for the cache handle.</param>
         /// <param name="isBackPlateSource">
         /// Set this to true if this cache handle should be the source of the back plate.
         /// <para>This setting will be ignored if no back plate is configured.</para>
         /// </param>
-        /// <typeparam name="TCacheHandle">The type of the cache handle implementation</typeparam>
+        /// <returns>The builder part.</returns>
+        /// <exception cref="System.ArgumentNullException">If handleName is null.</exception>
+        /// <exception cref="System.InvalidOperationException">
+        /// Only one cache handle can be the backplate's source.
+        /// </exception>
         /// <exception cref="ArgumentNullException">
         /// Thrown if handleName or handleType are null.
         /// </exception>
@@ -539,6 +569,9 @@ namespace CacheManager.Core.Configuration
         /// </summary>
         /// <param name="retries">The maximum number of retries.</param>
         /// <returns>The configuration builder.</returns>
+        /// <exception cref="System.InvalidOperationException">
+        /// Maximum number of retries must be greater than 0.
+        /// </exception>
         public ConfigurationBuilderCachePart<TCacheValue> WithMaxRetries(int retries)
         {
             if (retries <= 0)
@@ -559,6 +592,9 @@ namespace CacheManager.Core.Configuration
         /// </summary>
         /// <param name="timeoutMillis">The timeout in milliseconds.</param>
         /// <returns>The configuration builder.</returns>
+        /// <exception cref="System.InvalidOperationException">
+        /// Retry timeout must be greater than or equal to zero.
+        /// </exception>
         public ConfigurationBuilderCachePart<TCacheValue> WithRetryTimeout(int timeoutMillis)
         {
             if (timeoutMillis < 0)
@@ -575,6 +611,7 @@ namespace CacheManager.Core.Configuration
         /// <para>If nothing is set, the default will be <c>CacheUpdateMode.None</c>.</para>
         /// </summary>
         /// <param name="updateMode">The update mode.</param>
+        /// <returns>The builder part.</returns>
         /// <seealso cref="CacheUpdateMode"/>
         public ConfigurationBuilderCachePart<TCacheValue> WithUpdateMode(CacheUpdateMode updateMode)
         {

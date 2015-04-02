@@ -6,7 +6,7 @@ namespace CacheManager.Core.Cache
     /// <summary>
     /// The <c>BaseCacheHandle</c> implements all the logic which might be common for all the cache
     /// handles. It abstracts the <see cref="ICache{T}"/> and <see cref="ICacheHandle{T}"/>
-    /// interface and defines new properties and methods the implementor must use.
+    /// interface and defines new properties and methods the implementer must use.
     /// <para>
     /// Actually it is not advisable to not use <see cref="BaseCacheHandle{T}"/> and directly
     /// implement <see cref="ICacheHandle{T}"/>.
@@ -55,11 +55,13 @@ namespace CacheManager.Core.Cache
         /// <summary>
         /// Gets the cache handle configuration.
         /// </summary>
+        /// <value>The configuration.</value>
         public ICacheHandleConfiguration Configuration { get; private set; }
 
         /// <summary>
         /// Gets the number of items the cache handle currently maintains.
         /// </summary>
+        /// <value>The count.</value>
         public abstract int Count { get; }
 
         /// <summary>
@@ -71,6 +73,7 @@ namespace CacheManager.Core.Cache
         /// <summary>
         /// Gets the cache stats object.
         /// </summary>
+        /// <value>The stats.</value>
         public CacheStats<TCacheValue> Stats { get; private set; }
 
         /// <summary>
@@ -133,7 +136,7 @@ namespace CacheManager.Core.Cache
         /// </para>
         /// </summary>
         /// <param name="key">The key to update.</param>
-        /// <param name="region"></param>
+        /// <param name="region">The cache region.</param>
         /// <param name="updateValue">The function to perform the update.</param>
         /// <param name="config">The cache configuration used to specify the update behavior.</param>
         /// <returns>The update result which is interpreted by the cache manager.</returns>

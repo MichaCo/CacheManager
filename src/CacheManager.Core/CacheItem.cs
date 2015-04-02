@@ -223,7 +223,7 @@ namespace CacheManager.Core
         /// <summary>
         /// Creates a copy of the current cache item with different expiration options.
         /// </summary>
-        /// <remarks>We do not clone the cache item or value!</remarks>
+        /// <remarks>We do not clone the cache item or value.</remarks>
         /// <param name="mode">The expiration mode.</param>
         /// <param name="timeout">The expiration timeout.</param>
         /// <returns>The new instance of the cache item.</returns>
@@ -235,7 +235,7 @@ namespace CacheManager.Core
         /// <summary>
         /// Creates a copy of the current cache item with new value.
         /// </summary>
-        /// <remarks>We do not clone the cache item or value!</remarks>
+        /// <remarks>We do not clone the cache item or value.</remarks>
         /// <param name="value">The new value.</param>
         /// <returns>The new instance of the cache item.</returns>
         public CacheItem<T> WithValue(T value)

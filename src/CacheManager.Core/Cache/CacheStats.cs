@@ -34,11 +34,11 @@ namespace CacheManager.Core.Cache
         /// <param name="cacheName">Name of the cache.</param>
         /// <param name="handleName">Name of the handle.</param>
         /// <param name="enabled">
-        /// if set to <c>true</c> the stats are enabled. Otherwise any statitics and performance
+        /// If set to <c>true</c> the stats are enabled. Otherwise any statistics and performance
         /// counters will be disabled.
         /// </param>
         /// <param name="enablePerformanceCounters">
-        /// if set to <c>true</c> performance counters and statistics will be enabled.
+        /// If set to <c>true</c> performance counters and statistics will be enabled.
         /// </param>
         /// <exception cref="System.ArgumentNullException">
         /// If cacheName or handleName are null.
@@ -97,7 +97,7 @@ namespace CacheManager.Core.Cache
         /// </summary>
         /// <remarks>
         /// In multi threaded environments the counters can be changed while reading. Do not rely on
-        /// those counters as they might not be 100% accurate!
+        /// those counters as they might not be 100% accurate.
         /// </remarks>
         /// <example>
         /// <code>
@@ -159,7 +159,7 @@ namespace CacheManager.Core.Cache
         /// </summary>
         /// <remarks>
         /// In multithreaded environments the counters can be changed while reading. Do not rely on
-        /// those counters as they might not be 100% accurate!
+        /// those counters as they might not be 100% accurate.
         /// </remarks>
         /// <example>
         /// <code>
@@ -196,7 +196,7 @@ namespace CacheManager.Core.Cache
         /// Called when an item gets added to the cache.
         /// </summary>
         /// <param name="item">The item.</param>
-        /// <exception cref="System.ArgumentNullException">item</exception>
+        /// <exception cref="System.ArgumentNullException">If item is null.</exception>
         public void OnAdd(CacheItem<T> item)
         {
             if (!this.isStatsEnabled)
@@ -284,7 +284,7 @@ namespace CacheManager.Core.Cache
         }
 
         /// <summary>
-        /// Called when a Get was successfull.
+        /// Called when a Get was successful.
         /// </summary>
         /// <param name="region">The region.</param>
         public void OnHit(string region = null)
@@ -301,7 +301,7 @@ namespace CacheManager.Core.Cache
         }
 
         /// <summary>
-        /// Called when a Get was not successfull.
+        /// Called when a Get was not successful.
         /// </summary>
         /// <param name="region">The region.</param>
         public void OnMiss(string region = null)

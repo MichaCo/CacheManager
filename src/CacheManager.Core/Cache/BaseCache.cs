@@ -230,7 +230,7 @@ namespace CacheManager.Core.Cache
         /// <summary>
         /// Gets a value for the specified key and will cast it to the specified type.
         /// </summary>
-        /// <typeparam name="TOut">the type the value is converted and returned.</typeparam>
+        /// <typeparam name="TOut">The type the value is converted and returned.</typeparam>
         /// <param name="key">The key being used to identify the item within the cache.</param>
         /// <returns>The value being stored in the cache for the given <paramref name="key"/>.</returns>
         /// <exception cref="ArgumentNullException">If the <paramref name="key"/> is null.</exception>
