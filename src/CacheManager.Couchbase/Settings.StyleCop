@@ -1,0 +1,9 @@
+<StyleCopSettings Version="105">
+  <GlobalSettings>
+    <StringProperty Name="LinkedSettingsFile">..\..\Settings.StyleCop</StringProperty>
+    <StringProperty Name="MergeSettingsFiles">Linked</StringProperty>
+    <CollectionProperty Name="RecognizedWords">
+      <Value>Couchbase</Value>
+    </CollectionProperty>
+  </GlobalSettings>
+</StyleCopSettings>

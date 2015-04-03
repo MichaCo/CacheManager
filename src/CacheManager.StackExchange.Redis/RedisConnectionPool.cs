@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using CacheManager.Core.Configuration;
 using StackRedis = StackExchange.Redis;
 
 namespace CacheManager.Redis
 {
     internal class RedisConnectionPool
     {
+        private static IDictionary<string, StackRedis.ConnectionMultiplexer> connections;
+
         // connection string to connection multiplexer
         private static object connectLock = new object();
-        private static IDictionary<string, StackRedis.ConnectionMultiplexer> connections;
 
         static RedisConnectionPool()
         {

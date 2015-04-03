@@ -1,6 +1,6 @@
 ﻿namespace CacheManager.Memcached
 {
-    public enum StatusCode
+    internal enum StatusCode
     {
         Success = 0x0000,
         KeyNotFound = 0x0001,
@@ -26,7 +26,7 @@
         OperationTimeout = 0x094
     }
 
-    public static class StatusCodeExtension
+    internal static class StatusCodeExtension
     {
         public static int ToInt(this StatusCode statusCode)
         {

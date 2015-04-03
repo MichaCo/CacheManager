@@ -9,24 +9,14 @@ namespace CacheManager.Redis
     /// </summary>
     public class RedisConfigurationBuilder
     {
+        private bool allowAdmin = false;
+        private int connectionTimeout = 5000;
+        private int database = 0;
+        private IList<ServerEndPoint> endpoints = new List<ServerEndPoint>();
+        private bool isSsl = false;
         private string key = string.Empty;
         private string password = null;
-        private bool isSsl = false;
         private string sslHost = null;
-        private int connectionTimeout = 5000;
-        private IList<ServerEndPoint> endpoints = new List<ServerEndPoint>();
-        private bool allowAdmin = false;
-        private int database = 0;
-
-        /// <summary>
-        /// Creates the <see cref="RedisConfiguration"/> out of the currently specified properties, if possible.
-        /// </summary>
-        /// <returns></returns>
-        public RedisConfiguration Build()
-        {
-            return new RedisConfiguration(key, endpoints, database, password, isSsl, sslHost, connectionTimeout, allowAdmin);
-        }
-
         /// <summary>
         /// Creates a new instance of <see cref="RedisConfigurationBuilder"/> which will create 
         /// add a <see cref="RedisConfiguration"/> for the <paramref name="configurationKey"/>.
@@ -43,28 +33,21 @@ namespace CacheManager.Redis
         }
 
         /// <summary>
-        /// Sets the password for the redis server.
+        /// Creates the <see cref="RedisConfiguration"/> out of the currently specified properties, if possible.
         /// </summary>
-        /// <param name="password">The redis server password.</param>
-        /// <returns>The builder</returns>
-        public RedisConfigurationBuilder WithPassword(string password)
+        /// <returns></returns>
+        public RedisConfiguration Build()
         {
-            this.password = password;
-            return this;
+            return new RedisConfiguration(this.key, this.endpoints, this.database, this.password, this.isSsl, this.sslHost, this.connectionTimeout, this.allowAdmin);
         }
-
         /// <summary>
-        /// Enables SSL encryption.
-        /// <para>
-        /// If host is specified it will enforce a particular SSL host identity on the server's certificate.
-        /// </para>
+        /// If set to true, commands which might be risky are enabled, like Clear which will delete all 
+        /// entries in the redis database.
         /// </summary>
-        /// <param name="sslHost">The SSL host.</param>
         /// <returns>The builder</returns>
-        public RedisConfigurationBuilder WithSsl(string sslHost = null)
+        public RedisConfigurationBuilder WithAllowAdmin()
         {
-            this.isSsl = true;
-            this.sslHost = sslHost;
+            this.allowAdmin = true;
             return this;
         }
 
@@ -93,17 +76,6 @@ namespace CacheManager.Redis
         }
 
         /// <summary>
-        /// If set to true, commands which might be risky are enabled, like Clear which will delete all 
-        /// entries in the redis database.
-        /// </summary>
-        /// <returns>The builder</returns>
-        public RedisConfigurationBuilder WithAllowAdmin()
-        {
-            this.allowAdmin = true;
-            return this;
-        }
-
-        /// <summary>
         /// Adds an endpoint to the connection configuration.
         /// <para>
         /// Call this multiple times to add multiple endpoints.
@@ -116,6 +88,32 @@ namespace CacheManager.Redis
         {
             var endpoint = new ServerEndPoint(host, port);
             this.endpoints.Add(endpoint);
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the password for the redis server.
+        /// </summary>
+        /// <param name="password">The redis server password.</param>
+        /// <returns>The builder</returns>
+        public RedisConfigurationBuilder WithPassword(string password)
+        {
+            this.password = password;
+            return this;
+        }
+
+        /// <summary>
+        /// Enables SSL encryption.
+        /// <para>
+        /// If host is specified it will enforce a particular SSL host identity on the server's certificate.
+        /// </para>
+        /// </summary>
+        /// <param name="sslHost">The SSL host.</param>
+        /// <returns>The builder</returns>
+        public RedisConfigurationBuilder WithSsl(string sslHost = null)
+        {
+            this.isSsl = true;
+            this.sslHost = sslHost;
             return this;
         }
     }

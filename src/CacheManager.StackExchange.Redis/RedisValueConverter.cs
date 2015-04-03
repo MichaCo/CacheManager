@@ -5,18 +5,17 @@ using StackRedis = StackExchange.Redis;
 
 namespace CacheManager.Redis
 {
-    // this looks strange but yes it has a reason.
-    // I could use a serializer to get and set values from redis
-    // but using the "native" supported types from Stackexchange.Redis, instead of using a 
-    // serializer is up to 10x faster... so its more than worth the effort...
+    // this looks strange but yes it has a reason. I could use a serializer to get and set values
+    // from redis but using the "native" supported types from Stackexchange.Redis, instead of using
+    // a serializer is up to 10x faster... so its more than worth the effort...
 
-    // basically I have to cast the values to and from RedisValue which has implicit conversions to/from
-    // those types defined internally...
-    // I cannot simply cast to my TCacheValue, because its generic, and not defined as class or struct or anything...
-    // so there is basically no other way
+    // basically I have to cast the values to and from RedisValue which has implicit conversions
+    // to/from those types defined internally... I cannot simply cast to my TCacheValue, because its
+    // generic, and not defined as class or struct or anything... so there is basically no other way
     internal interface IRedisValueConverter<T>
     {
         StackRedis.RedisValue ToRedisValue(T value);
+
         T FromRedisValue(StackRedis.RedisValue value, string valueType);
     }
 
@@ -29,13 +28,42 @@ namespace CacheManager.Redis
         IRedisValueConverter<long>,
         IRedisValueConverter<object>
     {
+        private static readonly Type ByteArrayType = typeof(byte[]);
+        private static readonly Type StringType = typeof(string);
+        private static readonly Type IntType = typeof(int);
+        private static readonly Type DoubleType = typeof(double);
+        private static readonly Type BoolType = typeof(bool);
+        private static readonly Type LongType = typeof(long);
 
-        private static readonly Type byteArrayType = typeof(byte[]);
-        private static readonly Type stringType = typeof(string);
-        private static readonly Type intType = typeof(int);
-        private static readonly Type doubleType = typeof(double);
-        private static readonly Type boolType = typeof(bool);
-        private static readonly Type longType = typeof(long);
+        public static byte[] ToBytes(object obj)
+        {
+            if (obj == null)
+            {
+                return null;
+            }
+
+            BinaryFormatter binaryFormatter = new BinaryFormatter();
+            using (MemoryStream memoryStream = new MemoryStream())
+            {
+                binaryFormatter.Serialize(memoryStream, obj);
+                byte[] objectDataAsStream = memoryStream.ToArray();
+                return objectDataAsStream;
+            }
+        }
+
+        public static T FromBytes<T>(byte[] stream)
+        {
+            if (stream == null)
+            {
+                return default(T);
+            }
+
+            BinaryFormatter binaryFormatter = new BinaryFormatter();
+            using (MemoryStream memoryStream = new MemoryStream(stream))
+            {
+                return (T)binaryFormatter.Deserialize(memoryStream);
+            }
+        }
 
         StackRedis.RedisValue IRedisValueConverter<byte[]>.ToRedisValue(byte[] value)
         {
@@ -97,39 +125,38 @@ namespace CacheManager.Redis
             return (long)value;
         }
 
-        // for object this could be epcial because the value could be any of the supported values
-        // or any king of object...
-        // to also have the performance benefit from the known types, lets try to use it for 
-        // object based cache, too
+        // for object this could be epcial because the value could be any of the supported values or
+        // any king of object... to also have the performance benefit from the known types, lets try
+        // to use it for object based cache, too
         StackRedis.RedisValue IRedisValueConverter<object>.ToRedisValue(object value)
         {
             var valueType = value.GetType();
-            if (valueType == byteArrayType)
+            if (valueType == ByteArrayType)
             {
                 var converter = (IRedisValueConverter<byte[]>)this;
                 return converter.ToRedisValue((byte[])value);
             }
-            else if (valueType == stringType)
+            else if (valueType == StringType)
             {
                 var converter = (IRedisValueConverter<string>)this;
                 return converter.ToRedisValue((string)value);
             }
-            else if (valueType == intType)
+            else if (valueType == IntType)
             {
                 var converter = (IRedisValueConverter<int>)this;
                 return converter.ToRedisValue((int)value);
             }
-            else if (valueType == doubleType)
+            else if (valueType == DoubleType)
             {
                 var converter = (IRedisValueConverter<double>)this;
                 return converter.ToRedisValue((double)value);
             }
-            else if (valueType == boolType)
+            else if (valueType == BoolType)
             {
                 var converter = (IRedisValueConverter<bool>)this;
                 return converter.ToRedisValue((bool)value);
             }
-            else if (valueType == longType)
+            else if (valueType == LongType)
             {
                 var converter = (IRedisValueConverter<long>)this;
                 return converter.ToRedisValue((long)value);
@@ -140,68 +167,38 @@ namespace CacheManager.Redis
 
         object IRedisValueConverter<object>.FromRedisValue(StackRedis.RedisValue value, string valueType)
         {
-            if (valueType == byteArrayType.FullName)
+            if (valueType == ByteArrayType.FullName)
             {
                 var converter = (IRedisValueConverter<byte[]>)this;
                 return converter.FromRedisValue(value, valueType);
             }
-            else if (valueType == stringType.FullName)
+            else if (valueType == StringType.FullName)
             {
                 var converter = (IRedisValueConverter<string>)this;
                 return converter.FromRedisValue(value, valueType);
             }
-            else if (valueType == intType.FullName)
+            else if (valueType == IntType.FullName)
             {
                 var converter = (IRedisValueConverter<int>)this;
                 return converter.FromRedisValue(value, valueType);
             }
-            else if (valueType == doubleType.FullName)
+            else if (valueType == DoubleType.FullName)
             {
                 var converter = (IRedisValueConverter<double>)this;
                 return converter.FromRedisValue(value, valueType);
             }
-            else if (valueType == boolType.FullName)
+            else if (valueType == BoolType.FullName)
             {
                 var converter = (IRedisValueConverter<bool>)this;
                 return converter.FromRedisValue(value, valueType);
             }
-            else if (valueType == longType.FullName)
+            else if (valueType == LongType.FullName)
             {
                 var converter = (IRedisValueConverter<long>)this;
                 return converter.FromRedisValue(value, valueType);
             }
 
             return FromBytes<object>(value);
-        }
-
-        public static byte[] ToBytes(object obj)
-        {
-            if (obj == null)
-            {
-                return null;
-            }
-
-            BinaryFormatter binaryFormatter = new BinaryFormatter();
-            using (MemoryStream memoryStream = new MemoryStream())
-            {
-                binaryFormatter.Serialize(memoryStream, obj);
-                byte[] objectDataAsStream = memoryStream.ToArray();
-                return objectDataAsStream;
-            }
-        }
-
-        public static T FromBytes<T>(byte[] stream)
-        {
-            if (stream == null)
-            {
-                return default(T);
-            }
-
-            BinaryFormatter binaryFormatter = new BinaryFormatter();
-            using (MemoryStream memoryStream = new MemoryStream(stream))
-            {
-                return (T)binaryFormatter.Deserialize(memoryStream);
-            }
         }
     }
 }

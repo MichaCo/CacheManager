@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Configuration;
-using System.Globalization;
 using System.Linq;
 using System.Net;
-using System.Threading.Tasks;
 using CacheManager.Core;
 using CacheManager.Core.Cache;
 using CacheManager.Core.Configuration;
@@ -12,45 +9,75 @@ using StackRedis = StackExchange.Redis;
 
 namespace CacheManager.Redis
 {
+    /// <summary>
+    /// Cache handle implementation for Redis.
+    /// </summary>
     public class RedisCacheHandle : RedisCacheHandle<object>
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RedisCacheHandle"/> class.
+        /// </summary>
+        /// <param name="manager">The manager.</param>
+        /// <param name="configuration">The configuration.</param>
         public RedisCacheHandle(ICacheManager<object> manager, ICacheHandleConfiguration configuration)
             : base(manager, configuration)
         {
         }
     }
 
+    /// <summary>
+    /// Cache handle implementation for Redis.
+    /// </summary>
+    /// <typeparam name="TCacheValue">The type of the cache value.</typeparam>
     public class RedisCacheHandle<TCacheValue> : BaseCacheHandle<TCacheValue>
     {
-        // the object value
-        private const string HashFieldValue = "value";
+        private const string HashFieldCreated = "created";
 
         // expiration mode enum stored as int
         private const string HashFieldExpirationMode = "expiration";
 
         // expiration timeout stored as long
         private const string HashFieldExpirationTimeout = "timeout";
-        private const string HashFieldCreated = "created";
+
         private const string HashFieldType = "type";
 
-        private static readonly IRedisValueConverter<TCacheValue> valueConverter = new RedisValueConverter() as IRedisValueConverter<TCacheValue>;
+        // the object value
+        private const string HashFieldValue = "value";
+
+        private static readonly IRedisValueConverter<TCacheValue> ValueConverter = new RedisValueConverter() as IRedisValueConverter<TCacheValue>;
         private StackRedis.IDatabase database = null;
         private RedisConfiguration redisConfiguration = null;
 
-        private RedisConfiguration RedisConfiguration
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RedisCacheHandle{TCacheValue}"/> class.
+        /// </summary>
+        /// <param name="manager">The manager.</param>
+        /// <param name="configuration">The configuration.</param>
+        public RedisCacheHandle(ICacheManager<TCacheValue> manager, ICacheHandleConfiguration configuration)
+            : base(manager, configuration)
+        {
+        }
+
+        /// <summary>
+        /// Gets the number of items the cache handle currently maintains.
+        /// </summary>
+        /// <value>The count.</value>
+        /// <exception cref="System.InvalidOperationException">No active master found.</exception>
+        public override int Count
         {
             get
             {
-                if (redisConfiguration == null)
+                var server = this.GetServers(this.Connection).First(p => !p.IsSlave && p.IsConnected);
+                if (server == null)
                 {
-                    // throws an exception if not found for the name
-                    redisConfiguration = RedisConfigurations.GetConfiguration(this.Configuration.HandleName);
+                    throw new InvalidOperationException("No active master found.");
                 }
 
-                return redisConfiguration;
+                // aprox size, only size on the master..
+                return (int)server.DatabaseSize(this.RedisConfiguration.Database);
             }
         }
-        
+
         private StackRedis.ConnectionMultiplexer Connection
         {
             get
@@ -63,67 +90,53 @@ namespace CacheManager.Redis
         {
             get
             {
-                if (database == null)
+                if (this.database == null)
                 {
-                    Retry(() =>
+                    this.Retry(() =>
                     {
-                        database = Connection.GetDatabase(this.RedisConfiguration.Database);
+                        this.database = this.Connection.GetDatabase(this.RedisConfiguration.Database);
 
-                        database.Ping();
+                        this.database.Ping();
                     });
                 }
 
-                return database;
+                return this.database;
             }
         }
 
-        public RedisCacheHandle(ICacheManager<TCacheValue> manager, ICacheHandleConfiguration configuration)
-            : base(manager, configuration)
-        {
-        }
-
-        protected override void Dispose(bool disposeManaged)
-        {
-            base.Dispose(disposeManaged);
-        }
-
-        public override int Count
+        private RedisConfiguration RedisConfiguration
         {
             get
             {
-                var server = this.GetServers(Connection).First(p => !p.IsSlave && p.IsConnected);
-                if (server == null)
+                if (this.redisConfiguration == null)
                 {
-                    throw new InvalidOperationException("No active master found.");
+                    // throws an exception if not found for the name
+                    this.redisConfiguration = RedisConfigurations.GetConfiguration(this.Configuration.HandleName);
                 }
 
-                // aprox size, only size on the master..
-                return (int)server.DatabaseSize(this.RedisConfiguration.Database);
+                return this.redisConfiguration;
             }
         }
 
+        /// <summary>
+        /// Clears this cache, removing all items in the base cache and all regions.
+        /// </summary>
         public override void Clear()
         {
-            foreach (var server in this.GetServers(Connection)
+            foreach (var server in this.GetServers(this.Connection)
                 .Where(p => !p.IsSlave))
             {
                 server.FlushDatabase(this.RedisConfiguration.Database);
             }
         }
 
-        public IEnumerable<StackRedis.IServer> GetServers(StackRedis.ConnectionMultiplexer muxer)
-        {
-            EndPoint[] endpoints = muxer.GetEndPoints();
-            foreach (var endpoint in endpoints)
-            {
-                var server = muxer.GetServer(endpoint);
-                yield return server;
-            }
-        }
-
+        /// <summary>
+        /// Clears the cache region, removing all items from the specified <paramref name="region"/> only.
+        /// </summary>
+        /// <param name="region">The cache region.</param>
         public override void ClearRegion(string region)
         {
-            Retry(() =>
+            this.Retry(() =>
             {
                 // we are storing all keys stored in the region in the hash for key=region
                 var hashKeys = this.Database.HashKeys(region);
@@ -139,20 +152,237 @@ namespace CacheManager.Redis
                 this.Database.KeyDelete(region);
             });
         }
-        
-        // Add call is synced, so might be slower than put which is fire and forget
-        // but we want to retun true|false if the operation was successfully or not. And always returning true could be missleading if the 
-        // item already exists
+
+        /// <summary>
+        /// Gets the servers.
+        /// </summary>
+        /// <param name="muxer">The muxer.</param>
+        /// <returns>The list of servers.</returns>
+        public IEnumerable<StackRedis.IServer> GetServers(StackRedis.ConnectionMultiplexer muxer)
+        {
+            EndPoint[] endpoints = muxer.GetEndPoints();
+            foreach (var endpoint in endpoints)
+            {
+                var server = muxer.GetServer(endpoint);
+                yield return server;
+            }
+        }
+
+        /// <summary>
+        /// Updates an existing key in the cache.
+        /// <para>
+        /// The cache manager will make sure the update will always happen on the most recent version.
+        /// </para>
+        /// <para>
+        /// If version conflicts occur, if for example multiple cache clients try to write the same
+        /// key, and during the update process, someone else changed the value for the key, the
+        /// cache manager will retry the operation.
+        /// </para>
+        /// <para>
+        /// The <paramref name="updateValue"/> function will get invoked on each retry with the most
+        /// recent value which is stored in cache.
+        /// </para>
+        /// </summary>
+        /// <param name="key">The key to update.</param>
+        /// <param name="updateValue">The function to perform the update.</param>
+        /// <param name="config">The cache configuration used to specify the update behavior.</param>
+        /// <returns>The update result which is interpreted by the cache manager.</returns>
+        /// <remarks>
+        /// If the cache does not use a distributed cache system. Update is doing exactly the same
+        /// as Get plus Put.
+        /// </remarks>
+        public override UpdateItemResult Update(string key, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config)
+        {
+            return this.Update(key, null, updateValue, config);
+        }
+
+        /// <summary>
+        /// Updates an existing key in the cache.
+        /// <para>
+        /// The cache manager will make sure the update will always happen on the most recent version.
+        /// </para>
+        /// <para>
+        /// If version conflicts occur, if for example multiple cache clients try to write the same
+        /// key, and during the update process, someone else changed the value for the key, the
+        /// cache manager will retry the operation.
+        /// </para>
+        /// <para>
+        /// The <paramref name="updateValue"/> function will get invoked on each retry with the most
+        /// recent value which is stored in cache.
+        /// </para>
+        /// </summary>
+        /// <param name="key">The key to update.</param>
+        /// <param name="region">The cache region.</param>
+        /// <param name="updateValue">The function to perform the update.</param>
+        /// <param name="config">The cache configuration used to specify the update behavior.</param>
+        /// <returns>The update result which is interpreted by the cache manager.</returns>
+        /// <remarks>
+        /// If the cache does not use a distributed cache system. Update is doing exactly the same
+        /// as Get plus Put.
+        /// </remarks>
+        public override UpdateItemResult Update(string key, string region, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config)
+        {
+            var committed = false;
+            var tries = 0;
+            var fullKey = this.GetKey(key, region);
+
+            return this.Retry(() =>
+            {
+                do
+                {
+                    tries++;
+
+                    var item = this.GetCacheItemInternal(key, region);
+
+                    if (item == null)
+                    {
+                        return new UpdateItemResult(false, false, 1);
+                    }
+
+                    var oldValue = ToRedisValue(item.Value);
+
+                    var tran = this.Database.CreateTransaction();
+                    tran.AddCondition(StackRedis.Condition.HashEqual(fullKey, HashFieldValue, oldValue));
+
+                    // run update
+                    var newValue = updateValue(item.Value);
+
+                    tran.HashSetAsync(fullKey, HashFieldValue, ToRedisValue(newValue));
+
+                    committed = tran.Execute();
+
+                    if (committed)
+                    {
+                        return new UpdateItemResult(tries > 1, true, tries);
+                    }
+                }
+                while (committed == false && tries <= config.MaxRetries);
+
+                return new UpdateItemResult(false, false, 1);
+            });
+        }
+
+        /// <summary>
+        /// Adds a value to the cache.
+        /// <para>
+        /// Add call is synced, so might be slower than put which is fire and forget but we want to
+        /// return true|false if the operation was successfully or not. And always returning true
+        /// could be misleading if the item already exists
+        /// </para>
+        /// </summary>
+        /// <param name="item">The <c>CacheItem</c> to be added to the cache.</param>
+        /// <returns>
+        /// <c>true</c> if the key was not already added to the cache, <c>false</c> otherwise.
+        /// </returns>
         protected override bool AddInternalPrepared(CacheItem<TCacheValue> item)
         {
             return this.Set(item, StackRedis.When.NotExists, true);
         }
 
+        /// <summary>
+        /// Performs application-defined tasks associated with freeing, releasing, or resetting
+        /// unmanaged resources.
+        /// </summary>
+        /// <param name="disposeManaged">Indicator if managed resources should be released.</param>
+        protected override void Dispose(bool disposeManaged)
+        {
+            base.Dispose(disposeManaged);
+        }
+
+        /// <summary>
+        /// Gets a <c>CacheItem</c> for the specified key.
+        /// </summary>
+        /// <param name="key">The key being used to identify the item within the cache.</param>
+        /// <returns>The <c>CacheItem</c>.</returns>
+        protected override CacheItem<TCacheValue> GetCacheItemInternal(string key)
+        {
+            return this.GetCacheItemInternal(key, null);
+        }
+
+        /// <summary>
+        /// Gets a <c>CacheItem</c> for the specified key.
+        /// </summary>
+        /// <param name="key">The key being used to identify the item within the cache.</param>
+        /// <param name="region">The cache region.</param>
+        /// <returns>The <c>CacheItem</c>.</returns>
+        protected override CacheItem<TCacheValue> GetCacheItemInternal(string key, string region)
+        {
+            return this.Retry(() =>
+            {
+                var fullKey = this.GetKey(key, region);
+
+                // getting both, the value and, if exists, the expiration mode. if that one is set
+                // and it is sliding, we also retrieve the timeout later
+                var values = this.Database.HashGet(
+                    fullKey,
+                    new StackRedis.RedisValue[]
+                    {
+                        HashFieldValue,
+                        HashFieldExpirationMode,
+                        HashFieldExpirationTimeout,
+                        HashFieldCreated,
+                        HashFieldType
+                    });
+
+                // the first item stores the value
+                var item = values[0];
+                var expirationModeItem = values[1];
+                var timeoutItem = values[2];
+                var createdItem = values[3];
+                var valueTypeItem = values[4];
+
+                if (!item.HasValue || !valueTypeItem.HasValue /* partially removed? */
+                    || item.IsNullOrEmpty || item.IsNull)
+                {
+                    return null;
+                }
+
+                var expirationMode = ExpirationMode.None;
+                var expirationTimeout = default(TimeSpan);
+
+                // checking if the expiration mode is set on the hash
+                if (expirationModeItem.HasValue && timeoutItem.HasValue)
+                {
+                    expirationMode = (ExpirationMode)(int)expirationModeItem;
+                    expirationTimeout = TimeSpan.FromTicks((long)timeoutItem);
+                }
+
+                var value = FromRedisValue(item, (string)valueTypeItem);
+
+                var cacheItem = string.IsNullOrWhiteSpace(region) ?
+                        new CacheItem<TCacheValue>(key, value, expirationMode, expirationTimeout) :
+                        new CacheItem<TCacheValue>(key, value, region, expirationMode, expirationTimeout);
+
+                if (createdItem.HasValue)
+                {
+                    cacheItem.CreatedUtc = new DateTime((long)createdItem);
+                }
+
+                // update sliding
+                if (expirationMode == ExpirationMode.Sliding && expirationTimeout != default(TimeSpan))
+                {
+                    this.Database.KeyExpire(fullKey, cacheItem.ExpirationTimeout, StackRedis.CommandFlags.FireAndForget);
+                }
+
+                return cacheItem;
+            });
+        }
+
+        /// <summary>
+        /// Puts the <paramref name="item"/> into the cache. If the item exists it will get updated
+        /// with the new value. If the item doesn't exist, the item will be added to the cache.
+        /// </summary>
+        /// <param name="item">The <c>CacheItem</c> to be added to the cache.</param>
         protected override void PutInternal(CacheItem<TCacheValue> item)
         {
             base.PutInternal(item);
         }
 
+        /// <summary>
+        /// Puts the <paramref name="item"/> into the cache. If the item exists it will get updated
+        /// with the new value. If the item doesn't exist, the item will be added to the cache.
+        /// </summary>
+        /// <param name="item">The <c>CacheItem</c> to be added to the cache.</param>
         protected override void PutInternalPrepared(CacheItem<TCacheValue> item)
         {
             // try to set the item
@@ -165,9 +395,94 @@ namespace CacheManager.Redis
             }
         }
 
+        /// <summary>
+        /// Removes a value from the cache for the specified key.
+        /// </summary>
+        /// <param name="key">The key being used to identify the item within the cache.</param>
+        /// <returns>
+        /// <c>true</c> if the key was found and removed from the cache, <c>false</c> otherwise.
+        /// </returns>
+        protected override bool RemoveInternal(string key)
+        {
+            return this.RemoveInternal(key, null);
+        }
+
+        /// <summary>
+        /// Removes a value from the cache for the specified key.
+        /// </summary>
+        /// <param name="key">The key being used to identify the item within the cache.</param>
+        /// <param name="region">The cache region.</param>
+        /// <returns>
+        /// <c>true</c> if the key was found and removed from the cache, <c>false</c> otherwise.
+        /// </returns>
+        protected override bool RemoveInternal(string key, string region)
+        {
+            return this.Retry(() =>
+            {
+                // clean up region
+                if (!string.IsNullOrWhiteSpace(region))
+                {
+                    this.Database.HashDelete(region, key, StackRedis.CommandFlags.FireAndForget);
+                }
+
+                // remove key
+                var fullKey = this.GetKey(key, region);
+                var result = this.Database.KeyDelete(fullKey);
+
+                return result;
+            });
+        }
+
+        private static TCacheValue FromRedisValue(StackRedis.RedisValue value, string valueType)
+        {
+            if (value.IsNull || value.IsNullOrEmpty || !value.HasValue)
+            {
+                return default(TCacheValue);
+            }
+
+            if (ValueConverter != null)
+            {
+                return ValueConverter.FromRedisValue(value, valueType);
+            }
+
+            return RedisValueConverter.FromBytes<TCacheValue>(value);
+        }
+
+        private static StackRedis.RedisValue ToRedisValue(TCacheValue value)
+        {
+            if (ValueConverter != null)
+            {
+                return ValueConverter.ToRedisValue(value);
+            }
+
+            return (StackRedis.RedisValue)RedisValueConverter.ToBytes(value);
+        }
+
+        private string GetKey(string key, string region = null)
+        {
+            var fullKey = key;
+
+            if (!string.IsNullOrWhiteSpace(region))
+            {
+                fullKey = string.Concat(region, ":", key);
+            }
+
+            return fullKey;
+        }
+
+        private T Retry<T>(Func<T> retryme)
+        {
+            return RetryHelper.Retry(retryme, this.Manager.Configuration.RetryTimeout, this.Manager.Configuration.MaxRetries);
+        }
+
+        private void Retry(Action retryme)
+        {
+            var result = this.Retry<bool>(() => { retryme(); return true; });
+        }
+
         private bool Set(CacheItem<TCacheValue> item, StackRedis.When when, bool sync = false)
         {
-            return Retry(() =>
+            return this.Retry(() =>
             {
                 TimeSpan? expiration = item.ExpirationTimeout;
                 if (item.ExpirationMode == ExpirationMode.None)
@@ -177,7 +492,6 @@ namespace CacheManager.Redis
 
                 var fullKey = this.GetKey(item.Key, item.Region);
                 var value = ToRedisValue(item.Value);
-
 
                 StackRedis.HashEntry[] metaValues = new[]
                 {
@@ -210,9 +524,9 @@ namespace CacheManager.Redis
                         this.Database.HashSet(item.Region, item.Key, "regionKey", when, StackRedis.CommandFlags.FireAndForget);
                     }
 
-                    // set the additional fields in case sliding expiration should be used
-                    // in this case we have to store the expiration mode and timeout on the hash, too
-                    // so that we can extend the expiration period every time we do a get
+                    // set the additional fields in case sliding expiration should be used in this
+                    // case we have to store the expiration mode and timeout on the hash, too so
+                    // that we can extend the expiration period every time we do a get
                     if (metaValues != null)
                     {
                         this.Database.HashSet(fullKey, metaValues, flags);
@@ -226,188 +540,6 @@ namespace CacheManager.Redis
 
                 return setResult;
             });
-        }
-
-        public override UpdateItemResult Update(string key, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config)
-        {
-            return this.Update(key, null, updateValue, config);
-        }
-
-        public override UpdateItemResult Update(string key, string region, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config)
-        {
-            var committed = false;
-            var tries = 0;
-            var fullKey = this.GetKey(key, region);
-
-            return Retry(() =>
-            {
-                do
-                {
-                    tries++;
-                    
-                    var item = this.GetCacheItemInternal(key, region);
-
-                    if (item == null)
-                    {
-                        return new UpdateItemResult(false, false, 1);
-                    }
-
-                    var oldValue = ToRedisValue(item.Value);
-
-                    var tran = this.Database.CreateTransaction();
-                    tran.AddCondition(StackRedis.Condition.HashEqual(fullKey, HashFieldValue, oldValue));
-
-                    // run update
-                    var newValue = updateValue(item.Value);
-                    
-                    tran.HashSetAsync(fullKey, HashFieldValue, ToRedisValue(newValue));
-
-                    committed = tran.Execute();
-
-                    if (committed)
-                    {
-                        return new UpdateItemResult(tries > 1, true, tries);
-                    }
-                } while (committed == false && tries <= config.MaxRetries);
-
-                return new UpdateItemResult(false, false, 1);
-            });
-        }
-
-        protected override CacheItem<TCacheValue> GetCacheItemInternal(string key)
-        {
-            return GetCacheItemInternal(key, null);
-        }
-
-        protected override CacheItem<TCacheValue> GetCacheItemInternal(string key, string region)
-        {
-            return Retry(() =>
-            {
-                var fullKey = this.GetKey(key, region);
-
-                // getting both, the value and, if exists, the expiration mode. 
-                // if that one is set and it is sliding, we also retrieve the timeout later
-                var values = this.Database.HashGet(fullKey, new StackRedis.RedisValue[] { 
-                    HashFieldValue, 
-                    HashFieldExpirationMode,
-                    HashFieldExpirationTimeout,
-                    HashFieldCreated,
-                    HashFieldType
-                });
-
-                // the first item stores the value
-                var item = values[0]; 
-                var expirationModeItem = values[1];
-                var timeoutItem = values[2];
-                var createdItem = values[3];
-                var valueTypeItem = values[4];
-                
-                if (!item.HasValue || !valueTypeItem.HasValue /* partially removed? */
-                    || item.IsNullOrEmpty || item.IsNull)
-                {
-                    return null;
-                }
-
-                var expirationMode = ExpirationMode.None;
-                var expirationTimeout = default(TimeSpan);
-
-                // checking if the expiration mode is set on the hash
-                
-                if (expirationModeItem.HasValue && timeoutItem.HasValue)
-                {
-                    expirationMode = (ExpirationMode)(int)expirationModeItem;
-                    expirationTimeout = TimeSpan.FromTicks((long)timeoutItem);
-                }
-
-                var value = FromRedisValue(item, (string)valueTypeItem);
-
-                var cacheItem = string.IsNullOrWhiteSpace(region) ?
-                        new CacheItem<TCacheValue>(key, value, expirationMode, expirationTimeout) :
-                        new CacheItem<TCacheValue>(key, value, region, expirationMode, expirationTimeout);
-
-                if (createdItem.HasValue)
-                {
-                    cacheItem.CreatedUtc = new DateTime((long)createdItem);
-                }
-
-                // update sliding
-                if (expirationMode == ExpirationMode.Sliding && expirationTimeout != default(TimeSpan))
-                {
-                    this.Database.KeyExpire(fullKey, cacheItem.ExpirationTimeout, StackRedis.CommandFlags.FireAndForget);
-                }
-
-                return cacheItem;
-            });
-        }
-
-        protected override bool RemoveInternal(string key)
-        {
-            return RemoveInternal(key, null);
-        }
-
-        protected override bool RemoveInternal(string key, string region)
-        {
-            return Retry(() =>
-            {
-                // clean up region
-                if (!string.IsNullOrWhiteSpace(region))
-                {
-                    this.Database.HashDelete(region, key, StackRedis.CommandFlags.FireAndForget);
-                }
-
-                // remove key
-                var fullKey = this.GetKey(key, region);
-                var result = this.Database.KeyDelete(fullKey);
-                
-                return result;
-            });
-        }
-
-        private string GetKey(string key, string region = null)
-        {
-            var fullKey = key;
-
-            if (!string.IsNullOrWhiteSpace(region))
-            {
-                fullKey = string.Concat(region, ":", key);
-            }
-
-            return fullKey;
-        }
-
-        private T Retry<T>(Func<T> retryme)
-        {
-            return RetryHelper.Retry(retryme, this.Manager.Configuration.RetryTimeout, this.Manager.Configuration.MaxRetries);
-        }
-
-        private void Retry(Action retryme)
-        {
-            var result = Retry<bool>(() => { retryme(); return true; });
-        }
-
-        private static StackRedis.RedisValue ToRedisValue(TCacheValue value)
-        {
-            if(valueConverter != null)
-            {
-                return valueConverter.ToRedisValue(value);
-            }
-            
-            return (StackRedis.RedisValue)RedisValueConverter.ToBytes(value);
-        }
-
-        private static TCacheValue FromRedisValue(StackRedis.RedisValue value, string valueType)
-        {
-            if (value.IsNull || value.IsNullOrEmpty || !value.HasValue)
-            {
-                return default(TCacheValue);
-            }
-                        
-            if(valueConverter != null)
-            {
-                return valueConverter.FromRedisValue(value, valueType);
-            }
-
-            return RedisValueConverter.FromBytes<TCacheValue>(value);
         }
     }
 }

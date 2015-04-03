@@ -6,10 +6,20 @@ using System.IO;
 
 namespace CacheManager.Redis
 {
+    /// <summary>
+    /// Manages redis client configurations for the cache handle.
+    /// <para>
+    /// Configurations will be added by the cache configuration builder/factory or the configuration
+    /// loader. The cache handle will pick up the configuration matching the handle's name.
+    /// </para>
+    /// </summary>
     public static class RedisConfigurations
     {
         private static Dictionary<string, RedisConfiguration> configurations = new Dictionary<string, RedisConfiguration>();
 
+        /// <summary>
+        /// Initializes the <see cref="RedisConfigurations"/> class.
+        /// </summary>
         static RedisConfigurations()
         {
             // load defaults
@@ -20,6 +30,11 @@ namespace CacheManager.Redis
             }
         }
 
+        /// <summary>
+        /// Adds the configuration.
+        /// </summary>
+        /// <param name="configuration">The configuration.</param>
+        /// <exception cref="System.ArgumentNullException">configuration</exception>
         public static void AddConfiguration(RedisConfiguration configuration)
         {
             if (configuration == null)
@@ -33,6 +48,15 @@ namespace CacheManager.Redis
             }
         }
 
+        /// <summary>
+        /// Gets the configuration.
+        /// </summary>
+        /// <param name="id">The identifier.</param>
+        /// <returns></returns>
+        /// <exception cref="System.ArgumentNullException">If id is null.</exception>
+        /// <exception cref="System.InvalidOperationException">
+        /// If no configuration was added for the id.
+        /// </exception>
         public static RedisConfiguration GetConfiguration(string id)
         {
             if (string.IsNullOrWhiteSpace(id))
@@ -48,6 +72,17 @@ namespace CacheManager.Redis
             return configurations[id];
         }
 
+        /// <summary>
+        /// Loads the configuration.
+        /// </summary>
+        /// <param name="configFileName">Name of the configuration file.</param>
+        /// <param name="sectionName">Name of the section.</param>
+        /// <exception cref="System.ArgumentNullException">
+        /// If configFileName or sectionName are null.
+        /// </exception>
+        /// <exception cref="System.InvalidOperationException">
+        /// If the configuration file could not be found.
+        /// </exception>
         public static void LoadConfiguration(string configFileName, string sectionName)
         {
             if (string.IsNullOrWhiteSpace(configFileName))
@@ -82,6 +117,11 @@ namespace CacheManager.Redis
             LoadConfiguration(section);
         }
 
+        /// <summary>
+        /// Loads the configuration.
+        /// </summary>
+        /// <param name="section">The section.</param>
+        /// <exception cref="System.ArgumentNullException">If section is null.</exception>
         public static void LoadConfiguration(RedisConfigurationSection section)
         {
             if (section == null)
@@ -120,6 +160,11 @@ namespace CacheManager.Redis
             }
         }
 
+        /// <summary>
+        /// Loads the configuration.
+        /// </summary>
+        /// <param name="sectionName">Name of the section.</param>
+        /// <exception cref="System.ArgumentNullException">If sectionName is null.</exception>
         public static void LoadConfiguration(string sectionName)
         {
             if (string.IsNullOrWhiteSpace(sectionName))
@@ -131,6 +176,9 @@ namespace CacheManager.Redis
             LoadConfiguration(section);
         }
 
+        /// <summary>
+        /// Loads the configuration from the default section name 'cacheManager.Redis'.
+        /// </summary>
         public static void LoadConfiguration()
         {
             LoadConfiguration(RedisConfigurationSection.DefaultSectionName);

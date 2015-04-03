@@ -5,15 +5,27 @@ using Couchbase;
 using Couchbase.Configuration.Client;
 using Couchbase.Configuration.Client.Providers;
 using Couchbase.Core;
-using Couchbase.Core.Buckets;
 
 namespace CacheManager.Couchbase
 {
+    /// <summary>
+    /// Manages configurations for the couchbase cache handle.
+    /// <para>
+    /// The configurations will be added by the configuration builder or configuration loader and
+    /// then referenced via handle's name.
+    /// </para>
+    /// </summary>
     public static class CouchbaseConfigurationManager
     {
         private static Dictionary<string, ClientConfiguration> configurations = new Dictionary<string, ClientConfiguration>();
         private static Dictionary<string, IBucket> buckets = new Dictionary<string, IBucket>();
 
+        /// <summary>
+        /// Adds the configuration.
+        /// </summary>
+        /// <param name="name">The name.</param>
+        /// <param name="configuration">The configuration.</param>
+        /// <exception cref="System.ArgumentNullException">If name or configuration are null.</exception>
         public static void AddConfiguration(string name, ClientConfiguration configuration)
         {
             if (string.IsNullOrWhiteSpace(name))
@@ -31,6 +43,15 @@ namespace CacheManager.Couchbase
             }
         }
 
+        /// <summary>
+        /// Gets the configuration.
+        /// </summary>
+        /// <param name="name">The name.</param>
+        /// <returns>The configuration.</returns>
+        /// <exception cref="System.ArgumentNullException">If name is null.</exception>
+        /// <exception cref="System.InvalidOperationException">
+        /// If no configuration or section can be found for configuration.
+        /// </exception>
         public static ClientConfiguration GetConfiguration(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
@@ -48,28 +69,50 @@ namespace CacheManager.Couchbase
             {
                 throw new InvalidOperationException("No configuration or section found for configuration " + name + ".");
             }
-            
+
             var clientConfiguration = new ClientConfiguration(section);
             configurations.Add(name, clientConfiguration);
             return clientConfiguration;
         }
 
+        /// <summary>
+        /// Gets the bucket configuration.
+        /// </summary>
+        /// <param name="clientConfiguration">The client configuration.</param>
+        /// <param name="bucketName">Name of the bucket.</param>
+        /// <returns>The configuration for the named bucket.</returns>
+        /// <exception cref="System.InvalidOperationException">No bucket with the name found.</exception>
         public static BucketConfiguration GetBucketConfiguration(ClientConfiguration clientConfiguration, string bucketName)
         {
             BucketConfiguration configuration;
             if (!clientConfiguration.BucketConfigs.TryGetValue(bucketName, out configuration))
             {
-                throw new InvalidOperationException("Not bucket with bucket name " + bucketName + " found.");
+                throw new InvalidOperationException("No bucket with bucket name " + bucketName + " found.");
             }
 
             return configuration;
         }
 
+        /// <summary>
+        /// Gets a couchbase cluster from configuration.
+        /// </summary>
+        /// <param name="clientConfiguration">The client configuration.</param>
+        /// <returns>The couchbase cluster.</returns>
         public static Cluster GetCluster(ClientConfiguration clientConfiguration)
         {
             return new Cluster(clientConfiguration);
         }
 
+        /// <summary>
+        /// Gets a couchbase bucket from configuration.
+        /// </summary>
+        /// <param name="clientConfiguration">The client configuration.</param>
+        /// <param name="configurationName">Name of the configuration.</param>
+        /// <param name="bucketName">Name of the bucket.</param>
+        /// <returns>The couchbase bucket.</returns>
+        /// <exception cref="System.ArgumentNullException">
+        /// If bucketName or clientConfiguration are null.
+        /// </exception>
         internal static IBucket GetBucket(ClientConfiguration clientConfiguration, string configurationName, string bucketName)
         {
             if (string.IsNullOrWhiteSpace(bucketName))

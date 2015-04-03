@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using StackRedis = StackExchange.Redis;
 
@@ -39,7 +37,8 @@ namespace CacheManager.Redis
                         return false;
                     });
                 }
-            } while (tries < retries);
+            } 
+            while (tries < retries);
 
             return default(T);
         }
