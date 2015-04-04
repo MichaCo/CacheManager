@@ -21,8 +21,8 @@ The developer can opt-in to those features only if needed.
 | [CacheManager.Web] [Web.nuget]  | - | x
 | [CacheManager.Couchbase] [Couchbase.nuget]  | - | x
 
-## Features in Version: [0.4.3][releases]
-[![Build Status](https://travis-ci.org/MichaCo/CacheManager.svg?branch=master)](https://travis-ci.org/MichaCo/CacheManager) [Html documentation](http://michaco.github.io/Documentation/CacheManager/Help/html)
+## Features in Version: [0.4.3][releases] [![Build Status](https://travis-ci.org/MichaCo/CacheManager.svg?branch=master)](https://travis-ci.org/MichaCo/CacheManager) 
+[See html documentation](http://michaco.github.io/Documentation/CacheManager/Help/html)
 
 * One common interface for handling different caching technologies: `ICache<T>`
 * Configurable via app/web.config or by code.
