@@ -71,9 +71,3 @@ OnGet, OnAdd, OnPut, OnRemove, OnClear, OnClearRegion
 [Memcached.nuget]: https://www.nuget.org/packages/CacheManager.Memcached
 [Web.nuget]: https://www.nuget.org/packages/CacheManager.Web
 [Couchbase.nuget]: https://www.nuget.org/packages/CacheManager.Couchbase
-
-
- 
- 
- 
- 
