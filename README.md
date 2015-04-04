@@ -7,14 +7,13 @@ With CacheManager it is possible to implement multiple layers of caching,
 e.g. in-process caching in front of a distributed cache, in just a few lines of code.
 
 CacheManager is not just an interface to unify the programming model for various cache providers, which will 
-make it very easy to change the caching strategy later on in a project.  
-It also offers additional features, like cache invalidation for above mentioned multi layer cache scenario for example.  
+make it very easy to change the caching strategy later on in a project. It also offers additional features, like cache invalidation for above mentioned multi layer cache scenario for example. 
 The developer can opt-in to those features only if needed.
 
 ## CacheManager Nuget Packages
 
 | Package Name | .Net 4.0 | .Net 4.5
-----------|----------|------------
+----------| :----------: | :------------:
 | [CacheManager.Core] [Core.nuget] | x | x
 | [CacheManager.StackExchange.Redis] [Redis.nuget] | x | x 
 | [CacheManager.SystemRuntimeCaching] [SystemRuntimeCaching.nuget]  | x | x 
