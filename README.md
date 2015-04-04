@@ -2,18 +2,18 @@
 
 [![Build Status](https://travis-ci.org/MichaCo/CacheManager.svg?branch=master)](https://travis-ci.org/MichaCo/CacheManager)
 
-The purpose of this project is 
+The main goal of the CacheManager package is to make developer's life easier to handle even very complex caching scenarios.  
+With CacheManager it is possible to implement multiple layers of caching, 
+e.g. in-process caching in front of a distributed cache, in just a few lines of code.
 
-* to define a common interface for different cache providers and techniques
-* to create an abstraction layer between your application logic and cache to make it easier to switch different cache strategies later 
-For example starting with a simple in-process cache and switching to a more complex distributed cache layer later.
-* to enable the use of multiple caches layers on top of each other.   
-A common scenario would be using a distributed cache, and to make read access faster on each node, have an in-process cache on top of it.  
-* additional features like region support, events, cross server invalidation/sync, statistics, performance counters etc...
+CacheManager is not just an interface to unify the programming model for various cache providers, which will 
+make it very easy to change the caching strategy later on in a project.  
+It also offers additional features, like cache invalidation for above mentioned multi layer cache scenario for example.  
+The developer can opt-in to those features only if needed.
 
-## Packages
+## CacheManager Nuget Packages
 
-| Package | .Net 4.0 | .Net 4.5
+| Package Name | .Net 4.0 | .Net 4.5
 ----------|----------|------------
 | [CacheManager.Core] [Core.nuget] | x | x
 | [CacheManager.StackExchange.Redis] [Redis.nuget] | x | x 
@@ -24,29 +24,9 @@ A common scenario would be using a distributed cache, and to make read access fa
 | [CacheManager.Web] [Web.nuget]  | - | x
 | [CacheManager.Couchbase] [Couchbase.nuget]  | - | x
 
-## Getting Started
-The easiest way to get started is to
-
-* Create an empty console application in Visual Studio
-* Install the [CacheManager.SystemRuntimeCaching](https://www.nuget.org/packages/CacheManager.SystemRuntimeCaching ) nuget package (which will also install the core package).
-The Nuget will update the app.config of your project and will add the available handles and a sample cache configuration.
-
-Now you can use the configured cache "myCache" by loading the configuration using the `CacheFactory`.
-As you can see, the name of the cacheManager/managers/cache element within app.config must match with the parameter you pass to `CacheFactory.FromConfiguration`.
-
-    class Program
-    {
-        static void Main(string[] args)
-        {
-            var cache = CacheFactory.FromConfiguration<object>("myCache");
-            cache.Add("key", "value");
-            var value = cache.Get("key");
-        }
-    }
-
 ## Implemented Features
 
-### Version 0.4
+### Current Version: [0.4.3][releases]
 
 * One common interface for handling different caching technologies: `ICache<T>`
 * Configurable via app/web.config or by code.
@@ -69,16 +49,23 @@ CacheManager will synchronize those layers for you.
         * None: No update across the cache handles on Get
         * Up: Updates the handles "above"
         * All: Updates/Adds the item to all handles
-* **Cache Regions**: Even if some cache systems do not support or implement cache regions, the CacheManager implements the mechanism for you.
-* **Statistics**: Counters for all kind of cache actions, including counters per region
+* **Expiration**: It is possible to configure the expiration per cache manager, for each cache handle within the manager individually or even overrule the configuration on cache item level.
+The following are the supported expiration modes:
+    * Sliding expiration: On cache hit, the cache item expiration timeout will be extended by the configured amount.
+    * Absolute expiration: The cache item will expire after the configured timeout.
+* **Cache Regions**: Even if some cache systems do not support or implement cache regions, the CacheManager implements the mechanism.
+This can be used to for example group elements and remove all of them at once.
+* **Statistics**: Counters for all kind of cache actions.
 * **Performance Counters**: To be able to inspect certain numbers with perfmon, CacheManager supports performance counters per instance of the manager and per cache handle.
 * **Event System**: CacheManager triggers events for common cache actions:
 OnGet, OnAdd, OnPut, OnRemove, OnClear, OnClearRegion
-* **System.Web.OutputCache** implementation to use CacheManager as OutputCache provider which makes the cache extremly flexible, for example by using a distributed cache like Redis across many web servers.
+* **System.Web.OutputCache** implementation to use CacheManager as OutputCache provider which makes the OutputCache extremly flexible, for example by using a distributed cache like Redis across many web servers.
 * **Cache clients synchronization** 
-    * Implemented with the Redis cache handle using Redis' pub/sub
+    * Implemented with the Redis pub/sub feature
     * (Other implementations without Redis might be an option for a later version)
+* Supports .Net 4.0, .Net 4.5
 
+[releases]: https://github.com/MichaCo/CacheManager/releases
 [Core.nuget]: https://www.nuget.org/packages/CacheManager.Core
 [Redis.nuget]: https://www.nuget.org/packages/CacheManager.StackExchange.Redis 
 [SystemRuntimeCaching.nuget]: https://www.nuget.org/packages/CacheManager.SystemRuntimeCaching
