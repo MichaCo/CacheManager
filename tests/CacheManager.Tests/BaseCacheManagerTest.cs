@@ -4,7 +4,10 @@ using System.Diagnostics.CodeAnalysis;
 using CacheManager.Core;
 using CacheManager.Core.Cache;
 using CacheManager.Core.Configuration;
+using Xunit;
+#if !NET40
 using Couchbase.Configuration.Client;
+#endif
 
 namespace CacheManager.Tests
 {
@@ -189,6 +192,7 @@ namespace CacheManager.Tests
             }
         }
 
+#if !NET40
         public ICacheManager<object> WithCouchbaseMemcached
         {
             get
@@ -227,6 +231,7 @@ namespace CacheManager.Tests
                 return cache;
             }
         }
+#endif
 
         public static IEnumerable<object[]> GetCacheManagers()
         {
@@ -241,6 +246,11 @@ namespace CacheManager.Tests
             // yield return new object[] { data.WithSystemAndRedisCache };
             // yield return new object[] { data.WithMemcached };
             // yield return new object[] { data.WithCouchbaseMemcached };            
+        }
+        
+        public static string GetCfgFileName(string fileName)
+        {
+            return AppDomain.CurrentDomain.BaseDirectory + (fileName.StartsWith("\\") ? fileName : "\\" + fileName);
         }
     }
 }

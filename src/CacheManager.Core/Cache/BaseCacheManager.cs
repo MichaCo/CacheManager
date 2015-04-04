@@ -116,7 +116,11 @@ namespace CacheManager.Core.Cache
         /// This list is read only, any changes to the returned list instance will not affect the
         /// state of the cache manager instance.
         /// </remarks>
+#if NET40
+        public ICollection<ICacheHandle<TCacheValue>> CacheHandles
+#else
         public IReadOnlyCollection<ICacheHandle<TCacheValue>> CacheHandles
+#endif
         {
             get
             {

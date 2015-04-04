@@ -20,6 +20,8 @@
     <dependencies>
       <dependency id="CacheManager.Core"  version="$version$"/>
     </dependencies>
+    <copyright>Copyright © 2015 MichaConrad</copyright>
+    <tags>Caching Distributed Cache CacheManager StackExchange Redis Azure AppFabric Enyim Memcached Client System Runtime</tags>
   </metadata>
   <files>
     <!--<file src="app.config.transform" target="content/app.config.transform" />

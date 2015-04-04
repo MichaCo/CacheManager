@@ -18,9 +18,17 @@
     <language>en-US</language>
     <projectUrl>http://michaco.github.io/CacheManager/</projectUrl>
     <licenseUrl>https://github.com/MichaCo/CacheManager/blob/master/LICENSE</licenseUrl>
+    <copyright>Copyright © 2015 MichaConrad</copyright>
+    <tags>Caching Distributed Cache CacheManager StackExchange Redis Azure AppFabric Enyim Memcached Client System Runtime</tags>
   </metadata>
   <files>
     <file src="..\..\CacheManagerCfg.xsd" target="CacheManagerCfg.xsd" />
+    <file src="bin\Release\CacheManager.Core.dll" target="lib\net45" />
+    <file src="bin\Release\CacheManager.Core.xml" target="lib\net45" />
+    <file src="bin\Release\CacheManager.Core.pdb" target="lib\net45" />
+    <file src="..\CacheManager.Core.Net40\bin\Release\CacheManager.Core.dll" target="lib\net40" />
+    <file src="..\CacheManager.Core.Net40\bin\Release\CacheManager.Core.xml" target="lib\net40" />
+    <file src="..\CacheManager.Core.Net40\bin\Release\CacheManager.Core.pdb" target="lib\net40" />
     <!--<file src="app.config.transform" target="content/app.config.transform" />
     <file src="app.config.transform" target="content/web.config.transform" />-->
   </files>

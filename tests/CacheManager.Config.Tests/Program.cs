@@ -28,6 +28,55 @@ namespace CacheManager.Config.Tests
 
     internal class Program
     {
+        private static void Main(string[] args)
+        {
+            var swatch = Stopwatch.StartNew();
+            int iterations = int.MaxValue;
+            swatch.Restart();
+            var cacheConfiguration = ConfigurationBuilder.BuildConfiguration<object>("myCache", cfg =>
+            {
+                cfg.WithUpdateMode(CacheUpdateMode.Up);
+
+                cfg.WithSystemRuntimeCacheHandle("default")
+                    .DisableStatistics()
+                    //.EnablePerformanceCounters()
+                    //.WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMilliseconds(20)
+                ;
+
+                cfg.WithRedisCacheHandle("redis", true)
+                    .DisableStatistics()
+                ;
+
+                cfg.WithRedisBackPlate("redis");
+
+                cfg.WithRedisConfiguration("redis", config =>
+                {
+                    config.WithAllowAdmin()
+                        .WithDatabase(0)
+                        .WithEndpoint("localhost", 6379);
+                });
+            });
+
+            for (int i = 0; i < iterations; i++)
+            {
+                // CacheThreadTest(cache, i + 10);
+                SimpleAddGetTest(
+                    // CacheFactory.FromConfiguration(cacheConfiguration),
+                    CacheFactory.FromConfiguration(cacheConfiguration));
+                //CacheUpdateTest(cache);
+
+                //Console.WriteLine(string.Format("Iterations ended after {0}ms.", swatch.ElapsedMilliseconds));
+                Console.WriteLine("---------------------------------------------------------");
+                swatch.Restart();
+
+                GC.Collect();
+            }
+
+            Console.ForegroundColor = ConsoleColor.DarkGreen;
+            Console.WriteLine("We are done...");
+            Console.ReadKey();
+        }
+
         public static void CacheThreadTest(ICacheManager<string> cache, int seed)
         {
             var threads = 10;
@@ -208,62 +257,11 @@ namespace CacheManager.Config.Tests
 
                     cache.Update("key" + rand.Next(0, items - 1), v => "222");
                 }
-
-                var item = cache.Get(key);
             }
 
             var elapsed = swatch.ElapsedMilliseconds;
             var opsPerSec = Math.Round(ops / swatch.Elapsed.TotalSeconds, 0);
             Console.WriteLine("SimpleAddGetTest completed \tafter: {0:C} ms. \twith {1:C0} Ops/s.", elapsed, opsPerSec);
-        }
-
-        private static void Main(string[] args)
-        {
-            var swatch = Stopwatch.StartNew();
-            int iterations = int.MaxValue;
-            swatch.Restart();
-            var cacheConfiguration = ConfigurationBuilder.BuildConfiguration<object>("myCache", cfg =>
-            {
-                cfg.WithUpdateMode(CacheUpdateMode.Up);
-
-                cfg.WithSystemRuntimeCacheHandle("default")
-                    .DisableStatistics()
-                    //.EnablePerformanceCounters()
-                    //.WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMilliseconds(20)
-                ;
-
-                cfg.WithRedisCacheHandle("redis", true)
-                    .DisableStatistics()
-                ;
-
-                cfg.WithRedisBackPlate("redis");
-
-                cfg.WithRedisConfiguration("redis", config =>
-                {
-                    config.WithAllowAdmin()
-                        .WithDatabase(0)
-                        .WithEndpoint("localhost", 6379);
-                });
-            });
-
-            for (int i = 0; i < iterations; i++)
-            {
-                // CacheThreadTest(cache, i + 10);
-                SimpleAddGetTest(
-                    // CacheFactory.FromConfiguration(cacheConfiguration),
-                    CacheFactory.FromConfiguration(cacheConfiguration));
-                //CacheUpdateTest(cache);
-
-                //Console.WriteLine(string.Format("Iterations ended after {0}ms.", swatch.ElapsedMilliseconds));
-                Console.WriteLine("---------------------------------------------------------");
-                swatch.Restart();
-
-                GC.Collect();
-            }
-
-            Console.ForegroundColor = ConsoleColor.DarkGreen;
-            Console.WriteLine("We are done...");
-            Console.ReadKey();
         }
     }
 }

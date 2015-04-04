@@ -75,7 +75,7 @@
         /// <c>true</c> to release both managed and unmanaged resources; <c>false</c> to release
         /// only unmanaged resources.
         /// </param>
-        public virtual void Dispose(bool managed)
+        protected virtual void Dispose(bool managed)
         {
         }
 

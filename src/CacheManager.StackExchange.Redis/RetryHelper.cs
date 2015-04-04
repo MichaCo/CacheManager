@@ -18,11 +18,19 @@ namespace CacheManager.Redis
                 }
                 catch (StackRedis.RedisConnectionException)
                 {
+#if NET40
+                    TaskEx.Delay(timeOut).Wait();
+#else
                     Task.Delay(timeOut).Wait();
+#endif
                 }
                 catch (System.TimeoutException)
                 {
+#if NET40
+                    TaskEx.Delay(timeOut).Wait();
+#else
                     Task.Delay(timeOut).Wait();
+#endif
                 }
                 catch (AggregateException ag)
                 {
@@ -30,7 +38,12 @@ namespace CacheManager.Redis
                     {
                         if (e is StackRedis.RedisConnectionException || e is System.TimeoutException)
                         {
-                            Task.Delay(timeOut).Wait();
+#if NET40
+                            TaskEx.Delay(timeOut).Wait();
+#else
+                    Task.Delay(timeOut).Wait();
+#endif
+
                             return true;
                         }
 

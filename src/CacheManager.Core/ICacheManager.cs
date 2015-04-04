@@ -58,19 +58,22 @@ namespace CacheManager.Core
         /// This list is read only, any changes to the returned list instance will not affect the
         /// state of the cache manager instance.
         /// </remarks>
+#if NET40
+        ICollection<ICacheHandle<TCacheValue>> CacheHandles { get; }
+#else
         IReadOnlyCollection<ICacheHandle<TCacheValue>> CacheHandles { get; }
-
+#endif
         /// <summary>
         /// Gets the configuration.
         /// </summary>
         /// <value>The configuration.</value>
         ICacheManagerConfiguration Configuration { get; }
 
-        /// <summary>
-        /// Adds a cache handle to the cache manager instance.
-        /// </summary>
-        /// <param name="handle">The cache handle.</param>
-        void AddCacheHandle(ICacheHandle<TCacheValue> handle);
+        /////// <summary>
+        /////// Adds a cache handle to the cache manager instance.
+        /////// </summary>
+        /////// <param name="handle">The cache handle.</param>
+        ////void AddCacheHandle(ICacheHandle<TCacheValue> handle);
 
         /// <summary>
         /// Updates an existing key in the cache.

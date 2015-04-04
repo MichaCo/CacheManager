@@ -20,11 +20,23 @@
     <dependencies>
       <dependency id="CacheManager.Core"  version="$version$"/>
     </dependencies>
+    <copyright>Copyright © 2015 MichaConrad</copyright>
+    <tags>Caching Distributed Cache CacheManager StackExchange Redis Azure AppFabric Enyim Memcached Client System Runtime</tags>
   </metadata>
   <files>
-    <file src="bin\release\CacheManager.Redis.dll" target="lib\net45\CacheManager.Redis.dll" />
-    <file src="bin\release\CacheManager.Redis.xml" target="lib\net45\CacheManager.Redis.xml" />
     <file src="..\..\RedisCfg.xsd" target="RedisCfg.xsd" />
+    <file src="bin\Release\CacheManager.StackExchange.Redis.dll" target="lib\net45" />
+    <file src="bin\Release\CacheManager.StackExchange.Redis.xml" target="lib\net45" />
+    <file src="bin\Release\CacheManager.StackExchange.Redis.pdb" target="lib\net45" />
+    <file src="..\CacheManager.Redis\bin\Release\CacheManager.Redis.dll" target="lib\net45" />
+    <file src="..\CacheManager.Redis\bin\Release\CacheManager.Redis.xml" target="lib\net45" />
+    <file src="..\CacheManager.Redis\bin\Release\CacheManager.Redis.pdb" target="lib\net45" />
+    <file src="..\CacheManager.StackExchange.Redis.Net40\bin\Release\CacheManager.StackExchange.Redis.dll" target="lib\net40" />
+    <file src="..\CacheManager.StackExchange.Redis.Net40\bin\Release\CacheManager.StackExchange.Redis.xml" target="lib\net40" />
+    <file src="..\CacheManager.StackExchange.Redis.Net40\bin\Release\CacheManager.StackExchange.Redis.pdb" target="lib\net40" />
+    <file src="..\CacheManager.Redis.Net40\bin\Release\CacheManager.Redis.dll" target="lib\net40" />
+    <file src="..\CacheManager.Redis.Net40\bin\Release\CacheManager.Redis.xml" target="lib\net40" />
+    <file src="..\CacheManager.Redis.Net40\bin\Release\CacheManager.Redis.pdb" target="lib\net40" />
     <!--<file src="app.config.transform" target="content/app.config.transform" />
     <file src="app.config.transform" target="content/web.config.transform" />-->
   </files>

@@ -23,8 +23,16 @@
     <dependencies>
       <dependency id="CacheManager.Core"  version="$version$"/>
     </dependencies>
+    <copyright>Copyright © 2015 MichaConrad</copyright>
+    <tags>Caching Distributed Cache CacheManager StackExchange Redis Azure AppFabric Enyim Memcached Client System Runtime</tags>
   </metadata>
   <files>
+    <file src="bin\Release\CacheManager.SystemRuntimeCaching.dll" target="lib\net45" />
+    <file src="bin\Release\CacheManager.SystemRuntimeCaching.xml" target="lib\net45" />
+    <file src="bin\Release\CacheManager.SystemRuntimeCaching.pdb" target="lib\net45" />
+    <file src="..\CacheManager.SystemRuntimeCaching.Net40\bin\Release\CacheManager.SystemRuntimeCaching.dll" target="lib\net40" />
+    <file src="..\CacheManager.SystemRuntimeCaching.Net40\bin\Release\CacheManager.SystemRuntimeCaching.xml" target="lib\net40" />
+    <file src="..\CacheManager.SystemRuntimeCaching.Net40\bin\Release\CacheManager.SystemRuntimeCaching.pdb" target="lib\net40" />
     <!--<file src="app.config.transform" target="content/app.config.transform" />
     <file src="app.config.transform" target="content/web.config.transform" />-->
   </files>

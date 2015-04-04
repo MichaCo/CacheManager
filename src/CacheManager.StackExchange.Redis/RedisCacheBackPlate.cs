@@ -57,7 +57,7 @@ namespace CacheManager.Redis
         /// </summary>
         /// <param name="managed"><c>true</c> to release both managed and unmanaged resources; <c>false</c> to release
         /// only unmanaged resources.</param>
-        public override void Dispose(bool managed)
+        protected override void Dispose(bool managed)
         {
             if (managed)
             {

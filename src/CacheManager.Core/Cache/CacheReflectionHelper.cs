@@ -96,7 +96,7 @@ namespace CacheManager.Core.Cache
 
             if (handle.IsGenericType && !handle.IsGenericTypeDefinition)
             {
-                if (handle.GenericTypeArguments.Count() != 1)
+                if (handle.GetGenericArguments().Count() != 1)
                 {
                     throw new InvalidOperationException(
                         string.Format(
@@ -104,7 +104,7 @@ namespace CacheManager.Core.Cache
                             "Invalid number of generic type arguments found for handle [{0}].",
                             handle.ToString()));
                 }
-                if (!handle.GenericTypeArguments.First().Equals(arg))
+                if (!handle.GetGenericArguments().First().Equals(arg))
                 {
                     throw new InvalidOperationException(
                         string.Format(

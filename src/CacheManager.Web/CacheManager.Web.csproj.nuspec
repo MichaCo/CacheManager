@@ -22,7 +22,9 @@
     </frameworkAssemblies>
     <dependencies>
       <dependency id="CacheManager.Core"  version="$version$"/>
-    </dependencies>
+    </dependencies>    
+    <copyright>Copyright © 2015 MichaConrad</copyright>
+    <tags>Caching Distributed Cache CacheManager StackExchange Redis Azure AppFabric Enyim Memcached Client System Runtime</tags>
   </metadata>
   <!--<files> System.Web.Cache handle not implemented yet
     <file src="app.config.transform" target="content/app.config.transform" />
