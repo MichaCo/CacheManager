@@ -27,7 +27,7 @@ The developer can opt-in to those features only if needed.
 
 * One common interface for handling different caching technologies: `ICache<T>`
 * Configurable via app/web.config or by code.
-* Support for different caches
+* Support for different cache providers
     * **MemoryCache** (System.Runtime.Caching)
     * **Redis** using [StackExchange.Redis](https://github.com/StackExchange/StackExchange.Redis)
     * **Memcached** using [Enyim.Memcached](https://github.com/enyim/EnyimMemcached)
