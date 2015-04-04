@@ -1,0 +1,85 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <!-- The configuration and platform will be used to determine which assemblies to include from solution and
+				 project documentation sources -->
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{93fdfdc0-7246-40b2-97fb-72995427d70c}</ProjectGuid>
+    <SHFBSchemaVersion>1.9.9.0</SHFBSchemaVersion>
+    <!-- AssemblyName, Name, and RootNamespace are not used by SHFB but Visual Studio adds them anyway -->
+    <AssemblyName>Documentation</AssemblyName>
+    <RootNamespace>Documentation</RootNamespace>
+    <Name>Documentation</Name>
+    <!-- SHFB properties -->
+    <FrameworkVersion>.NET Framework 4.5</FrameworkVersion>
+    <OutputPath>.\Help\</OutputPath>
+    <HtmlHelpName>CacheManager Documentation</HtmlHelpName>
+    <Language>en-US</Language>
+    <BuildAssemblerVerbosity>OnlyWarningsAndErrors</BuildAssemblerVerbosity>
+    <BuildLogFile>C:\Temp\build.log</BuildLogFile>
+    <HelpFileFormat>Website</HelpFileFormat>
+    <IndentHtml>False</IndentHtml>
+    <KeepLogFile>True</KeepLogFile>
+    <DisableCodeBlockComponent>False</DisableCodeBlockComponent>
+    <CppCommentsFixup>False</CppCommentsFixup>
+    <CleanIntermediates>True</CleanIntermediates>
+    <DocumentationSources>
+      <DocumentationSource sourceFile="src\CacheManager.AppFabricCache\CacheManager.AppFabricCache.csproj" xmlns="" />
+<DocumentationSource sourceFile="src\CacheManager.Core\CacheManager.Core.csproj" xmlns="" />
+<DocumentationSource sourceFile="src\CacheManager.Couchbase\CacheManager.Couchbase.csproj" xmlns="" />
+<DocumentationSource sourceFile="src\CacheManager.MemCached\CacheManager.Memcached.csproj" xmlns="" />
+<DocumentationSource sourceFile="src\CacheManager.Redis\CacheManager.Redis.csproj" xmlns="" />
+<DocumentationSource sourceFile="src\CacheManager.Serialization\CacheManager.Serialization.csproj" xmlns="" />
+<DocumentationSource sourceFile="src\CacheManager.StackExchange.Redis\CacheManager.StackExchange.Redis.csproj" xmlns="" />
+<DocumentationSource sourceFile="src\CacheManager.SystemRuntimeCaching\CacheManager.SystemRuntimeCaching.csproj" xmlns="" />
+<DocumentationSource sourceFile="src\CacheManager.Web\CacheManager.Web.csproj" xmlns="" />
+<DocumentationSource sourceFile="src\CacheManager.WindowsAzureCaching\CacheManager.WindowsAzureCaching.csproj" xmlns="" /></DocumentationSources>
+    <MissingTags>Summary, Parameter, Returns, AutoDocumentCtors, TypeParameter, AutoDocumentDispose</MissingTags>
+    <MaximumGroupParts>2</MaximumGroupParts>
+    <NamespaceGrouping>False</NamespaceGrouping>
+    <SyntaxFilters>Standard</SyntaxFilters>
+    <SdkLinkTarget>Blank</SdkLinkTarget>
+    <RootNamespaceContainer>True</RootNamespaceContainer>
+    <PresentationStyle>VS2013</PresentationStyle>
+    <Preliminary>False</Preliminary>
+    <NamingMethod>MemberName</NamingMethod>
+    <HelpTitle>CacheManager Documentation</HelpTitle>
+    <ContentPlacement>AboveNamespaces</ContentPlacement>
+    <NamespaceSummaries>
+      <NamespaceSummaryItem name="(global)" isDocumented="False" />
+<NamespaceSummaryItem name="CacheManager.Core" isDocumented="True">The base namespace for the CacheManager.Core package contains all interface definitions for the CacheManager.</NamespaceSummaryItem>
+<NamespaceSummaryItem name="CacheManager.AppFabricCache" isDocumented="True">This namespace contains the Microsoft AppFabric cache handle.</NamespaceSummaryItem>
+<NamespaceSummaryItem name="CacheManager.Core.Cache" isDocumented="True">This namespace contains the base implementations for CacheManager and CacheHandle. It is the base implementation of the CacheManager library.</NamespaceSummaryItem>
+<NamespaceSummaryItem name="CacheManager.Core.Configuration" isDocumented="True">This namespace contains all configuration related implementations for the CacheManager.</NamespaceSummaryItem>
+<NamespaceSummaryItem name="CacheManager.Couchbase" isDocumented="True">This namespace contains the Couchbase cache handle base on the Couchbase .Net client.</NamespaceSummaryItem>
+<NamespaceSummaryItem name="CacheManager.Memcached" isDocumented="True">This namespace contains the Memcache cache handle base on Enyim's memcached client.</NamespaceSummaryItem>
+<NamespaceSummaryItem name="CacheManager.Redis" isDocumented="True">This namespace contains the basic Redis helpers and configuration classes. It implements a Redis configuration section which can be used to confgure the Redis cache handle via app/web.config.</NamespaceSummaryItem>
+<NamespaceSummaryItem name="CacheManager.SystemRuntimeCaching" isDocumented="True">This namespace contains the MemoryCache cache handle build on top of System.Runtime.Caching in memory cache implementation.</NamespaceSummaryItem>
+<NamespaceSummaryItem name="CacheManager.Web" isDocumented="True">This namespace contains System.Web related implementations based on CacheManager.</NamespaceSummaryItem>
+<NamespaceSummaryItem name="CacheManager.WindowsAzureCaching" isDocumented="True">This namespace contains the Microsoft Azure cache handle. It shares the implementation with AppFabricCache but uses different Nuget references.</NamespaceSummaryItem></NamespaceSummaries>
+    <RootNamespaceTitle>Packages</RootNamespaceTitle>
+    <ProjectSummary>&amp;lt%3ba href=&amp;quot%3bhttp://michaco.github.io/CacheManager&amp;quot%3b&amp;gt%3bCacheManager&amp;lt%3b/a&amp;gt%3b is a common interface and abstraction layer for caching. It supports various cache providers and implements many advanced features. </ProjectSummary>
+  </PropertyGroup>
+  <!-- There are no properties for these groups.  AnyCPU needs to appear in order for Visual Studio to perform
+			 the build.  The others are optional common platform types that may appear. -->
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|Win32' ">
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|Win32' ">
+  </PropertyGroup>
+  <!-- Import the SHFB build targets -->
+  <Import Project="$(SHFBROOT)\SandcastleHelpFileBuilder.targets" />
+</Project>
