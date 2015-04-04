@@ -14,9 +14,9 @@ A common scenario would be using a distributed cache, and to make read access fa
 ## Packages
 
 | Package | .Net 4.0 | .Net 4.5
---------------------------------
+----------|----------|------------
 | [CacheManager.Core] [Core.nuget] | x | x
-| [CacheManager.StackExchange.Redis] [Redis.nuget | x | x 
+| [CacheManager.StackExchange.Redis] [Redis.nuget] | x | x 
 | [CacheManager.SystemRuntimeCaching] [SystemRuntimeCaching.nuget]  | x | x 
 | [CacheManager.AppFabricCache] [AppFabricCache.nuget]  | - | x 
 | [CacheManager.WindowsAzureCaching] [WindowsAzureCaching.nuget]  | - | x 
