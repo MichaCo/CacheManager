@@ -1,7 +1,5 @@
 # CacheManager
 
-[![Build Status](https://travis-ci.org/MichaCo/CacheManager.svg?branch=master)](https://travis-ci.org/MichaCo/CacheManager)
-
 The main goal of the CacheManager package is to make developer's life easier to handle even very complex caching scenarios.  
 With CacheManager it is possible to implement multiple layers of caching, 
 e.g. in-process caching in front of a distributed cache, in just a few lines of code.
@@ -24,6 +22,7 @@ The developer can opt-in to those features only if needed.
 | [CacheManager.Couchbase] [Couchbase.nuget]  | - | x
 
 ## Features in Version: [0.4.3][releases]
+[![Build Status](https://travis-ci.org/MichaCo/CacheManager.svg?branch=master)](https://travis-ci.org/MichaCo/CacheManager) [Html documentation](http://michaco.github.io/Documentation/CacheManager/Help/html)
 
 * One common interface for handling different caching technologies: `ICache<T>`
 * Configurable via app/web.config or by code.
