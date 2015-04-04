@@ -23,9 +23,7 @@ The developer can opt-in to those features only if needed.
 | [CacheManager.Web] [Web.nuget]  | - | x
 | [CacheManager.Couchbase] [Couchbase.nuget]  | - | x
 
-## Implemented Features
-
-### Current Version: [0.4.3][releases]
+## Features in Version: [0.4.3][releases]
 
 * One common interface for handling different caching technologies: `ICache<T>`
 * Configurable via app/web.config or by code.
