@@ -75,6 +75,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CacheManager.SystemRuntimeC
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CacheManager.Memcached.Net40", "src\CacheManager.Memcached.Net40\CacheManager.Memcached.Net40.csproj", "{3CEA3848-8C1A-41DA-B65C-90E57A7447CB}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Articles", "Articles", "{BF84619C-FFD1-4B18-85FC-9CBD010A6ACC}"
+	ProjectSection(SolutionItems) = preProject
+		Articles\cachemanager_architecture.md = Articles\cachemanager_architecture.md
+		Articles\cachemanager_getting_started.md = Articles\cachemanager_getting_started.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
