@@ -1,8 +1,5 @@
 <properties id="cachemanager_architecture" />
-
 # Cache Manager Basics and Architecture
-
-[TOC]
 
 ## General Design and Goals
 First and foremost Cache Manager will provide well known cache methods like Get, Put, Remove. 
@@ -58,3 +55,4 @@ layers of our cache in sync.
 
 #### Get operations
 
+[TOC]
