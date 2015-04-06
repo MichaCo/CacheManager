@@ -1,3 +1,5 @@
+<properties id="cachemanager_architecture" />
+
 # Cache Manager Basics and Architecture
 
 [TOC]
