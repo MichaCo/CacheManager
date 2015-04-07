@@ -15,7 +15,7 @@
       This package contains the specific cache handle for System.Runtime.Caching.MemoryCache.
     </description>
     <language>en-US</language>
-    <projectUrl>http://michaco.github.io/CacheManager/</projectUrl>
+    <projectUrl>http://mconrad.azurewebsites.net/</projectUrl>
     <licenseUrl>https://github.com/MichaCo/CacheManager/blob/master/LICENSE</licenseUrl>
     <frameworkAssemblies>
       <frameworkAssembly assemblyName="System.Runtime.Caching"/>
