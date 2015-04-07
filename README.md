@@ -11,7 +11,7 @@ The developer can opt-in to those features only if needed.
 ## Documentation
 I'm currently working on the documentation... more to come soon ;). 
 
-* Documentation can be found wihtin the [Articles folder](https://github.com/MichaCo/CacheManager/tree/master/Articles) and  hosted on [my website](http://mconrad.azurewebsites.net).
+* Documentation can be found within the [Articles folder](https://github.com/MichaCo/CacheManager/tree/master/Articles) and  hosted on [my website](http://mconrad.azurewebsites.net).
 * [API html documentation](http://michaco.github.io/Documentation/CacheManager/Help).
 
 ## CacheManager Nuget Packages
