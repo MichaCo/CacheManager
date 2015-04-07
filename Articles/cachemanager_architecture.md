@@ -55,9 +55,7 @@ Adding multiple cache handles looks pretty much the same:
 Now how does the BaseCacheManager handle items in multiple caches?  
 This depends on configuration in some cases, lets have a look at the basic cache operations:
 
-`Set` and `Put` adds and/or overrides a cached value. The cache manager will add or put the cache item 
-into **all configured cache handles**. This is necessary because in general we want to have all 
-layers of our cache in sync.
+`Set` and `Put` adds and/or overrides a cached value. The cache manager will add or put the cache item into **all configured cache handles**. This is necessary because in general we want to have all layers of our cache in sync.
 
 `Remove`, `Clear` and `ClearRegion` also act on all configured cache handles.
 
@@ -70,4 +68,3 @@ There are 3 different configuration options for Cache Manager to handle this, de
 * **None** - setting `CacheUpdateMode`to `None` will instruct the Cache Manager to do nothing on cache hits.
 * **Up** - instructs the Cache Manager to update cache handles "above" the one the cache item was found in. The order of the cache handles matter in this case. 
 * **All** - instructs the Cache Manager to update all other cache handles
-
