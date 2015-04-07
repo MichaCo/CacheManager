@@ -1,4 +1,6 @@
 <properties id="cachemanager_architecture" />
+
+[TOC]
 # Features and Architecture
 
 ## Design and Goals
@@ -69,6 +71,3 @@ There are 3 different configuration options for Cache Manager to handle this, de
 * **Up** - instructs the Cache Manager to update cache handles "above" the one the cache item was found in. The order of the cache handles matter in this case. 
 * **All** - instructs the Cache Manager to update all other cache handles
 
-
-
-[TOC]
