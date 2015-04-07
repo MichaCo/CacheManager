@@ -1,58 +1,74 @@
 <properties id="cachemanager_architecture" />
-# Cache Manager Basics and Architecture
+# Features and Architecture
 
-## General Design and Goals
+## Design and Goals
 First and foremost Cache Manager will provide well known cache methods like Get, Put, Remove. 
 All cache items will have a `string Key` and `T` Value where `T` can be anything, e.g. `int`, `string` or even `object`.
 
+    cache.Add("key", "value");
+    var value = cache.Get("key");
+    cache.Remove("key");
+        
 ### Regions
 Cache Manager has overloads for all cache methods to support a `string Region` in addition to the `Key` to identify an item within the cache. 
 
-> **note** 
+    cache.Add("key", "value", "region");
+    var value = cache.Get("key", "region");
+    cache.Remove("key", "region");
+    
+> **Note** 
 > Each cache handle might implement cache regions differently. Often the implementation will simply concatenate `region + key` to form the cache key. 
+> Also the cache `Key` will only be accessible together with the region specified.
 
+To clear a cache region, you can call `cache.ClearRegion("region")`
 
- But the 
-main architectural feature is that the Cache Manager can handle multiple different cache layers, the so called 
-cache handles.  
-The Manager can have many handles, and we have one cache handle for each supported cache provider.
+## Multiple Cache Layers
+One of the main feature of Cache Manager is handling multiple cache layers. To define the cache layers the cache manager can have one or many so called cache handles.  
+Each Cache Manager package for a cache provider implement such a cache handle.
 
-This makes it very flexible in terms of caching strategy! And it makes it easy to start with in the first place, because 
-you might not know how complex a cache must be at the start of the project. Or you just want to test something out first and later 
-you realize that you need a more complex scenario.
+This concept makes it very flexible in terms of caching strategy. And it makes it easy to start with and maybe create a more complex cache later.
 
-#### Example Usecase
-A common, more complex scenario would be, that you have a distributed cache, e.g. Redis, and you want to access that layer 
-from multiple clients and share the cached data across those clients because the creation of the cached items is expensive, or 
-you want to store data in one place and use it by multiple clients...  
+To configure and add cache handles by code call the `WithHandle` method of the `ConfigurationBuilder`. 
+Every cache provider specific Cache Manager package will provide an extension method to add the specific cache handle, e.g. `WithSystemRuntimeCacheHandle`, `WithRedisCacheHandle`...
 
-Distributed caches are fast, but not as fast as in-process caches which keep your cache values in memory and do not have 
-to use expensive serialization or network resources.   
+Example:
 
-In addition to the performance differernce, usually an application will read from cache a lot more than writing to it. 
-Now if we put an in-process cache in front of the distributed cache, to read directly from memory, this would drastically increase the overall 
-application's performance.   
-To give you just a rough idea of the read performance difference, it can be up to 100 times faster or even more...
-If a Redis cache for example can handle 10k Gets per second, a memory cache can perfrom 2 million.
+    var cache = CacheFactory.Build("myCacheName", settings =>
+    {
+	    settings
+		    .WithSystemRuntimeCacheHandle("handle1");
+    });
 
-#### Challenges when mixing distributed and in-process cache
-There are some challenges with this scenario. We now store cache values in memory, what happens if the cache item was removed from cache by one client...
-Of course, it will still be cached in memory by all other clients.
+Adding multiple cache handles looks pretty much the same:
 
-Also updating a cache item in a distributed cache is different. With in process caches, we can ensure thread safe writes, with 
-distributed caches, we cannot do it that easily. Every distributed cache provider has some slightly different ways to handle that...
+    var cache = CacheFactory.Build("myCacheName", settings =>
+    {
+	    settings
+		    .WithSystemRuntimeCacheHandle("handle1")
+            .And
+            .WithRedisCacheHandle("redis");
+    });
 
-**The good new is, that CacheManager handles all that for you behind the scenes!**
-
-### Cache Manager
-Now how does the BaseCacheManager handle items in mulitple caches?  
+## Cache Item handling
+Now how does the BaseCacheManager handle items in multiple caches?  
 This depends on configuration in some cases, lets have a look at the basic cache operations:
 
-#### Set and Put
-Set and Put adds and/or overrides a cached value. The cache manager will add or put the cache item 
-into all configured cache handles. This is necessairy because in general we want to have all 
+`Set` and `Put` adds and/or overrides a cached value. The cache manager will add or put the cache item 
+into **all configured cache handles**. This is necessary because in general we want to have all 
 layers of our cache in sync.
 
-#### Get operations
+`Remove`, `Clear` and `ClearRegion` also act on all configured cache handles.
+
+### Get operations
+Let's say we have two cache handles configured, and the `Get` operation finds the `Key` within the second cache handle. 
+Now we can assume that the two configured layers of the cache have some purpose and that the CacheManager should maybe update the other cache handles.   
+
+There are 3 different configuration options for Cache Manager to handle this, defined by `CacheUpdateMode`:
+
+* **None** - setting `CacheUpdateMode`to `None` will instruct the Cache Manager to do nothing on cache hits.
+* **Up** - instructs the Cache Manager to update cache handles "above" the one the cache item was found in. The order of the cache handles matter in this case. 
+* **All** - instructs the Cache Manager to update all other cache handles
+
+
 
 [TOC]
