@@ -1,3 +1,4 @@
+[TOC]
 #Cache Synchronization
 
 ## Multi-Layer Use Case
@@ -30,5 +31,5 @@ This means that ClientB works with out of sync data.
 
 To prevent this, Cache Manager has a feature called **CacheBackPlate** which will try to synchronize multiple cache clients.
 
-### Cache Back Plates
+## Cache Back Plates
 

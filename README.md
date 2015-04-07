@@ -8,6 +8,12 @@ CacheManager is not just an interface to unify the programming model for various
 make it very easy to change the caching strategy later on in a project. It also offers additional features, like cache invalidation for above mentioned multi layer cache scenario for example. 
 The developer can opt-in to those features only if needed.
 
+## Documentation
+I'm currently working on the documentation... more to come soon ;). 
+
+* Documentation can be found wihtin the [Articles folder](https://github.com/MichaCo/CacheManager/tree/master/Articles) and  hosted on [my website](http://mconrad.azurewebsites.net).
+* [API html documentation](http://michaco.github.io/Documentation/CacheManager/Help).
+
 ## CacheManager Nuget Packages
 
 | Package Name | .Net 4.0 | .Net 4.5
@@ -22,7 +28,6 @@ The developer can opt-in to those features only if needed.
 | [CacheManager.Couchbase] [Couchbase.nuget]  | - | x
 
 ## Features in Version: [0.4.3][releases] [![Build Status](https://travis-ci.org/MichaCo/CacheManager.svg?branch=master)](https://travis-ci.org/MichaCo/CacheManager) 
-[See html documentation](http://michaco.github.io/Documentation/CacheManager/Help)
 
 * One common interface for handling different caching technologies: `ICache<T>`
 * Configurable via app/web.config or by code.
