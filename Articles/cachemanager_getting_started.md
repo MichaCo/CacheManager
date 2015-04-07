@@ -1,3 +1,4 @@
+[TOC]
 ## Getting started with Cache Manager
 
 ### Basics
