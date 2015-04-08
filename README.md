@@ -1,17 +1,17 @@
 # CacheManager
+CacheManager is a common interface and abstraction layer for caching written in C#. It is open source and available via Nuget. It supports various cache providers and implements many advanced features.
 
 The main goal of the CacheManager package is to make developer's life easier to handle even very complex caching scenarios.  
-With CacheManager it is possible to implement multiple layers of caching, 
-e.g. in-process caching in front of a distributed cache, in just a few lines of code.
+With CacheManager it is possible to implement multiple layers of caching, e.g. in-process caching in front of a distributed cache, in just a few lines of code.
 
 CacheManager is not just an interface to unify the programming model for various cache providers, which will 
-make it very easy to change the caching strategy later on in a project. It also offers additional features, like cache invalidation for above mentioned multi layer cache scenario for example. 
+make it very easy to change the caching strategy later on in a project. It also offers additional features, like cache synchronization, concurrent updates, events, performance counters... 
 The developer can opt-in to those features only if needed.
 
 ## Documentation
 I'm currently working on the documentation... more to come soon ;). 
 
-* Documentation can be found wihtin the [Articles folder](https://github.com/MichaCo/CacheManager/tree/master/Articles) and  hosted on [my website](http://mconrad.azurewebsites.net).
+* Documentation can be found within the [Articles folder](https://github.com/MichaCo/CacheManager/tree/master/Articles) and  hosted on [my website](http://mconrad.azurewebsites.net).
 * [API html documentation](http://michaco.github.io/Documentation/CacheManager/Help).
 
 ## CacheManager Nuget Packages
@@ -50,7 +50,7 @@ CacheManager will synchronize those layers for you.
         * None: No update across the cache handles on Get
         * Up: Updates the handles "above"
         * All: Updates/Adds the item to all handles
-* **Expiration**: It is possible to configure the expiration per cache manager, for each cache handle within the manager individually or even overrule the configuration on cache item level.
+* **Expiration**: It is possible to configure the expiration per cache handle within the manager or per cache item.
 The following are the supported expiration modes:
     * Sliding expiration: On cache hit, the cache item expiration timeout will be extended by the configured amount.
     * Absolute expiration: The cache item will expire after the configured timeout.
@@ -75,3 +75,5 @@ OnGet, OnAdd, OnPut, OnRemove, OnClear, OnClearRegion
 [Memcached.nuget]: https://www.nuget.org/packages/CacheManager.Memcached
 [Web.nuget]: https://www.nuget.org/packages/CacheManager.Web
 [Couchbase.nuget]: https://www.nuget.org/packages/CacheManager.Couchbase
+
+[TOC]
