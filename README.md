@@ -50,7 +50,7 @@ CacheManager will synchronize those layers for you.
         * None: No update across the cache handles on Get
         * Up: Updates the handles "above"
         * All: Updates/Adds the item to all handles
-* **Expiration**: It is possible to configure the expiration per cache manager, for each cache handle within the manager individually or even overrule the configuration on cache item level.
+* **Expiration**: It is possible to configure the expiration cache handle within the manager individually or per cache item.
 The following are the supported expiration modes:
     * Sliding expiration: On cache hit, the cache item expiration timeout will be extended by the configured amount.
     * Absolute expiration: The cache item will expire after the configured timeout.
