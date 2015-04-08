@@ -105,16 +105,16 @@ namespace CacheManager.Examples
 		{
 			// this is using the CacheManager.Core.Configuration.ConfigurationBuilder to build a custom config
 			// you can do the same with the CacheFactory
-			CacheManagerConfiguration<object> cfg = ConfigurationBuilder.BuildConfiguration<object>("myCacheName", settings =>
-			 {
-				 settings.WithUpdateMode(CacheUpdateMode.Up)
-                     .WithSystemRuntimeCacheHandle("handle1")
-						 .EnablePerformanceCounters()
-						 .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(10));
-			 });
+	        var cfg = ConfigurationBuilder.BuildConfiguration<object>("myCacheName", settings =>
+		        {
+			        settings.WithUpdateMode(CacheUpdateMode.Up)
+                        .WithSystemRuntimeCacheHandle("handle1")
+					        .EnablePerformanceCounters()
+					        .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(10));
+		        });
 
-			var cache = CacheFactory.FromConfiguration<object>(cfg);
-			cache.Add("key", "value");
+	        var cache = CacheFactory.FromConfiguration(cfg);
+	        cache.Add("key", "value");
 
 		}
 

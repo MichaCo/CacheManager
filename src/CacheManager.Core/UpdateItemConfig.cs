@@ -5,6 +5,9 @@ namespace CacheManager.Core
     /// <summary>
     /// Defines the options for handling version conflicts during update operations.
     /// </summary>
+    /// <remarks>
+    /// The value <c>Ignore</c> should not be used unless you are 100% sure what you are doing.
+    /// </remarks>
     public enum VersionConflictHandling
     {
         /// <summary>
@@ -48,6 +51,24 @@ namespace CacheManager.Core
             : this()
         {
             this.VersionConflictOperation = conflictHandling;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="UpdateItemConfig"/> class with default
+        /// value for version conflict handling.
+        /// </summary>
+        /// <param name="maxRetries">
+        /// The maximum number of retries the update operation should make.
+        /// </param>
+        public UpdateItemConfig(int maxRetries)
+            : this()
+        {
+            if (maxRetries < 0)
+            {
+                throw new ArgumentException("maxRetries must be greater than or equal to 0.");
+            }
+
+            this.MaxRetries = maxRetries;
         }
 
         /// <summary>
