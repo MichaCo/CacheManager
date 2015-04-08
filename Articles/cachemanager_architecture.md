@@ -87,9 +87,7 @@ To create a Cache Manager instance one should use the `CacheFactory` class which
 	var cache = CacheFactory.Build("cacheName", settings => settings
         .WithUpdateMode(CacheUpdateMode.Up)
         .WithSystemRuntimeCacheHandle("handleName")
-            .EnableStatistics()
-            .EnablePerformanceCounters()
-        .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(10)));
+	        .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(10)));
 
 **`FromConfiguration`** takes either the `CacheManagerConfiguration` object or the `name` of the Cache Manager configured in the .config file of the application.
 
@@ -101,7 +99,6 @@ If you want to separate the creation of the configuration object and the creatio
 		{
 			settings.WithUpdateMode(CacheUpdateMode.Up)
                 .WithSystemRuntimeCacheHandle("handleName")
-					.EnablePerformanceCounters()
 					.WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(10));
 		});
 
@@ -115,7 +112,7 @@ And the `cacheHandles` collection which lists the available (installed) cache ha
 
     <cacheManager xmlns="http://tempuri.org/CacheManagerCfg.xsd">
       <managers>
-        <cache name="cacheName" updateMode="Up" enableStatistics="true" enablePerformanceCounters="true">
+        <cache name="cacheName" updateMode="Up" enableStatistics="false" enablePerformanceCounters="false">
           <handle name="handleName" ref="systemRuntimeHandle" expirationMode="Absolute" timeout="50s"/>
         </cache>
       </managers>
@@ -128,18 +125,112 @@ And the `cacheHandles` collection which lists the available (installed) cache ha
 The cacheHandles' elements can be defined with default values for expiration mode and timeout. It can be overridden by the `handle` element though.
 
 > **Hint**
-> To make configuration via .config file easier, enable intellisense by adding the `xmlns` attribute to he `cacheManagers` section and add the CacheManagerCfg.xsd file to your solution. The xsd file can be found in  [solution dir]\packages\CacheManager.Core.x.x.x.x\CacheManagerCfg.xsd
-> See also [this answer on stackoverflow](http://stackoverflow.com/questions/742905/enabling-intellisense-for-custom-sections-in-config-files)
+> To make configuration via .config file easier, enable intellisense by adding the `xmlns` attribute to he `cacheManagers` section and add the CacheManagerCfg.xsd file to your solution. The xsd file can be found in  [solution dir]/packages/CacheManager.Core.x.x.x.x/CacheManagerCfg.xsd
+> See also [this answer on stackoverflow][stackoverflow-config-xsd]
 
 ## Cache Expiration
-Setting an expiration timeout for cache items is a common thing when working with caching because we might not want the cache item to be stored in memory for ever, to free up resources.
+Setting an expiration timeout for cache items is a common thing when working with caching because we might not want the cache item to be stored in memory for ever and to free up resources.
 
-With Cache Manager, it is possible to control the cache expiration on multiple levels or per cache item.
+With Cache Manager, it is possible to control the cache expiration per cache handle or override it per cache item.
+
+As seen in the examples above, setting the expiration always has two parts, the `ExpirationMode` and the timeout (`TimeSpan`), e.g. `.WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(10))`.
+
+The `ExpirationMode` has three possible values:
+
+* **None** will instruct the Cache Manager to not set any expiration.
+* **Absolute** will set an absolute date on which the cache item should expire.
+* **Sliding** will also set a date on which the cache item should expire, but this date will be extended by `expirationTimeout` every time the cache item gets hit.
+
+To control the expiration per cache item, a `CacheItem` object has to be created and passed to the Cache Manager's methods instead of key value. 
+
+> **Hint** 
+> This is really only needed to control the expiration per cache item. To simply get or put an item, use `Get(key)`, `Put(key, value)`...
+
+	var item = new CacheItem<string>("key", "value", ExpirationMode.Absolute, TimeSpan.FromMinutes(10));
+    cache.Add(item);
+
+To retrieve a cache item and change the expiration, use the `GetCacheItem` method.
+
+    var item = cache.GetCacheItem("key");
+    item.WithExpiration(ExpirationMode.Sliding, TimeSpan.FromMinutes(15));
+    cache.Put(item);
+
+> **Note**
+> Currently the Memcached and Couchbase cache handles do not support sliding expiration.
 
 ## Statistics and Counters
+Ever wondered how many cache misses and hits occurred while running your application? 
+There are two models implemented in Cache Manager to get those numbers.
+
+The statistics and Windows performance counters. Both are stored per cache handle.
+
+Both can be enabled or disabled per cache manager instance. Especially performance counters can cause a performance overhead and should only be used for analysis if needed. The configuration can be done via .config file or `ConfigurationBuilder`
+
+	var cache = CacheFactory.Build("cacheName", settings => settings
+        .WithSystemRuntimeCacheHandle("handleName")
+	        .EnableStatistics()
+	        .EnablePerformanceCounters());
+
+> **Note**
+> Disabling statistics though will also disable performance counters and enabling performance counters will enable statistics.
+
+### Statistics
+Statistics are a collection of numbers identified via `CacheStatsCounterType` enum which stores the following numbers:
+
+* cache hits 
+* cache misses
+* number of items in the cache
+* number of `Remove` calls
+* number of `Add` calls
+* number of `Put` calls
+* number of `Get` calls
+* number of `Clear` calls
+* number of `ClearRegion` calls
+
+Statistics can be retrieved for each handle by calling `handle.GetStatistic(CacheStatsCounterType)`.
+
+*Example:*
+
+    foreach (var handle in cache.CacheHandles)
+    {
+        var stats = handle.Stats;
+        Console.WriteLine(string.Format(
+                "Items: {0}, Hits: {1}, Miss: {2}, Remove: {3}, ClearRegion: {4}, Clear: {5}, Adds: {6}, Puts: {7}, Gets: {8}",
+                    stats.GetStatistic(CacheStatsCounterType.Items),
+                    stats.GetStatistic(CacheStatsCounterType.Hits),
+                    stats.GetStatistic(CacheStatsCounterType.Misses),
+                    stats.GetStatistic(CacheStatsCounterType.RemoveCalls),
+                    stats.GetStatistic(CacheStatsCounterType.ClearRegionCalls),
+                    stats.GetStatistic(CacheStatsCounterType.ClearCalls),
+                    stats.GetStatistic(CacheStatsCounterType.AddCalls),
+                    stats.GetStatistic(CacheStatsCounterType.PutCalls),
+                    stats.GetStatistic(CacheStatsCounterType.GetCalls)
+                ));
+    }
+
+### Performance Counters
+
+If performance counters are enabled, Cache Manager will try to create new `PerformanceCounterCategory` named ".Net CacheManager". With several counters below. This is how it will look like in Server Explorer:
+![Performance Counters in Server Explorer][server-explorer]
+
+> **Note** 
+> The creation of performance counter categories might fail because your application might run in a security context which doesn't allow the creation.
+> In this case Cache Manager will silently disable performance counters.
+
+To watch performance counters in action, run "perfmon.exe", select "Performance Monitor" and click the green plus sign on the toolbar. Now find ".Net Cache Manager" in the list, (should be at the top). And select the instances and counters you want to track.
+
+The result should look similar to this:
+![Performance Counters in Server Explorer][perfmon]
+
+The instance name displayed in Performance Monitor is the host name of your application combined with the cache and cache handle's name. 
 
 ## Events
 
 ## System.Web.OutputCache
+
+[stackoverflow-config-xsd]: http://stackoverflow.com/questions/742905/enabling-intellisense-for-custom-sections-in-config-files
+[server-explorer]: https://github.com/MichaCo/CacheManager/raw/master/Articles/media/cachemanager-architecture/performance-counters.jpg "Performance Counters"
+[perfmon]: https://github.com/MichaCo/CacheManager/raw/master/Articles/media/cachemanager-architecture/performance-counters2.jpg "Perfmon.exe"
+
 
 [TOC]
