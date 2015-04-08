@@ -5,7 +5,7 @@ The main goal of the CacheManager package is to make developer's life easier to 
 With CacheManager it is possible to implement multiple layers of caching, e.g. in-process caching in front of a distributed cache, in just a few lines of code.
 
 CacheManager is not just an interface to unify the programming model for various cache providers, which will 
-make it very easy to change the caching strategy later on in a project. It also offers additional features, like cache synchronization for above mentioned scenario, concurrent updates, events, performance counters... 
+make it very easy to change the caching strategy later on in a project. It also offers additional features, like cache synchronization, concurrent updates, events, performance counters... 
 The developer can opt-in to those features only if needed.
 
 ## Documentation
