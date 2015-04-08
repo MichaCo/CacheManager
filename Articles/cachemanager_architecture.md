@@ -2,7 +2,7 @@
 
 ## Standard operations
 First and foremost Cache Manager will provide well known cache methods like Get, Put, Remove and Clear.
-All cache items will have a `string Key` and `T` Value where `T` can be anything, e.g. `int`, `string` or even `object`.
+All cache items will have a `string Key` and `T` Value where `T` can be anything, e.g. `int`, `string` or even `object`. The Cache Manager is implemented as a strongly typed cache interface.
 
     cache.Add("key", "value");
     var value = cache.Get("key");
@@ -217,7 +217,7 @@ If performance counters are enabled, Cache Manager will try to create new `Perfo
 > The creation of performance counter categories might fail because your application might run in a security context which doesn't allow the creation.
 > In this case Cache Manager will silently disable performance counters.
 
-To watch performance counters in action, run "perfmon.exe", select "Performance Monitor" and click the green plus sign on the toolbar. Now find ".Net Cache Manager" in the list, (should be at the top). And select the instances and counters you want to track.
+To see performance counters in action, run "perfmon.exe", select "Performance Monitor" and click the green plus sign on the toolbar. Now find ".Net Cache Manager" in the list, (should be at the top). And select the instances and counters you want to track.
 
 The result should look similar to this:
 ![Performance Counters in Server Explorer][perfmon]
@@ -225,12 +225,39 @@ The result should look similar to this:
 The instance name displayed in Performance Monitor is the host name of your application combined with the cache and cache handle's name. 
 
 ## Events
+The Cache Manager `ICacheManager` interface defines several events which get triggered on cache operations. 
+The events will be fired only once per cache operation, not per cache handle!
+
+To subscribe to an event, simply add an event listener like that:
+
+	cache.OnAdd += (sender, args) => ...;
+
+Events are available for `Add`, `Clear`, `ClearRegion`, `Get`, `Put`, `Remove` and `Update` operations.
+
+The event arguments passed into the listener depend on the event, for `Add`,`Get`, `Put` and `Remove` the `CacheActionEventArgs` will provide the `Key` and `Region` of the cache operation. `Region` might be empty though.
+`OnClearRegion` will provide the `Region` and `OnUpdate` gives you the `UpdateItemResult` and `UdateItemConfig` in addition to the `Key` and `Region`.
 
 ## System.Web.OutputCache
+The [CacheManager.Web][cm.web] Nuget package contains an implementation for `System.Web.OutputCache` which uses the cache manager to store the page results, if the `OutputCache` is configured to store it on the server.
+
+Configure of the `OutputCache` can be done via web.config:
+
+	 <system.web>	    
+	   <caching>
+	     <outputCache defaultProvider="CacheManagerOutputCacheProvider">
+	       <providers>
+	         <add cacheName="websiteCache" name="CacheManagerOutputCacheProvider" type="CacheManager.Web.CacheManagerOutputCacheProvider, CacheManager.Web" />
+	       </providers>
+	     </outputCache>
+	   </caching>
+	 </system.web>
+
+The `cacheName` attribute within the `add` tag is important. This will let CacheManager know which configuration to use. The configuration must also be provided via web.config!
 
 [stackoverflow-config-xsd]: http://stackoverflow.com/questions/742905/enabling-intellisense-for-custom-sections-in-config-files
 [server-explorer]: https://github.com/MichaCo/CacheManager/raw/master/Articles/media/cachemanager-architecture/performance-counters.jpg "Performance Counters"
 [perfmon]: https://github.com/MichaCo/CacheManager/raw/master/Articles/media/cachemanager-architecture/performance-counters2.jpg "Perfmon.exe"
+[cm.web]:  https://www.nuget.org/packages/CacheManager.Web/
 
 
 [TOC]
