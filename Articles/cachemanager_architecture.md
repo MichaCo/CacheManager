@@ -1,15 +1,13 @@
-<properties id="cachemanager_architecture" />
-
-[TOC]
 # Features and Architecture
 
-## Design and Goals
-First and foremost Cache Manager will provide well known cache methods like Get, Put, Remove. 
+## Standard operations
+First and foremost Cache Manager will provide well known cache methods like Get, Put, Remove and Clear.
 All cache items will have a `string Key` and `T` Value where `T` can be anything, e.g. `int`, `string` or even `object`.
 
     cache.Add("key", "value");
     var value = cache.Get("key");
     cache.Remove("key");
+    cache.Clear();
         
 ### Regions
 Cache Manager has overloads for all cache methods to support a `string Region` in addition to the `Key` to identify an item within the cache. 
@@ -52,7 +50,7 @@ Adding multiple cache handles looks pretty much the same:
     });
 
 ## Cache Item handling
-Now how does the BaseCacheManager handle items in multiple caches?  
+Now how does the BaseCacheManager handle values in caches?  
 This depends on configuration in some cases, lets have a look at the basic cache operations:
 
 `Set` and `Put` adds and/or overrides a cached value. The cache manager will add or put the cache item into **all configured cache handles**. This is necessary because in general we want to have all layers of our cache in sync.
@@ -68,3 +66,5 @@ There are 3 different configuration options for Cache Manager to handle this, de
 * **None** - setting `CacheUpdateMode`to `None` will instruct the Cache Manager to do nothing on cache hits.
 * **Up** - instructs the Cache Manager to update cache handles "above" the one the cache item was found in. The order of the cache handles matter in this case. 
 * **All** - instructs the Cache Manager to update all other cache handles
+
+[TOC]
