@@ -224,14 +224,16 @@ Statistics can be retrieved for each handle by calling `handle.GetStatistic(Cach
 
 ### Performance Counters
 
-If performance counters are enabled, Cache Manager will try to create new `PerformanceCounterCategory` named ".Net CacheManager". With several counters below. This is how it will look like in Server Explorer:
+If performance counters are enabled, Cache Manager will try to create a new `PerformanceCounterCategory` named ".Net CacheManager" with several counters below. 
+
+Server Explorer:
 ![Performance Counters in Server Explorer][server-explorer]
 
 > **Note** 
 > The creation of performance counter categories might fail because your application might run in a security context which doesn't allow the creation.
 > In this case Cache Manager will silently disable performance counters.
 
-To see performance counters in action, run "perfmon.exe", select "Performance Monitor" and click the green plus sign on the toolbar. Now find ".Net Cache Manager" in the list, (should be at the top). And select the instances and counters you want to track.
+To see performance counters in action, run "perfmon.exe", select "Performance Monitor" and click the green plus sign on the toolbar. Now find ".Net Cache Manager" in the list (should be at the top)  and select the instances and counters you want to track.
 
 The result should look similar to this:
 ![Performance Counters in Server Explorer][perfmon]
@@ -241,7 +243,7 @@ The instance name displayed in Performance Monitor is the host name of your appl
 ## System.Web.OutputCache
 The [CacheManager.Web][cm.web] Nuget package contains an implementation for `System.Web.OutputCache` which uses the cache manager to store the page results, if the `OutputCache` is configured to store it on the server.
 
-Configure of the `OutputCache` can be done via web.config:
+Configuration of the `OutputCache` can be done via web.config:
 
 	 <system.web>	    
 	   <caching>
@@ -253,7 +255,7 @@ Configure of the `OutputCache` can be done via web.config:
 	   </caching>
 	 </system.web>
 
-The `cacheName` attribute within the `add` tag is important. This will let CacheManager know which configuration to use. The configuration must also be provided via web.config!
+The `cacheName` attribute within the `add` tag is important. This will let CacheManager know which `cache` configuration to use. The configuration must also be provided via web.config, configuration by code is not supported!
 
 [stackoverflow-config-xsd]: http://stackoverflow.com/questions/742905/enabling-intellisense-for-custom-sections-in-config-files
 [server-explorer]: https://github.com/MichaCo/CacheManager/raw/master/Articles/media/cachemanager-architecture/performance-counters.jpg "Performance Counters"
