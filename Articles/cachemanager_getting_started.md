@@ -1,4 +1,4 @@
-# Getting started with Cache Manager
+# Getting Started with Cache Manager
 
 ## Basics
 Cache Manager is structured into many different Nuget packages.
