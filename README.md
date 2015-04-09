@@ -10,7 +10,7 @@ The developer can opt-in to those features only if needed.
 
 ## Documentation
  
-Documentation can be found within the [articles folder][articles] of this repository and  hosted on my [website][mcweb]:
+Documentation can be found within the [articles folder][articles] of the CacheManager repository and  hosted on my [website][mcweb]:
 
 * [**Getting Started**][gettingstarted]
 Is a very basic introduction of how to install and use Cache Manager
