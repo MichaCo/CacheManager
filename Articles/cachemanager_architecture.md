@@ -158,13 +158,26 @@ To retrieve a cache item and change the expiration, use the `GetCacheItem` metho
 > **Note**
 > Currently the Memcached and Couchbase cache handles do not support sliding expiration.
 
+## Events
+The Cache Manager `ICacheManager` interface defines several events which get triggered on cache operations. 
+The events will be fired only once per cache operation, not per cache handle!
+
+To subscribe to an event, simply add an event listener like that:
+
+	cache.OnAdd += (sender, args) => ...;
+
+Events are available for `Add`, `Clear`, `ClearRegion`, `Get`, `Put`, `Remove` and `Update` operations.
+
+The event arguments passed into the listener depend on the event, for `Add`,`Get`, `Put` and `Remove` the `CacheActionEventArgs` will provide the `Key` and `Region` of the cache operation. `Region` might be empty though.
+`OnClearRegion` will provide the `Region` and `OnUpdate` gives you the `UpdateItemResult` and `UdateItemConfig` in addition to the `Key` and `Region`.
+
 ## Statistics and Counters
 Ever wondered how many cache misses and hits occurred while running your application? 
 There are two models implemented in Cache Manager to get those numbers.
 
 The statistics and Windows performance counters. Both are stored per cache handle.
 
-Both can be enabled or disabled per cache manager instance. Especially performance counters can cause a performance overhead and should only be used for analysis if needed. The configuration can be done via .config file or `ConfigurationBuilder`
+Both can be enabled or disabled per cache handle. The configuration can be done via .config file or `ConfigurationBuilder`
 
 	var cache = CacheFactory.Build("cacheName", settings => settings
         .WithSystemRuntimeCacheHandle("handleName")
@@ -172,7 +185,8 @@ Both can be enabled or disabled per cache manager instance. Especially performan
 	        .EnablePerformanceCounters());
 
 > **Note**
-> Disabling statistics though will also disable performance counters and enabling performance counters will enable statistics.
+> Disabling statistics will also disable performance counters and enabling performance counters will enable statistics.
+> Collecting the numbers and updating performance counters can cause a slight performance decrease, only use it for analysis in production if really needed. 
 
 ### Statistics
 Statistics are a collection of numbers identified via `CacheStatsCounterType` enum which stores the following numbers:
@@ -210,37 +224,26 @@ Statistics can be retrieved for each handle by calling `handle.GetStatistic(Cach
 
 ### Performance Counters
 
-If performance counters are enabled, Cache Manager will try to create new `PerformanceCounterCategory` named ".Net CacheManager". With several counters below. This is how it will look like in Server Explorer:
+If performance counters are enabled, Cache Manager will try to create a new `PerformanceCounterCategory` named ".Net CacheManager" with several counters below. 
+
+Server Explorer:
 ![Performance Counters in Server Explorer][server-explorer]
 
 > **Note** 
 > The creation of performance counter categories might fail because your application might run in a security context which doesn't allow the creation.
 > In this case Cache Manager will silently disable performance counters.
 
-To see performance counters in action, run "perfmon.exe", select "Performance Monitor" and click the green plus sign on the toolbar. Now find ".Net Cache Manager" in the list, (should be at the top). And select the instances and counters you want to track.
+To see performance counters in action, run "perfmon.exe", select "Performance Monitor" and click the green plus sign on the toolbar. Now find ".Net Cache Manager" in the list (should be at the top)  and select the instances and counters you want to track.
 
 The result should look similar to this:
 ![Performance Counters in Server Explorer][perfmon]
 
 The instance name displayed in Performance Monitor is the host name of your application combined with the cache and cache handle's name. 
 
-## Events
-The Cache Manager `ICacheManager` interface defines several events which get triggered on cache operations. 
-The events will be fired only once per cache operation, not per cache handle!
-
-To subscribe to an event, simply add an event listener like that:
-
-	cache.OnAdd += (sender, args) => ...;
-
-Events are available for `Add`, `Clear`, `ClearRegion`, `Get`, `Put`, `Remove` and `Update` operations.
-
-The event arguments passed into the listener depend on the event, for `Add`,`Get`, `Put` and `Remove` the `CacheActionEventArgs` will provide the `Key` and `Region` of the cache operation. `Region` might be empty though.
-`OnClearRegion` will provide the `Region` and `OnUpdate` gives you the `UpdateItemResult` and `UdateItemConfig` in addition to the `Key` and `Region`.
-
 ## System.Web.OutputCache
 The [CacheManager.Web][cm.web] Nuget package contains an implementation for `System.Web.OutputCache` which uses the cache manager to store the page results, if the `OutputCache` is configured to store it on the server.
 
-Configure of the `OutputCache` can be done via web.config:
+Configuration of the `OutputCache` can be done via web.config:
 
 	 <system.web>	    
 	   <caching>
@@ -252,7 +255,7 @@ Configure of the `OutputCache` can be done via web.config:
 	   </caching>
 	 </system.web>
 
-The `cacheName` attribute within the `add` tag is important. This will let CacheManager know which configuration to use. The configuration must also be provided via web.config!
+The `cacheName` attribute within the `add` tag is important. This will let CacheManager know which `cache` configuration to use. The configuration must also be provided via web.config, configuration by code is not supported!
 
 [stackoverflow-config-xsd]: http://stackoverflow.com/questions/742905/enabling-intellisense-for-custom-sections-in-config-files
 [server-explorer]: https://github.com/MichaCo/CacheManager/raw/master/Articles/media/cachemanager-architecture/performance-counters.jpg "Performance Counters"
