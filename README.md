@@ -15,7 +15,7 @@ Documentation can be found within the [articles folder][articles] of the Cache M
 * [**Getting Started**][gettingstarted]
 Is a very basic introduction of how to install and use Cache Manager
 * [**Features and Architecture**][featuresarticle]
-A more advanced in death introduction to all features of Cache Manager
+A more advanced in depth introduction to all features of Cache Manager
 * [**Update Operations**][updatearticle]
 Explanation of why and when to use the update method instead of `Put` 
 * [**Cache Synchronization**][cachesyncarticle]
