@@ -44,8 +44,8 @@ To use the instance, we can add some test code. We will add two items, updated t
     cache.Put("keyB", 23);
     cache.Update("keyB", v => 42);
 
-    Console.WriteLine("KeyA is " + cache.Get("keyA"));
-    Console.WriteLine("KeyB is " + cache.Get("keyB"));
+    Console.WriteLine("KeyA is " + cache.Get("keyA"));      // should be valueA
+    Console.WriteLine("KeyB is " + cache.Get("keyB"));      // should be 42
 
 Let's remove one key and see if it worked:
 
