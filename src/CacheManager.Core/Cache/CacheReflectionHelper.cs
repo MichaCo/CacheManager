@@ -52,7 +52,7 @@ namespace CacheManager.Core.Cache
 
                 try
                 {
-                    var backPlate = (ICacheBackPlate)Activator.CreateInstance(
+                    var backPlate = (CacheBackPlate)Activator.CreateInstance(
                         managerConfiguration.BackPlateType,
                         new object[]
                         {

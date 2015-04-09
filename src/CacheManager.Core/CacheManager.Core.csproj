@@ -70,7 +70,6 @@
     <Compile Include="Cache\CacheStatsCounterType.cs" />
     <Compile Include="Cache\DictionaryCacheHandle.cs" />
     <Compile Include="Cache\DictionaryCacheHandle`1.cs" />
-    <Compile Include="ICacheBackPlate.cs" />
     <Compile Include="UpdateItemResult.cs">
       <SubType>Code</SubType>
     </Compile>

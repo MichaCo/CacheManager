@@ -5,6 +5,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using CacheManager.Core.Cache;
 
 namespace CacheManager.Core.Configuration
 {
@@ -497,7 +498,7 @@ namespace CacheManager.Core.Configuration
         /// <param name="name">The name.</param>
         /// <returns>The builder instance.</returns>
         /// <exception cref="System.ArgumentNullException">If name is null.</exception>
-        public ConfigurationBuilderCachePart<TCacheValue> WithBackPlate<TBackPlate>(string name) where TBackPlate : ICacheBackPlate
+        public ConfigurationBuilderCachePart<TCacheValue> WithBackPlate<TBackPlate>(string name) where TBackPlate : CacheBackPlate
         {
             if (string.IsNullOrWhiteSpace(name))
             {

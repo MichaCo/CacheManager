@@ -10,9 +10,9 @@ namespace CacheManager.Redis
     /// <summary>
     /// Implementation of the cache back plate with Redis Pub/Sub feature.
     /// <para>
-    /// Pub/Sub is used to send messages to the redis server on any Update, Cache Clear, Region Clear or Remove operation.
-    /// Every cache manager with the same configuration subscribes to the same chanel and can react on those messages to keep 
-    /// other cache handles in sync with the 'master'.
+    /// Pub/Sub is used to send messages to the redis server on any Update, Cache Clear, Region
+    /// Clear or Remove operation. Every cache manager with the same configuration subscribes to the
+    /// same chanel and can react on those messages to keep other cache handles in sync with the 'master'.
     /// </para>
     /// </summary>
     public sealed class RedisCacheBackPlate : CacheBackPlate
@@ -45,18 +45,75 @@ namespace CacheManager.Redis
                     var connection = RedisConnectionPool.Connect(cfg);
 
                     this.redisSubscriper = connection.GetSubscriber();
-                }, 
-                0, 
+                },
+                0,
                 10);
 
             this.Subscribe();
         }
 
         /// <summary>
+        /// Notifies other cache clients about a changed cache key.
+        /// </summary>
+        /// <param name="key">The key.</param>
+        public override void NotifyChange(string key)
+        {
+            PublishMessage(BackPlateMessage.ForChanged(this.identifier, key));
+        }
+
+        /// <summary>
+        /// Notifies other cache clients about a changed cache key.
+        /// </summary>
+        /// <param name="key">The key.</param>
+        /// <param name="region">The region.</param>
+        public override void NotifyChange(string key, string region)
+        {
+            this.PublishMessage(BackPlateMessage.ForChanged(this.identifier, key, region));
+        }
+
+        /// <summary>
+        /// Notifies other cache clients about a cache clear.
+        /// </summary>
+        public override void NotifyClear()
+        {
+            this.PublishMessage(BackPlateMessage.ForClear(this.identifier));
+        }
+
+        /// <summary>
+        /// Notifies other cache clients about a cache clear region call.
+        /// </summary>
+        /// <param name="region">The region.</param>
+        public override void NotifyClearRegion(string region)
+        {
+            this.PublishMessage(BackPlateMessage.ForClearRegion(this.identifier, region));
+        }
+
+        /// <summary>
+        /// Notifies other cache clients about a removed cache key.
+        /// </summary>
+        /// <param name="key">The key.</param>
+        public override void NotifyRemove(string key)
+        {
+            this.PublishMessage(BackPlateMessage.ForRemoved(this.identifier, key));
+        }
+
+        /// <summary>
+        /// Notifies other cache clients about a removed cache key.
+        /// </summary>
+        /// <param name="key">The key.</param>
+        /// <param name="region">The region.</param>
+        public override void NotifyRemove(string key, string region)
+        {
+            this.PublishMessage(BackPlateMessage.ForRemoved(this.identifier, key, region));
+        }
+
+        /// <summary>
         /// Releases unmanaged and - optionally - managed resources.
         /// </summary>
-        /// <param name="managed"><c>true</c> to release both managed and unmanaged resources; <c>false</c> to release
-        /// only unmanaged resources.</param>
+        /// <param name="managed">
+        /// <c>true</c> to release both managed and unmanaged resources; <c>false</c> to release
+        /// only unmanaged resources.
+        /// </param>
         protected override void Dispose(bool managed)
         {
             if (managed)
@@ -67,76 +124,20 @@ namespace CacheManager.Redis
             base.Dispose(managed);
         }
 
-        /// <summary>
-        /// Notifies other cache clients about a changed cache key.
-        /// </summary>
-        /// <param name="key">The key.</param>
-        public override void NotifyChange(string key)
-        {
-            var message = BackPlateMessage.ForChanged(this.identifier, key);
-            this.Publish(message.Serialize());
-        }
-
-        /// <summary>
-        /// Notifies other cache clients about a changed cache key.
-        /// </summary>
-        /// <param name="key">The key.</param>
-        /// <param name="region">The region.</param>
-        public override void NotifyChange(string key, string region)
-        {
-            var message = BackPlateMessage.ForChanged(this.identifier, key, region);
-            this.Publish(message.Serialize());
-        }
-
-        /// <summary>
-        /// Notifies other cache clients about a cache clear.
-        /// </summary>
-        public override void NotifyClear()
-        {
-            var message = BackPlateMessage.ForClear(this.identifier).Serialize();
-            this.Publish(message);
-        }
-
-        /// <summary>
-        /// Notifies other cache clients about a cache clear region call.
-        /// </summary>
-        /// <param name="region">The region.</param>
-        public override void NotifyClearRegion(string region)
-        {
-            var message = BackPlateMessage.ForClearRegion(this.identifier, region);
-            this.Publish(message.Serialize());
-        }
-
-        /// <summary>
-        /// Notifies other cache clients about a removed cache key.
-        /// </summary>
-        /// <param name="key">The key.</param>
-        public override void NotifyRemove(string key)
-        {
-            var message = BackPlateMessage.ForRemoved(this.identifier, key);
-            this.Publish(message.Serialize());
-        }
-
-        /// <summary>
-        /// Notifies other cache clients about a removed cache key.
-        /// </summary>
-        /// <param name="key">The key.</param>
-        /// <param name="region">The region.</param>
-        public override void NotifyRemove(string key, string region)
-        {
-            var message = BackPlateMessage.ForRemoved(this.identifier, key, region);
-            this.Publish(message.Serialize());
-        }
-
         private void Publish(string message)
         {
             this.redisSubscriper.Publish(this.channelName, message, StackRedis.CommandFlags.FireAndForget);
         }
 
+        private void PublishMessage(BackPlateMessage message)
+        {
+            this.Publish(message.Serialize());
+        }
+
         private void Subscribe()
         {
             this.redisSubscriper.Subscribe(
-                this.channelName, 
+                this.channelName,
                 (channel, msg) =>
                 {
                     string messageStr = (string)msg;
@@ -181,7 +182,7 @@ namespace CacheManager.Redis
                             }
                             break;
                     }
-                }, 
+                },
                 StackRedis.CommandFlags.FireAndForget);
         }
     }

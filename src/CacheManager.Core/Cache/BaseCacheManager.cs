@@ -19,7 +19,7 @@ namespace CacheManager.Core.Cache
         /// <summary>
         /// The cache back plate.
         /// </summary>
-        private ICacheBackPlate cacheBackPlate = null;
+        private CacheBackPlate cacheBackPlate = null;
 
         /// <summary>
         /// The cache handles collection.
@@ -366,7 +366,7 @@ namespace CacheManager.Core.Cache
         /// <exception cref="System.ArgumentNullException">
         /// If <paramref name="backPlate"/> is null.
         /// </exception>
-        internal void SetCacheBackPlate(ICacheBackPlate backPlate)
+        internal void SetCacheBackPlate(CacheBackPlate backPlate)
         {
             if (backPlate == null)
             {

@@ -51,25 +51,33 @@ namespace CacheManager.Redis
         /// <summary>
         /// Gets the configuration.
         /// </summary>
-        /// <param name="id">The identifier.</param>
+        /// <param name="configurationName">The identifier.</param>
         /// <returns></returns>
         /// <exception cref="System.ArgumentNullException">If id is null.</exception>
         /// <exception cref="System.InvalidOperationException">
         /// If no configuration was added for the id.
         /// </exception>
-        public static RedisConfiguration GetConfiguration(string id)
+        public static RedisConfiguration GetConfiguration(string configurationName)
         {
-            if (string.IsNullOrWhiteSpace(id))
+            if (string.IsNullOrWhiteSpace(configurationName))
             {
-                throw new ArgumentNullException("id");
+                throw new ArgumentNullException("configurationName");
             }
 
-            if (!configurations.ContainsKey(id))
+            if (!configurations.ContainsKey(configurationName))
             {
-                throw new InvalidOperationException("No configuration added for id " + id);
+                // check connection strings if there is one matching the name
+                var connectionStringHolder = ConfigurationManager.ConnectionStrings[configurationName];
+                if (connectionStringHolder == null || string.IsNullOrWhiteSpace(connectionStringHolder.ConnectionString))
+                {
+                    throw new InvalidOperationException("No configuration added for configurationName " + configurationName);
+                }
+
+                var configuration = new RedisConfiguration(configurationName, connectionStringHolder.ConnectionString);
+                configurations.Add(configurationName, configuration);
             }
 
-            return configurations[id];
+            return configurations[configurationName];
         }
 
         /// <summary>

@@ -16,7 +16,7 @@
     /// The same mechanism will apply to any Update, Put, Remove, Clear or ClearRegion call of the cache.
     /// </para>
     /// </summary>
-    public abstract class CacheBackPlate : ICacheBackPlate
+    public abstract class CacheBackPlate : IDisposable
     {
         private Action<string> onChangeKey;
         private Action<string, string> onChangeKeyRegion;
@@ -215,7 +215,7 @@
         /// </summary>
         /// <param name="change">The change.</param>
         /// <exception cref="System.ArgumentNullException">Id change is null.</exception>
-        public void SubscribeChanged(Action<string> change)
+        internal void SubscribeChanged(Action<string> change)
         {
             if (change == null)
             {
@@ -231,7 +231,7 @@
         /// </summary>
         /// <param name="change">The change.</param>
         /// <exception cref="System.ArgumentNullException">If change is null.</exception>
-        public void SubscribeChanged(Action<string, string> change)
+        internal void SubscribeChanged(Action<string, string> change)
         {
             if (change == null)
             {
@@ -247,7 +247,7 @@
         /// </summary>
         /// <param name="clear">The clear.</param>
         /// <exception cref="System.ArgumentNullException">If clear is null.</exception>
-        public void SubscribeClear(Action clear)
+        internal void SubscribeClear(Action clear)
         {
             if (clear == null)
             {
@@ -263,7 +263,7 @@
         /// </summary>
         /// <param name="clearRegion">The clear region.</param>
         /// <exception cref="System.ArgumentNullException">If clearRegion is null.</exception>
-        public void SubscribeClearRegion(Action<string> clearRegion)
+        internal void SubscribeClearRegion(Action<string> clearRegion)
         {
             if (clearRegion == null)
             {
@@ -279,7 +279,7 @@
         /// </summary>
         /// <param name="remove">The remove.</param>
         /// <exception cref="System.ArgumentNullException">If remove is null.</exception>
-        public void SubscribeRemove(Action<string> remove)
+        internal void SubscribeRemove(Action<string> remove)
         {
             if (remove == null)
             {
@@ -295,7 +295,7 @@
         /// </summary>
         /// <param name="remove">The remove.</param>
         /// <exception cref="System.ArgumentNullException">If remove is null.</exception>
-        public void SubscribeRemove(Action<string, string> remove)
+        internal void SubscribeRemove(Action<string, string> remove)
         {
             if (remove == null)
             {
