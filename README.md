@@ -9,10 +9,19 @@ make it very easy to change the caching strategy later on in a project. It also 
 The developer can opt-in to those features only if needed.
 
 ## Documentation
-I'm currently working on the documentation... more to come soon ;). 
+ 
+Documentation can be found within the [articles folder][articles] of this repository and  hosted on my [website][mcweb]:
 
-* Documentation can be found within the [Articles folder](https://github.com/MichaCo/CacheManager/tree/master/Articles) and  hosted on [my website](http://mconrad.azurewebsites.net).
-* [API html documentation](http://michaco.github.io/Documentation/CacheManager/Help).
+* [**Getting Started**][gettingstarted]
+Is a very basic introduction of how to install and use Cache Manager
+* [**Features and Architecture**][featuresarticle]
+A more advanced in death introduction to all features of Cache Manager
+* [**Update Operations**][updatearticle]
+Explanation of why and when to use the update method instead of `Put` 
+* [**Cache Synchronization**][cachesyncarticle]
+Use case for and explanation of the Cache Back Plate feature.
+
+There is also from source generated [html documentation][help] available online.
 
 ## CacheManager Nuget Packages
 
@@ -75,5 +84,12 @@ OnGet, OnAdd, OnPut, OnRemove, OnClear, OnClearRegion
 [Memcached.nuget]: https://www.nuget.org/packages/CacheManager.Memcached
 [Web.nuget]: https://www.nuget.org/packages/CacheManager.Web
 [Couchbase.nuget]: https://www.nuget.org/packages/CacheManager.Couchbase
+[mcweb]: http://mconrad.azurewebsites.net
+[articles]: https://github.com/MichaCo/CacheManager/tree/master/Articles
+[help]: http://michaco.github.io/Documentation/CacheManager/Help
+[gettingstarted]: http://mconrad.azurewebsites.net/Documentation/Index/cachemanager_getting_started
+[featuresarticle]: http://mconrad.azurewebsites.net/Documentation/Index/cachemanager_architecture
+[updatearticle]: http://mconrad.azurewebsites.net/Documentation/Index/cachemanager_update
+[cachesyncarticle]: http://mconrad.azurewebsites.net/Documentation/Index/cachemanager_synchronization
 
 [TOC]
