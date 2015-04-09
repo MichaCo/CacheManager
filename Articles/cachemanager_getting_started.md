@@ -14,8 +14,10 @@ To get started let us create a new .Net C# console application in visual studio:
 ![New project][newProject]
 
 Now right click the project in solution explorer and click "Manage Nuget Packages", put "cachemanger" into the search box on the top right, you should get a list of packages like this:
+
 ![Add nuget][addnuget]
 
+Select the "CacheManager.SystemRuntimeCaching" package and hit "Install".
 This will actually install already all you need to use cache manager with the `System.Runtime.Caching` based in-process cache.
 
 Now let's add some code to the newly created program.cs `Main` method:
@@ -44,17 +46,29 @@ To use the instance, we can add some test code. We will add two items, updated t
     cache.Put("keyB", 23);
     cache.Update("keyB", v => 42);
 
-    Console.WriteLine("KeyA is " + cache.Get("keyA"));      // should be valueA
-    Console.WriteLine("KeyB is " + cache.Get("keyB"));      // should be 42
+Let's also remove one key and see if it worked...
+The full code example:
 
-Let's remove one key and see if it worked:
+    static void Main(string[] args)
+    {
+        var cache = CacheFactory.Build("getStartedCache", settings =>
+        {
+            settings.WithSystemRuntimeCacheHandle("handleName");
+        });
+	        
+	    cache.Add("keyA", "valueA");
+	    cache.Put("keyB", 23);
+	    cache.Update("keyB", v => 42);
+	
+	    Console.WriteLine("KeyA is " + cache.Get("keyA"));      // should be valueA
+	    Console.WriteLine("KeyB is " + cache.Get("keyB"));      // should be 42
+		cache.Remove("keyA");
 
-    cache.Remove("keyA");
-
-    Console.WriteLine("KeyA removed? " + (cache.Get("keyA") == null).ToString());
-
-    Console.WriteLine("We are done...");
-    Console.ReadKey();
+	    Console.WriteLine("KeyA removed? " + (cache.Get("keyA") == null).ToString());
+	
+	    Console.WriteLine("We are done...");
+	    Console.ReadKey();
+    }
 
 Hopefully this worked out just fine. Now you should be set to play around with the cache!
 
