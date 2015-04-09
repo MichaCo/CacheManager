@@ -70,7 +70,7 @@ The full code example:
 	    Console.ReadKey();
     }
 
-Hopefully this worked out just fine. Now you should be set to play around with the cache!
+Hopefully this worked out just fine. Now you should be set to play around with the Cache Manager!
 
 [readme]: http://mconrad.azurewebsites.net/Home/CacheManager
 [features]: http://mconrad.azurewebsites.net/Documentation/Index/cachemanager_architecture
