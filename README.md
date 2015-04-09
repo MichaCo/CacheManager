@@ -25,8 +25,8 @@ There is also from source generated [html documentation][help] available online.
 
 ## CacheManager Nuget Packages
 
-| Package Name | .Net 4.0 | .Net 4.5
-----------| :----------: | :------------:
+| Package Name         | .Net 4.0         | .Net 4.5
+|----------------------| :--------------: | :----------------:
 | [CacheManager.Core] [Core.nuget] | x | x
 | [CacheManager.StackExchange.Redis] [Redis.nuget] | x | x 
 | [CacheManager.SystemRuntimeCaching] [SystemRuntimeCaching.nuget]  | x | x 
