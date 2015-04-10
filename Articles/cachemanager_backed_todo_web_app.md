@@ -4,17 +4,18 @@
 We will create a single page To-Do web site backed via Cache Manager.
 
 To implement this, we will use an existing AngularJS based [examples][1] from [todomvc.com][2]. All credits for the JavaScript part of this sample site goes to them of course. 
-I will just show the service implementation backed by Cache Manager.
 
-If you don't know what the sample ToDo app does, go to [todomvc.com][2], there are many different implementations of the same application which looks similar to this:
+In this article I will explain the service implementation backed by Cache Manager. You can see the it in action on the [cachemanager-todo.azurewebsites.net][demo] sample site and [browse the code on Github][3].
+
+If you don't know what the sample todo app does, go to [todomvc.com][2], there are many different implementations of the same application which looks similar to this:
 
 ![todomvc example][3]
 
 ## Basic Functionality
-With the app the user can add new todos, edit existing ones, delete them and set them to completed state. Also there is one button which allows deleting of all completed.
+With the app the user can add new todos, edit existing ones, delete them and set them to completed state. Also there is one button which allows deleting of all completed todos.
 
 ## Rest Service
-Our service therefore has to provide the following methods:
+The single page application will call an web api service which has to store, remove the todos and therefore has to provide the following methods:
 
 * Get - retrieves all existing todos
 * Get(id) - retrieves on todo by id
@@ -24,11 +25,11 @@ Our service therefore has to provide the following methods:
 * Delete - removes all completed todos
 
 ## Project setup
-We will implement the service with asp.net WebAPI, so lets create an empty WebAPI project and add the sample code to it.  So that our solution looks like that:
+We will implement the service with asp.net Web API, so lets create an empty Web API project and add the sample code to it.  Our solution will look like that:
 ![enter image description here][5]
 
 > **Hint**
-> Don't worry, you can simply get the full source code of this sample from the [website repository on Github][4]
+> Don't worry, you can simply get the full source code of this sample from the [website's repository on Github][4]
 
 I also installed some additional nuget packages, CacheManager packages, Unity and Json.Net.
 
@@ -268,7 +269,7 @@ The connection string itself must contain at least the host, SSL being set to tr
 
 
 ----------
-And that's it, you can see the sample site in action on [cachemanager-todo.azurewebsites.net][demo] and [browse the code on Github][3]
+And that's it, you can see the sample site in action on [cachemanager-todo.azurewebsites.net][demo] and [browse the code on Github][3].
 
 [demo]: http://cachemanager-todo.azurewebsites.net/
 [1]: https://github.com/tastejs/todomvc/tree/gh-pages/examples/angularjs
