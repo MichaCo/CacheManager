@@ -274,7 +274,7 @@ namespace CacheManager.Tests
 
             // assert
             act.ShouldThrow<InvalidOperationException>()
-                .WithMessage("*No configuration added for id redis*");
+                .WithMessage("*No configuration added for configurationName redis*");
         }
 
         [Fact]
