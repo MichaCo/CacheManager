@@ -232,8 +232,7 @@ With Cache Manager this change is extremely easy to change. Just a few lines of 
                 .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMinutes(10))
             .And
             .WithRedisConfiguration("redisLocal", "localhost:6379,ssl=false")
-            .WithRedisCacheHandle("redisLocal", true)
-                .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMinutes(20));
+            .WithRedisCacheHandle("redisLocal", true);
     });
 
 The configuration now has two cache handles! A "first level" in-process cache, and the "second level" distributed cache. This way we can reduce the traffic to the Redis server which will make our Application a lot faster.
@@ -250,8 +249,7 @@ We can also use the Cache Manager's back plate feature, to keep the configured f
                 .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMinutes(10))
             .And
             .WithRedisBackPlate("redis.azure.us")
-            .WithRedisCacheHandle("redis.azure.us", true)
-                .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMinutes(20));
+            .WithRedisCacheHandle("redis.azure.us", true);
     });
 
 You can either add the connection string via web.config `ConnectionStrings` section, or add it via Azure Management Portal (which is the preferred way for security reasons...).
