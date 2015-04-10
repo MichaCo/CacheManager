@@ -1,5 +1,5 @@
 
-# Update operations
+# Update Operations
 Updating a cache item in a distributed cache is different from just changing the item within an in-process cache. 
 With in-process caches, we can ensure thread safe writes, and with poco objects, the in-process cache will just keep the reference to that object and therefor always holds the same version for all threads. 
 
