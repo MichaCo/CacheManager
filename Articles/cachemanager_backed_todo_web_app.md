@@ -278,3 +278,5 @@ And that's it, you can see the sample site in action on [cachemanager-todo.azure
 [5]: https://github.com/MichaCo/CacheManager/raw/master/Articles/media/cachemanager-single-page-todo-app/adding-todosample-into-webapi-project.jpg
 [6]: http://mconrad.azurewebsites.net/Documentation/Index/cachemanager_update
 [7]: https://github.com/MichaCo/CacheManager/raw/master/Articles/media/cachemanager-single-page-todo-app/cachemanager-todo-appsettings.jpg
+
+[TOC]
