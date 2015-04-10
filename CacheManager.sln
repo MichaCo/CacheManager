@@ -78,7 +78,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Articles", "Articles", "{BF84619C-FFD1-4B18-85FC-9CBD010A6ACC}"
 	ProjectSection(SolutionItems) = preProject
 		Articles\cachemanager_architecture.md = Articles\cachemanager_architecture.md
-		cachemanager_backed_todo_web_app.md = cachemanager_backed_todo_web_app.md
+		Articles\cachemanager_backed_todo_web_app.md = Articles\cachemanager_backed_todo_web_app.md
 		Articles\cachemanager_getting_started.md = Articles\cachemanager_getting_started.md
 		Articles\cachemanager_synchronization.md = Articles\cachemanager_synchronization.md
 		Articles\cachemanager_update.md = Articles\cachemanager_update.md
