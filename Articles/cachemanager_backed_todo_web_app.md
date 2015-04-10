@@ -257,13 +257,24 @@ And in addition we can use the back plate feature, so that if we have multiple i
     });
 
 You can either add the connection string via web.config `ConnectionStrings` section, or add it via Azure Management Portal (which is the preferred way for security reasons...).
+On the Azure Management Portal, click on your web app, "All Settings", "Application Settings" and scroll down to "Connection Strings" and add the connection string to the list.
+It should look similar to this:
 
-The connection string for 
+![Azure portal][7]
+
+The connection string itself must contain at least the host, SSL being set to true and the password being set to one of the Redis Access Keys provided by the portal.
+
+	hostName:6380,ssl=true,password=ThEaCcessKey
 
 
+----------
+And that's it, you can see the sample site in action on [cachemanager-todo.azurewebsites.net][demo] and [browse the code on Github][3]
+
+[demo]: http://cachemanager-todo.azurewebsites.net/
 [1]: https://github.com/tastejs/todomvc/tree/gh-pages/examples/angularjs
 [2]: http://todomvc.com/
 [3]: https://github.com/MichaCo/CacheManager/raw/master/Articles/media/cachemanager-single-page-todo-app/todo-app.jpg
 [4]: https://github.com/MichaCo/MichaCo.Websites/tree/master/cachemanager-todo.azurewebsites.net/Website
 [5]: https://github.com/MichaCo/CacheManager/raw/master/Articles/media/cachemanager-single-page-todo-app/adding-todosample-into-webapi-project.jpg
 [6]: http://mconrad.azurewebsites.net/Documentation/Index/cachemanager_update
+[7]: https://github.com/MichaCo/CacheManager/raw/master/Articles/media/cachemanager-single-page-todo-app/cachemanager-todo-appsettings.jpg
