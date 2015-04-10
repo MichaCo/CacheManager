@@ -130,7 +130,7 @@ I'm using `Add` here because `Add` only adds the value only if it is not already
 	   }
 
 ### Get and Get by Id
-We can use the `AllKeys` property and iterate over the keys to return the list of `Todo`´s.
+We can use the `AllKeys` property and iterate over the keys to return the list of `Todo`Â´s.
 For `Get` by id, we simply call `cache.Get(id)`.
 
 	   // GET: api/ToDo
@@ -189,7 +189,7 @@ If a version conflict occurs during the update process, our changes will be disc
 Afterwards we can update the `Id` property of our `Todo` and finally `Add` it to our cache and return it. 
 
 ### Delete
-Delete all completed `Todo`´s will just iterate over all existing `Todo`´s and check the `Completed` state and then call `Delete` by id.
+Delete all completed `Todo`Â´s will just iterate over all existing `Todo`Â´s and check the `Completed` state and then call `Delete` by id.
 
 	   // DELETE ALL completed: api/ToDo
 	   public void Delete()
@@ -207,7 +207,7 @@ Delete all completed `Todo`´s will just iterate over all existing `Todo`´s and c
 	   }
         
 ### Delete by Id
-Delete by Id has a similar problem as our `Post` method, we also have to update the key holding all the todos´ ids. Same thing here, we'll use the `Update` method to ensure we work on the correct version of the ids array. All we have to do is removing the id from the array though.
+Delete by Id has a similar problem as our `Post` method, we also have to update the key holding all the todosÂ´ ids. Same thing here, we'll use the `Update` method to ensure we work on the correct version of the ids array. All we have to do is removing the id from the array though.
 
 	   // DELETE: api/ToDo/5
 	   public void Delete(int id)
