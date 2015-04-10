@@ -7,7 +7,7 @@ I will explain the service implementation and usage of Cache Manager, also discu
 To implement the site, I will use an existing AngularJS based [example][1] from [todomvc.com][2]. 
 All credits for this part of this sample site goes to them of course. 
 
-You can see the sample site in action on [cachemanager-todo.azurewebsites.net][demo] or [browse the code on Github][3].
+You can see the sample site in action on [cachemanager-todo.azurewebsites.net][demo] or [browse the code on Github][4].
 
 If you don't know what the todo app does, go to [todomvc.com][2], there are many different implementations of the same application which look similar to this:
 
@@ -264,7 +264,7 @@ The connection string itself must contain at least the host, SSL being set to tr
 
 
 ----------
-And that's it, you can see the sample site in action on [cachemanager-todo.azurewebsites.net][demo] and [browse the code on Github][3].
+And that's it, you can see the sample site in action on [cachemanager-todo.azurewebsites.net][demo] and [browse the code on Github][4].
 
 [demo]: http://cachemanager-todo.azurewebsites.net/
 [redis]: http://redis.io/
