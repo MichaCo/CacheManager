@@ -14,10 +14,10 @@ If you don't know what the todo app does, go to [todomvc.com][2], there are many
 ![todomvc example][3]
 
 ## Basic Functionality
-With the app the user can add new todos, edit existing ones, delete them and set them to completed state. Also there is a delete all completed function.
+With this simple app the user can add new todos, edit existing ones, delete them and set them to completed state. There is also a delete "all completed" function.
 
-## Rest Service
-The single page application will call a web API service which has to store or remove the todos and therefore has to provide the following methods:
+## Service Definition
+This single page application will use a web API service to store or remove the todos and which has to provide the following methods:
 
 * Get - retrieves all existing todos
 * Get(id) - retrieves one todo by id
