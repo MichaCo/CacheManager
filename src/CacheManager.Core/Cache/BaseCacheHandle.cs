@@ -173,7 +173,7 @@ namespace CacheManager.Core.Cache
         /// </returns>
         protected internal override bool AddInternal(CacheItem<TCacheValue> item)
         {
-            this.GetItemExpiration(item);
+            item = this.GetItemExpiration(item);
             return this.AddInternalPrepared(item);
         }
 
@@ -184,7 +184,7 @@ namespace CacheManager.Core.Cache
         /// <param name="item">The <c>CacheItem</c> to be added to the cache.</param>
         protected internal override void PutInternal(CacheItem<TCacheValue> item)
         {
-            this.GetItemExpiration(item);
+            item = this.GetItemExpiration(item);
             this.PutInternalPrepared(item);
         }
 
@@ -220,7 +220,7 @@ namespace CacheManager.Core.Cache
         /// <exception cref="System.InvalidOperationException">
         /// If expiration mode is defined without timeout.
         /// </exception>
-        protected void GetItemExpiration(CacheItem<TCacheValue> item)
+        protected CacheItem<TCacheValue> GetItemExpiration(CacheItem<TCacheValue> item)
         {
             if (item == null)
             {
@@ -250,8 +250,8 @@ namespace CacheManager.Core.Cache
             }
 
             // Fix issue 2: updating the item exp timeout and mode:
-            item.ExpirationMode = expirationMode;
-            item.ExpirationTimeout = expirationTimeout;
+            // Fix issue where expiration got applied to all caches because it was stored in the item passed around.
+            return item.WithExpiration(expirationMode, expirationTimeout);
         }
 
         /// <summary>

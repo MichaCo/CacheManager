@@ -150,7 +150,7 @@ namespace CacheManager.SystemRuntimeCaching
             {
                 // because we don't use UpdateCallback because of some multithreading issues lets
                 // try to simply reset the item by setting it again.
-                this.GetItemExpiration(item);
+                item = this.GetItemExpiration(item);
                 cache.Set(fullKey, item, GetPolicy(item));
             }
 
