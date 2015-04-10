@@ -223,7 +223,7 @@ Delete by Id is similar to `Post`, we also have to update the key holding all th
 As you might have recognized, in the "Setting up Cache Manager" section of this article, I only specified one in-process cache handle. This would mean that our `Todo`s are stored in memory only and will be flushed whenever the app gets restarted.
 To persist our `Todo`s we could use some distributed cache like [Redis][redis] or couchbase.
 
-With Cache Manager this change is extremely easy to change. Just a few lines of configuration and there are no changes needed in our Api controller!
+With Cache Manager this is extremely easy to change. Just a few lines of configuration and there are no changes needed in our Api controller!
 
     var cache = CacheFactory.Build("todos", settings =>
     {
