@@ -4,7 +4,7 @@
 This is about creating a single page web site using an asp.net Web API Service which stores the data via Cache Manager. 
 I will explain the service implementation and usage of Cache Manager, also discussing how to host the newly created site on Azure and how to configure Azure's Redis cache.
 
-To implement the site, I will use an existing AngularJS based [examples][1] from [todomvc.com][2]. 
+To implement the site, I will use an existing AngularJS based [example][1] from [todomvc.com][2]. 
 All credits for this part of this sample site goes to them of course. 
 
 You can see the sample site in action on [cachemanager-todo.azurewebsites.net][demo] or [browse the code on Github][3].
