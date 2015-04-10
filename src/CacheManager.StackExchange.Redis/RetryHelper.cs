@@ -16,8 +16,13 @@ namespace CacheManager.Redis
                 {
                     return retryme();
                 }
-                catch (StackRedis.RedisConnectionException)
+                catch (StackRedis.RedisConnectionException conEx)
                 {
+                    if (conEx.FailureType == StackRedis.ConnectionFailureType.UnableToConnect
+                        || conEx.FailureType == StackRedis.ConnectionFailureType.AuthenticationFailure)
+                    {
+                        throw conEx;
+                    }
 #if NET40
                     TaskEx.Delay(timeOut).Wait();
 #else
@@ -36,6 +41,16 @@ namespace CacheManager.Redis
                 {
                     ag.Handle(e =>
                     {
+                        var conEx = e as StackRedis.RedisConnectionException;
+                        if (conEx != null)
+                        {
+                            if (conEx.FailureType == StackRedis.ConnectionFailureType.UnableToConnect
+                                || conEx.FailureType == StackRedis.ConnectionFailureType.AuthenticationFailure)
+                            {
+                                throw conEx;
+                            }
+                        }
+
                         if (e is StackRedis.RedisConnectionException || e is System.TimeoutException)
                         {
 #if NET40
