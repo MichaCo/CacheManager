@@ -33,7 +33,7 @@ Every cache provider specific Cache Manager package will provide an extension me
 
 Example:
 
-    var cache = CacheFactory.Build("myCacheName", settings =>
+    var cache = CacheFactory.Build<string>("myCacheName", settings =>
     {
 	    settings
 		    .WithSystemRuntimeCacheHandle("handle1");
@@ -41,7 +41,7 @@ Example:
 
 Adding multiple cache handles looks pretty much the same:
 
-    var cache = CacheFactory.Build("myCacheName", settings =>
+    var cache = CacheFactory.Build<string>("myCacheName", settings =>
     {
 	    settings
 		    .WithSystemRuntimeCacheHandle("handle1")
@@ -95,15 +95,20 @@ To create a Cache Manager instance one should use the `CacheFactory` class which
 
 If you want to separate the creation of the configuration object and the creation of the Cache Manager instance, use the `ConfigurationBuilder` to create the configuration.
 
-	var cfg = ConfigurationBuilder.BuildConfiguration<object>("cacheName", settings =>
+	var cfg = ConfigurationBuilder.BuildConfiguration(settings =>
 		{
 			settings.WithUpdateMode(CacheUpdateMode.Up)
                 .WithSystemRuntimeCacheHandle("handleName")
 					.WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(10));
 		});
 
-	var cache = CacheFactory.FromConfiguration(cfg);
+	var cache = CacheFactory.FromConfiguration<string>("cacheName", cfg);
 	cache.Add("key", "value");
+
+And now, you can reuse the configuration and create another Cache Manager instance for a different type for example:
+
+	var cache = CacheFactory.FromConfiguration<int>("numbers", cfg);
+
 
 ### Configuration Section
 The Cache Manager configuration section has two main parts, the `managers`  collection which is used to configure the cache manager instances. The `name` of the element within the collection can be passed to `CacheFactory.FromConfiguration`.
@@ -122,7 +127,7 @@ And the `cacheHandles` collection which lists the available (installed) cache ha
       </cacheHandles>
     </cacheManager>
 
-The cacheHandles' elements can be defined with default values for expiration mode and timeout. It can be overridden by the `handle` element though.
+The cacheHandles' elements can be defined with default values for expiration mode and timeout. It can be overridden by the `handle` element though. The `type` must a `Type` extending from `BaseCacheHandle`, it also has to be an open generic at this point.
 
 > **Hint**
 > To make configuration via .config file easier, enable intellisense by adding the `xmlns` attribute to he `cacheManagers` section and add the CacheManagerCfg.xsd file to your solution. The xsd file can be found in  [solution dir]/packages/CacheManager.Core.x.x.x.x/CacheManagerCfg.xsd
