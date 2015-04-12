@@ -5,16 +5,19 @@ namespace CacheManager.Core.Cache
 {
     /// <summary>
     /// The <c>BaseCacheHandle</c> implements all the logic which might be common for all the cache
-    /// handles. It abstracts the <see cref="ICache{T}"/> and <see cref="ICacheHandle{T}"/>
+    /// handles. It abstracts the <see cref="ICache{T}"/>
     /// interface and defines new properties and methods the implementer must use.
     /// <para>
-    /// Actually it is not advisable to not use <see cref="BaseCacheHandle{T}"/> and directly
-    /// implement <see cref="ICacheHandle{T}"/>.
+    /// Actually it is not advisable to not use <see cref="BaseCacheHandle{T}"/>.
     /// </para>
     /// </summary>
     /// <typeparam name="TCacheValue">The type of the cache value.</typeparam>
-    public abstract class BaseCacheHandle<TCacheValue> : BaseCache<TCacheValue>, ICacheHandle<TCacheValue>
+    public abstract class BaseCacheHandle<TCacheValue> : BaseCache<TCacheValue>
     {
+        protected BaseCacheHandle()
+        {
+        }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="BaseCacheHandle{TCacheValue}"/> class.
         /// </summary>
@@ -24,7 +27,7 @@ namespace CacheManager.Core.Cache
         /// If configuration or manager are null.
         /// </exception>
         /// <exception cref="System.ArgumentException">If configuration name is empty.</exception>
-        protected BaseCacheHandle(ICacheManager<TCacheValue> manager, ICacheHandleConfiguration configuration)
+        protected BaseCacheHandle(ICacheManager<TCacheValue> manager, CacheHandleConfiguration configuration)
         {
             if (configuration == null)
             {
@@ -46,7 +49,7 @@ namespace CacheManager.Core.Cache
             this.Manager = manager;
 
             this.Stats = new CacheStats<TCacheValue>(
-                this.Configuration.CacheName,
+                manager.Name,
                 this.Configuration.HandleName,
                 this.Configuration.EnableStatistics,
                 this.Configuration.EnablePerformanceCounters);
@@ -56,7 +59,7 @@ namespace CacheManager.Core.Cache
         /// Gets the cache handle configuration.
         /// </summary>
         /// <value>The configuration.</value>
-        public ICacheHandleConfiguration Configuration { get; private set; }
+        public virtual CacheHandleConfiguration Configuration { get; private set; }
 
         /// <summary>
         /// Gets the number of items the cache handle currently maintains.
@@ -68,13 +71,13 @@ namespace CacheManager.Core.Cache
         /// Gets the cache manager the cache handle was added to.
         /// </summary>
         /// <value>The manager.</value>
-        public ICacheManager<TCacheValue> Manager { get; private set; }
+        public virtual ICacheManager<TCacheValue> Manager { get; private set; }
 
         /// <summary>
         /// Gets the cache stats object.
         /// </summary>
         /// <value>The stats.</value>
-        public CacheStats<TCacheValue> Stats { get; private set; }
+        public virtual CacheStats<TCacheValue> Stats { get; private set; }
 
         /// <summary>
         /// Updates an existing key in the cache.
@@ -220,7 +223,7 @@ namespace CacheManager.Core.Cache
         /// <exception cref="System.InvalidOperationException">
         /// If expiration mode is defined without timeout.
         /// </exception>
-        protected CacheItem<TCacheValue> GetItemExpiration(CacheItem<TCacheValue> item)
+        protected virtual CacheItem<TCacheValue> GetItemExpiration(CacheItem<TCacheValue> item)
         {
             if (item == null)
             {

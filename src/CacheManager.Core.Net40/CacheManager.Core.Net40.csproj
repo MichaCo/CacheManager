@@ -120,9 +120,6 @@
     <Compile Include="..\CacheManager.Core\ICache.cs">
       <Link>ICache.cs</Link>
     </Compile>
-    <Compile Include="..\CacheManager.Core\ICacheHandle.cs">
-      <Link>ICacheHandle.cs</Link>
-    </Compile>
     <Compile Include="..\CacheManager.Core\ICacheManager.cs">
       <Link>ICacheManager.cs</Link>
     </Compile>

@@ -1,5 +1,6 @@
 ﻿namespace CacheManager.Core.Configuration
 {
+    //TODO: remove
     /// <summary>
     /// Defines the contract for the cache manager configuration.
     /// </summary>
@@ -17,13 +18,6 @@
         /// </summary>
         /// <value>The maximum retries.</value>
         int MaxRetries { get; set; }
-
-        /// <summary>
-        /// Gets the name the cache will be using.
-        /// <para>The name might be used by several components as an identifier or display name.</para>
-        /// </summary>
-        /// <value>The name.</value>
-        string Name { get; }
 
         /// <summary>
         /// Gets or sets the number of milliseconds the cache should wait before it will retry an action.

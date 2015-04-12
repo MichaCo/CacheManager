@@ -28,12 +28,12 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="CacheBackPlate"/> class.
         /// </summary>
-        /// <param name="name">The name.</param>
-        /// <param name="configuration">The configuration.</param>
-        public CacheBackPlate(string name, ICacheManagerConfiguration configuration)
+        /// <param name="configurationKey">The name.</param>
+        /// <param name="cacheName">The cache name.</param>
+        public CacheBackPlate(string configurationKey, string cacheName)
         {
-            this.Name = name;
-            this.Configuration = configuration;
+            this.Name = configurationKey;
+            this.CacheName = cacheName;
         }
 
         /// <summary>
@@ -48,7 +48,7 @@
         /// Gets the configuration.
         /// </summary>
         /// <value>The configuration.</value>
-        public ICacheManagerConfiguration Configuration { get; private set; }
+        public string CacheName { get; private set; }
 
         /// <summary>
         /// Gets the name.

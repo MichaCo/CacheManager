@@ -18,7 +18,7 @@ namespace CacheManager.Core.Cache
         /// </summary>
         /// <param name="manager">The manager.</param>
         /// <param name="configuration">The configuration.</param>
-        public DictionaryCacheHandle(ICacheManager<TCacheValue> manager, ICacheHandleConfiguration configuration)
+        public DictionaryCacheHandle(ICacheManager<TCacheValue> manager, CacheHandleConfiguration configuration)
             : base(manager, configuration)
         {
             this.cache = new ConcurrentDictionary<string, CacheItem<TCacheValue>>();

@@ -44,7 +44,7 @@ namespace CacheManager.Core
         /// <exception cref="System.InvalidOperationException">
         /// Thrown on certain configuration errors related to the cache handles.
         /// </exception>
-        public static ICacheManager<object> Build(string cacheName, Action<ConfigurationBuilderCachePart<object>> settings)
+        public static ICacheManager<object> Build(string cacheName, Action<ConfigurationBuilderCachePart> settings)
         {
             return Build<object>(cacheName, settings);
         }
@@ -84,22 +84,22 @@ namespace CacheManager.Core
         /// <exception cref="System.InvalidOperationException">
         /// Thrown on certain configuration errors related to the cache handles.
         /// </exception>
-        public static ICacheManager<TCacheValue> Build<TCacheValue>(string cacheName, Action<ConfigurationBuilderCachePart<TCacheValue>> settings)
+        public static ICacheManager<TCacheValue> Build<TCacheValue>(string cacheName, Action<ConfigurationBuilderCachePart> settings)
         {
             if (settings == null)
             {
                 throw new ArgumentNullException("settings");
             }
 
-            var part = new ConfigurationBuilderCachePart<TCacheValue>(cacheName);
+            var part = new ConfigurationBuilderCachePart();
             settings(part);
-            return CacheReflectionHelper.FromConfiguration<TCacheValue>(part.Configuration);
+            return CacheReflectionHelper.FromConfiguration<TCacheValue>(cacheName, part.Configuration);
         }
 
         /// <summary>
         /// <para>Instantiates a cache manager from app.config or web.config.</para>
         /// <para>
-        /// The <paramref name="name"/> must match with one cache element defined in your config file.
+        /// The <paramref name="cacheName"/> must match with one cache element defined in your config file.
         /// </para>
         /// </summary>
         /// <example>
@@ -112,12 +112,12 @@ namespace CacheManager.Core
         /// ]]>
         /// </code>
         /// </example>
-        /// <param name="name">The name of the configured cache element within the config file.</param>
+        /// <param name="cacheName">The name of the cache, must also match with the configured cache name.</param>
         /// <typeparam name="TCacheValue">The type of the cache item value.</typeparam>
         /// <returns>The cache manager instance.</returns>
         /// <seealso cref="ICacheManager{TCacheValue}"/>
         /// <exception cref="System.ArgumentNullException">
-        /// Thrown if the <paramref name="name"/> is null or an empty string.
+        /// Thrown if the <paramref name="cacheName"/> is null or an empty string.
         /// </exception>
         /// <exception cref="System.Configuration.ConfigurationErrorsException">
         /// Thrown if there are configuration errors within the cacheManager section.
@@ -126,9 +126,46 @@ namespace CacheManager.Core
         /// Thrown if no cacheManager section is defined or on certain configuration errors related
         /// to the cache handles.
         /// </exception>
-        public static ICacheManager<TCacheValue> FromConfiguration<TCacheValue>(string name)
+        public static ICacheManager<TCacheValue> FromConfiguration<TCacheValue>(string cacheName)
         {
-            return CacheReflectionHelper.FromConfiguration<TCacheValue>(name);
+            return CacheReflectionHelper.FromConfiguration<TCacheValue>(cacheName, cacheName);
+        }
+
+
+        /// <summary>
+        /// <para>Instantiates a cache manager from app.config or web.config.</para>
+        /// <para>
+        /// The <paramref name="cacheName"/> must match with one cache element defined in your config file.
+        /// </para>
+        /// </summary>
+        /// <example>
+        /// The following example show how to use the CacheFactory to create a new cache manager
+        /// instance from app/web.config.
+        /// <code>
+        /// <![CDATA[
+        ///     var cache = CacheFactory.FromConfiguration<object>("myCache");
+        ///     cache.Add("key", "value");
+        /// ]]>
+        /// </code>
+        /// </example>
+        /// <param name="cacheName">The name of the cache.</param>
+        /// <param name="configName">The configuration name must match with the configured cache name in the configuration file.</param>
+        /// <typeparam name="TCacheValue">The type of the cache item value.</typeparam>
+        /// <returns>The cache manager instance.</returns>
+        /// <seealso cref="ICacheManager{TCacheValue}"/>
+        /// <exception cref="System.ArgumentNullException">
+        /// Thrown if the <paramref name="cacheName"/> is null or an empty string.
+        /// </exception>
+        /// <exception cref="System.Configuration.ConfigurationErrorsException">
+        /// Thrown if there are configuration errors within the cacheManager section.
+        /// </exception>
+        /// <exception cref="System.InvalidOperationException">
+        /// Thrown if no cacheManager section is defined or on certain configuration errors related
+        /// to the cache handles.
+        /// </exception>
+        public static ICacheManager<TCacheValue> FromConfiguration<TCacheValue>(string cacheName, string configName)
+        {
+            return CacheReflectionHelper.FromConfiguration<TCacheValue>(cacheName, configName);
         }
 
         /// <summary>
@@ -139,7 +176,7 @@ namespace CacheManager.Core
         /// using the <c>CacheFactory</c> to create a new cache manager instance.
         /// <code>
         /// <![CDATA[
-        /// CacheManagerConfiguration<object> managerConfiguration = ConfigurationBuilder.BuildConfiguration<object>("myCacheName", settings =>
+        /// CacheManagerConfiguration<object> managerConfiguration = ConfigurationBuilder.BuildConfiguration<object>(settings =>
         /// {
         ///     settings.WithUpdateMode(CacheUpdateMode.Up)
         ///         .WithHandle<DictionaryCacheHandle<object>>("handle1")
@@ -147,28 +184,27 @@ namespace CacheManager.Core
         ///             .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(10));
         /// });
         /// 
-        /// var cache = CacheFactory.FromConfiguration<object>(managerConfiguration);
+        /// var cache = CacheFactory.FromConfiguration<object>("myCache", managerConfiguration);
         /// cache.Add("key", "value");
         /// ]]>
         /// </code>
         /// </example>
+        /// <param name="cacheName">The name of the cache.</param>
         /// <param name="configuration">
         /// The configured which will be used to configure the cache manager instance.
         /// </param>
         /// <typeparam name="TCacheValue">The type of the cache item value.</typeparam>
         /// <returns>The cache manager instance.</returns>
         /// <see cref="ConfigurationBuilder"/>
-        /// <seealso cref="ICacheManager{TCacheValue}"/>
-        /// <seealso cref="CacheManagerConfiguration{TCacheValue}"/>
         /// <exception cref="System.ArgumentNullException">
         /// Thrown if the <paramref name="configuration"/> is null.
         /// </exception>
         /// <exception cref="System.InvalidOperationException">
         /// Thrown on certain configuration errors related to the cache handles.
         /// </exception>
-        public static ICacheManager<TCacheValue> FromConfiguration<TCacheValue>(CacheManagerConfiguration<TCacheValue> configuration)
+        public static ICacheManager<TCacheValue> FromConfiguration<TCacheValue>(string cacheName, CacheManagerConfiguration configuration)
         {
-            return CacheReflectionHelper.FromConfiguration<TCacheValue>(configuration);
+            return CacheReflectionHelper.FromConfiguration<TCacheValue>(cacheName, configuration);
         }
     }
 }

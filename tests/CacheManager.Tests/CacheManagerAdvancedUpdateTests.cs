@@ -76,7 +76,7 @@ namespace CacheManager.Tests
 
             // the update config setting it to Ignore
             UpdateItemConfig updateConfig = new UpdateItemConfig(0, VersionConflictHandling.Ignore);
-            var cfg = ConfigurationBuilder.BuildConfiguration<object>("cache", settings => settings.WithUpdateMode(CacheUpdateMode.Up));
+            var cfg = ConfigurationBuilder.BuildConfiguration(settings => settings.WithUpdateMode(CacheUpdateMode.Up));
             int updateCalls = 0;
             int putCalls = 0;
             int removeCalls = 0;
@@ -96,7 +96,7 @@ namespace CacheManager.Tests
                 removeCalls: Enumerable.Repeat<Action>(() => removeCalls++, 5).ToArray());
 
             // act
-            using (var cache = new BaseCacheManager<string>(cfg, handles))
+            using (var cache = new BaseCacheManager<string>("cacheName", cfg, handles))
             {
                 var updateResult = cache.Update("key", updateFunc, updateConfig);
                 
@@ -116,7 +116,7 @@ namespace CacheManager.Tests
 
             // the update config setting it to Ignore
             UpdateItemConfig updateConfig = new UpdateItemConfig(0, VersionConflictHandling.EvictItemFromOtherCaches);
-            var cfg = ConfigurationBuilder.BuildConfiguration<object>("cache", settings => settings.WithUpdateMode(CacheUpdateMode.Up));
+            var cfg = ConfigurationBuilder.BuildConfiguration(settings => settings.WithUpdateMode(CacheUpdateMode.Up));
             int updateCalls = 0;
             int putCalls = 0;
             int removeCalls = 0;
@@ -136,7 +136,7 @@ namespace CacheManager.Tests
                 removeCalls: Enumerable.Repeat<Action>(() => removeCalls++, 5).ToArray());
 
             // act
-            using (var cache = new BaseCacheManager<string>(cfg, handles))
+            using (var cache = new BaseCacheManager<string>("cacheName", cfg, handles))
             {
                 var updateResult = cache.Update("key", updateFunc, updateConfig);
 
@@ -156,7 +156,7 @@ namespace CacheManager.Tests
 
             // the update config setting it to EvictItemFromOtherCaches
             UpdateItemConfig updateConfig = new UpdateItemConfig(0, VersionConflictHandling.EvictItemFromOtherCaches);
-            var cfg = ConfigurationBuilder.BuildConfiguration<object>("cache", settings => settings.WithUpdateMode(CacheUpdateMode.Up));
+            var cfg = ConfigurationBuilder.BuildConfiguration(settings => settings.WithUpdateMode(CacheUpdateMode.Up));
             int updateCalls = 0;
             int putCalls = 0;
             int removeCalls = 0;
@@ -176,7 +176,7 @@ namespace CacheManager.Tests
                 removeCalls: Enumerable.Repeat<Action>(() => removeCalls++, 5).ToArray());
 
             // act
-            using (var cache = new BaseCacheManager<string>(cfg, handles))
+            using (var cache = new BaseCacheManager<string>("cacheName", cfg, handles))
             {
                 var updateResult = cache.Update("key", updateFunc, updateConfig);
 
@@ -196,7 +196,7 @@ namespace CacheManager.Tests
 
             // the update config setting it to UpdateOtherCaches
             UpdateItemConfig updateConfig = new UpdateItemConfig(0, VersionConflictHandling.UpdateOtherCaches);
-            var cfg = ConfigurationBuilder.BuildConfiguration<object>("cache", settings => settings.WithUpdateMode(CacheUpdateMode.Up));
+            var cfg = ConfigurationBuilder.BuildConfiguration(settings => settings.WithUpdateMode(CacheUpdateMode.Up));
             int updateCalls = 0;
             int putCalls = 0;
             int removeCalls = 0;
@@ -226,7 +226,7 @@ namespace CacheManager.Tests
                 });
 
             // act
-            using (var cache = new BaseCacheManager<string>(cfg, handles))
+            using (var cache = new BaseCacheManager<string>("cacheName", cfg, handles))
             {
                 var updateResult = cache.Update("key", updateFunc, updateConfig);
 
@@ -246,7 +246,7 @@ namespace CacheManager.Tests
 
             // the update config setting it to UpdateOtherCaches
             UpdateItemConfig updateConfig = new UpdateItemConfig(0, VersionConflictHandling.UpdateOtherCaches);
-            var cfg = ConfigurationBuilder.BuildConfiguration<object>("cache", settings => settings.WithUpdateMode(CacheUpdateMode.Up));
+            var cfg = ConfigurationBuilder.BuildConfiguration(settings => settings.WithUpdateMode(CacheUpdateMode.Up));
             int updateCalls = 0;
             int putCalls = 0;
             int removeCalls = 0;
@@ -306,7 +306,7 @@ namespace CacheManager.Tests
             }
         }
 
-        static ICacheHandle<string>[] MockHandles(int count, Action[] updateCalls, UpdateItemResult[] updateCallResults, Action[] putCalls, Action[] removeCalls, CacheItem<string>[] getCallValues = null)
+        static BaseCacheHandle<string>[] MockHandles(int count, Action[] updateCalls, UpdateItemResult[] updateCallResults, Action[] putCalls, Action[] removeCalls, CacheItem<string>[] getCallValues = null)
         {
             if (count <= 0) throw new InvalidOperationException();
             if (updateCalls.Length != count || updateCallResults.Length != count || putCalls.Length != count || removeCalls.Length != count)
@@ -314,11 +314,11 @@ namespace CacheManager.Tests
                 throw new InvalidOperationException("Count and arrays must match");
             }
             var cacheName = "myCache";
-            var handles = new List<ICacheHandle<string>>();
+            var handles = new List<BaseCacheHandle<string>>();
             for (int i = 0; i < count; i++)
             {
                 var handleName = "handle" + i;
-                var handleMock = new Mock<ICacheHandle<string>>();
+                var handleMock = new Mock<BaseCacheHandle<string>>();
                 handleMock
                     .Setup(p => p.Update(It.IsAny<string>(), It.IsAny<Func<string, string>>(), It.IsAny<UpdateItemConfig>()))
                     .Callback(updateCalls[i])

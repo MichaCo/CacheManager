@@ -20,13 +20,12 @@ namespace CacheManager.Core
         /// source. The cache manager then will try to synchronize multiple instances of the same configuration.
         /// </para>
         /// </summary>
-        /// <typeparam name="TCacheValue">The type of the cache value.</typeparam>
         /// <param name="part">The part.</param>
         /// <param name="redisConfigurationId">
         /// The id of the configuration the back plate should use.
         /// </param>
         /// <returns>The builder instance.</returns>
-        public static ConfigurationBuilderCachePart<TCacheValue> WithRedisBackPlate<TCacheValue>(this ConfigurationBuilderCachePart<TCacheValue> part, string redisConfigurationId)
+        public static ConfigurationBuilderCachePart WithRedisBackPlate(this ConfigurationBuilderCachePart part, string redisConfigurationId)
         {
             return part.WithBackPlate<RedisCacheBackPlate>(redisConfigurationId);
         }
@@ -38,7 +37,6 @@ namespace CacheManager.Core
         /// <paramref name="redisConfigurationId"/> matching the configuration's id.
         /// </para>
         /// </summary>
-        /// <typeparam name="TCacheValue">The type of the cache value.</typeparam>
         /// <param name="part">The builder part.</param>
         /// <param name="redisConfigurationId">
         /// The redis configuration identifier will be used as name for the cache handle and to
@@ -46,9 +44,9 @@ namespace CacheManager.Core
         /// </param>
         /// <returns>The part.</returns>
         /// <exception cref="ArgumentNullException">Thrown if handleName is null.</exception>
-        public static ConfigurationBuilderCacheHandlePart<TCacheValue> WithRedisCacheHandle<TCacheValue>(this ConfigurationBuilderCachePart<TCacheValue> part, string redisConfigurationId)
+        public static ConfigurationBuilderCacheHandlePart WithRedisCacheHandle(this ConfigurationBuilderCachePart part, string redisConfigurationId)
         {
-            return part.WithHandle<RedisCacheHandle<TCacheValue>>(redisConfigurationId);
+            return WithRedisCacheHandle(part, redisConfigurationId, false);
         }
 
         /// <summary>
@@ -58,7 +56,6 @@ namespace CacheManager.Core
         /// <paramref name="redisConfigurationId"/> matching the configuration's id.
         /// </para>
         /// </summary>
-        /// <typeparam name="TCacheValue">The type of the cache value.</typeparam>
         /// <param name="part">The builder part.</param>
         /// <param name="redisConfigurationId">
         /// The redis configuration identifier will be used as name for the cache handle and to
@@ -72,9 +69,9 @@ namespace CacheManager.Core
         /// <exception cref="ArgumentNullException">
         /// Thrown if handleName or handleType are null.
         /// </exception>
-        public static ConfigurationBuilderCacheHandlePart<TCacheValue> WithRedisCacheHandle<TCacheValue>(this ConfigurationBuilderCachePart<TCacheValue> part, string redisConfigurationId, bool isBackPlateSource)
+        public static ConfigurationBuilderCacheHandlePart WithRedisCacheHandle(this ConfigurationBuilderCachePart part, string redisConfigurationId, bool isBackPlateSource)
         {
-            return part.WithHandle<RedisCacheHandle<TCacheValue>>(redisConfigurationId, isBackPlateSource);
+            return part.WithHandle(typeof(RedisCacheHandle<>), redisConfigurationId, isBackPlateSource);
         }
     }
 }

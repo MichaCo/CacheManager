@@ -31,9 +31,9 @@ namespace CacheManager.Tests
             string cacheName = "MemoryCacheAbsoluteExpire";
 
             // act
-            var cfg = ConfigurationBuilder.LoadConfigurationFile<string>(fileName, cacheName);
+            var cfg = ConfigurationBuilder.LoadConfigurationFile(fileName, cacheName);
 
-            using (var cache = CacheFactory.FromConfiguration(cfg))
+            using (var cache = CacheFactory.FromConfiguration<string>(cacheName, cfg))
             {
                 cache.Put("key", "value");
                 

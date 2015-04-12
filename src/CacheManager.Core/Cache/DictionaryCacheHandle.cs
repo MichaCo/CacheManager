@@ -12,7 +12,7 @@ namespace CacheManager.Core.Cache
         /// </summary>
         /// <param name="manager">The manager.</param>
         /// <param name="configuration">The configuration.</param>
-        public DictionaryCacheHandle(ICacheManager<object> manager, ICacheHandleConfiguration configuration)
+        public DictionaryCacheHandle(ICacheManager<object> manager, CacheHandleConfiguration configuration)
             : base(manager, configuration)
         {
         }

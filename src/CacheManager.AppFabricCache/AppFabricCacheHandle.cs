@@ -13,7 +13,7 @@ namespace CacheManager.AppFabricCache
         /// </summary>
         /// <param name="manager">The manager.</param>
         /// <param name="configuration">The configuration.</param>
-        public AppFabricCacheHandle(ICacheManager<object> manager, ICacheHandleConfiguration configuration)
+        public AppFabricCacheHandle(ICacheManager<object> manager, CacheHandleConfiguration configuration)
             : base(manager, configuration)
         {
         }

@@ -70,12 +70,11 @@
     <Compile Include="Cache\CacheStatsCounterType.cs" />
     <Compile Include="Cache\DictionaryCacheHandle.cs" />
     <Compile Include="Cache\DictionaryCacheHandle`1.cs" />
+    <Compile Include="ICache.cs" />
     <Compile Include="UpdateItemResult.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Configuration\ICacheHandleConfiguration.cs" />
     <Compile Include="Configuration\ICacheManagerConfiguration.cs" />
-    <Compile Include="ICacheHandle.cs" />
     <Compile Include="ICacheManager.cs" />
     <Compile Include="CacheItem.cs" />
     <Compile Include="Configuration\CacheHandleConfiguration.cs" />
@@ -85,7 +84,6 @@
     <Compile Include="Configuration\ConfigurationBuilder.cs" />
     <Compile Include="Configuration\ExpirationMode.cs" />
     <Compile Include="GlobalSuppressions.cs" />
-    <Compile Include="ICache.cs" />
     <Compile Include="Cache\CachePerformanceCounters.cs" />
     <Compile Include="UpdateItemConfig.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

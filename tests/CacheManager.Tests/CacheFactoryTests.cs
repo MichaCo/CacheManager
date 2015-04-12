@@ -24,12 +24,26 @@ namespace CacheManager.Tests
 
         [Fact]
         [ReplaceCulture]
+        public void CacheFactory_FromConfig_C()
+        {
+            // arrange
+
+            // act
+            Action act = () => CacheFactory.FromConfiguration<object>(null, new CacheManagerConfiguration());
+
+            // assert
+            act.ShouldThrow<ArgumentNullException>()
+                .WithMessage("*Parameter name: cacheName*");
+        }
+
+        [Fact]
+        [ReplaceCulture]
         public void CacheFactory_FromConfig_A()
         {
             // arrange
 
             // act
-            Action act = () => CacheFactory.FromConfiguration((CacheManagerConfiguration<string>)null);
+            Action act = () => CacheFactory.FromConfiguration<object>("cache", (CacheManagerConfiguration)null);
 
             // assert
             act.ShouldThrow<ArgumentNullException>()
@@ -73,7 +87,7 @@ namespace CacheManager.Tests
             // act
             Action act = () => CacheFactory.Build("cacheName", settings =>
             {
-                settings.WithHandle<DictionaryCacheHandle<object>>(null);
+                settings.WithHandle(typeof(DictionaryCacheHandle<>), null);
             });
 
             // assert
@@ -97,29 +111,13 @@ namespace CacheManager.Tests
 
         [Fact]
         [ReplaceCulture]
-        public void CacheFactory_Build_InvalidHandle_Interface()
-        {
-            // act
-            Action act = () => CacheFactory.Build<string>("stringCache", settings =>
-            {
-                settings.WithUpdateMode(CacheUpdateMode.Full)
-                    .WithHandle<ICacheHandle<string>>("h1");
-            });
-
-            // assert
-            act.ShouldThrow<InvalidOperationException>()
-                .WithMessage("Interfaces are not allowed*");
-        }
-
-        [Fact]
-        [ReplaceCulture]
         public void CacheFactory_Build_DisablePerfCounters()
         {
             // act
             Func<ICacheManager<string>> act = () => CacheFactory.Build<string>("stringCache", settings =>
             {
                 settings.WithUpdateMode(CacheUpdateMode.Full)
-                    .WithHandle<DictionaryCacheHandle<string>>("h1")
+                    .WithHandle(typeof(DictionaryCacheHandle<>),"h1")
                     .DisablePerformanceCounters();
             });
 
@@ -136,7 +134,7 @@ namespace CacheManager.Tests
             Func<ICacheManager<string>> act = () => CacheFactory.Build<string>("stringCache", settings =>
             {
                 settings.WithUpdateMode(CacheUpdateMode.Full)
-                    .WithHandle<DictionaryCacheHandle<string>>("h1")
+                    .WithHandle(typeof(DictionaryCacheHandle<>),"h1")
                     .DisableStatistics()            // disable it first
                     .EnablePerformanceCounters();   // should enable stats
             });
@@ -154,7 +152,7 @@ namespace CacheManager.Tests
             Func<ICacheManager<string>> act = () => CacheFactory.Build<string>("stringCache", settings =>
             {
                 settings.WithUpdateMode(CacheUpdateMode.Full)
-                    .WithHandle<DictionaryCacheHandle<string>>("h1")
+                    .WithHandle(typeof(DictionaryCacheHandle<>),"h1")
                     .EnableStatistics();
             });
 
@@ -171,7 +169,7 @@ namespace CacheManager.Tests
             Func<ICacheManager<string>> act = () => CacheFactory.Build<string>("stringCache", settings =>
             {
                 settings.WithUpdateMode(CacheUpdateMode.Full)
-                    .WithHandle<DictionaryCacheHandle<string>>("h1");
+                    .WithHandle(typeof(DictionaryCacheHandle<>),"h1");
             });
 
             // assert
@@ -187,7 +185,7 @@ namespace CacheManager.Tests
             Action act = () => CacheFactory.Build<string>("stringCache", settings =>
             {
                 settings.WithUpdateMode(CacheUpdateMode.Full)
-                    .WithHandle<DictionaryCacheHandle<string>>("h1")
+                    .WithHandle(typeof(DictionaryCacheHandle<>),"h1")
                         .WithExpiration(ExpirationMode.Absolute, TimeSpan.Zero);
             });
 
@@ -409,13 +407,13 @@ namespace CacheManager.Tests
                     .WithMaxRetries(22)
                     .WithRetryTimeout(2223)
                     .WithUpdateMode(CacheUpdateMode.Full)
-                    .WithHandle<DictionaryCacheHandle<string>>("h1")
+                    .WithHandle(typeof(DictionaryCacheHandle<>),"h1")
                         .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromHours(12))
                         .EnablePerformanceCounters()
-                    .And.WithHandle<DictionaryCacheHandle<string>>("h2")
+                    .And.WithHandle(typeof(DictionaryCacheHandle<>),"h2")
                         .WithExpiration(ExpirationMode.None, TimeSpan.Zero)
                         .DisableStatistics()
-                    .And.WithHandle<DictionaryCacheHandle<string>>("h3")
+                    .And.WithHandle(typeof(DictionaryCacheHandle<>),"h3")
                         .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(231))
                         .EnableStatistics();
             });
@@ -425,21 +423,19 @@ namespace CacheManager.Tests
             act.Configuration.CacheUpdateMode.Should().Be(CacheUpdateMode.Full);
             act.Configuration.MaxRetries.Should().Be(22);
             act.Configuration.RetryTimeout.Should().Be(2223);
-            act.CacheHandles.ElementAt(0).Configuration.CacheName.Should().Be("stringCache");
+            act.Name.Should().Be("stringCache");
             act.CacheHandles.ElementAt(0).Configuration.HandleName.Should().Be("h1");
             act.CacheHandles.ElementAt(0).Configuration.EnablePerformanceCounters.Should().BeTrue();
             act.CacheHandles.ElementAt(0).Configuration.EnableStatistics.Should().BeTrue();
             act.CacheHandles.ElementAt(0).Configuration.ExpirationMode.Should().Be(ExpirationMode.Absolute);
             act.CacheHandles.ElementAt(0).Configuration.ExpirationTimeout.Should().Be(new TimeSpan(12, 0, 0));
 
-            act.CacheHandles.ElementAt(1).Configuration.CacheName.Should().Be("stringCache");
             act.CacheHandles.ElementAt(1).Configuration.HandleName.Should().Be("h2");
             act.CacheHandles.ElementAt(1).Configuration.EnablePerformanceCounters.Should().BeFalse();
             act.CacheHandles.ElementAt(1).Configuration.EnableStatistics.Should().BeFalse();
             act.CacheHandles.ElementAt(1).Configuration.ExpirationMode.Should().Be(ExpirationMode.None);
             act.CacheHandles.ElementAt(1).Configuration.ExpirationTimeout.Should().Be(new TimeSpan(0, 0, 0));
 
-            act.CacheHandles.ElementAt(2).Configuration.CacheName.Should().Be("stringCache");
             act.CacheHandles.ElementAt(2).Configuration.HandleName.Should().Be("h3");
             act.CacheHandles.ElementAt(2).Configuration.EnablePerformanceCounters.Should().BeFalse();
             act.CacheHandles.ElementAt(2).Configuration.EnableStatistics.Should().BeTrue();

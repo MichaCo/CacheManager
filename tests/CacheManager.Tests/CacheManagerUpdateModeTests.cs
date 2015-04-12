@@ -28,17 +28,17 @@ namespace CacheManager.Tests
             // creating 20 handles, the 10th should return some value for any key,
             // so the cache manager should update all handles (calling addA) depending on the mode,
             // meaning we simply have to count the add calls.
-            var handles = new List<ICacheHandle<object>>();
+            var handles = new List<BaseCacheHandle<object>>();
             for (int i = 0; i < 20; i++)
             {
-                var handleMock = new Mock<ICacheHandle<object>>();
+                var handleMock = new Mock<BaseCacheHandle<object>>();
                 handleMock
                     .Setup(p => p.Add(It.IsAny<CacheItem<object>>()))
                     .Callback(() => addCalls++)
                     .Returns(true);
 
                 handleMock.Setup(p => p.Stats).Returns(new CacheStats<object>("cache", "handle"));
-                handleMock.Setup(p => p.Configuration).Returns(new Mock<ICacheHandleConfiguration>().Object);
+                handleMock.Setup(p => p.Configuration).Returns(new  CacheHandleConfiguration("handle"));
 
                 if (i == 10)
                 {
@@ -49,8 +49,8 @@ namespace CacheManager.Tests
 
                 handles.Add(handleMock.Object);
             }
-            var cfg = ConfigurationBuilder.BuildConfiguration<object>("cache", settings => settings.WithUpdateMode(mode));
-            var cache = new BaseCacheManager<object>(cfg, handles.ToArray());
+            var cfg = ConfigurationBuilder.BuildConfiguration(settings => settings.WithUpdateMode(mode));
+            var cache = new BaseCacheManager<object>("cacheName", cfg, handles.ToArray());
             cache.Get("somekey").Should().Be(value);
             
             return addCalls;

@@ -12,20 +12,18 @@ namespace CacheManager.Core
         /// <summary>
         /// Add a <see cref="MemcachedCacheHandle"/> with the required name.
         /// </summary>
-        /// <typeparam name="TCacheValue">The type of the cache value.</typeparam>
         /// <param name="part">The builder part.</param>
         /// <param name="handleName">The name to be used for the cache handle.</param>
         /// <returns>The part.</returns>
         /// <exception cref="ArgumentNullException">Thrown if handleName is null.</exception>
-        public static ConfigurationBuilderCacheHandlePart<TCacheValue> WithMemcachedCacheHandle<TCacheValue>(this ConfigurationBuilderCachePart<TCacheValue> part, string handleName)
+        public static ConfigurationBuilderCacheHandlePart WithMemcachedCacheHandle(this ConfigurationBuilderCachePart part, string handleName)
         {
-            return part.WithHandle<MemcachedCacheHandle<TCacheValue>>(handleName);
+            return WithMemcachedCacheHandle(part, handleName, false);
         }
 
         /// <summary>
         /// Add a <see cref="MemcachedCacheHandle"/> with the required name.
         /// </summary>
-        /// <typeparam name="TCacheValue">The type of the cache value.</typeparam>
         /// <param name="part">The builder part.</param>
         /// <param name="handleName">The name to be used for the cache handle.</param>
         /// <param name="isBackPlateSource">
@@ -36,9 +34,9 @@ namespace CacheManager.Core
         /// <exception cref="ArgumentNullException">
         /// Thrown if handleName or handleType are null.
         /// </exception>
-        public static ConfigurationBuilderCacheHandlePart<TCacheValue> WithMemcachedCacheHandle<TCacheValue>(this ConfigurationBuilderCachePart<TCacheValue> part, string handleName, bool isBackPlateSource)
+        public static ConfigurationBuilderCacheHandlePart WithMemcachedCacheHandle(this ConfigurationBuilderCachePart part, string handleName, bool isBackPlateSource)
         {
-            return part.WithHandle<MemcachedCacheHandle<TCacheValue>>(handleName, isBackPlateSource);
+            return part.WithHandle(typeof(MemcachedCacheHandle<>), handleName, isBackPlateSource);
         }
     }
 }

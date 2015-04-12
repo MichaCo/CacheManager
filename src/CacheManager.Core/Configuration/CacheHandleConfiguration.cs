@@ -1,4 +1,5 @@
 ﻿using System;
+using CacheManager.Core.Cache;
 
 namespace CacheManager.Core.Configuration
 {
@@ -6,29 +7,17 @@ namespace CacheManager.Core.Configuration
     /// Implements <see cref="ICacheHandleConfiguration"/> and basically defines all settings the
     /// cache handle should respect.
     /// </summary>
-    /// <typeparam name="TCacheValue">The type of the cache value.</typeparam>
-    public sealed class CacheHandleConfiguration<TCacheValue> : ICacheHandleConfiguration
+    public sealed class CacheHandleConfiguration
     {
-        internal CacheHandleConfiguration(string cacheName, string handleName)
+        public CacheHandleConfiguration(string handleName)
         {
-            if (string.IsNullOrWhiteSpace(cacheName))
-            {
-                throw new ArgumentNullException("cacheName");
-            }
             if (string.IsNullOrWhiteSpace(handleName))
             {
                 throw new ArgumentNullException("handleName");
             }
 
-            this.CacheName = cacheName;
             this.HandleName = handleName;
         }
-
-        /// <summary>
-        /// Gets the name of the cache the handle got assigned to.
-        /// </summary>
-        /// <value>The name of the cache.</value>
-        public string CacheName { get; private set; }
 
         /// <summary>
         /// Gets a value indicating whether performance counters should be enabled or not.
@@ -81,20 +70,5 @@ namespace CacheManager.Core.Configuration
         /// </summary>
         /// <value>The type of the handle.</value>
         internal Type HandleType { get; set; }
-
-        /// <summary>
-        /// Creates the specified cache name.
-        /// </summary>
-        /// <typeparam name="TCacheHandle">The type of the cache handle.</typeparam>
-        /// <param name="cacheName">Name of the cache.</param>
-        /// <param name="handleName">Name of the handle.</param>
-        /// <returns>The newly created configuration.</returns>
-        internal static CacheHandleConfiguration<TCacheValue> Create<TCacheHandle>(string cacheName, string handleName) where TCacheHandle : ICacheHandle<TCacheValue>
-        {
-            return new CacheHandleConfiguration<TCacheValue>(cacheName, handleName)
-            {
-                HandleType = typeof(TCacheHandle)
-            };
-        }
     }
 }

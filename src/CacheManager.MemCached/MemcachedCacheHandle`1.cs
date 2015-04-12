@@ -20,7 +20,7 @@ namespace CacheManager.Memcached
         /// </summary>
         /// <param name="manager">The manager.</param>
         /// <param name="configuration">The configuration.</param>
-        public MemcachedCacheHandle(ICacheManager<object> manager, ICacheHandleConfiguration configuration)
+        public MemcachedCacheHandle(ICacheManager<object> manager, CacheHandleConfiguration configuration)
             : base(manager, configuration)
         {
         }
@@ -43,7 +43,7 @@ namespace CacheManager.Memcached
         /// <exception cref="System.Configuration.ConfigurationErrorsException">
         /// If the enyim configuration section could not be initialized.
         /// </exception>
-        public MemcachedCacheHandle(ICacheManager<TCacheValue> manager, ICacheHandleConfiguration configuration)
+        public MemcachedCacheHandle(ICacheManager<TCacheValue> manager, CacheHandleConfiguration configuration)
             : base(manager, configuration)
         {
             // initialize memcached client with section name which must be equal to handle name...

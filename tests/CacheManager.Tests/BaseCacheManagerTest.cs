@@ -39,7 +39,7 @@ namespace CacheManager.Tests
             {
                 return CacheFactory.Build("cache", settings => settings
                     .WithUpdateMode(CacheUpdateMode.Full)
-                    .WithHandle<DictionaryCacheHandle>("h1")
+                    .WithHandle(typeof(DictionaryCacheHandle<>), "h1")
                         .EnableStatistics()
                     .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(10)));
             }
@@ -66,9 +66,9 @@ namespace CacheManager.Tests
                         .And.WithSystemRuntimeCacheHandle("h2")
                             .EnableStatistics()
                             .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(10))
-                        .And.WithHandle<DictionaryCacheHandle>("h3")
+                        .And.WithHandle(typeof(DictionaryCacheHandle<>), "h3")
                             .EnableStatistics()
-                        .And.WithHandle<DictionaryCacheHandle>("h4")
+                        .And.WithHandle(typeof(DictionaryCacheHandle<>),"h4")
                             .EnableStatistics()
                             .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(10));
                 });
@@ -83,24 +83,24 @@ namespace CacheManager.Tests
                 {
                     settings
                         .WithUpdateMode(CacheUpdateMode.Up)
-                        .WithHandle<DictionaryCacheHandle>("h1")
+                        .WithHandle(typeof(DictionaryCacheHandle<>),"h1")
                             .EnableStatistics()
-                        .And.WithHandle<DictionaryCacheHandle>("h2")
+                        .And.WithHandle(typeof(DictionaryCacheHandle<>),"h2")
                             .EnableStatistics()
                             .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(10))
-                        .And.WithHandle<DictionaryCacheHandle>("h3")
+                        .And.WithHandle(typeof(DictionaryCacheHandle<>),"h3")
                             .EnableStatistics()
                             .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(20))
-                        .And.WithHandle<DictionaryCacheHandle>("h4")
+                        .And.WithHandle(typeof(DictionaryCacheHandle<>),"h4")
                             .EnableStatistics()
                             .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(10))
-                        .And.WithHandle<DictionaryCacheHandle>("h5")
+                        .And.WithHandle(typeof(DictionaryCacheHandle<>),"h5")
                             .EnableStatistics()
                             .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(20))
-                        .And.WithHandle<DictionaryCacheHandle>("h6")
+                        .And.WithHandle(typeof(DictionaryCacheHandle<>),"h6")
                             .EnableStatistics()
                             .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(10))
-                        .And.WithHandle<DictionaryCacheHandle>("h7")
+                        .And.WithHandle(typeof(DictionaryCacheHandle<>),"h7")
                             .EnableStatistics()
                             .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(20));
                 });
@@ -242,7 +242,7 @@ namespace CacheManager.Tests
             yield return new object[] { data.WithMemoryAndDictionaryHandles };
             yield return new object[] { data.WithManyDictionaryHandles };
             yield return new object[] { data.WithTwoNamedMemoryCaches };
-            yield return new object[] { data.WithRedisCache };
+            // yield return new object[] { data.WithRedisCache };
             // yield return new object[] { data.WithSystemAndRedisCache };
             // yield return new object[] { data.WithMemcached };
             // yield return new object[] { data.WithCouchbaseMemcached };            

@@ -12,7 +12,7 @@ namespace CacheManager.Core.Cache
     /// </para>
     /// </summary>
     /// <typeparam name="TCacheValue">The type of the cache value.</typeparam>
-    public abstract class BaseCache<TCacheValue> : ICache<TCacheValue>
+    public abstract class BaseCache<TCacheValue>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="BaseCache{TCacheValue}"/> class.
@@ -48,7 +48,7 @@ namespace CacheManager.Core.Cache
         /// <param name="key">The key being used to identify the item within the cache.</param>
         /// <returns>The value being stored in the cache for the given <paramref name="key"/>.</returns>
         /// <exception cref="ArgumentNullException">If the <paramref name="key"/> is null.</exception>
-        public TCacheValue this[string key]
+        public virtual TCacheValue this[string key]
         {
             get
             {
@@ -76,7 +76,7 @@ namespace CacheManager.Core.Cache
         /// <exception cref="ArgumentNullException">
         /// If the <paramref name="key"/> or <paramref name="region"/> is null.
         /// </exception>
-        public TCacheValue this[string key, string region]
+        public virtual TCacheValue this[string key, string region]
         {
             get
             {
@@ -103,7 +103,7 @@ namespace CacheManager.Core.Cache
         /// <exception cref="ArgumentNullException">
         /// If the <paramref name="key"/> or <paramref name="value"/> is null.
         /// </exception>
-        public bool Add(string key, TCacheValue value)
+        public virtual bool Add(string key, TCacheValue value)
         {
             // null checks are done within ctor of the item
             var item = new CacheItem<TCacheValue>(key, value);
@@ -129,7 +129,7 @@ namespace CacheManager.Core.Cache
         /// <exception cref="ArgumentNullException">
         /// If the <paramref name="key"/>, <paramref name="value"/> or <paramref name="region"/> is null.
         /// </exception>
-        public bool Add(string key, TCacheValue value, string region)
+        public virtual bool Add(string key, TCacheValue value, string region)
         {
             // null checks are done within ctor of the item
             var item = new CacheItem<TCacheValue>(key, value, region);
@@ -154,7 +154,7 @@ namespace CacheManager.Core.Cache
         /// <exception cref="ArgumentNullException">
         /// If the <paramref name="item"/> or the item's key or value is null.
         /// </exception>
-        public bool Add(CacheItem<TCacheValue> item)
+        public virtual bool Add(CacheItem<TCacheValue> item)
         {
             if (item == null)
             {
@@ -192,7 +192,7 @@ namespace CacheManager.Core.Cache
         /// <param name="key">The key being used to identify the item within the cache.</param>
         /// <returns>The value being stored in the cache for the given <paramref name="key"/>.</returns>
         /// <exception cref="ArgumentNullException">If the <paramref name="key"/> is null.</exception>
-        public TCacheValue Get(string key)
+        public virtual TCacheValue Get(string key)
         {
             CacheItem<TCacheValue> item = this.GetCacheItem(key);
 
@@ -215,7 +215,7 @@ namespace CacheManager.Core.Cache
         /// <exception cref="ArgumentNullException">
         /// If the <paramref name="key"/> or <paramref name="region"/> is null.
         /// </exception>
-        public TCacheValue Get(string key, string region)
+        public virtual TCacheValue Get(string key, string region)
         {
             CacheItem<TCacheValue> item = this.GetCacheItem(key, region);
 
@@ -270,7 +270,7 @@ namespace CacheManager.Core.Cache
         /// <param name="key">The key being used to identify the item within the cache.</param>
         /// <returns>The <c>CacheItem</c>.</returns>
         /// <exception cref="ArgumentNullException">If the <paramref name="key"/> is null.</exception>
-        public CacheItem<TCacheValue> GetCacheItem(string key)
+        public virtual CacheItem<TCacheValue> GetCacheItem(string key)
         {
             if (string.IsNullOrWhiteSpace(key))
             {
@@ -289,7 +289,7 @@ namespace CacheManager.Core.Cache
         /// <exception cref="ArgumentNullException">
         /// If the <paramref name="key"/> or <paramref name="region"/> is null.
         /// </exception>
-        public CacheItem<TCacheValue> GetCacheItem(string key, string region)
+        public virtual CacheItem<TCacheValue> GetCacheItem(string key, string region)
         {
             if (string.IsNullOrWhiteSpace(key))
             {
@@ -316,7 +316,7 @@ namespace CacheManager.Core.Cache
         /// <exception cref="ArgumentNullException">
         /// If the <paramref name="key"/> or <paramref name="value"/> is null.
         /// </exception>
-        public void Put(string key, TCacheValue value)
+        public virtual void Put(string key, TCacheValue value)
         {
             var item = new CacheItem<TCacheValue>(key, value);
             this.Put(item);
@@ -338,7 +338,7 @@ namespace CacheManager.Core.Cache
         /// <exception cref="ArgumentNullException">
         /// If the <paramref name="key"/>, <paramref name="value"/> or <paramref name="region"/> is null.
         /// </exception>
-        public void Put(string key, TCacheValue value, string region)
+        public virtual void Put(string key, TCacheValue value, string region)
         {
             var item = new CacheItem<TCacheValue>(key, value, region);
             this.Put(item);
@@ -359,7 +359,7 @@ namespace CacheManager.Core.Cache
         /// <exception cref="ArgumentNullException">
         /// If the <paramref name="item"/> or the item's key or value is null.
         /// </exception>
-        public void Put(CacheItem<TCacheValue> item)
+        public virtual void Put(CacheItem<TCacheValue> item)
         {
             if (item == null)
             {
@@ -377,7 +377,7 @@ namespace CacheManager.Core.Cache
         /// <c>true</c> if the key was found and removed from the cache, <c>false</c> otherwise.
         /// </returns>
         /// <exception cref="ArgumentNullException">If the <paramref name="key"/> is null.</exception>
-        public bool Remove(string key)
+        public virtual bool Remove(string key)
         {
             if (string.IsNullOrWhiteSpace(key))
             {
@@ -398,7 +398,7 @@ namespace CacheManager.Core.Cache
         /// <exception cref="ArgumentNullException">
         /// If the <paramref name="key"/> or <paramref name="region"/> is null.
         /// </exception>
-        public bool Remove(string key, string region)
+        public virtual bool Remove(string key, string region)
         {
             if (string.IsNullOrWhiteSpace(key))
             {

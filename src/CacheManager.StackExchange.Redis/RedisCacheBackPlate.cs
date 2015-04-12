@@ -24,15 +24,15 @@ namespace CacheManager.Redis
         /// <summary>
         /// Initializes a new instance of the <see cref="RedisCacheBackPlate"/> class.
         /// </summary>
-        /// <param name="name">The name.</param>
-        /// <param name="configuration">The configuration.</param>
-        public RedisCacheBackPlate(string name, ICacheManagerConfiguration configuration)
-            : base(name, configuration)
+        /// <param name="configurationKey">The configuration key.</param>
+        /// <param name="cacheName">The cache name.</param>
+        public RedisCacheBackPlate(string configurationKey, string cacheName)
+            : base(configurationKey, cacheName)
         {
             this.channelName = string.Format(
                 CultureInfo.InvariantCulture,
                 "CacheManagerBackPlate_{0}",
-                configuration.Name);
+                cacheName);
 
             this.identifier = Guid.NewGuid().ToString();
 
@@ -40,7 +40,7 @@ namespace CacheManager.Redis
                 () =>
                 {
                     // throws an exception if not found for the name
-                    var cfg = RedisConfigurations.GetConfiguration(name);
+                    var cfg = RedisConfigurations.GetConfiguration(configurationKey);
 
                     var connection = RedisConnectionPool.Connect(cfg);
 

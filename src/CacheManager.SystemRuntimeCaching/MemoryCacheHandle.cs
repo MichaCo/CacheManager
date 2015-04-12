@@ -13,7 +13,7 @@ namespace CacheManager.SystemRuntimeCaching
         /// </summary>
         /// <param name="manager">The manager.</param>
         /// <param name="configuration">The configuration.</param>
-        public MemoryCacheHandle(ICacheManager<object> manager, ICacheHandleConfiguration configuration)
+        public MemoryCacheHandle(ICacheManager<object> manager, CacheHandleConfiguration configuration)
             : base(manager, configuration)
         {
         }

@@ -7,24 +7,18 @@ namespace CacheManager.Core.Configuration
     /// The basic cache manager configuration class.
     /// </summary>
     /// <typeparam name="TCacheValue">The type of the cache value.</typeparam>
-    public sealed class CacheManagerConfiguration<TCacheValue> : ICacheManagerConfiguration
+    public sealed class CacheManagerConfiguration : ICacheManagerConfiguration
     {
-        internal CacheManagerConfiguration(string cacheName)
+        public CacheManagerConfiguration()
         {
-            if (string.IsNullOrWhiteSpace(cacheName))
-            {
-                throw new ArgumentNullException("cacheName");
-            }
-
-            this.Name = cacheName;
-            this.CacheHandles = new List<CacheHandleConfiguration<TCacheValue>>();
+            this.CacheHandles = new List<CacheHandleConfiguration>();
             this.MaxRetries = int.MaxValue;
             this.RetryTimeout = 10;
             this.CacheUpdateMode = CacheUpdateMode.Up;
         }
 
-        internal CacheManagerConfiguration(string cacheName, int maxRetries = int.MaxValue, int retryTimeout = 10)
-            : this(cacheName)
+        public CacheManagerConfiguration(int maxRetries = int.MaxValue, int retryTimeout = 10)
+            : this()
         {
             this.MaxRetries = maxRetries;
             this.RetryTimeout = retryTimeout;
@@ -55,13 +49,6 @@ namespace CacheManager.Core.Configuration
         public int MaxRetries { get; set; }
 
         /// <summary>
-        /// Gets the name which serves as Identifier and can be passed in to construct a
-        /// CacheManager instance.
-        /// </summary>
-        /// <value>The name.</value>
-        public string Name { get; private set; }
-
-        /// <summary>
         /// Gets or sets the number of milliseconds the cache should wait before it will retry an action.
         /// <para>Default is 10.</para>
         /// </summary>
@@ -78,6 +65,6 @@ namespace CacheManager.Core.Configuration
         /// Gets the list of cache handle configurations.
         /// <para>Internally used only.</para>
         /// </summary>
-        internal IList<CacheHandleConfiguration<TCacheValue>> CacheHandles { get; private set; }
+        internal IList<CacheHandleConfiguration> CacheHandles { get; private set; }
     }
 }

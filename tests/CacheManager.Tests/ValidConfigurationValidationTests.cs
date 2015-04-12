@@ -2,6 +2,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using CacheManager.Core;
+using CacheManager.Core.Cache;
 using CacheManager.Core.Configuration;
 using CacheManager.SystemRuntimeCaching;
 using FluentAssertions;
@@ -24,8 +25,8 @@ namespace CacheManager.Tests
             string cacheName = "C1";
 
             // act
-            var cfg = ConfigurationBuilder.LoadConfiguration<object>(cacheName);
-            var cache = CacheFactory.FromConfiguration(cfg);
+            var cfg = ConfigurationBuilder.LoadConfiguration(cacheName);
+            var cache = CacheFactory.FromConfiguration<object>(cacheName, cfg);
 
             // assert
             cache.Configuration.CacheUpdateMode.Should().Be(CacheUpdateMode.Up);
@@ -60,8 +61,8 @@ namespace CacheManager.Tests
             string cacheName = "ExpirationVariances";
 
             // act
-            var cfg = ConfigurationBuilder.LoadConfigurationFile<object>(fileName, cacheName);
-            var cache = CacheFactory.FromConfiguration(cfg);
+            var cfg = ConfigurationBuilder.LoadConfigurationFile(fileName, cacheName);
+            var cache = CacheFactory.FromConfiguration<object>(cacheName, cfg);
 
             // assert
             cache.Configuration.CacheUpdateMode.Should().Be(CacheUpdateMode.Full);
@@ -80,8 +81,8 @@ namespace CacheManager.Tests
             string cacheName = "DefaultSysMemCache";
 
             // act
-            var cfg = ConfigurationBuilder.LoadConfigurationFile<object>(fileName, cacheName);
-            var cache = CacheFactory.FromConfiguration(cfg);
+            var cfg = ConfigurationBuilder.LoadConfigurationFile(fileName, cacheName);
+            var cache = CacheFactory.FromConfiguration<object>(cacheName, cfg);
 
             var memHandle = cache.CacheHandles.ElementAt(0) as MemoryCacheHandle<object>;
 
@@ -103,8 +104,8 @@ namespace CacheManager.Tests
             string cacheName = "ExpirationVariances";
 
             // act
-            var cfg = ConfigurationBuilder.LoadConfigurationFile<object>(fileName, cacheName);
-            var cache = CacheFactory.FromConfiguration(cfg);
+            var cfg = ConfigurationBuilder.LoadConfigurationFile(fileName, cacheName);
+            var cache = CacheFactory.FromConfiguration<object>(cacheName, cfg);
 
             // assert
             cache.CacheHandles.Select(p => p.Configuration.EnableStatistics)
@@ -125,8 +126,8 @@ namespace CacheManager.Tests
             string cacheName = "DefaultSysMemCache";
 
             // act
-            var cfg = ConfigurationBuilder.LoadConfigurationFile<object>(fileName, cacheName);
-            var cache = CacheFactory.FromConfiguration(cfg);
+            var cfg = ConfigurationBuilder.LoadConfigurationFile(fileName, cacheName);
+            var cache = CacheFactory.FromConfiguration<object>(cacheName, cfg);
 
             // assert
             cache.CacheHandles.Select(p => p.Configuration.EnableStatistics)
@@ -143,8 +144,8 @@ namespace CacheManager.Tests
             string cacheName = "c3";
 
             // act
-            var cfg = ConfigurationBuilder.LoadConfigurationFile<object>(fileName, cacheName);
-            var cache = CacheFactory.FromConfiguration(cfg);
+            var cfg = ConfigurationBuilder.LoadConfigurationFile(fileName, cacheName);
+            var cache = CacheFactory.FromConfiguration<object>(cacheName, cfg);
 
             // assert
             cache.CacheHandles.Select(p => p.Configuration.EnableStatistics)
@@ -153,7 +154,7 @@ namespace CacheManager.Tests
                 .ShouldAllBeEquivalentTo(Enumerable.Repeat(false, cache.CacheHandles.Count));
         }
 
-        private static void AssertCacheHandleConfig<T>(ICacheHandle<T> handle, string name, ExpirationMode mode, TimeSpan timeout)
+        private static void AssertCacheHandleConfig<T>(BaseCacheHandle<T> handle, string name, ExpirationMode mode, TimeSpan timeout)
         {
             var cfg = handle.Configuration;
             cfg.HandleName.Should().Be(name);

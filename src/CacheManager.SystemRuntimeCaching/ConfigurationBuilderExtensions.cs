@@ -15,9 +15,9 @@ namespace CacheManager.Core
         /// <param name="handleName">The name to be used for the cache handle.</param>
         /// <param name="part">The builder part</param>
         /// <exception cref="ArgumentNullException">Thrown if handleName is null.</exception>
-        public static ConfigurationBuilderCacheHandlePart<TCacheValue> WithSystemRuntimeCacheHandle<TCacheValue>(this ConfigurationBuilderCachePart<TCacheValue> part, string handleName)
+        public static ConfigurationBuilderCacheHandlePart WithSystemRuntimeCacheHandle(this ConfigurationBuilderCachePart part, string handleName)
         {
-            return part.WithHandle<MemoryCacheHandle<TCacheValue>>(handleName);
+            return WithSystemRuntimeCacheHandle(part, handleName, false);
         }
 
         /// <summary>
@@ -29,9 +29,9 @@ namespace CacheManager.Core
         /// <para>This setting will be ignored if no back plate is configured.</para>
         /// </param>
         /// <exception cref="ArgumentNullException">Thrown if handleName or handleType are null.</exception>
-        public static ConfigurationBuilderCacheHandlePart<TCacheValue> WithSystemRuntimeCacheHandle<TCacheValue>(this ConfigurationBuilderCachePart<TCacheValue> part, string handleName, bool isBackPlateSource)
+        public static ConfigurationBuilderCacheHandlePart WithSystemRuntimeCacheHandle(this ConfigurationBuilderCachePart part, string handleName, bool isBackPlateSource)
         {
-            return part.WithHandle<MemoryCacheHandle<TCacheValue>>(handleName, isBackPlateSource);
+            return part.WithHandle(typeof(MemoryCacheHandle<>), handleName, isBackPlateSource);
         }
     }
 }

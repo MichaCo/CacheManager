@@ -32,7 +32,7 @@ namespace CacheManager.SystemRuntimeCaching
         /// </summary>
         /// <param name="manager">The manager.</param>
         /// <param name="configuration">The configuration.</param>
-        public MemoryCacheHandle(ICacheManager<TCacheValue> manager, ICacheHandleConfiguration configuration)
+        public MemoryCacheHandle(ICacheManager<TCacheValue> manager, CacheHandleConfiguration configuration)
             : base(manager, configuration)
         {
             cacheName = this.Configuration.HandleName;

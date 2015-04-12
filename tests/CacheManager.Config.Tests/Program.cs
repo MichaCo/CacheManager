@@ -33,7 +33,7 @@ namespace CacheManager.Config.Tests
             var swatch = Stopwatch.StartNew();
             int iterations = int.MaxValue;
             swatch.Restart();
-            var cacheConfiguration = ConfigurationBuilder.BuildConfiguration<object>("myCache", cfg =>
+            var cacheConfiguration = ConfigurationBuilder.BuildConfiguration(cfg =>
             {
                 cfg.WithUpdateMode(CacheUpdateMode.Up);
 
@@ -62,7 +62,7 @@ namespace CacheManager.Config.Tests
                 // CacheThreadTest(cache, i + 10);
                 SimpleAddGetTest(
                     // CacheFactory.FromConfiguration(cacheConfiguration),
-                    CacheFactory.FromConfiguration(cacheConfiguration));
+                    CacheFactory.FromConfiguration<object>("cache", cacheConfiguration));
                 //CacheUpdateTest(cache);
 
                 //Console.WriteLine(string.Format("Iterations ended after {0}ms.", swatch.ElapsedMilliseconds));
@@ -115,23 +115,23 @@ namespace CacheManager.Config.Tests
             };
 
             Parallel.Invoke(new ParallelOptions() { MaxDegreeOfParallelism = 8 }, Enumerable.Repeat(test, threads).ToArray());
-            
-    foreach (var handle in cache.CacheHandles)
-    {
-        var stats = handle.Stats;
-        Console.WriteLine(string.Format(
-                "Items: {0}, Hits: {1}, Miss: {2}, Remove: {3}, ClearRegion: {4}, Clear: {5}, Adds: {6}, Puts: {7}, Gets: {8}",
-                    stats.GetStatistic(CacheStatsCounterType.Items),
-                    stats.GetStatistic(CacheStatsCounterType.Hits),
-                    stats.GetStatistic(CacheStatsCounterType.Misses),
-                    stats.GetStatistic(CacheStatsCounterType.RemoveCalls),
-                    stats.GetStatistic(CacheStatsCounterType.ClearRegionCalls),
-                    stats.GetStatistic(CacheStatsCounterType.ClearCalls),
-                    stats.GetStatistic(CacheStatsCounterType.AddCalls),
-                    stats.GetStatistic(CacheStatsCounterType.PutCalls),
-                    stats.GetStatistic(CacheStatsCounterType.GetCalls)
-                ));
-    }
+
+            foreach (var handle in cache.CacheHandles)
+            {
+                var stats = handle.Stats;
+                Console.WriteLine(string.Format(
+                        "Items: {0}, Hits: {1}, Miss: {2}, Remove: {3}, ClearRegion: {4}, Clear: {5}, Adds: {6}, Puts: {7}, Gets: {8}",
+                            stats.GetStatistic(CacheStatsCounterType.Items),
+                            stats.GetStatistic(CacheStatsCounterType.Hits),
+                            stats.GetStatistic(CacheStatsCounterType.Misses),
+                            stats.GetStatistic(CacheStatsCounterType.RemoveCalls),
+                            stats.GetStatistic(CacheStatsCounterType.ClearRegionCalls),
+                            stats.GetStatistic(CacheStatsCounterType.ClearCalls),
+                            stats.GetStatistic(CacheStatsCounterType.AddCalls),
+                            stats.GetStatistic(CacheStatsCounterType.PutCalls),
+                            stats.GetStatistic(CacheStatsCounterType.GetCalls)
+                        ));
+            }
 
             Console.WriteLine(string.Format("Event - Adds {0} Gets {1} Removes {2}",
                 eventAddCount,

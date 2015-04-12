@@ -19,7 +19,7 @@ namespace CacheManager.Redis
         /// </summary>
         /// <param name="manager">The manager.</param>
         /// <param name="configuration">The configuration.</param>
-        public RedisCacheHandle(ICacheManager<object> manager, ICacheHandleConfiguration configuration)
+        public RedisCacheHandle(ICacheManager<object> manager, CacheHandleConfiguration configuration)
             : base(manager, configuration)
         {
         }
@@ -53,7 +53,7 @@ namespace CacheManager.Redis
         /// </summary>
         /// <param name="manager">The manager.</param>
         /// <param name="configuration">The configuration.</param>
-        public RedisCacheHandle(ICacheManager<TCacheValue> manager, ICacheHandleConfiguration configuration)
+        public RedisCacheHandle(ICacheManager<TCacheValue> manager, CacheHandleConfiguration configuration)
             : base(manager, configuration)
         {
         }

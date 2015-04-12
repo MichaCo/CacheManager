@@ -20,7 +20,7 @@ namespace CacheManager.Couchbase
         /// </summary>
         /// <param name="manager">The manager.</param>
         /// <param name="configuration">The configuration.</param>
-        public BucketCacheHandle(ICacheManager<object> manager, ICacheHandleConfiguration configuration)
+        public BucketCacheHandle(ICacheManager<object> manager, CacheHandleConfiguration configuration)
             : base(manager, configuration)
         {
         }
@@ -46,7 +46,7 @@ namespace CacheManager.Couchbase
         /// <exception cref="System.InvalidOperationException">
         /// If <c>configuration.HandleName</c> is not valid.
         /// </exception>
-        public BucketCacheHandle(ICacheManager<TCacheValue> manager, ICacheHandleConfiguration configuration)
+        public BucketCacheHandle(ICacheManager<TCacheValue> manager, CacheHandleConfiguration configuration)
             : base(manager, configuration)
         {
             // we can configure the bucket name by having "<configKey>:<bucketName>" as handle's

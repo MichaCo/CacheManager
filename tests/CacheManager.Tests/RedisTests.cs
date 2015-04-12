@@ -25,8 +25,8 @@ namespace CacheManager.Tests
             string cacheName = "redisWithBackPlate";
 
             // act
-            var cfg = ConfigurationBuilder.LoadConfigurationFile<object>(fileName, cacheName);
-            var cache = CacheFactory.FromConfiguration(cfg);
+            var cfg = ConfigurationBuilder.LoadConfigurationFile(fileName, cacheName);
+            var cache = CacheFactory.FromConfiguration<object>(cacheName, cfg);
 
             // assert
             cache.CacheHandles.Any(p => p.Configuration.IsBackPlateSource).Should().BeTrue();

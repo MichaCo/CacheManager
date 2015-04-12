@@ -12,20 +12,18 @@ namespace CacheManager.Core
         /// <summary>
         /// Add a <see cref="AppFabricCacheHandle"/> with the required name.
         /// </summary>
-        /// <typeparam name="TCacheValue">The type of the cache value.</typeparam>
         /// <param name="part">The builder.</param>
         /// <param name="handleName">The name to be used for the cache handle.</param>
         /// <returns>The builder part.</returns>
         /// <exception cref="ArgumentNullException">Thrown if handleName is null.</exception>
-        public static ConfigurationBuilderCacheHandlePart<TCacheValue> WithAppFabricCacheHandle<TCacheValue>(this ConfigurationBuilderCachePart<TCacheValue> part, string handleName)
+        public static ConfigurationBuilderCacheHandlePart WithAppFabricCacheHandle(this ConfigurationBuilderCachePart part, string handleName)
         {
-            return part.WithHandle<AppFabricCacheHandle<TCacheValue>>(handleName);
+            return WithAppFabricCacheHandle(part, handleName, false);
         }
 
         /// <summary>
         /// Add a <see cref="AppFabricCacheHandle"/> with the required name.
         /// </summary>
-        /// <typeparam name="TCacheValue">The type of the cache value.</typeparam>
         /// <param name="part">The builder.</param>
         /// <param name="handleName">The name to be used for the cache handle.</param>
         /// <param name="isBackPlateSource">
@@ -36,9 +34,9 @@ namespace CacheManager.Core
         /// <exception cref="ArgumentNullException">
         /// Thrown if handleName or handleType are null.
         /// </exception>
-        public static ConfigurationBuilderCacheHandlePart<TCacheValue> WithAppFabricCacheHandle<TCacheValue>(this ConfigurationBuilderCachePart<TCacheValue> part, string handleName, bool isBackPlateSource)
+        public static ConfigurationBuilderCacheHandlePart WithAppFabricCacheHandle(this ConfigurationBuilderCachePart part, string handleName, bool isBackPlateSource)
         {
-            return part.WithHandle<AppFabricCacheHandle<TCacheValue>>(handleName, isBackPlateSource);
+            return part.WithHandle(typeof(AppFabricCacheHandle<>), handleName, isBackPlateSource);
         }
     }
 }

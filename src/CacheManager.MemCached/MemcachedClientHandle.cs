@@ -24,7 +24,7 @@ namespace CacheManager.Memcached
         /// <exception cref="System.InvalidOperationException">
         /// To use memcached, the cache value must be serializable but it is not.
         /// </exception>
-        public MemcachedClientHandle(ICacheManager<TCacheValue> manager, ICacheHandleConfiguration configuration)
+        public MemcachedClientHandle(ICacheManager<TCacheValue> manager, CacheHandleConfiguration configuration)
             : base(manager, configuration)
         {
             if (!typeof(TCacheValue).IsSerializable)

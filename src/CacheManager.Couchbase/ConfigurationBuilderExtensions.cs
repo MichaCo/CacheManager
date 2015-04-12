@@ -14,13 +14,12 @@ namespace CacheManager.Core
         /// Adds a <see cref="ClientConfiguration"/> for the given key.
         /// <para>The key will be matched with the Couchbase cache handle name.</para>
         /// </summary>
-        /// <typeparam name="TCacheValue">The type of the cache value.</typeparam>
         /// <param name="part">The part.</param>
         /// <param name="key">The key which has to match with the cache handle name.</param>
         /// <param name="config">The Couchbase configuration object.</param>
         /// <returns>The configuration builder.</returns>
         /// <exception cref="System.ArgumentNullException">If key or config are null.</exception>
-        public static ConfigurationBuilderCachePart<TCacheValue> WithCouchbaseConfiguration<TCacheValue>(this ConfigurationBuilderCachePart<TCacheValue> part, string key, ClientConfiguration config)
+        public static ConfigurationBuilderCachePart WithCouchbaseConfiguration(this ConfigurationBuilderCachePart part, string key, ClientConfiguration config)
         {
             if (string.IsNullOrWhiteSpace(key))
             {
@@ -42,7 +41,6 @@ namespace CacheManager.Core
         /// the <paramref name="couchbaseConfigurationKey"/> matching the configuration's key.
         /// </para>
         /// </summary>
-        /// <typeparam name="TCacheValue">The type of the cache value.</typeparam>
         /// <param name="part">The builder part.</param>
         /// <param name="couchbaseConfigurationKey">
         /// The configuration key will be used as name for the cache handle and to retrieve the
@@ -50,9 +48,9 @@ namespace CacheManager.Core
         /// </param>
         /// <returns>The part.</returns>
         /// <exception cref="ArgumentNullException">Thrown if handleName is null.</exception>
-        public static ConfigurationBuilderCacheHandlePart<TCacheValue> WithCouchbaseCacheHandle<TCacheValue>(this ConfigurationBuilderCachePart<TCacheValue> part, string couchbaseConfigurationKey)
+        public static ConfigurationBuilderCacheHandlePart WithCouchbaseCacheHandle(this ConfigurationBuilderCachePart part, string couchbaseConfigurationKey)
         {
-            return part.WithHandle<BucketCacheHandle<TCacheValue>>(couchbaseConfigurationKey);
+            return WithCouchbaseCacheHandle(part, couchbaseConfigurationKey, false);
         }
 
         /// <summary>
@@ -76,9 +74,9 @@ namespace CacheManager.Core
         /// <exception cref="ArgumentNullException">
         /// Thrown if handleName or handleType are null.
         /// </exception>
-        public static ConfigurationBuilderCacheHandlePart<TCacheValue> WithCouchbaseCacheHandle<TCacheValue>(this ConfigurationBuilderCachePart<TCacheValue> part, string couchbaseConfigurationKey, bool isBackPlateSource)
+        public static ConfigurationBuilderCacheHandlePart WithCouchbaseCacheHandle(this ConfigurationBuilderCachePart part, string couchbaseConfigurationKey, bool isBackPlateSource)
         {
-            return part.WithHandle<BucketCacheHandle<TCacheValue>>(couchbaseConfigurationKey, isBackPlateSource);
+            return part.WithHandle(typeof(BucketCacheHandle<>), couchbaseConfigurationKey, isBackPlateSource);
         }
 
         /// <summary>
@@ -100,14 +98,9 @@ namespace CacheManager.Core
         /// <returns>The part.</returns>
         /// <exception cref="System.ArgumentNullException">If bucketName is null.</exception>
         /// <exception cref="ArgumentNullException">Thrown if handleName is null.</exception>
-        public static ConfigurationBuilderCacheHandlePart<TCacheValue> WithCouchbaseCacheHandle<TCacheValue>(this ConfigurationBuilderCachePart<TCacheValue> part, string couchbaseConfigurationKey, string bucketName)
+        public static ConfigurationBuilderCacheHandlePart WithCouchbaseCacheHandle(this ConfigurationBuilderCachePart part, string couchbaseConfigurationKey, string bucketName)
         {
-            if (string.IsNullOrWhiteSpace(bucketName))
-            {
-                throw new ArgumentNullException("bucketName");
-            }
-
-            return part.WithHandle<BucketCacheHandle<TCacheValue>>(couchbaseConfigurationKey + ":" + bucketName);
+            return WithCouchbaseCacheHandle(part, couchbaseConfigurationKey, bucketName, false);
         }
 
         /// <summary>
@@ -135,14 +128,14 @@ namespace CacheManager.Core
         /// <exception cref="ArgumentNullException">
         /// Thrown if handleName or handleType are null.
         /// </exception>
-        public static ConfigurationBuilderCacheHandlePart<TCacheValue> WithCouchbaseCacheHandle<TCacheValue>(this ConfigurationBuilderCachePart<TCacheValue> part, string couchbaseConfigurationKey, string bucketName, bool isBackPlateSource)
+        public static ConfigurationBuilderCacheHandlePart WithCouchbaseCacheHandle(this ConfigurationBuilderCachePart part, string couchbaseConfigurationKey, string bucketName, bool isBackPlateSource)
         {
             if (string.IsNullOrWhiteSpace(bucketName))
             {
                 throw new ArgumentNullException("bucketName");
             }
 
-            return part.WithHandle<BucketCacheHandle<TCacheValue>>(couchbaseConfigurationKey + ":" + bucketName, isBackPlateSource);
+            return part.WithHandle(typeof(BucketCacheHandle<>), couchbaseConfigurationKey + ":" + bucketName, isBackPlateSource);
         }
     }
 }

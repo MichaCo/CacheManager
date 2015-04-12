@@ -9,8 +9,8 @@ namespace CacheManager.Core.Cache
     /// The BaseCacheManager implements <see cref="ICacheManager{T}"/> and is the main class which
     /// gets constructed by <see cref="CacheFactory"/>.
     /// <para>
-    /// The cache manager manages the <see cref="ICacheHandle{T}"/> which have been added. /// It
-    /// will keep them in sync depending on the configuration.
+    /// The cache manager manages the list of <see cref="BaseCacheHandle{T}"/>'s which have been added. 
+    /// It will keep them in sync depending on the configuration.
     /// </para>
     /// </summary>
     /// <typeparam name="TCacheValue">The type of the cache value.</typeparam>
@@ -24,7 +24,15 @@ namespace CacheManager.Core.Cache
         /// <summary>
         /// The cache handles collection.
         /// </summary>
-        private ICacheHandle<TCacheValue>[] cacheHandles = new ICacheHandle<TCacheValue>[] { };
+        private BaseCacheHandle<TCacheValue>[] cacheHandles = new BaseCacheHandle<TCacheValue>[] { };
+
+        /// <summary>
+        /// Gets the cache name.
+        /// </summary>
+        /// <value>
+        /// The name of the cache.
+        /// </value>
+        public string Name { get; private set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BaseCacheManager{TCacheValue}"/> class
@@ -35,6 +43,7 @@ namespace CacheManager.Core.Cache
         /// <paramref name="configuration"/> only defines the name of this instance.
         /// </para>
         /// </summary>
+        /// <param name="cacheName">The name of the cache. Can be used for scoping the cache.</param>
         /// <param name="configuration">The configuration which defines the name of the manager.</param>
         /// <param name="handles">The list of cache handles.</param>
         /// <exception cref="System.ArgumentNullException">When handles is null.</exception>
@@ -42,13 +51,20 @@ namespace CacheManager.Core.Cache
         /// This constructor is primarily used for unit testing. To construct a cache manager, use
         /// the <see cref="CacheFactory"/>.
         /// </remarks>
-        public BaseCacheManager(ICacheManagerConfiguration configuration, params ICacheHandle<TCacheValue>[] handles)
+        public BaseCacheManager(string cacheName, ICacheManagerConfiguration configuration, params BaseCacheHandle<TCacheValue>[] handles)
             : this(configuration)
         {
+            if (string.IsNullOrEmpty(cacheName))
+            {
+                throw new ArgumentNullException("cacheName");
+            }
+
             if (handles == null)
             {
                 throw new ArgumentNullException("handles");
             }
+
+            this.Name = cacheName;
 
             foreach (var handle in handles)
             {
@@ -117,15 +133,15 @@ namespace CacheManager.Core.Cache
         /// state of the cache manager instance.
         /// </remarks>
 #if NET40
-        public ICollection<ICacheHandle<TCacheValue>> CacheHandles
+        public ICollection<BaseCacheHandle<TCacheValue>> CacheHandles
 #else
-        public IReadOnlyCollection<ICacheHandle<TCacheValue>> CacheHandles
+        public IReadOnlyCollection<BaseCacheHandle<TCacheValue>> CacheHandles
 #endif
         {
             get
             {
-                return new ReadOnlyCollection<ICacheHandle<TCacheValue>>(
-                    new List<ICacheHandle<TCacheValue>>(
+                return new ReadOnlyCollection<BaseCacheHandle<TCacheValue>>(
+                    new List<BaseCacheHandle<TCacheValue>>(
                         this.cacheHandles));
             }
         }
@@ -144,14 +160,14 @@ namespace CacheManager.Core.Cache
         /// Adds a cache handle to the cache manager instance.
         /// </summary>
         /// <param name="handle">The cache handle.</param>
-        public void AddCacheHandle(ICacheHandle<TCacheValue> handle)
+        public void AddCacheHandle(BaseCacheHandle<TCacheValue> handle)
         {
             if (handle == null)
             {
                 throw new ArgumentNullException("handle");
             }
 
-            var handleList = new List<ICacheHandle<TCacheValue>>(this.cacheHandles);
+            var handleList = new List<BaseCacheHandle<TCacheValue>>(this.cacheHandles);
             handleList.Add(handle);
             this.cacheHandles = handleList.ToArray();
         }
@@ -375,9 +391,9 @@ namespace CacheManager.Core.Cache
 
             this.cacheBackPlate = backPlate;
 
-            var handles = new Func<ICacheHandle<TCacheValue>[]>(() =>
+            var handles = new Func<BaseCacheHandle<TCacheValue>[]>(() =>
             {
-                var handleList = new List<ICacheHandle<TCacheValue>>();
+                var handleList = new List<BaseCacheHandle<TCacheValue>>();
                 foreach (var handle in this.cacheHandles)
                 {
                     if (!handle.Configuration.IsBackPlateSource)
@@ -692,7 +708,7 @@ namespace CacheManager.Core.Cache
         /// Clears the cache handles provided.
         /// </summary>
         /// <param name="handles">The handles.</param>
-        private void ClearHandles(ICacheHandle<TCacheValue>[] handles)
+        private void ClearHandles(BaseCacheHandle<TCacheValue>[] handles)
         {
             foreach (var handle in handles)
             {
@@ -708,7 +724,7 @@ namespace CacheManager.Core.Cache
         /// </summary>
         /// <param name="region">The region.</param>
         /// <param name="handles">The handles.</param>
-        private void ClearRegionHandles(string region, ICacheHandle<TCacheValue>[] handles)
+        private void ClearRegionHandles(string region, BaseCacheHandle<TCacheValue>[] handles)
         {
             foreach (var handle in handles)
             {
@@ -725,7 +741,7 @@ namespace CacheManager.Core.Cache
         /// <param name="key">The key.</param>
         /// <param name="region">The region.</param>
         /// <param name="handles">The handles.</param>
-        private void EvictFromHandles(string key, string region, ICacheHandle<TCacheValue>[] handles)
+        private void EvictFromHandles(string key, string region, BaseCacheHandle<TCacheValue>[] handles)
         {
             foreach (var handle in handles)
             {

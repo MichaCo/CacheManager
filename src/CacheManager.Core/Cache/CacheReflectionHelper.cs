@@ -9,22 +9,22 @@ namespace CacheManager.Core.Cache
 {
     internal static class CacheReflectionHelper
     {
-        public static ICacheManager<TCacheValue> FromConfiguration<TCacheValue>(string name)
+        public static ICacheManager<TCacheValue> FromConfiguration<TCacheValue>(string cacheName, string configName)
         {
-            CacheManagerConfiguration<TCacheValue> managerConfiguration = ConfigurationBuilder.LoadConfiguration<TCacheValue>(name);
-            return FromConfiguration<TCacheValue>(managerConfiguration);
+            CacheManagerConfiguration managerConfiguration = ConfigurationBuilder.LoadConfiguration(configName);
+            return FromConfiguration<TCacheValue>(cacheName, managerConfiguration);
         }
 
-        public static ICacheManager<TCacheValue> FromConfiguration<TCacheValue>(CacheManagerConfiguration<TCacheValue> managerConfiguration)
+        public static ICacheManager<TCacheValue> FromConfiguration<TCacheValue>(string cacheName, CacheManagerConfiguration managerConfiguration)
         {
-            var manager = new BaseCacheManager<TCacheValue>(managerConfiguration);
+            var manager = new BaseCacheManager<TCacheValue>(cacheName, managerConfiguration);
 
             foreach (var handleConfiguration in managerConfiguration.CacheHandles)
             {
                 Type handleType = handleConfiguration.HandleType;
                 Type instanceType = null;
 
-                ValidateCacheHandleGenericTypeArguments(handleType, typeof(TCacheValue));
+                ValidateCacheHandleGenericTypeArguments(handleType);
 
                 // if the configured type doesn't have a generic type definition ( <T> is not
                 // defined )
@@ -57,7 +57,7 @@ namespace CacheManager.Core.Cache
                         new object[]
                         {
                             managerConfiguration.BackPlateName,
-                            managerConfiguration
+                            cacheName
                         });
 
                     manager.SetCacheBackPlate(backPlate);
@@ -83,14 +83,15 @@ namespace CacheManager.Core.Cache
                              .Concat(type.BaseType.GetGenericBaseTypes());
         }
 
-        public static void ValidateCacheHandleGenericTypeArguments(Type handle, Type arg)
+        public static void ValidateCacheHandleGenericTypeArguments(Type handle)
         {
-            if (handle.IsInterface)
+            // not really needed due to the generic type from callees being restricted.
+            if (!handle.GetGenericBaseTypes().Any(p => p == typeof(BaseCacheHandle<>)))
             {
                 throw new InvalidOperationException(
                     string.Format(
                         CultureInfo.InvariantCulture,
-                        "Interfaces are not allowed as handle type, try change the type of handle [{0}]",
+                        "Configured cache handle does not implement BaseCacheHandle<> [{0}].",
                         handle.ToString()));
             }
 
@@ -104,24 +105,14 @@ namespace CacheManager.Core.Cache
                             "Invalid number of generic type arguments found for handle [{0}].",
                             handle.ToString()));
                 }
-                if (!handle.GetGenericArguments().First().Equals(arg))
+                if (handle.GetGenericArguments().Any())
                 {
                     throw new InvalidOperationException(
                         string.Format(
                             CultureInfo.InvariantCulture,
-                            "Item value type configured [{0}] does not match with the requested generic type argument [{1}]",
-                            handle.ToString(),
-                            arg.ToString()));
+                            "Cache handle type [{0}] should not have any generic arguments defined. Use typeof(MyType<>).",
+                            handle.ToString()));
                 }
-            }
-
-            if (!handle.GetGenericBaseTypes().Any(p => p == typeof(BaseCacheHandle<>)))
-            {
-                throw new InvalidOperationException(
-                    string.Format(
-                        CultureInfo.InvariantCulture,
-                        "Configured cache handle does not implement BaseCacheHandle<> [{0}].",
-                        handle.ToString()));
             }
         }
     }

@@ -47,7 +47,7 @@ namespace CacheManager.AppFabricCache
         /// <param name="configuration">The configuration.</param>
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "not possible")]
         [SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0", Justification = "Gets validated in base.")]
-        public AppFabricCacheHandle(ICacheManager<TCacheValue> manager, ICacheHandleConfiguration configuration)
+        public AppFabricCacheHandle(ICacheManager<TCacheValue> manager, CacheHandleConfiguration configuration)
             : base(manager, configuration)
         {
             DataCacheFactoryConfiguration cfg = null;

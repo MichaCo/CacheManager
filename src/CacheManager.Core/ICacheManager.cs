@@ -50,6 +50,8 @@ namespace CacheManager.Core
         /// </summary>
         event EventHandler<CacheUpdateEventArgs> OnUpdate;
 
+        string Name { get; }
+
         /// <summary>
         /// Gets a list of cache handles currently registered within the cache manager.
         /// </summary>
@@ -59,9 +61,9 @@ namespace CacheManager.Core
         /// state of the cache manager instance.
         /// </remarks>
 #if NET40
-        ICollection<ICacheHandle<TCacheValue>> CacheHandles { get; }
+        ICollection<BaseCacheHandle<TCacheValue>> CacheHandles { get; }
 #else
-        IReadOnlyCollection<ICacheHandle<TCacheValue>> CacheHandles { get; }
+        IReadOnlyCollection<BaseCacheHandle<TCacheValue>> CacheHandles { get; }
 #endif
         /// <summary>
         /// Gets the configuration.

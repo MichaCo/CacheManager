@@ -20,7 +20,7 @@ namespace CacheManager.Core
         /// <param name="config">The redis configuration object.</param>
         /// <returns>The configuration builder.</returns>
         /// <exception cref="System.ArgumentNullException">If config is null.</exception>
-        public static ConfigurationBuilderCachePart<TCacheValue> WithRedisConfiguration<TCacheValue>(this ConfigurationBuilderCachePart<TCacheValue> part, string configurationKey, Action<RedisConfigurationBuilder> config)
+        public static ConfigurationBuilderCachePart WithRedisConfiguration(this ConfigurationBuilderCachePart part, string configurationKey, Action<RedisConfigurationBuilder> config)
         {
             if (config == null)
             {
@@ -35,7 +35,6 @@ namespace CacheManager.Core
         /// <summary>
         /// Adds a redis configuration.
         /// </summary>
-        /// <typeparam name="TCacheValue">The type of the cache value.</typeparam>
         /// <param name="part">The part.</param>
         /// <param name="configurationKey">
         /// The configuration key which has to match with the cache handle name.
@@ -45,7 +44,7 @@ namespace CacheManager.Core
         /// <exception cref="System.ArgumentNullException">
         /// If configurationKey or connectionString are null.
         /// </exception>
-        public static ConfigurationBuilderCachePart<TCacheValue> WithRedisConfiguration<TCacheValue>(this ConfigurationBuilderCachePart<TCacheValue> part, string configurationKey, string connectionString)
+        public static ConfigurationBuilderCachePart WithRedisConfiguration(this ConfigurationBuilderCachePart part, string configurationKey, string connectionString)
         {
             if (string.IsNullOrWhiteSpace(configurationKey))
             {
