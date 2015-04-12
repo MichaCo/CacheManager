@@ -14,6 +14,8 @@ Documentation can be found within the [articles folder][articles] of the Cache M
 
 * [**Getting Started**][gettingstarted]
 Is a very basic introduction of how to install and use Cache Manager
+* [**Configuration**][configuration]
+Explains how to configure Cache Manager via code or configuration file
 * [**Features and Architecture**][featuresarticle]
 A more advanced in depth introduction to all features of Cache Manager
 * [**Update Operations**][updatearticle]
@@ -88,6 +90,7 @@ OnGet, OnAdd, OnPut, OnRemove, OnClear, OnClearRegion
 [articles]: https://github.com/MichaCo/CacheManager/tree/master/Articles
 [help]: http://michaco.github.io/Documentation/CacheManager/Help
 [gettingstarted]: http://mconrad.azurewebsites.net/Documentation/Index/cachemanager_getting_started
+[configuration]: http://mconrad.azurewebsites.net/Documentation/Index/cachemanager_configuration
 [featuresarticle]: http://mconrad.azurewebsites.net/Documentation/Index/cachemanager_architecture
 [updatearticle]: http://mconrad.azurewebsites.net/Documentation/Index/cachemanager_update
 [cachesyncarticle]: http://mconrad.azurewebsites.net/Documentation/Index/cachemanager_synchronization
