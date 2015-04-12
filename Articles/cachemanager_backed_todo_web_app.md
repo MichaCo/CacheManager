@@ -1,8 +1,7 @@
-
 # Single Page Todo App with Cache Manager
 
-This is about creating a single page web site using an asp.net Web API Service which stores the data via Cache Manager. 
-I will explain the service implementation and usage of Cache Manager, also discussing how to host the newly created site on Azure and how to configure Azure's Redis cache.
+This is about creating a single page web site using an ASP.NET Web API Service which stores the data via Cache Manager. 
+I will explain the service implementation and usage of Cache Manager, and also discuss how to host the newly created site on Azure and how to configure Azure's Redis cache.
 
 To implement the site, I will use an existing AngularJS based [example][1] from [todomvc.com][2]. 
 All credits for this part of this sample site goes to them of course. 
@@ -14,20 +13,20 @@ If you don't know what the todo app does, go to [todomvc.com][2], there are many
 ![todomvc example][3]
 
 ## Basic Functionality
-With this simple app the user can add new todos, edit existing ones, delete them and set them to completed state. There is also a delete "all completed" function.
+With this simple app, the user can add new todos, edit existing ones, delete them and set them to completed state. There is also a delete "all completed" function.
 
 ## Service Definition
 This single page application will use a web API service to store or remove the todos and which has to provide the following methods:
 
-* Get - retrieves all existing todos
-* Get(id) - retrieves one todo by id
-* Post(todo) - creates a new todo, assigns a new id and returns it.
-* Put(todo) - updates the todo
-* Delete(id) - removes one todo by id
-* Delete - removes all completed todos
+* `Get` - Retrieves all existing `todo`s
+* `Get(id)` - Retrieves one `todo` by `id`
+* `Post(todo)` - Creates a new `todo`, assigns a new `id` and returns it.
+* `Put(todo)` - Updates the `todo`
+* `Delete(id)` - Removes one `todo` by `id`
+* `Delete` - Removes all completed `todo`s
 
 ## Project setup
-I will implement the service with asp.net Web API, so lets create an empty Web API project and add the sample code to it.  Our solution will look like that:
+I will implement the service with ASP.NET Web API, so let's create an empty Web API project and add the sample code to it.  Our solution will look like that:
 ![enter image description here][5]
 
 > **Hint**
@@ -36,7 +35,7 @@ I will implement the service with asp.net Web API, so lets create an empty Web A
 I also installed some additional nuget packages, CacheManager packages, Unity and Json.Net.
 
 ## Model
-Let's add the Todo Model to the solution, the model has three properties: `Id`, `Title` and `Completed`.
+Let's add the `Todo` Model to the solution, the model has three properties: `Id`, `Title` and `Completed`.
 
 	using System;
 	using System.Linq;
@@ -59,12 +58,12 @@ Let's add the Todo Model to the solution, the model has three properties: `Id`, 
 	    }
 	}
 
-To get the JavaScript typical `camelCase` casing we define the `JsonProperty`'s name. Also we have to mark the object to be `Serializable` otherwise cache handles like the Redis handle cannot store the Todo entity.
+To get the JavaScript typical `camelCase` casing, we define the `JsonProperty`'s name. Also, we have to mark the object to be `Serializable` otherwise cache handles like the Redis handle cannot store the `Todo` entity.
 
-## Setting up Cache Manager
+## Setting Up Cache Manager
 Our service should use Cache Manager to store and retrieve the todo items. To make the Cache Manager instance accessible by the controller, I will use Unity as IoC container. This could be done in many different ways of course, use whatever IoC container you prefer.
 
-In Global.asax during app initialization (`Application_Start`) we just have to create the `IUnityContainer` and register the Cache Manager instance. 
+In *Global.asax* during app initialization (`Application_Start`), we just have to create the `IUnityContainer` and register the Cache Manager instance. 
 To have Unity inject the Cache Manager instance into our controller every time the controller gets instantiated by the framework we have to also tell the Web API framework to use Unity as the dependency resolver.
 
     public class WebApiApplication : System.Web.HttpApplication
@@ -86,7 +85,7 @@ To have Unity inject the Cache Manager instance into our controller every time t
         }
     }
 
-In the Api Controller, I will add a property which the `Dependency` attribute on. This will let Unity set the property for us. We could also use constructor based injection, but this would be more code to write...  
+In the API Controller, I will add a property whith the `Dependency` attribute on. This will let Unity set the property for us. We could also use constructor based injection, but this would be more code to write...  
 
 	[Dependency]
 	protected ICacheManager<object> todoCache { get; set; }
@@ -95,17 +94,17 @@ In the Api Controller, I will add a property which the `Dependency` attribute on
 Let's create the service. I will let MVC scaffold a full CRUD Web API controller. 
 The generated code will be using `string` as types, we'll have to change that to our `Todo` model.
 
-### How do we store the items
-We know we have to retrieve all and remove subsets of the todos. We could store the todos as **one** list but this is usually not very efficient if we think about scaling and performance. 
+### How Do We Store the Items
+We know we have to retrieve all and remove subsets of the todos. We could store the `Todo`s as **one** list but this is usually not very efficient if we think about scaling and performance. 
 
 The better solution is to store each item independently.
-That being said, this solution makes it a little bit more difficult to retrieve all todos from cache.
-One way of solving this is to put another key into the cache which stores all available ids. 
-This way we also have a way to generate new ids; if we know all existing ids, we can simply create a new one...
+That being said, this solution makes it a little bit more difficult to retrieve all `Todo`s from cache.
+One way of solving this is to put another key into the cache which stores all available `id`s. 
+This way, we also have a way to generate new `id`s; if we know all existing `id`s, we can simply create a new one...
 
 Let's go ahead and implement this solution:
 
-I'll add a simple private property to retrieve the list of ids. If the key is not present, I'll add an empty array into the cache. This is necessary because we want to call `Update` later on, and if there is no cache key to update, the method doesn't do anything!
+I'll add a simple `private` property to retrieve the list of `id`s. If the key is not present, I'll add an empty array into the cache. This is necessary because we want to call `Update` later on, and if there is no cache key to update, the method doesn't do anything!
 
 I'm using `Add` in this case because it adds the value only if it is not already present to prevent eventual issues in distributed environments.
 
@@ -184,10 +183,10 @@ If we would use `Put` or `Add` instead, we would run into concurrency issues wit
 As discussed in [the article about the `Update` method][6], the `Action` you pass in might be called multiple times depending on version conflicts. We will always receive the "latest" value though, in this case `obj`.
 If a version conflict occurs during the update process, our changes will be discarded and the `Action` runs again, this means we will not add the new id multiple times, only the `Max` value will be different on every iteration.
 
-At the end we can set the `Id` property of our `Todo`, finally `Add` it to our cache and return it. 
+At the end, we can set the `Id` property of our `Todo`, finally `Add` it to our cache and return it. 
 
 ### Implementing Delete
-To delete all completed `Todo`´s we'll have to iterate over all existing `Todo`s, check the `Completed` state and call `Delete` by id.
+To delete all completed `Todo`´s, we'll have to iterate over all existing `Todo`s, check the `Completed` state and call `Delete` by id.
 
 	   // DELETE ALL completed: api/ToDo
 	   public void Delete()
@@ -205,7 +204,7 @@ To delete all completed `Todo`´s we'll have to iterate over all existing `Todo`
 	   }
         
 ### Implementing Delete by Id
-Delete by Id is similar to `Post`, we also have to update the key holding all the `Todo`s´ ids. Same thing here, we'll use the `Update` method to ensure we work on the correct version of the array. 
+`Delete` by `Id` is similar to `Post`, we also have to update the key holding all the `Todo`s´ `id`s. Same thing here, we'll use the `Update` method to ensure we work on the correct version of the array. 
 
 	   // DELETE: api/ToDo/5
 	   public void Delete(int id)
@@ -219,11 +218,11 @@ Delete by Id is similar to `Post`, we also have to update the key holding all th
 	       });
 	   }
 
-## Using Cache Manager to scale
+## Using Cache Manager to Scale
 As you might have recognized, in the "Setting up Cache Manager" section of this article, I only specified one in-process cache handle. This would mean that our `Todo`s are stored in memory only and will be flushed whenever the app gets restarted.
-To persist our `Todo`s we could use some distributed cache like [Redis][redis] or couchbase.
+To persist our `Todo`s, we could use some distributed cache like [Redis][redis] or couchbase.
 
-With Cache Manager this is extremely easy to change. Just a few lines of configuration and there are no changes needed in our Api controller!
+With Cache Manager, this is extremely easy to change. Just a few lines of configuration and there are no changes needed in our API controller!
 
     var cache = CacheFactory.Build("todos", settings =>
     {
@@ -235,7 +234,7 @@ With Cache Manager this is extremely easy to change. Just a few lines of configu
             .WithRedisCacheHandle("redisLocal", true);
     });
 
-The configuration now has two cache handles! A "first level" in-process cache, and the "second level" distributed cache. This way we can reduce the traffic to the Redis server which will make our Application a lot faster.
+The configuration now has two cache handles! A "first level" in-process cache, and the "second level" distributed cache. This way, we can reduce the traffic to the Redis server which will make our application a lot faster.
 
 ## Hosting
 If we now host this site on Azure for example, we can change the configuration slightly and use a connection string instead of hard coded connection parameters.
@@ -252,13 +251,13 @@ We can also use the Cache Manager's back plate feature, to keep the configured f
             .WithRedisCacheHandle("redis.azure.us", true);
     });
 
-You can either add the connection string via web.config `ConnectionStrings` section, or add it via Azure Management Portal (which is the preferred way for security reasons...).
+You can either add the connection string via *web.config* `ConnectionStrings` section, or add it via Azure Management Portal (which is the preferred way for security reasons...).
 On the Azure Management Portal, click on your web app, "All Settings", "Application Settings" and scroll down to "Connection Strings" and add the connection string to the list.
 It should look similar to this:
 
 ![Azure portal][7]
 
-The connection string itself must contain at least the host, SSL being set to true and the password being set to one of the Redis Access Keys provided by the portal.
+The connection string itself must contain at least the host, SSL being set to `true` and the password being set to one of the Redis Access Keys provided by the portal.
 
 	hostName:6380,ssl=true,password=ThEaCcessKey
 
