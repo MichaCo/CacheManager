@@ -68,4 +68,6 @@ The cacheHandles' elements can be defined with default values for expiration mod
 > To make configuration via .config file easier, enable intellisense by adding the `xmlns` attribute to he `cacheManagers` section and add the CacheManagerCfg.xsd file to your solution. The xsd file can be found in  [solution dir]/packages/CacheManager.Core.x.x.x.x/CacheManagerCfg.xsd
 > See also [this answer on stackoverflow][stackoverflow-config-xsd]
 
+[stackoverflow-config-xsd]: http://stackoverflow.com/questions/742905/enabling-intellisense-for-custom-sections-in-config-files
+
 [TOC]
