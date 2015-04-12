@@ -11,7 +11,7 @@ That being said, most cache provider already come with configuration sections to
 > Make sure to read the cache handle configuration documentation for specific information of how to configure it correctly. It may vary from implementation to implementation.
 
 ### CacheFactory
-To create a Cache Manager instance one should use the `CacheFactory` class which has two different methods: 
+To create a Cache Manager instance you can use the `CacheFactory` class which has two different methods: 
 
 **`Build`** can be used to create a new cache configuration via an `Action` using a fluent configuration builder. 
 
@@ -20,13 +20,13 @@ To create a Cache Manager instance one should use the `CacheFactory` class which
         .WithSystemRuntimeCacheHandle("handleName")
 	        .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(10)));
 
-**`FromConfiguration`** takes either the `CacheManagerConfiguration` object or the `name` of the Cache Manager configured in the .config file of the application.
+**`FromConfiguration`** takes either the `CacheManagerConfiguration` object or the `name` of the Cache Manager configured in the *app/web.config* file of the application. The type of the Cache Manager instance also must be specified now.
 
-	var cache = CacheFactory.FromConfiguration("cacheName")
+	var cache = CacheFactory.FromConfiguration<string>("cacheName")
 
-Optionally, the name of the Cache Manager instance and the name of the configured cache can be separated:
+Optionally, the name of the Cache Manager instance and the name of the configured cache can be defined separated, to create multiple instances from the same configuration:
 
-	var cache = CacheFactory.FromConfiguration("cacheInstanceName", "configuredCacheName")
+	var cache = CacheFactory.FromConfiguration<int>("cacheInstanceName", "configuredCacheName")
 
 If you want to separate the creation of the configuration object and the creation of the Cache Manager instance, use the `ConfigurationBuilder` to create the configuration.
 
