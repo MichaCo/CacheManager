@@ -8,12 +8,12 @@
     <owners>$author$</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <summary>
-      CacheManager is a common interface and abstraction layer for caching. It supports various cache providers and implements many advanced features.
+      CacheManager is an open source abstraction layer for caching written in C#. It supports various cache providers and implements many advanced features.
     </summary>
     <description>
       $description$
       The Core library contains all base interfaces and tools.
-      You may also want to install one of the other CacheManager packages to get other cache handle implementations etc.
+      You should install at least one other CacheManager package to get cache handle implementations.
     </description>
     <language>en-US</language>
     <projectUrl>http://mconrad.azurewebsites.net/</projectUrl>

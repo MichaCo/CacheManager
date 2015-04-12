@@ -8,7 +8,7 @@
     <owners>$author$</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <summary>
-      CacheManager is a common interface and abstraction layer for caching. It supports various cache providers and implements many advanced features.
+      CacheManager is an open source abstraction layer for caching written in C#. It supports various cache providers and implements many advanced features.
     </summary>
     <description>
       $description$
