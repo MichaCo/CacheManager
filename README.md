@@ -27,9 +27,9 @@ There is also from source generated [html documentation][help] available online.
 
 ## Examples
 * Examples included in the Cache Manager repository
-	* [Some usage examples][program.cs]
-	* [ASP.NET MVC website][outputcachesample] showcasing usage of the Cache Manager `OutputCache` provider
-* [Single Page Todo App with Cache Manager on Azure using Redis][todosample]
+	* [**Some usage examples**][program.cs]
+	* [**ASP.NET MVC website**][outputcachesample] showcasing usage of the Cache Manager `OutputCache` provider
+* [**Single Page Todo App with Cache Manager on Azure using Redis**][todosample]
 
 
 ## CacheManager Nuget Packages
