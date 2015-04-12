@@ -25,6 +25,13 @@ Use case for and explanation of the Cache Back Plate feature.
 
 There is also from source generated [html documentation][help] available online.
 
+## Examples
+* Examples included in the Cache Manager repository
+	* [Some usage examples][program.cs]
+	* [ASP.NET MVC website][outputcachesample] showcasing usage of the Cache Manager `OutputCache` provider
+* [Single Page Todo App with Cache Manager on Azure using Redis][todosample]
+
+
 ## CacheManager Nuget Packages
 
 | Package Name         | .Net 4.0         | .Net 4.5
@@ -94,5 +101,8 @@ OnGet, OnAdd, OnPut, OnRemove, OnClear, OnClearRegion
 [featuresarticle]: http://mconrad.azurewebsites.net/Documentation/Index/cachemanager_architecture
 [updatearticle]: http://mconrad.azurewebsites.net/Documentation/Index/cachemanager_update
 [cachesyncarticle]: http://mconrad.azurewebsites.net/Documentation/Index/cachemanager_synchronization
+[program.cs]: https://github.com/MichaCo/CacheManager/blob/master/samples/CacheManager.Examples/Program.cs
+[outputcachesample]: https://github.com/MichaCo/CacheManager/tree/master/samples/CacheManager.Samples.Mvc
+[todosample]: http://mconrad.azurewebsites.net/Documentation/Index/cachemanager_backed_todo_web_app
 
 [TOC]
