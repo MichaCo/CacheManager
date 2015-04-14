@@ -74,15 +74,14 @@
     <Compile Include="UpdateItemResult.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Configuration\ICacheManagerConfiguration.cs" />
     <Compile Include="ICacheManager.cs" />
     <Compile Include="CacheItem.cs" />
-    <Compile Include="Configuration\CacheHandleConfiguration.cs" />
-    <Compile Include="Configuration\CacheManagerConfiguration.cs" />
+    <Compile Include="CacheHandleConfiguration.cs" />
+    <Compile Include="CacheManagerConfiguration.cs" />
     <Compile Include="Configuration\CacheManagerSection.cs" />
-    <Compile Include="Configuration\CacheUpdateMode.cs" />
+    <Compile Include="CacheUpdateMode.cs" />
     <Compile Include="Configuration\ConfigurationBuilder.cs" />
-    <Compile Include="Configuration\ExpirationMode.cs" />
+    <Compile Include="ExpirationMode.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Cache\CachePerformanceCounters.cs" />
     <Compile Include="UpdateItemConfig.cs" />
@@ -91,6 +90,7 @@
   <ItemGroup>
     <None Include="CacheManager.Core.csproj.nuspec" />
     <None Include="app.config.transform" />
+    <None Include="Settings.StyleCop" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />

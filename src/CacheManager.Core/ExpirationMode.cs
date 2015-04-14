@@ -1,4 +1,4 @@
-﻿namespace CacheManager.Core.Configuration
+﻿namespace CacheManager.Core
 {
     /// <summary>
     /// Defines the supported expiration modes for cache items.

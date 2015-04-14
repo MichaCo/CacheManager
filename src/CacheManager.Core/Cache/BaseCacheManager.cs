@@ -51,7 +51,7 @@ namespace CacheManager.Core.Cache
         /// This constructor is primarily used for unit testing. To construct a cache manager, use
         /// the <see cref="CacheFactory"/>.
         /// </remarks>
-        public BaseCacheManager(string cacheName, ICacheManagerConfiguration configuration, params BaseCacheHandle<TCacheValue>[] handles)
+        public BaseCacheManager(string cacheName, CacheManagerConfiguration configuration, params BaseCacheHandle<TCacheValue>[] handles)
             : this(configuration)
         {
             if (string.IsNullOrEmpty(cacheName))
@@ -77,7 +77,7 @@ namespace CacheManager.Core.Cache
         /// </summary>
         /// <param name="configuration">The configuration.</param>
         /// <exception cref="System.ArgumentNullException">If configuration is null.</exception>
-        private BaseCacheManager(ICacheManagerConfiguration configuration)
+        private BaseCacheManager(CacheManagerConfiguration configuration)
         {
             if (configuration == null)
             {
@@ -150,7 +150,7 @@ namespace CacheManager.Core.Cache
         /// Gets the configuration.
         /// </summary>
         /// <value>The configuration.</value>
-        public ICacheManagerConfiguration Configuration
+        public CacheManagerConfiguration Configuration
         {
             get;
             private set;

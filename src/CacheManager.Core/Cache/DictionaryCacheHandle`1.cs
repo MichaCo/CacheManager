@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Linq;
-using CacheManager.Core.Configuration;
 
 namespace CacheManager.Core.Cache
 {

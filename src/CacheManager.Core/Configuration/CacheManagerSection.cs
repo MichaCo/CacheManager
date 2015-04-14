@@ -189,8 +189,8 @@ namespace CacheManager.Core.Configuration
     /// <summary>
     /// Configuration element which defines a cache handle configuration within a cache manager configuration.
     /// </summary>
-    /// <see cref="ICacheHandleConfiguration"/>
-    /// <see cref="ICacheManagerConfiguration"/>
+    /// <see cref="CacheHandleConfiguration"/>
+    /// <see cref="CacheManagerConfiguration"/>
     public sealed class CacheManagerHandle : ConfigurationElement
     {
         /// <summary>

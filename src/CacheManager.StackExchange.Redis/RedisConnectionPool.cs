@@ -33,8 +33,11 @@ namespace CacheManager.Redis
                 {
                     connection = StackRedis.ConnectionMultiplexer.Connect(connectionString);
 
-                    connection.PreserveAsyncOrder = false;
-                    connections.Add(connectionString, connection);
+                    if (connection.IsConnected)
+                    {
+                        connection.PreserveAsyncOrder = false;
+                        connections.Add(connectionString, connection);
+                    }
                 }
             }
 

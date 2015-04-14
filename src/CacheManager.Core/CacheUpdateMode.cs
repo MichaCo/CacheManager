@@ -1,4 +1,4 @@
-﻿namespace CacheManager.Core.Configuration
+﻿namespace CacheManager.Core
 {
     /// <summary>
     /// Defines the possible update modes of the cache manager.

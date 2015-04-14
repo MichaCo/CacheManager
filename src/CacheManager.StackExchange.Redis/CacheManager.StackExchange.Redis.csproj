@@ -65,6 +65,7 @@
     <None Include="app.config.transform" />
     <None Include="CacheManager.StackExchange.Redis.csproj.nuspec" />
     <None Include="packages.config" />
+    <None Include="Settings.StyleCop" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CacheManager.Core\CacheManager.Core.csproj">

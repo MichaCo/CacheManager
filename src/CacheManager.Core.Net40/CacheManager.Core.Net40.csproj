@@ -45,8 +45,17 @@
     <Compile Include="..\CacheManager.Core\CacheFactory.cs">
       <Link>CacheFactory.cs</Link>
     </Compile>
+    <Compile Include="..\CacheManager.Core\CacheHandleConfiguration.cs">
+      <Link>CacheHandleConfiguration.cs</Link>
+    </Compile>
     <Compile Include="..\CacheManager.Core\CacheItem.cs">
       <Link>CacheItem.cs</Link>
+    </Compile>
+    <Compile Include="..\CacheManager.Core\CacheManagerConfiguration.cs">
+      <Link>CacheManagerConfiguration.cs</Link>
+    </Compile>
+    <Compile Include="..\CacheManager.Core\CacheUpdateMode.cs">
+      <Link>CacheUpdateMode.cs</Link>
     </Compile>
     <Compile Include="..\CacheManager.Core\Cache\BackPlateMessage.cs">
       <Link>Cache\BackPlateMessage.cs</Link>
@@ -90,29 +99,14 @@
     <Compile Include="..\CacheManager.Core\Cache\DictionaryCacheHandle`1.cs">
       <Link>Cache\DictionaryCacheHandle`1.cs</Link>
     </Compile>
-    <Compile Include="..\CacheManager.Core\Configuration\CacheHandleConfiguration.cs">
-      <Link>Configuration\CacheHandleConfiguration.cs</Link>
-    </Compile>
-    <Compile Include="..\CacheManager.Core\Configuration\CacheManagerConfiguration.cs">
-      <Link>Configuration\CacheManagerConfiguration.cs</Link>
-    </Compile>
     <Compile Include="..\CacheManager.Core\Configuration\CacheManagerSection.cs">
       <Link>Configuration\CacheManagerSection.cs</Link>
-    </Compile>
-    <Compile Include="..\CacheManager.Core\Configuration\CacheUpdateMode.cs">
-      <Link>Configuration\CacheUpdateMode.cs</Link>
     </Compile>
     <Compile Include="..\CacheManager.Core\Configuration\ConfigurationBuilder.cs">
       <Link>Configuration\ConfigurationBuilder.cs</Link>
     </Compile>
-    <Compile Include="..\CacheManager.Core\Configuration\ExpirationMode.cs">
-      <Link>Configuration\ExpirationMode.cs</Link>
-    </Compile>
-    <Compile Include="..\CacheManager.Core\Configuration\ICacheHandleConfiguration.cs">
-      <Link>Configuration\ICacheHandleConfiguration.cs</Link>
-    </Compile>
-    <Compile Include="..\CacheManager.Core\Configuration\ICacheManagerConfiguration.cs">
-      <Link>Configuration\ICacheManagerConfiguration.cs</Link>
+    <Compile Include="..\CacheManager.Core\ExpirationMode.cs">
+      <Link>ExpirationMode.cs</Link>
     </Compile>
     <Compile Include="..\CacheManager.Core\GlobalSuppressions.cs">
       <Link>GlobalSuppressions.cs</Link>

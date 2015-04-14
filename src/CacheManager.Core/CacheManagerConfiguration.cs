@@ -1,14 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace CacheManager.Core.Configuration
+namespace CacheManager.Core
 {
     /// <summary>
     /// The basic cache manager configuration class.
     /// </summary>
     /// <typeparam name="TCacheValue">The type of the cache value.</typeparam>
-    public sealed class CacheManagerConfiguration : ICacheManagerConfiguration
+    public sealed class CacheManagerConfiguration
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CacheManagerConfiguration"/> class.
+        /// </summary>
         public CacheManagerConfiguration()
         {
             this.CacheHandles = new List<CacheHandleConfiguration>();
@@ -17,6 +20,11 @@ namespace CacheManager.Core.Configuration
             this.CacheUpdateMode = CacheUpdateMode.Up;
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CacheManagerConfiguration"/> class.
+        /// </summary>
+        /// <param name="maxRetries">The maximum retries.</param>
+        /// <param name="retryTimeout">The retry timeout.</param>
         public CacheManagerConfiguration(int maxRetries = int.MaxValue, int retryTimeout = 10)
             : this()
         {

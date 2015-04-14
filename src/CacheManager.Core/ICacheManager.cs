@@ -69,7 +69,7 @@ namespace CacheManager.Core
         /// Gets the configuration.
         /// </summary>
         /// <value>The configuration.</value>
-        ICacheManagerConfiguration Configuration { get; }
+        CacheManagerConfiguration Configuration { get; }
 
         /////// <summary>
         /////// Adds a cache handle to the cache manager instance.
