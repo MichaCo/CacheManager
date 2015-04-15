@@ -45,7 +45,7 @@ There is also from source generated [html documentation][help] available online.
 | [CacheManager.Web] [Web.nuget]  | - | x
 | [CacheManager.Couchbase] [Couchbase.nuget]  | - | x
 
-## Features in Version: [0.4.4][releases] [![Build Status](https://travis-ci.org/MichaCo/CacheManager.svg?branch=master)](https://travis-ci.org/MichaCo/CacheManager) 
+## Features in Version: [0.5.x][releases] [![Build Status](https://travis-ci.org/MichaCo/CacheManager.svg?branch=master)](https://travis-ci.org/MichaCo/CacheManager) 
 
 * One common interface for handling different caching technologies: `ICache<T>`
 * Configurable via app/web.config or by code.
