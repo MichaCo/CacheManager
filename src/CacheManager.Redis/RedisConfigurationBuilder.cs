@@ -4,8 +4,8 @@ using System.Collections.Generic;
 namespace CacheManager.Redis
 {
     /// <summary>
-    /// <see cref="RedisConfigurationBuilder"/> helps creating the <see cref="RedisConfiguration"/> object
-    /// via code.
+    /// <see cref="RedisConfigurationBuilder"/> helps creating the <see cref="RedisConfiguration"/>
+    /// object via code.
     /// </summary>
     public class RedisConfigurationBuilder
     {
@@ -17,11 +17,12 @@ namespace CacheManager.Redis
         private string key = string.Empty;
         private string password = null;
         private string sslHost = null;
+
         /// <summary>
-        /// Creates a new instance of <see cref="RedisConfigurationBuilder"/> which will create 
-        /// add a <see cref="RedisConfiguration"/> for the <paramref name="configurationKey"/>.
+        /// Initializes a new instance of the <see cref="RedisConfigurationBuilder"/> class.
         /// </summary>
-        /// <param name="configurationKey"></param>
+        /// <param name="configurationKey">The configuration key.</param>
+        /// <exception cref="System.ArgumentNullException">If configurationKey is null.</exception>
         public RedisConfigurationBuilder(string configurationKey)
         {
             if (string.IsNullOrWhiteSpace(configurationKey))
@@ -33,18 +34,20 @@ namespace CacheManager.Redis
         }
 
         /// <summary>
-        /// Creates the <see cref="RedisConfiguration"/> out of the currently specified properties, if possible.
+        /// Creates the <see cref="RedisConfiguration"/> out of the currently specified properties,
+        /// if possible.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>The <c>RedisConfiguration</c></returns>
         public RedisConfiguration Build()
         {
             return new RedisConfiguration(this.key, this.endpoints, this.database, this.password, this.isSsl, this.sslHost, this.connectionTimeout, this.allowAdmin);
         }
+
         /// <summary>
-        /// If set to true, commands which might be risky are enabled, like Clear which will delete all 
-        /// entries in the redis database.
+        /// If set to true, commands which might be risky are enabled, like Clear which will delete
+        /// all entries in the redis database.
         /// </summary>
-        /// <returns>The builder</returns>
+        /// <returns>The builder.</returns>
         public RedisConfigurationBuilder WithAllowAdmin()
         {
             this.allowAdmin = true;
@@ -55,7 +58,7 @@ namespace CacheManager.Redis
         /// Sets the timeout in milliseconds for connect operations.
         /// </summary>
         /// <param name="timeout">The timeout in milliseconds.</param>
-        /// <returns>The builder</returns>
+        /// <returns>The builder.</returns>
         public RedisConfigurationBuilder WithConnectionTimeout(int timeout)
         {
             this.connectionTimeout = timeout;
@@ -63,12 +66,12 @@ namespace CacheManager.Redis
         }
 
         /// <summary>
-        /// Sets the database. 
-        /// <para>Maximum number of database depends on the redis server configuration.</para>
-        /// Default is <c>0</c>.
+        /// Sets the database.
+        /// <para>Maximum number of database depends on the redis server configuration.</para>Default
+        /// is <c>0</c>.
         /// </summary>
         /// <param name="database">The database index.</param>
-        /// <returns>The builder</returns>
+        /// <returns>The builder.</returns>
         public RedisConfigurationBuilder WithDatabase(int database)
         {
             this.database = database;
@@ -77,13 +80,11 @@ namespace CacheManager.Redis
 
         /// <summary>
         /// Adds an endpoint to the connection configuration.
-        /// <para>
-        /// Call this multiple times to add multiple endpoints.
-        /// </para>
+        /// <para>Call this multiple times to add multiple endpoints.</para>
         /// </summary>
         /// <param name="host">The host or IP of the redis server.</param>
-        /// <param name="port"></param>
-        /// <returns>The builder</returns>
+        /// <param name="port">The port of the redis server.</param>
+        /// <returns>The builder.</returns>
         public RedisConfigurationBuilder WithEndpoint(string host, int port)
         {
             var endpoint = new ServerEndPoint(host, port);
@@ -95,7 +96,7 @@ namespace CacheManager.Redis
         /// Sets the password for the redis server.
         /// </summary>
         /// <param name="password">The redis server password.</param>
-        /// <returns>The builder</returns>
+        /// <returns>The builder.</returns>
         public RedisConfigurationBuilder WithPassword(string password)
         {
             this.password = password;
@@ -109,7 +110,7 @@ namespace CacheManager.Redis
         /// </para>
         /// </summary>
         /// <param name="sslHost">The SSL host.</param>
-        /// <returns>The builder</returns>
+        /// <returns>The builder.</returns>
         public RedisConfigurationBuilder WithSsl(string sslHost = null)
         {
             this.isSsl = true;

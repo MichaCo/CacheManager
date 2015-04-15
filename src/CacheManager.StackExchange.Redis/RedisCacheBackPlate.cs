@@ -58,7 +58,7 @@ namespace CacheManager.Redis
         /// <param name="key">The key.</param>
         public override void NotifyChange(string key)
         {
-            PublishMessage(BackPlateMessage.ForChanged(this.identifier, key));
+            this.PublishMessage(BackPlateMessage.ForChanged(this.identifier, key));
         }
 
         /// <summary>

@@ -99,7 +99,8 @@ namespace CacheManager.Core
         /// <summary>
         /// <para>Instantiates a cache manager from app.config or web.config.</para>
         /// <para>
-        /// The <paramref name="cacheName"/> must match with one cache element defined in your config file.
+        /// The <paramref name="cacheName"/> must match with one cache element defined in your
+        /// config file.
         /// </para>
         /// </summary>
         /// <example>
@@ -112,7 +113,9 @@ namespace CacheManager.Core
         /// ]]>
         /// </code>
         /// </example>
-        /// <param name="cacheName">The name of the cache, must also match with the configured cache name.</param>
+        /// <param name="cacheName">
+        /// The name of the cache, must also match with the configured cache name.
+        /// </param>
         /// <typeparam name="TCacheValue">The type of the cache item value.</typeparam>
         /// <returns>The cache manager instance.</returns>
         /// <seealso cref="ICacheManager{TCacheValue}"/>
@@ -131,11 +134,11 @@ namespace CacheManager.Core
             return CacheReflectionHelper.FromConfiguration<TCacheValue>(cacheName, cacheName);
         }
 
-
         /// <summary>
         /// <para>Instantiates a cache manager from app.config or web.config.</para>
         /// <para>
-        /// The <paramref name="cacheName"/> must match with one cache element defined in your config file.
+        /// The <paramref name="cacheName"/> must match with one cache element defined in your
+        /// config file.
         /// </para>
         /// </summary>
         /// <example>
@@ -149,7 +152,9 @@ namespace CacheManager.Core
         /// </code>
         /// </example>
         /// <param name="cacheName">The name of the cache.</param>
-        /// <param name="configName">The configuration name must match with the configured cache name in the configuration file.</param>
+        /// <param name="configName">
+        /// The configuration name must match with the configured cache name in the configuration file.
+        /// </param>
         /// <typeparam name="TCacheValue">The type of the cache item value.</typeparam>
         /// <returns>The cache manager instance.</returns>
         /// <seealso cref="ICacheManager{TCacheValue}"/>

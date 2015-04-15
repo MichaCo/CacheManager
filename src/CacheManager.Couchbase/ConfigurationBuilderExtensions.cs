@@ -60,7 +60,6 @@ namespace CacheManager.Core
         /// the <paramref name="couchbaseConfigurationKey"/> matching the configuration's key.
         /// </para>
         /// </summary>
-        /// <typeparam name="TCacheValue">The type of the cache value.</typeparam>
         /// <param name="part">The builder part.</param>
         /// <param name="couchbaseConfigurationKey">
         /// The Couchbase configuration identifier will be used as name for the cache handle and to
@@ -86,7 +85,6 @@ namespace CacheManager.Core
         /// the <paramref name="couchbaseConfigurationKey"/> matching the configuration's key.
         /// </para>
         /// </summary>
-        /// <typeparam name="TCacheValue">The type of the cache value.</typeparam>
         /// <param name="part">The builder part.</param>
         /// <param name="couchbaseConfigurationKey">
         /// The configuration key will be used as name for the cache handle and to retrieve the
@@ -110,7 +108,6 @@ namespace CacheManager.Core
         /// the <paramref name="couchbaseConfigurationKey"/> matching the configuration's key.
         /// </para>
         /// </summary>
-        /// <typeparam name="TCacheValue">The type of the cache value.</typeparam>
         /// <param name="part">The builder part.</param>
         /// <param name="couchbaseConfigurationKey">
         /// The Couchbase configuration identifier will be used as name for the cache handle and to

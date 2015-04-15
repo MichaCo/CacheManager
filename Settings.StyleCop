@@ -1,4 +1,13 @@
 <StyleCopSettings Version="105">
+  <GlobalSettings>
+    <CollectionProperty Name="RecognizedWords">
+      <Value>Memcached</Value>
+      <Value>Protobuf</Value>
+      <Value>Redis</Value>
+      <Value>enyim</Value>
+      <Value>Couchbase</Value>
+    </CollectionProperty>
+  </GlobalSettings>
   <Analyzers>
     <Analyzer AnalyzerId="StyleCop.CSharp.LayoutRules">
       <Rules>

@@ -13,7 +13,7 @@ namespace CacheManager.Web
     /// </summary>
     public class CacheManagerOutputCacheProvider : OutputCacheProvider
     {
-        private static readonly object configLock = new object();
+        private static readonly object ConfigLock = new object();
         private static ICacheManager<object> cacheInstance;
         private static bool isInitialized = false;
 
@@ -75,14 +75,14 @@ namespace CacheManager.Web
         /// A collection of the name/value pairs representing the provider-specific attributes
         /// specified in the configuration for this provider.
         /// </param>
-        /// <exception cref="System.InvalidOperationException"></exception>
+        /// <exception cref="System.InvalidOperationException">Might be re thrown.</exception>
         public override void Initialize(string name, NameValueCollection config)
         {
             try
             {
                 if (!isInitialized)
                 {
-                    lock (configLock)
+                    lock (ConfigLock)
                     {
                         if (!isInitialized)
                         {

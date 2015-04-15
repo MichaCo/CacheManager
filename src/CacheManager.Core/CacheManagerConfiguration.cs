@@ -6,7 +6,6 @@ namespace CacheManager.Core
     /// <summary>
     /// The basic cache manager configuration class.
     /// </summary>
-    /// <typeparam name="TCacheValue">The type of the cache value.</typeparam>
     public sealed class CacheManagerConfiguration
     {
         /// <summary>

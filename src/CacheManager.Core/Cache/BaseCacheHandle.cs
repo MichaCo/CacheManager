@@ -1,19 +1,19 @@
 ﻿using System;
-using CacheManager.Core.Configuration;
 
 namespace CacheManager.Core.Cache
 {
     /// <summary>
     /// The <c>BaseCacheHandle</c> implements all the logic which might be common for all the cache
-    /// handles. It abstracts the <see cref="ICache{T}"/>
-    /// interface and defines new properties and methods the implementer must use.
-    /// <para>
-    /// Actually it is not advisable to not use <see cref="BaseCacheHandle{T}"/>.
-    /// </para>
+    /// handles. It abstracts the <see cref="ICache{T}"/> interface and defines new properties and
+    /// methods the implementer must use.
+    /// <para>Actually it is not advisable to not use <see cref="BaseCacheHandle{T}"/>.</para>
     /// </summary>
     /// <typeparam name="TCacheValue">The type of the cache value.</typeparam>
     public abstract class BaseCacheHandle<TCacheValue> : BaseCache<TCacheValue>
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="BaseCacheHandle{TCacheValue}"/> class.
+        /// </summary>
         protected BaseCacheHandle()
         {
         }
@@ -219,6 +219,7 @@ namespace CacheManager.Core.Cache
         /// Gets the item expiration.
         /// </summary>
         /// <param name="item">The item.</param>
+        /// <returns>Returns the updated cache item.</returns>
         /// <exception cref="System.ArgumentNullException">If item is null.</exception>
         /// <exception cref="System.InvalidOperationException">
         /// If expiration mode is defined without timeout.
@@ -252,8 +253,8 @@ namespace CacheManager.Core.Cache
                 expirationTimeout = item.ExpirationTimeout != TimeSpan.Zero ? item.ExpirationTimeout : this.Configuration.ExpirationTimeout;
             }
 
-            // Fix issue 2: updating the item exp timeout and mode:
-            // Fix issue where expiration got applied to all caches because it was stored in the item passed around.
+            // Fix issue 2: updating the item exp timeout and mode: Fix issue where expiration got
+            // applied to all caches because it was stored in the item passed around.
             return item.WithExpiration(expirationMode, expirationTimeout);
         }
 

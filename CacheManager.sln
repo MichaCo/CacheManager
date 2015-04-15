@@ -22,7 +22,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "common", "common", "{A8DA8B
 		Local.testsettings = Local.testsettings
 		README.md = README.md
 		RedisCfg.xsd = RedisCfg.xsd
-		common\Settings.StyleCop = common\Settings.StyleCop
+		Settings.StyleCop = Settings.StyleCop
 		WE-Markdown.css = WE-Markdown.css
 		WebEssentials-Settings.json = WebEssentials-Settings.json
 	EndProjectSection

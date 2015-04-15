@@ -12,7 +12,6 @@ namespace CacheManager.Core
         /// <summary>
         /// Adds a redis configuration.
         /// </summary>
-        /// <typeparam name="TCacheValue">The type of the cache value.</typeparam>
         /// <param name="part">The part.</param>
         /// <param name="configurationKey">
         /// The configuration key which has to match with the cache handle name.

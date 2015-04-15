@@ -7,18 +7,44 @@ using ProtoBuf;
 
 namespace CacheManager.WindowsAzureCaching
 {
+    /// <summary>
+    /// Serializer implementation based on Protobuf.
+    /// </summary>
+    /// <typeparam name="T">The object type.</typeparam>
     [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Buf", Justification = "Library name")]
     public class ProtoBufDataCacheObjectSerializer<T> : IDataCacheObjectSerializer
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ProtoBufDataCacheObjectSerializer{T}"/> class.
+        /// </summary>
         public ProtoBufDataCacheObjectSerializer()
         {
         }
 
+        /// <summary>
+        /// Deserializes a memory stream to an object.
+        /// </summary>
+        /// <param name="stream">The memory stream returned from the cache.</param>
+        /// <returns>
+        /// Returns <see cref="T:System.Object" />.
+        /// </returns>
         public object Deserialize(Stream stream)
         {
             return Serializer.Deserialize<CacheItem<T>>(stream);
         }
 
+        /// <summary>
+        /// Serializes an object to a memory stream.
+        /// </summary>
+        /// <param name="stream">A memory stream to use to store the serialized object.</param>
+        /// <param name="value">The object to serialize.</param>
+        /// <exception cref="System.InvalidOperationException">
+        /// If value is null or of wrong type
+        /// or
+        /// we cannot serialize the object with Protobuf.net
+        /// or
+        /// protobuf.net doesn't support T.
+        /// </exception>
         [SuppressMessage("Microsoft.Naming", "CA2204:Literals should be spelled correctly", MessageId = "Protobuf", Justification = "Library name")]
         [SuppressMessage("Microsoft.Naming", "CA2204:Literals should be spelled correctly", MessageId = "Protobuf", Justification = "Library name")]
         public void Serialize(Stream stream, object value)

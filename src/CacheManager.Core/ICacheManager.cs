@@ -50,6 +50,12 @@ namespace CacheManager.Core
         /// </summary>
         event EventHandler<CacheUpdateEventArgs> OnUpdate;
 
+        /// <summary>
+        /// Gets the cache name.
+        /// </summary>
+        /// <value>
+        /// The cache name.
+        /// </value>
         string Name { get; }
 
         /// <summary>

@@ -1,7 +1,6 @@
 ﻿namespace CacheManager.Core.Cache
 {
     using System;
-    using CacheManager.Core.Configuration;
 
     /// <summary>
     /// In CacheManager, a cache back plate is used to keep in process and distributed caches in
@@ -66,17 +65,6 @@
             this.Dispose(true);
 
             GC.SuppressFinalize(this);
-        }
-
-        /// <summary>
-        /// Releases unmanaged and - optionally - managed resources.
-        /// </summary>
-        /// <param name="managed">
-        /// <c>true</c> to release both managed and unmanaged resources; <c>false</c> to release
-        /// only unmanaged resources.
-        /// </param>
-        protected virtual void Dispose(bool managed)
-        {
         }
 
         /// <summary>
@@ -303,6 +291,17 @@
             }
 
             this.onRemoveKeyRegion = remove;
+        }
+
+        /// <summary>
+        /// Releases unmanaged and - optionally - managed resources.
+        /// </summary>
+        /// <param name="managed">
+        /// <c>true</c> to release both managed and unmanaged resources; <c>false</c> to release
+        /// only unmanaged resources.
+        /// </param>
+        protected virtual void Dispose(bool managed)
+        {
         }
     }
 }

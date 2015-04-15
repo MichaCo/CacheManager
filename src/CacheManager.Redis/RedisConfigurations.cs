@@ -18,7 +18,7 @@ namespace CacheManager.Redis
         private static Dictionary<string, RedisConfiguration> configurations = new Dictionary<string, RedisConfiguration>();
 
         /// <summary>
-        /// Initializes the <see cref="RedisConfigurations"/> class.
+        /// Initializes static members of the <see cref="RedisConfigurations"/> class.
         /// </summary>
         static RedisConfigurations()
         {
@@ -34,7 +34,7 @@ namespace CacheManager.Redis
         /// Adds the configuration.
         /// </summary>
         /// <param name="configuration">The configuration.</param>
-        /// <exception cref="System.ArgumentNullException">configuration</exception>
+        /// <exception cref="System.ArgumentNullException">If configuration is null.</exception>
         public static void AddConfiguration(RedisConfiguration configuration)
         {
             if (configuration == null)
@@ -52,7 +52,7 @@ namespace CacheManager.Redis
         /// Gets the configuration.
         /// </summary>
         /// <param name="configurationName">The identifier.</param>
-        /// <returns></returns>
+        /// <returns>The <c>RedisConfiguration</c>.</returns>
         /// <exception cref="System.ArgumentNullException">If id is null.</exception>
         /// <exception cref="System.InvalidOperationException">
         /// If no configuration was added for the id.

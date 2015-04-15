@@ -130,7 +130,7 @@ namespace CacheManager.Redis
     public sealed class RedisConfigurationSection : ConfigurationSection
     {
         /// <summary>
-        /// The default section name
+        /// The default section name.
         /// </summary>
         public const string DefaultSectionName = "cacheManager.Redis";
 

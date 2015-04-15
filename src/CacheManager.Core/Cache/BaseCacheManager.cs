@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using CacheManager.Core.Configuration;
 
 namespace CacheManager.Core.Cache
 {
@@ -9,8 +8,8 @@ namespace CacheManager.Core.Cache
     /// The BaseCacheManager implements <see cref="ICacheManager{T}"/> and is the main class which
     /// gets constructed by <see cref="CacheFactory"/>.
     /// <para>
-    /// The cache manager manages the list of <see cref="BaseCacheHandle{T}"/>'s which have been added. 
-    /// It will keep them in sync depending on the configuration.
+    /// The cache manager manages the list of <see cref="BaseCacheHandle{T}"/>'s which have been
+    /// added. It will keep them in sync depending on the configuration.
     /// </para>
     /// </summary>
     /// <typeparam name="TCacheValue">The type of the cache value.</typeparam>
@@ -25,14 +24,6 @@ namespace CacheManager.Core.Cache
         /// The cache handles collection.
         /// </summary>
         private BaseCacheHandle<TCacheValue>[] cacheHandles = new BaseCacheHandle<TCacheValue>[] { };
-
-        /// <summary>
-        /// Gets the cache name.
-        /// </summary>
-        /// <value>
-        /// The name of the cache.
-        /// </value>
-        public string Name { get; private set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BaseCacheManager{TCacheValue}"/> class
@@ -125,6 +116,12 @@ namespace CacheManager.Core.Cache
         public event EventHandler<CacheUpdateEventArgs> OnUpdate;
 
         /// <summary>
+        /// Gets the cache name.
+        /// </summary>
+        /// <value>The name of the cache.</value>
+        public string Name { get; private set; }
+
+        /// <summary>
         /// Gets a list of cache handles currently registered within the cache manager.
         /// </summary>
         /// <value>The cache handles.</value>
@@ -135,6 +132,7 @@ namespace CacheManager.Core.Cache
 #if NET40
         public ICollection<BaseCacheHandle<TCacheValue>> CacheHandles
 #else
+
         public IReadOnlyCollection<BaseCacheHandle<TCacheValue>> CacheHandles
 #endif
         {

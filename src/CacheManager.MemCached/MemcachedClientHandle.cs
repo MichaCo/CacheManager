@@ -46,18 +46,6 @@ namespace CacheManager.Memcached
         }
 
         /// <summary>
-        /// Gets the server stats.
-        /// </summary>
-        /// <value>The server stats.</value>
-        public ServerStats ServerStats
-        {
-            get
-            {
-                return this.Cache.Stats();
-            }
-        }
-
-        /// <summary>
         /// Gets or sets the cache.
         /// </summary>
         /// <value>The cache.</value>

@@ -356,8 +356,7 @@ namespace CacheManager.Core.Configuration
     /// <summary>
     /// Used to build a <c>CacheHandleConfiguration</c>.
     /// </summary>
-    /// <typeparam name="TCacheValue">The type of the cache value.</typeparam>
-    /// <see cref="CacheManagerConfiguration{T}"/>
+    /// <see cref="CacheManagerConfiguration"/>
     public sealed class ConfigurationBuilderCacheHandlePart
     {
         private ConfigurationBuilderCachePart parent;
@@ -457,12 +456,11 @@ namespace CacheManager.Core.Configuration
     /// <summary>
     /// Used to build a <c>CacheManagerConfiguration</c>.
     /// </summary>
-    /// <see cref="CacheManagerConfiguration{T}"/>
+    /// <see cref="CacheManagerConfiguration"/>
     public sealed class ConfigurationBuilderCachePart
     {
         /// <summary>
-        /// Initializes a new instance of the
-        /// <see cref="ConfigurationBuilderCachePart{TCacheValue}"/> class.
+        /// Initializes a new instance of the <see cref="ConfigurationBuilderCachePart"/> class.
         /// </summary>
         internal ConfigurationBuilderCachePart()
         {
