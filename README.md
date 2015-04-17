@@ -54,8 +54,8 @@ There is also from source generated [html documentation][help] available online.
     * **Redis** using [StackExchange.Redis](https://github.com/StackExchange/StackExchange.Redis)
     * **Memcached** using [Enyim.Memcached](https://github.com/enyim/EnyimMemcached)
     * **Couchbase** using [Couchbase.Net.Client v2](https://github.com/couchbase/couchbase-net-client)
-    * AppFabric cache (might get descoped)
-    * Azure cache (might get descoped)
+    * AppFabric cache (might get removed)
+    * Azure cache (might get removed)
 * **Update values with lock or transaction** for distributed caches. 
 The interfaced provides a simple update method which internally ensures you work with the latest version.
 And CacheManager handles version conflicts for you.
