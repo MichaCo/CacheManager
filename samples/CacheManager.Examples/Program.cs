@@ -14,7 +14,7 @@ namespace CacheManager.Examples
             AppConfigLoadInstalledCacheCfg();
             SimpleCustomBuildConfigurationUsingConfigBuilder();
             SimpleCustomBuildConfigurationUsingFactory();
-            RedisSample();
+            // RedisSample();
 
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Press any key to exit...");

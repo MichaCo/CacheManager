@@ -28,8 +28,12 @@ namespace CacheManager.Core
         /// <param name="handleName">The name to be used for the cache handle.</param>
         /// <param name="isBackPlateSource">Set this to true if this cache handle should be the source of the back plate.
         /// <para>This setting will be ignored if no back plate is configured.</para></param>
-        /// <returns>The part.</returns>
+        /// <returns>
+        /// The part.
+        /// </returns>
+        /// <exception cref="System.ArgumentNullException">If part is null.</exception>
         /// <exception cref="ArgumentNullException">Thrown if handleName or handleType are null.</exception>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0", Justification = "Not for extenions.")]
         public static ConfigurationBuilderCacheHandlePart WithSystemRuntimeCacheHandle(this ConfigurationBuilderCachePart part, string handleName, bool isBackPlateSource)
         {
             return part.WithHandle(typeof(MemoryCacheHandle<>), handleName, isBackPlateSource);

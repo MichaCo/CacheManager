@@ -25,13 +25,25 @@
         private Action<string, string> onRemoveKeyRegion;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CacheBackPlate"/> class.
+        /// Initializes a new instance of the <see cref="CacheBackPlate" /> class.
         /// </summary>
-        /// <param name="configurationKey">The name.</param>
+        /// <param name="configuration">The cache manager configuration.</param>
         /// <param name="cacheName">The cache name.</param>
-        public CacheBackPlate(string configurationKey, string cacheName)
+        /// <exception cref="System.ArgumentNullException">If configuration is null.</exception>
+        /// <exception cref="System.ArgumentException">Parameter cacheName cannot be null or empty.</exception>
+        protected CacheBackPlate(CacheManagerConfiguration configuration, string cacheName)
         {
-            this.Name = configurationKey;
+            if (configuration == null)
+            {
+                throw new ArgumentNullException("configuration");
+            }
+            if (string.IsNullOrWhiteSpace(cacheName))
+            {
+                throw new ArgumentException("Parameter cacheName cannot be null or empty.");
+            }
+
+            this.CacheConfiguration = configuration;
+            this.Name = configuration.BackPlateName;
             this.CacheName = cacheName;
         }
 
@@ -42,6 +54,14 @@
         {
             this.Dispose(false);
         }
+
+        /// <summary>
+        /// Gets the cache configuration.
+        /// </summary>
+        /// <value>
+        /// The cache configuration.
+        /// </value>
+        public CacheManagerConfiguration CacheConfiguration { get; private set; }
 
         /// <summary>
         /// Gets the configuration.

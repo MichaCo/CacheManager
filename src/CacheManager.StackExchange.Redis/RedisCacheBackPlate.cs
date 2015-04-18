@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Globalization;
 using System.Linq;
+using CacheManager.Core;
 using CacheManager.Core.Cache;
 using CacheManager.Core.Configuration;
 using StackRedis = StackExchange.Redis;
@@ -24,10 +25,10 @@ namespace CacheManager.Redis
         /// <summary>
         /// Initializes a new instance of the <see cref="RedisCacheBackPlate"/> class.
         /// </summary>
-        /// <param name="configurationKey">The configuration key.</param>
+        /// <param name="configuration">The cache manager configuration.</param>
         /// <param name="cacheName">The cache name.</param>
-        public RedisCacheBackPlate(string configurationKey, string cacheName)
-            : base(configurationKey, cacheName)
+        public RedisCacheBackPlate(CacheManagerConfiguration configuration, string cacheName)
+            : base(configuration, cacheName)
         {
             this.channelName = string.Format(
                 CultureInfo.InvariantCulture,
@@ -40,14 +41,14 @@ namespace CacheManager.Redis
                 () =>
                 {
                     // throws an exception if not found for the name
-                    var cfg = RedisConfigurations.GetConfiguration(configurationKey);
+                    var cfg = RedisConfigurations.GetConfiguration(this.Name);
 
-                    var connection = RedisConnectionPool.Connect(cfg);
+                    var connection = RedisConnectionPool.Connect(this.CacheConfiguration, cfg);
 
                     this.redisSubscriper = connection.GetSubscriber();
                 },
-                0,
-                10);
+                configuration.RetryTimeout,
+                configuration.MaxRetries);
 
             this.Subscribe();
         }

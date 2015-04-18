@@ -12,7 +12,7 @@ namespace CacheManager.Core.Cache
     /// </para>
     /// </summary>
     /// <typeparam name="TCacheValue">The type of the cache value.</typeparam>
-    public abstract class BaseCache<TCacheValue>
+    public abstract class BaseCache<TCacheValue> : IDisposable
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="BaseCache{TCacheValue}"/> class.
@@ -76,6 +76,7 @@ namespace CacheManager.Core.Cache
         /// <exception cref="ArgumentNullException">
         /// If the <paramref name="key"/> or <paramref name="region"/> is null.
         /// </exception>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1023:IndexersShouldNotBeMultidimensional", Justification = "We need both overloads.")]
         public virtual TCacheValue this[string key, string region]
         {
             get

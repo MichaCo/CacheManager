@@ -170,6 +170,7 @@ namespace CacheManager.Core.Configuration
         }
 
         // todo: refactor -> high complexity
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA2204:Literals should be spelled correctly", MessageId = "BackPlateName", Justification = "no."), System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA2204:Literals should be spelled correctly", MessageId = "BackPlateType", Justification = "no")]
         internal static CacheManagerConfiguration LoadFromSection(CacheManagerSection section, string configName)
         {
             if (string.IsNullOrWhiteSpace(configName))
@@ -489,6 +490,7 @@ namespace CacheManager.Core.Configuration
         /// <param name="name">The name.</param>
         /// <returns>The builder instance.</returns>
         /// <exception cref="System.ArgumentNullException">If name is null.</exception>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1004:GenericMethodsShouldProvideTypeParameter", Justification = "Users should use the extensions.")]
         public ConfigurationBuilderCachePart WithBackPlate<TBackPlate>(string name) where TBackPlate : CacheBackPlate
         {
             if (string.IsNullOrWhiteSpace(name))
@@ -553,7 +555,7 @@ namespace CacheManager.Core.Configuration
 
             if (this.Configuration.CacheHandles.Any(p => p.IsBackPlateSource))
             {
-                throw new InvalidOperationException("Only one cache handle can be the backplate's source.");
+                throw new InvalidOperationException("Only one cache handle can be the back plate's source.");
             }
 
             this.Configuration.CacheHandles.Add(handleCfg);

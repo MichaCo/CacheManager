@@ -82,7 +82,7 @@ namespace CacheManager.Redis
         {
             get
             {
-                return RedisConnectionPool.Connect(this.RedisConfiguration);
+                return RedisConnectionPool.Connect(this.Manager.Configuration, this.RedisConfiguration);
             }
         }
 

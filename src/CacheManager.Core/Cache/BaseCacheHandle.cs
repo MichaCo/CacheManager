@@ -9,7 +9,7 @@ namespace CacheManager.Core.Cache
     /// <para>Actually it is not advisable to not use <see cref="BaseCacheHandle{T}"/>.</para>
     /// </summary>
     /// <typeparam name="TCacheValue">The type of the cache value.</typeparam>
-    public abstract class BaseCacheHandle<TCacheValue> : BaseCache<TCacheValue>
+    public abstract class BaseCacheHandle<TCacheValue> : BaseCache<TCacheValue>, IDisposable
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="BaseCacheHandle{TCacheValue}"/> class.
@@ -27,6 +27,7 @@ namespace CacheManager.Core.Cache
         /// If configuration or manager are null.
         /// </exception>
         /// <exception cref="System.ArgumentException">If configuration name is empty.</exception>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Not in this case.")]
         protected BaseCacheHandle(ICacheManager<TCacheValue> manager, CacheHandleConfiguration configuration)
         {
             if (configuration == null)
@@ -59,7 +60,7 @@ namespace CacheManager.Core.Cache
         /// Gets the cache handle configuration.
         /// </summary>
         /// <value>The configuration.</value>
-        public virtual CacheHandleConfiguration Configuration { get; private set; }
+        public CacheHandleConfiguration Configuration { get; private set; }
 
         /// <summary>
         /// Gets the number of items the cache handle currently maintains.

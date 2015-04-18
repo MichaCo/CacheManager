@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using CacheManager.Core;
 using StackRedis = StackExchange.Redis;
 
 namespace CacheManager.Redis
@@ -16,13 +17,13 @@ namespace CacheManager.Redis
             connections = new Dictionary<string, StackRedis.ConnectionMultiplexer>();
         }
 
-        public static StackRedis.ConnectionMultiplexer Connect(RedisConfiguration configuration)
+        public static StackRedis.ConnectionMultiplexer Connect(CacheManagerConfiguration cacheConfig, RedisConfiguration configuration)
         {
             string connectionString = configuration.ConnectionString;
 
             if (string.IsNullOrWhiteSpace(configuration.ConnectionString))
             {
-                var options = CreateConfigurationOptions(configuration);
+                var options = CreateConfigurationOptions(cacheConfig, configuration);
                 connectionString = options.ToString();
             }
 
@@ -33,18 +34,29 @@ namespace CacheManager.Redis
                 {
                     connection = StackRedis.ConnectionMultiplexer.Connect(connectionString);
 
-                    if (connection.IsConnected)
+                    ////connection.ErrorMessage += (sender, args) =>
+                    ////{
+                    ////};
+
+                    connection.ConnectionFailed += (sender, args) =>
                     {
-                        connection.PreserveAsyncOrder = false;
-                        connections.Add(connectionString, connection);
+                        connections.Remove(connectionString);
+                    };
+
+                    if (!connection.IsConnected)
+                    {
+                        throw new InvalidOperationException("Connection failed.");
                     }
+
+                    connection.PreserveAsyncOrder = false;
+                    connections.Add(connectionString, connection);                    
                 }
             }
 
             return connection;
         }
 
-        private static StackRedis.ConfigurationOptions CreateConfigurationOptions(RedisConfiguration configuration)
+        private static StackRedis.ConfigurationOptions CreateConfigurationOptions(CacheManagerConfiguration cacheConfig, RedisConfiguration configuration)
         {
             var configurationOptions = new StackRedis.ConfigurationOptions()
             {
@@ -53,7 +65,7 @@ namespace CacheManager.Redis
                 Password = configuration.Password,
                 Ssl = configuration.IsSsl,
                 SslHost = configuration.SslHost,
-                ConnectRetry = 100,
+                ConnectRetry = cacheConfig.MaxRetries,
                 AbortOnConnectFail = false,
             };
 

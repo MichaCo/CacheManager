@@ -45,6 +45,24 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\packages\Antlr.3.5.0.2\lib\Antlr3.Runtime.dll</HintPath>
     </Reference>
+    <Reference Include="CacheManager.Core, Version=0.5.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\CacheManager.Core.0.5.0.0\lib\net45\CacheManager.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="CacheManager.Redis">
+      <HintPath>..\..\packages\CacheManager.StackExchange.Redis.0.5.0.0\lib\net45\CacheManager.Redis.dll</HintPath>
+    </Reference>
+    <Reference Include="CacheManager.StackExchange.Redis">
+      <HintPath>..\..\packages\CacheManager.StackExchange.Redis.0.5.0.0\lib\net45\CacheManager.StackExchange.Redis.dll</HintPath>
+    </Reference>
+    <Reference Include="CacheManager.SystemRuntimeCaching, Version=0.5.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\CacheManager.SystemRuntimeCaching.0.5.0.0\lib\net45\CacheManager.SystemRuntimeCaching.dll</HintPath>
+    </Reference>
+    <Reference Include="CacheManager.Web, Version=0.5.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\CacheManager.Web.0.5.0.0\lib\net45\CacheManager.Web.dll</HintPath>
+    </Reference>
     <Reference Include="Enyim.Caching">
       <HintPath>..\..\packages\EnyimMemcached.2.13\lib\net35\Enyim.Caching.dll</HintPath>
     </Reference>
@@ -63,9 +81,13 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\packages\Newtonsoft.Json.6.0.8\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
+    <Reference Include="StackExchange.Redis">
+      <HintPath>..\..\packages\StackExchange.Redis.1.0.414\lib\net45\StackExchange.Redis.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Runtime.Caching" />
     <Reference Include="System.Web.DynamicData" />
     <Reference Include="System.Web.Entity" />
     <Reference Include="System.Web.ApplicationServices" />
@@ -186,20 +208,6 @@
   <ItemGroup>
     <Content Include="packages.config" />
     <None Include="Project_Readme.html" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\src\CacheManager.Core\CacheManager.Core.csproj">
-      <Project>{701df657-8670-4313-a06b-63d8485b18f9}</Project>
-      <Name>CacheManager.Core</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\src\CacheManager.SystemRuntimeCaching\CacheManager.SystemRuntimeCaching.csproj">
-      <Project>{d292fd01-c6f3-4600-abe7-7bba2b81bfd5}</Project>
-      <Name>CacheManager.SystemRuntimeCaching</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\src\CacheManager.Web\CacheManager.Web.csproj">
-      <Project>{56ee8576-6d0e-469d-a522-35788110dc1c}</Project>
-      <Name>CacheManager.Web</Name>
-    </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

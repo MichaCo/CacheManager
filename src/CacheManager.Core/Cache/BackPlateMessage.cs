@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Text;
 
 namespace CacheManager.Core.Cache
@@ -95,13 +96,21 @@ namespace CacheManager.Core.Cache
         /// Deserializes the specified message.
         /// </summary>
         /// <param name="message">The message.</param>
-        /// <returns>The <see cref="BackPlateMessage"/> instance.</returns>
+        /// <returns>
+        /// The <see cref="BackPlateMessage" /> instance.
+        /// </returns>
+        /// <exception cref="System.ArgumentException">Parameter message cannot be null or empty.</exception>
         public static BackPlateMessage Deserialize(string message)
         {
+            if (string.IsNullOrWhiteSpace(message))
+            {
+                throw new ArgumentException("Parameter message cannot be null or empty.");
+            }
+
             var tokens = message.Split(new[] { ":" }, StringSplitOptions.RemoveEmptyEntries);
 
             var ident = tokens[0];
-            var action = (BackPlateAction)int.Parse(tokens[1]);
+            var action = (BackPlateAction)int.Parse(tokens[1], CultureInfo.InvariantCulture);
 
             if (action == BackPlateAction.Clear)
             {

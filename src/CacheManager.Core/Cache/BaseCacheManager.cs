@@ -13,7 +13,7 @@ namespace CacheManager.Core.Cache
     /// </para>
     /// </summary>
     /// <typeparam name="TCacheValue">The type of the cache value.</typeparam>
-    public sealed class BaseCacheManager<TCacheValue> : BaseCache<TCacheValue>, ICacheManager<TCacheValue>
+    public sealed class BaseCacheManager<TCacheValue> : BaseCache<TCacheValue>, ICacheManager<TCacheValue>, IDisposable
     {
         /// <summary>
         /// The cache back plate.
@@ -404,22 +404,22 @@ namespace CacheManager.Core.Cache
 
             backPlate.SubscribeChanged((key) =>
             {
-                this.EvictFromHandles(key, null, handles());
+                EvictFromHandles(key, null, handles());
             });
 
             backPlate.SubscribeChanged((key, region) =>
             {
-                this.EvictFromHandles(key, region, handles());
+                EvictFromHandles(key, region, handles());
             });
 
             backPlate.SubscribeRemove((key) =>
             {
-                this.EvictFromHandles(key, null, handles());
+                EvictFromHandles(key, null, handles());
             });
 
             backPlate.SubscribeRemove((key, region) =>
             {
-                this.EvictFromHandles(key, region, handles());
+                EvictFromHandles(key, region, handles());
             });
 
             backPlate.SubscribeClear(() =>
@@ -524,6 +524,11 @@ namespace CacheManager.Core.Cache
                 foreach (var handle in this.cacheHandles)
                 {
                     handle.Dispose();
+                }
+
+                if (this.cacheBackPlate != null)
+                {
+                    this.cacheBackPlate.Dispose();
                 }
             }
 
@@ -658,6 +663,33 @@ namespace CacheManager.Core.Cache
         }
 
         /// <summary>
+        /// Evicts a cache item from <paramref name="handles"/>.
+        /// </summary>
+        /// <param name="key">The key.</param>
+        /// <param name="region">The region.</param>
+        /// <param name="handles">The handles.</param>
+        private static void EvictFromHandles(string key, string region, BaseCacheHandle<TCacheValue>[] handles)
+        {
+            foreach (var handle in handles)
+            {
+                bool result;
+                if (string.IsNullOrWhiteSpace(region))
+                {
+                    result = handle.Remove(key);
+                }
+                else
+                {
+                    result = handle.Remove(key, region);
+                }
+
+                if (result)
+                {
+                    handle.Stats.OnRemove(region);
+                }
+            }
+        }
+
+        /// <summary>
         /// Adds an item to handles depending on the update mode configuration.
         /// </summary>
         /// <param name="item">The item to be added.</param>
@@ -731,33 +763,6 @@ namespace CacheManager.Core.Cache
             }
 
             this.TriggerOnClearRegion(region);
-        }
-
-        /// <summary>
-        /// Evicts a cache item from <paramref name="handles"/>.
-        /// </summary>
-        /// <param name="key">The key.</param>
-        /// <param name="region">The region.</param>
-        /// <param name="handles">The handles.</param>
-        private void EvictFromHandles(string key, string region, BaseCacheHandle<TCacheValue>[] handles)
-        {
-            foreach (var handle in handles)
-            {
-                bool result;
-                if (string.IsNullOrWhiteSpace(region))
-                {
-                    result = handle.Remove(key);
-                }
-                else
-                {
-                    result = handle.Remove(key, region);
-                }
-
-                if (result)
-                {
-                    handle.Stats.OnRemove(region);
-                }
-            }
         }
 
         /// <summary>

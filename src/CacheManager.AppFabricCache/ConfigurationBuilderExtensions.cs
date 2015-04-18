@@ -34,6 +34,7 @@ namespace CacheManager.Core
         /// <exception cref="ArgumentNullException">
         /// Thrown if handleName or handleType are null.
         /// </exception>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0", Justification = "Not for extenions.")]
         public static ConfigurationBuilderCacheHandlePart WithAppFabricCacheHandle(this ConfigurationBuilderCachePart part, string handleName, bool isBackPlateSource)
         {
             return part.WithHandle(typeof(AppFabricCacheHandle<>), handleName, isBackPlateSource);

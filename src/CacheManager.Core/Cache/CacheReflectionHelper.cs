@@ -15,6 +15,7 @@ namespace CacheManager.Core.Cache
             return FromConfiguration<TCacheValue>(cacheName, managerConfiguration);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "no")]
         public static ICacheManager<TCacheValue> FromConfiguration<TCacheValue>(string cacheName, CacheManagerConfiguration managerConfiguration)
         {
             var manager = new BaseCacheManager<TCacheValue>(cacheName, managerConfiguration);
@@ -47,7 +48,7 @@ namespace CacheManager.Core.Cache
             {
                 if (!manager.CacheHandles.Any(p => p.Configuration.IsBackPlateSource))
                 {
-                    throw new InvalidOperationException("At least one cache handle must be marked as the backplate's source.");
+                    throw new InvalidOperationException("At least one cache handle must be marked as the back plate source.");
                 }
 
                 try
@@ -56,7 +57,7 @@ namespace CacheManager.Core.Cache
                         managerConfiguration.BackPlateType,
                         new object[]
                         {
-                            managerConfiguration.BackPlateName,
+                            managerConfiguration,
                             cacheName
                         });
 
@@ -91,7 +92,7 @@ namespace CacheManager.Core.Cache
                 throw new InvalidOperationException(
                     string.Format(
                         CultureInfo.InvariantCulture,
-                        "Configured cache handle does not implement BaseCacheHandle<> [{0}].",
+                        "Configured cache handle does not implement base cache handle [{0}].",
                         handle.ToString()));
             }
 
@@ -110,7 +111,7 @@ namespace CacheManager.Core.Cache
                     throw new InvalidOperationException(
                         string.Format(
                             CultureInfo.InvariantCulture,
-                            "Cache handle type [{0}] should not have any generic arguments defined. Use typeof(MyType<>).",
+                            "Cache handle type [{0}] should not have any generic arguments defined.",
                             handle.ToString()));
                 }
             }

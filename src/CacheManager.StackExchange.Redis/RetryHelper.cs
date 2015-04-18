@@ -12,16 +12,17 @@ namespace CacheManager.Redis
             var tries = 0;
             do
             {
+                tries++;
+
                 try
                 {
                     return retryme();
                 }
-                catch (StackRedis.RedisConnectionException conEx)
+                catch (StackRedis.RedisConnectionException)
                 {
-                    if (conEx.FailureType == StackRedis.ConnectionFailureType.UnableToConnect
-                        || conEx.FailureType == StackRedis.ConnectionFailureType.AuthenticationFailure)
+                    if (tries >= retries)
                     {
-                        throw conEx;
+                        throw;
                     }
 #if NET40
                     TaskEx.Delay(timeOut).Wait();
@@ -29,34 +30,44 @@ namespace CacheManager.Redis
                     Task.Delay(timeOut).Wait();
 #endif
                 }
-                catch (System.TimeoutException)
+                catch (TimeoutException)
                 {
+                    if (tries >= retries)
+                    {
+                        throw;
+                    }
 #if NET40
                     TaskEx.Delay(timeOut).Wait();
 #else
                     Task.Delay(timeOut).Wait();
 #endif
                 }
-                catch (AggregateException ag)
+                catch (AggregateException aggregateException)
                 {
-                    ag.Handle(e =>
+                    if (tries >= retries)
                     {
-                        var conEx = e as StackRedis.RedisConnectionException;
-                        if (conEx != null)
-                        {
-                            if (conEx.FailureType == StackRedis.ConnectionFailureType.UnableToConnect
-                                || conEx.FailureType == StackRedis.ConnectionFailureType.AuthenticationFailure)
-                            {
-                                throw conEx;
-                            }
-                        }
+                        throw;
+                    }
+
+                    aggregateException.Handle(e =>
+                    {
+                        ////var connectionException = e as StackRedis.RedisConnectionException;
+                        ////if (connectionException != null)
+                        ////{
+                        ////    if (connectionException.FailureType == StackRedis.ConnectionFailureType.UnableToConnect
+                        ////        || connectionException.FailureType == StackRedis.ConnectionFailureType.AuthenticationFailure
+                        ////        || connectionException.FailureType == StackRedis.ConnectionFailureType.UnableToResolvePhysicalConnection)
+                        ////    {
+                        ////        throw connectionException;
+                        ////    }
+                        ////}
 
                         if (e is StackRedis.RedisConnectionException || e is System.TimeoutException)
                         {
 #if NET40
                             TaskEx.Delay(timeOut).Wait();
 #else
-                    Task.Delay(timeOut).Wait();
+                            Task.Delay(timeOut).Wait();
 #endif
 
                             return true;

@@ -24,6 +24,7 @@ namespace CacheManager.Core
         /// </summary>
         /// <param name="maxRetries">The maximum retries.</param>
         /// <param name="retryTimeout">The retry timeout.</param>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "We use it for configuration only.")]
         public CacheManagerConfiguration(int maxRetries = int.MaxValue, int retryTimeout = 10)
             : this()
         {
