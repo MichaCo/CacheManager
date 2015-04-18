@@ -277,7 +277,7 @@ namespace CacheManager.Tests
 
             // assert
             act.ShouldThrow<InvalidOperationException>()
-                .WithMessage("Configured cache handle does not implement BaseCacheHandle<>*");
+                .WithMessage("Configured cache handle does not implement*");
         }
 
         [Fact]

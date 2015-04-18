@@ -27,6 +27,7 @@ namespace CacheManager.Core.Cache
         /// If configuration or manager are null.
         /// </exception>
         /// <exception cref="System.ArgumentException">If configuration name is empty.</exception>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors", Justification = "Configuration must be virtual for some unit tests only. Should never be set by users.")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Not in this case.")]
         protected BaseCacheHandle(ICacheManager<TCacheValue> manager, CacheHandleConfiguration configuration)
         {
@@ -60,7 +61,7 @@ namespace CacheManager.Core.Cache
         /// Gets the cache handle configuration.
         /// </summary>
         /// <value>The configuration.</value>
-        public CacheHandleConfiguration Configuration { get; private set; }
+        public virtual CacheHandleConfiguration Configuration { get; private set; }
 
         /// <summary>
         /// Gets the number of items the cache handle currently maintains.
