@@ -128,6 +128,7 @@ namespace CacheManager.Redis
         // for object this could be epcial because the value could be any of the supported values or
         // any king of object... to also have the performance benefit from the known types, lets try
         // to use it for object based cache, too
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0", Scope = "member", Target = "CacheManager.Redis.RedisValueConverter.#CacheManager.Redis.IRedisValueConverter`1<System.Object>.ToRedisValue(System.Object)", Justification = "For performance reasons we don't do checks at this point. Also, its internally used only.")]
         StackRedis.RedisValue IRedisValueConverter<object>.ToRedisValue(object value)
         {
             var valueType = value.GetType();

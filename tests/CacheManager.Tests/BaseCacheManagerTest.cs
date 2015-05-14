@@ -12,14 +12,10 @@ using Couchbase.Configuration.Client;
 
 namespace CacheManager.Tests
 {
-    /// <summary>
-    /// Provides some pre configured caches with different setups for testing. <remarks>Do not add
-    /// NullCacheHandle to any of the config. Some tests expect a working implementation...</remarks>
-    /// </summary>
     [ExcludeFromCodeCoverage]
-    public class BaseCacheManagerTest
+    public static class TestManagers
     {
-        public ICacheManager<object> WithOneMemoryCacheHandleSliding
+        public static ICacheManager<object> WithOneMemoryCacheHandleSliding
         {
             get
             {
@@ -32,7 +28,7 @@ namespace CacheManager.Tests
             }
         }
 
-        public ICacheManager<object> WithOneDicCacheHandle
+        public static ICacheManager<object> WithOneDicCacheHandle
         {
             get
             {
@@ -44,7 +40,7 @@ namespace CacheManager.Tests
             }
         }
 
-        public ICacheManager<object> WithOneMemoryCacheHandle
+        public static ICacheManager<object> WithOneMemoryCacheHandle
         {
             get
             {
@@ -52,7 +48,7 @@ namespace CacheManager.Tests
             }
         }
 
-        public ICacheManager<object> WithMemoryAndDictionaryHandles
+        public static ICacheManager<object> WithMemoryAndDictionaryHandles
         {
             get
             {
@@ -74,7 +70,7 @@ namespace CacheManager.Tests
             }
         }
 
-        public ICacheManager<object> WithManyDictionaryHandles
+        public static ICacheManager<object> WithManyDictionaryHandles
         {
             get
             {
@@ -106,7 +102,7 @@ namespace CacheManager.Tests
             }
         }
 
-        public ICacheManager<object> WithTwoNamedMemoryCaches
+        public static ICacheManager<object> WithTwoNamedMemoryCaches
         {
             get
             {
@@ -122,7 +118,7 @@ namespace CacheManager.Tests
             }
         }
 
-        public ICacheManager<object> WithRedisCache
+        public static ICacheManager<object> WithRedisCache
         {
             get
             {
@@ -146,7 +142,7 @@ namespace CacheManager.Tests
             }
         }
 
-        public ICacheManager<object> WithSystemAndRedisCache
+        public static ICacheManager<object> WithSystemAndRedisCache
         {
             get
             {
@@ -174,7 +170,7 @@ namespace CacheManager.Tests
             }
         }
 
-        public ICacheManager<object> WithMemcached
+        public static ICacheManager<object> WithMemcached
         {
             get
             {
@@ -193,7 +189,7 @@ namespace CacheManager.Tests
 
 #if !NET40
 
-        public ICacheManager<object> WithCouchbaseMemcached
+        public static ICacheManager<object> WithCouchbaseMemcached
         {
             get
             {
@@ -235,24 +231,34 @@ namespace CacheManager.Tests
         }
 
 #endif
-
-        public static IEnumerable<object[]> GetCacheManagers()
-        {
-            var data = new BaseCacheManagerTest();
-            yield return new object[] { data.WithOneMemoryCacheHandleSliding };
-            yield return new object[] { data.WithOneDicCacheHandle };
-            yield return new object[] { data.WithOneMemoryCacheHandle };
-            yield return new object[] { data.WithMemoryAndDictionaryHandles };
-            yield return new object[] { data.WithManyDictionaryHandles };
-            yield return new object[] { data.WithTwoNamedMemoryCaches };
-            // yield return new object[] { data.WithRedisCache }; yield return new object[] {
-            // data.WithSystemAndRedisCache }; yield return new object[] { data.WithMemcached };
-            // yield return new object[] { data.WithCouchbaseMemcached };
-        }
-
         public static string GetCfgFileName(string fileName)
         {
+            if (string.IsNullOrWhiteSpace(fileName))
+            {
+                throw new ArgumentException("File name should not be empty", "fileName");
+            }
+
             return AppDomain.CurrentDomain.BaseDirectory + (fileName.StartsWith("\\") ? fileName : "\\" + fileName);
+        }
+    }
+    
+    [SuppressMessage("Microsoft.Design", "CA1053:StaticHolderTypesShouldNotHaveConstructors", Justification = "Needed for xunit"), ExcludeFromCodeCoverage]
+    public class BaseCacheManagerTest
+    {
+        public static IEnumerable<object[]> TestCacheManagers
+        {
+            get
+            {
+                yield return new object[] { TestManagers.WithOneMemoryCacheHandleSliding };
+                yield return new object[] { TestManagers.WithOneDicCacheHandle };
+                yield return new object[] { TestManagers.WithOneMemoryCacheHandle };
+                yield return new object[] { TestManagers.WithMemoryAndDictionaryHandles };
+                yield return new object[] { TestManagers.WithManyDictionaryHandles };
+                yield return new object[] { TestManagers.WithTwoNamedMemoryCaches };
+                // yield return new object[] { data.WithRedisCache }; yield return new object[] {
+                // data.WithSystemAndRedisCache }; yield return new object[] { data.WithMemcached };
+                // yield return new object[] { data.WithCouchbaseMemcached };
+            }
         }
     }
 }

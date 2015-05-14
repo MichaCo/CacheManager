@@ -16,9 +16,14 @@ namespace CacheManager.Tests
     public class ThreadRandomReadWriteTestBase : BaseCacheManagerTest
     {
         [Theory]
-        [MemberData("GetCacheManagers")]
+        [MemberData("TestCacheManagers")]
         public void Thread_RandomAccess(ICacheManager<object> cache)
         {
+            if (cache == null)
+            {
+                throw new ArgumentNullException("cache");
+            }
+
             foreach (var handle in cache.CacheHandles)
             {
                 Trace.TraceInformation("Using handle {0}", handle.GetType());

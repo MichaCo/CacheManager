@@ -21,7 +21,7 @@ namespace CacheManager.Tests
     public class CacheManagerRegionTests : BaseCacheManagerTest
     {
         [Theory]
-        [MemberData("GetCacheManagers")]
+        [MemberData("TestCacheManagers")]
         public void CacheManager_Region_AddItems_UseSameKeys<T>(T cache) where T : ICacheManager<object>
         {
             using (cache)
@@ -59,7 +59,7 @@ namespace CacheManager.Tests
         }
 
         [Theory]
-        [MemberData("GetCacheManagers")]
+        [MemberData("TestCacheManagers")]
         public void CacheManager_Region_AddItems_UseDifferentKeys<T>(T cache) where T : ICacheManager<object>
         {
             using (cache)
@@ -91,7 +91,7 @@ namespace CacheManager.Tests
         }
 
         [Theory]
-        [MemberData("GetCacheManagers")]
+        [MemberData("TestCacheManagers")]
         public void CacheManager_Region_ClearRegion<T>(T cache) where T : ICacheManager<object>
         {
             using (cache)
@@ -130,7 +130,7 @@ namespace CacheManager.Tests
         }
 
         [Theory]
-        [MemberData("GetCacheManagers")]
+        [MemberData("TestCacheManagers")]
         public void CacheManager_Region_Put_ModifySomeItems<T>(T cache) where T : ICacheManager<object>
         {
             using (cache)
@@ -183,7 +183,7 @@ namespace CacheManager.Tests
         }
 
         [Theory]
-        [MemberData("GetCacheManagers")]
+        [MemberData("TestCacheManagers")]
         public void CacheManager_Region_RemoveItem_RandomRemoveSomeItems<T>(T cache) where T : ICacheManager<object>
         {
             using (cache)

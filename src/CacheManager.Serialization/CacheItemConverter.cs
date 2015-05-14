@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using CacheManager.Core;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -7,9 +8,7 @@ namespace CacheManager.Serialization
 {
     /// <summary>
     /// A <see cref="JsonConverter"/> for cache items.
-    /// <para>
-    /// This was experimental and not in use at the moment.
-    /// </para>
+    /// <para>This was experimental and not in use at the moment.</para>
     /// </summary>
     /// <typeparam name="T">The cache item's value type.</typeparam>
     public class CacheItemConverter<T> : JsonConverter
@@ -24,10 +23,12 @@ namespace CacheManager.Serialization
         private const string ValueTypeName = "ValueType";
 
         /// <summary>
-        /// Gets a value indicating whether this <see cref="T:Newtonsoft.Json.JsonConverter" /> can read JSON.
+        /// Gets a value indicating whether this <see cref="T:Newtonsoft.Json.JsonConverter"/> can
+        /// read JSON.
         /// </summary>
         /// <value>
-        /// <c>true</c> if this <see cref="T:Newtonsoft.Json.JsonConverter" /> can read JSON; otherwise, <c>false</c>.
+        /// <c>true</c> if this <see cref="T:Newtonsoft.Json.JsonConverter"/> can read JSON;
+        /// otherwise, <c>false</c>.
         /// </value>
         public override bool CanRead
         {
@@ -38,10 +39,12 @@ namespace CacheManager.Serialization
         }
 
         /// <summary>
-        /// Gets a value indicating whether this <see cref="T:Newtonsoft.Json.JsonConverter" /> can write JSON.
+        /// Gets a value indicating whether this <see cref="T:Newtonsoft.Json.JsonConverter"/> can
+        /// write JSON.
         /// </summary>
         /// <value>
-        /// <c>true</c> if this <see cref="T:Newtonsoft.Json.JsonConverter" /> can write JSON; otherwise, <c>false</c>.
+        /// <c>true</c> if this <see cref="T:Newtonsoft.Json.JsonConverter"/> can write JSON;
+        /// otherwise, <c>false</c>.
         /// </value>
         public override bool CanWrite
         {
@@ -66,16 +69,26 @@ namespace CacheManager.Serialization
         /// <summary>
         /// Reads the JSON representation of the object.
         /// </summary>
-        /// <param name="reader">The <see cref="T:Newtonsoft.Json.JsonReader" /> to read from.</param>
+        /// <param name="reader">The <see cref="T:Newtonsoft.Json.JsonReader"/> to read from.</param>
         /// <param name="objectType">Type of the object.</param>
         /// <param name="existingValue">The existing value of object being read.</param>
         /// <param name="serializer">The calling serializer.</param>
-        /// <returns>
-        /// The object value.
-        /// </returns>
-        /// <exception cref="Newtonsoft.Json.JsonSerializationException">CacheItem.Key did not deserialize but must be null.</exception>
+        /// <returns>The object value.</returns>
+        /// <exception cref="Newtonsoft.Json.JsonSerializationException">
+        /// CacheItem.Key did not deserialize but must be null.
+        /// </exception>
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
+            if (reader == null)
+            {
+                throw new ArgumentNullException("reader");
+            }
+
+            if (serializer == null)
+            {
+                throw new ArgumentNullException("serializer");
+            }
+
             if (reader.TokenType == JsonToken.Null)
             {
                 return null;
@@ -145,7 +158,7 @@ namespace CacheManager.Serialization
 
             if (string.IsNullOrWhiteSpace(key))
             {
-                throw new JsonSerializationException("CacheItem.Key did not deserialize but must be null.");
+                throw new JsonSerializationException("Cache item key did not deserialize but must be null.");
             }
 
             // type conversion based on the type stored in the cache item. this will back cast even
@@ -168,7 +181,7 @@ namespace CacheManager.Serialization
                 }
                 else
                 {
-                    value = (T)Convert.ChangeType(value, targetType);
+                    value = (T)Convert.ChangeType(value, targetType, CultureInfo.InvariantCulture);
                 }
             }
 
@@ -189,7 +202,7 @@ namespace CacheManager.Serialization
         /// <summary>
         /// Writes the JSON representation of the object.
         /// </summary>
-        /// <param name="writer">The <see cref="T:Newtonsoft.Json.JsonWriter" /> to write to.</param>
+        /// <param name="writer">The <see cref="T:Newtonsoft.Json.JsonWriter"/> to write to.</param>
         /// <param name="value">The value.</param>
         /// <param name="serializer">The calling serializer.</param>
         /// <exception cref="System.NotSupportedException">This method is not supported.</exception>
@@ -202,12 +215,14 @@ namespace CacheManager.Serialization
         /// Reads the specified reader.
         /// </summary>
         /// <param name="reader">The reader.</param>
-        /// <exception cref="Newtonsoft.Json.JsonSerializationException">Unexpected end when reading CacheItem.</exception>
+        /// <exception cref="Newtonsoft.Json.JsonSerializationException">
+        /// Unexpected end when reading CacheItem.
+        /// </exception>
         private static void Read(JsonReader reader)
         {
             if (!reader.Read())
             {
-                throw new JsonSerializationException("Unexpected end when reading CacheItem.");
+                throw new JsonSerializationException("Unexpected end when reading cache item.");
             }
         }
     }

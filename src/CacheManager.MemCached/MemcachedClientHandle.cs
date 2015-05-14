@@ -3,7 +3,6 @@ using System.Security.Cryptography;
 using System.Text;
 using CacheManager.Core;
 using CacheManager.Core.Cache;
-using CacheManager.Core.Configuration;
 using Enyim.Caching;
 using Enyim.Caching.Memcached;
 using Enyim.Caching.Memcached.Results;
@@ -22,14 +21,14 @@ namespace CacheManager.Memcached
         /// <param name="manager">The manager.</param>
         /// <param name="configuration">The configuration.</param>
         /// <exception cref="System.InvalidOperationException">
-        /// To use memcached, the cache value must be serializable but it is not.
+        /// The cache value type must be serializable but it is not.
         /// </exception>
-        public MemcachedClientHandle(ICacheManager<TCacheValue> manager, CacheHandleConfiguration configuration)
+        protected MemcachedClientHandle(ICacheManager<TCacheValue> manager, CacheHandleConfiguration configuration)
             : base(manager, configuration)
         {
             if (!typeof(TCacheValue).IsSerializable)
             {
-                throw new InvalidOperationException("To use memcached, the inner type must be serializable but " + typeof(TCacheValue).ToString() + " is not.");
+                throw new InvalidOperationException("The cache value type must be serializable but " + typeof(TCacheValue).ToString() + " is not.");
             }
         }
 
@@ -171,7 +170,7 @@ namespace CacheManager.Memcached
         /// <returns>The <c>CacheItem</c>.</returns>
         protected override CacheItem<TCacheValue> GetCacheItemInternal(string key, string region)
         {
-            var item = this.Cache.Get(this.GetKey(key, region));
+            var item = this.Cache.Get(GetKey(key, region));
             return item as CacheItem<TCacheValue>;
         }
 
@@ -207,7 +206,7 @@ namespace CacheManager.Memcached
         /// </returns>
         protected override bool RemoveInternal(string key, string region)
         {
-            return this.Cache.Remove(this.GetKey(key, region));
+            return this.Cache.Remove(GetKey(key, region));
         }
 
         /// <summary>
@@ -218,7 +217,12 @@ namespace CacheManager.Memcached
         /// <returns>The result.</returns>
         protected virtual IStoreOperationResult Store(StoreMode mode, CacheItem<TCacheValue> item)
         {
-            var key = this.GetKey(item.Key, item.Region);
+            if (item == null)
+            {
+                throw new ArgumentNullException("item");
+            }
+
+            var key = GetKey(item.Key, item.Region);
 
             if (item.ExpirationMode == ExpirationMode.Absolute)
             {
@@ -238,16 +242,7 @@ namespace CacheManager.Memcached
             }
         }
 
-        private static string GetSHA256Key(string key)
-        {
-            using (var sha = SHA256Managed.Create())
-            {
-                byte[] hashBytes = sha.ComputeHash(Encoding.UTF8.GetBytes(key));
-                return Convert.ToBase64String(hashBytes);
-            }
-        }
-
-        private string GetKey(string key, string region = null)
+        private static string GetKey(string key, string region = null)
         {
             var fullKey = key;
 
@@ -265,9 +260,35 @@ namespace CacheManager.Memcached
             return fullKey;
         }
 
+        private static string GetSHA256Key(string key)
+        {
+            using (var sha = SHA256Managed.Create())
+            {
+                byte[] hashBytes = sha.ComputeHash(Encoding.UTF8.GetBytes(key));
+                return Convert.ToBase64String(hashBytes);
+            }
+        }
+
+        private static bool ShouldRetry(StatusCode statusCode)
+        {
+            switch (statusCode)
+            {
+                case StatusCode.NodeShutdown:
+                case StatusCode.OperationTimeout:
+                case StatusCode.OutOfMemory:
+                case StatusCode.Busy:
+                case StatusCode.SocketPoolTimeout:
+                case StatusCode.UnableToLocateNode:
+                case StatusCode.VBucketBelongsToAnotherServer:
+                    return true;
+            }
+
+            return false;
+        }
+
         private UpdateItemResult Set(string key, string region, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config)
         {
-            var fullyKey = this.GetKey(key, region);
+            var fullyKey = GetKey(key, region);
             var tries = 0;
             IStoreOperationResult result;
 
@@ -286,7 +307,7 @@ namespace CacheManager.Memcached
                     item = cas.Result;
                     getStatus = (StatusCode)cas.StatusCode;
                 }
-                while (this.ShouldRetry(getStatus) && getTries <= config.MaxRetries);
+                while (ShouldRetry(getStatus) && getTries <= config.MaxRetries);
 
                 // break operation if we cannot retrieve the object (maybe it has expired already).
                 if (getStatus != StatusCode.Success || item == null)
@@ -313,23 +334,6 @@ namespace CacheManager.Memcached
             while (!result.Success && result.StatusCode.HasValue && result.StatusCode.Value == 2 && tries <= config.MaxRetries);
 
             return new UpdateItemResult(tries > 1, result.Success, tries);
-        }
-
-        private bool ShouldRetry(StatusCode statusCode)
-        {
-            switch (statusCode)
-            {
-                case StatusCode.NodeShutdown:
-                case StatusCode.OperationTimeout:
-                case StatusCode.OutOfMemory:
-                case StatusCode.Busy:
-                case StatusCode.SocketPoolTimeout:
-                case StatusCode.UnableToLocateNode:
-                case StatusCode.VBucketBelongsToAnotherServer:
-                    return true;
-            }
-
-            return false;
         }
     }
 }

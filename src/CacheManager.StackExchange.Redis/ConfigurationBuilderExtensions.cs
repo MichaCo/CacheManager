@@ -27,6 +27,11 @@ namespace CacheManager.Core
         /// <returns>The builder instance.</returns>
         public static ConfigurationBuilderCachePart WithRedisBackPlate(this ConfigurationBuilderCachePart part, string redisConfigurationId)
         {
+            if (part == null)
+            {
+                throw new ArgumentNullException("part");
+            }
+
             return part.WithBackPlate<RedisCacheBackPlate>(redisConfigurationId);
         }
 
@@ -71,6 +76,11 @@ namespace CacheManager.Core
         /// </exception>
         public static ConfigurationBuilderCacheHandlePart WithRedisCacheHandle(this ConfigurationBuilderCachePart part, string redisConfigurationId, bool isBackPlateSource)
         {
+            if (part == null)
+            {
+                throw new ArgumentNullException("part");
+            }
+
             return part.WithHandle(typeof(RedisCacheHandle<>), redisConfigurationId, isBackPlateSource);
         }
     }

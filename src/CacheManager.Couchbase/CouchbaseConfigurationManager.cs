@@ -84,6 +84,16 @@ namespace CacheManager.Couchbase
         /// <exception cref="System.InvalidOperationException">No bucket with the name found.</exception>
         public static BucketConfiguration GetBucketConfiguration(ClientConfiguration clientConfiguration, string bucketName)
         {
+            if (clientConfiguration == null)
+            {
+                throw new ArgumentNullException("clientConfiguration");
+            }
+
+            if (string.IsNullOrWhiteSpace(bucketName))
+            {
+                throw new ArgumentException("Bucket's name cannot be empty", "bucketName");
+            }
+
             BucketConfiguration configuration;
             if (!clientConfiguration.BucketConfigs.TryGetValue(bucketName, out configuration))
             {

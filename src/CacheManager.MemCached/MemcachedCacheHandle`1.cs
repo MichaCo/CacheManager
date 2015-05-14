@@ -43,9 +43,15 @@ namespace CacheManager.Memcached
         /// <exception cref="System.Configuration.ConfigurationErrorsException">
         /// If the enyim configuration section could not be initialized.
         /// </exception>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Cache gets disposed correctly when the owner gets disposed.")]
         public MemcachedCacheHandle(ICacheManager<TCacheValue> manager, CacheHandleConfiguration configuration)
             : base(manager, configuration)
         {
+            if (configuration == null)
+            {
+                throw new ArgumentNullException("configuration");
+            }
+
             // initialize memcached client with section name which must be equal to handle name...
             // Default is "enyim.com/memcached"
             try
@@ -84,14 +90,19 @@ namespace CacheManager.Memcached
         }
 
         /// <summary>
-        /// Gets the server count.
+        /// Gets the total number of items per server.
         /// </summary>
-        /// <returns>The count per server.</returns>
-        public IEnumerable<long> GetServerCount()
+        /// <value>
+        /// The total number of items per server.
+        /// </value>
+        public IEnumerable<long> ServerItemCount
         {
-            foreach (var count in this.Cache.Stats().GetRaw("total_items"))
+            get
             {
-                yield return long.Parse(count.Value, CultureInfo.InvariantCulture);
+                foreach (var count in this.Cache.Stats().GetRaw("total_items"))
+                {
+                    yield return long.Parse(count.Value, CultureInfo.InvariantCulture);
+                }
             }
         }
 
@@ -126,13 +137,13 @@ namespace CacheManager.Memcached
 
             if (section == null)
             {
-                throw new ConfigurationErrorsException("Memcached client section " + sectionName + " is not found.");
+                throw new ConfigurationErrorsException("Client section " + sectionName + " is not found.");
             }
 
             // validate
             if (section.Servers.Count <= 0)
             {
-                throw new ConfigurationErrorsException("There are no servers defined for memcached.");
+                throw new ConfigurationErrorsException("There are no servers defined.");
             }
 
             return section;

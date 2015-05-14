@@ -14,6 +14,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "common", "common", "{A8DA8B90-61EA-43AB-AD71-22C248780401}"
 	ProjectSection(SolutionItems) = preProject
 		.travis.yml = .travis.yml
+		common\CacheManager.ruleset = common\CacheManager.ruleset
+		common\CacheManager.Test.ruleset = common\CacheManager.Test.ruleset
 		CacheManagerCfg.xsd = CacheManagerCfg.xsd
 		COPYRIGHT.txt = COPYRIGHT.txt
 		CREDITS.txt = CREDITS.txt

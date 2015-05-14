@@ -14,7 +14,7 @@ namespace CacheManager.Tests
     /// To run the memcached test, run the bat files under /memcached before executing the tests.
     /// </summary>
     [ExcludeFromCodeCoverage]
-    public class RedisTests : BaseCacheManagerTest
+    public class RedisTests
     {
         [Fact]
         [Trait("IntegrationTest", "Redis")]
@@ -22,7 +22,7 @@ namespace CacheManager.Tests
         {
             // arrange
             var item = new CacheItem<object>("key", "something", ExpirationMode.Absolute, TimeSpan.FromMilliseconds(50));
-            var cache = this.WithRedisCache;
+            var cache = TestManagers.WithRedisCache;
 
             // act/assert
             using (cache)
@@ -49,8 +49,8 @@ namespace CacheManager.Tests
         public void Redis_Absolute_DoesExpire_MultiClients()
         {
             // arrange
-            var cacheA = this.WithSystemAndRedisCache;
-            var cacheB = this.WithSystemAndRedisCache;
+            var cacheA = TestManagers.WithSystemAndRedisCache;
+            var cacheB = TestManagers.WithSystemAndRedisCache;
 
             // act/assert
             using (cacheA)
@@ -99,7 +99,7 @@ namespace CacheManager.Tests
             {
                 var val = cache.Get(item.Key);
                 cache.Get(item.Key).Should().Be("new value");
-            }, 10, this.WithSystemAndRedisCache, this.WithSystemAndRedisCache, this.WithRedisCache, this.WithSystemAndRedisCache);
+            }, 10, TestManagers.WithSystemAndRedisCache, TestManagers.WithSystemAndRedisCache, TestManagers.WithRedisCache, TestManagers.WithSystemAndRedisCache);
         }
 
         [Fact]
@@ -119,7 +119,7 @@ namespace CacheManager.Tests
             (cache) =>
             {
                 cache.Get(item.Key).Should().BeNull();
-            }, 10, this.WithSystemAndRedisCache, this.WithSystemAndRedisCache, this.WithRedisCache, this.WithSystemAndRedisCache);
+            }, 10, TestManagers.WithSystemAndRedisCache, TestManagers.WithSystemAndRedisCache, TestManagers.WithRedisCache, TestManagers.WithSystemAndRedisCache);
         }
 
         [Fact]
@@ -139,7 +139,7 @@ namespace CacheManager.Tests
             (cache) =>
             {
                 cache.Get(item.Key, item.Region).Should().BeNull();
-            }, 10, this.WithSystemAndRedisCache, this.WithSystemAndRedisCache, this.WithRedisCache, this.WithSystemAndRedisCache);
+            }, 10, TestManagers.WithSystemAndRedisCache, TestManagers.WithSystemAndRedisCache, TestManagers.WithRedisCache, TestManagers.WithSystemAndRedisCache);
         }
 
         [Fact]
@@ -159,7 +159,7 @@ namespace CacheManager.Tests
             (cache) =>
             {
                 cache.GetCacheItem(item.Key).Should().BeNull();
-            }, 10, this.WithSystemAndRedisCache, this.WithSystemAndRedisCache, this.WithRedisCache, this.WithSystemAndRedisCache);
+            }, 10, TestManagers.WithSystemAndRedisCache, TestManagers.WithSystemAndRedisCache, TestManagers.WithRedisCache, TestManagers.WithSystemAndRedisCache);
         }
 
         [Fact]
@@ -261,7 +261,7 @@ namespace CacheManager.Tests
         {
             // arrange
             var item = new CacheItem<object>("key", "something", ExpirationMode.Sliding, TimeSpan.FromMilliseconds(50));
-            var cache = this.WithSystemAndRedisCache;
+            var cache = TestManagers.WithSystemAndRedisCache;
 
             // act/assert
             using (cache)
@@ -294,8 +294,8 @@ namespace CacheManager.Tests
         {
             // arrange
             var item = new CacheItem<object>("key", "something", ExpirationMode.Sliding, TimeSpan.FromMilliseconds(50));
-            var cacheA = this.WithSystemAndRedisCache;
-            var cacheB = this.WithSystemAndRedisCache;
+            var cacheA = TestManagers.WithSystemAndRedisCache;
+            var cacheB = TestManagers.WithSystemAndRedisCache;
 
             // act/assert
             using (cacheA)
@@ -333,7 +333,7 @@ namespace CacheManager.Tests
         {
             // arrange
             var item = new CacheItem<object>("key", "something", "region", ExpirationMode.Sliding, TimeSpan.FromMilliseconds(50));
-            var cache = this.WithSystemAndRedisCache;
+            var cache = TestManagers.WithSystemAndRedisCache;
 
             // act/assert
             using (cache)
@@ -365,7 +365,7 @@ namespace CacheManager.Tests
         public void Redis_Valid_CfgFile_LoadWithRedisBackPlate()
         {
             // arrange
-            string fileName = BaseCacheManagerTest.GetCfgFileName(@"\Configuration\configuration.valid.allFeatures.config");
+            string fileName = TestManagers.GetCfgFileName(@"\Configuration\configuration.valid.allFeatures.config");
             string cacheName = "redisWithBackPlate";
 
             // act
@@ -380,7 +380,7 @@ namespace CacheManager.Tests
         [Trait("IntegrationTest", "Redis")]
         public void Redis_ValueConverter_ObjectCacheTypeConversion_Bool()
         {
-            var cache = this.WithRedisCache;
+            var cache = TestManagers.WithRedisCache;
 
             // act/assert
             using (cache)
@@ -397,7 +397,7 @@ namespace CacheManager.Tests
         [Trait("IntegrationTest", "Redis")]
         public void Redis_ValueConverter_ObjectCacheTypeConversion_Bytes()
         {
-            var cache = this.WithRedisCache;
+            var cache = TestManagers.WithRedisCache;
 
             // act/assert
             using (cache)
@@ -414,7 +414,7 @@ namespace CacheManager.Tests
         [Trait("IntegrationTest", "Redis")]
         public void Redis_ValueConverter_ObjectCacheTypeConversion_Double()
         {
-            var cache = this.WithRedisCache;
+            var cache = TestManagers.WithRedisCache;
 
             // act/assert
             using (cache)
@@ -431,7 +431,7 @@ namespace CacheManager.Tests
         [Trait("IntegrationTest", "Redis")]
         public void Redis_ValueConverter_ObjectCacheTypeConversion_Int32()
         {
-            var cache = this.WithRedisCache;
+            var cache = TestManagers.WithRedisCache;
 
             // act/assert
             using (cache)
@@ -448,7 +448,7 @@ namespace CacheManager.Tests
         [Trait("IntegrationTest", "Redis")]
         public void Redis_ValueConverter_ObjectCacheTypeConversion_Long()
         {
-            var cache = this.WithRedisCache;
+            var cache = TestManagers.WithRedisCache;
 
             // act/assert
             using (cache)
@@ -465,7 +465,7 @@ namespace CacheManager.Tests
         [Trait("IntegrationTest", "Redis")]
         public void Redis_ValueConverter_ObjectCacheTypeConversion_Poco()
         {
-            var cache = this.WithRedisCache;
+            var cache = TestManagers.WithRedisCache;
 
             // act/assert
             using (cache)
@@ -482,7 +482,7 @@ namespace CacheManager.Tests
         [Trait("IntegrationTest", "Redis")]
         public void Redis_ValueConverter_ObjectCacheTypeConversion_String()
         {
-            var cache = this.WithRedisCache;
+            var cache = TestManagers.WithRedisCache;
 
             // act/assert
             using (cache)
@@ -539,8 +539,10 @@ namespace CacheManager.Tests
     [ExcludeFromCodeCoverage]
     internal class Poco
     {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "For testing only")]
         public int Id { get; set; }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "For testing only")]
         public string Something { get; set; }
     }
 }

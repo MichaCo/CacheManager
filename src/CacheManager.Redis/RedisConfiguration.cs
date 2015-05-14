@@ -31,6 +31,7 @@ namespace CacheManager.Redis
         /// If set to <c>True</c> it enables the cache to use features which might be risky.
         /// <c>Clear</c> for example.
         /// </param>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "Using it for configuration data only.")]
         public RedisConfiguration(
             string key,
             IList<ServerEndPoint> endpoints,
@@ -43,7 +44,7 @@ namespace CacheManager.Redis
         {
             if (string.IsNullOrWhiteSpace(key))
             {
-                throw new ArgumentNullException("id");
+                throw new ArgumentNullException("key");
             }
 
             if (endpoints == null)

@@ -16,7 +16,7 @@ namespace CacheManager.Tests
     public class CacheManagerStatsTest : BaseCacheManagerTest
     {
         [Theory]
-        [MemberData("GetCacheManagers")]
+        [MemberData("TestCacheManagers")]
         [ReplaceCulture]
         public void CacheManager_Stats_AddGet<T>(T cache) where T : ICacheManager<object>
         {
@@ -67,7 +67,7 @@ namespace CacheManager.Tests
         }
 
         [Theory]
-        [MemberData("GetCacheManagers")]
+        [MemberData("TestCacheManagers")]
         [ReplaceCulture]
         public void CacheManager_Stats_Clear<T>(T cache) where T : ICacheManager<object>
         {
@@ -91,7 +91,7 @@ namespace CacheManager.Tests
         }
 
         [Theory]
-        [MemberData("GetCacheManagers")]
+        [MemberData("TestCacheManagers")]
         [ReplaceCulture]
         public void CacheManager_Stats_ClearRegion<T>(T cache) where T : ICacheManager<object>
         {
@@ -116,7 +116,7 @@ namespace CacheManager.Tests
         }
 
         [Theory]
-        [MemberData("GetCacheManagers")]
+        [MemberData("TestCacheManagers")]
         [ReplaceCulture]
         public void CacheManager_Stats_Put<T>(T cache) where T : ICacheManager<object>
         {
@@ -138,7 +138,7 @@ namespace CacheManager.Tests
         }
 
         [Theory]
-        [MemberData("GetCacheManagers")]
+        [MemberData("TestCacheManagers")]
         [ReplaceCulture]
         public void CacheManager_Stats_Update<T>(T cache) where T : ICacheManager<object>
         {
@@ -167,7 +167,7 @@ namespace CacheManager.Tests
         }
 
         [Theory]
-        [MemberData("GetCacheManagers")]
+        [MemberData("TestCacheManagers")]
         [ReplaceCulture]
         public void CacheManager_Stats_Remove<T>(T cache) where T : ICacheManager<object>
         {
@@ -208,7 +208,7 @@ namespace CacheManager.Tests
         }
 
         [Theory]
-        [MemberData("GetCacheManagers")]
+        [MemberData("TestCacheManagers")]
         [ReplaceCulture]
         public void CacheManager_Stats_Threaded<T>(T cache) where T : ICacheManager<object>
         {

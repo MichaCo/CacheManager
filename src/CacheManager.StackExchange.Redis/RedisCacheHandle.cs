@@ -224,7 +224,7 @@ namespace CacheManager.Redis
         {
             var committed = false;
             var tries = 0;
-            var fullKey = this.GetKey(key, region);
+            var fullKey = GetKey(key, region);
 
             return this.Retry(() =>
             {
@@ -309,7 +309,7 @@ namespace CacheManager.Redis
         {
             return this.Retry(() =>
             {
-                var fullKey = this.GetKey(key, region);
+                var fullKey = GetKey(key, region);
 
                 // getting both, the value and, if exists, the expiration mode. if that one is set
                 // and it is sliding, we also retrieve the timeout later
@@ -426,7 +426,7 @@ namespace CacheManager.Redis
                 }
 
                 // remove key
-                var fullKey = this.GetKey(key, region);
+                var fullKey = GetKey(key, region);
                 var result = this.Database.KeyDelete(fullKey);
 
                 return result;
@@ -458,7 +458,7 @@ namespace CacheManager.Redis
             return (StackRedis.RedisValue)RedisValueConverter.ToBytes(value);
         }
 
-        private string GetKey(string key, string region = null)
+        private static string GetKey(string key, string region = null)
         {
             var fullKey = key;
 
@@ -484,13 +484,7 @@ namespace CacheManager.Redis
         {
             return this.Retry(() =>
             {
-                TimeSpan? expiration = item.ExpirationTimeout;
-                if (item.ExpirationMode == ExpirationMode.None)
-                {
-                    expiration = null;
-                }
-
-                var fullKey = this.GetKey(item.Key, item.Region);
+                var fullKey = GetKey(item.Key, item.Region);
                 var value = ToRedisValue(item.Value);
 
                 StackRedis.HashEntry[] metaValues = new[]

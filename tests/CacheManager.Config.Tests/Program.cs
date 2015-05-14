@@ -30,7 +30,7 @@ namespace CacheManager.Config.Tests
         public static void CacheThreadTest(ICacheManager<string> cache, int seed)
         {
             var threads = 10;
-            var numItems = 55000;
+            var numItems = 100;
             var eventAddCount = 0;
             var eventRemoveCount = 0;
             var eventGetCount = 0;
@@ -39,20 +39,26 @@ namespace CacheManager.Config.Tests
             cache.OnRemove += (sender, args) => { Interlocked.Increment(ref eventRemoveCount); };
             cache.OnGet += (sender, args) => { Interlocked.Increment(ref eventGetCount); };
 
+            Func<int, string> keyGet = (index) => "key" + ((index + 1) * seed);
+
             Action test = () =>
             {
                 for (int i = 0; i < numItems; i++)
                 {
-                    var key = "key" + ((i + 1) * seed);
-                    cache.Add(key, i.ToString());
+                    cache.Add(keyGet(i), i.ToString());
                 }
-
-                cache.CacheHandles.First().Clear();
 
                 for (int i = 0; i < numItems; i++)
                 {
-                    var key = "key" + ((i + 1) * seed);
-                    string intVal = cache.Get(key);
+                    if (i % 10 == 0)
+                    {
+                        cache.Remove(keyGet(i));
+                    }
+                }
+
+                for (int i = 0; i < numItems; i++)
+                {
+                    string intVal = cache.Get(keyGet(i));
                 }
 
                 Thread.Yield();
@@ -76,7 +82,7 @@ namespace CacheManager.Config.Tests
                             stats.GetStatistic(CacheStatsCounterType.GetCalls)));
             }
 
-            Console.WriteLine(string.Format("Event - Adds {0} Gets {1} Removes {2}",
+            Console.WriteLine(string.Format("Event - Adds {0} Hits {1} Removes {2}",
                 eventAddCount,
                 eventGetCount,
                 eventRemoveCount));
@@ -124,8 +130,8 @@ namespace CacheManager.Config.Tests
             Console.WriteLine("\nSimpleAddGetTest completed \tafter: {0:C} ms. \twith {1:C0} Ops/s.", elapsed, opsPerSec);
         }
 
-        private static void Main(string[] args)
-        {
+        private static void Main()
+       { 
             var swatch = Stopwatch.StartNew();
             int iterations = int.MaxValue;
             swatch.Restart();
@@ -134,10 +140,10 @@ namespace CacheManager.Config.Tests
                 cfg.WithUpdateMode(CacheUpdateMode.Up);
 
                 cfg.WithSystemRuntimeCacheHandle("default")
-                    .DisableStatistics();
+                    .EnableStatistics();
 
                 cfg.WithRedisCacheHandle("redis", true)
-                    .DisableStatistics();
+                    .EnableStatistics();
 
                 cfg.WithRedisBackPlate("redis");
 
@@ -152,7 +158,10 @@ namespace CacheManager.Config.Tests
 
             for (int i = 0; i < iterations; i++)
             {
-                // CacheThreadTest(cache, i + 10);
+                CacheThreadTest(
+                    CacheFactory.FromConfiguration<string>("cache", cacheConfiguration), 
+                    i + 10);
+
                 SimpleAddGetTest(
                     // CacheFactory.FromConfiguration(cacheConfiguration),
                     CacheFactory.FromConfiguration<object>("cache", cacheConfiguration));
@@ -161,8 +170,6 @@ namespace CacheManager.Config.Tests
                 // Console.WriteLine(string.Format("Iterations ended after {0}ms.", swatch.ElapsedMilliseconds));
                 Console.WriteLine("---------------------------------------------------------");
                 swatch.Restart();
-
-                GC.Collect();
             }
 
             Console.ForegroundColor = ConsoleColor.DarkGreen;

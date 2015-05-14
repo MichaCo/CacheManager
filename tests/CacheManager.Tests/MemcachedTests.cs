@@ -31,7 +31,7 @@ namespace CacheManager.Tests
             // assert
             act.ShouldThrow<TargetInvocationException>()
                 .WithInnerException<InvalidOperationException>()
-                .WithInnerMessage("To use memcached*IAmNotSerializable is not*");
+                .WithInnerMessage("The cache value type must be serializable*");
         }
 
         [Fact]

@@ -47,16 +47,14 @@ namespace CacheManager.Tests
         public void CacheManager_AddCacheItem_WithExpMode_ButWithoutTimeout()
         {
             // arrange
-            using (var cache = this.WithManyDictionaryHandles)
-            {
-                var key = "key";
+            var cache = TestManagers.WithManyDictionaryHandles;
+            var key = "key";
 
-                // act
-                Action act = () => cache.Add(new CacheItem<object>(key, "something", ExpirationMode.Absolute, default(TimeSpan)));
+            // act
+            Action act = () => cache.Add(new CacheItem<object>(key, "something", ExpirationMode.Absolute, default(TimeSpan)));
 
-                act.ShouldThrow<InvalidOperationException>()
-                    .WithMessage("Expiration mode is defined without timeout.");
-            }
+            act.ShouldThrow<InvalidOperationException>()
+                .WithMessage("Expiration mode is defined without timeout.");            
         }
 
         [Fact]
@@ -947,7 +945,7 @@ namespace CacheManager.Tests
         #endregion indexer
 
         [Theory]
-        [MemberData("GetCacheManagers")]
+        [MemberData("TestCacheManagers")]
         [ReplaceCulture]
         public void CacheManager_CastGet_Region<T>(T cache) where T : ICacheManager<object>
         {
@@ -965,7 +963,7 @@ namespace CacheManager.Tests
         }
 
         [Theory]
-        [MemberData("GetCacheManagers")]
+        [MemberData("TestCacheManagers")]
         [ReplaceCulture]
         public void CacheManager_CastGet<T>(T cache) where T : ICacheManager<object>
         {
@@ -1007,7 +1005,7 @@ namespace CacheManager.Tests
         }
 
         [Theory]
-        [MemberData("GetCacheManagers")]
+        [MemberData("TestCacheManagers")]
         [ReplaceCulture]
         public void CacheManager_CastGet_InvalidTypeThrows<T>(T cache) where T : ICacheManager<object>
         {
@@ -1025,7 +1023,7 @@ namespace CacheManager.Tests
         }
 
         [Theory]
-        [MemberData("GetCacheManagers")]
+        [MemberData("TestCacheManagers")]
         [ReplaceCulture]
         public void CacheManager_SimplePut<T>(T cache) where T : ICacheManager<object>
         {
@@ -1049,7 +1047,7 @@ namespace CacheManager.Tests
         }
 
         [Theory]
-        [MemberData("GetCacheManagers")]
+        [MemberData("TestCacheManagers")]
         public void CacheManager_SimpleAdd<T>(T cache) where T : ICacheManager<object>
         {
             using (cache)
@@ -1072,7 +1070,7 @@ namespace CacheManager.Tests
         }
 
         [Theory]
-        [MemberData("GetCacheManagers")]
+        [MemberData("TestCacheManagers")]
         public void CacheManager_SimpleIndexPut<T>(T cache) where T : ICacheManager<object>
         {
             using (cache)
@@ -1095,7 +1093,7 @@ namespace CacheManager.Tests
         }
 
         [Theory]
-        [MemberData("GetCacheManagers")]
+        [MemberData("TestCacheManagers")]
         public void CacheManager_SimpleRemove<T>(T cache) where T : ICacheManager<object>
         {
             using (cache)
@@ -1119,7 +1117,7 @@ namespace CacheManager.Tests
         }
 
         [Theory]
-        [MemberData("GetCacheManagers")]
+        [MemberData("TestCacheManagers")]
         public void CacheManager_Clear_AllItemsRemoved<T>(T cache) where T : ICacheManager<object>
         {
             // arrange act
@@ -1137,7 +1135,7 @@ namespace CacheManager.Tests
         }
 
         [Theory]
-        [MemberData("GetCacheManagers")]
+        [MemberData("TestCacheManagers")]
         public void CacheManager_SimpleUpdate<T>(T cache) where T : ICacheManager<object>
         {
             using (cache)

@@ -25,21 +25,4 @@
         NodeShutdown = 0x093,
         OperationTimeout = 0x094
     }
-
-    internal static class StatusCodeExtension
-    {
-        public static int ToInt(this StatusCode statusCode)
-        {
-            return (int)statusCode;
-        }
-
-        public static StatusCode ToEnum(this int? statusCodeInt)
-        {
-            if (statusCodeInt != null)
-            {
-                return (StatusCode)statusCodeInt.Value;
-            }
-            return StatusCode.Success;
-        }
-    }
 }

@@ -15,18 +15,24 @@ namespace CacheManager.Redis
     /// </summary>
     public static class RedisConfigurations
     {
-        private static Dictionary<string, RedisConfiguration> configurations = new Dictionary<string, RedisConfiguration>();
+        private static Dictionary<string, RedisConfiguration> config = null;
 
-        /// <summary>
-        /// Initializes static members of the <see cref="RedisConfigurations"/> class.
-        /// </summary>
-        static RedisConfigurations()
+        private static Dictionary<string, RedisConfiguration> Configurations
         {
-            // load defaults
-            var section = ConfigurationManager.GetSection(RedisConfigurationSection.DefaultSectionName) as RedisConfigurationSection;
-            if (section != null)
+            get
             {
-                LoadConfiguration(section);
+                if (config == null)
+                {
+                    config = new Dictionary<string, RedisConfiguration>();
+
+                    var section = ConfigurationManager.GetSection(RedisConfigurationSection.DefaultSectionName) as RedisConfigurationSection;
+                    if (section != null)
+                    {
+                        LoadConfiguration(section);
+                    }
+                }
+
+                return config;
             }
         }
 
@@ -42,9 +48,9 @@ namespace CacheManager.Redis
                 throw new ArgumentNullException("configuration");
             }
 
-            if (!configurations.ContainsKey(configuration.Key))
+            if (!Configurations.ContainsKey(configuration.Key))
             {
-                configurations.Add(configuration.Key, configuration);
+                Configurations.Add(configuration.Key, configuration);
             }
         }
 
@@ -64,20 +70,20 @@ namespace CacheManager.Redis
                 throw new ArgumentNullException("configurationName");
             }
 
-            if (!configurations.ContainsKey(configurationName))
+            if (!Configurations.ContainsKey(configurationName))
             {
                 // check connection strings if there is one matching the name
                 var connectionStringHolder = ConfigurationManager.ConnectionStrings[configurationName];
                 if (connectionStringHolder == null || string.IsNullOrWhiteSpace(connectionStringHolder.ConnectionString))
                 {
-                    throw new InvalidOperationException("No configuration added for configurationName " + configurationName);
+                    throw new InvalidOperationException("No configuration added for configuration name " + configurationName);
                 }
 
                 var configuration = new RedisConfiguration(configurationName, connectionStringHolder.ConnectionString);
-                configurations.Add(configurationName, configuration);
+                Configurations.Add(configurationName, configuration);
             }
 
-            return configurations[configurationName];
+            return Configurations[configurationName];
         }
 
         /// <summary>

@@ -30,6 +30,11 @@ namespace CacheManager.Redis
         public RedisCacheBackPlate(CacheManagerConfiguration configuration, string cacheName)
             : base(configuration, cacheName)
         {
+            if (configuration == null)
+            {
+                throw new ArgumentNullException("configuration");
+            }
+
             this.channelName = string.Format(
                 CultureInfo.InvariantCulture,
                 "CacheManagerBackPlate_{0}",
@@ -143,7 +148,7 @@ namespace CacheManager.Redis
                 {
                     string messageStr = (string)msg;
 
-                    if (messageStr.StartsWith(this.identifier))
+                    if (messageStr.StartsWith(this.identifier, StringComparison.Ordinal))
                     {
                         // do not notify ourself (might be faster than the second method?
                         return;

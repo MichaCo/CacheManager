@@ -88,7 +88,7 @@ namespace CacheManager.Tests
         }
 
         [Theory]
-        [MemberData("GetCacheManagers")]
+        [MemberData("TestCacheManagers")]
         [ReplaceCulture]
         public void CacheManager_Events_OnGet<T>(T cache) where T : ICacheManager<object>
         {
@@ -114,7 +114,7 @@ namespace CacheManager.Tests
         }
 
         [Theory]
-        [MemberData("GetCacheManagers")]
+        [MemberData("TestCacheManagers")]
         [ReplaceCulture]
         public void CacheManager_Events_OnGetWithRegion<T>(T cache) where T : ICacheManager<object>
         {
@@ -140,7 +140,7 @@ namespace CacheManager.Tests
         }
 
         [Theory]
-        [MemberData("GetCacheManagers")]
+        [MemberData("TestCacheManagers")]
         [ReplaceCulture]
         public void CacheManager_Events_OnGetMiss<T>(T cache) where T : ICacheManager<object>
         {
@@ -165,7 +165,7 @@ namespace CacheManager.Tests
         }
 
         [Theory]
-        [MemberData("GetCacheManagers")]
+        [MemberData("TestCacheManagers")]
         [ReplaceCulture]
         public void CacheManager_Events_OnGetManyHandles<T>(T cache) where T : ICacheManager<object>
         {
@@ -200,7 +200,7 @@ namespace CacheManager.Tests
         /// <typeparam name="T">The cache type.</typeparam>
         /// <param name="cache">The cache instance.</param>
         [Theory]
-        [MemberData("GetCacheManagers")]
+        [MemberData("TestCacheManagers")]
         [ReplaceCulture]
         public void CacheManager_Events_OnRemoveMany<T>(T cache) where T : ICacheManager<object>
         {
@@ -248,7 +248,7 @@ namespace CacheManager.Tests
         /// <typeparam name="T">The cache type.</typeparam>
         /// <param name="cache">The cache instance.</param>
         [Theory]
-        [MemberData("GetCacheManagers")]
+        [MemberData("TestCacheManagers")]
         [ReplaceCulture]
         public void CacheManager_Events_OnAddMany<T>(T cache) where T : ICacheManager<object>
         {
@@ -301,7 +301,7 @@ namespace CacheManager.Tests
         /// <typeparam name="T">The cache type.</typeparam>
         /// <param name="cache">The cache instance.</param>
         [Theory]
-        [MemberData("GetCacheManagers")]
+        [MemberData("TestCacheManagers")]
         [ReplaceCulture]
         public void CacheManager_Events_OnPutMany<T>(T cache) where T : ICacheManager<object>
         {
@@ -350,7 +350,7 @@ namespace CacheManager.Tests
         /// <typeparam name="T">The cache type.</typeparam>
         /// <param name="cache">The cache instance.</param>
         [Theory]
-        [MemberData("GetCacheManagers")]
+        [MemberData("TestCacheManagers")]
         [ReplaceCulture]
         public void CacheManager_Events_OnUpdate<T>(T cache) where T : ICacheManager<object>
         {
@@ -401,7 +401,7 @@ namespace CacheManager.Tests
         /// <typeparam name="T">The cache type.</typeparam>
         /// <param name="cache">The cache instance.</param>
         [Theory]
-        [MemberData("GetCacheManagers")]
+        [MemberData("TestCacheManagers")]
         [ReplaceCulture]
         public void CacheManager_Events_OnClearRegion<T>(T cache) where T : ICacheManager<object>
         {
@@ -414,7 +414,7 @@ namespace CacheManager.Tests
                 cache.OnClearRegion += (sender, args) => data.AddCall(args);
                 cache.OnClearRegion += (sender, args) => data.AddCall(args);
                 cache.OnClearRegion += (sender, args) => data.AddCall(args);
-                cache.OnClear += (sender, args) => data.AddCall(args);                // this should not trigger
+                cache.OnClear += (sender, args) => data.AddCall();                // this should not trigger
                 cache.OnGet += (sender, args) => data.AddCall(args);  // this should not trigger
                 cache.OnRemove += (sender, args) => data.AddCall(args);  // this should not trigger
                 cache.Put("key1", "something", "region");
@@ -447,7 +447,7 @@ namespace CacheManager.Tests
         /// <typeparam name="T">The cache type.</typeparam>
         /// <param name="cache">The cache instance.</param>
         [Theory]
-        [MemberData("GetCacheManagers")]
+        [MemberData("TestCacheManagers")]
         [ReplaceCulture]
         public void CacheManager_Events_OnClear<T>(T cache) where T : ICacheManager<object>
         {
@@ -457,9 +457,9 @@ namespace CacheManager.Tests
                 // arrange
                 var data = new EventCallbackData();
                 // all callbacks should be triggered, so result count should be 4
-                cache.OnClear += (sender, args) => data.AddCall(args);
-                cache.OnClear += (sender, args) => data.AddCall(args);
-                cache.OnClear += (sender, args) => data.AddCall(args);
+                cache.OnClear += (sender, args) => data.AddCall();
+                cache.OnClear += (sender, args) => data.AddCall();
+                cache.OnClear += (sender, args) => data.AddCall();
                 cache.OnClearRegion += (sender, args) => data.AddCall(args); // this should not trigger
                 cache.OnGet += (sender, args) => data.AddCall(args);  // this should not trigger
                 cache.OnRemove += (sender, args) => data.AddCall(args);  // this should not trigger
@@ -523,7 +523,7 @@ namespace CacheManager.Tests
                 this.Regions.Add(args.Region);
             }
 
-            internal void AddCall(CacheClearEventArgs args)
+            internal void AddCall()
             {
                 this.Calls++;
                 this.Keys.Add(null);

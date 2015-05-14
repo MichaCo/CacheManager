@@ -7,15 +7,9 @@ namespace CacheManager.Redis
 {
     internal class RedisConnectionPool
     {
-        private static IDictionary<string, StackRedis.ConnectionMultiplexer> connections;
+        private static IDictionary<string, StackRedis.ConnectionMultiplexer> connections = new Dictionary<string, StackRedis.ConnectionMultiplexer>();
 
-        // connection string to connection multiplexer
         private static object connectLock = new object();
-
-        static RedisConnectionPool()
-        {
-            connections = new Dictionary<string, StackRedis.ConnectionMultiplexer>();
-        }
 
         public static StackRedis.ConnectionMultiplexer Connect(CacheManagerConfiguration cacheConfig, RedisConfiguration configuration)
         {

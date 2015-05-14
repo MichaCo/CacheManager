@@ -70,11 +70,11 @@ namespace CacheManager.Redis
         /// <para>Maximum number of database depends on the redis server configuration.</para>Default
         /// is <c>0</c>.
         /// </summary>
-        /// <param name="database">The database index.</param>
+        /// <param name="databaseIndex">The database index.</param>
         /// <returns>The builder.</returns>
-        public RedisConfigurationBuilder WithDatabase(int database)
+        public RedisConfigurationBuilder WithDatabase(int databaseIndex)
         {
-            this.database = database;
+            this.database = databaseIndex;
             return this;
         }
 
@@ -95,11 +95,11 @@ namespace CacheManager.Redis
         /// <summary>
         /// Sets the password for the redis server.
         /// </summary>
-        /// <param name="password">The redis server password.</param>
+        /// <param name="serverPassword">The redis server password.</param>
         /// <returns>The builder.</returns>
-        public RedisConfigurationBuilder WithPassword(string password)
+        public RedisConfigurationBuilder WithPassword(string serverPassword)
         {
-            this.password = password;
+            this.password = serverPassword;
             return this;
         }
 
@@ -109,12 +109,13 @@ namespace CacheManager.Redis
         /// If host is specified it will enforce a particular SSL host identity on the server's certificate.
         /// </para>
         /// </summary>
-        /// <param name="sslHost">The SSL host.</param>
+        /// <param name="host">The SSL host.</param>
         /// <returns>The builder.</returns>
-        public RedisConfigurationBuilder WithSsl(string sslHost = null)
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "Using it for configuration data only.")]
+        public RedisConfigurationBuilder WithSsl(string host = null)
         {
             this.isSsl = true;
-            this.sslHost = sslHost;
+            this.sslHost = host;
             return this;
         }
     }

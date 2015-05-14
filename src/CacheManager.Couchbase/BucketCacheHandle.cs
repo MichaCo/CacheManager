@@ -49,6 +49,11 @@ namespace CacheManager.Couchbase
         public BucketCacheHandle(ICacheManager<TCacheValue> manager, CacheHandleConfiguration configuration)
             : base(manager, configuration)
         {
+            if (configuration == null)
+            {
+                throw new ArgumentNullException("configuration");
+            }
+
             // we can configure the bucket name by having "<configKey>:<bucketName>" as handle's
             // name value
             var nameParts = configuration.HandleName.Split(new[] { ":" }, StringSplitOptions.RemoveEmptyEntries);
@@ -111,7 +116,12 @@ namespace CacheManager.Couchbase
         /// </returns>
         protected override bool AddInternalPrepared(CacheItem<TCacheValue> item)
         {
-            var fullKey = this.GetKey(item.Key, item.Region);
+            if (item == null)
+            {
+                throw new ArgumentNullException("item");
+            }
+
+            var fullKey = GetKey(item.Key, item.Region);
             if (item.ExpirationMode != ExpirationMode.None)
             {
                 return this.bucket.Insert(fullKey, item, item.ExpirationTimeout).Success;
@@ -152,7 +162,7 @@ namespace CacheManager.Couchbase
         /// <returns>The <c>CacheItem</c>.</returns>
         protected override CacheItem<TCacheValue> GetCacheItemInternal(string key, string region)
         {
-            var fullkey = this.GetKey(key, region);
+            var fullkey = GetKey(key, region);
             var result = this.bucket.Get<CacheItem<TCacheValue>>(fullkey);
 
             //// TODO: implement sliding expiration whenever the guys from couchbase actually
@@ -185,7 +195,12 @@ namespace CacheManager.Couchbase
         /// <param name="item">The <c>CacheItem</c> to be added to the cache.</param>
         protected override void PutInternalPrepared(CacheItem<TCacheValue> item)
         {
-            var fullKey = this.GetKey(item.Key, item.Region);
+            if (item == null)
+            {
+                throw new ArgumentNullException("item");
+            }
+
+            var fullKey = GetKey(item.Key, item.Region);
             if (item.ExpirationMode != ExpirationMode.None)
             {
                 this.bucket.Upsert(fullKey, item, item.ExpirationTimeout);
@@ -218,7 +233,7 @@ namespace CacheManager.Couchbase
         /// </returns>
         protected override bool RemoveInternal(string key, string region)
         {
-            var fullKey = this.GetKey(key, region);
+            var fullKey = GetKey(key, region);
             var result = this.bucket.Remove(fullKey);
             return result.Success;
         }
@@ -232,7 +247,7 @@ namespace CacheManager.Couchbase
             }
         }
 
-        private string GetKey(string key, string region = null)
+        private static string GetKey(string key, string region = null)
         {
             var fullKey = key;
 

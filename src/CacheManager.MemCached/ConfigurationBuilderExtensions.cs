@@ -36,6 +36,11 @@ namespace CacheManager.Core
         /// </exception>
         public static ConfigurationBuilderCacheHandlePart WithMemcachedCacheHandle(this ConfigurationBuilderCachePart part, string handleName, bool isBackPlateSource)
         {
+            if (part == null)
+            {
+                throw new ArgumentNullException("part");
+            }
+
             return part.WithHandle(typeof(MemcachedCacheHandle<>), handleName, isBackPlateSource);
         }
     }

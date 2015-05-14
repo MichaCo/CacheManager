@@ -75,6 +75,11 @@ namespace CacheManager.Core
         /// </exception>
         public static ConfigurationBuilderCacheHandlePart WithCouchbaseCacheHandle(this ConfigurationBuilderCachePart part, string couchbaseConfigurationKey, bool isBackPlateSource)
         {
+            if (part == null)
+            {
+                throw new ArgumentNullException("part");
+            }
+
             return part.WithHandle(typeof(BucketCacheHandle<>), couchbaseConfigurationKey, isBackPlateSource);
         }
 
@@ -127,6 +132,11 @@ namespace CacheManager.Core
         /// </exception>
         public static ConfigurationBuilderCacheHandlePart WithCouchbaseCacheHandle(this ConfigurationBuilderCachePart part, string couchbaseConfigurationKey, string bucketName, bool isBackPlateSource)
         {
+            if (part == null)
+            {
+                throw new ArgumentNullException("part");
+            }
+
             if (string.IsNullOrWhiteSpace(bucketName))
             {
                 throw new ArgumentNullException("bucketName");
