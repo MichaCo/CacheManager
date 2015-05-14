@@ -3,7 +3,6 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using CacheManager.Core;
-using CacheManager.Core.Configuration;
 using Xunit;
 
 namespace CacheManager.Tests

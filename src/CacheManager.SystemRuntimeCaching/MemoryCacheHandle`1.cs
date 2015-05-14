@@ -35,7 +35,12 @@ namespace CacheManager.SystemRuntimeCaching
         public MemoryCacheHandle(ICacheManager<TCacheValue> manager, CacheHandleConfiguration configuration)
             : base(manager, configuration)
         {
-            this.cacheName = this.Configuration.HandleName;
+            if (configuration == null)
+            {
+                throw new ArgumentNullException("configuration");
+            }
+
+            this.cacheName = configuration.HandleName;
 
             if (this.cacheName.ToUpper(CultureInfo.InvariantCulture).Equals(DefaultName.ToUpper(CultureInfo.InvariantCulture)))
             {

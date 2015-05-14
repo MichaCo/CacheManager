@@ -23,10 +23,9 @@ namespace CacheManager.Tests
         [ReplaceCulture]
         public void UpdateItemConfig_Default()
         {
-            // arrange
-            // act
+            // arrange act
             Func<UpdateItemConfig> act = () => new UpdateItemConfig();
-            
+
             // assert
             act().ShouldBeEquivalentTo(new { MaxRetries = int.MaxValue, VersionConflictOperation = VersionConflictHandling.EvictItemFromOtherCaches });
         }
@@ -35,8 +34,7 @@ namespace CacheManager.Tests
         [ReplaceCulture]
         public void UpdateItemConfig_Ctor()
         {
-            // arrange
-            // act
+            // arrange act
             Func<UpdateItemConfig> act = () => new UpdateItemConfig(101, VersionConflictHandling.Ignore);
 
             // assert
@@ -47,8 +45,7 @@ namespace CacheManager.Tests
         [ReplaceCulture]
         public void UpdateItemConfig_Ctor_InvalidRetries()
         {
-            // arrange
-            // act
+            // arrange act
             Action act = () => new UpdateItemConfig(-10, VersionConflictHandling.Ignore);
 
             // assert
@@ -60,10 +57,9 @@ namespace CacheManager.Tests
         [ReplaceCulture]
         public void UpdateItemResult_Ctor()
         {
-            // arrange
-            // act
+            // arrange act
             Func<UpdateItemResult> act = () => new UpdateItemResult(true, true, 1001);
-            
+
             // assert
             act().ShouldBeEquivalentTo(new { Success = true, NumberOfRetriesNeeded = 1001, VersionConflictOccurred = true });
         }
@@ -72,7 +68,7 @@ namespace CacheManager.Tests
         public void CacheManager_Update_ValidateConflictHandle_Ignore()
         {
             // arrange
-            Func<string, string> updateFunc = s=>s;
+            Func<string, string> updateFunc = s => s;
 
             // the update config setting it to Ignore
             UpdateItemConfig updateConfig = new UpdateItemConfig(0, VersionConflictHandling.Ignore);
@@ -99,7 +95,7 @@ namespace CacheManager.Tests
             using (var cache = new BaseCacheManager<string>("cacheName", cfg, handles))
             {
                 var updateResult = cache.Update("key", updateFunc, updateConfig);
-                
+
                 // assert
                 updateCalls.Should().Be(5, "all handle should have been invoked");
                 putCalls.Should().Be(0, "with ignore, the manager should not run put on the other handles");
@@ -147,7 +143,7 @@ namespace CacheManager.Tests
                 updateResult.Should().BeTrue("we return success in handle 3 allthough there is a version conflict");
             }
         }
-        
+
         [Fact]
         public void CacheManager_Update_ValidateConflictHandle_EvictWithFailedResult()
         {
@@ -209,8 +205,9 @@ namespace CacheManager.Tests
                     new UpdateItemResult(false, true, 0),
                     new UpdateItemResult(false, true, 0),
                     new UpdateItemResult(true, true, 0),    // version conflict but successfully updated
-                                                            // this should trigger cache manager to update the other 4 handles
-                                                            // with the new version
+                                                            // this should trigger cache manager to
+                                                            // update the other 4 handles with the
+                                                            // new version
                     new UpdateItemResult(false, true, 0),
                     new UpdateItemResult(true, false, 100)
                 },
@@ -259,8 +256,9 @@ namespace CacheManager.Tests
                     new UpdateItemResult(false, true, 0),
                     new UpdateItemResult(false, true, 0),
                     new UpdateItemResult(true, true, 0),    // version conflict but successfully updated
-                                                            // this should trigger cache manager to update the other 4 handles
-                                                            // with the new version
+                                                            // this should trigger cache manager to
+                                                            // update the other 4 handles with the
+                                                            // new version
                     new UpdateItemResult(false, true, 0),
                     new UpdateItemResult(true, false, 100)
                 },
@@ -275,7 +273,6 @@ namespace CacheManager.Tests
                     null
                 });
 
-
             // act
             using (var cache = CacheFactory.Build<string>("myCache", settings =>
             {
@@ -283,12 +280,12 @@ namespace CacheManager.Tests
                     .EnableStatistics();
             }))
             {
-                var oCache = cache as BaseCacheManager<string>;
-                
+                var localCache = cache as BaseCacheManager<string>;
+
                 var handle1 = cache.CacheHandles.ElementAt(0);
                 foreach (var handle in handles)
                 {
-                    oCache.AddCacheHandle(handle);
+                    localCache.AddCacheHandle(handle);
                 }
                 cache.Add("key", "something", "region");
 
@@ -306,13 +303,18 @@ namespace CacheManager.Tests
             }
         }
 
-        static BaseCacheHandle<string>[] MockHandles(int count, Action[] updateCalls, UpdateItemResult[] updateCallResults, Action[] putCalls, Action[] removeCalls, CacheItem<string>[] getCallValues = null)
+        private static BaseCacheHandle<string>[] MockHandles(int count, Action[] updateCalls, UpdateItemResult[] updateCallResults, Action[] putCalls, Action[] removeCalls, CacheItem<string>[] getCallValues = null)
         {
-            if (count <= 0) throw new InvalidOperationException();
+            if (count <= 0)
+            {
+                throw new InvalidOperationException();
+            }
+
             if (updateCalls.Length != count || updateCallResults.Length != count || putCalls.Length != count || removeCalls.Length != count)
             {
                 throw new InvalidOperationException("Count and arrays must match");
             }
+
             var cacheName = "myCache";
             var handles = new List<BaseCacheHandle<string>>();
             for (int i = 0; i < count; i++)

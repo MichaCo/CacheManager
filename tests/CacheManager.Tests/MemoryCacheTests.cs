@@ -3,16 +3,12 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 using CacheManager.Core;
-using CacheManager.Core.Configuration;
 using CacheManager.SystemRuntimeCaching;
 using FluentAssertions;
 using Xunit;
 
 namespace CacheManager.Tests
 {
-    /// <summary>
-    /// Relies on app.config (default and named sys cache)
-    /// </summary>
     [ExcludeFromCodeCoverage]
 #if NET40
     [Trait("Framework", "NET40")]
@@ -27,7 +23,7 @@ namespace CacheManager.Tests
             // arrange
             var item = new CacheItem<object>("key", "something", ExpirationMode.Absolute, new TimeSpan(0, 0, 0, 0, 100));
             // act
-            using (var act = GetHandle("Default"))
+            using (var act = this.GetHandle("Default"))
             {
                 // act
                 act.Add(item);
@@ -44,12 +40,11 @@ namespace CacheManager.Tests
         [Fact]
         public void SysRuntime_MemoryCache_CreateDefaultCache()
         {
-            using (var act = GetHandle("Default"))
+            using (var act = this.GetHandle("Default"))
             {
                 // arrange
                 var settings = ((MemoryCacheHandle<object>)act.CacheHandles.ElementAt(0)).CacheSettings;
-                // act
-                // assert
+                // act assert
                 settings["CacheMemoryLimitMegabytes"].Should().Be("42");
                 settings["PhysicalMemoryLimitPercentage"].Should().Be("69");
                 settings["PollingInterval"].Should().Be("00:10:00");
@@ -59,12 +54,11 @@ namespace CacheManager.Tests
         [Fact]
         public void SysRuntime_MemoryCache_CreateNamedCache()
         {
-            using (var act = GetHandle("NamedTest"))
+            using (var act = this.GetHandle("NamedTest"))
             {
                 // arrange
                 var settings = ((MemoryCacheHandle<object>)act.CacheHandles.ElementAt(0)).CacheSettings;
-                // act
-                // assert
+                // act assert
                 settings["CacheMemoryLimitMegabytes"].Should().Be("12");
                 settings["PhysicalMemoryLimitPercentage"].Should().Be("23");
                 settings["PollingInterval"].Should().Be("00:02:00");
@@ -77,7 +71,7 @@ namespace CacheManager.Tests
             // arrange
             var item = new CacheItem<object>("sliding key", "something", ExpirationMode.Sliding, new TimeSpan(0, 0, 0, 0, 8));
             // act
-            using (var act = GetHandle("Default"))
+            using (var act = this.GetHandle("Default"))
             {
                 // act
                 act.Add(item);
@@ -95,7 +89,7 @@ namespace CacheManager.Tests
             // arrange
             var item = new CacheItem<object>("sliding key", "something", ExpirationMode.Sliding, new TimeSpan(0, 0, 0, 0, 20));
             // act
-            var act = GetHandle("Default");
+            var act = this.GetHandle("Default");
             {
                 // act
                 act.Add(item);
@@ -104,9 +98,9 @@ namespace CacheManager.Tests
                 var state = 0;
                 var t = new Thread(new ThreadStart(() =>
                 {
-                    // assert
-                    // trying to get the item 2 times after 15ms which are 10ms more then the TimeSpan of 20ms.
-                    // So each hit should extend the timeout for 20ms... if not, the test will fail.
+                    // assert trying to get the item 2 times after 15ms which are 10ms more then the
+                    // TimeSpan of 20ms. So each hit should extend the timeout for 20ms... if not,
+                    // the test will fail.
                     Thread.Sleep(15);
                     valid = act["sliding key"] != null;
 

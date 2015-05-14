@@ -1,19 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 using CacheManager.Core;
-using CacheManager.Core.Cache;
 using CacheManager.Core.Configuration;
 using FluentAssertions;
 using Xunit;
 
 namespace CacheManager.Tests
 {
-    /// <summary>
-    ///
-    /// </summary>
     [ExcludeFromCodeCoverage]
 #if NET40
     [Trait("Framework", "NET40")]
@@ -24,7 +19,7 @@ namespace CacheManager.Tests
     {
         [Fact]
         [ReplaceCulture]
-        public void CacheManager_Configuration_AbsoluteExpires() 
+        public void CacheManager_Configuration_AbsoluteExpires()
         {
             // arrange
             string fileName = GetCfgFileName(@"\Configuration\configuration.ExpireTest.config");
@@ -36,7 +31,7 @@ namespace CacheManager.Tests
             using (var cache = CacheFactory.FromConfiguration<string>(cacheName, cfg))
             {
                 cache.Put("key", "value");
-                
+
                 Thread.Sleep(500);
 
                 cache.Get("key").Should().Be("value");
@@ -50,7 +45,8 @@ namespace CacheManager.Tests
         [Fact]
         public void BaseCacheHandle_ExpirationInherits_Issue_1()
         {
-            using(var cache = CacheFactory.Build("testCache", settings => {
+            using (var cache = CacheFactory.Build("testCache", settings =>
+            {
                 settings.WithSystemRuntimeCacheHandle("handleA")
                         .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(10))
                     .And

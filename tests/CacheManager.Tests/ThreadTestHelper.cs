@@ -15,7 +15,7 @@ namespace CacheManager.Tests
         {
             var threadList = new List<Thread>();
 
-            Exception exResult = null;
+            Exception exeptionResult = null;
             for (int i = 0; i < threads; i++)
             {
                 var t = new Thread(new ThreadStart(() =>
@@ -28,7 +28,7 @@ namespace CacheManager.Tests
                         }
                         catch (Exception ex)
                         {
-                            exResult = ex;
+                            exeptionResult = ex;
                         }
                     }
                 }));
@@ -37,11 +37,11 @@ namespace CacheManager.Tests
 
             threadList.ForEach(p => p.Start());
             threadList.ForEach(p => p.Join());
-            
-            if (exResult != null)
+
+            if (exeptionResult != null)
             {
-                Trace.TraceError(exResult.Message + "\n\r" + exResult.StackTrace);
-                throw exResult;
+                Trace.TraceError(exeptionResult.Message + "\n\r" + exeptionResult.StackTrace);
+                throw exeptionResult;
             }
         }
 
@@ -53,10 +53,10 @@ namespace CacheManager.Tests
             {
                 await Task.WhenAll(threadList.Select(t => t()));
             }
-            catch (Exception exResult)
+            catch (Exception ex)
             {
-                Trace.TraceError(exResult.Message + "\n\r" + exResult.StackTrace);
-                throw exResult;
+                Trace.TraceError(ex.Message + "\n\r" + ex.StackTrace);
+                throw ex;
             }
         }
     }

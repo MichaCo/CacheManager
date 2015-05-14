@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Threading;
-using System.Threading.Tasks;
 using CacheManager.Core;
 using CacheManager.Core.Cache;
 using CacheManager.Core.Configuration;
@@ -20,14 +18,14 @@ namespace CacheManager.Tests
 #endif
     public class CacheManagerUpdateModeTests
     {
-        private Func<CacheUpdateMode, int> TestHandleAddCalls = (mode) =>
+        private Func<CacheUpdateMode, int> testHandleAddCalls = (mode) =>
         {
             var addCalls = 0;
             var value = "something";
 
-            // creating 20 handles, the 10th should return some value for any key,
-            // so the cache manager should update all handles (calling addA) depending on the mode,
-            // meaning we simply have to count the add calls.
+            // creating 20 handles, the 10th should return some value for any key, so the cache
+            // manager should update all handles (calling addA) depending on the mode, meaning we
+            // simply have to count the add calls.
             var handles = new List<BaseCacheHandle<object>>();
             for (int i = 0; i < 20; i++)
             {
@@ -38,7 +36,7 @@ namespace CacheManager.Tests
                     .Returns(true);
 
                 handleMock.Setup(p => p.Stats).Returns(new CacheStats<object>("cache", "handle"));
-                handleMock.Setup(p => p.Configuration).Returns(new  CacheHandleConfiguration("handle"));
+                handleMock.Setup(p => p.Configuration).Returns(new CacheHandleConfiguration("handle"));
 
                 if (i == 10)
                 {
@@ -52,15 +50,15 @@ namespace CacheManager.Tests
             var cfg = ConfigurationBuilder.BuildConfiguration(settings => settings.WithUpdateMode(mode));
             var cache = new BaseCacheManager<object>("cacheName", cfg, handles.ToArray());
             cache.Get("somekey").Should().Be(value);
-            
+
             return addCalls;
         };
-        
+
         [Fact]
         public void CacheManager_UpdateModeTests_All()
         {
             // act
-            var result = TestHandleAddCalls(CacheUpdateMode.Full);
+            var result = this.testHandleAddCalls(CacheUpdateMode.Full);
 
             // assert
             result.Should().Be(19, " cachemanger should have updated all other 19  handles"); // 19 other handles should be updated.
@@ -70,7 +68,7 @@ namespace CacheManager.Tests
         public void CacheManager_UpdateModeTests_Up()
         {
             // act
-            var result = TestHandleAddCalls(CacheUpdateMode.Up);
+            var result = this.testHandleAddCalls(CacheUpdateMode.Up);
 
             // assert
             result.Should().Be(10, " cachemanger should have updated all 10 handles above");
@@ -80,7 +78,7 @@ namespace CacheManager.Tests
         public void CacheManager_UpdateModeTests_None()
         {
             // act
-            var result = TestHandleAddCalls(CacheUpdateMode.None);
+            var result = this.testHandleAddCalls(CacheUpdateMode.None);
 
             // assert
             result.Should().Be(0, " cachemanger should not have updated any handles");

@@ -23,8 +23,7 @@ namespace CacheManager.Tests
         [ReplaceCulture]
         public void Cfg_BuildConfiguration_MissingSettings()
         {
-            // arrange
-            // act
+            // arrange act
             Action act = () => ConfigurationBuilder.BuildConfiguration(null);
 
             // assert
@@ -81,8 +80,7 @@ namespace CacheManager.Tests
         [ReplaceCulture]
         public void Cfg_LoadConfiguration_InvalidSectionName()
         {
-            // arrange
-            // act
+            // arrange act
             Action act = () => ConfigurationBuilder.LoadConfiguration(null, "config");
 
             // assert
@@ -94,9 +92,8 @@ namespace CacheManager.Tests
         [ReplaceCulture]
         public void Cfg_LoadConfiguration_InvalidConfigName()
         {
-            // arrange
-            // act
-            Action act = () => ConfigurationBuilder.LoadConfiguration("cacheManager", "");
+            // arrange act
+            Action act = () => ConfigurationBuilder.LoadConfiguration("cacheManager", string.Empty);
 
             // assert
             act.ShouldThrow<ArgumentNullException>()
@@ -110,7 +107,7 @@ namespace CacheManager.Tests
             // arrange
             var sectionName = Guid.NewGuid().ToString();
             // act
-            Action act = () => ConfigurationBuilder.LoadConfiguration(sectionName, "");
+            Action act = () => ConfigurationBuilder.LoadConfiguration(sectionName, string.Empty);
 
             // assert
             act.ShouldThrow<InvalidOperationException>()
@@ -121,9 +118,8 @@ namespace CacheManager.Tests
         [ReplaceCulture]
         public void Cfg_LoadConfigurationFile_EmptyCfgFileName()
         {
-            // arrange
-            // act
-            Action act = () => ConfigurationBuilder.LoadConfigurationFile("", "configName");
+            // arrange act
+            Action act = () => ConfigurationBuilder.LoadConfigurationFile(string.Empty, "configName");
 
             // assert
             act.ShouldThrow<ArgumentException>()
@@ -134,8 +130,7 @@ namespace CacheManager.Tests
         [ReplaceCulture]
         public void Cfg_LoadConfigurationFile_EmptySectionName()
         {
-            // arrange
-            // act
+            // arrange act
             Action act = () => ConfigurationBuilder.LoadConfigurationFile("file", null, "configName");
 
             // assert
@@ -147,8 +142,7 @@ namespace CacheManager.Tests
         [ReplaceCulture]
         public void Cfg_LoadConfigurationFile_EmptyConfigName()
         {
-            // arrange
-            // act
+            // arrange act
             Action act = () => ConfigurationBuilder.LoadConfigurationFile("file", "section", null);
 
             // assert
@@ -459,7 +453,7 @@ namespace CacheManager.Tests
             act.ShouldThrow<ConfigurationErrorsException>()
                 .WithMessage("Expiration mode set without a valid timeout specified for handle [h1]");
         }
-        
+
         [Fact]
         [ReplaceCulture]
         public void Cfg_InvalidCfgFile_MaxRetriesLessThanOne()
@@ -524,16 +518,15 @@ namespace CacheManager.Tests
         [ReplaceCulture]
         public void Cfg_CreateConfig_CacheManagerHandleCollection()
         {
-            // arrange
-            // act
+            // arrange act
             var col = new CacheManagerHandleCollection()
             {
                 Name = "name",
                 UpdateMode = CacheUpdateMode.Up,
                 EnablePerformanceCounters = true,
-                EnableStatistics = true, 
+                EnableStatistics = true,
                 MaximumRetries = 10012,
-                RetryTimeout = 234, 
+                RetryTimeout = 234,
                 BackPlateName = "backPlate",
                 BackPlateType = typeof(string).FullName
             };
@@ -553,8 +546,7 @@ namespace CacheManager.Tests
         [ReplaceCulture]
         public void Cfg_CreateConfig_CacheManagerHandle()
         {
-            // arrange
-            // act
+            // arrange act
             var col = new CacheManagerHandle()
             {
                 IsBackPlateSource = true,
@@ -576,8 +568,7 @@ namespace CacheManager.Tests
         [ReplaceCulture]
         public void Cfg_CreateConfig_CacheHandleDefinition()
         {
-            // arrange
-            // act
+            // arrange act
             var col = new CacheHandleDefinition()
             {
                 Id = "id",

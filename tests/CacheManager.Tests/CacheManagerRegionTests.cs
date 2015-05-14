@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Threading;
 using CacheManager.Core;
 using FluentAssertions;
 using Xunit;
@@ -10,8 +9,8 @@ using Xunit;
 namespace CacheManager.Tests
 {
     /// <summary>
-    /// Validates that add and put adds a new item to all handles defined.
-    /// Validates that remove removes an item from all handles defined.
+    /// Validates that add and put adds a new item to all handles defined. Validates that remove
+    /// removes an item from all handles defined.
     /// </summary>
     [ExcludeFromCodeCoverage]
 #if NET40
@@ -53,8 +52,7 @@ namespace CacheManager.Tests
                         cache.Get(key, otherRegion).Should()
                             .BeOfType<string>(reason)
                             .And
-                            .NotBe(value, reason
-                            );
+                            .NotBe(value, reason);
                     }
                 }
             }
@@ -99,8 +97,7 @@ namespace CacheManager.Tests
             using (cache)
             {
                 cache.Clear();
-                // Thread.Sleep(1000);
-                // arrange
+                // Thread.Sleep(1000); arrange
                 List<Tuple<string, string, string>> keys;
                 List<string> regions;
 
@@ -149,7 +146,8 @@ namespace CacheManager.Tests
                 // act
                 AddRegionData(cache, itemsPerRegion, regionCount, true, out keys, out regions);
 
-                // lets find 5 random items and modify them, then store the modified keys to be able to assert correctly
+                // lets find 5 random items and modify them, then store the modified keys to be able
+                // to assert correctly
                 var modifiedKeys = new List<Tuple<string, string>>();
                 var rnd = new Random();
                 for (int i = 0; i < 5; i++)
@@ -201,7 +199,8 @@ namespace CacheManager.Tests
                 // act
                 AddRegionData(cache, itemsPerRegion, regionCount, true, out keys, out regions);
 
-                // lets find 5 random items and remove them, then store the removed keys to be able to assert correctly
+                // lets find 5 random items and remove them, then store the removed keys to be able
+                // to assert correctly
                 var removedKeys = new List<Tuple<string, string>>();
                 var rnd = new Random();
                 for (int i = 0; i < 5; i++)

@@ -13,43 +13,49 @@ namespace CacheManager.Tests
     [AttributeUsage(AttributeTargets.Method)]
     public class ReplaceCultureAttribute : Xunit.Sdk.BeforeAfterTestAttribute
     {
-        private CultureInfo _originalCulture;
-        private CultureInfo _originalUICulture;
+        private CultureInfo originalCulture;
+        private CultureInfo originalUICulture;
 
         public ReplaceCultureAttribute()
         {
-            Culture = "en-GB";
-            UICulture = "en-US";
+            this.Culture = "en-GB";
+            this.UICulture = "en-US";
         }
 
         /// <summary>
-        /// Sets <see cref="Thread.CurrentCulture"/> for the test. Defaults to en-GB.
+        /// Gets or sets <see cref="Thread.CurrentCulture" /> for the test. Defaults to en-GB.
         /// </summary>
+        /// <value>
+        /// The culture.
+        /// </value>
         /// <remarks>
-        /// en-GB is used here as the default because en-US is equivalent to the InvariantCulture. We
-        /// want to be able to find bugs where we're accidentally relying on the Invariant instead of the
-        /// user's culture.
+        /// <c>en-GB</c> is used here as the default because en-US is equivalent to the InvariantCulture.
+        /// We want to be able to find bugs where we're accidentally relying on the Invariant
+        /// instead of the user's culture.
         /// </remarks>
         public string Culture { get; set; }
 
         /// <summary>
-        /// Sets <see cref="Thread.CurrentUICulture"/> for the test. Defaults to en-US.
+        /// Gets or sets <see cref="Thread.CurrentUICulture" /> for the test. Defaults to en-US.
         /// </summary>
+        /// <value>
+        /// The UI culture.
+        /// </value>
         public string UICulture { get; set; }
 
         public override void Before(MethodInfo methodUnderTest)
         {
-            _originalCulture = Thread.CurrentThread.CurrentCulture;
-            _originalUICulture = Thread.CurrentThread.CurrentUICulture;
+            this.originalCulture = Thread.CurrentThread.CurrentCulture;
+            this.originalUICulture = Thread.CurrentThread.CurrentUICulture;
 
-            Thread.CurrentThread.CurrentCulture = CultureInfo.GetCultureInfo(Culture);
-            Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(UICulture);
+            Thread.CurrentThread.CurrentCulture = CultureInfo.GetCultureInfo(this.Culture);
+            Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(this.UICulture);
         }
 
         public override void After(MethodInfo methodUnderTest)
         {
-            Thread.CurrentThread.CurrentCulture = _originalCulture;
-            Thread.CurrentThread.CurrentUICulture = _originalUICulture;
+            Thread.CurrentThread.CurrentCulture = this.originalCulture;
+            Thread.CurrentThread.CurrentUICulture = this.originalUICulture;
         }
     }
 }

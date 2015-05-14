@@ -9,9 +9,6 @@ using Xunit;
 
 namespace CacheManager.Tests
 {
-    /// <summary>
-    ///
-    /// </summary>
     [ExcludeFromCodeCoverage]
 #if NET40
     [Trait("Framework", "NET40")]
@@ -20,53 +17,6 @@ namespace CacheManager.Tests
 #endif
     public class CacheManagerEventsTest : BaseCacheManagerTest
     {
-        private class EventCallbackData
-        {
-            public EventCallbackData()
-            {
-                Keys = new List<string>();
-                Regions = new List<string>();
-                Results = new List<UpdateItemResult>();
-            }
-
-            internal void AddCall(CacheActionEventArgs args)
-            {
-                this.Calls++;
-                this.Keys.Add(args.Key);
-                this.Regions.Add(args.Region);
-            }
-
-            internal void AddCall(CacheUpdateEventArgs args)
-            {
-                this.Calls++;
-                this.Keys.Add(args.Key);
-                this.Regions.Add(args.Region);
-                this.Results.Add(args.Result);
-            }
-
-            internal void AddCall(CacheClearRegionEventArgs args)
-            {
-                this.Calls++;
-                this.Keys.Add(null);
-                this.Regions.Add(args.Region);
-            }
-
-            internal void AddCall(CacheClearEventArgs args)
-            {
-                this.Calls++;
-                this.Keys.Add(null);
-                this.Regions.Add(null);
-            }
-
-            public int Calls { get; set; }
-
-            public List<string> Keys { get; set; }
-
-            public List<string> Regions { get; set; }
-
-            public List<UpdateItemResult> Results { get; set; }
-        }
-
         [Fact]
         [ReplaceCulture]
         public void CacheManager_Events_CacheActionEventArgsCtor()
@@ -101,8 +51,7 @@ namespace CacheManager.Tests
         [Fact]
         public void CacheManager_Events_CacheClearEventArgsCtor()
         {
-            // arrange
-            // act
+            // arrange act
             Action act = () => new CacheClearEventArgs();
 
             // assert
@@ -151,8 +100,7 @@ namespace CacheManager.Tests
                 cache.OnGet += (sender, args) => data.AddCall(args);
                 cache.Add("key1", "something");
 
-                // act
-                // get without region, should not return anything and should not trigger the event
+                // act get without region, should not return anything and should not trigger the event
                 var result = cache.Get("key1");
                 var resultWithRegion = cache.Get("key1", "region");
 
@@ -178,8 +126,7 @@ namespace CacheManager.Tests
                 cache.OnGet += (sender, args) => data.AddCall(args);
                 cache.Add("key1", "something", "region");
 
-                // act
-                // get without region, should not return anything and should not trigger the event
+                // act get without region, should not return anything and should not trigger the event
                 var resultWithoutRegion = cache.Get("key1");
                 var result = cache.Get("key1", "region");
 
@@ -234,8 +181,7 @@ namespace CacheManager.Tests
                 cache.OnGet += (sender, args) => data.AddCall(args);
                 cache.Add("key1", "something", "region");
 
-                // act
-                // get without region, should not return anything and should not trigger the event
+                // act get without region, should not return anything and should not trigger the event
                 var result = cache.Get("key1", "region");
 
                 // assert
@@ -247,11 +193,12 @@ namespace CacheManager.Tests
         }
 
         /// <summary>
-        /// Validates that many event subscriptions all get called
-        /// Validates that remove misses do not trigger
-        /// Validates that other events do not trigger
-        /// Validates that it works with and without region
+        /// Validates that many event subscriptions all get called Validates that remove misses do
+        /// not trigger Validates that other events do not trigger Validates that it works with and
+        /// without region.
         /// </summary>
+        /// <typeparam name="T">The cache type.</typeparam>
+        /// <param name="cache">The cache instance.</param>
         [Theory]
         [MemberData("GetCacheManagers")]
         [ReplaceCulture]
@@ -271,8 +218,7 @@ namespace CacheManager.Tests
                 cache.Add("key1", "something", "region");
                 cache.Add("key2", "something", "region2");
 
-                // act
-                // get without region, should not return anything and should not trigger the event
+                // act get without region, should not return anything and should not trigger the event
                 var r1 = cache.Remove("key1");              // false
                 var r2 = cache.Remove("key1", "region");    // true
                 var r3 = cache.Remove("key2", "region3");   // false
@@ -295,11 +241,12 @@ namespace CacheManager.Tests
         }
 
         /// <summary>
-        /// Validates that many event subscriptions all get called
-        /// Validates that add misses do not trigger
-        /// Validates that other events do not trigger
-        /// Validates that it works with and without region
+        /// Validates that many event subscriptions all get called Validates that add misses do not
+        /// trigger Validates that other events do not trigger Validates that it works with and
+        /// without region.
         /// </summary>
+        /// <typeparam name="T">The cache type.</typeparam>
+        /// <param name="cache">The cache instance.</param>
         [Theory]
         [MemberData("GetCacheManagers")]
         [ReplaceCulture]
@@ -317,8 +264,7 @@ namespace CacheManager.Tests
                 cache.OnGet += (sender, args) => data.AddCall(args);  // this should not trigger
                 cache.OnRemove += (sender, args) => data.AddCall(args);  // this should not trigger
 
-                // act
-                // get without region, should not return anything and should not trigger the event
+                // act get without region, should not return anything and should not trigger the event
                 var r1 = cache.Add("key1", "something", "region");  // true
                 var r2 = cache.Add("key2", "something", "region2"); // true
                 var r3 = cache.Add("key1", "something", "region");  // false
@@ -340,8 +286,8 @@ namespace CacheManager.Tests
                     "we expect 9 hits");
 
                 data.Regions.ShouldAllBeEquivalentTo(
-                    Enumerable.Repeat("region", 3)              // 3 times region
-                        .Concat(Enumerable.Repeat("region2", 3))// 3 times region2
+                    Enumerable.Repeat("region", 3)                      // 3 times region
+                        .Concat(Enumerable.Repeat("region2", 3))        // 3 times region2
                         .Concat(Enumerable.Repeat((string)null, 3)),    // 3 times no region
                     cfg => cfg.WithStrictOrdering(),
                     "we expect 9 hits");
@@ -349,10 +295,11 @@ namespace CacheManager.Tests
         }
 
         /// <summary>
-        /// Validates that many event subscriptions all get called
-        /// Validates that other events do not trigger
-        /// Validates that it works with and without region
+        /// Validates that many event subscriptions all get called Validates that other events do
+        /// not trigger Validates that it works with and without region.
         /// </summary>
+        /// <typeparam name="T">The cache type.</typeparam>
+        /// <param name="cache">The cache instance.</param>
         [Theory]
         [MemberData("GetCacheManagers")]
         [ReplaceCulture]
@@ -371,15 +318,13 @@ namespace CacheManager.Tests
                 cache.OnGet += (sender, args) => data.AddCall(args);  // this should not trigger
                 cache.OnRemove += (sender, args) => data.AddCall(args);  // this should not trigger
 
-                // act
-                // get without region, should not return anything and should not trigger the event
+                // act get without region, should not return anything and should not trigger the event
                 cache.Put("key1", "something", "region");
                 cache.Put("key2", "something", "region2");
                 cache.Put("key1", "something", "region");
                 cache.Put("key1", "something");
 
-                // assert
-                // 4x Put calls x 3 event handles = 12 calls
+                // assert 4x Put calls x 3 event handles = 12 calls
                 data.Calls.Should().Be(12, "we expect 12 hits");
                 data.Keys.ShouldAllBeEquivalentTo(
                     Enumerable.Repeat("key1", 3)
@@ -389,20 +334,21 @@ namespace CacheManager.Tests
                     "we expect 12 hits");
 
                 data.Regions.ShouldAllBeEquivalentTo(
-                    Enumerable.Repeat("region", 3)                  // 3 times region
-                        .Concat(Enumerable.Repeat("region2", 3))    // 3 times region2
-                        .Concat(Enumerable.Repeat("region", 3))     // 3 times region
-                        .Concat(Enumerable.Repeat((string)null, 3)),// 3 times no region
+                    Enumerable.Repeat("region", 3)                      // 3 times region
+                        .Concat(Enumerable.Repeat("region2", 3))        // 3 times region2
+                        .Concat(Enumerable.Repeat("region", 3))         // 3 times region
+                        .Concat(Enumerable.Repeat((string)null, 3)),    // 3 times no region
                     cfg => cfg.WithStrictOrdering(),
                     "we expect 12 hits");
             }
         }
 
         /// <summary>
-        /// Validates that many event subscriptions all get called
-        /// Validates that other events do not trigger
-        /// Validates that it works with and without region
+        /// Validates that many event subscriptions all get called Validates that other events do
+        /// not trigger Validates that it works with and without region.
         /// </summary>
+        /// <typeparam name="T">The cache type.</typeparam>
+        /// <param name="cache">The cache instance.</param>
         [Theory]
         [MemberData("GetCacheManagers")]
         [ReplaceCulture]
@@ -421,8 +367,7 @@ namespace CacheManager.Tests
                 cache.OnGet += (sender, args) => data.AddCall(args);    // this should not trigger
                 cache.OnRemove += (sender, args) => data.AddCall(args);  // this should not trigger
 
-                // act
-                // get without region, should not return anything and should not trigger the event
+                // act get without region, should not return anything and should not trigger the event
                 cache.Add("key1", 1, "region");
                 cache.Add("key2", 1, "region2");
                 cache.Add("key1", 1);
@@ -431,8 +376,7 @@ namespace CacheManager.Tests
                 cache.Update("key2", "region2", o => ((int)o) + 1);
                 cache.Update("key1", o => ((int)o) + 1);
 
-                // assert
-                // 4x Put calls x 3 event handles = 12 calls
+                // assert 4x Put calls x 3 event handles = 12 calls
                 data.Calls.Should().Be(6, "we expect 6 hits");
                 data.Keys.ShouldAllBeEquivalentTo(
                     new string[] { "key1", "key2", "key1", "key1", "key2", "key1" },
@@ -451,10 +395,11 @@ namespace CacheManager.Tests
         }
 
         /// <summary>
-        /// Validates that many event subscriptions all get called
-        /// Validates that other events do not trigger
-        /// Validates that it works with and without region
+        /// Validates that many event subscriptions all get called Validates that other events do
+        /// not trigger Validates that it works with and without region.
         /// </summary>
+        /// <typeparam name="T">The cache type.</typeparam>
+        /// <param name="cache">The cache instance.</param>
         [Theory]
         [MemberData("GetCacheManagers")]
         [ReplaceCulture]
@@ -477,13 +422,11 @@ namespace CacheManager.Tests
                 cache.Put("key1", "something", "region");
                 cache.Put("key1", "something");
 
-                // act
-                // get without region, should not return anything and should not trigger the event
+                // act get without region, should not return anything and should not trigger the event
                 cache.ClearRegion("region");
                 cache.ClearRegion("region2");
 
-                // assert
-                // 2x calls x 3 event handles = 6 calls
+                // assert 2x calls x 3 event handles = 6 calls
                 data.Calls.Should().Be(6, "we expect 6 hits");
                 data.Keys.ShouldAllBeEquivalentTo(
                     Enumerable.Repeat((string)null, 6),
@@ -498,10 +441,11 @@ namespace CacheManager.Tests
         }
 
         /// <summary>
-        /// Validates that many event subscriptions all get called
-        /// Validates that other events do not trigger
-        /// Validates that it works with and without region
+        /// Validates that many event subscriptions all get called Validates that other events do
+        /// not trigger Validates that it works with and without region.
         /// </summary>
+        /// <typeparam name="T">The cache type.</typeparam>
+        /// <param name="cache">The cache instance.</param>
         [Theory]
         [MemberData("GetCacheManagers")]
         [ReplaceCulture]
@@ -524,13 +468,11 @@ namespace CacheManager.Tests
                 cache.Put("key1", "something", "region");
                 cache.Put("key1", "something");
 
-                // act
-                // get without region, should not return anything and should not trigger the event
+                // act get without region, should not return anything and should not trigger the event
                 cache.Clear();
                 cache.Clear();
 
-                // assert
-                // 2x calls x 3 event handles = 6 calls
+                // assert 2x calls x 3 event handles = 6 calls
                 data.Calls.Should().Be(6, "we expect 6 hits");
                 data.Keys.ShouldAllBeEquivalentTo(
                     Enumerable.Repeat((string)null, 6),
@@ -539,6 +481,53 @@ namespace CacheManager.Tests
                 data.Regions.ShouldAllBeEquivalentTo(
                     Enumerable.Repeat((string)null, 6),
                     "we expect 6 hits");
+            }
+        }
+
+        private class EventCallbackData
+        {
+            public EventCallbackData()
+            {
+                this.Keys = new List<string>();
+                this.Regions = new List<string>();
+                this.Results = new List<UpdateItemResult>();
+            }
+
+            public int Calls { get; set; }
+
+            public List<string> Keys { get; set; }
+
+            public List<string> Regions { get; set; }
+
+            public List<UpdateItemResult> Results { get; set; }
+
+            internal void AddCall(CacheActionEventArgs args)
+            {
+                this.Calls++;
+                this.Keys.Add(args.Key);
+                this.Regions.Add(args.Region);
+            }
+
+            internal void AddCall(CacheUpdateEventArgs args)
+            {
+                this.Calls++;
+                this.Keys.Add(args.Key);
+                this.Regions.Add(args.Region);
+                this.Results.Add(args.Result);
+            }
+
+            internal void AddCall(CacheClearRegionEventArgs args)
+            {
+                this.Calls++;
+                this.Keys.Add(null);
+                this.Regions.Add(args.Region);
+            }
+
+            internal void AddCall(CacheClearEventArgs args)
+            {
+                this.Calls++;
+                this.Keys.Add(null);
+                this.Regions.Add(null);
             }
         }
     }

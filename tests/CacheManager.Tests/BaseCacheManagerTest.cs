@@ -3,19 +3,18 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using CacheManager.Core;
 using CacheManager.Core.Cache;
-using CacheManager.Core.Configuration;
-using Xunit;
+
 #if !NET40
+
 using Couchbase.Configuration.Client;
+
 #endif
 
 namespace CacheManager.Tests
 {
     /// <summary>
-    /// Provides some pre configured caches with different setups for testing.
-    /// <remarks>
-    /// Do not add NullCacheHandle to any of the config. Some tests expect a working implementation...
-    /// </remarks>
+    /// Provides some pre configured caches with different setups for testing. <remarks>Do not add
+    /// NullCacheHandle to any of the config. Some tests expect a working implementation...</remarks>
     /// </summary>
     [ExcludeFromCodeCoverage]
     public class BaseCacheManagerTest
@@ -68,7 +67,7 @@ namespace CacheManager.Tests
                             .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(10))
                         .And.WithHandle(typeof(DictionaryCacheHandle<>), "h3")
                             .EnableStatistics()
-                        .And.WithHandle(typeof(DictionaryCacheHandle<>),"h4")
+                        .And.WithHandle(typeof(DictionaryCacheHandle<>), "h4")
                             .EnableStatistics()
                             .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(10));
                 });
@@ -83,24 +82,24 @@ namespace CacheManager.Tests
                 {
                     settings
                         .WithUpdateMode(CacheUpdateMode.Up)
-                        .WithHandle(typeof(DictionaryCacheHandle<>),"h1")
+                        .WithHandle(typeof(DictionaryCacheHandle<>), "h1")
                             .EnableStatistics()
-                        .And.WithHandle(typeof(DictionaryCacheHandle<>),"h2")
+                        .And.WithHandle(typeof(DictionaryCacheHandle<>), "h2")
                             .EnableStatistics()
                             .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(10))
-                        .And.WithHandle(typeof(DictionaryCacheHandle<>),"h3")
+                        .And.WithHandle(typeof(DictionaryCacheHandle<>), "h3")
                             .EnableStatistics()
                             .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(20))
-                        .And.WithHandle(typeof(DictionaryCacheHandle<>),"h4")
+                        .And.WithHandle(typeof(DictionaryCacheHandle<>), "h4")
                             .EnableStatistics()
                             .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(10))
-                        .And.WithHandle(typeof(DictionaryCacheHandle<>),"h5")
+                        .And.WithHandle(typeof(DictionaryCacheHandle<>), "h5")
                             .EnableStatistics()
                             .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(20))
-                        .And.WithHandle(typeof(DictionaryCacheHandle<>),"h6")
+                        .And.WithHandle(typeof(DictionaryCacheHandle<>), "h6")
                             .EnableStatistics()
                             .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(10))
-                        .And.WithHandle(typeof(DictionaryCacheHandle<>),"h7")
+                        .And.WithHandle(typeof(DictionaryCacheHandle<>), "h7")
                             .EnableStatistics()
                             .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(20));
                 });
@@ -193,6 +192,7 @@ namespace CacheManager.Tests
         }
 
 #if !NET40
+
         public ICacheManager<object> WithCouchbaseMemcached
         {
             get
@@ -205,19 +205,21 @@ namespace CacheManager.Tests
                     },
                     UseSsl = false,
                     BucketConfigs = new Dictionary<string, BucketConfiguration>
-                      {
-                        {"default", new BucketConfiguration
+                    {
                         {
-                          BucketName = "default",
-                          UseSsl = false,
-                          PoolConfiguration = new PoolConfiguration
-                          {
-                            MaxSize = 10,
-                            MinSize = 5
-                          }
-                        }}
-                      }
-
+                            "default",
+                            new BucketConfiguration
+                            {
+                                BucketName = "default",
+                                UseSsl = false,
+                                PoolConfiguration = new PoolConfiguration
+                                {
+                                    MaxSize = 10,
+                                    MinSize = 5
+                                }
+                            }
+                        }
+                    }
                 };
 
                 var cache = CacheFactory.Build("myCache", settings =>
@@ -231,6 +233,7 @@ namespace CacheManager.Tests
                 return cache;
             }
         }
+
 #endif
 
         public static IEnumerable<object[]> GetCacheManagers()
@@ -242,12 +245,11 @@ namespace CacheManager.Tests
             yield return new object[] { data.WithMemoryAndDictionaryHandles };
             yield return new object[] { data.WithManyDictionaryHandles };
             yield return new object[] { data.WithTwoNamedMemoryCaches };
-            // yield return new object[] { data.WithRedisCache };
-            // yield return new object[] { data.WithSystemAndRedisCache };
-            // yield return new object[] { data.WithMemcached };
-            // yield return new object[] { data.WithCouchbaseMemcached };            
+            // yield return new object[] { data.WithRedisCache }; yield return new object[] {
+            // data.WithSystemAndRedisCache }; yield return new object[] { data.WithMemcached };
+            // yield return new object[] { data.WithCouchbaseMemcached };
         }
-        
+
         public static string GetCfgFileName(string fileName)
         {
             return AppDomain.CurrentDomain.BaseDirectory + (fileName.StartsWith("\\") ? fileName : "\\" + fileName);

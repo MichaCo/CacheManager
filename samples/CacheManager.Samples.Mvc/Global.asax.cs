@@ -21,7 +21,7 @@ namespace CacheManager.Samples.Mvc
 
             var container = new UnityContainer();
 
-            System.Web.Mvc.DependencyResolver.SetResolver((t)=>container.Resolve(t), (t)=> container.ResolveAll(t));
+            System.Web.Mvc.DependencyResolver.SetResolver((t) => container.Resolve(t), (t) => container.ResolveAll(t));
 
             var cache = CacheFactory.FromConfiguration<int>("myCache");
             container.RegisterInstance(cache);

@@ -3,16 +3,12 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using CacheManager.Core;
 using CacheManager.Core.Cache;
-using CacheManager.Core.Configuration;
 using CacheManager.Redis;
 using FluentAssertions;
 using Xunit;
 
 namespace CacheManager.Tests
 {
-    /// <summary>
-    ///
-    /// </summary>
     [ExcludeFromCodeCoverage]
 #if NET40
     [Trait("Framework", "NET40")]
@@ -21,7 +17,6 @@ namespace CacheManager.Tests
 #endif
     public class CacheFactoryTests
     {
-
         [Fact]
         [ReplaceCulture]
         public void CacheFactory_FromConfig_C()
@@ -117,7 +112,7 @@ namespace CacheManager.Tests
             Func<ICacheManager<string>> act = () => CacheFactory.Build<string>("stringCache", settings =>
             {
                 settings.WithUpdateMode(CacheUpdateMode.Full)
-                    .WithHandle(typeof(DictionaryCacheHandle<>),"h1")
+                    .WithHandle(typeof(DictionaryCacheHandle<>), "h1")
                     .DisablePerformanceCounters();
             });
 
@@ -134,7 +129,7 @@ namespace CacheManager.Tests
             Func<ICacheManager<string>> act = () => CacheFactory.Build<string>("stringCache", settings =>
             {
                 settings.WithUpdateMode(CacheUpdateMode.Full)
-                    .WithHandle(typeof(DictionaryCacheHandle<>),"h1")
+                    .WithHandle(typeof(DictionaryCacheHandle<>), "h1")
                     .DisableStatistics()            // disable it first
                     .EnablePerformanceCounters();   // should enable stats
             });
@@ -152,7 +147,7 @@ namespace CacheManager.Tests
             Func<ICacheManager<string>> act = () => CacheFactory.Build<string>("stringCache", settings =>
             {
                 settings.WithUpdateMode(CacheUpdateMode.Full)
-                    .WithHandle(typeof(DictionaryCacheHandle<>),"h1")
+                    .WithHandle(typeof(DictionaryCacheHandle<>), "h1")
                     .EnableStatistics();
             });
 
@@ -169,7 +164,7 @@ namespace CacheManager.Tests
             Func<ICacheManager<string>> act = () => CacheFactory.Build<string>("stringCache", settings =>
             {
                 settings.WithUpdateMode(CacheUpdateMode.Full)
-                    .WithHandle(typeof(DictionaryCacheHandle<>),"h1");
+                    .WithHandle(typeof(DictionaryCacheHandle<>), "h1");
             });
 
             // assert
@@ -185,7 +180,7 @@ namespace CacheManager.Tests
             Action act = () => CacheFactory.Build<string>("stringCache", settings =>
             {
                 settings.WithUpdateMode(CacheUpdateMode.Full)
-                    .WithHandle(typeof(DictionaryCacheHandle<>),"h1")
+                    .WithHandle(typeof(DictionaryCacheHandle<>), "h1")
                         .WithExpiration(ExpirationMode.Absolute, TimeSpan.Zero);
             });
 
@@ -223,13 +218,12 @@ namespace CacheManager.Tests
             act.ShouldThrow<InvalidOperationException>()
                 .WithMessage("Retry timeout must be greater*");
         }
-        
+
         [Fact]
         [ReplaceCulture]
         public void CacheFactory_Build_WithRedisBackPlateNoBackplateSource()
         {
-            // arrange
-            // act
+            // arrange act
             Action act = () => CacheFactory.Build<object>("cacheName", settings =>
             {
                 settings.WithRedisBackPlate("redis");
@@ -244,8 +238,7 @@ namespace CacheManager.Tests
         [ReplaceCulture]
         public void CacheFactory_Build_WithRedisBackPlateTooManyBackplateSources()
         {
-            // arrange
-            // act
+            // arrange act
             Action act = () => CacheFactory.Build<object>("cacheName", settings =>
             {
                 settings.WithRedisBackPlate("redis");
@@ -257,13 +250,12 @@ namespace CacheManager.Tests
             act.ShouldThrow<InvalidOperationException>()
                 .WithMessage("*Only one cache handle can be *");
         }
-        
+
         [Fact]
         [ReplaceCulture]
         public void CacheFactory_Build_WithRedisBackPlateNoRedisConfig()
         {
-            // arrange
-            // act
+            // arrange act
             Action act = () => CacheFactory.Build<object>("cacheName", settings =>
             {
                 settings.WithRedisBackPlate("redis");
@@ -279,11 +271,10 @@ namespace CacheManager.Tests
         [ReplaceCulture]
         public void CacheFactory_Build_WithRedisBackPlateNoName()
         {
-            // arrange
-            // act
+            // arrange act
             Action act = () => CacheFactory.Build<object>("cacheName", settings =>
             {
-                settings.WithRedisBackPlate("");                
+                settings.WithRedisBackPlate(string.Empty);
             });
 
             // assert
@@ -295,11 +286,10 @@ namespace CacheManager.Tests
         [ReplaceCulture]
         public void CacheFactory_Build_WithRedisConfigurationNoKeyA()
         {
-            // arrange
-            // act
+            // arrange act
             Action act = () => CacheFactory.Build<object>("cacheName", settings =>
             {
-                settings.WithRedisConfiguration("", "");
+                settings.WithRedisConfiguration(string.Empty, string.Empty);
             });
 
             // assert
@@ -311,11 +301,10 @@ namespace CacheManager.Tests
         [ReplaceCulture]
         public void CacheFactory_Build_WithRedisConfigurationNoKeyB()
         {
-            // arrange
-            // act
+            // arrange act
             Action act = () => CacheFactory.Build<object>("cacheName", settings =>
             {
-                settings.WithRedisConfiguration("", config => { });
+                settings.WithRedisConfiguration(string.Empty, config => { });
             });
 
             // assert
@@ -327,11 +316,10 @@ namespace CacheManager.Tests
         [ReplaceCulture]
         public void CacheFactory_Build_WithRedisConfigurationInvalidEndpoint()
         {
-            // arrange
-            // act
+            // arrange act
             Action act = () => CacheFactory.Build<object>("cacheName", settings =>
             {
-                settings.WithRedisConfiguration("redis", config => config.WithEndpoint("", 0));
+                settings.WithRedisConfiguration("redis", config => config.WithEndpoint(string.Empty, 0));
             });
 
             // assert
@@ -352,7 +340,7 @@ namespace CacheManager.Tests
             });
 
             var config = RedisConfigurations.GetConfiguration("redisWithConnectionString");
-            
+
             // assert
             config.ConnectionString.Should().Be(connection);
             config.Key.Should().Be("redisWithConnectionString");
@@ -362,8 +350,7 @@ namespace CacheManager.Tests
         [ReplaceCulture]
         public void CacheFactory_Build_WithRedisConfigurationValidateBuilder()
         {
-            // arrange
-            // act
+            // arrange act
             CacheFactory.Build<object>("cacheName", settings =>
             {
                 settings.WithRedisConfiguration("redisBuildUpConfiguration", config =>
@@ -407,13 +394,13 @@ namespace CacheManager.Tests
                     .WithMaxRetries(22)
                     .WithRetryTimeout(2223)
                     .WithUpdateMode(CacheUpdateMode.Full)
-                    .WithHandle(typeof(DictionaryCacheHandle<>),"h1")
+                    .WithHandle(typeof(DictionaryCacheHandle<>), "h1")
                         .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromHours(12))
                         .EnablePerformanceCounters()
-                    .And.WithHandle(typeof(DictionaryCacheHandle<>),"h2")
+                    .And.WithHandle(typeof(DictionaryCacheHandle<>), "h2")
                         .WithExpiration(ExpirationMode.None, TimeSpan.Zero)
                         .DisableStatistics()
-                    .And.WithHandle(typeof(DictionaryCacheHandle<>),"h3")
+                    .And.WithHandle(typeof(DictionaryCacheHandle<>), "h3")
                         .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(231))
                         .EnableStatistics();
             });

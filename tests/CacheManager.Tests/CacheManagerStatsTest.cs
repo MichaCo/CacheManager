@@ -7,9 +7,6 @@ using Xunit;
 
 namespace CacheManager.Tests
 {
-    /// <summary>
-    ///
-    /// </summary>
     [ExcludeFromCodeCoverage]
 #if NET40
     [Trait("Framework", "NET40")]
@@ -33,8 +30,7 @@ namespace CacheManager.Tests
                 var hits = cache.CacheHandles.Select(p => p.Stats.GetStatistic(CacheStatsCounterType.Hits));
                 var items = cache.CacheHandles.Select(p => p.Stats.GetStatistic(CacheStatsCounterType.Items));
 
-                // act
-                // get without region, should not return anything and should not trigger the event
+                // act get without region, should not return anything and should not trigger the event
                 var a1 = cache.Add("key1", "something");
                 var a2 = cache.Add("key1", "something"); // should not increase
 
@@ -53,8 +49,8 @@ namespace CacheManager.Tests
                 // each cachhandle stats should have one addCall increase
                 addCalls.ShouldAllBeEquivalentTo(Enumerable.Repeat(1, cache.CacheHandles.Count));
 
-                // we called get 3 times but only the first handle should have a stat increase!
-                // but we had one miss, so all handles have been called to retrieve the item
+                // we called get 3 times but only the first handle should have a stat increase! but
+                // we had one miss, so all handles have been called to retrieve the item
                 getCalls.ShouldAllBeEquivalentTo(
                     new[] { 3 }.Concat(Enumerable.Repeat(1, cache.CacheHandles.Count - 1)));
 
@@ -88,8 +84,7 @@ namespace CacheManager.Tests
                 cache.Clear();
                 cache.Clear();
 
-                // assert
-                // all handles should have 2 clear increases.
+                // assert all handles should have 2 clear increases.
                 clears.ShouldAllBeEquivalentTo(
                     Enumerable.Repeat(2, cache.CacheHandles.Count));
             }
@@ -114,8 +109,7 @@ namespace CacheManager.Tests
                 cache.Clear();  // should not trigger
                 cache.ClearRegion("region2");
 
-                // assert
-                // all handles should have 2 clearRegion increases.
+                // assert all handles should have 2 clearRegion increases.
                 clears.ShouldAllBeEquivalentTo(
                     Enumerable.Repeat(2, cache.CacheHandles.Count));
             }
@@ -137,8 +131,7 @@ namespace CacheManager.Tests
                 cache.Put("key2", "something");
                 cache.Put("key2", "something", "region");
 
-                // assert
-                // all handles should have 2 clearRegion increases.
+                // assert all handles should have 2 clearRegion increases.
                 puts.ShouldAllBeEquivalentTo(
                     Enumerable.Repeat(3, cache.CacheHandles.Count));
             }
@@ -213,7 +206,7 @@ namespace CacheManager.Tests
                     Enumerable.Repeat(2, cache.CacheHandles.Count));
             }
         }
-                
+
         [Theory]
         [MemberData("GetCacheManagers")]
         [ReplaceCulture]
@@ -227,12 +220,14 @@ namespace CacheManager.Tests
             using (cache)
             {
                 cache.Clear();
-                ThreadTestHelper.Run(() =>
-                {
-                    cache.Add("key1", "hi");
-
-                    cache.Put("key1", "changed");
-                }, threads, iterations);
+                ThreadTestHelper.Run(
+                    () =>
+                    {
+                        cache.Add("key1", "hi");
+                        cache.Put("key1", "changed");
+                    }, 
+                    threads, 
+                    iterations);
             }
 
             // item should have been added only once

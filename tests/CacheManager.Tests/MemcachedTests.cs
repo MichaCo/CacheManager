@@ -5,15 +5,11 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using CacheManager.Core;
-using CacheManager.Core.Configuration;
 using FluentAssertions;
 using Xunit;
 
 namespace CacheManager.Tests
 {
-    /// <summary>
-    /// To run the memcached test, run the bat files under /memcached before executing the tests!
-    /// </summary>
     [ExcludeFromCodeCoverage]
     public class MemcachedTests
     {
@@ -25,8 +21,7 @@ namespace CacheManager.Tests
 #endif
         public void Memcached_Ctor()
         {
-            // arrange
-            // act
+            // arrange act
             Action act = () => CacheFactory.Build<IAmNotSerializable>("myCache", settings =>
                             {
                                 settings.WithUpdateMode(CacheUpdateMode.Full)
@@ -44,7 +39,7 @@ namespace CacheManager.Tests
         public void Memcached_KeySizeLimit()
         {
             // arrange
-            var longKey = string.Join("", Enumerable.Repeat("a", 300));
+            var longKey = string.Join(string.Empty, Enumerable.Repeat("a", 300));
 
             var item = new CacheItem<string>(longKey, "something");
             var cache = CacheFactory.Build<string>("myCache", settings =>
@@ -72,7 +67,7 @@ namespace CacheManager.Tests
         public void Memcached_KeySizeLimit_WithRegion()
         {
             // arrange
-            var longKey = string.Join("", Enumerable.Repeat("a", 300));
+            var longKey = string.Join(string.Empty, Enumerable.Repeat("a", 300));
 
             var item = new CacheItem<string>(longKey, "something", "someRegion");
             var cache = CacheFactory.Build<string>("myCache", settings =>
@@ -160,7 +155,9 @@ namespace CacheManager.Tests
 
                         cache.Put("myCounter", val);
                     }
-                }, numThreads, iterations);
+                }, 
+                numThreads, 
+                iterations);
 
                 // assert
                 Thread.Sleep(10);
@@ -205,7 +202,9 @@ namespace CacheManager.Tests
                             return value;
                         }, new UpdateItemConfig(50, VersionConflictHandling.EvictItemFromOtherCaches));
                     }
-                }, numThreads, iterations);
+                }, 
+                numThreads, 
+                iterations);
 
                 // assert
                 Thread.Sleep(10);
@@ -225,9 +224,6 @@ namespace CacheManager.Tests
             using (var cache = CacheFactory.Build<RaceConditionTestElement>("myCache", settings =>
             {
                 settings.WithUpdateMode(CacheUpdateMode.Full)
-                    //.WithHandle<MemoryCacheHandle<RaceConditionTestElement>>("default")
-                    //    .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1))
-                    //.And
                     .WithMemcachedCacheHandle("default")
                         .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMinutes(10));
             }))
@@ -246,14 +242,19 @@ namespace CacheManager.Tests
                 {
                     for (int i = 0; i < numInnerIterations; i++)
                     {
-                        cache.Update(key, region, (value) =>
-                        {
-                            value.Counter++;
-                            Interlocked.Increment(ref countCasModifyCalls);
-                            return value;
-                        });
+                        cache.Update(
+                            key, 
+                            region, 
+                            (value) =>
+                            {
+                                value.Counter++;
+                                Interlocked.Increment(ref countCasModifyCalls);
+                                return value;
+                            });
                     }
-                }, numThreads, iterations);
+                }, 
+                numThreads, 
+                iterations);
 
                 // assert
                 Thread.Sleep(10);
@@ -297,16 +298,18 @@ namespace CacheManager.Tests
                             return value;
                         }, new UpdateItemConfig(retries, VersionConflictHandling.EvictItemFromOtherCaches));
                     }
-                }, numThreads, iterations);
+                }, 
+                numThreads, 
+                iterations);
 
                 // assert
                 Thread.Sleep(10);
                 var result = cache.Get("myCounter");
                 result.Should().NotBeNull();
                 Trace.TraceInformation("Counter increased to " + result.Counter + " cas calls needed " + countCasModifyCalls);
-                result.Counter.Should().BeLessThan(numThreads * numInnerIterations * iterations, 
+                result.Counter.Should().BeLessThan(numThreads * numInnerIterations * iterations,
                     "counter should NOT be exactly the expected value");
-                countCasModifyCalls.Should().Be(numThreads * numInnerIterations * iterations, 
+                countCasModifyCalls.Should().Be(numThreads * numInnerIterations * iterations,
                     "with one try, we exactly one update call per iteration");
             }
         }
@@ -331,7 +334,7 @@ namespace CacheManager.Tests
             }
         }
     }
-    
+
     [Serializable]
     [ExcludeFromCodeCoverage]
     public class RaceConditionTestElement
@@ -346,6 +349,5 @@ namespace CacheManager.Tests
     [ExcludeFromCodeCoverage]
     public class IAmNotSerializable
     {
-
     }
 }

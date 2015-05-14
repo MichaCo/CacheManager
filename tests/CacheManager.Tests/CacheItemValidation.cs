@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using CacheManager.Core;
-using CacheManager.Core.Configuration;
 using FluentAssertions;
 using Xunit;
 

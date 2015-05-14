@@ -115,8 +115,8 @@ namespace CacheManager.Tests
         }
 
         /// <summary>
-        /// Expecting not defined enableStats and enablePerformanceCounters in config.
-        /// And validating the default fall back to stats = true and performanceCounters = false.
+        /// Expecting not defined enableStats and enablePerformanceCounters in config. And
+        /// validating the default fall back to stats = true and performanceCounters = false.
         /// </summary>
         [Fact]
         public void Cfg_Valid_CfgFile_EnabledStatsPerformanceCountersDefaults()
