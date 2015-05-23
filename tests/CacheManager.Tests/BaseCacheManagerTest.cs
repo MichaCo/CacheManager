@@ -197,7 +197,7 @@ namespace CacheManager.Tests
                 {
                     Servers = new List<Uri>()
                     {
-                        new Uri("http://192.168.178.27:8091/pools")
+                        new Uri("http://127.0.0.1:8091/pools")
                     },
                     UseSsl = false,
                     BucketConfigs = new Dictionary<string, BucketConfiguration>
