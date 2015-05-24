@@ -58,7 +58,11 @@ namespace CacheManager.Core.Cache
             this.InitializeCounters();
             this.stats = stats;
             this.statsCounts = new long[NumStatsCounters];
-            this.counterTimer = new Timer(new TimerCallback(this.PerformanceCounterWorker), null, 450L, 450L);
+
+            if (this.enabled)
+            {
+                this.counterTimer = new Timer(new TimerCallback(this.PerformanceCounterWorker), null, 450L, 450L);
+            }
         }
 
         ~CachePerformanceCounters()
@@ -172,6 +176,11 @@ namespace CacheManager.Core.Cache
                 try
                 {
                     this.ResetCounters();
+                    
+                    if (this.counterTimer != null)
+                    {
+                        this.counterTimer.Dispose();
+                    }
                 }
                 catch
                 {
@@ -193,22 +202,29 @@ namespace CacheManager.Core.Cache
 
         private void InitializeCounters()
         {
-            InitializeCategory();
+            try
+            {
+                InitializeCategory();
 
-            this.counters = new PerformanceCounter[9];
-            this.counters[0] = new PerformanceCounter(Category, Entries, this.instanceName, false);
-            this.counters[1] = new PerformanceCounter(Category, HitRatio, this.instanceName, false);
-            this.counters[2] = new PerformanceCounter(Category, HitRatioBase, this.instanceName, false);
-            this.counters[3] = new PerformanceCounter(Category, Hits, this.instanceName, false);
-            this.counters[4] = new PerformanceCounter(Category, Misses, this.instanceName, false);
-            this.counters[5] = new PerformanceCounter(Category, Writes, this.instanceName, false);
-            this.counters[6] = new PerformanceCounter(Category, ReadsPerSecond, this.instanceName, false);
-            this.counters[7] = new PerformanceCounter(Category, WritesPerSecond, this.instanceName, false);
-            this.counters[8] = new PerformanceCounter(Category, HitsPerSecond, this.instanceName, false);
+                this.counters = new PerformanceCounter[9];
+                this.counters[0] = new PerformanceCounter(Category, Entries, this.instanceName, false);
+                this.counters[1] = new PerformanceCounter(Category, HitRatio, this.instanceName, false);
+                this.counters[2] = new PerformanceCounter(Category, HitRatioBase, this.instanceName, false);
+                this.counters[3] = new PerformanceCounter(Category, Hits, this.instanceName, false);
+                this.counters[4] = new PerformanceCounter(Category, Misses, this.instanceName, false);
+                this.counters[5] = new PerformanceCounter(Category, Writes, this.instanceName, false);
+                this.counters[6] = new PerformanceCounter(Category, ReadsPerSecond, this.instanceName, false);
+                this.counters[7] = new PerformanceCounter(Category, WritesPerSecond, this.instanceName, false);
+                this.counters[8] = new PerformanceCounter(Category, HitsPerSecond, this.instanceName, false);
 
-            // resetting them cleans up previous runs on the same category, which will otherwise
-            // stay in perfmon forever
-            this.ResetCounters();
+                // resetting them cleans up previous runs on the same category, which will otherwise
+                // stay in perfmon forever
+                this.ResetCounters();
+            }
+            catch
+            {
+                this.enabled = false;
+            }
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "Is just fine at that point.")]
