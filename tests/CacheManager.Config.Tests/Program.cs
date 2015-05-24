@@ -58,7 +58,7 @@ namespace CacheManager.Config.Tests
 
                 for (int i = 0; i < numItems; i++)
                 {
-                    string intVal = cache.Get(keyGet(i));
+                    string val = cache.Get(keyGet(i));
                 }
 
                 Thread.Yield();
@@ -86,6 +86,9 @@ namespace CacheManager.Config.Tests
                 eventAddCount,
                 eventGetCount,
                 eventRemoveCount));
+
+            cache.Clear();
+            cache.Dispose();
         }
 
         public static void SimpleAddGetTest(params ICacheManager<object>[] caches)
@@ -102,7 +105,11 @@ namespace CacheManager.Config.Tests
             {
                 for (var ta = 0; ta < items; ta++)
                 {
-                    cache.Add(key + ta, "val" + ta);
+                    var value = cache.AddOrUpdate(key + ta, "val" + ta, (v) => "val" + ta);
+                    if (value == null)
+                    {
+                        throw new InvalidOperationException("really?");
+                    }
                 }
 
                 for (var t = 0; t < threads; t++)
@@ -119,9 +126,14 @@ namespace CacheManager.Config.Tests
                         Console.Write(".");
                     }
 
-                    cache.Update("key" + rand.Next(0, items - 1), v => "222");
+                    object value;
+                    if (!cache.TryUpdate("key" + rand.Next(0, items - 1), v => "222", out value))
+                    {
+                        throw new InvalidOperationException("really?");
+                    }
                 }
 
+                cache.Clear();
                 cache.Dispose();
             }
 
@@ -131,7 +143,7 @@ namespace CacheManager.Config.Tests
         }
 
         private static void Main()
-       { 
+        {
             var swatch = Stopwatch.StartNew();
             int iterations = int.MaxValue;
             swatch.Restart();
@@ -140,10 +152,10 @@ namespace CacheManager.Config.Tests
                 cfg.WithUpdateMode(CacheUpdateMode.Up);
 
                 cfg.WithSystemRuntimeCacheHandle("default")
-                    .EnableStatistics();
+                    .EnablePerformanceCounters();
 
                 cfg.WithRedisCacheHandle("redis", true)
-                    .EnableStatistics();
+                    .EnablePerformanceCounters();
 
                 cfg.WithRedisBackPlate("redis");
 
@@ -159,7 +171,7 @@ namespace CacheManager.Config.Tests
             for (int i = 0; i < iterations; i++)
             {
                 CacheThreadTest(
-                    CacheFactory.FromConfiguration<string>("cache", cacheConfiguration), 
+                    CacheFactory.FromConfiguration<string>("cache", cacheConfiguration),
                     i + 10);
 
                 SimpleAddGetTest(

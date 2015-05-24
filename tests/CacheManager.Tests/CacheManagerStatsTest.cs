@@ -76,8 +76,8 @@ namespace CacheManager.Tests
                 cache.Clear();
                 // arrange
                 var clears = cache.CacheHandles.Select(p => p.Stats.GetStatistic(CacheStatsCounterType.ClearCalls));
-                var a1 = cache.Add("key1", "something");
-                var a2 = cache.Add("key2", "something");
+                cache.Add("key1", "something");
+                cache.Add("key2", "something");
 
                 // act
                 cache.ClearRegion("region"); // should not trigger
@@ -100,9 +100,9 @@ namespace CacheManager.Tests
                 cache.Clear();
                 // arrange
                 var clears = cache.CacheHandles.Select(p => p.Stats.GetStatistic(CacheStatsCounterType.ClearRegionCalls));
-                var a1 = cache.Add("key1", "something");
-                var a2 = cache.Add("key2", "something");
-                var a3 = cache.Add("key2", "something", "region");
+                cache.Add("key1", "something");
+                cache.Add("key2", "something");
+                cache.Add("key2", "something", "region");
 
                 // act
                 cache.ClearRegion("region");

@@ -83,9 +83,9 @@ namespace CacheManager.Core.Cache
         /// If the cache does not use a distributed cache system. Update is doing exactly the same
         /// as Get plus Put.
         /// </remarks>
-        public override UpdateItemResult Update(string key, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config)
+        public override UpdateItemResult<TCacheValue> Update(string key, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config)
         {
-            return base.Update(key, updateValue, config);
+            return this.UpdateInternal(key, null, updateValue, config);
         }
 
         /// <summary>
@@ -113,41 +113,9 @@ namespace CacheManager.Core.Cache
         /// If the cache does not use a distributed cache system. Update is doing exactly the same
         /// as Get plus Put.
         /// </remarks>
-        public override UpdateItemResult Update(string key, string region, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config)
+        public override UpdateItemResult<TCacheValue> Update(string key, string region, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config)
         {
-            if (updateValue == null)
-            {
-                throw new ArgumentNullException("updateValue");
-            }
-
-            if (config == null)
-            {
-                throw new ArgumentNullException("config");
-            }
-
-            var retries = 0;
-            do
-            {
-                var fullKey = GetKey(key, region);
-                var item = this.GetCacheItemInternal(key, region);
-                if (item == null)
-                {
-                    break;
-                }
-
-                var newValue = updateValue(item.Value);
-                var newItem = item.WithValue(newValue);
-
-                if (this.cache.TryUpdate(fullKey, newItem, item))
-                {
-                    return new UpdateItemResult(retries > 0, true, retries);
-                }
-
-                retries++;
-            }
-            while (retries <= config.MaxRetries);
-
-            return new UpdateItemResult(retries > 0, false, retries);
+            return this.UpdateInternal(key, region, updateValue, config);
         }
 
         /// <summary>
@@ -258,6 +226,43 @@ namespace CacheManager.Core.Cache
             }
 
             return string.Concat(region, ":", key);
+        }
+
+        private UpdateItemResult<TCacheValue> UpdateInternal(string key, string region, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config)
+        {
+            if (updateValue == null)
+            {
+                throw new ArgumentNullException("updateValue");
+            }
+
+            if (config == null)
+            {
+                throw new ArgumentNullException("config");
+            }
+
+            var retries = 0;
+            do
+            {
+                retries++;
+
+                var fullKey = GetKey(key, region);
+                var item = this.GetCacheItemInternal(key, region);
+                if (item == null)
+                {
+                    break;
+                }
+
+                var newValue = updateValue(item.Value);
+                var newItem = item.WithValue(newValue);
+
+                if (this.cache.TryUpdate(fullKey, newItem, item))
+                {
+                    return new UpdateItemResult<TCacheValue>(newItem.Value, retries > 1, true, retries);
+                }
+            }
+            while (retries <= config.MaxRetries);
+
+            return new UpdateItemResult<TCacheValue>(default(TCacheValue), retries > 0, false, retries);
         }
     }
 }

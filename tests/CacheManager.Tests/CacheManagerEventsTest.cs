@@ -389,7 +389,7 @@ namespace CacheManager.Tests
                     "we expect 12 hits");
 
                 data.Results.ShouldAllBeEquivalentTo(
-                    Enumerable.Repeat(new UpdateItemResult(false, true, 1), 3),
+                    Enumerable.Repeat(new UpdateItemResult<object>(2, false, true, 1), 3),
                     "we expect exactly 3 update results with the same results");
             }
         }
@@ -490,7 +490,7 @@ namespace CacheManager.Tests
             {
                 this.Keys = new List<string>();
                 this.Regions = new List<string>();
-                this.Results = new List<UpdateItemResult>();
+                this.Results = new List<UpdateItemResult<object>>();
             }
 
             public int Calls { get; set; }
@@ -499,7 +499,7 @@ namespace CacheManager.Tests
 
             public List<string> Regions { get; set; }
 
-            public List<UpdateItemResult> Results { get; set; }
+            public List<UpdateItemResult<object>> Results { get; set; }
 
             internal void AddCall(CacheActionEventArgs args)
             {
@@ -508,7 +508,7 @@ namespace CacheManager.Tests
                 this.Regions.Add(args.Region);
             }
 
-            internal void AddCall(CacheUpdateEventArgs args)
+            internal void AddCall(CacheUpdateEventArgs<object> args)
             {
                 this.Calls++;
                 this.Keys.Add(args.Key);

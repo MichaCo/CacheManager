@@ -18,18 +18,18 @@ namespace CacheManager.Core.Cache
     /// The class is primarily used internally. Only the GetStatistics is visible. Therefore the
     /// class is sealed.
     /// </remarks>
-    /// <typeparam name="T">Inherited object type of the owning cache handle.</typeparam>
-    public sealed class CacheStats<T> : IDisposable
+    /// <typeparam name="TCacheValue">Inherited object type of the owning cache handle.</typeparam>
+    public sealed class CacheStats<TCacheValue> : IDisposable
     {
         private static readonly string NullRegionKey = Guid.NewGuid().ToString();
         private readonly ConcurrentDictionary<string, CacheStatsCounter> counters;
         private readonly bool isPerformanceCounterEnabled;
         private readonly bool isStatsEnabled;
         private readonly object lockObject;
-        private readonly CachePerformanceCounters<T> performanceCounters;
+        private readonly CachePerformanceCounters<TCacheValue> performanceCounters;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CacheStats{T}"/> class.
+        /// Initializes a new instance of the <see cref="CacheStats{TCacheValue}"/> class.
         /// </summary>
         /// <param name="cacheName">Name of the cache.</param>
         /// <param name="handleName">Name of the handle.</param>
@@ -64,12 +64,12 @@ namespace CacheManager.Core.Cache
 
             if (this.isPerformanceCounterEnabled)
             {
-                this.performanceCounters = new CachePerformanceCounters<T>(cacheName, handleName, this);
+                this.performanceCounters = new CachePerformanceCounters<TCacheValue>(cacheName, handleName, this);
             }
         }
 
         /// <summary>
-        /// Finalizes an instance of the <see cref="CacheStats{T}"/> class.
+        /// Finalizes an instance of the <see cref="CacheStats{TCacheValue}"/> class.
         /// </summary>
         ~CacheStats()
         {
@@ -197,7 +197,7 @@ namespace CacheManager.Core.Cache
         /// </summary>
         /// <param name="item">The item.</param>
         /// <exception cref="System.ArgumentNullException">If item is null.</exception>
-        public void OnAdd(CacheItem<T> item)
+        public void OnAdd(CacheItem<TCacheValue> item)
         {
             if (!this.isStatsEnabled)
             {
@@ -323,7 +323,7 @@ namespace CacheManager.Core.Cache
         /// <param name="item">The item.</param>
         /// <param name="itemAdded">If <c>true</c> the item didn't exist and has been added.</param>
         /// <exception cref="System.ArgumentNullException">If item is null.</exception>
-        public void OnPut(CacheItem<T> item, bool itemAdded)
+        public void OnPut(CacheItem<TCacheValue> item, bool itemAdded)
         {
             if (!this.isStatsEnabled)
             {
@@ -371,7 +371,7 @@ namespace CacheManager.Core.Cache
         /// <param name="region">The region.</param>
         /// <param name="result">The result.</param>
         /// <exception cref="System.ArgumentNullException">If key or result are null.</exception>
-        public void OnUpdate(string key, string region, UpdateItemResult result)
+        public void OnUpdate(string key, string region, UpdateItemResult<TCacheValue> result)
         {
             if (!this.isStatsEnabled)
             {
@@ -390,8 +390,8 @@ namespace CacheManager.Core.Cache
 
             foreach (var counter in this.GetWorkingCounters(region))
             {
-                counter.Add(CacheStatsCounterType.GetCalls, result.NumberOfRetriesNeeded);
-                counter.Add(CacheStatsCounterType.Hits, result.NumberOfRetriesNeeded);
+                counter.Add(CacheStatsCounterType.GetCalls, result.NumberOfTriesNeeded);
+                counter.Add(CacheStatsCounterType.Hits, result.NumberOfTriesNeeded);
                 counter.Increment(CacheStatsCounterType.PutCalls);
             }
         }

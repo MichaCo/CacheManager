@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using CacheManager.Core.Cache;
-using CacheManager.Core.Configuration;
 
 namespace CacheManager.Core
 {
@@ -48,14 +47,18 @@ namespace CacheManager.Core
         /// <summary>
         /// Occurs when an item was successfully updated.
         /// </summary>
-        event EventHandler<CacheUpdateEventArgs> OnUpdate;
+        event EventHandler<CacheUpdateEventArgs<TCacheValue>> OnUpdate;
+
+        /// <summary>
+        /// Gets the configuration.
+        /// </summary>
+        /// <value>The configuration.</value>
+        CacheManagerConfiguration Configuration { get; }
 
         /// <summary>
         /// Gets the cache name.
         /// </summary>
-        /// <value>
-        /// The cache name.
-        /// </value>
+        /// <value>The cache name.</value>
         string Name { get; }
 
         /// <summary>
@@ -69,22 +72,14 @@ namespace CacheManager.Core
 #if NET40
         ICollection<BaseCacheHandle<TCacheValue>> CacheHandles { get; }
 #else
+
         IReadOnlyCollection<BaseCacheHandle<TCacheValue>> CacheHandles { get; }
+
 #endif
-        /// <summary>
-        /// Gets the configuration.
-        /// </summary>
-        /// <value>The configuration.</value>
-        CacheManagerConfiguration Configuration { get; }
-
-        /////// <summary>
-        /////// Adds a cache handle to the cache manager instance.
-        /////// </summary>
-        /////// <param name="handle">The cache handle.</param>
-        ////void AddCacheHandle(ICacheHandle<TCacheValue> handle);
 
         /// <summary>
-        /// Updates an existing key in the cache.
+        /// Adds an item to the cache or, if the item already exists, updates the item using the
+        /// <paramref name="updateValue"/> function.
         /// <para>
         /// The cache manager will make sure the update will always happen on the most recent version.
         /// </para>
@@ -98,20 +93,28 @@ namespace CacheManager.Core
         /// recent value which is stored in cache.
         /// </para>
         /// </summary>
-        /// <remarks>
-        /// If the cache does not use a distributed cache system. Update is doing exactly the same
-        /// as Get plus Put.
-        /// </remarks>
         /// <param name="key">The key to update.</param>
-        /// <param name="updateValue">The function to perform the update.</param>
-        /// <returns><c>True</c> if the update operation was successfully, <c>False</c> otherwise.</returns>
+        /// <param name="addValue">
+        /// The value which should be added in case the item doesn't already exist.
+        /// </param>
+        /// <param name="updateValue">
+        /// The function to perform the update in case the item does already exist.
+        /// </param>
+        /// <returns>
+        /// The value which has been added or updated, or null, if the update was not successful.
+        /// </returns>
         /// <exception cref="System.ArgumentNullException">
         /// If <paramref name="key"/> or <paramref name="updateValue"/> are null.
         /// </exception>
-        bool Update(string key, Func<TCacheValue, TCacheValue> updateValue);
+        /// <remarks>
+        /// If the cache does not use a distributed cache system. Update is doing exactly the same
+        /// as Get plus Put.
+        /// </remarks>
+        TCacheValue AddOrUpdate(string key, TCacheValue addValue, Func<TCacheValue, TCacheValue> updateValue);
 
         /// <summary>
-        /// Updates an existing key in the cache.
+        /// Adds an item to the cache or, if the item already exists, updates the item using the
+        /// <paramref name="updateValue"/> function.
         /// <para>
         /// The cache manager will make sure the update will always happen on the most recent version.
         /// </para>
@@ -125,22 +128,30 @@ namespace CacheManager.Core
         /// recent value which is stored in cache.
         /// </para>
         /// </summary>
-        /// <remarks>
-        /// If the cache does not use a distributed cache system. Update is doing exactly the same
-        /// as Get plus Put.
-        /// </remarks>
         /// <param name="key">The key to update.</param>
         /// <param name="region">The region of the key to update.</param>
-        /// <param name="updateValue">The function to perform the update.</param>
-        /// <returns><c>True</c> if the update operation was successfully, <c>False</c> otherwise.</returns>
+        /// <param name="addValue">
+        /// The value which should be added in case the item doesn't already exist.
+        /// </param>
+        /// <param name="updateValue">
+        /// The function to perform the update in case the item does already exist.
+        /// </param>
+        /// <returns>
+        /// The value which has been added or updated, or null, if the update was not successful.
+        /// </returns>
         /// <exception cref="System.ArgumentNullException">
         /// If <paramref name="key"/> or <paramref name="region"/> or <paramref name="updateValue"/>
         /// are null.
         /// </exception>
-        bool Update(string key, string region, Func<TCacheValue, TCacheValue> updateValue);
+        /// <remarks>
+        /// If the cache does not use a distributed cache system. Update is doing exactly the same
+        /// as Get plus Put.
+        /// </remarks>
+        TCacheValue AddOrUpdate(string key, string region, TCacheValue addValue, Func<TCacheValue, TCacheValue> updateValue);
 
         /// <summary>
-        /// Updates an existing key in the cache.
+        /// Adds an item to the cache or, if the item already exists, updates the item using the
+        /// <paramref name="updateValue"/> function.
         /// <para>
         /// The cache manager will make sure the update will always happen on the most recent version.
         /// </para>
@@ -154,19 +165,203 @@ namespace CacheManager.Core
         /// recent value which is stored in cache.
         /// </para>
         /// </summary>
-        /// <remarks>
-        /// If the cache does not use a distributed cache system. Update is doing exactly the same
-        /// as Get plus Put.
-        /// </remarks>
         /// <param name="key">The key to update.</param>
-        /// <param name="updateValue">The function to perform the update.</param>
+        /// <param name="addValue">
+        /// The value which should be added in case the item doesn't already exist.
+        /// </param>
+        /// <param name="updateValue">
+        /// The function to perform the update in case the item does already exist.
+        /// </param>
         /// <param name="config">The cache configuration used to specify the update behavior.</param>
-        /// <returns><c>True</c> if the update operation was successfully, <c>False</c> otherwise.</returns>
+        /// <returns>
+        /// The value which has been added or updated, or null, if the update was not successful.
+        /// </returns>
         /// <exception cref="System.ArgumentNullException">
         /// If <paramref name="key"/> or <paramref name="updateValue"/> or <paramref name="config"/>
         /// are null.
         /// </exception>
-        bool Update(string key, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config);
+        /// <remarks>
+        /// If the cache does not use a distributed cache system. Update is doing exactly the same
+        /// as Get plus Put.
+        /// </remarks>
+        TCacheValue AddOrUpdate(string key, TCacheValue addValue, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config);
+
+        /// <summary>
+        /// Adds an item to the cache or, if the item already exists, updates the item using the
+        /// <paramref name="updateValue"/> function.
+        /// <para>
+        /// The cache manager will make sure the update will always happen on the most recent version.
+        /// </para>
+        /// <para>
+        /// If version conflicts occur, if for example multiple cache clients try to write the same
+        /// key, and during the update process, someone else changed the value for the key, the
+        /// cache manager will retry the operation.
+        /// </para>
+        /// <para>
+        /// The <paramref name="updateValue"/> function will get invoked on each retry with the most
+        /// recent value which is stored in cache.
+        /// </para>
+        /// </summary>
+        /// <param name="key">The key to update.</param>
+        /// <param name="region">The region of the key to update.</param>
+        /// <param name="addValue">
+        /// The value which should be added in case the item doesn't already exist.
+        /// </param>
+        /// <param name="updateValue">
+        /// The function to perform the update in case the item does already exist.
+        /// </param>
+        /// <param name="config">The cache configuration used to specify the update behavior.</param>
+        /// <returns>
+        /// The value which has been added or updated, or null, if the update was not successful.
+        /// </returns>
+        /// <exception cref="System.ArgumentNullException">
+        /// If <paramref name="key"/> or <paramref name="region"/> or <paramref name="updateValue"/>
+        /// or <paramref name="config"/> are null.
+        /// </exception>
+        /// <remarks>
+        /// If the cache does not use a distributed cache system. Update is doing exactly the same
+        /// as Get plus Put.
+        /// </remarks>
+        TCacheValue AddOrUpdate(string key, string region, TCacheValue addValue, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config);
+
+        /// <summary>
+        /// Adds an item to the cache or, if the item already exists, updates the item using the
+        /// <paramref name="updateValue"/> function.
+        /// <para>
+        /// The cache manager will make sure the update will always happen on the most recent version.
+        /// </para>
+        /// <para>
+        /// If version conflicts occur, if for example multiple cache clients try to write the same
+        /// key, and during the update process, someone else changed the value for the key, the
+        /// cache manager will retry the operation.
+        /// </para>
+        /// <para>
+        /// The <paramref name="updateValue"/> function will get invoked on each retry with the most
+        /// recent value which is stored in cache.
+        /// </para>
+        /// </summary>
+        /// <param name="addItem">The item which should be added or updated.</param>
+        /// <param name="updateValue">The function to perform the update, if the item does exist.</param>
+        /// <returns>
+        /// The value which has been added or updated, or null, if the update was not successful.
+        /// </returns>
+        /// <exception cref="System.ArgumentNullException">
+        /// If <paramref name="addItem"/> or <paramref name="updateValue"/> are null.
+        /// </exception>
+        TCacheValue AddOrUpdate(CacheItem<TCacheValue> addItem, Func<TCacheValue, TCacheValue> updateValue);
+
+        /// <summary>
+        /// Adds an item to the cache or, if the item already exists, updates the item using the
+        /// <paramref name="updateValue"/> function.
+        /// <para>
+        /// The cache manager will make sure the update will always happen on the most recent version.
+        /// </para>
+        /// <para>
+        /// If version conflicts occur, if for example multiple cache clients try to write the same
+        /// key, and during the update process, someone else changed the value for the key, the
+        /// cache manager will retry the operation.
+        /// </para>
+        /// <para>
+        /// The <paramref name="updateValue"/> function will get invoked on each retry with the most
+        /// recent value which is stored in cache.
+        /// </para>
+        /// </summary>
+        /// <param name="addItem">The item which should be added or updated.</param>
+        /// <param name="updateValue">The function to perform the update, if the item does exist.</param>
+        /// <param name="config">The cache configuration used to specify the update behavior.</param>
+        /// <returns>
+        /// The value which has been added or updated, or null, if the update was not successful.
+        /// </returns>
+        /// <exception cref="System.ArgumentNullException">
+        /// If <paramref name="addItem"/> or <paramref name="updateValue"/> or
+        /// <paramref name="config"/> are null.
+        /// </exception>
+        TCacheValue AddOrUpdate(CacheItem<TCacheValue> addItem, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config);
+
+        /// <summary>
+        /// Updates an existing key in the cache.
+        /// <para>
+        /// The cache manager will make sure the update will always happen on the most recent version.
+        /// </para>
+        /// <para>
+        /// If version conflicts occur, if for example multiple cache clients try to write the same
+        /// key, and during the update process, someone else changed the value for the key, the
+        /// cache manager will retry the operation.
+        /// </para>
+        /// <para>
+        /// The <paramref name="updateValue"/> function will get invoked on each retry with the most
+        /// recent value which is stored in cache.
+        /// </para>
+        /// </summary>
+        /// <remarks>
+        /// If the cache does not use a distributed cache system. Update is doing exactly the same
+        /// as Get plus Put.
+        /// </remarks>
+        /// <param name="key">The key to update.</param>
+        /// <param name="updateValue">The function to perform the update.</param>
+        /// <returns>The updated value, or null, if the update was not successful.</returns>
+        /// <exception cref="System.ArgumentNullException">
+        /// If <paramref name="key"/> or <paramref name="updateValue"/> are null.
+        /// </exception>
+        TCacheValue Update(string key, Func<TCacheValue, TCacheValue> updateValue);
+
+        /// <summary>
+        /// Updates an existing key in the cache.
+        /// <para>
+        /// The cache manager will make sure the update will always happen on the most recent version.
+        /// </para>
+        /// <para>
+        /// If version conflicts occur, if for example multiple cache clients try to write the same
+        /// key, and during the update process, someone else changed the value for the key, the
+        /// cache manager will retry the operation.
+        /// </para>
+        /// <para>
+        /// The <paramref name="updateValue"/> function will get invoked on each retry with the most
+        /// recent value which is stored in cache.
+        /// </para>
+        /// </summary>
+        /// <remarks>
+        /// If the cache does not use a distributed cache system. Update is doing exactly the same
+        /// as Get plus Put.
+        /// </remarks>
+        /// <param name="key">The key to update.</param>
+        /// <param name="region">The region of the key to update.</param>
+        /// <param name="updateValue">The function to perform the update.</param>
+        /// <returns>The updated value, or null, if the update was not successful.</returns>
+        /// <exception cref="System.ArgumentNullException">
+        /// If <paramref name="key"/> or <paramref name="region"/> or <paramref name="updateValue"/>
+        /// are null.
+        /// </exception>
+        TCacheValue Update(string key, string region, Func<TCacheValue, TCacheValue> updateValue);
+
+        /// <summary>
+        /// Updates an existing key in the cache.
+        /// <para>
+        /// The cache manager will make sure the update will always happen on the most recent version.
+        /// </para>
+        /// <para>
+        /// If version conflicts occur, if for example multiple cache clients try to write the same
+        /// key, and during the update process, someone else changed the value for the key, the
+        /// cache manager will retry the operation.
+        /// </para>
+        /// <para>
+        /// The <paramref name="updateValue"/> function will get invoked on each retry with the most
+        /// recent value which is stored in cache.
+        /// </para>
+        /// </summary>
+        /// <remarks>
+        /// If the cache does not use a distributed cache system. Update is doing exactly the same
+        /// as Get plus Put.
+        /// </remarks>
+        /// <param name="key">The key to update.</param>
+        /// <param name="updateValue">The function to perform the update.</param>
+        /// <param name="config">The cache configuration used to specify the update behavior.</param>
+        /// <returns>The updated value, or null, if the update was not successful.</returns>
+        /// <exception cref="System.ArgumentNullException">
+        /// If <paramref name="key"/> or <paramref name="updateValue"/> or <paramref name="config"/>
+        /// are null.
+        /// </exception>
+        TCacheValue Update(string key, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config);
 
         /// <summary>
         /// Updates an existing key in the cache.
@@ -191,11 +386,130 @@ namespace CacheManager.Core
         /// <param name="region">The region of the key to update.</param>
         /// <param name="updateValue">The function to perform the update.</param>
         /// <param name="config">The cache configuration used to specify the update behavior.</param>
-        /// <returns><c>True</c> if the update operation was successfully, <c>False</c> otherwise.</returns>
+        /// <returns>The updated value, or null, if the update was not successful.</returns>
         /// <exception cref="System.ArgumentNullException">
         /// If <paramref name="key"/> or <paramref name="region"/> or <paramref name="updateValue"/>
         /// or <paramref name="config"/> are null.
         /// </exception>
-        bool Update(string key, string region, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config);
+        TCacheValue Update(string key, string region, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config);
+
+        /// <summary>
+        /// Tries to update an existing key in the cache.
+        /// <para>
+        /// The cache manager will make sure the update will always happen on the most recent version.
+        /// </para>
+        /// <para>
+        /// If version conflicts occur, if for example multiple cache clients try to write the same
+        /// key, and during the update process, someone else changed the value for the key, the
+        /// cache manager will retry the operation.
+        /// </para>
+        /// <para>
+        /// The <paramref name="updateValue"/> function will get invoked on each retry with the most
+        /// recent value which is stored in cache.
+        /// </para>
+        /// </summary>
+        /// <param name="key">The key to update.</param>
+        /// <param name="updateValue">The function to perform the update.</param>
+        /// <param name="value">The updated value, or null, if the update was not successful.</param>
+        /// <returns><c>True</c> if the update operation was successful, <c>False</c> otherwise.</returns>
+        /// <exception cref="System.ArgumentNullException">
+        /// If <paramref name="key"/> or <paramref name="updateValue"/> are null.
+        /// </exception>
+        /// <remarks>
+        /// If the cache does not use a distributed cache system. Update is doing exactly the same
+        /// as Get plus Put.
+        /// </remarks>
+        bool TryUpdate(string key, Func<TCacheValue, TCacheValue> updateValue, out TCacheValue value);
+
+        /// <summary>
+        /// Tries to update an existing key in the cache.
+        /// <para>
+        /// The cache manager will make sure the update will always happen on the most recent version.
+        /// </para>
+        /// <para>
+        /// If version conflicts occur, if for example multiple cache clients try to write the same
+        /// key, and during the update process, someone else changed the value for the key, the
+        /// cache manager will retry the operation.
+        /// </para>
+        /// <para>
+        /// The <paramref name="updateValue"/> function will get invoked on each retry with the most
+        /// recent value which is stored in cache.
+        /// </para>
+        /// </summary>
+        /// <param name="key">The key to update.</param>
+        /// <param name="region">The region of the key to update.</param>
+        /// <param name="updateValue">The function to perform the update.</param>
+        /// <param name="value">The updated value, or null, if the update was not successful.</param>
+        /// <returns><c>True</c> if the update operation was successful, <c>False</c> otherwise.</returns>
+        /// <exception cref="System.ArgumentNullException">
+        /// If <paramref name="key"/> or <paramref name="region"/> or <paramref name="updateValue"/>
+        /// are null.
+        /// </exception>
+        /// <remarks>
+        /// If the cache does not use a distributed cache system. Update is doing exactly the same
+        /// as Get plus Put.
+        /// </remarks>
+        bool TryUpdate(string key, string region, Func<TCacheValue, TCacheValue> updateValue, out TCacheValue value);
+
+        /// <summary>
+        /// Tries to update an existing key in the cache.
+        /// <para>
+        /// The cache manager will make sure the update will always happen on the most recent version.
+        /// </para>
+        /// <para>
+        /// If version conflicts occur, if for example multiple cache clients try to write the same
+        /// key, and during the update process, someone else changed the value for the key, the
+        /// cache manager will retry the operation.
+        /// </para>
+        /// <para>
+        /// The <paramref name="updateValue"/> function will get invoked on each retry with the most
+        /// recent value which is stored in cache.
+        /// </para>
+        /// </summary>
+        /// <param name="key">The key to update.</param>
+        /// <param name="updateValue">The function to perform the update.</param>
+        /// <param name="config">The cache configuration used to specify the update behavior.</param>
+        /// <param name="value">The updated value, or null, if the update was not successful.</param>
+        /// <returns><c>True</c> if the update operation was successful, <c>False</c> otherwise.</returns>
+        /// <exception cref="System.ArgumentNullException">
+        /// If <paramref name="key"/> or <paramref name="updateValue"/> or <paramref name="config"/>
+        /// are null.
+        /// </exception>
+        /// <remarks>
+        /// If the cache does not use a distributed cache system. Update is doing exactly the same
+        /// as Get plus Put.
+        /// </remarks>
+        bool TryUpdate(string key, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config, out TCacheValue value);
+
+        /// <summary>
+        /// Tries to update an existing key in the cache.
+        /// <para>
+        /// The cache manager will make sure the update will always happen on the most recent version.
+        /// </para>
+        /// <para>
+        /// If version conflicts occur, if for example multiple cache clients try to write the same
+        /// key, and during the update process, someone else changed the value for the key, the
+        /// cache manager will retry the operation.
+        /// </para>
+        /// <para>
+        /// The <paramref name="updateValue"/> function will get invoked on each retry with the most
+        /// recent value which is stored in cache.
+        /// </para>
+        /// </summary>
+        /// <param name="key">The key to update.</param>
+        /// <param name="region">The region of the key to update.</param>
+        /// <param name="updateValue">The function to perform the update.</param>
+        /// <param name="config">The cache configuration used to specify the update behavior.</param>
+        /// <param name="value">The updated value, or null, if the update was not successful.</param>
+        /// <returns><c>True</c> if the update operation was successful, <c>False</c> otherwise.</returns>
+        /// <exception cref="System.ArgumentNullException">
+        /// If <paramref name="key"/> or <paramref name="region"/> or <paramref name="updateValue"/>
+        /// or <paramref name="config"/> are null.
+        /// </exception>
+        /// <remarks>
+        /// If the cache does not use a distributed cache system. Update is doing exactly the same
+        /// as Get plus Put.
+        /// </remarks>
+        bool TryUpdate(string key, string region, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config, out TCacheValue value);
     }
 }

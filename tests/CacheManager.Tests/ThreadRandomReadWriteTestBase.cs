@@ -67,8 +67,6 @@ namespace CacheManager.Tests
                                     cache.Put(item);
                                 }
 
-                                var cacheItem = cache.GetCacheItem(key);
-                                var cacheItemFromRegion = cache.GetCacheItem(key, region);
                                 var result = cache.Get(key);
                                 if (result == null)
                                 {

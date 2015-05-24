@@ -84,7 +84,7 @@ namespace CacheManager.Redis
 
         public static void Retry(Action retryme, int timeOut, int retries)
         {
-            var result = Retry<bool>(() => { retryme(); return true; }, timeOut, retries);
+            Retry<bool>(() => { retryme(); return true; }, timeOut, retries);
         }
     }
 }

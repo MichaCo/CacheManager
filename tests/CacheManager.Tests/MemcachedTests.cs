@@ -94,8 +94,6 @@ namespace CacheManager.Tests
         [Trait("IntegrationTest", "Memcached")]
         public void Memcached_Absolute_DoesExpire()
         {
-            // arrange
-            var item = new CacheItem<object>("key", "something");
             // act
             var cache = CacheFactory.Build("myCache", settings =>
             {
@@ -326,8 +324,10 @@ namespace CacheManager.Tests
                     .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMinutes(20));
             }))
             {
+                RaceConditionTestElement value;
+
                 // act
-                Func<bool> act = () => cache.Update(Guid.NewGuid().ToString(), item => item);
+                Func<bool> act = () => cache.TryUpdate(Guid.NewGuid().ToString(), item => item, out value);
 
                 // assert
                 act().Should().BeFalse("Item has not been added to the cache");

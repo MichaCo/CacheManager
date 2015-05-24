@@ -7,7 +7,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using CacheManager.Core;
 using CacheManager.Core.Cache;
-using CacheManager.Core.Configuration;
 using Microsoft.ApplicationServer.Caching;
 
 namespace CacheManager.AppFabricCache
@@ -171,7 +170,7 @@ namespace CacheManager.AppFabricCache
         /// If the cache does not use a distributed cache system. Update is doing exactly the same
         /// as Get plus Put.
         /// </remarks>
-        public override UpdateItemResult Update(string key, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config)
+        public override UpdateItemResult<TCacheValue> Update(string key, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config)
         {
             return this.Update(key, null, updateValue, config);
         }
@@ -201,7 +200,7 @@ namespace CacheManager.AppFabricCache
         /// If the cache does not use a distributed cache system. Update is doing exactly the same
         /// as Get plus Put.
         /// </remarks>
-        public override UpdateItemResult Update(string key, string region, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config)
+        public override UpdateItemResult<TCacheValue> Update(string key, string region, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config)
         {
             if (updateValue == null)
             {
@@ -256,13 +255,14 @@ namespace CacheManager.AppFabricCache
 
             if (item == null)
             {
-                return new UpdateItemResult(hasVersionConflict, false, tries);
+                return new UpdateItemResult<TCacheValue>(default(TCacheValue), hasVersionConflict, false, tries);
             }
-
-            item = item.WithValue(updateValue(item.Value));
 
             do
             {
+                // fix: never actually updated the item next retry...
+                item = item.WithValue(updateValue(item.Value));
+
                 tries++;
                 retry = false;
                 try
@@ -289,6 +289,8 @@ namespace CacheManager.AppFabricCache
                             this.cache.PutAndUnlock(item.Key, item, lockHandle, item.Region);
                         }
                     }
+
+                    return new UpdateItemResult<TCacheValue>(item.Value, hasVersionConflict, true, tries);
                 }
                 catch (DataCacheException ex)
                 {
@@ -296,7 +298,7 @@ namespace CacheManager.AppFabricCache
                         || ex.ErrorCode == DataCacheErrorCode.InvalidCacheLockHandle
                         || ex.ErrorCode == DataCacheErrorCode.KeyDoesNotExist)
                     {
-                        return new UpdateItemResult(hasVersionConflict, false, tries);
+                        return new UpdateItemResult<TCacheValue>(default(TCacheValue), hasVersionConflict, false, tries);
                     }
                     else if (IsTransientError(ex))
                     {
@@ -312,14 +314,7 @@ namespace CacheManager.AppFabricCache
             }
             while (retry && tries <= config.MaxRetries);
 
-            // if retry is still true, we exceeded max tries: returning false indicating that the
-            // item has not been updated
-            if (retry)
-            {
-                return new UpdateItemResult(hasVersionConflict, false, tries);
-            }
-
-            return new UpdateItemResult(hasVersionConflict, true, tries);
+            return new UpdateItemResult<TCacheValue>(default(TCacheValue), hasVersionConflict, false, tries);
         }
 
         /// <summary>

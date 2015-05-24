@@ -74,16 +74,16 @@ namespace CacheManager.Core.Cache
     /// <summary>
     /// Event arguments for cache update actions.
     /// </summary>
-    public sealed class CacheUpdateEventArgs : EventArgs
+    public sealed class CacheUpdateEventArgs<TCacheValue> : EventArgs
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="CacheUpdateEventArgs"/> class.
+        /// Initializes a new instance of the <see cref="CacheUpdateEventArgs{TCacheValue}" /> class.
         /// </summary>
         /// <param name="key">The key.</param>
         /// <param name="region">The region.</param>
         /// <param name="config">The configuration.</param>
         /// <param name="result">The result.</param>
-        public CacheUpdateEventArgs(string key, string region, UpdateItemConfig config, UpdateItemResult result)
+        public CacheUpdateEventArgs(string key, string region, UpdateItemConfig config, UpdateItemResult<TCacheValue> result)
         {
             this.Key = key;
             this.Region = region;
@@ -113,6 +113,6 @@ namespace CacheManager.Core.Cache
         /// Gets the result.
         /// </summary>
         /// <value>The result.</value>
-        public UpdateItemResult Result { get; private set; }
+        public UpdateItemResult<TCacheValue> Result { get; private set; }
     }
 }

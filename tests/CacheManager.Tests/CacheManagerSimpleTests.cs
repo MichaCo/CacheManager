@@ -364,8 +364,54 @@ namespace CacheManager.Tests
             }
         }
 
+        [Theory]
+        [MemberData("TestCacheManagers")]
+        public void CacheManager_Update_ItemNotAdded<T>(T cache) where T : ICacheManager<object>
+        {
+            using (cache)
+            {
+                // arrange act
+                Func<object> act = () => cache.Update("key", item => item);
+
+                object value;
+                Func<bool> act2 = () => cache.TryUpdate("key", item => item, out value);
+
+                // assert
+                act().Should().BeNull();
+                act2().Should().BeFalse("Item has not been added to the cache");
+            }
+        }
+
+        [Theory]
+        [MemberData("TestCacheManagers")]
+        public void CacheManager_Update_Simple<T>(T cache) where T : ICacheManager<object>
+        {
+            using (cache)
+            {
+                // arrange
+                cache.Add("mykey", "something");
+                // act
+                Func<object> act = () => cache.Update("mykey", item => item + " more");
+
+                object value = string.Empty;
+                Func<bool> act1 = () => cache.TryUpdate("mykey", item => item + " awesome", out value);
+                Func<string> act2 = () => cache.Get<string>("mykey");
+
+                // assert
+                act().Should().Be("something more");
+                act1().Should().BeTrue();
+                value.Should().Be("something more awesome");
+                act2().Should().Be("something more awesome");
+            }
+        }
+
+        #endregion update call validation
+
+        #region add or update call validation
+
         [Fact]
-        public void CacheManager_Update_ItemNotAdded()
+        [ReplaceCulture]
+        public void CacheManager_AddOrUpdate_InvalidKey()
         {
             using (var cache = CacheFactory.Build("cache", settings =>
             {
@@ -373,34 +419,148 @@ namespace CacheManager.Tests
             }))
             {
                 // arrange act
-                Func<bool> act = () => cache.Update("key", item => item);
+                Action act = () => cache.AddOrUpdate(null, null, (o) => o);
+                Action actR = () => cache.AddOrUpdate(null, "r", null, (o) => o);
+                Action actU = () => cache.AddOrUpdate(null, null, (o) => o, new UpdateItemConfig());
+                Action actRU = () => cache.AddOrUpdate(null, "r", null, null, null);
 
                 // assert
-                act().Should().BeFalse("Item has not been added to the cache");
+                act.ShouldThrow<ArgumentException>()
+                    .WithMessage("*Parameter name: key*");
+
+                actR.ShouldThrow<ArgumentException>()
+                    .WithMessage("*Parameter name: key*");
+
+                actU.ShouldThrow<ArgumentException>()
+                    .WithMessage("*Parameter name: key*");
+
+                actRU.ShouldThrow<ArgumentException>()
+                    .WithMessage("*Parameter name: key*");
             }
         }
 
         [Fact]
-        public void CacheManager_Update_Simple()
+        [ReplaceCulture]
+        public void CacheManager_AddOrUpdate_InvalidUpdateFunc()
         {
             using (var cache = CacheFactory.Build("cache", settings =>
             {
                 settings.WithHandle(typeof(DictionaryCacheHandle<>), "h1");
             }))
             {
-                // arrange
-                cache.Add("mykey", "something");
-                // act
-                Func<bool> act = () => cache.Update("mykey", item => item + " awesome");
-                Func<string> act2 = () => cache.Get<string>("mykey");
+                // arrange act
+                Action act = () => cache.AddOrUpdate("key", "value", null);
+                Action actR = () => cache.AddOrUpdate("key", "region", "value", null);
+                Action actU = () => cache.AddOrUpdate("key", "value", null, new UpdateItemConfig());
+                Action actRU = () => cache.AddOrUpdate("key", "region", "value", null, null);
+                Action actI = () => cache.AddOrUpdate(new CacheItem<object>("k", "v"), null);
+                Action actIU = () => cache.AddOrUpdate(new CacheItem<object>("k", "v"), null, new UpdateItemConfig());
 
                 // assert
-                act().Should().BeTrue();
-                act2().Should().Be("something awesome");
+                act.ShouldThrow<ArgumentException>()
+                    .WithMessage("*Parameter name: updateValue*");
+
+                actR.ShouldThrow<ArgumentException>()
+                    .WithMessage("*Parameter name: updateValue*");
+
+                actU.ShouldThrow<ArgumentException>()
+                    .WithMessage("*Parameter name: updateValue*");
+
+                actRU.ShouldThrow<ArgumentException>()
+                    .WithMessage("*Parameter name: updateValue*");
             }
         }
 
-        #endregion update call validation
+        [Fact]
+        [ReplaceCulture]
+        public void CacheManager_AddOrUpdate_InvalidRegion()
+        {
+            using (var cache = CacheFactory.Build("cache", settings =>
+            {
+                settings.WithHandle(typeof(DictionaryCacheHandle<>), "h1");
+            }))
+            {
+                // arrange act
+                Action actR = () => cache.AddOrUpdate("key", null, "value", a => a);
+                Action actRU = () => cache.AddOrUpdate("key", null, "value", a => a, new UpdateItemConfig());
+
+                // assert
+                actR.ShouldThrow<ArgumentException>()
+                    .WithMessage("*Parameter name: region*");
+
+                actRU.ShouldThrow<ArgumentException>()
+                    .WithMessage("*Parameter name: region*");
+            }
+        }
+
+        [Fact]
+        [ReplaceCulture]
+        public void CacheManager_AddOrUpdate_InvalidConfig()
+        {
+            using (var cache = CacheFactory.Build("cache", settings =>
+            {
+                settings.WithHandle(typeof(DictionaryCacheHandle<>), "h1");
+            }))
+            {
+                // arrange act
+                Action actU = () => cache.AddOrUpdate("key", "value", (o) => o, null);
+                Action actRU = () => cache.AddOrUpdate("key", "region", "value", (o) => o, null);
+                Action actIU = () => cache.AddOrUpdate(new CacheItem<object>("k", "v"), (o) => o, null);
+
+                // assert
+                actU.ShouldThrow<ArgumentException>()
+                    .WithMessage("*Parameter name: config*");
+
+                actRU.ShouldThrow<ArgumentException>()
+                    .WithMessage("*Parameter name: config*");
+
+                actIU.ShouldThrow<ArgumentException>()
+                    .WithMessage("*Parameter name: config*");
+            }
+        }
+
+        [Theory]
+        [MemberData("TestCacheManagers")]
+        public void CacheManager_AddOrUpdate_ItemNotAdded<T>(T cache) where T : ICacheManager<object>
+        {
+            using (cache)
+            {
+                cache.Clear();
+
+                object value = "value";
+
+                // arrange act
+                Func<object> act = () => cache.AddOrUpdate("key", value, item => value);
+
+                // assert
+                act().Should().Be(value);
+
+                var addCalls = cache.CacheHandles.Select(h => h.Stats.GetStatistic(CacheStatsCounterType.AddCalls)).Sum();
+                addCalls.Should().Be(cache.CacheHandles.Count, "Item should be added to each handle");
+            }
+        }
+
+        [Theory]
+        [MemberData("TestCacheManagers")]
+        public void CacheManager_AddOrUpdate_Update_Simple<T>(T cache) where T : ICacheManager<object>
+        {
+            using (cache)
+            {
+                cache.Clear();
+
+                // arrange
+                cache.Add("mykey", "something");
+                // act
+                Func<object> act = () => cache.AddOrUpdate("mykey", "does exist", item => item + " more");
+                Func<string> act2 = () => cache.Get<string>("mykey");
+
+                // assert
+                act().Should().Be("something more");
+                act2().Should().Be("something more");
+            }
+        }
+
+        #endregion add or update call validation
 
         #region Add validation
 
@@ -1153,7 +1313,6 @@ namespace CacheManager.Tests
 
                     foreach (var key in keys)
                     {
-                        int oldValue = cache.Get<int>(key);
                         cache.Update(key, item =>
                         {
                             int val = (int)item + 1;

@@ -200,6 +200,7 @@ namespace CacheManager.Core.Cache
             return this.counters[(int)type];
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "At this point its fine")]
         private void InitializeCounters()
         {
             try

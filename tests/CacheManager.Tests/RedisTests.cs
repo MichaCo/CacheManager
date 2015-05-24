@@ -97,7 +97,6 @@ namespace CacheManager.Tests
             },
             (cache) =>
             {
-                var val = cache.Get(item.Key);
                 cache.Get(item.Key).Should().Be("new value");
             }, 10, TestManagers.WithSystemAndRedisCache, TestManagers.WithSystemAndRedisCache, TestManagers.WithRedisCache, TestManagers.WithSystemAndRedisCache);
         }

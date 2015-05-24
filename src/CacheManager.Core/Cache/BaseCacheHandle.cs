@@ -107,7 +107,7 @@ namespace CacheManager.Core.Cache
         /// If the cache does not use a distributed cache system. Update is doing exactly the same
         /// as Get plus Put.
         /// </remarks>
-        public virtual UpdateItemResult Update(string key, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config)
+        public virtual UpdateItemResult<TCacheValue> Update(string key, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config)
         {
             if (updateValue == null)
             {
@@ -117,12 +117,12 @@ namespace CacheManager.Core.Cache
             var original = this.Get(key);
             if (original == null)
             {
-                return new UpdateItemResult(false, false, 1);
+                return new UpdateItemResult<TCacheValue>(original, false, false, 1);
             }
 
             var value = updateValue(original);
             this.Put(key, value);
-            return new UpdateItemResult(false, true, 1);
+            return new UpdateItemResult<TCacheValue>(value, false, true, 1);
         }
 
         /// <summary>
@@ -152,7 +152,7 @@ namespace CacheManager.Core.Cache
         /// If the cache does not use a distributed cache system. Update is doing exactly the same
         /// as Get plus Put.
         /// </remarks>
-        public virtual UpdateItemResult Update(string key, string region, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config)
+        public virtual UpdateItemResult<TCacheValue> Update(string key, string region, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config)
         {
             if (updateValue == null)
             {
@@ -161,12 +161,12 @@ namespace CacheManager.Core.Cache
             var original = this.Get(key, region);
             if (original == null)
             {
-                return new UpdateItemResult(false, false, 1);
+                return new UpdateItemResult<TCacheValue>(original, false, false, 1);
             }
 
             var value = updateValue(original);
             this.Put(key, value, region);
-            return new UpdateItemResult(false, true, 1);
+            return new UpdateItemResult<TCacheValue>(value, false, true, 1);
         }
 
         /// <summary>

@@ -58,10 +58,10 @@ namespace CacheManager.Tests
         public void UpdateItemResult_Ctor()
         {
             // arrange act
-            Func<UpdateItemResult> act = () => new UpdateItemResult(true, true, 1001);
+            Func<UpdateItemResult<object>> act = () => new UpdateItemResult<object>("value", true, true, 1001);
 
             // assert
-            act().ShouldBeEquivalentTo(new { Success = true, NumberOfRetriesNeeded = 1001, VersionConflictOccurred = true });
+            act().ShouldBeEquivalentTo(new { Value = "value", Success = true, NumberOfTriesNeeded = 1001, VersionConflictOccurred = true });
         }
 
         [Fact]
@@ -80,13 +80,13 @@ namespace CacheManager.Tests
             var handles = MockHandles(
                 count: 5,
                 updateCalls: Enumerable.Repeat<Action>(() => updateCalls++, 5).ToArray(),
-                updateCallResults: new UpdateItemResult[]
+                updateCallResults: new UpdateItemResult<string>[]
                 {
-                    new UpdateItemResult(false, true, 0),
-                    new UpdateItemResult(true, true, 0),
-                    new UpdateItemResult(false, true, 0),
-                    new UpdateItemResult(true, true, 0),
-                    new UpdateItemResult(true, false, 100)
+                    new UpdateItemResult<string>(string.Empty, false, true, 0),
+                    new UpdateItemResult<string>(string.Empty, true, true, 0),
+                    new UpdateItemResult<string>(string.Empty, false, true, 0),
+                    new UpdateItemResult<string>(string.Empty, true, true, 0),
+                    new UpdateItemResult<string>(string.Empty, true, false, 100)
                 },
                 putCalls: Enumerable.Repeat<Action>(() => putCalls++, 5).ToArray(),
                 removeCalls: Enumerable.Repeat<Action>(() => removeCalls++, 5).ToArray());
@@ -94,7 +94,8 @@ namespace CacheManager.Tests
             // act
             using (var cache = new BaseCacheManager<string>("cacheName", cfg, handles))
             {
-                var updateResult = cache.Update("key", updateFunc, updateConfig);
+                string value;
+                var updateResult = cache.TryUpdate("key", updateFunc, updateConfig, out value);
 
                 // assert
                 updateCalls.Should().Be(5, "all handle should have been invoked");
@@ -120,13 +121,13 @@ namespace CacheManager.Tests
             var handles = MockHandles(
                 count: 5,
                 updateCalls: Enumerable.Repeat<Action>(() => updateCalls++, 5).ToArray(),
-                updateCallResults: new UpdateItemResult[]
+                updateCallResults: new UpdateItemResult<string>[]
                 {
-                    new UpdateItemResult(false, true, 0),
-                    new UpdateItemResult(false, true, 0),
-                    new UpdateItemResult(true, true, 0),    // version conflict but successfully updated
-                    new UpdateItemResult(false, true, 0),
-                    new UpdateItemResult(true, false, 100)
+                    new UpdateItemResult<string>(string.Empty, false, true, 0),
+                    new UpdateItemResult<string>(string.Empty, false, true, 0),
+                    new UpdateItemResult<string>(string.Empty, true, true, 0),    // version conflict but successfully updated
+                    new UpdateItemResult<string>(string.Empty, false, true, 0),
+                    new UpdateItemResult<string>(string.Empty, true, false, 100)
                 },
                 putCalls: Enumerable.Repeat<Action>(() => putCalls++, 5).ToArray(),
                 removeCalls: Enumerable.Repeat<Action>(() => removeCalls++, 5).ToArray());
@@ -134,7 +135,8 @@ namespace CacheManager.Tests
             // act
             using (var cache = new BaseCacheManager<string>("cacheName", cfg, handles))
             {
-                var updateResult = cache.Update("key", updateFunc, updateConfig);
+                string value;
+                var updateResult = cache.TryUpdate("key", updateFunc, updateConfig, out value);
 
                 // assert
                 updateCalls.Should().Be(3, "cache manager should have stopped updating after the first version conflict");
@@ -160,13 +162,13 @@ namespace CacheManager.Tests
             var handles = MockHandles(
                 count: 5,
                 updateCalls: Enumerable.Repeat<Action>(() => updateCalls++, 5).ToArray(),
-                updateCallResults: new UpdateItemResult[]
+                updateCallResults: new UpdateItemResult<string>[]
                 {
-                    new UpdateItemResult(false, true, 0),
-                    new UpdateItemResult(false, true, 0),
-                    new UpdateItemResult(true, false, 0),    // version conflict but failed to update
-                    new UpdateItemResult(false, true, 0),
-                    new UpdateItemResult(true, false, 100)
+                    new UpdateItemResult<string>(string.Empty, false, true, 0),
+                    new UpdateItemResult<string>(string.Empty, false, true, 0),
+                    new UpdateItemResult<string>(string.Empty, true, false, 0),    // version conflict but failed to update
+                    new UpdateItemResult<string>(string.Empty, false, true, 0),
+                    new UpdateItemResult<string>(string.Empty, true, false, 100)
                 },
                 putCalls: Enumerable.Repeat<Action>(() => putCalls++, 5).ToArray(),
                 removeCalls: Enumerable.Repeat<Action>(() => removeCalls++, 5).ToArray());
@@ -174,12 +176,13 @@ namespace CacheManager.Tests
             // act
             using (var cache = new BaseCacheManager<string>("cacheName", cfg, handles))
             {
-                var updateResult = cache.Update("key", updateFunc, updateConfig);
+                string value;
+                var updateResult = cache.TryUpdate("key", updateFunc, updateConfig, out value);
 
                 // assert
                 updateCalls.Should().Be(3, "cache manager should have stopped updating after the first version conflict");
                 putCalls.Should().Be(0, "no put calls expected");
-                removeCalls.Should().Be(0, "the key should have been removed from the other 4 handles");
+                removeCalls.Should().Be(4, "the key should have been removed from the other 4 handles");
                 updateResult.Should().BeFalse("the update in handle 3 was not successful.");
             }
         }
@@ -200,16 +203,16 @@ namespace CacheManager.Tests
             var handles = MockHandles(
                 count: 5,
                 updateCalls: Enumerable.Repeat<Action>(() => updateCalls++, 5).ToArray(),
-                updateCallResults: new UpdateItemResult[]
+                updateCallResults: new UpdateItemResult<string>[]
                 {
-                    new UpdateItemResult(false, true, 0),
-                    new UpdateItemResult(false, true, 0),
-                    new UpdateItemResult(true, true, 0),    // version conflict but successfully updated
+                    new UpdateItemResult<string>(string.Empty, false, true, 0),
+                    new UpdateItemResult<string>(string.Empty, false, true, 0),
+                    new UpdateItemResult<string>(string.Empty, true, true, 0),    // version conflict but successfully updated
                                                             // this should trigger cache manager to
                                                             // update the other 4 handles with the
                                                             // new version
-                    new UpdateItemResult(false, true, 0),
-                    new UpdateItemResult(true, false, 100)
+                    new UpdateItemResult<string>(string.Empty, false, true, 0),
+                    new UpdateItemResult<string>(string.Empty, true, false, 100)
                 },
                 putCalls: Enumerable.Repeat<Action>(() => putCalls++, 5).ToArray(),
                 removeCalls: Enumerable.Repeat<Action>(() => removeCalls++, 5).ToArray(),
@@ -225,7 +228,8 @@ namespace CacheManager.Tests
             // act
             using (var cache = new BaseCacheManager<string>("cacheName", cfg, handles))
             {
-                var updateResult = cache.Update("key", updateFunc, updateConfig);
+                string value;
+                var updateResult = cache.TryUpdate("key", updateFunc, updateConfig, out value);
 
                 // assert
                 updateCalls.Should().Be(3, "first 3 updates until version conflict");
@@ -243,7 +247,6 @@ namespace CacheManager.Tests
 
             // the update config setting it to UpdateOtherCaches
             UpdateItemConfig updateConfig = new UpdateItemConfig(0, VersionConflictHandling.UpdateOtherCaches);
-            var cfg = ConfigurationBuilder.BuildConfiguration(settings => settings.WithUpdateMode(CacheUpdateMode.Up));
             int updateCalls = 0;
             int putCalls = 0;
             int removeCalls = 0;
@@ -251,16 +254,16 @@ namespace CacheManager.Tests
             var handles = MockHandles(
                 count: 5,
                 updateCalls: Enumerable.Repeat<Action>(() => updateCalls++, 5).ToArray(),
-                updateCallResults: new UpdateItemResult[]
+                updateCallResults: new UpdateItemResult<string>[]
                 {
-                    new UpdateItemResult(false, true, 0),
-                    new UpdateItemResult(false, true, 0),
-                    new UpdateItemResult(true, true, 0),    // version conflict but successfully updated
+                    new UpdateItemResult<string>(string.Empty, false, true, 0),
+                    new UpdateItemResult<string>(string.Empty, false, true, 0),
+                    new UpdateItemResult<string>(string.Empty, true, true, 0),    // version conflict but successfully updated
                                                             // this should trigger cache manager to
                                                             // update the other 4 handles with the
                                                             // new version
-                    new UpdateItemResult(false, true, 0),
-                    new UpdateItemResult(true, false, 100)
+                    new UpdateItemResult<string>(string.Empty, false, true, 0),
+                    new UpdateItemResult<string>(string.Empty, true, false, 100)
                 },
                 putCalls: Enumerable.Repeat<Action>(() => putCalls++, 5).ToArray(),
                 removeCalls: Enumerable.Repeat<Action>(() => removeCalls++, 5).ToArray(),
@@ -289,7 +292,8 @@ namespace CacheManager.Tests
                 }
                 cache.Add("key", "something", "region");
 
-                var updateResult = cache.Update("key", "region", updateFunc, updateConfig);
+                string value;
+                var updateResult = cache.TryUpdate("key", "region", updateFunc, updateConfig, out value);
 
                 var result = cache.Get("key", "region");
 
@@ -303,7 +307,7 @@ namespace CacheManager.Tests
             }
         }
 
-        private static BaseCacheHandle<string>[] MockHandles(int count, Action[] updateCalls, UpdateItemResult[] updateCallResults, Action[] putCalls, Action[] removeCalls, CacheItem<string>[] getCallValues = null)
+        private static BaseCacheHandle<string>[] MockHandles(int count, Action[] updateCalls, UpdateItemResult<string>[] updateCallResults, Action[] putCalls, Action[] removeCalls, CacheItem<string>[] getCallValues = null)
         {
             if (count <= 0)
             {

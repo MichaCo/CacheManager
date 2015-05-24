@@ -91,7 +91,7 @@ namespace CacheManager.Memcached
         /// If the cache does not use a distributed cache system. Update is doing exactly the same
         /// as Get plus Put.
         /// </remarks>
-        public override UpdateItemResult Update(string key, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config)
+        public override UpdateItemResult<TCacheValue> Update(string key, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config)
         {
             return this.Update(key, null, updateValue, config);
         }
@@ -120,7 +120,7 @@ namespace CacheManager.Memcached
         /// If the cache does not use a distributed cache system. Update is doing exactly the same
         /// as Get plus Put.
         /// </remarks>
-        public override UpdateItemResult Update(string key, string region, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config)
+        public override UpdateItemResult<TCacheValue> Update(string key, string region, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config)
         {
             return this.Set(key, region, updateValue, config);
         }
@@ -286,17 +286,17 @@ namespace CacheManager.Memcached
             return false;
         }
 
-        private UpdateItemResult Set(string key, string region, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config)
+        private UpdateItemResult<TCacheValue> Set(string key, string region, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config)
         {
             var fullyKey = GetKey(key, region);
             var tries = 0;
             IStoreOperationResult result;
-
+            
             do
             {
                 tries++;
                 var getTries = 0;
-                StatusCode getStatus;
+                StatusCode getStatus; 
                 CacheItem<TCacheValue> item;
                 CasResult<CacheItem<TCacheValue>> cas;
                 do
@@ -312,7 +312,7 @@ namespace CacheManager.Memcached
                 // break operation if we cannot retrieve the object (maybe it has expired already).
                 if (getStatus != StatusCode.Success || item == null)
                 {
-                    return new UpdateItemResult(tries > 1, false, tries);
+                    return new UpdateItemResult<TCacheValue>(default(TCacheValue), tries > 1, false, tries);
                 }
 
                 item = item.WithValue(updateValue(item.Value));
@@ -330,10 +330,15 @@ namespace CacheManager.Memcached
                 {
                     result = this.Cache.ExecuteCas(StoreMode.Set, fullyKey, item, cas.Cas);
                 }
+
+                if (result.Success)
+                {
+                    return new UpdateItemResult<TCacheValue>(item.Value, tries > 1, result.Success, tries);
+                }
             }
             while (!result.Success && result.StatusCode.HasValue && result.StatusCode.Value == 2 && tries <= config.MaxRetries);
-
-            return new UpdateItemResult(tries > 1, result.Success, tries);
+            
+            return new UpdateItemResult<TCacheValue>(default(TCacheValue), tries > 1, result.Success, tries);
         }
     }
 }

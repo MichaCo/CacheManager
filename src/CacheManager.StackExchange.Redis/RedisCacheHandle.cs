@@ -145,7 +145,7 @@ namespace CacheManager.Redis
                 {
                     // lets remove all keys which where in the region
                     var keys = hashKeys.Where(p => p.HasValue).Select(p => (StackRedis.RedisKey)GetKey(p, region)).ToArray();
-                    var delKeysResult = this.Database.KeyDelete(keys);
+                    this.Database.KeyDelete(keys);
                 }
 
                 // now delete the region
@@ -191,7 +191,7 @@ namespace CacheManager.Redis
         /// If the cache does not use a distributed cache system. Update is doing exactly the same
         /// as Get plus Put.
         /// </remarks>
-        public override UpdateItemResult Update(string key, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config)
+        public override UpdateItemResult<TCacheValue> Update(string key, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config)
         {
             return this.Update(key, null, updateValue, config);
         }
@@ -220,7 +220,7 @@ namespace CacheManager.Redis
         /// If the cache does not use a distributed cache system. Update is doing exactly the same
         /// as Get plus Put.
         /// </remarks>
-        public override UpdateItemResult Update(string key, string region, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config)
+        public override UpdateItemResult<TCacheValue> Update(string key, string region, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config)
         {
             var committed = false;
             var tries = 0;
@@ -236,7 +236,7 @@ namespace CacheManager.Redis
 
                     if (item == null)
                     {
-                        return new UpdateItemResult(false, false, 1);
+                        return new UpdateItemResult<TCacheValue>(default(TCacheValue), false, false, 1);
                     }
 
                     var oldValue = ToRedisValue(item.Value);
@@ -253,12 +253,12 @@ namespace CacheManager.Redis
 
                     if (committed)
                     {
-                        return new UpdateItemResult(tries > 1, true, tries);
+                        return new UpdateItemResult<TCacheValue>(newValue, tries > 1, true, tries);
                     }
                 }
                 while (committed == false && tries <= config.MaxRetries);
 
-                return new UpdateItemResult(false, false, 1);
+                return new UpdateItemResult<TCacheValue>(default(TCacheValue), false, false, tries);
             });
         }
 
@@ -477,7 +477,7 @@ namespace CacheManager.Redis
 
         private void Retry(Action retryme)
         {
-            var result = this.Retry<bool>(() => { retryme(); return true; });
+            this.Retry<bool>(() => { retryme(); return true; });
         }
 
         private bool Set(CacheItem<TCacheValue> item, StackRedis.When when, bool sync = false)
