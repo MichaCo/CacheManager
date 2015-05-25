@@ -32,6 +32,8 @@ namespace CacheManager.Examples
             AppConfigLoadInstalledCacheCfg();
             SimpleCustomBuildConfigurationUsingConfigBuilder();
             SimpleCustomBuildConfigurationUsingFactory();
+            UpdateTest();
+            UpdateCounterTest();
 
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Press any key to exit...");
@@ -118,34 +120,75 @@ namespace CacheManager.Examples
             checkTarget.GetSomething();
         }
 
-        public class UnityInjectionExampleTarget
+        private static void UpdateTest()
         {
-            private ICacheManager<object> cache;
+            var cache = CacheFactory.Build<string>("myCache", s => s.WithSystemRuntimeCacheHandle("handle"));
 
-            public UnityInjectionExampleTarget(ICacheManager<object> cache)
+            Console.WriteLine("Testing update...");
+
+            string newValue;
+            if (!cache.TryUpdate("test", v => "item has not yet been added", out newValue))
             {
-                if (cache == null)
-                {
-                    throw new ArgumentNullException("cache");
-                }
-
-                this.cache = cache;
+                Console.WriteLine("Value not added?: {0}", newValue == null);
             }
 
-            public void GetSomething()
+            cache.Add("test", "start");
+            Console.WriteLine("Inital value: {0}", cache["test"]);
+
+            cache.AddOrUpdate("test", "adding again?", v => "updating and not adding");
+            Console.WriteLine("After AddOrUpdate: {0}", cache["test"]);
+
+            cache.Remove("test");
+            var removeValue = cache.Update("test", v => "updated?");
+            Console.WriteLine("Value after remove is null?: {0}", removeValue == null);
+        }
+
+        private static void UpdateCounterTest()
+        {
+            var cache = CacheFactory.Build<long>("myCache", s => s.WithSystemRuntimeCacheHandle("handle"));
+
+            Console.WriteLine("Testing update counter...");
+
+            cache.AddOrUpdate("counter", 0, v => v + 1);
+
+            Console.WriteLine("Initial value: {0}", cache.Get("counter"));
+
+            for (int i = 0; i < 12345; i++)
             {
-                var value = this.cache.Get("myKey");
-                var x = value;
-                if (value == null)
-                {
-                    throw new InvalidOperationException();
-                }
+                cache.Update("counter", v => v + 1);
             }
 
-            public void PutSomethingIntoTheCache()
+            Console.WriteLine("Final value: {0}", cache.Get("counter"));
+        }
+    }
+    
+    public class UnityInjectionExampleTarget
+    {
+        private ICacheManager<object> cache;
+
+        public UnityInjectionExampleTarget(ICacheManager<object> cache)
+        {
+            if (cache == null)
             {
-                this.cache.Put("myKey", "something");
+                throw new ArgumentNullException("cache");
             }
+
+            this.cache = cache;
+        }
+
+        public void GetSomething()
+        {
+            var value = this.cache.Get("myKey");
+            var x = value;
+            if (value == null)
+            {
+                throw new InvalidOperationException();
+            }
+        }
+
+        public void PutSomethingIntoTheCache()
+        {
+            this.cache.Put("myKey", "something");
         }
     }
 }

@@ -1,5 +1,6 @@
 
 # Update Operations
+## Why / When to use `Update`
 Updating a cache item in a distributed cache is different from just changing the item within an in-process cache. 
 With in-process caches, we can ensure thread safe writes, and with poco objects, the in-process cache will just keep the reference to that object and therefor always holds the same version for all threads. 
 
@@ -8,6 +9,7 @@ Let's say you have a click counter stored in a distributed cache and both client
 
 To prevent such scenarios and ensure you don't loose any data, every distributed cache provider has some slightly different ways to handle that. 
 
+## How to use `Update`
 Cache Manager provides a simple interface to make this whole process very easy to use, the `Update` method.
 
 	cache.Update("key", counter => counter + 1);
@@ -25,10 +27,69 @@ Per default, Cache Manager will retry update operations as long as needed to suc
 		obj => "new value", 
 		new UpdateItemConfig(100, VersionConflictHandling.EvictItemFromOtherCaches));
 
-If Cache Manager reaches the limit, the Update will not be successful and you would have to handle that by reacting on the returned `boolean` value.
+If Cache Manager reaches the limit, the Update will not be successful and you would have to handle that by reacting on the returned value.
 
-In addition you can configure what Cache Manager should do in case a version conflict occurred during the update operation. This will be executed even if the update was not successful (maybe because of the a limit)
+In addition you can configure what Cache Manager should do in case a version conflict occurred during the update operation. This will be executed even if the update was not successful (maybe because of the retry limit)
 
 Per default, Cache Manager will remove the cache item from all other handles, because it assumes the other handles don't have the same version of the cache item.
+
+## Update method variants
+There are currently three different method which provide the update functionality:
+
+* `Update`
+As shown above, the `Update` method will try to safely update the element with your instruction.
+The method returns the updated value if the update was successful and `Null` if not.
+* `TryUpdate`
+Does the same as `Update` but returns `True` if the update was successful, `False` if not, and it has an `out` parameter with the updated value which will also be `Null` if the update failed. 
+* `AddOrUpdate`
+This method can be used to ensure the cached item is present before updating it. If the cache item is not already stored in cache, it will be added, otherwise the update function will get executed.
+
+## Example 1
+Let's look at a simple example using all the `Update` methods:
+
+First create a cache
+
+    var cache = CacheFactory.Build<string>("myCache", s => s.WithSystemRuntimeCacheHandle("handle"));
+    Console.WriteLine("Testing update...");
+
+Inspect what happens if we try to update an item which has not yet been added to the cache:
+
+    string newValue;
+    if (!cache.TryUpdate("test", v => "item has not yet been added", out newValue))
+    {
+        Console.WriteLine("Value not added?: {0}", newValue == null);
+    }
+
+Now we add it to the cache
+
+    cache.Add("test", "start");
+    Console.WriteLine("Inital value: {0}", cache["test"]);
+
+Let's see what `AddOrUpdate` does, it should run the update in this case:
+
+    cache.AddOrUpdate("test", "adding again?", v => "updating and not adding");
+    Console.WriteLine("After AddOrUpdate: {0}", cache["test"]);
+
+Removing the item, will cause the following `Update` call to return `Null` again
+
+    cache.Remove("test");
+    var removeValue = cache.Update("test", v => "updated?");
+    Console.WriteLine("Value after remove is null?: {0}", removeValue == null);
+
+## Example 2
+The second example will increase a counter in a loop:
+
+
+    cache.AddOrUpdate("counter", 0, v => v + 1);
+
+    Console.WriteLine("Initial value: {0}", cache.Get("counter"));
+
+    for (int i = 0; i < 12345; i++)
+    {
+        cache.Update("counter", v => v + 1);
+    }
+
+    Console.WriteLine("Final value: {0}", cache.Get("counter"));
+
 
 [TOC]
