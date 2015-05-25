@@ -29,7 +29,7 @@ namespace CacheManager.Tests
                 Trace.TraceInformation("Using handle {0}", handle.GetType());
             }
 
-            var blob = new byte[4096];
+            var blob = new byte[1024];
 
             using (cache)
             {
@@ -45,7 +45,7 @@ namespace CacheManager.Tests
                     {
                         for (var r = 0; r < 5; r++)
                         {
-                            for (int i = 0; i < 200; i++)
+                            for (int i = 0; i < 5; i++)
                             {
                                 string key = "key" + i;
                                 object value = blob.Clone();
@@ -99,7 +99,7 @@ namespace CacheManager.Tests
                     Trace.TraceInformation("Hits: {0}, Misses: {1}", hits, misses);
                 };
 
-                ThreadTestHelper.Run(test, 5, 1);
+                ThreadTestHelper.Run(test, 2, 1);
             }
         }
     }

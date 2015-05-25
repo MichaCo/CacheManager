@@ -21,16 +21,16 @@ namespace CacheManager.Tests
         public void SysRuntime_MemoryCache_Absolute_DoesExpire()
         {
             // arrange
-            var item = new CacheItem<object>("key", "something", ExpirationMode.Absolute, new TimeSpan(0, 0, 0, 0, 100));
+            var item = new CacheItem<object>("key", "something", ExpirationMode.Absolute, new TimeSpan(0, 0, 0, 0, 50));
             // act
             using (var act = this.GetHandle("Default"))
             {
                 // act
                 act.Add(item);
-                Thread.Sleep(60);
+                Thread.Sleep(15);
                 act["key"].Should().NotBeNull();
 
-                Thread.Sleep(60);
+                Thread.Sleep(40);
 
                 // assert
                 act["key"].Should().BeNull();

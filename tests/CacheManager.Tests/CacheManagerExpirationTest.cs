@@ -21,22 +21,19 @@ namespace CacheManager.Tests
         [ReplaceCulture]
         public void CacheManager_Configuration_AbsoluteExpires()
         {
-            // arrange
-            string fileName = GetCfgFileName(@"\Configuration\configuration.ExpireTest.config");
-            string cacheName = "MemoryCacheAbsoluteExpire";
-
-            // act
-            var cfg = ConfigurationBuilder.LoadConfigurationFile(fileName, cacheName);
-
-            using (var cache = CacheFactory.FromConfiguration<string>(cacheName, cfg))
+            using (var cache = CacheFactory.Build("testCache", settings =>
+            {
+                settings.WithSystemRuntimeCacheHandle("handleA")
+                        .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMilliseconds(10));
+            }))
             {
                 cache.Put("key", "value");
 
-                Thread.Sleep(500);
+                Thread.Sleep(5);
 
                 cache.Get("key").Should().Be("value");
 
-                Thread.Sleep(501);
+                Thread.Sleep(8);
 
                 cache.Get("key").Should().BeNull("Should be expired.");
             }
@@ -62,11 +59,6 @@ namespace CacheManager.Tests
                 handles[1].GetCacheItem("something").ExpirationMode.Should().Be(ExpirationMode.None);
                 handles[1].GetCacheItem("something").ExpirationTimeout.Should().Be(default(TimeSpan));
             }
-        }
-
-        private static string GetCfgFileName(string fileName)
-        {
-            return AppDomain.CurrentDomain.BaseDirectory + (fileName.StartsWith("\\") ? fileName : "\\" + fileName);
         }
     }
 }
