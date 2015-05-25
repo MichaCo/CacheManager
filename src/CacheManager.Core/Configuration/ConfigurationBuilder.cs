@@ -290,10 +290,10 @@ namespace CacheManager.Core.Configuration
                             handle.HandleName));
                 }
 
-                cfg.CacheHandles.Add(handle);
+                cfg.CacheHandleConfigurations.Add(handle);
             }
 
-            if (cfg.CacheHandles.Count == 0)
+            if (cfg.CacheHandleConfigurations.Count == 0)
             {
                 throw new InvalidOperationException(
                     string.Format(CultureInfo.InvariantCulture, "There are no valid cache handles linked to the cache manager configuration [{0}]", configName));
@@ -553,12 +553,12 @@ namespace CacheManager.Core.Configuration
 
             handleCfg.IsBackPlateSource = isBackPlateSource;
 
-            if (this.Configuration.CacheHandles.Any(p => p.IsBackPlateSource))
+            if (this.Configuration.CacheHandleConfigurations.Any(p => p.IsBackPlateSource))
             {
                 throw new InvalidOperationException("Only one cache handle can be the back plate's source.");
             }
 
-            this.Configuration.CacheHandles.Add(handleCfg);
+            this.Configuration.CacheHandleConfigurations.Add(handleCfg);
             var part = new ConfigurationBuilderCacheHandlePart(handleCfg, this);
             return part;
         }

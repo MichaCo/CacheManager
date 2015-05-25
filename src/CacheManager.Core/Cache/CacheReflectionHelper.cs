@@ -9,18 +9,12 @@ namespace CacheManager.Core.Cache
 {
     internal static class CacheReflectionHelper
     {
-        public static ICacheManager<TCacheValue> FromConfiguration<TCacheValue>(string cacheName, string configName)
+        internal static ICollection<BaseCacheHandle<TCacheValue>> CreateCacheHandles<TCacheValue>(BaseCacheManager<TCacheValue> manager)
         {
-            CacheManagerConfiguration managerConfiguration = ConfigurationBuilder.LoadConfiguration(configName);
-            return FromConfiguration<TCacheValue>(cacheName, managerConfiguration);
-        }
+            var managerConfiguration = manager.Configuration;
+            var handles = new List<BaseCacheHandle<TCacheValue>>();
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "no")]
-        public static ICacheManager<TCacheValue> FromConfiguration<TCacheValue>(string cacheName, CacheManagerConfiguration managerConfiguration)
-        {
-            var manager = new BaseCacheManager<TCacheValue>(cacheName, managerConfiguration);
-
-            foreach (var handleConfiguration in managerConfiguration.CacheHandles)
+            foreach (var handleConfiguration in managerConfiguration.CacheHandleConfigurations)
             {
                 Type handleType = handleConfiguration.HandleType;
                 Type instanceType = null;
@@ -40,11 +34,24 @@ namespace CacheManager.Core.Cache
 
                 var handleInstance = Activator.CreateInstance(instanceType, new object[] { manager, handleConfiguration });
                 var instance = handleInstance as BaseCacheHandle<TCacheValue>;
+                handles.Add(instance);
+            }
+            
+            return handles;
+        }
 
-                manager.AddCacheHandle(instance);
+        internal static CacheBackPlate CreateBackPlate<TCacheValue>(BaseCacheManager<TCacheValue> manager)
+        {
+            if(manager == null)
+            {
+                throw new ArgumentNullException("manager");
+            }
+            if(manager.Configuration == null)
+            {
+                throw new ArgumentException("Manager's configuration must not be null.", "manager");
             }
 
-            if (managerConfiguration.BackPlateType != null)
+            if (manager.Configuration.BackPlateType != null)
             {
                 if (!manager.CacheHandles.Any(p => p.Configuration.IsBackPlateSource))
                 {
@@ -54,14 +61,14 @@ namespace CacheManager.Core.Cache
                 try
                 {
                     var backPlate = (CacheBackPlate)Activator.CreateInstance(
-                        managerConfiguration.BackPlateType,
+                        manager.Configuration.BackPlateType,
                         new object[]
                         {
-                            managerConfiguration,
-                            cacheName
+                            manager.Configuration,
+                            manager.Name
                         });
 
-                    manager.SetCacheBackPlate(backPlate);
+                    return backPlate;
                 }
                 catch (TargetInvocationException e)
                 {
@@ -69,7 +76,7 @@ namespace CacheManager.Core.Cache
                 }
             }
 
-            return manager;
+            return null;
         }
 
         public static IEnumerable<Type> GetGenericBaseTypes(this Type type)

@@ -14,13 +14,6 @@ namespace CacheManager.Core.Cache
         /// <summary>
         /// Initializes a new instance of the <see cref="BaseCacheHandle{TCacheValue}"/> class.
         /// </summary>
-        protected BaseCacheHandle()
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="BaseCacheHandle{TCacheValue}"/> class.
-        /// </summary>
         /// <param name="manager">The manager.</param>
         /// <param name="configuration">The configuration.</param>
         /// <exception cref="System.ArgumentNullException">

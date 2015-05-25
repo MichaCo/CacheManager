@@ -251,7 +251,8 @@ namespace CacheManager.Tests
 
             // act
             var cfg = ConfigurationBuilder.LoadConfigurationFile(fileName, "cacheManager2", "configName");
-            Action act = () => CacheFactory.FromConfiguration<string>("mycache", cfg);
+            var cache = CacheFactory.FromConfiguration<string>("mycache", cfg);
+            Action act = () => cache.Add("test", "test");
 
             // assert
             act.ShouldThrow<InvalidOperationException>()
@@ -267,7 +268,9 @@ namespace CacheManager.Tests
 
             // act
             var cfg = ConfigurationBuilder.LoadConfigurationFile(fileName, "cacheManager4", "configName");
-            Action act = () => CacheFactory.FromConfiguration<object>("mycache", cfg);
+            var cache = CacheFactory.FromConfiguration<object>("mycache", cfg);
+
+            Action act = () => cache.Add("test", "test");
 
             // assert
             act.ShouldThrow<InvalidOperationException>()

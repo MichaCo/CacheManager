@@ -19,64 +19,40 @@ namespace CacheManager.Core.Cache
         /// <summary>
         /// The cache back plate.
         /// </summary>
-        private CacheBackPlate cacheBackPlate = null;
+        private Lazy<CacheBackPlate> cacheBackPlate;
 
         /// <summary>
         /// The cache handles collection.
         /// </summary>
-        private BaseCacheHandle<TCacheValue>[] cacheHandles = new BaseCacheHandle<TCacheValue>[] { };
+        private Lazy<BaseCacheHandle<TCacheValue>[]> cacheHandles;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BaseCacheManager{TCacheValue}"/> class
-        /// using the specified configuration and list of handles.
-        /// <para>
-        /// In this case, the <paramref name="configuration"/> will not get interpreted, only the
-        /// handles passed in by <paramref name="handles"/> will be added to the cache. The
-        /// <paramref name="configuration"/> only defines the name of this instance.
-        /// </para>
+        /// using the specified configuration.
         /// </summary>
-        /// <param name="cacheName">The name of the cache. Can be used for scoping the cache.</param>
-        /// <param name="configuration">The configuration which defines the name of the manager.</param>
-        /// <param name="handles">The list of cache handles.</param>
-        /// <exception cref="System.ArgumentNullException">When handles is null.</exception>
-        /// <remarks>
-        /// This constructor is primarily used for unit testing. To construct a cache manager, use
-        /// the <see cref="CacheFactory"/>.
-        /// </remarks>
-        public BaseCacheManager(string cacheName, CacheManagerConfiguration configuration, params BaseCacheHandle<TCacheValue>[] handles)
-            : this(configuration)
+        /// <param name="name">The cache name.</param>
+        /// <param name="configuration">The configuration which defines the name of the manager and contains information of the cache handles this instance should manage.</param>
+        /// <exception cref="System.ArgumentNullException">When <paramref name="configuration"/> is null.</exception>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "nope")]
+        public BaseCacheManager(string name, CacheManagerConfiguration configuration)
         {
-            if (string.IsNullOrEmpty(cacheName))
+            if (string.IsNullOrEmpty(name))
             {
-                throw new ArgumentNullException("cacheName");
+                throw new ArgumentException("Name must not be empty.", "name");
             }
-
-            if (handles == null)
-            {
-                throw new ArgumentNullException("handles");
-            }
-
-            this.Name = cacheName;
-
-            foreach (var handle in handles)
-            {
-                this.AddCacheHandle(handle);
-            }
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="BaseCacheManager{TCacheValue}"/> class.
-        /// </summary>
-        /// <param name="configuration">The configuration.</param>
-        /// <exception cref="System.ArgumentNullException">If configuration is null.</exception>
-        private BaseCacheManager(CacheManagerConfiguration configuration)
-        {
             if (configuration == null)
             {
                 throw new ArgumentNullException("configuration");
             }
 
+            this.Name = name;
             this.Configuration = configuration;
+            this.cacheHandles = new Lazy<BaseCacheHandle<TCacheValue>[]>(() => CacheReflectionHelper.CreateCacheHandles(this).ToArray());
+            this.cacheBackPlate = new Lazy<CacheBackPlate>(() =>
+            {
+                this.RegisterCacheBackPlate(CacheReflectionHelper.CreateBackPlate(this));
+                return CacheReflectionHelper.CreateBackPlate(this);
+            });
         }
 
         /// <summary>
@@ -145,7 +121,7 @@ namespace CacheManager.Core.Cache
             {
                 return new ReadOnlyCollection<BaseCacheHandle<TCacheValue>>(
                     new List<BaseCacheHandle<TCacheValue>>(
-                        this.cacheHandles));
+                        this.cacheHandles.Value));
             }
         }
 
@@ -154,22 +130,6 @@ namespace CacheManager.Core.Cache
         /// </summary>
         /// <value>The name of the cache.</value>
         public string Name { get; private set; }
-
-        /// <summary>
-        /// Adds a cache handle to the cache manager instance.
-        /// </summary>
-        /// <param name="handle">The cache handle.</param>
-        public void AddCacheHandle(BaseCacheHandle<TCacheValue> handle)
-        {
-            if (handle == null)
-            {
-                throw new ArgumentNullException("handle");
-            }
-
-            var handleList = new List<BaseCacheHandle<TCacheValue>>(this.cacheHandles);
-            handleList.Add(handle);
-            this.cacheHandles = handleList.ToArray();
-        }
 
         /// <summary>
         /// Adds an item to the cache or, if the item already exists, updates the item using the
@@ -408,15 +368,15 @@ namespace CacheManager.Core.Cache
         /// </summary>
         public override void Clear()
         {
-            foreach (var handle in this.cacheHandles)
+            foreach (var handle in this.cacheHandles.Value)
             {
                 handle.Clear();
                 handle.Stats.OnClear();
             }
 
-            if (this.cacheBackPlate != null)
+            if (this.Configuration.HasBackPlate)
             {
-                this.cacheBackPlate.NotifyClear();
+                this.cacheBackPlate.Value.NotifyClear();
             }
 
             this.TriggerOnClear();
@@ -434,15 +394,15 @@ namespace CacheManager.Core.Cache
                 throw new ArgumentNullException("region");
             }
 
-            foreach (var handle in this.cacheHandles)
+            foreach (var handle in this.cacheHandles.Value)
             {
                 handle.ClearRegion(region);
                 handle.Stats.OnClearRegion(region);
             }
 
-            if (this.cacheBackPlate != null)
+            if (this.Configuration.HasBackPlate)
             {
-                this.cacheBackPlate.NotifyClearRegion(region);
+                this.cacheBackPlate.Value.NotifyClearRegion(region);
             }
 
             this.TriggerOnClearRegion(region);
@@ -555,7 +515,7 @@ namespace CacheManager.Core.Cache
                 throw new ArgumentNullException("config");
             }
 
-            return this.UpdateInternal(this.cacheHandles, key, updateValue, config, out value);
+            return this.UpdateInternal(this.cacheHandles.Value, key, updateValue, config, out value);
         }
 
         /// <summary>
@@ -607,7 +567,7 @@ namespace CacheManager.Core.Cache
                 throw new ArgumentNullException("config");
             }
 
-            return this.UpdateInternal(this.cacheHandles, key, region, updateValue, config, out value);
+            return this.UpdateInternal(this.cacheHandles.Value, key, region, updateValue, config, out value);
         }
 
         /// <summary>
@@ -748,57 +708,59 @@ namespace CacheManager.Core.Cache
         /// <exception cref="System.ArgumentNullException">
         /// If <paramref name="backPlate"/> is null.
         /// </exception>
-        internal void SetCacheBackPlate(CacheBackPlate backPlate)
+        private void RegisterCacheBackPlate(CacheBackPlate backPlate)
         {
             if (backPlate == null)
             {
                 throw new ArgumentNullException("backPlate");
             }
 
-            this.cacheBackPlate = backPlate;
-
-            var handles = new Func<BaseCacheHandle<TCacheValue>[]>(() =>
+            // TODO: better throw? Or at least log warn
+            if (this.cacheHandles.Value.Any(p => p.Configuration.IsBackPlateSource))
             {
-                var handleList = new List<BaseCacheHandle<TCacheValue>>();
-                foreach (var handle in this.cacheHandles)
+                var handles = new Func<BaseCacheHandle<TCacheValue>[]>(() =>
                 {
-                    if (!handle.Configuration.IsBackPlateSource)
+                    var handleList = new List<BaseCacheHandle<TCacheValue>>();
+                    foreach (var handle in this.cacheHandles.Value)
                     {
-                        handleList.Add(handle);
+                        if (!handle.Configuration.IsBackPlateSource)
+                        {
+                            handleList.Add(handle);
+                        }
                     }
-                }
-                return handleList.ToArray();
-            });
+                    return handleList.ToArray();
+                });
 
-            backPlate.SubscribeChanged((key) =>
-            {
-                EvictFromHandles(key, null, handles());
-            });
+                backPlate.SubscribeChanged((key) =>
+                {
+                    EvictFromHandles(key, null, handles());
+                });
 
-            backPlate.SubscribeChanged((key, region) =>
-            {
-                EvictFromHandles(key, region, handles());
-            });
+                backPlate.SubscribeChanged((key, region) =>
+                {
+                    EvictFromHandles(key, region, handles());
+                });
 
-            backPlate.SubscribeRemove((key) =>
-            {
-                EvictFromHandles(key, null, handles());
-            });
+                backPlate.SubscribeRemove((key) =>
+                {
+                    EvictFromHandles(key, null, handles());
+                });
 
-            backPlate.SubscribeRemove((key, region) =>
-            {
-                EvictFromHandles(key, region, handles());
-            });
+                backPlate.SubscribeRemove((key, region) =>
+                {
+                    EvictFromHandles(key, region, handles());
+                });
 
-            backPlate.SubscribeClear(() =>
-            {
-                this.ClearHandles(handles());
-            });
+                backPlate.SubscribeClear(() =>
+                {
+                    this.ClearHandles(handles());
+                });
 
-            backPlate.SubscribeClearRegion((region) =>
-            {
-                this.ClearRegionHandles(region, handles());
-            });
+                backPlate.SubscribeClearRegion((region) =>
+                {
+                    this.ClearRegionHandles(region, handles());
+                });
+            }
         }
 
         /// <summary>
@@ -817,7 +779,7 @@ namespace CacheManager.Core.Cache
             }
 
             var result = false;
-            foreach (var handle in this.cacheHandles)
+            foreach (var handle in this.cacheHandles.Value)
             {
                 // do not set result back to false if one handle didn't add the item.
                 if (AddItemToHandle(item, handle))
@@ -847,7 +809,7 @@ namespace CacheManager.Core.Cache
                 throw new ArgumentNullException("item");
             }
 
-            foreach (var handle in this.cacheHandles)
+            foreach (var handle in this.cacheHandles.Value)
             {
                 if (handle.Configuration.EnableStatistics)
                 {
@@ -865,15 +827,15 @@ namespace CacheManager.Core.Cache
             }
 
             // update back plate
-            if (this.cacheBackPlate != null)
+            if (this.Configuration.HasBackPlate)
             {
                 if (string.IsNullOrWhiteSpace(item.Region))
                 {
-                    this.cacheBackPlate.NotifyChange(item.Key);
+                    this.cacheBackPlate.Value.NotifyChange(item.Key);
                 }
                 else
                 {
-                    this.cacheBackPlate.NotifyChange(item.Key, item.Region);
+                    this.cacheBackPlate.Value.NotifyChange(item.Key, item.Region);
                 }
             }
 
@@ -889,14 +851,14 @@ namespace CacheManager.Core.Cache
         {
             if (disposeManaged)
             {
-                foreach (var handle in this.cacheHandles)
+                foreach (var handle in this.cacheHandles.Value)
                 {
                     handle.Dispose();
                 }
 
-                if (this.cacheBackPlate != null)
+                if (this.Configuration.HasBackPlate)
                 {
-                    this.cacheBackPlate.Dispose();
+                    this.cacheBackPlate.Value.Dispose();
                 }
             }
 
@@ -927,9 +889,9 @@ namespace CacheManager.Core.Cache
         {
             CacheItem<TCacheValue> cacheItem = null;
 
-            for (int handleIndex = 0; handleIndex < this.cacheHandles.Length; handleIndex++)
+            for (int handleIndex = 0; handleIndex < this.cacheHandles.Value.Length; handleIndex++)
             {
-                var handle = this.cacheHandles[handleIndex];
+                var handle = this.cacheHandles.Value[handleIndex];
                 if (string.IsNullOrWhiteSpace(region))
                 {
                     cacheItem = handle.GetCacheItem(key);
@@ -989,7 +951,7 @@ namespace CacheManager.Core.Cache
         {
             var result = false;
 
-            foreach (var handle in this.cacheHandles)
+            foreach (var handle in this.cacheHandles.Value)
             {
                 var handleResult = false;
                 if (!string.IsNullOrWhiteSpace(region))
@@ -1009,15 +971,15 @@ namespace CacheManager.Core.Cache
             }
 
             // update back plate
-            if (this.cacheBackPlate != null)
+            if (this.Configuration.HasBackPlate)
             {
                 if (string.IsNullOrWhiteSpace(region))
                 {
-                    this.cacheBackPlate.NotifyRemove(key);
+                    this.cacheBackPlate.Value.NotifyRemove(key);
                 }
                 else
                 {
-                    this.cacheBackPlate.NotifyRemove(key, region);
+                    this.cacheBackPlate.Value.NotifyRemove(key, region);
                 }
             }
 
@@ -1080,7 +1042,7 @@ namespace CacheManager.Core.Cache
             var addResult = false;
 
             var updateHandles = new List<BaseCacheHandle<TCacheValue>>();
-            foreach (var handle in this.cacheHandles)
+            foreach (var handle in this.cacheHandles.Value)
             {
                 if (AddItemToHandle(item, handle))
                 {
@@ -1122,11 +1084,11 @@ namespace CacheManager.Core.Cache
 
                 case CacheUpdateMode.Full:
                     // update all cache handles except the one where we found the item
-                    for (int handleIndex = 0; handleIndex < this.cacheHandles.Length; handleIndex++)
+                    for (int handleIndex = 0; handleIndex < this.cacheHandles.Value.Length; handleIndex++)
                     {
                         if (handleIndex != foundIndex)
                         {
-                            this.cacheHandles[handleIndex].Add(item);
+                            this.cacheHandles.Value[handleIndex].Add(item);
                         }
                     }
 
@@ -1140,11 +1102,11 @@ namespace CacheManager.Core.Cache
                     }
 
                     // update all cache handles with lower order, up the list
-                    for (int handleIndex = 0; handleIndex < this.cacheHandles.Length; handleIndex++)
+                    for (int handleIndex = 0; handleIndex < this.cacheHandles.Value.Length; handleIndex++)
                     {
                         if (handleIndex < foundIndex)
                         {
-                            this.cacheHandles[handleIndex].Add(item);
+                            this.cacheHandles.Value[handleIndex].Add(item);
                         }
                     }
 
@@ -1192,16 +1154,16 @@ namespace CacheManager.Core.Cache
         /// <exception cref="System.ArgumentOutOfRangeException">If excludeIndex is not valid.</exception>
         private void EvictFromOtherHandles(string key, string region, int excludeIndex)
         {
-            if (excludeIndex < 0 || excludeIndex >= this.cacheHandles.Length)
+            if (excludeIndex < 0 || excludeIndex >= this.cacheHandles.Value.Length)
             {
                 throw new ArgumentOutOfRangeException("excludeIndex");
             }
 
-            for (int handleIndex = 0; handleIndex < this.cacheHandles.Length; handleIndex++)
+            for (int handleIndex = 0; handleIndex < this.cacheHandles.Value.Length; handleIndex++)
             {
                 if (handleIndex != excludeIndex)
                 {
-                    var handle = this.cacheHandles[handleIndex];
+                    var handle = this.cacheHandles.Value[handleIndex];
                     bool result;
                     if (string.IsNullOrWhiteSpace(region))
                     {
@@ -1419,15 +1381,15 @@ namespace CacheManager.Core.Cache
             }
 
             // update back plate
-            if (overallResult && this.cacheBackPlate != null)
+            if (overallResult && this.Configuration.HasBackPlate)
             {
                 if (string.IsNullOrWhiteSpace(region))
                 {
-                    this.cacheBackPlate.NotifyChange(key);
+                    this.cacheBackPlate.Value.NotifyChange(key);
                 }
                 else
                 {
-                    this.cacheBackPlate.NotifyChange(key, region);
+                    this.cacheBackPlate.Value.NotifyChange(key, region);
                 }
             }
 
@@ -1449,11 +1411,11 @@ namespace CacheManager.Core.Cache
             }
 
             // .Where(p => p.Key != excludeIndex).Select(p => p.Value)
-            for (int handleIndex = 0; handleIndex < this.cacheHandles.Length; handleIndex++)
+            for (int handleIndex = 0; handleIndex < this.cacheHandles.Value.Length; handleIndex++)
             {
                 if (handleIndex != excludeIndex)
                 {
-                    this.cacheHandles[handleIndex].Put(item);
+                    this.cacheHandles.Value[handleIndex].Put(item);
                     //// handle.Stats.OnPut(item); don't update,
                     //// we expect the item to be in the cache already at this point, so we should not increase the count...
 

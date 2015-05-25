@@ -220,7 +220,7 @@ namespace CacheManager.Core.Cache
         {
             CacheItem<TCacheValue> item = this.GetCacheItem(key, region);
 
-            if (item != null && item.Key.Equals(key) && item.Region.Equals(region))
+            if (item != null && item.Key.Equals(key) && item.Region != null && item.Region.Equals(region))
             {
                 return item.Value;
             }

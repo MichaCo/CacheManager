@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.31101.0
+# Visual Studio 14
+VisualStudioVersion = 14.0.22823.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CacheManager.Core", "src\CacheManager.Core\CacheManager.Core.csproj", "{701DF657-8670-4313-A06B-63D8485B18F9}"
 EndProject
@@ -86,6 +86,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Articles", "Articles", "{BF
 	EndProjectSection
 EndProject
 Global
+	GlobalSection(Performance) = preSolution
+		HasPerformanceSessions = true
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
@@ -196,8 +199,5 @@ Global
 		{26D20E36-3DB8-49DF-8CEB-4BF9CEAE7ED4} = {A4153E09-B842-4BBF-B4D1-D05F8792A9A5}
 		{009FAF28-6829-414E-A03F-6A39660B12A6} = {3CBC4C94-1EE1-44E8-BB56-620B8A7F7777}
 		{3CEA3848-8C1A-41DA-B65C-90E57A7447CB} = {3CBC4C94-1EE1-44E8-BB56-620B8A7F7777}
-	EndGlobalSection
-	GlobalSection(Performance) = preSolution
-		HasPerformanceSessions = true
 	EndGlobalSection
 EndGlobal

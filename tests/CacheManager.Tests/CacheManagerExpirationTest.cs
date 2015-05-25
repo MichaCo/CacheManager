@@ -24,16 +24,16 @@ namespace CacheManager.Tests
             using (var cache = CacheFactory.Build("testCache", settings =>
             {
                 settings.WithSystemRuntimeCacheHandle("handleA")
-                        .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMilliseconds(10));
+                        .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMilliseconds(50));
             }))
             {
                 cache.Put("key", "value");
 
-                Thread.Sleep(5);
+                Thread.Sleep(20);
 
                 cache.Get("key").Should().Be("value");
 
-                Thread.Sleep(8);
+                Thread.Sleep(40);
 
                 cache.Get("key").Should().BeNull("Should be expired.");
             }

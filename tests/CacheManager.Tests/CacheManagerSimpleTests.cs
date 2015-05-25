@@ -56,23 +56,7 @@ namespace CacheManager.Tests
             act.ShouldThrow<InvalidOperationException>()
                 .WithMessage("Expiration mode is defined without timeout.");            
         }
-
-        [Fact]
-        [ReplaceCulture]
-        public void CacheManager_ManuallyAddHandler_WithNullValue()
-        {
-            // arrange
-            var cfg = ConfigurationBuilder.BuildConfiguration(settings => { });
-            var cache = new BaseCacheManager<string>("cache", cfg);
-
-            // act
-            Action act = () => cache.AddCacheHandle(null);
-
-            // assert
-            act.ShouldThrow<ArgumentNullException>()
-                .WithMessage("*Parameter name: handle");
-        }
-
+        
         [Fact]
         [ReplaceCulture]
         public void CacheManager_Ctor_Cfg_WithoutName()
@@ -84,7 +68,7 @@ namespace CacheManager.Tests
 
             // assert
             act.ShouldThrow<ArgumentException>()
-                    .WithMessage("*Parameter name: cacheName");
+                    .WithMessage("*Name must not be empty*");
         }
 
         [Fact]
@@ -94,26 +78,11 @@ namespace CacheManager.Tests
             // arrange
 
             // act
-            Action act = () => new BaseCacheManager<object>("cache", null);
+            Action act = () => new BaseCacheManager<object>("name", null);
 
             // assert
             act.ShouldThrow<ArgumentException>()
                     .WithMessage("*Parameter name: configuration");
-        }
-
-        [Fact]
-        [ReplaceCulture]
-        public void CacheManager_Ctor_Handles_WithNullValue()
-        {
-            // arrange
-            var cfg = ConfigurationBuilder.BuildConfiguration(settings => { });
-
-            // act
-            Action act = () => new BaseCacheManager<object>("cache", cfg, null);
-
-            // assert
-            act.ShouldThrow<ArgumentException>()
-                    .WithMessage("*Parameter name: handles");
         }
 
         #endregion general

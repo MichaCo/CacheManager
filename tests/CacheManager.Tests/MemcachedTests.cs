@@ -22,12 +22,15 @@ namespace CacheManager.Tests
         public void Memcached_Ctor()
         {
             // arrange act
-            Action act = () => CacheFactory.Build<IAmNotSerializable>("myCache", settings =>
+            var cache = CacheFactory.Build<IAmNotSerializable>("myCache", settings =>
                             {
                                 settings.WithUpdateMode(CacheUpdateMode.Full)
                                     .WithMemcachedCacheHandle("default")
                                     .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1));
                             });
+
+            Action act = () => cache.Add("test", new IAmNotSerializable());
+
             // assert
             act.ShouldThrow<TargetInvocationException>()
                 .WithInnerException<InvalidOperationException>()

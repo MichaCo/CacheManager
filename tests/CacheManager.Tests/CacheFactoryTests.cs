@@ -27,8 +27,8 @@ namespace CacheManager.Tests
             Action act = () => CacheFactory.FromConfiguration<object>(null, new CacheManagerConfiguration());
 
             // assert
-            act.ShouldThrow<ArgumentNullException>()
-                .WithMessage("*Parameter name: cacheName*");
+            act.ShouldThrow<ArgumentException>()
+                .WithMessage("*Name must not be empty*");
         }
 
         [Fact]
@@ -38,7 +38,7 @@ namespace CacheManager.Tests
             // arrange
 
             // act
-            Action act = () => CacheFactory.FromConfiguration<object>("cache", (CacheManagerConfiguration)null);
+            Action act = () => CacheFactory.FromConfiguration<object>("name", (CacheManagerConfiguration)null);
 
             // assert
             act.ShouldThrow<ArgumentNullException>()
@@ -69,8 +69,8 @@ namespace CacheManager.Tests
             Action act = () => CacheFactory.Build(null, settings => { });
 
             // assert
-            act.ShouldThrow<ArgumentNullException>()
-                .WithMessage("*Parameter name: cacheName*");
+            act.ShouldThrow<ArgumentException>()
+                .WithMessage("*Name must not be empty*");
         }
 
         [Fact]
@@ -224,10 +224,16 @@ namespace CacheManager.Tests
         public void CacheFactory_Build_WithRedisBackPlateNoBackplateSource()
         {
             // arrange act
-            Action act = () => CacheFactory.Build<object>("cacheName", settings =>
+            Action act = () =>
             {
-                settings.WithRedisBackPlate("redis");
-            });
+                var cache = CacheFactory.Build<object>("cacheName", settings =>
+                {
+                    settings.WithRedisBackPlate("redis");
+                });
+
+                cache.Add("test", "test");
+                cache.Remove("test");
+            };
 
             // assert
             act.ShouldThrow<InvalidOperationException>()
@@ -256,11 +262,17 @@ namespace CacheManager.Tests
         public void CacheFactory_Build_WithRedisBackPlateNoRedisConfig()
         {
             // arrange act
-            Action act = () => CacheFactory.Build<object>("cacheName", settings =>
+            var cache = CacheFactory.Build<object>("cacheName", settings =>
             {
                 settings.WithRedisBackPlate("redis");
                 settings.WithSystemRuntimeCacheHandle("h1", true);
             });
+
+            Action act = () =>
+            {
+                cache.Add("test", "test");
+                cache.Remove("test");
+            };
 
             // assert
             act.ShouldThrow<InvalidOperationException>()

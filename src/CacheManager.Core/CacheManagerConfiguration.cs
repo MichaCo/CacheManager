@@ -13,7 +13,7 @@ namespace CacheManager.Core
         /// </summary>
         public CacheManagerConfiguration()
         {
-            this.CacheHandles = new List<CacheHandleConfiguration>();
+            this.CacheHandleConfigurations = new List<CacheHandleConfiguration>();
             this.MaxRetries = int.MaxValue;
             this.RetryTimeout = 10;
             this.CacheUpdateMode = CacheUpdateMode.Up;
@@ -39,7 +39,7 @@ namespace CacheManager.Core
         public string BackPlateName { get; internal set; }
 
         /// <summary>
-        /// Gets the <see cref="CacheUpdateMode"/> for the cache manager instance.
+        /// Gets or sets the <see cref="CacheUpdateMode"/> for the cache manager instance.
         /// <para>
         /// Drives the behavior of the cache manager how it should update the different cache
         /// handles it manages.
@@ -47,7 +47,7 @@ namespace CacheManager.Core
         /// </summary>
         /// <value>The cache update mode.</value>
         /// <see cref="CacheUpdateMode"/>
-        public CacheUpdateMode CacheUpdateMode { get; internal set; }
+        public CacheUpdateMode CacheUpdateMode { get; set; }
 
         /// <summary>
         /// Gets or sets the limit of the number of retry operations per action.
@@ -67,12 +67,23 @@ namespace CacheManager.Core
         /// Gets or sets the type of the back plate.
         /// </summary>
         /// <value>The type of the back plate.</value>
-        internal Type BackPlateType { get; set; }
+        public Type BackPlateType { get; set; }
+
+        /// <summary>
+        /// Gets a value indicating wether the cache manager has a backplate defined or not.
+        /// </summary>
+        public bool HasBackPlate
+        {
+            get
+            {
+                return this.BackPlateType != null;
+            }
+        }
 
         /// <summary>
         /// Gets the list of cache handle configurations.
         /// <para>Internally used only.</para>
         /// </summary>
-        internal IList<CacheHandleConfiguration> CacheHandles { get; private set; }
+        public IList<CacheHandleConfiguration> CacheHandleConfigurations { get; private set; }
     }
 }

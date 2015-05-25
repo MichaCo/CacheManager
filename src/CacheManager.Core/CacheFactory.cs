@@ -93,7 +93,7 @@ namespace CacheManager.Core
 
             var part = new ConfigurationBuilderCachePart();
             settings(part);
-            return CacheReflectionHelper.FromConfiguration<TCacheValue>(cacheName, part.Configuration);
+            return new BaseCacheManager<TCacheValue>(cacheName, part.Configuration);
         }
 
         /// <summary>
@@ -131,7 +131,9 @@ namespace CacheManager.Core
         /// </exception>
         public static ICacheManager<TCacheValue> FromConfiguration<TCacheValue>(string cacheName)
         {
-            return CacheReflectionHelper.FromConfiguration<TCacheValue>(cacheName, cacheName);
+            var cfg = ConfigurationBuilder.LoadConfiguration(cacheName);
+
+            return new BaseCacheManager<TCacheValue>(cacheName, cfg);
         }
 
         /// <summary>
@@ -152,8 +154,8 @@ namespace CacheManager.Core
         /// </code>
         /// </example>
         /// <param name="cacheName">The name of the cache.</param>
-        /// <param name="configName">
-        /// The configuration name must match with the configured cache name in the configuration file.
+        /// <param name="sectionName">
+        /// The cache manager section name.
         /// </param>
         /// <typeparam name="TCacheValue">The type of the cache item value.</typeparam>
         /// <returns>The cache manager instance.</returns>
@@ -168,9 +170,11 @@ namespace CacheManager.Core
         /// Thrown if no cacheManager section is defined or on certain configuration errors related
         /// to the cache handles.
         /// </exception>
-        public static ICacheManager<TCacheValue> FromConfiguration<TCacheValue>(string cacheName, string configName)
+        public static ICacheManager<TCacheValue> FromConfiguration<TCacheValue>(string cacheName, string sectionName)
         {
-            return CacheReflectionHelper.FromConfiguration<TCacheValue>(cacheName, configName);
+            var cfg = ConfigurationBuilder.LoadConfiguration(sectionName, cacheName);
+
+            return new BaseCacheManager<TCacheValue>(cacheName, cfg);
         }
 
         /// <summary>
@@ -209,7 +213,7 @@ namespace CacheManager.Core
         /// </exception>
         public static ICacheManager<TCacheValue> FromConfiguration<TCacheValue>(string cacheName, CacheManagerConfiguration configuration)
         {
-            return CacheReflectionHelper.FromConfiguration<TCacheValue>(cacheName, configuration);
+            return new BaseCacheManager<TCacheValue>(cacheName, configuration);
         }
     }
 }
