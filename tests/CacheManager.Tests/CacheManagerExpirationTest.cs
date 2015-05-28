@@ -15,8 +15,29 @@ namespace CacheManager.Tests
 #else
     [Trait("Framework", "NET45")]
 #endif
-    public class CacheManagerExpirationTest
+    public class CacheManagerExpirationTest : BaseCacheManagerTest
     {
+        [Theory]
+        [MemberData("TestCacheManagers")]
+        public void CacheManager_RemoveExpiration_DoesNotExpire<T>(T cache) where T : ICacheManager<object>
+        {
+            using (cache)
+            {
+                cache.Clear();
+
+                cache.Add(new CacheItem<object>("key", "value", ExpirationMode.Absolute, TimeSpan.FromMilliseconds(30)))
+                    .Should().BeTrue();
+
+                var item = cache.GetCacheItem("key");
+
+                cache.Put(item.WithExpiration(ExpirationMode.None, default(TimeSpan)));
+
+                Thread.Sleep(40);
+
+                cache.Get("key").Should().NotBeNull();
+            }
+        }
+
         [Fact]
         [ReplaceCulture]
         public void CacheManager_Configuration_AbsoluteExpires()
