@@ -1,9 +1,10 @@
-﻿using System;
-using System.Diagnostics;
-using System.Threading;
-
-namespace CacheManager.Core.Cache
+﻿namespace CacheManager.Core.Cache
 {
+#if !PORTABLE
+    using System;
+    using System.Diagnostics;
+    using System.Threading;
+
     internal class CachePerformanceCounters<T> : IDisposable
     {
         private const string Category = ".NET CacheManager";
@@ -278,4 +279,5 @@ namespace CacheManager.Core.Cache
             }
         }
     }
+#endif
 }

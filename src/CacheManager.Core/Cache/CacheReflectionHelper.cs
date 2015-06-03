@@ -9,7 +9,7 @@ namespace CacheManager.Core.Cache
 {
     internal static class CacheReflectionHelper
     {
-        internal static ICollection<BaseCacheHandle<TCacheValue>> CreateCacheHandles<TCacheValue>(BaseCacheManager<TCacheValue> manager)
+        public static ICollection<BaseCacheHandle<TCacheValue>> CreateCacheHandles<TCacheValue>(BaseCacheManager<TCacheValue> manager)
         {
             var managerConfiguration = manager.Configuration;
             var handles = new List<BaseCacheHandle<TCacheValue>>();
@@ -23,7 +23,11 @@ namespace CacheManager.Core.Cache
 
                 // if the configured type doesn't have a generic type definition ( <T> is not
                 // defined )
+#if NET40
                 if (handleType.IsGenericTypeDefinition)
+#else
+                if (handleType.GetTypeInfo().IsGenericTypeDefinition)
+#endif
                 {
                     instanceType = handleType.MakeGenericType(new Type[] { typeof(TCacheValue) });
                 }
@@ -42,11 +46,11 @@ namespace CacheManager.Core.Cache
 
         internal static CacheBackPlate CreateBackPlate<TCacheValue>(BaseCacheManager<TCacheValue> manager)
         {
-            if(manager == null)
+            if (manager == null)
             {
                 throw new ArgumentNullException("manager");
             }
-            if(manager.Configuration == null)
+            if (manager.Configuration == null)
             {
                 throw new ArgumentException("Manager's configuration must not be null.", "manager");
             }
@@ -79,19 +83,31 @@ namespace CacheManager.Core.Cache
             return null;
         }
 
-        public static IEnumerable<Type> GetGenericBaseTypes(this Type type)
+        private static IEnumerable<Type> GetGenericBaseTypes(this Type type)
         {
-            if (!type.BaseType.IsGenericType)
+#if NET40
+            var baseType = type.BaseType;
+            if (baseType == null || !baseType.IsGenericType)
+#else
+            var baseType = type.GetTypeInfo().BaseType;
+            if (baseType == null || !baseType.GetTypeInfo().IsGenericType)
+#endif
             {
                 return Enumerable.Empty<Type>();
             }
 
-            var genericBaseType = type.BaseType.IsGenericTypeDefinition ? type.BaseType : type.BaseType.GetGenericTypeDefinition();
+#if NET40
+            var genericBaseType = baseType.IsGenericTypeDefinition ? baseType : baseType.GetGenericTypeDefinition();
             return Enumerable.Repeat(genericBaseType, 1)
-                             .Concat(type.BaseType.GetGenericBaseTypes());
+                .Concat(baseType.GetGenericBaseTypes());
+#else
+            var genericBaseType = baseType.GetTypeInfo().IsGenericTypeDefinition ? baseType : baseType.GetGenericTypeDefinition();
+            return Enumerable.Repeat(genericBaseType, 1)
+                .Concat(baseType.GetGenericBaseTypes());
+#endif
         }
 
-        public static void ValidateCacheHandleGenericTypeArguments(Type handle)
+        private static void ValidateCacheHandleGenericTypeArguments(Type handle)
         {
             // not really needed due to the generic type from callees being restricted.
             if (!handle.GetGenericBaseTypes().Any(p => p == typeof(BaseCacheHandle<>)))
@@ -103,24 +119,18 @@ namespace CacheManager.Core.Cache
                         handle.ToString()));
             }
 
+#if PORTABLE
+            var handleInfo = handle.GetTypeInfo();
+            if (handleInfo.IsGenericType && !handleInfo.IsGenericTypeDefinition)
+#else
             if (handle.IsGenericType && !handle.IsGenericTypeDefinition)
+#endif
             {
-                if (handle.GetGenericArguments().Count() != 1)
-                {
-                    throw new InvalidOperationException(
-                        string.Format(
-                            CultureInfo.InvariantCulture,
-                            "Invalid number of generic type arguments found for handle [{0}].",
-                            handle.ToString()));
-                }
-                if (handle.GetGenericArguments().Any())
-                {
-                    throw new InvalidOperationException(
-                        string.Format(
-                            CultureInfo.InvariantCulture,
-                            "Cache handle type [{0}] should not have any generic arguments defined.",
-                            handle.ToString()));
-                }
+                throw new InvalidOperationException(
+                    string.Format(
+                        CultureInfo.InvariantCulture,
+                        "Cache handle type [{0}] should not have any generic arguments defined.",
+                        handle.ToString()));                
             }
         }
     }

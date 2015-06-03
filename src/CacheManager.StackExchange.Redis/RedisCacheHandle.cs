@@ -255,6 +255,14 @@ namespace CacheManager.Redis
                     {
                         return new UpdateItemResult<TCacheValue>(newValue, tries > 1, true, tries);
                     }
+                    else
+                    {
+                        var checkItem = this.GetCacheItemInternal(key, region);
+                        if (newValue.Equals(checkItem.Value))
+                        {
+                            throw new InvalidOperationException("Updated although not committed.");
+                        }
+                    }
                 }
                 while (committed == false && tries <= config.MaxRetries);
 

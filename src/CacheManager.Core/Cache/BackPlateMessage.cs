@@ -229,7 +229,8 @@ namespace CacheManager.Core.Cache
 
         private static string Decode(string value)
         {
-            return Encoding.UTF8.GetString(Convert.FromBase64String(value));
+            var bytes = Convert.FromBase64String(value);
+            return Encoding.UTF8.GetString(bytes, 0, bytes.Length);
         }
 
         private static string Encode(string value)

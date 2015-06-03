@@ -5,6 +5,7 @@
 *.suo
 *.user
 *.sln.docstates
+*.lock.json
 
 # Build results
 
@@ -157,3 +158,4 @@ $RECYCLE.BIN/
 /packages
 /samples/CacheManager.Examples/packages
 *.rdb
+/.vs/config/applicationhost.config

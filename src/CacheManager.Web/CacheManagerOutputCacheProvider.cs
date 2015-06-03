@@ -3,7 +3,6 @@ using System.Collections.Specialized;
 using System.Reflection;
 using System.Web.Caching;
 using CacheManager.Core;
-using CacheManager.Core.Configuration;
 
 namespace CacheManager.Web
 {

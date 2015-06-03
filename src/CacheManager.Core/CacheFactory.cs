@@ -96,6 +96,7 @@ namespace CacheManager.Core
             return new BaseCacheManager<TCacheValue>(cacheName, part.Configuration);
         }
 
+#if !PORTABLE
         /// <summary>
         /// <para>Instantiates a cache manager from app.config or web.config.</para>
         /// <para>
@@ -176,6 +177,7 @@ namespace CacheManager.Core
 
             return new BaseCacheManager<TCacheValue>(cacheName, cfg);
         }
+#endif
 
         /// <summary>
         /// <para>Instantiates a cache manager using the given <paramref name="configuration"/>.</para>
