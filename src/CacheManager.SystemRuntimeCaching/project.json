@@ -1,0 +1,33 @@
+{
+  "version": "0.6.0.0",
+  "description": "CacheManager is an open source abstraction layer for caching written in C#. It supports various cache providers and implements many advanced features. This package contains the specific cache handle for System.Runtime.Caching.MemoryCache.",
+  "authors": [ "MichaConrad" ],
+  "tags": [ "Caching", "Cache", "CacheManager", "Distributed Cache", "StackExchange Redis", "Azure AppFabric", "Memcached" ],
+  "projectUrl": "http://mconrad.azurewebsites.net/",
+  "licenseUrl": "https://github.com/MichaCo/CacheManager/blob/master/LICENSE",  
+  "exclude": [
+    "bin/**/*.*",
+    "obj/**/*.*",
+    "Properties/**/*.*"
+  ],
+  "dependencies": {
+    "CacheManager.Core": "0.6.0-*"
+  },
+  "frameworks": {
+    "net40": {
+      "frameworkAssemblies": {
+        "System.Runtime.Caching": "4.0.0.0"
+      }
+    },
+    "net45": {
+      "frameworkAssemblies": {
+        "System.Runtime.Caching": "4.0.0.0"
+      }
+    },
+    "dnx451": {
+      "frameworkAssemblies": {
+        "System.Runtime.Caching": "4.0.0.0"
+      }
+    }
+  }
+}

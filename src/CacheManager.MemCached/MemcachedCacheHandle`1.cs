@@ -61,7 +61,7 @@ namespace CacheManager.Memcached
             }
             catch (ConfigurationErrorsException ex)
             {
-                throw new ConfigurationErrorsException("Failed to initialize " + this.GetType().Name + ". " + ex.BareMessage, ex);
+                throw new InvalidOperationException("Failed to initialize " + this.GetType().Name + ". " + ex.BareMessage, ex);
             }
         }
 

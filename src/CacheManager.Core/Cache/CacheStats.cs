@@ -26,8 +26,9 @@ namespace CacheManager.Core.Cache
         private readonly bool isPerformanceCounterEnabled;
         private readonly bool isStatsEnabled;
         private readonly object lockObject;
+#if !PORTABLE
         private readonly CachePerformanceCounters<TCacheValue> performanceCounters;
-
+#endif
         /// <summary>
         /// Initializes a new instance of the <see cref="CacheStats{TCacheValue}"/> class.
         /// </summary>
@@ -62,10 +63,12 @@ namespace CacheManager.Core.Cache
             this.isPerformanceCounterEnabled = enablePerformanceCounters;
             this.counters = new ConcurrentDictionary<string, CacheStatsCounter>();
 
+#if !PORTABLE
             if (this.isPerformanceCounterEnabled)
             {
                 this.performanceCounters = new CachePerformanceCounters<TCacheValue>(cacheName, handleName, this);
             }
+#endif
         }
 
         /// <summary>
@@ -400,10 +403,12 @@ namespace CacheManager.Core.Cache
         {
             if (disposeManaged)
             {
+#if !PORTABLE
                 if (this.isPerformanceCounterEnabled)
                 {
                     this.performanceCounters.Dispose();
                 }
+#endif
             }
         }
 

@@ -1,5 +1,7 @@
 ﻿using System;
+#if !PORTABLE
 using System.Runtime.Serialization;
+#endif
 using CacheManager.Core.Configuration;
 
 namespace CacheManager.Core
@@ -9,8 +11,12 @@ namespace CacheManager.Core
     /// information needed by the cache handles and manager.
     /// </summary>
     /// <typeparam name="T">The type of the cache value.</typeparam>
+#if !PORTABLE
     [Serializable]
     public class CacheItem<T> : ISerializable
+#else
+    public class CacheItem<T>
+#endif
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="CacheItem{T}"/> class.
@@ -93,6 +99,7 @@ namespace CacheManager.Core
         {
         }
 
+#if !PORTABLE
         /// <summary>
         /// Initializes a new instance of the <see cref="CacheItem{T}"/> class.
         /// </summary>
@@ -115,6 +122,7 @@ namespace CacheManager.Core
             this.CreatedUtc = info.GetDateTime("CreatedUtc");
             this.LastAccessedUtc = info.GetDateTime("LastAccessedUtc");
         }
+#endif
 
         private CacheItem(string key, string region, T value, DateTime created, DateTime lastAccess, ExpirationMode expiration, TimeSpan timeout)
         {
@@ -191,6 +199,7 @@ namespace CacheManager.Core
             private set;
         }
 
+#if !PORTABLE
         /// <summary>
         /// Populates a <see cref="T:System.Runtime.Serialization.SerializationInfo"/> with the data
         /// needed to serialize the target object.
@@ -219,6 +228,7 @@ namespace CacheManager.Core
             info.AddValue("CreatedUtc", this.CreatedUtc);
             info.AddValue("LastAccessedUtc", this.LastAccessedUtc);
         }
+#endif
 
         /// <summary>
         /// Creates a copy of the current cache item with different expiration options.

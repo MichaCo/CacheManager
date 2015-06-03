@@ -1,10 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Configuration;
-
-namespace CacheManager.Core.Configuration
+﻿namespace CacheManager.Core.Configuration
 {
+#if !PORTABLE
+
+    using System;
+    using System.Collections.Generic;
+    using System.ComponentModel;
+    using System.Configuration;
+
     /// <summary>
     /// Part of the section defining the available cache handles.
     /// </summary>
@@ -533,4 +535,6 @@ namespace CacheManager.Core.Configuration
         [ConfigurationProperty("xmlns", IsRequired = false)]
         public string Xmlns { get; set; }
     }
+
+#endif
 }

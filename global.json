@@ -1,0 +1,11 @@
+﻿{
+  "projects": [
+    "src",
+    "test",
+    "E:/GIT/dotnet/corefx/src/System.Console/src"
+  ],
+ 
+  "sdk": {
+    "version": "default"
+  }
+}

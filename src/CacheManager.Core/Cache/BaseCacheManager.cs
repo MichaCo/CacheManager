@@ -31,8 +31,13 @@ namespace CacheManager.Core.Cache
         /// using the specified configuration.
         /// </summary>
         /// <param name="name">The cache name.</param>
-        /// <param name="configuration">The configuration which defines the name of the manager and contains information of the cache handles this instance should manage.</param>
-        /// <exception cref="System.ArgumentNullException">When <paramref name="configuration"/> is null.</exception>
+        /// <param name="configuration">
+        /// The configuration which defines the name of the manager and contains information of the
+        /// cache handles this instance should manage.
+        /// </param>
+        /// <exception cref="System.ArgumentNullException">
+        /// When <paramref name="configuration"/> is null.
+        /// </exception>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "nope")]
         public BaseCacheManager(string name, CacheManagerConfiguration configuration)
         {
@@ -702,68 +707,6 @@ namespace CacheManager.Core.Cache
         }
 
         /// <summary>
-        /// Sets the cache back plate and subscribes to it.
-        /// </summary>
-        /// <param name="backPlate">The back plate.</param>
-        /// <exception cref="System.ArgumentNullException">
-        /// If <paramref name="backPlate"/> is null.
-        /// </exception>
-        private void RegisterCacheBackPlate(CacheBackPlate backPlate)
-        {
-            if (backPlate == null)
-            {
-                throw new ArgumentNullException("backPlate");
-            }
-
-            // TODO: better throw? Or at least log warn
-            if (this.cacheHandles.Value.Any(p => p.Configuration.IsBackPlateSource))
-            {
-                var handles = new Func<BaseCacheHandle<TCacheValue>[]>(() =>
-                {
-                    var handleList = new List<BaseCacheHandle<TCacheValue>>();
-                    foreach (var handle in this.cacheHandles.Value)
-                    {
-                        if (!handle.Configuration.IsBackPlateSource)
-                        {
-                            handleList.Add(handle);
-                        }
-                    }
-                    return handleList.ToArray();
-                });
-
-                backPlate.SubscribeChanged((key) =>
-                {
-                    EvictFromHandles(key, null, handles());
-                });
-
-                backPlate.SubscribeChanged((key, region) =>
-                {
-                    EvictFromHandles(key, region, handles());
-                });
-
-                backPlate.SubscribeRemove((key) =>
-                {
-                    EvictFromHandles(key, null, handles());
-                });
-
-                backPlate.SubscribeRemove((key, region) =>
-                {
-                    EvictFromHandles(key, region, handles());
-                });
-
-                backPlate.SubscribeClear(() =>
-                {
-                    this.ClearHandles(handles());
-                });
-
-                backPlate.SubscribeClearRegion((region) =>
-                {
-                    this.ClearRegionHandles(region, handles());
-                });
-            }
-        }
-
-        /// <summary>
         /// Adds a value to the cache handles. Triggers OnAdd if the key has been added.
         /// </summary>
         /// <param name="item">The <c>CacheItem</c> to be added to the cache.</param>
@@ -1179,6 +1122,68 @@ namespace CacheManager.Core.Cache
                         handle.Stats.OnRemove(region);
                     }
                 }
+            }
+        }
+
+        /// <summary>
+        /// Sets the cache back plate and subscribes to it.
+        /// </summary>
+        /// <param name="backPlate">The back plate.</param>
+        /// <exception cref="System.ArgumentNullException">
+        /// If <paramref name="backPlate"/> is null.
+        /// </exception>
+        private void RegisterCacheBackPlate(CacheBackPlate backPlate)
+        {
+            if (backPlate == null)
+            {
+                throw new ArgumentNullException("backPlate");
+            }
+
+            // TODO: better throw? Or at least log warn
+            if (this.cacheHandles.Value.Any(p => p.Configuration.IsBackPlateSource))
+            {
+                var handles = new Func<BaseCacheHandle<TCacheValue>[]>(() =>
+                {
+                    var handleList = new List<BaseCacheHandle<TCacheValue>>();
+                    foreach (var handle in this.cacheHandles.Value)
+                    {
+                        if (!handle.Configuration.IsBackPlateSource)
+                        {
+                            handleList.Add(handle);
+                        }
+                    }
+                    return handleList.ToArray();
+                });
+
+                backPlate.SubscribeChanged((key) =>
+                {
+                    EvictFromHandles(key, null, handles());
+                });
+
+                backPlate.SubscribeChanged((key, region) =>
+                {
+                    EvictFromHandles(key, region, handles());
+                });
+
+                backPlate.SubscribeRemove((key) =>
+                {
+                    EvictFromHandles(key, null, handles());
+                });
+
+                backPlate.SubscribeRemove((key, region) =>
+                {
+                    EvictFromHandles(key, region, handles());
+                });
+
+                backPlate.SubscribeClear(() =>
+                {
+                    this.ClearHandles(handles());
+                });
+
+                backPlate.SubscribeClearRegion((region) =>
+                {
+                    this.ClearRegionHandles(region, handles());
+                });
             }
         }
 

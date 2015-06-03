@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using System.Reflection;
 
 namespace CacheManager.Core.Cache
 {
@@ -497,10 +498,17 @@ namespace CacheManager.Core.Cache
                 return default(TOut);
             }
 
-            if (typeof(TOut).IsClass)
+#if NET40
+            var info = typeof(TOut);
+            if (info.IsClass)
+#else
+            var info = typeof(TOut).GetTypeInfo();
+            if (info.IsClass)
+#endif
             {
                 return (TOut)value;
             }
+
             object changed = Convert.ChangeType(value, typeof(TOut), CultureInfo.InvariantCulture);
             return changed == null ? (TOut)value : (TOut)changed;
         }

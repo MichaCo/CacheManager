@@ -158,7 +158,14 @@ namespace CacheManager.Core.Cache
             var fullKey = GetKey(key, region);
 
             CacheItem<TCacheValue> result = null;
-            this.cache.TryGetValue(fullKey, out result);
+            if (this.cache.TryGetValue(fullKey, out result))
+            {
+                if (IsExpired(result))
+                {
+                    this.cache.TryRemove(fullKey, out result);
+                    return null;
+                }
+            }
 
             return result;
         }
@@ -226,6 +233,23 @@ namespace CacheManager.Core.Cache
             }
 
             return string.Concat(region, ":", key);
+        }
+
+        private static bool IsExpired(CacheItem<TCacheValue> item)
+        {
+            var now = DateTime.UtcNow;
+            if (item.ExpirationMode == ExpirationMode.Absolute
+                && item.CreatedUtc.Add(item.ExpirationTimeout) < now)
+            {
+                return true;
+            }
+            else if (item.ExpirationMode == ExpirationMode.Sliding
+                && item.LastAccessedUtc.Add(item.ExpirationTimeout) < now)
+            {
+                return true;
+            }
+
+            return false;
         }
 
         private UpdateItemResult<TCacheValue> UpdateInternal(string key, string region, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config)
