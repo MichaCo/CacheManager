@@ -11,7 +11,7 @@
     "Properties/**/*.*"
   ],
   "dependencies": {
-    "CacheManager.Core": "0.6.0-*"
+    "CacheManager.Core": "0.6.0.0"
   },
   "frameworks": {
     "net40": {

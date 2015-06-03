@@ -7,11 +7,6 @@
   "licenseUrl": "https://github.com/MichaCo/CacheManager/blob/master/LICENSE",
   "dependencies": {
   },
-  "exclude": [
-    "bin/**/*.*",
-    "obj/**/*.*",
-    "*.Cache"
-  ],
   "frameworks": {
     "net40": {
       "frameworkAssemblies": {
@@ -37,7 +32,7 @@
         "System.Linq": "4.0.0-beta-*",
         "System.Diagnostics.Tools": "4.0.0-beta-*",
         "System.Globalization": "4.0.10-beta-*",
-        "System.Threading": "4.0.10-beta-22913",
+        "System.Threading": "4.0.10-beta-*",
         "System.Threading.Timer": "4.0.0-beta-*",
         "System.Collections.Concurrent": "4.0.10-beta-*",
         "System.Text.Encoding": "4.0.10-beta-*",

@@ -18,7 +18,7 @@
         "System.Configuration": ""
       },
       "dependencies": {
-        "CacheManager.SystemRuntimeCaching": "0.6.0",
+        "CacheManager.SystemRuntimeCaching": "0.6.0.0",
         "CacheManager.StackExchange.Redis": "0.6.0.0"
       }
     },

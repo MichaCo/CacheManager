@@ -6,13 +6,9 @@
   "projectUrl": "http://mconrad.azurewebsites.net/",
   "licenseUrl": "https://github.com/MichaCo/CacheManager/blob/master/LICENSE",
   "dependencies": {
-    "CacheManager.Core": "0.6.0-*",
+    "CacheManager.Core": "0.6.0.0",
     "StackExchange.Redis": "1.0.450"
   },
-  "exclude": [
-    "bin/**/*.*",
-    "obj/**/*.*"
-  ],
   "frameworks": {
     "net40": {
       "frameworkAssemblies": {
