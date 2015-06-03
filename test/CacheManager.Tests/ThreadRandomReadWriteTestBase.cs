@@ -15,10 +15,6 @@ namespace CacheManager.Tests
 #endif
     public class ThreadRandomReadWriteTestBase : BaseCacheManagerTest
     {
-        public ThreadRandomReadWriteTestBase(Microsoft.Framework.Runtime.IApplicationEnvironment env) : base(env)
-        {
-        }
-
         [Theory]
         [MemberData("TestCacheManagers")]
         public void Thread_RandomAccess(ICacheManager<object> cache)

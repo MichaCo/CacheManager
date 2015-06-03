@@ -20,10 +20,6 @@ namespace CacheManager.Tests
 #endif
     public class CacheManagerRegionTests : BaseCacheManagerTest
     {
-        public CacheManagerRegionTests(Microsoft.Framework.Runtime.IApplicationEnvironment env) : base(env)
-        {
-        }
-
         [Theory]
         [MemberData("TestCacheManagers")]
         public void CacheManager_Region_AddItems_UseSameKeys<T>(T cache) where T : ICacheManager<object>

@@ -15,10 +15,6 @@ namespace CacheManager.Tests
 #endif
     public class CacheManagerStatsTest : BaseCacheManagerTest
     {
-        public CacheManagerStatsTest(Microsoft.Framework.Runtime.IApplicationEnvironment env) : base(env)
-        {
-        }
-
         [Theory]
         [MemberData("TestCacheManagers")]
         [ReplaceCulture]

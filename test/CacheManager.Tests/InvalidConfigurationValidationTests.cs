@@ -20,10 +20,6 @@ namespace CacheManager.Tests
 #endif
     public class InvalidConfigurationValidationTests : BaseCacheManagerTest
     {
-        public InvalidConfigurationValidationTests(Microsoft.Framework.Runtime.IApplicationEnvironment env) : base(env)
-        {
-        }
-
         [Fact]
         [ReplaceCulture]
         public void Cfg_BuildConfiguration_MissingSettings()
@@ -590,12 +586,6 @@ namespace CacheManager.Tests
             col.HandleType.Should().Be(typeof(string));
             col.DefaultTimeout.Should().Be("22m");
             col.DefaultExpirationMode.Should().Be(ExpirationMode.None);
-        }
-
-        private string GetCfgFileName(string fileName)
-        {
-            Debug.WriteLine("Loading file: " + fileName + " from base path: " + this.BasePath);
-            return this.BasePath + (fileName.StartsWith("\\") ? fileName : "\\" + fileName);
         }
     }
 }

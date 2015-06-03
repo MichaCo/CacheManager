@@ -23,10 +23,6 @@ namespace CacheManager.Tests
 #endif
     public class CacheManagerSimpleTests : BaseCacheManagerTest
     {
-        public CacheManagerSimpleTests(Microsoft.Framework.Runtime.IApplicationEnvironment env) : base(env)
-        {
-        }
-
         #region general
 
         [Fact]

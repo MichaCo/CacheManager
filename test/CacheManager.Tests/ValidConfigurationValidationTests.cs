@@ -16,7 +16,7 @@ namespace CacheManager.Tests
 #else
     [Trait("Framework", "NET45")]
 #endif
-    public class ValidConfigurationValidationTests
+    public class ValidConfigurationValidationTests : BaseCacheManagerTest
     {
         [Fact]
         public void Cfg_Valid_AppConfig_ByNameByLoader()
@@ -57,7 +57,7 @@ namespace CacheManager.Tests
         public void Cfg_Valid_CfgFile_ExpirationVariances()
         {
             // arrange
-            string fileName = TestManagers.GetCfgFileName(@"\Configuration\configuration.valid.allFeatures.config");
+            string fileName = GetCfgFileName(@"\Configuration\configuration.valid.allFeatures.config");
             string cacheName = "ExpirationVariances";
 
             // act
@@ -77,7 +77,7 @@ namespace CacheManager.Tests
         public void Cfg_Valid_CfgFile_DefaultSysMemCache()
         {
             // arrange
-            string fileName = TestManagers.GetCfgFileName(@"\Configuration\configuration.valid.allFeatures.config");
+            string fileName = GetCfgFileName(@"\Configuration\configuration.valid.allFeatures.config");
             string cacheName = "DefaultSysMemCache";
 
             // act
@@ -100,7 +100,7 @@ namespace CacheManager.Tests
         public void Cfg_Valid_CfgFile_EnabledStatsAndPerformanceCounters()
         {
             // arrange
-            string fileName = TestManagers.GetCfgFileName(@"\Configuration\configuration.valid.allFeatures.config");
+            string fileName = GetCfgFileName(@"\Configuration\configuration.valid.allFeatures.config");
             string cacheName = "ExpirationVariances";
 
             // act
@@ -122,7 +122,7 @@ namespace CacheManager.Tests
         public void Cfg_Valid_CfgFile_EnabledStatsPerformanceCountersDefaults()
         {
             // arrange
-            string fileName = TestManagers.GetCfgFileName(@"\Configuration\configuration.valid.allFeatures.config");
+            string fileName = GetCfgFileName(@"\Configuration\configuration.valid.allFeatures.config");
             string cacheName = "DefaultSysMemCache";
 
             // act
@@ -140,7 +140,7 @@ namespace CacheManager.Tests
         public void Cfg_Valid_CfgFile_DisableStatsAndPerformanceCounters()
         {
             // arrange
-            string fileName = TestManagers.GetCfgFileName(@"\Configuration\configuration.valid.allFeatures.config");
+            string fileName = GetCfgFileName(@"\Configuration\configuration.valid.allFeatures.config");
             string cacheName = "c3";
 
             // act

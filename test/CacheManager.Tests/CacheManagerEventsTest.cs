@@ -17,10 +17,6 @@ namespace CacheManager.Tests
 #endif
     public class CacheManagerEventsTest : BaseCacheManagerTest
     {
-        public CacheManagerEventsTest(Microsoft.Framework.Runtime.IApplicationEnvironment env) : base(env)
-        {
-        }
-
         [Fact]
         [ReplaceCulture]
         public void CacheManager_Events_CacheActionEventArgsCtor()

@@ -231,6 +231,11 @@ namespace CacheManager.Tests
         }
 
 #endif
+    }
+    
+    [SuppressMessage("Microsoft.Design", "CA1053:StaticHolderTypesShouldNotHaveConstructors", Justification = "Needed for xunit"), ExcludeFromCodeCoverage]
+    public class BaseCacheManagerTest
+    {
         public static string GetCfgFileName(string fileName)
         {
             if (string.IsNullOrWhiteSpace(fileName))
@@ -239,17 +244,6 @@ namespace CacheManager.Tests
             }
 
             return AppDomain.CurrentDomain.BaseDirectory + (fileName.StartsWith("\\") ? fileName : "\\" + fileName);
-        }
-    }
-    
-    [SuppressMessage("Microsoft.Design", "CA1053:StaticHolderTypesShouldNotHaveConstructors", Justification = "Needed for xunit"), ExcludeFromCodeCoverage]
-    public class BaseCacheManagerTest
-    {
-        public string BasePath { get; }
-
-        public BaseCacheManagerTest(Microsoft.Framework.Runtime.IApplicationEnvironment env)
-        {
-            this.BasePath = env.ApplicationBasePath;
         }
 
         public static IEnumerable<object[]> TestCacheManagers

@@ -364,7 +364,7 @@ namespace CacheManager.Tests
         public void Redis_Valid_CfgFile_LoadWithRedisBackPlate()
         {
             // arrange
-            string fileName = TestManagers.GetCfgFileName(@"\Configuration\configuration.valid.allFeatures.config");
+            string fileName = BaseCacheManagerTest.GetCfgFileName(@"\Configuration\configuration.valid.allFeatures.config");
             string cacheName = "redisWithBackPlate";
 
             // act
