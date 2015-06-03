@@ -70,8 +70,11 @@ namespace CacheManager.Core
         public Type BackPlateType { get; set; }
 
         /// <summary>
-        /// Gets a value indicating wether the cache manager has a backplate defined or not.
+        /// Gets a value indicating whether this instance has a back plate defined.
         /// </summary>
+        /// <value>
+        /// <c>true</c> if this instance has cache back plate; otherwise, <c>false</c>.
+        /// </value>
         public bool HasBackPlate
         {
             get
@@ -84,6 +87,9 @@ namespace CacheManager.Core
         /// Gets the list of cache handle configurations.
         /// <para>Internally used only.</para>
         /// </summary>
+        /// <value>
+        /// The cache handle configurations.
+        /// </value>
         public IList<CacheHandleConfiguration> CacheHandleConfigurations { get; private set; }
     }
 }

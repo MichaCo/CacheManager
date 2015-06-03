@@ -1,14 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Globalization;
-using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
 using CacheManager.Core.Cache;
 
 namespace CacheManager.Core.Configuration
 {
+#if !PORTABLE
+
+    using System.Configuration;
+    using System.IO;
+    using System.Text.RegularExpressions;
+
+#endif
     /// <summary>
     /// Helper class to load cache manager configurations from file or to build new configurations
     /// in a fluent way.
@@ -46,6 +50,8 @@ namespace CacheManager.Core.Configuration
             settings(part);
             return part.Configuration;
         }
+
+#if !PORTABLE
 
         /// <summary>
         /// Loads a configuration from web.config or app.config.
@@ -352,6 +358,8 @@ namespace CacheManager.Core.Configuration
 
             return propInfo.IsModified;
         }
+
+#endif
     }
 
     /// <summary>
@@ -515,6 +523,17 @@ namespace CacheManager.Core.Configuration
         public ConfigurationBuilderCacheHandlePart WithHandle(Type cacheHandleBaseType, string handleName)
         {
             return this.WithHandle(cacheHandleBaseType, handleName, false);
+        }
+
+        /// <summary>
+        /// Adds a cache dictionary cache handle with the required name.
+        /// </summary>
+        /// <param name="handleName">The name to be used for the cache handle.</param>
+        /// <returns>The builder part.</returns>
+        /// <exception cref="ArgumentNullException">Thrown if handleName is null.</exception>
+        public ConfigurationBuilderCacheHandlePart WithDictionaryHandle(string handleName)
+        {
+            return this.WithHandle(typeof(DictionaryCacheHandle<>), handleName, false);
         }
 
         /// <summary>

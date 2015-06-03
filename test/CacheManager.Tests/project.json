@@ -1,0 +1,21 @@
+﻿{
+  "dependencies": {
+    "CacheManager.StackExchange.Redis": "0.6.0.0",
+    "CacheManager.SystemRuntimeCaching": "0.6.0.0",
+    "CacheManager.MemCached": "0.6.0.0",
+    "CacheManager.Couchbase": "0.6.0.0",
+    "xunit.runner.aspnet": "2.0.0-aspnet-*",
+    "FluentAssertions": "3.3.0",
+    "CacheManager.Core": "0.6.0.0",
+    "System.Runtime": "4.0.20-beta-*",
+    "System.Reflection": "4.0.10-beta-*",
+    "Moq": "4.2.1502.911"
+  },
+  "frameworks": {
+    "dnx451": {
+    }
+  },
+  "commands": {
+    "test": "xunit.runner.aspnet"
+  }
+}

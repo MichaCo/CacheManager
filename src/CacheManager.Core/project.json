@@ -1,0 +1,64 @@
+﻿{
+  "version": "0.6.0.0",
+  "description": "CacheManager is an open source abstraction layer for caching written in C#. It supports various cache providers and implements many advanced features.",
+  "authors": [ "MichaConrad" ],
+  "tags": [ "Caching", "Cache", "CacheManager", "Distributed Cache", "StackExchange Redis", "Azure AppFabric", "Memcached" ],
+  "projectUrl": "http://mconrad.azurewebsites.net/",
+  "licenseUrl": "https://github.com/MichaCo/CacheManager/blob/master/LICENSE",
+  "dependencies": {
+  },
+  "frameworks": {
+    "net40": {
+      "frameworkAssemblies": {
+        "System.Configuration": ""
+      }
+    },
+    "net45": {
+      "frameworkAssemblies": {
+        "System.Configuration": ""
+      },
+      "dependencies": {
+      }
+    },
+    "dnx451": {
+      "frameworkAssemblies": {
+        "System.Configuration": ""
+      }
+    },
+    "dnxcore50": {
+      "compilationOptions": { "define": [ "PORTABLE" ] },
+      "dependencies": {
+        "System.Collections": "4.0.10-beta-*",
+        "System.Linq": "4.0.0-beta-*",
+        "System.Diagnostics.Tools": "4.0.0-beta-*",
+        "System.Globalization": "4.0.10-beta-*",
+        "System.Threading": "4.0.10-beta-*",
+        "System.Threading.Timer": "4.0.0-beta-*",
+        "System.Collections.Concurrent": "4.0.10-beta-*",
+        "System.Text.Encoding": "4.0.10-beta-*",
+        "System.Runtime.Extensions": "4.0.10-beta-*",
+        "System.Runtime.InteropServices": "4.0.20-beta-*",
+        "System.Reflection": "4.0.10-beta-*",
+        "System.Reflection.TypeExtensions": "4.0.0-beta-*"
+      }
+    },
+    ".NETPortable,Version=v4.5,Profile=Profile111": {
+      "compilationOptions": { "define": [ "PORTABLE" ] },
+      "frameworkAssemblies": {
+        "System.Collections": "",
+        "System.Linq": "",
+        "System.Diagnostics.Tools": "",
+        "System.Globalization": "",
+        "System.Threading": "",
+        "System.Collections.Concurrent": "",
+        "System.Text.Encoding": "",
+        "System.Runtime.Extensions": "",
+        "System.Reflection": "",
+        "System.Reflection.Extensions": "",
+        "System.Runtime": "",
+        "System.Runtime.InteropServices": "",
+        "System.Text.Encoding.Extensions": ""
+      }
+    }
+  }
+}

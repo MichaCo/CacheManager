@@ -90,7 +90,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="CacheManager.Core.csproj.nuspec" />
-    <None Include="app.config.transform" />
     <None Include="Settings.StyleCop" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

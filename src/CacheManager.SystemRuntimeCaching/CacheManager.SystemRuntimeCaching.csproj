@@ -59,8 +59,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config.transform" />
-    <None Include="CacheManager.SystemRuntimeCaching.csproj.nuspec" />
     <None Include="Settings.StyleCop" />
   </ItemGroup>
   <ItemGroup>
