@@ -5,11 +5,6 @@
   "tags": [ "Caching", "Cache", "CacheManager", "Distributed Cache", "StackExchange Redis", "Azure AppFabric", "Memcached" ],
   "projectUrl": "http://mconrad.azurewebsites.net/",
   "licenseUrl": "https://github.com/MichaCo/CacheManager/blob/master/LICENSE",  
-  "exclude": [
-    "bin/**/*.*",
-    "obj/**/*.*",
-    "Properties/**/*.*"
-  ],
   "dependencies": {
     "CacheManager.Core": "0.6.0.0"
   },
