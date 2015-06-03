@@ -93,16 +93,16 @@ OnGet, OnAdd, OnPut, OnRemove, OnClear, OnClearRegion
 [Memcached.nuget]: https://www.nuget.org/packages/CacheManager.Memcached
 [Web.nuget]: https://www.nuget.org/packages/CacheManager.Web
 [Couchbase.nuget]: https://www.nuget.org/packages/CacheManager.Couchbase
-[mcweb]: http://mconrad.azurewebsites.net
+[mcweb]: http://michaconrad.com
 [articles]: https://github.com/MichaCo/CacheManager/tree/master/Articles
 [help]: http://michaco.github.io/Documentation/CacheManager/Help
-[gettingstarted]: http://mconrad.azurewebsites.net/Documentation/Index/cachemanager_getting_started
-[configuration]: http://mconrad.azurewebsites.net/Documentation/Index/cachemanager_configuration
-[featuresarticle]: http://mconrad.azurewebsites.net/Documentation/Index/cachemanager_architecture
-[updatearticle]: http://mconrad.azurewebsites.net/Documentation/Index/cachemanager_update
-[cachesyncarticle]: http://mconrad.azurewebsites.net/Documentation/Index/cachemanager_synchronization
+[gettingstarted]: http://cachemanager.net/Documentation/Index/cachemanager_getting_started
+[configuration]: http://cachemanager.net/Documentation/Index/cachemanager_configuration
+[featuresarticle]: http://cachemanager.net/Documentation/Index/cachemanager_architecture
+[updatearticle]: http://cachemanager.net/Documentation/Index/cachemanager_update
+[cachesyncarticle]: http://cachemanager.net/Documentation/Index/cachemanager_synchronization
 [program.cs]: https://github.com/MichaCo/CacheManager/blob/master/samples/CacheManager.Examples/Program.cs
 [outputcachesample]: https://github.com/MichaCo/CacheManager/tree/master/samples/CacheManager.Samples.Mvc
-[todosample]: http://mconrad.azurewebsites.net/Documentation/Index/cachemanager_backed_todo_web_app
+[todosample]: http://cachemanager.net/Documentation/Index/cachemanager_backed_todo_web_app
 
 [TOC]
