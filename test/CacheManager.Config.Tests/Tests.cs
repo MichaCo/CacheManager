@@ -1,24 +1,13 @@
-﻿using CacheManager.Core;
-using CacheManager.Core.Cache;
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using CacheManager.Core;
+using CacheManager.Core.Cache;
 
 namespace CacheManager.Config.Tests
 {
-    public class Item
-    {
-        public Item()
-        {
-        }
-
-        public string Name { get; set; }
-
-        public int Number { get; set; }
-    }
-
     public static class Tests
     {
         public static void CacheThreadTest(ICacheManager<string> cache, int seed)
@@ -54,7 +43,6 @@ namespace CacheManager.Config.Tests
                 {
                     string val = cache.Get(keyGet(i));
                 }
-
             };
 
             Parallel.Invoke(new ParallelOptions() { MaxDegreeOfParallelism = 8 }, Enumerable.Repeat(test, threads).ToArray());
@@ -124,7 +112,6 @@ namespace CacheManager.Config.Tests
                     object value;
                     if (!cache.TryUpdate("key" + rand.Next(0, items - 1), v => Guid.NewGuid().ToString(), out value))
                     {
-
                     }
                 }
 
@@ -136,5 +123,16 @@ namespace CacheManager.Config.Tests
             var opsPerSec = Math.Round(ops / swatch.Elapsed.TotalSeconds, 0);
             Console.WriteLine("\nSimpleAddGetTest completed \tafter: {0:N} ms. \twith {1:N0} Ops/s.", elapsed, opsPerSec);
         }
+    }
+
+    public class Item
+    {
+        public Item()
+        {
+        }
+
+        public string Name { get; set; }
+
+        public int Number { get; set; }
     }
 }

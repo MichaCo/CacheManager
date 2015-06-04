@@ -22,7 +22,7 @@ namespace CacheManager.Config.Tests
                 cfg.WithRedisCacheHandle("redis", true)
                     .EnablePerformanceCounters();
 
-                //cfg.WithRedisBackPlate("redis");
+                //// cfg.WithRedisBackPlate("redis");
 
                 cfg.WithRedisConfiguration("redis", config =>
                 {
@@ -35,16 +35,17 @@ namespace CacheManager.Config.Tests
 
             for (int i = 0; i < iterations; i++)
             {
-                //CacheThreadTest(
-                //    CacheFactory.FromConfiguration<string>("cache", cacheConfiguration),
-                //    i + 10);
+                //// CacheThreadTest(
+                ////    CacheFactory.FromConfiguration<string>("cache", cacheConfiguration),
+                ////    i + 10);
 
                 Tests.SimpleAddGetTest(
                     // CacheFactory.FromConfiguration(cacheConfiguration),
                     CacheFactory.FromConfiguration<object>("cache", cacheConfiguration));
-                // CacheUpdateTest(cache);
 
-                // Console.WriteLine(string.Format("Iterations ended after {0}ms.", swatch.ElapsedMilliseconds));
+                //// CacheUpdateTest(cache);
+
+                //// Console.WriteLine(string.Format("Iterations ended after {0}ms.", swatch.ElapsedMilliseconds));
                 Console.WriteLine("---------------------------------------------------------");
                 swatch.Restart();
             }

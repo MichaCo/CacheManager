@@ -236,16 +236,6 @@ namespace CacheManager.Tests
     [SuppressMessage("Microsoft.Design", "CA1053:StaticHolderTypesShouldNotHaveConstructors", Justification = "Needed for xunit"), ExcludeFromCodeCoverage]
     public class BaseCacheManagerTest
     {
-        public static string GetCfgFileName(string fileName)
-        {
-            if (string.IsNullOrWhiteSpace(fileName))
-            {
-                throw new ArgumentException("File name should not be empty", "fileName");
-            }
-
-            return AppDomain.CurrentDomain.BaseDirectory + (fileName.StartsWith("\\") ? fileName : "\\" + fileName);
-        }
-
         public static IEnumerable<object[]> TestCacheManagers
         {
             get
@@ -261,6 +251,16 @@ namespace CacheManager.Tests
                 // yield return new object[] { TestManagers.WithMemcached };
                 // yield return new object[] { TestManagers.WithCouchbaseMemcached };
             }
+        }
+
+        public static string GetCfgFileName(string fileName)
+        {
+            if (string.IsNullOrWhiteSpace(fileName))
+            {
+                throw new ArgumentException("File name should not be empty", "fileName");
+            }
+
+            return AppDomain.CurrentDomain.BaseDirectory + (fileName.StartsWith("\\") ? fileName : "\\" + fileName);
         }
     }
 }

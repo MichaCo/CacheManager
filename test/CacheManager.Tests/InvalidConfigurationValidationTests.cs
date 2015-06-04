@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Configuration;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using CacheManager.Core;
 using CacheManager.Core.Configuration;
 using FluentAssertions;
 using Xunit;
-using System.Diagnostics;
 
 namespace CacheManager.Tests
 {
