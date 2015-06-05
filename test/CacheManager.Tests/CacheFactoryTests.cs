@@ -262,17 +262,11 @@ namespace CacheManager.Tests
         public void CacheFactory_Build_WithRedisBackPlateNoRedisConfig()
         {
             // arrange act
-            var cache = CacheFactory.Build<object>("cacheName", settings =>
+            Action act = () => CacheFactory.Build<object>("cacheName", settings =>
             {
                 settings.WithRedisBackPlate("redis");
                 settings.WithSystemRuntimeCacheHandle("h1", true);
             });
-
-            Action act = () =>
-            {
-                cache.Add("test", "test");
-                cache.Remove("test");
-            };
 
             // assert
             act.ShouldThrow<InvalidOperationException>()

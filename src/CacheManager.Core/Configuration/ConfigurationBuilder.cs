@@ -85,6 +85,10 @@ namespace CacheManager.Core.Configuration
             {
                 throw new ArgumentNullException("sectionName");
             }
+            if (string.IsNullOrWhiteSpace(configName))
+            {
+                throw new ArgumentNullException("configName");
+            }
 
             var section = ConfigurationManager.GetSection(sectionName) as CacheManagerSection;
             if (section == null)

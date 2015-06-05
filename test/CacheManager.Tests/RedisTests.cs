@@ -21,14 +21,12 @@ namespace CacheManager.Tests
         public void Redis_Absolute_DoesExpire()
         {
             // arrange
-            var item = new CacheItem<object>("key", "something", ExpirationMode.Absolute, TimeSpan.FromMilliseconds(50));
-            var cache = TestManagers.WithRedisCache;
+            var item = new CacheItem<object>(Guid.NewGuid().ToString(), "something", ExpirationMode.Absolute, TimeSpan.FromMilliseconds(50));
+            var cache = TestManagers.CreateRedisCache(1);
 
             // act/assert
             using (cache)
             {
-                cache.Clear();
-
                 // act
                 var result = cache.Add(item);
 
@@ -49,18 +47,15 @@ namespace CacheManager.Tests
         public void Redis_Absolute_DoesExpire_MultiClients()
         {
             // arrange
-            var cacheA = TestManagers.WithSystemAndRedisCache;
-            var cacheB = TestManagers.WithSystemAndRedisCache;
+            var cacheA = TestManagers.CreateRedisCache(2);
+            var cacheB = TestManagers.CreateRedisCache(2);
 
             // act/assert
             using (cacheA)
             using (cacheB)
             {
-                cacheA.Clear();
-                cacheB.Clear();
-
                 // act
-                var item = new CacheItem<object>("key", "something", ExpirationMode.Absolute, TimeSpan.FromMilliseconds(50));
+                var item = new CacheItem<object>(Guid.NewGuid().ToString(), "something", ExpirationMode.Absolute, TimeSpan.FromMilliseconds(50));
 
                 var result = cacheA.Add(item);
 
@@ -86,19 +81,29 @@ namespace CacheManager.Tests
         public void Redis_Multiple_PubSub_Change()
         {
             // arrange
-            var item = new CacheItem<object>("key", "something");
+            var item = new CacheItem<object>(Guid.NewGuid().ToString(), "something");
 
             // act/assert
-            RedisTests.RunMultipleCaches((cacheA, cacheB) =>
-            {
-                cacheA.Add(item);
-                cacheB.Get(item.Key).Should().Be(item.Value);
-                cacheB.Put(item.Key, "new value");
-            },
-            (cache) =>
-            {
-                cache.Get(item.Key).Should().Be("new value");
-            }, 10, TestManagers.WithSystemAndRedisCache, TestManagers.WithSystemAndRedisCache, TestManagers.WithRedisCache, TestManagers.WithSystemAndRedisCache);
+            RedisTests.RunMultipleCaches(
+                (cacheA, cacheB) =>
+                {
+                    cacheA.Put(item);
+                    Thread.Sleep(1);
+                    var value = cacheB.Get(item.Key);
+                    value.Should().Be(item.Value);
+                    cacheB.Put(item.Key, "new value");
+                },
+                (cache) =>
+                {
+                    Thread.Sleep(1);
+                    var value = cache.Get(item.Key);
+                    value.Should().Be("new value");
+                }, 
+                3,
+                TestManagers.CreateRedisAndSystemCacheWithBackPlate(3),
+                TestManagers.CreateRedisAndSystemCacheWithBackPlate(3),
+                TestManagers.CreateRedisCache(3),
+                TestManagers.CreateRedisAndSystemCacheWithBackPlate(3));
         }
 
         [Fact]
@@ -106,19 +111,25 @@ namespace CacheManager.Tests
         public void Redis_Multiple_PubSub_Clear()
         {
             // arrange
-            var item = new CacheItem<object>("key", "something");
+            var item = new CacheItem<object>(Guid.NewGuid().ToString(), "something");
 
             // act/assert
-            RedisTests.RunMultipleCaches((cacheA, cacheB) =>
-            {
-                cacheA.Add(item);
-                cacheB.Get(item.Key).Should().Be(item.Value);
-                cacheB.Clear();
-            },
-            (cache) =>
-            {
-                cache.Get(item.Key).Should().BeNull();
-            }, 10, TestManagers.WithSystemAndRedisCache, TestManagers.WithSystemAndRedisCache, TestManagers.WithRedisCache, TestManagers.WithSystemAndRedisCache);
+            RedisTests.RunMultipleCaches(
+                (cacheA, cacheB) =>
+                {
+                    cacheA.Add(item);
+                    cacheB.Get(item.Key).Should().Be(item.Value);
+                    cacheB.Clear();
+                },
+                (cache) =>
+                {
+                    cache.Get(item.Key).Should().BeNull();
+                }, 
+                10,
+                TestManagers.CreateRedisAndSystemCacheWithBackPlate(4),
+                TestManagers.CreateRedisAndSystemCacheWithBackPlate(4),
+                TestManagers.CreateRedisCache(4),
+                TestManagers.CreateRedisAndSystemCacheWithBackPlate(4));
         }
 
         [Fact]
@@ -126,19 +137,24 @@ namespace CacheManager.Tests
         public void Redis_Multiple_PubSub_ClearRegion()
         {
             // arrange
-            var item = new CacheItem<object>("key", "something", "regionA");
+            var item = new CacheItem<object>(Guid.NewGuid().ToString(), "something", Guid.NewGuid().ToString());
 
             // act/assert
-            RedisTests.RunMultipleCaches((cacheA, cacheB) =>
-            {
-                cacheA.Add(item);
-                cacheB.Get(item.Key, item.Region).Should().Be(item.Value);
-                cacheB.ClearRegion(item.Region);
-            },
-            (cache) =>
-            {
-                cache.Get(item.Key, item.Region).Should().BeNull();
-            }, 10, TestManagers.WithSystemAndRedisCache, TestManagers.WithSystemAndRedisCache, TestManagers.WithRedisCache, TestManagers.WithSystemAndRedisCache);
+            RedisTests.RunMultipleCaches(
+                (cacheA, cacheB) =>
+                {
+                    cacheA.Add(item);
+                    cacheB.Get(item.Key, item.Region).Should().Be(item.Value);
+                    cacheB.ClearRegion(item.Region);
+                },
+                (cache) =>
+                {
+                    cache.Get(item.Key, item.Region).Should().BeNull();
+                }, 10,
+                TestManagers.CreateRedisAndSystemCacheWithBackPlate(5),
+                TestManagers.CreateRedisAndSystemCacheWithBackPlate(5),
+                TestManagers.CreateRedisCache(5),
+                TestManagers.CreateRedisAndSystemCacheWithBackPlate(5));
         }
 
         [Fact]
@@ -146,19 +162,27 @@ namespace CacheManager.Tests
         public void Redis_Multiple_PubSub_Remove()
         {
             // arrange
-            var item = new CacheItem<object>("key", "something");
+            var item = new CacheItem<object>(Guid.NewGuid().ToString(), "something");
 
             // act/assert
-            RedisTests.RunMultipleCaches((cacheA, cacheB) =>
-            {
-                cacheA.Add(item);
-                cacheB.Get(item.Key).Should().Be(item.Value);
-                cacheB.Remove(item.Key);
-            },
-            (cache) =>
-            {
-                cache.GetCacheItem(item.Key).Should().BeNull();
-            }, 10, TestManagers.WithSystemAndRedisCache, TestManagers.WithSystemAndRedisCache, TestManagers.WithRedisCache, TestManagers.WithSystemAndRedisCache);
+            RedisTests.RunMultipleCaches(
+                (cacheA, cacheB) =>
+                {
+                    cacheA.Add(item);
+                    cacheB.Get(item.Key).Should().Be(item.Value);
+                    cacheB.Remove(item.Key);
+                },
+                (cache) =>
+                {
+                    Thread.Sleep(10);
+                    var value = cache.GetCacheItem(item.Key);
+                    value.Should().BeNull();
+                }, 
+                2, 
+                TestManagers.CreateRedisAndSystemCacheWithBackPlate(6), 
+                TestManagers.CreateRedisAndSystemCacheWithBackPlate(6), 
+                TestManagers.CreateRedisCache(6), 
+                TestManagers.CreateRedisAndSystemCacheWithBackPlate(6));
         }
 
         [Fact]
@@ -173,13 +197,14 @@ namespace CacheManager.Tests
                 settings.WithRedisConfiguration("default", config =>
                 {
                     config.WithAllowAdmin()
-                        .WithDatabase(0)
+                        .WithDatabase(7)
                         .WithEndpoint("localhost", 6379);
                 });
             }))
             {
-                cache.Remove("myCounter");
-                cache.Add("myCounter", new RaceConditionTestElement() { Counter = 0 });
+                var key = Guid.NewGuid().ToString();
+                cache.Remove(key);
+                cache.Add(key, new RaceConditionTestElement() { Counter = 0 });
                 int numThreads = 5;
                 int iterations = 10;
                 int numInnerIterations = 10;
@@ -190,7 +215,7 @@ namespace CacheManager.Tests
                 {
                     for (int i = 0; i < numInnerIterations; i++)
                     {
-                        cache.Update("myCounter", (value) =>
+                        cache.Update(key, (value) =>
                         {
                             value.Counter++;
                             Interlocked.Increment(ref countCasModifyCalls);
@@ -201,7 +226,7 @@ namespace CacheManager.Tests
 
                 // assert
                 Thread.Sleep(10);
-                var result = cache.Get("myCounter");
+                var result = cache.Get(key);
                 result.Should().NotBeNull();
                 Trace.TraceInformation("Counter increased to " + result.Counter + " cas calls needed " + countCasModifyCalls);
                 result.Counter.Should().Be(numThreads * numInnerIterations * iterations, "counter should be exactly the expected value");
@@ -221,13 +246,13 @@ namespace CacheManager.Tests
                 settings.WithRedisConfiguration("default", config =>
                 {
                     config.WithAllowAdmin()
-                        .WithDatabase(0)
+                        .WithDatabase(8)
                         .WithEndpoint("localhost", 6379);
                 });
             }))
             {
-                cache.Clear();
-                cache.Add("myCounter", new RaceConditionTestElement() { Counter = 0 });
+                var key = Guid.NewGuid().ToString();
+                cache.Add(key, new RaceConditionTestElement() { Counter = 0 });
                 int numThreads = 5;
                 int iterations = 10;
                 int numInnerIterations = 10;
@@ -237,17 +262,17 @@ namespace CacheManager.Tests
                 {
                     for (int i = 0; i < numInnerIterations; i++)
                     {
-                        var val = cache.Get("myCounter");
+                        var val = cache.Get(key);
                         val.Should().NotBeNull();
                         val.Counter++;
 
-                        cache.Put("myCounter", val);
+                        cache.Put(key, val);
                     }
                 }, numThreads, iterations);
 
                 // assert
                 Thread.Sleep(10);
-                var result = cache.Get("myCounter");
+                var result = cache.Get(key);
                 result.Should().NotBeNull();
                 Trace.TraceInformation("Counter increased to " + result.Counter);
                 result.Counter.Should().NotBe(numThreads * numInnerIterations * iterations);
@@ -259,14 +284,12 @@ namespace CacheManager.Tests
         public void Redis_Sliding_DoesExpire()
         {
             // arrange
-            var item = new CacheItem<object>("key", "something", ExpirationMode.Sliding, TimeSpan.FromMilliseconds(50));
-            var cache = TestManagers.WithSystemAndRedisCache;
+            var item = new CacheItem<object>(Guid.NewGuid().ToString(), "something", ExpirationMode.Sliding, TimeSpan.FromMilliseconds(50));
+            var cache = TestManagers.CreateRedisCache(9);
 
             // act/assert
             using (cache)
             {
-                cache.Clear();
-
                 // act
                 var result = cache.Add(item);
 
@@ -287,22 +310,19 @@ namespace CacheManager.Tests
             }
         }
 
-        [Fact]
+        [Fact(Skip = "unreliable")]
         [Trait("IntegrationTest", "Redis")]
         public void Redis_Sliding_DoesExpire_MultiClients()
         {
             // arrange
-            var item = new CacheItem<object>("key", "something", ExpirationMode.Sliding, TimeSpan.FromMilliseconds(50));
-            var cacheA = TestManagers.WithSystemAndRedisCache;
-            var cacheB = TestManagers.WithSystemAndRedisCache;
+            var item = new CacheItem<object>(Guid.NewGuid().ToString(), "something", ExpirationMode.Sliding, TimeSpan.FromMilliseconds(50));
+            var cacheA = TestManagers.CreateRedisAndSystemCacheWithBackPlate(10);
+            var cacheB = TestManagers.CreateRedisAndSystemCacheWithBackPlate(10);
 
             // act/assert
             using (cacheA)
             using (cacheB)
             {
-                cacheA.Clear();
-                cacheB.Clear();
-
                 // act
                 var result = cacheA.Add(item);
 
@@ -331,14 +351,12 @@ namespace CacheManager.Tests
         public void Redis_Sliding_DoesExpire_WithRegion()
         {
             // arrange
-            var item = new CacheItem<object>("key", "something", "region", ExpirationMode.Sliding, TimeSpan.FromMilliseconds(50));
-            var cache = TestManagers.WithSystemAndRedisCache;
+            var item = new CacheItem<object>(Guid.NewGuid().ToString(), "something", "region", ExpirationMode.Sliding, TimeSpan.FromMilliseconds(50));
+            var cache = TestManagers.CreateRedisCache(11);
 
             // act/assert
             using (cache)
             {
-                cache.Clear();
-
                 // act
                 var result = cache.Add(item);
 
@@ -379,15 +397,15 @@ namespace CacheManager.Tests
         [Trait("IntegrationTest", "Redis")]
         public void Redis_ValueConverter_ObjectCacheTypeConversion_Bool()
         {
-            var cache = TestManagers.WithRedisCache;
+            var cache = TestManagers.CreateRedisCache(12);
 
             // act/assert
             using (cache)
             {
-                cache.Clear();
                 var value = true;
-                cache.Add("bytes", value);
-                var result = (bool)cache.Get("bytes");
+                var key = Guid.NewGuid().ToString();
+                cache.Add(key, value);
+                var result = (bool)cache.Get(key);
                 value.Should().Be(result);
             }
         }
@@ -396,15 +414,15 @@ namespace CacheManager.Tests
         [Trait("IntegrationTest", "Redis")]
         public void Redis_ValueConverter_ObjectCacheTypeConversion_Bytes()
         {
-            var cache = TestManagers.WithRedisCache;
+            var cache = TestManagers.CreateRedisCache(13);
 
             // act/assert
             using (cache)
             {
-                cache.Clear();
                 var value = new byte[] { 0, 1, 2, 3 };
-                cache.Add("bytes", value);
-                var result = cache.Get("bytes") as byte[];
+                var key = Guid.NewGuid().ToString();
+                cache.Add(key, value);
+                var result = cache.Get(key) as byte[];
                 value.Should().BeEquivalentTo(result);
             }
         }
@@ -413,15 +431,15 @@ namespace CacheManager.Tests
         [Trait("IntegrationTest", "Redis")]
         public void Redis_ValueConverter_ObjectCacheTypeConversion_Double()
         {
-            var cache = TestManagers.WithRedisCache;
+            var cache = TestManagers.CreateRedisCache(14);
 
             // act/assert
             using (cache)
             {
-                cache.Clear();
                 var value = 0231.2d;
-                cache.Add("bytes", value);
-                var result = (double)cache.Get("bytes");
+                var key = Guid.NewGuid().ToString();
+                cache.Add(key, value);
+                var result = (double)cache.Get(key);
                 value.Should().Be(result);
             }
         }
@@ -430,15 +448,15 @@ namespace CacheManager.Tests
         [Trait("IntegrationTest", "Redis")]
         public void Redis_ValueConverter_ObjectCacheTypeConversion_Int32()
         {
-            var cache = TestManagers.WithRedisCache;
+            var cache = TestManagers.CreateRedisCache(15);
 
             // act/assert
             using (cache)
             {
-                cache.Clear();
+                var key = Guid.NewGuid().ToString();
                 var value = 1234;
-                cache.Add("bytes", value);
-                var result = (int)cache.Get("bytes");
+                cache.Add(key, value);
+                var result = (int)cache.Get(key);
                 value.Should().Be(result);
             }
         }
@@ -447,15 +465,15 @@ namespace CacheManager.Tests
         [Trait("IntegrationTest", "Redis")]
         public void Redis_ValueConverter_ObjectCacheTypeConversion_Long()
         {
-            var cache = TestManagers.WithRedisCache;
+            var cache = TestManagers.CreateRedisCache(16);
 
             // act/assert
             using (cache)
             {
-                cache.Clear();
+                var key = Guid.NewGuid().ToString();
                 var value = 123456L;
-                cache.Add("bytes", value);
-                var result = (long)cache.Get("bytes");
+                cache.Add(key, value);
+                var result = (long)cache.Get(key);
                 value.Should().Be(result);
             }
         }
@@ -464,15 +482,15 @@ namespace CacheManager.Tests
         [Trait("IntegrationTest", "Redis")]
         public void Redis_ValueConverter_ObjectCacheTypeConversion_Poco()
         {
-            var cache = TestManagers.WithRedisCache;
+            var cache = TestManagers.CreateRedisCache(17);
 
             // act/assert
             using (cache)
             {
-                cache.Clear();
+                var key = Guid.NewGuid().ToString();
                 var value = new Poco() { Id = 23, Something = "§asdad" };
-                cache.Add("bytes", value);
-                var result = (Poco)cache.Get("bytes");
+                cache.Add(key, value);
+                var result = (Poco)cache.Get(key);
                 value.ShouldBeEquivalentTo(result);
             }
         }
@@ -481,15 +499,15 @@ namespace CacheManager.Tests
         [Trait("IntegrationTest", "Redis")]
         public void Redis_ValueConverter_ObjectCacheTypeConversion_String()
         {
-            var cache = TestManagers.WithRedisCache;
+            var cache = TestManagers.CreateRedisCache(18);
 
             // act/assert
             using (cache)
             {
-                cache.Clear();
+                var key = Guid.NewGuid().ToString();
                 var value = "some string";
-                cache.Add("bytes", value);
-                var result = cache.Get("bytes") as string;
+                cache.Add(key, value);
+                var result = cache.Get(key) as string;
                 value.Should().Be(result);
             }
         }
@@ -503,11 +521,6 @@ namespace CacheManager.Tests
         {
             for (int i = 0; i < iterations; i++)
             {
-                foreach (var cache in caches)
-                {
-                    cache.Clear();
-                }
-
                 Thread.Sleep(10);
 
                 if (caches.Length == 1)

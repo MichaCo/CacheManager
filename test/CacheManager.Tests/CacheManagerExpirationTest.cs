@@ -17,24 +17,24 @@ namespace CacheManager.Tests
 #endif
     public class CacheManagerExpirationTest : BaseCacheManagerTest
     {
+        // Issue #9 - item still expires validate
         [Theory]
         [MemberData("TestCacheManagers")]
         public void CacheManager_RemoveExpiration_DoesNotExpire<T>(T cache) where T : ICacheManager<object>
         {
             using (cache)
             {
-                cache.Clear();
-
-                cache.Add(new CacheItem<object>("key", "value", ExpirationMode.Absolute, TimeSpan.FromMilliseconds(30)))
+                var key = Guid.NewGuid().ToString();
+                cache.Add(new CacheItem<object>(key, "value", ExpirationMode.Absolute, TimeSpan.FromMilliseconds(30)))
                     .Should().BeTrue();
 
-                var item = cache.GetCacheItem("key");
+                var item = cache.GetCacheItem(key);
 
                 cache.Put(item.WithExpiration(ExpirationMode.None, default(TimeSpan)));
 
-                Thread.Sleep(40);
+                Thread.Sleep(100);
 
-                cache.Get("key").Should().NotBeNull();
+                cache.Get(key).Should().NotBeNull();
             }
         }
 
@@ -44,19 +44,20 @@ namespace CacheManager.Tests
         {
             using (var cache = CacheFactory.Build("testCache", settings =>
             {
-                settings.WithSystemRuntimeCacheHandle("handleA")
+                settings.WithSystemRuntimeCacheHandle(Guid.NewGuid().ToString())
                         .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMilliseconds(50));
             }))
             {
-                cache.Put("key", "value");
+                var key = Guid.NewGuid().ToString();
+                cache.Put(key, "value");
 
                 Thread.Sleep(20);
 
-                cache.Get("key").Should().Be("value");
+                cache.Get(key).Should().Be("value");
 
                 Thread.Sleep(40);
 
-                cache.Get("key").Should().BeNull("Should be expired.");
+                cache.Get(key).Should().BeNull("Should be expired.");
             }
         }
 
@@ -65,7 +66,7 @@ namespace CacheManager.Tests
         {
             using (var cache = CacheFactory.Build("testCache", settings =>
             {
-                settings.WithSystemRuntimeCacheHandle("handleA")
+                settings.WithSystemRuntimeCacheHandle(Guid.NewGuid().ToString())
                         .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(10))
                     .And
                     .WithSystemRuntimeCacheHandle("handleB");

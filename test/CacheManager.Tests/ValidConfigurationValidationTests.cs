@@ -22,10 +22,11 @@ namespace CacheManager.Tests
         public void Cfg_Valid_AppConfig_ByNameByLoader()
         {
             // arrange
+            string fileName = GetCfgFileName(@"\app.config");
             string cacheName = "C1";
 
             // act
-            var cfg = ConfigurationBuilder.LoadConfiguration(cacheName);
+            var cfg = ConfigurationBuilder.LoadConfigurationFile(fileName, cacheName);
             var cache = CacheFactory.FromConfiguration<object>(cacheName, cfg);
 
             // assert
@@ -40,10 +41,12 @@ namespace CacheManager.Tests
         public void Cfg_Valid_AppConfig_ByName()
         {
             // arrange
+            string fileName = GetCfgFileName(@"\app.config");
             string cacheName = "C1";
 
             // act
-            var cache = CacheFactory.FromConfiguration<object>(cacheName);
+            var cfg = ConfigurationBuilder.LoadConfigurationFile(fileName, cacheName);
+            var cache = CacheFactory.FromConfiguration<object>(cacheName, cfg);
 
             // assert
             cache.Configuration.CacheUpdateMode.Should().Be(CacheUpdateMode.Up);
@@ -73,7 +76,11 @@ namespace CacheManager.Tests
             AssertCacheHandleConfig(cache.CacheHandles.ElementAt(3), "h4", ExpirationMode.Absolute, new TimeSpan(0, 20, 0));
         }
 
+#if DNX451
+        [Fact(Skip = "DNX doesn't read from app.config")]
+#else
         [Fact]
+#endif
         public void Cfg_Valid_CfgFile_DefaultSysMemCache()
         {
             // arrange

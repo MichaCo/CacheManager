@@ -339,13 +339,14 @@ namespace CacheManager.Tests
         {
             using (cache)
             {
-                cache.Clear();
+                // arrange 
+                var key = Guid.NewGuid().ToString();
 
-                // arrange act
-                Func<object> act = () => cache.Update("key", item => item);
+                // act
+                Func<object> act = () => cache.Update(key, item => item);
 
                 object value;
-                Func<bool> act2 = () => cache.TryUpdate("key", item => item, out value);
+                Func<bool> act2 = () => cache.TryUpdate(key, item => item, out value);
 
                 // assert
                 act().Should().BeNull();
@@ -359,16 +360,15 @@ namespace CacheManager.Tests
         {
             using (cache)
             {
-                cache.Clear();
-
                 // arrange
-                cache.Add("mykey", "something");
+                var key = Guid.NewGuid().ToString();
+                cache.Add(key, "something");
                 // act
-                Func<object> act = () => cache.Update("mykey", item => item + " more");
+                Func<object> act = () => cache.Update(key, item => item + " more");
 
                 object value = string.Empty;
-                Func<bool> act1 = () => cache.TryUpdate("mykey", item => item + " awesome", out value);
-                Func<string> act2 = () => cache.Get<string>("mykey");
+                Func<bool> act1 = () => cache.TryUpdate(key, item => item + " awesome", out value);
+                Func<string> act2 = () => cache.Get<string>(key);
 
                 // assert
                 act().Should().Be("something more");
@@ -498,12 +498,12 @@ namespace CacheManager.Tests
         {
             using (cache)
             {
-                cache.Clear();
-
+                // arrange
+                var key = Guid.NewGuid().ToString();
                 object value = "value";
 
-                // arrange act
-                Func<object> act = () => cache.AddOrUpdate("key", value, item => value);
+                // act
+                Func<object> act = () => cache.AddOrUpdate(key, value, item => value);
 
                 // assert
                 act().Should().Be(value);
@@ -519,13 +519,12 @@ namespace CacheManager.Tests
         {
             using (cache)
             {
-                cache.Clear();
-
                 // arrange
-                cache.Add("mykey", "something");
+                var key = Guid.NewGuid().ToString();
+                cache.Add(key, "something");
                 // act
-                Func<object> act = () => cache.AddOrUpdate("mykey", "does exist", item => item + " more");
-                Func<string> act2 = () => cache.Get<string>("mykey");
+                Func<object> act = () => cache.AddOrUpdate(key, "does exist", item => item + " more");
+                Func<string> act2 = () => cache.Get<string>(key);
 
                 // assert
                 act().Should().Be("something more");
@@ -1084,10 +1083,10 @@ namespace CacheManager.Tests
         {
             using (cache)
             {
-                cache.Clear();
                 // arrange act
-                Func<bool> actA = () => cache.Add("key", "some value", "region");
-                Func<string> act = () => cache.Get<string>("key", "region");
+                var key = Guid.NewGuid().ToString();
+                Func<bool> actA = () => cache.Add(key, "some value", "region");
+                Func<string> act = () => cache.Get<string>(key, "region");
 
                 // assert
                 actA().Should().BeTrue();
@@ -1103,7 +1102,7 @@ namespace CacheManager.Tests
             using (cache)
             {
                 // arrange
-                var keys = new List<string>() { "key1", "key2", "key3", "key4", "key5", "key6", "key7", "key8" };
+                var keys = new List<string>() { Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString() };
                 var values = new List<object>()
                 {
                     "string", 33293, 0.123f, 0.324d, 123311L, true,
@@ -1113,14 +1112,14 @@ namespace CacheManager.Tests
 
                 // act
                 PopulateCache(cache, keys, values, 1);
-                string strSomething = cache.Get<string>("key1");
-                int someNumber = cache.Get<int>("key2");
-                float someFloating = cache.Get<float>("key3");
-                double someDoubling = cache.Get<double>("key4");
-                long someLonging = cache.Get<long>("key5");
-                bool someBooling = cache.Get<bool>("key6");
-                ComplexType obj = cache.Get<ComplexType>("key7");
-                DateTime date = cache.Get<DateTime>("key8");
+                string strSomething = cache.Get<string>(keys[0]);
+                int someNumber = cache.Get<int>(keys[1]);
+                float someFloating = cache.Get<float>(keys[2]);
+                double someDoubling = cache.Get<double>(keys[3]);
+                long someLonging = cache.Get<long>(keys[4]);
+                bool someBooling = cache.Get<bool>(keys[5]);
+                ComplexType obj = cache.Get<ComplexType>(keys[6]);
+                DateTime date = cache.Get<DateTime>(keys[7]);
                 object someObject = cache.Get<object>("nonexistent");
 
                 // assert
@@ -1162,9 +1161,8 @@ namespace CacheManager.Tests
         {
             using (cache)
             {
-                cache.Clear();
                 // arrange
-                var keys = new List<string>() { "key1", "key2", "key3" };
+                var keys = new List<string>() { Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString() };
                 var values = new List<object>() { new DateTime(2014, 1, 1), 234, "test string" };
 
                 // act
@@ -1185,9 +1183,8 @@ namespace CacheManager.Tests
         {
             using (cache)
             {
-                cache.Clear();
                 // arrange
-                var keys = new List<string>() { "key1", "key2", "key3", "key4" };
+                var keys = new List<string>() { Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString() };
                 var values = new List<object>() { new DateTime(2014, 1, 1), 234, "test string" };
 
                 // act
@@ -1208,9 +1205,8 @@ namespace CacheManager.Tests
         {
             using (cache)
             {
-                cache.Clear();
                 // arrange
-                var keys = new List<string>() { "key1", "key2", "key3" };
+                var keys = new List<string>() { Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString() };
                 var values = new List<object>() { new DateTime(2014, 1, 1), 234, "test string" };
 
                 // act
@@ -1232,7 +1228,7 @@ namespace CacheManager.Tests
             using (cache)
             {
                 // arrange
-                var keys = new List<string>() { "key1", "key2", "key3" };
+                var keys = new List<string>() { Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString() };
                 var values = new List<object>() { new DateTime(2014, 1, 1), 234, "test string" };
                 var nulls = new List<object>() { null, null, null };
 
@@ -1249,21 +1245,24 @@ namespace CacheManager.Tests
             }
         }
 
-        [Theory]
-        [MemberData("TestCacheManagers")]
-        public void CacheManager_Clear_AllItemsRemoved<T>(T cache) where T : ICacheManager<object>
+        [Fact]
+        public void CacheManager_Clear_AllItemsRemoved()
         {
             // arrange act
-            using (cache)
+            using (var cache = TestManagers.WithOneDicCacheHandle)
             {
+                // arrange
+                var key1 = Guid.NewGuid().ToString();
+                var key2 = Guid.NewGuid().ToString();
+
                 // act
-                cache.Add("key1", "value1");
-                cache.Add("key2", "value2");
+                cache.Add(key1, "value1");
+                cache.Add(key2, "value2");
                 cache.Clear();
 
                 // assert
-                cache["key1"].Should().BeNull();
-                cache["key2"].Should().BeNull();
+                cache[key1].Should().BeNull();
+                cache[key2].Should().BeNull();
             }
         }
 
@@ -1273,9 +1272,8 @@ namespace CacheManager.Tests
         {
             using (cache)
             {
-                cache.Clear();
                 // arrange
-                var keys = new List<string>() { "key1", "key2", "key3" };
+                var keys = new List<string>() { Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString() };
                 var values = new List<object>() { 10, 20, 30 };
                 var newValues = new List<object>() { 11, 21, 31 };
 
@@ -1300,33 +1298,37 @@ namespace CacheManager.Tests
             }
         }
 
+        private static object runLock = new object();
         private static void PopulateCache<T>(ICacheManager<T> cache, IList<string> keys, IList<T> values, int mode)
         {
-            cache.Clear();
-            foreach (var key in keys)
+            // let us make this safe per run so cache doesn't get cleared/populated from ultiple tests
+            lock (runLock)
             {
-                cache.Remove(key);
-            }
-
-            for (int i = 0; i < values.Count; i++)
-            {
-                var val = cache.Get(keys[i]);
-                if (val != null)
+                foreach (var key in keys)
                 {
-                    throw new InvalidOperationException("cache already contains this element");
+                    cache.Remove(key);
                 }
 
-                if (mode == 0)
+                for (int i = 0; i < values.Count; i++)
                 {
-                    cache.Put(keys[i], values[i]);
-                }
-                else if (mode == 1)
-                {
-                    cache.Add(keys[i], values[i]).Should().BeTrue();
-                }
-                else if (mode == 2)
-                {
-                    cache[keys[i]] = values[i];
+                    var val = cache.Get(keys[i]);
+                    if (val != null)
+                    {
+                        throw new InvalidOperationException("cache already contains this element");
+                    }
+
+                    if (mode == 0)
+                    {
+                        cache.Put(keys[i], values[i]);
+                    }
+                    else if (mode == 1)
+                    {
+                        cache.Add(keys[i], values[i]).Should().BeTrue();
+                    }
+                    else if (mode == 2)
+                    {
+                        cache[keys[i]] = values[i];
+                    }
                 }
             }
         }

@@ -1,1 +1,2 @@
-@..\..\packages\Redis-64.2.8.19\redis-server.exe master.conf
+CALL install.cmd
+@packages\Redis-64\redis-server.exe master.conf

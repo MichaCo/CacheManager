@@ -33,8 +33,6 @@ namespace CacheManager.Tests
 
             using (cache)
             {
-                cache.Clear();
-
                 Action test = () =>
                 {
                     var hits = 0;

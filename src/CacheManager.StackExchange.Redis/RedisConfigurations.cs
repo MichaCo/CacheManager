@@ -16,6 +16,7 @@ namespace CacheManager.Redis
     public static class RedisConfigurations
     {
         private static Dictionary<string, RedisConfiguration> config = null;
+        private static object configLock = new object();
 
         private static Dictionary<string, RedisConfiguration> Configurations
         {
@@ -23,12 +24,18 @@ namespace CacheManager.Redis
             {
                 if (config == null)
                 {
-                    config = new Dictionary<string, RedisConfiguration>();
-
-                    var section = ConfigurationManager.GetSection(RedisConfigurationSection.DefaultSectionName) as RedisConfigurationSection;
-                    if (section != null)
+                    lock (configLock)
                     {
-                        LoadConfiguration(section);
+                        if (config == null)
+                        {
+                            config = new Dictionary<string, RedisConfiguration>();
+
+                            var section = ConfigurationManager.GetSection(RedisConfigurationSection.DefaultSectionName) as RedisConfigurationSection;
+                            if (section != null)
+                            {
+                                LoadConfiguration(section);
+                            }
+                        }
                     }
                 }
 
@@ -43,14 +50,17 @@ namespace CacheManager.Redis
         /// <exception cref="System.ArgumentNullException">If configuration is null.</exception>
         public static void AddConfiguration(RedisConfiguration configuration)
         {
-            if (configuration == null)
+            lock (configLock)
             {
-                throw new ArgumentNullException("configuration");
-            }
+                if (configuration == null)
+                {
+                    throw new ArgumentNullException("configuration");
+                }
 
-            if (!Configurations.ContainsKey(configuration.Key))
-            {
-                Configurations.Add(configuration.Key, configuration);
+                if (!Configurations.ContainsKey(configuration.Key))
+                {
+                    Configurations.Add(configuration.Key, configuration);
+                }
             }
         }
 

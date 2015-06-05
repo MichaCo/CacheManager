@@ -159,3 +159,5 @@ $RECYCLE.BIN/
 /samples/CacheManager.Examples/packages
 *.rdb
 /.vs/config/applicationhost.config
+/tools/redis/packages/Redis-64
+/tools/redis/.nuget

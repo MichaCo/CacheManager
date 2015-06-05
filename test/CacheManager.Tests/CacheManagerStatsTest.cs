@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using CacheManager.Core;
 using CacheManager.Core.Cache;
@@ -22,8 +23,9 @@ namespace CacheManager.Tests
         {
             using (cache)
             {
-                cache.Clear();
                 // arrange
+                var key1 = Guid.NewGuid().ToString();
+                var key2 = Guid.NewGuid().ToString();
                 var addCalls = cache.CacheHandles.Select(p => p.Stats.GetStatistic(CacheStatsCounterType.AddCalls));
                 var getCalls = cache.CacheHandles.Select(p => p.Stats.GetStatistic(CacheStatsCounterType.GetCalls));
                 var misses = cache.CacheHandles.Select(p => p.Stats.GetStatistic(CacheStatsCounterType.Misses));
@@ -31,15 +33,15 @@ namespace CacheManager.Tests
                 var items = cache.CacheHandles.Select(p => p.Stats.GetStatistic(CacheStatsCounterType.Items));
 
                 // act get without region, should not return anything and should not trigger the event
-                var a1 = cache.Add("key1", "something");
-                var a2 = cache.Add("key1", "something"); // should not increase
+                var a1 = cache.Add(key1, "something");
+                var a2 = cache.Add(key1, "something"); // should not increase
 
                 // bot gets should increase first handle +1 and hits +1
-                var r1 = cache.Get("key1");
-                var r2 = cache["key1"];
+                var r1 = cache.Get(key1);
+                var r2 = cache[key1];
 
                 // should increase all handles get + 1 and misses +1
-                cache.Get("key1", "region");
+                cache.Get(key1, "region");
 
                 // assert
                 a1.Should().BeTrue();
@@ -66,18 +68,18 @@ namespace CacheManager.Tests
             }
         }
 
-        [Theory]
-        [MemberData("TestCacheManagers")]
+        [Fact]
         [ReplaceCulture]
-        public void CacheManager_Stats_Clear<T>(T cache) where T : ICacheManager<object>
+        public void CacheManager_Stats_Clear()
         {
-            using (cache)
+            using (var cache = TestManagers.WithOneDicCacheHandle)
             {
-                cache.Clear();
                 // arrange
+                var key1 = Guid.NewGuid().ToString();
+                var key2 = Guid.NewGuid().ToString();
                 var clears = cache.CacheHandles.Select(p => p.Stats.GetStatistic(CacheStatsCounterType.ClearCalls));
-                cache.Add("key1", "something");
-                cache.Add("key2", "something");
+                cache.Add(key1, "something");
+                cache.Add(key2, "something");
 
                 // act
                 cache.ClearRegion("region"); // should not trigger
@@ -90,19 +92,19 @@ namespace CacheManager.Tests
             }
         }
 
-        [Theory]
-        [MemberData("TestCacheManagers")]
+        [Fact]
         [ReplaceCulture]
-        public void CacheManager_Stats_ClearRegion<T>(T cache) where T : ICacheManager<object>
+        public void CacheManager_Stats_ClearRegion()
         {
-            using (cache)
+            using (var cache = TestManagers.WithOneDicCacheHandle)
             {
-                cache.Clear();
                 // arrange
+                var key1 = Guid.NewGuid().ToString();
+                var key2 = Guid.NewGuid().ToString();
                 var clears = cache.CacheHandles.Select(p => p.Stats.GetStatistic(CacheStatsCounterType.ClearRegionCalls));
-                cache.Add("key1", "something");
-                cache.Add("key2", "something");
-                cache.Add("key2", "something", "region");
+                cache.Add(key1, "something");
+                cache.Add(key2, "something");
+                cache.Add(key2, "something", "region");
 
                 // act
                 cache.ClearRegion("region");
@@ -122,14 +124,15 @@ namespace CacheManager.Tests
         {
             using (cache)
             {
-                cache.Clear();
                 // arrange
+                var key1 = Guid.NewGuid().ToString();
+                var key2 = Guid.NewGuid().ToString();
                 var puts = cache.CacheHandles.Select(p => p.Stats.GetStatistic(CacheStatsCounterType.PutCalls));
 
                 // act
-                cache.Put("key1", "something");
-                cache.Put("key2", "something");
-                cache.Put("key2", "something", "region");
+                cache.Put(key1, "something");
+                cache.Put(key2, "something");
+                cache.Put(key2, "something", "region");
 
                 // assert all handles should have 2 clearRegion increases.
                 puts.ShouldAllBeEquivalentTo(
@@ -144,17 +147,18 @@ namespace CacheManager.Tests
         {
             using (cache)
             {
-                cache.Clear();
                 // arrange
+                var key1 = Guid.NewGuid().ToString();
+                var key2 = Guid.NewGuid().ToString();
                 var puts = cache.CacheHandles.Select(p => p.Stats.GetStatistic(CacheStatsCounterType.PutCalls));
                 var gets = cache.CacheHandles.Select(p => p.Stats.GetStatistic(CacheStatsCounterType.GetCalls));
                 var hits = cache.CacheHandles.Select(p => p.Stats.GetStatistic(CacheStatsCounterType.Hits));
-                cache.Add("key1", "something");
-                cache.Add("key2", "something");
+                cache.Add(key1, "something");
+                cache.Add(key2, "something");
 
                 // act
-                cache.Update("key1", v => "somethingelse");
-                cache.Update("key2", v => "somethingelse");
+                cache.Update(key1, v => "somethingelse");
+                cache.Update(key2, v => "somethingelse");
 
                 // assert
                 puts.ShouldAllBeEquivalentTo(
@@ -173,23 +177,24 @@ namespace CacheManager.Tests
         {
             using (cache)
             {
-                cache.Clear();
                 // arrange
+                var key1 = Guid.NewGuid().ToString();
+                var key2 = Guid.NewGuid().ToString();
                 var adds = cache.CacheHandles.Select(p => p.Stats.GetStatistic(CacheStatsCounterType.AddCalls));
                 var removes = cache.CacheHandles.Select(p => p.Stats.GetStatistic(CacheStatsCounterType.RemoveCalls));
 
                 // act
-                var r1 = cache.Remove("key2");               // false
-                var r2 = cache.Remove("key2", "region");     // false
+                var r1 = cache.Remove(key2);               // false
+                var r2 = cache.Remove(key2, "region");     // false
 
-                var a1 = cache.Add("key1", "something");            // true
-                var a2 = cache.Add("key2", "something");            // true
-                var a3 = cache.Add("key2", "something", "region");  // true
-                var a4 = cache.Add("key1", "something");            // false
-                var r3 = cache.Remove("key2");                      // true
-                var r4 = cache.Remove("key2", "region");            // true
-                var a5 = cache.Add("key2", "something");            // true
-                var a6 = cache.Add("key2", "something", "region");  // true
+                var a1 = cache.Add(key1, "something");            // true
+                var a2 = cache.Add(key2, "something");            // true
+                var a3 = cache.Add(key2, "something", "region");  // true
+                var a4 = cache.Add(key1, "something");            // false
+                var r3 = cache.Remove(key2);                      // true
+                var r4 = cache.Remove(key2, "region");            // true
+                var a5 = cache.Add(key2, "something");            // true
+                var a6 = cache.Add(key2, "something", "region");  // true
 
                 // assert
                 (r1 && r2).Should().BeFalse();
@@ -219,12 +224,12 @@ namespace CacheManager.Tests
 
             using (cache)
             {
-                cache.Clear();
+                var key = Guid.NewGuid().ToString();
                 ThreadTestHelper.Run(
                     () =>
                     {
-                        cache.Add("key1", "hi");
-                        cache.Put("key1", "changed");
+                        cache.Add(key, "hi");
+                        cache.Put(key, "changed");
                     }, 
                     threads, 
                     iterations);

@@ -113,7 +113,9 @@
     <Compile Include="ThreadRandomReadWriteTestBase.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config" />
+    <Content Include="app.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <None Include="Configuration\configuration.invalid.backPlateTypeNoName.config">
       <SubType>Designer</SubType>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

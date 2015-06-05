@@ -62,7 +62,11 @@ namespace CacheManager.Tests
                 .WithMessage("*Parameter name: configName");
         }
 
+#if DNX451
+        [Fact(Skip = "DNX doesn't read from app.config")]
+#else
         [Fact]
+#endif
         [ReplaceCulture]
         public void Cfg_LoadConfiguration_NotExistingCacheCfgName()
         {
@@ -108,7 +112,7 @@ namespace CacheManager.Tests
             // arrange
             var sectionName = Guid.NewGuid().ToString();
             // act
-            Action act = () => ConfigurationBuilder.LoadConfiguration(sectionName, string.Empty);
+            Action act = () => ConfigurationBuilder.LoadConfiguration(sectionName, "configName");
 
             // assert
             act.ShouldThrow<InvalidOperationException>()
@@ -252,8 +256,7 @@ namespace CacheManager.Tests
 
             // act
             var cfg = ConfigurationBuilder.LoadConfigurationFile(fileName, "cacheManager2", "configName");
-            var cache = CacheFactory.FromConfiguration<string>("mycache", cfg);
-            Action act = () => cache.Add("test", "test");
+            Action act = () => CacheFactory.FromConfiguration<string>("mycache", cfg);
 
             // assert
             act.ShouldThrow<InvalidOperationException>()
@@ -269,9 +272,8 @@ namespace CacheManager.Tests
 
             // act
             var cfg = ConfigurationBuilder.LoadConfigurationFile(fileName, "cacheManager4", "configName");
-            var cache = CacheFactory.FromConfiguration<object>("mycache", cfg);
 
-            Action act = () => cache.Add("test", "test");
+            Action act = () => CacheFactory.FromConfiguration<object>("mycache", cfg);
 
             // assert
             act.ShouldThrow<InvalidOperationException>()

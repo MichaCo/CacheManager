@@ -257,11 +257,12 @@ namespace CacheManager.Redis
                     }
                     else
                     {
-                        var checkItem = this.GetCacheItemInternal(key, region);
-                        if (newValue.Equals(checkItem.Value))
-                        {
-                            throw new InvalidOperationException("Updated although not committed.");
-                        }
+                        //// just for debugging one bug in the redis client
+                        //// var checkItem = this.GetCacheItemInternal(key, region);
+                        //// if (newValue.Equals(checkItem.Value))
+                        //// {
+                        ////     throw new InvalidOperationException("Updated although not committed.");
+                        //// }
                     }
                 }
                 while (committed == false && tries <= config.MaxRetries);
@@ -537,6 +538,11 @@ namespace CacheManager.Redis
                     if (item.ExpirationMode != ExpirationMode.None)
                     {
                         this.Database.KeyExpire(fullKey, item.ExpirationTimeout, StackRedis.CommandFlags.FireAndForget);
+                    }
+                    else
+                    {
+                        // bugfix #9
+                        this.Database.KeyExpire(fullKey, default(TimeSpan?), StackRedis.CommandFlags.FireAndForget);
                     }
                 }
 

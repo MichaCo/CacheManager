@@ -238,7 +238,9 @@
       <Link>Configuration\configuration.valid.allFeatures.config</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="app.config" />
+    <Content Include="app.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <None Include="packages.config" />
     <None Include="Settings.StyleCop" />
   </ItemGroup>

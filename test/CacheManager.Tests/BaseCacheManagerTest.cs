@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Threading;
 using CacheManager.Core;
 using CacheManager.Core.Cache;
 
@@ -9,19 +10,28 @@ using CacheManager.Core.Cache;
 using Couchbase.Configuration.Client;
 
 #endif
+#if DNX451
+using Microsoft.Framework.Runtime;
+using Microsoft.Framework.Runtime.Infrastructure;
+#endif
 
 namespace CacheManager.Tests
 {
     [ExcludeFromCodeCoverage]
     public static class TestManagers
     {
+        private static string NewKey()
+        {
+            return Guid.NewGuid().ToString();
+        }
+
         public static ICacheManager<object> WithOneMemoryCacheHandleSliding
         {
             get
             {
-                return CacheFactory.Build("cache", settings => settings
+                return CacheFactory.Build(NewKey(), settings => settings
                     .WithUpdateMode(CacheUpdateMode.Up)
-                    .WithSystemRuntimeCacheHandle("h1")
+                    .WithSystemRuntimeCacheHandle(NewKey())
                         .EnableStatistics()
                         .EnablePerformanceCounters()
                     .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(10)));
@@ -32,9 +42,9 @@ namespace CacheManager.Tests
         {
             get
             {
-                return CacheFactory.Build("cache", settings => settings
+                return CacheFactory.Build(NewKey(), settings => settings
                     .WithUpdateMode(CacheUpdateMode.Full)
-                    .WithHandle(typeof(DictionaryCacheHandle<>), "h1")
+                    .WithHandle(typeof(DictionaryCacheHandle<>), NewKey())
                         .EnableStatistics()
                     .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(10)));
             }
@@ -44,7 +54,7 @@ namespace CacheManager.Tests
         {
             get
             {
-                return CacheFactory.Build("cache", settings => settings.WithSystemRuntimeCacheHandle("h1").EnableStatistics());
+                return CacheFactory.Build(NewKey(), settings => settings.WithSystemRuntimeCacheHandle(NewKey()).EnableStatistics());
             }
         }
 
@@ -52,11 +62,11 @@ namespace CacheManager.Tests
         {
             get
             {
-                return CacheFactory.Build("cache", settings =>
+                return CacheFactory.Build(NewKey(), settings =>
                 {
                     settings
                         .WithUpdateMode(CacheUpdateMode.None)
-                        .WithSystemRuntimeCacheHandle("h1")
+                        .WithSystemRuntimeCacheHandle(NewKey())
                             .EnableStatistics()
                         .And.WithSystemRuntimeCacheHandle("h2")
                             .EnableStatistics()
@@ -74,28 +84,28 @@ namespace CacheManager.Tests
         {
             get
             {
-                return CacheFactory.Build("cache", settings =>
+                return CacheFactory.Build(NewKey(), settings =>
                 {
                     settings
                         .WithUpdateMode(CacheUpdateMode.Up)
-                        .WithHandle(typeof(DictionaryCacheHandle<>), "h1")
+                        .WithHandle(typeof(DictionaryCacheHandle<>), NewKey())
                             .EnableStatistics()
-                        .And.WithHandle(typeof(DictionaryCacheHandle<>), "h2")
+                        .And.WithHandle(typeof(DictionaryCacheHandle<>), NewKey())
                             .EnableStatistics()
                             .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(10))
-                        .And.WithHandle(typeof(DictionaryCacheHandle<>), "h3")
+                        .And.WithHandle(typeof(DictionaryCacheHandle<>), NewKey())
                             .EnableStatistics()
                             .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(20))
-                        .And.WithHandle(typeof(DictionaryCacheHandle<>), "h4")
+                        .And.WithHandle(typeof(DictionaryCacheHandle<>), NewKey())
                             .EnableStatistics()
                             .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(10))
-                        .And.WithHandle(typeof(DictionaryCacheHandle<>), "h5")
+                        .And.WithHandle(typeof(DictionaryCacheHandle<>), NewKey())
                             .EnableStatistics()
                             .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(20))
-                        .And.WithHandle(typeof(DictionaryCacheHandle<>), "h6")
+                        .And.WithHandle(typeof(DictionaryCacheHandle<>), NewKey())
                             .EnableStatistics()
                             .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(10))
-                        .And.WithHandle(typeof(DictionaryCacheHandle<>), "h7")
+                        .And.WithHandle(typeof(DictionaryCacheHandle<>), NewKey())
                             .EnableStatistics()
                             .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(20));
                 });
@@ -106,67 +116,91 @@ namespace CacheManager.Tests
         {
             get
             {
-                return CacheFactory.Build("cache", settings =>
+                return CacheFactory.Build(NewKey(), settings =>
                 {
                     settings
                         .WithUpdateMode(CacheUpdateMode.Full)
-                        .WithSystemRuntimeCacheHandle("cache1")
+                        .WithSystemRuntimeCacheHandle(NewKey())
                             .EnableStatistics()
-                        .And.WithSystemRuntimeCacheHandle("cache2")
+                        .And.WithSystemRuntimeCacheHandle(NewKey())
                             .EnableStatistics();
                 });
             }
+        }
+
+        // first 10 dbs can be used for other cache tests
+        private const int StartDbCount = 100;
+        private static int dbCount = StartDbCount;
+
+        public static ICacheManager<object> CreateRedisCache(int database = 0)
+        {
+            var cache = CacheFactory.Build(NewKey(), settings =>
+            {
+                settings
+                    .WithMaxRetries(100)
+                    .WithRetryTimeout(1000)
+                    .WithRedisConfiguration("redisCache", config =>
+                    {
+                        config.WithAllowAdmin()
+                            .WithDatabase(database)
+                            .WithEndpoint("localhost", 6379);
+                    })
+                    // .WithRedisBackPlate("redisCache")
+                    .WithRedisCacheHandle("redisCache", true)
+                    .EnableStatistics();
+            });
+
+            return cache;
         }
 
         public static ICacheManager<object> WithRedisCache
         {
             get
             {
-                var cache = CacheFactory.Build("cache", settings =>
+                Interlocked.Increment(ref dbCount);
+                if (dbCount >= 2000)
                 {
-                    settings
-                        .WithMaxRetries(100)
-                        .WithRetryTimeout(1000)
-                        .WithRedisConfiguration("redisCache", config =>
-                        {
-                            config.WithAllowAdmin()
-                                .WithDatabase(99)
-                                .WithEndpoint("localhost", 6379);
-                        })
-                        // .WithRedisBackPlate("redisCache")
-                        .WithRedisCacheHandle("redisCache", true)
-                        .EnableStatistics();
-                });
+                    dbCount = StartDbCount;
+                }
 
-                return cache;
+                return CreateRedisCache(dbCount);
             }
+        }
+
+        public static ICacheManager<object> CreateRedisAndSystemCacheWithBackPlate(int database = 0)
+        {
+            return CacheFactory.Build("redisCache", settings =>
+            {
+                settings
+                    .WithUpdateMode(CacheUpdateMode.Up)
+                    .WithSystemRuntimeCacheHandle(NewKey())
+                        .EnableStatistics();
+                settings
+                    .WithMaxRetries(100)
+                    .WithRetryTimeout(1000)
+                    .WithRedisConfiguration("redisCache", config =>
+                    {
+                        config.WithAllowAdmin()
+                            .WithDatabase(database)
+                            .WithEndpoint("localhost", 6379);
+                    })
+                    .WithRedisBackPlate("redisCache")
+                    .WithRedisCacheHandle("redisCache", true)
+                    .EnableStatistics();
+            });
         }
 
         public static ICacheManager<object> WithSystemAndRedisCache
         {
             get
             {
-                var cache = CacheFactory.Build("cache", settings =>
+                Interlocked.Increment(ref dbCount);
+                if (dbCount >= 2000)
                 {
-                    settings
-                        .WithUpdateMode(CacheUpdateMode.Up)
-                        .WithSystemRuntimeCacheHandle("cache1")
-                            .EnableStatistics();
-                    settings
-                        .WithMaxRetries(100)
-                        .WithRetryTimeout(1000)
-                        .WithRedisConfiguration("redisCache", config =>
-                        {
-                            config.WithAllowAdmin()
-                                .WithDatabase(88)
-                                .WithEndpoint("localhost", 6379);
-                        })
-                        .WithRedisBackPlate("redisCache")
-                        .WithRedisCacheHandle("redisCache", true)
-                        .EnableStatistics();
-                });
+                    dbCount = StartDbCount;
+                }
 
-                return cache;
+                return CreateRedisAndSystemCacheWithBackPlate(dbCount);
             }
         }
 
@@ -174,7 +208,7 @@ namespace CacheManager.Tests
         {
             get
             {
-                var cache = CacheFactory.Build("myCache", settings =>
+                var cache = CacheFactory.Build(NewKey(), settings =>
                 {
                     settings.WithUpdateMode(CacheUpdateMode.Full)
                         .WithMemcachedCacheHandle("enyim.com/memcached")
@@ -182,7 +216,6 @@ namespace CacheManager.Tests
                             .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(100));
                 });
 
-                cache.Clear();
                 return cache;
             }
         }
@@ -218,7 +251,7 @@ namespace CacheManager.Tests
                     }
                 };
 
-                var cache = CacheFactory.Build("myCache", settings =>
+                var cache = CacheFactory.Build(NewKey(), settings =>
                 {
                     settings
                         .WithCouchbaseConfiguration("couchbase", clientConfiguration)
@@ -246,7 +279,7 @@ namespace CacheManager.Tests
                 yield return new object[] { TestManagers.WithMemoryAndDictionaryHandles };
                 yield return new object[] { TestManagers.WithManyDictionaryHandles };
                 yield return new object[] { TestManagers.WithTwoNamedMemoryCaches };
-                yield return new object[] { TestManagers.WithRedisCache };
+                //yield return new object[] { TestManagers.WithRedisCache };
                 // yield return new object[] { TestManagers.WithSystemAndRedisCache }; 
                 // yield return new object[] { TestManagers.WithMemcached };
                 // yield return new object[] { TestManagers.WithCouchbaseMemcached };
@@ -255,12 +288,20 @@ namespace CacheManager.Tests
 
         public static string GetCfgFileName(string fileName)
         {
+#if DNX451
+            var appEnv = CallContextServiceLocator.Locator.ServiceProvider
+                .GetService(typeof(IApplicationEnvironment)) as IApplicationEnvironment;
+            var basePath = appEnv.ApplicationBasePath;
+#else
+            var basePath = AppDomain.CurrentDomain.BaseDirectory;
+#endif
+
             if (string.IsNullOrWhiteSpace(fileName))
             {
                 throw new ArgumentException("File name should not be empty", "fileName");
             }
 
-            return AppDomain.CurrentDomain.BaseDirectory + (fileName.StartsWith("\\") ? fileName : "\\" + fileName);
+            return basePath + (fileName.StartsWith("\\") ? fileName : "\\" + fileName);
         }
     }
 }

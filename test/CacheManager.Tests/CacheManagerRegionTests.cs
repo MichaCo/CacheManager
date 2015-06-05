@@ -26,7 +26,6 @@ namespace CacheManager.Tests
         {
             using (cache)
             {
-                cache.Clear();
                 // arrange
                 List<Tuple<string, string, string>> keys;
                 List<string> regions;
@@ -49,7 +48,8 @@ namespace CacheManager.Tests
                             because the keys are the same,
                             but the value must be different";
 
-                        cache.Get(key, otherRegion).Should()
+                        var val = cache.Get(key, otherRegion);
+                        val.Should()
                             .BeOfType<string>(reason)
                             .And
                             .NotBe(value, reason);
@@ -64,8 +64,6 @@ namespace CacheManager.Tests
         {
             using (cache)
             {
-                cache.Clear();
-
                 // arrange
                 List<Tuple<string, string, string>> keys;
                 List<string> regions;
@@ -80,7 +78,8 @@ namespace CacheManager.Tests
                     var key = item.Item2;
                     var value = item.Item3;
                     cache[key].Should().BeNull("the cache should not find the item without region specified");
-                    cache[key, region].Should().Be(value, "item should be in cache for given region and key");
+                    var val = cache[key, region];
+                    val.Should().Be(value, "item should be in cache for given region and key");
                     var otherRegions = regions.Where(p => p != region).ToList();
                     foreach (var otherRegion in otherRegions)
                     {
@@ -96,7 +95,6 @@ namespace CacheManager.Tests
         {
             using (cache)
             {
-                cache.Clear();
                 // Thread.Sleep(1000); arrange
                 List<Tuple<string, string, string>> keys;
                 List<string> regions;
@@ -135,8 +133,6 @@ namespace CacheManager.Tests
         {
             using (cache)
             {
-                cache.Clear();
-
                 // arrange
                 List<Tuple<string, string, string>> keys;
                 List<string> regions;
@@ -188,8 +184,6 @@ namespace CacheManager.Tests
         {
             using (cache)
             {
-                cache.Clear();
-
                 // arrange
                 List<Tuple<string, string, string>> keys;
                 List<string> regions;
@@ -239,14 +233,15 @@ namespace CacheManager.Tests
         {
             keys = new List<Tuple<string, string, string>>();
             regions = new List<string>();
+            var sameKeyAllRegions = Guid.NewGuid().ToString();
 
             for (var r = 0; r < numRegions; r++)
             {
-                var region = "region" + r;
-
+                var region = Guid.NewGuid().ToString();
+                
                 for (var i = 0; i < numItems; i++)
                 {
-                    var key = sameKey ? "key" + i : r + "_key" + i;
+                    var key = sameKey ? sameKeyAllRegions + i : Guid.NewGuid().ToString();
                     var value = "Value in region " + r + ": " + i;
                     if (!cache.Add(key, value, region))
                     {
