@@ -395,7 +395,7 @@ namespace CacheManager.Tests
                     "we expect 12 hits");
 
                 data.Results.ShouldAllBeEquivalentTo(
-                    Enumerable.Repeat(new UpdateItemResult<object>(2, false, true, 1), 3),
+                    Enumerable.Repeat(UpdateItemResult.ForSuccess<object>(2, false, 1), 3),
                     "we expect exactly 3 update results with the same results");
             }
         }
@@ -448,12 +448,6 @@ namespace CacheManager.Tests
             }
         }
 
-        /// <summary>
-        /// Validates that many event subscriptions all get called Validates that other events do
-        /// not trigger Validates that it works with and without region.
-        /// </summary>
-        /// <typeparam name="T">The cache type.</typeparam>
-        /// <param name="cache">The cache instance.</param>
         [Fact]
         [ReplaceCulture]
         public void CacheManager_Events_OnClear()

@@ -10,9 +10,9 @@ using CacheManager.Core.Configuration;
 
 namespace CacheManager.Backplate.TestNode
 {
-    class Program
+    public class Program
     {
-        static ICacheManager<int> cache = new BaseCacheManager<int>(
+        private static ICacheManager<int> cache = new BaseCacheManager<int>(
             "cache",
             ConfigurationBuilder.BuildConfiguration(c =>
             {
@@ -25,14 +25,14 @@ namespace CacheManager.Backplate.TestNode
                     .WithRedisConfiguration("redis", "localhost:6379,allowAdmin=true");
             }));
 
-        static void Main(string[] args)
+        internal static void Main(string[] args)
         {
-            // README: 
-            // Run me multiple times and at least once with some arguments so that the first condition hits
-            // You should see one the console with args adding and removing the key
-            // All other consoles should receive the remove event and counting the counter
-            // counter should reset each remove, because the key was removed
-
+            //// README: 
+            //// Run me multiple times and at least once with some arguments so that the first condition hits
+            //// You should see one the console with args adding and removing the key
+            //// All other consoles should receive the remove event and counting the counter
+            //// counter should reset each remove, because the key was removed
+            
             cache.OnAdd += CacheOnAdd;
             cache.OnRemove += CacheOnRemove;
 
@@ -49,19 +49,19 @@ namespace CacheManager.Backplate.TestNode
             {
                 while (true)
                 {
-                    var value = cache.Update("backplateTest", v => v + 1);
+                    var value = cache.AddOrUpdate("backplateTest", 0, v => v + 1);
                     Console.WriteLine("Value: " + value);
-                    Thread.Sleep(500);
+                    Thread.Sleep(50);
                 }
             }
         }
 
-        static void CacheOnRemove(object sender, CacheActionEventArgs e)
+        private static void CacheOnRemove(object sender, CacheActionEventArgs e)
         {
             Console.WriteLine("Removing " + e.Key);
         }
 
-        static void CacheOnAdd(object sender, CacheActionEventArgs e)
+        private static void CacheOnAdd(object sender, CacheActionEventArgs e)
         {
             Console.WriteLine("Adding " + e.Key);
         }

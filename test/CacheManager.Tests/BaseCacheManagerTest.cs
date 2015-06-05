@@ -20,10 +20,8 @@ namespace CacheManager.Tests
     [ExcludeFromCodeCoverage]
     public static class TestManagers
     {
-        private static string NewKey()
-        {
-            return Guid.NewGuid().ToString();
-        }
+        private const int StartDbCount = 100;
+        private static int databaseCount = StartDbCount;
 
         public static ICacheManager<object> WithOneMemoryCacheHandleSliding
         {
@@ -34,7 +32,7 @@ namespace CacheManager.Tests
                     .WithSystemRuntimeCacheHandle(NewKey())
                         .EnableStatistics()
                         .EnablePerformanceCounters()
-                    .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(10)));
+                    .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(1000)));
             }
         }
 
@@ -46,7 +44,7 @@ namespace CacheManager.Tests
                     .WithUpdateMode(CacheUpdateMode.Full)
                     .WithHandle(typeof(DictionaryCacheHandle<>), NewKey())
                         .EnableStatistics()
-                    .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(10)));
+                    .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(1000)));
             }
         }
 
@@ -70,12 +68,12 @@ namespace CacheManager.Tests
                             .EnableStatistics()
                         .And.WithSystemRuntimeCacheHandle("h2")
                             .EnableStatistics()
-                            .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(10))
+                            .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1000))
                         .And.WithHandle(typeof(DictionaryCacheHandle<>), "h3")
                             .EnableStatistics()
                         .And.WithHandle(typeof(DictionaryCacheHandle<>), "h4")
                             .EnableStatistics()
-                            .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(10));
+                            .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1000));
                 });
             }
         }
@@ -92,22 +90,22 @@ namespace CacheManager.Tests
                             .EnableStatistics()
                         .And.WithHandle(typeof(DictionaryCacheHandle<>), NewKey())
                             .EnableStatistics()
-                            .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(10))
+                            .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(1000))
                         .And.WithHandle(typeof(DictionaryCacheHandle<>), NewKey())
                             .EnableStatistics()
-                            .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(20))
+                            .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1000))
                         .And.WithHandle(typeof(DictionaryCacheHandle<>), NewKey())
                             .EnableStatistics()
-                            .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(10))
+                            .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(1000))
                         .And.WithHandle(typeof(DictionaryCacheHandle<>), NewKey())
                             .EnableStatistics()
-                            .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(20))
+                            .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1000))
                         .And.WithHandle(typeof(DictionaryCacheHandle<>), NewKey())
                             .EnableStatistics()
-                            .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(10))
+                            .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(1000))
                         .And.WithHandle(typeof(DictionaryCacheHandle<>), NewKey())
                             .EnableStatistics()
-                            .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(20));
+                            .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1000));
                 });
             }
         }
@@ -128,79 +126,31 @@ namespace CacheManager.Tests
             }
         }
 
-        // first 10 dbs can be used for other cache tests
-        private const int StartDbCount = 100;
-        private static int dbCount = StartDbCount;
-
-        public static ICacheManager<object> CreateRedisCache(int database = 0)
-        {
-            var cache = CacheFactory.Build(NewKey(), settings =>
-            {
-                settings
-                    .WithMaxRetries(100)
-                    .WithRetryTimeout(1000)
-                    .WithRedisConfiguration("redisCache", config =>
-                    {
-                        config.WithAllowAdmin()
-                            .WithDatabase(database)
-                            .WithEndpoint("localhost", 6379);
-                    })
-                    // .WithRedisBackPlate("redisCache")
-                    .WithRedisCacheHandle("redisCache", true)
-                    .EnableStatistics();
-            });
-
-            return cache;
-        }
-
         public static ICacheManager<object> WithRedisCache
         {
             get
             {
-                Interlocked.Increment(ref dbCount);
-                if (dbCount >= 2000)
+                Interlocked.Increment(ref databaseCount);
+                if (databaseCount >= 2000)
                 {
-                    dbCount = StartDbCount;
+                    databaseCount = StartDbCount;
                 }
 
-                return CreateRedisCache(dbCount);
+                return CreateRedisCache(databaseCount);
             }
-        }
-
-        public static ICacheManager<object> CreateRedisAndSystemCacheWithBackPlate(int database = 0)
-        {
-            return CacheFactory.Build("redisCache", settings =>
-            {
-                settings
-                    .WithUpdateMode(CacheUpdateMode.Up)
-                    .WithSystemRuntimeCacheHandle(NewKey())
-                        .EnableStatistics();
-                settings
-                    .WithMaxRetries(100)
-                    .WithRetryTimeout(1000)
-                    .WithRedisConfiguration("redisCache", config =>
-                    {
-                        config.WithAllowAdmin()
-                            .WithDatabase(database)
-                            .WithEndpoint("localhost", 6379);
-                    })
-                    .WithRedisBackPlate("redisCache")
-                    .WithRedisCacheHandle("redisCache", true)
-                    .EnableStatistics();
-            });
         }
 
         public static ICacheManager<object> WithSystemAndRedisCache
         {
             get
             {
-                Interlocked.Increment(ref dbCount);
-                if (dbCount >= 2000)
+                Interlocked.Increment(ref databaseCount);
+                if (databaseCount >= 2000)
                 {
-                    dbCount = StartDbCount;
+                    databaseCount = StartDbCount;
                 }
 
-                return CreateRedisAndSystemCacheWithBackPlate(dbCount);
+                return CreateRedisAndSystemCacheWithBackPlate(databaseCount);
             }
         }
 
@@ -213,7 +163,7 @@ namespace CacheManager.Tests
                     settings.WithUpdateMode(CacheUpdateMode.Full)
                         .WithMemcachedCacheHandle("enyim.com/memcached")
                             .EnableStatistics()
-                            .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(100));
+                            .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1000));
                 });
 
                 return cache;
@@ -262,10 +212,58 @@ namespace CacheManager.Tests
                 return cache;
             }
         }
-
 #endif
+
+        public static ICacheManager<object> CreateRedisAndSystemCacheWithBackPlate(int database = 0)
+        {
+            return CacheFactory.Build("redisCache", settings =>
+            {
+                settings
+                    .WithUpdateMode(CacheUpdateMode.Up)
+                    .WithSystemRuntimeCacheHandle(NewKey())
+                        .EnableStatistics();
+                settings
+                    .WithMaxRetries(100)
+                    .WithRetryTimeout(1000)
+                    .WithRedisConfiguration("redisCache", config =>
+                    {
+                        config.WithAllowAdmin()
+                            .WithDatabase(database)
+                            .WithEndpoint("localhost", 6379);
+                    })
+                    .WithRedisBackPlate("redisCache")
+                    .WithRedisCacheHandle("redisCache", true)
+                    .EnableStatistics();
+            });
+        }
+
+        public static ICacheManager<object> CreateRedisCache(int database = 0)
+        {
+            var cache = CacheFactory.Build(NewKey(), settings =>
+            {
+                settings
+                    .WithMaxRetries(100)
+                    .WithRetryTimeout(1000)
+                    .WithRedisConfiguration("redisCache", config =>
+                    {
+                        config.WithAllowAdmin()
+                            .WithDatabase(database)
+                            .WithEndpoint("localhost", 6379);
+                    })
+                    // .WithRedisBackPlate("redisCache")
+                    .WithRedisCacheHandle("redisCache", true)
+                    .EnableStatistics();
+            });
+
+            return cache;
+        }
+
+        private static string NewKey()
+        {
+            return Guid.NewGuid().ToString();
+        }
     }
-    
+
     [SuppressMessage("Microsoft.Design", "CA1053:StaticHolderTypesShouldNotHaveConstructors", Justification = "Needed for xunit"), ExcludeFromCodeCoverage]
     public class BaseCacheManagerTest
     {
@@ -279,10 +277,10 @@ namespace CacheManager.Tests
                 yield return new object[] { TestManagers.WithMemoryAndDictionaryHandles };
                 yield return new object[] { TestManagers.WithManyDictionaryHandles };
                 yield return new object[] { TestManagers.WithTwoNamedMemoryCaches };
-                //yield return new object[] { TestManagers.WithRedisCache };
-                // yield return new object[] { TestManagers.WithSystemAndRedisCache }; 
-                // yield return new object[] { TestManagers.WithMemcached };
-                // yield return new object[] { TestManagers.WithCouchbaseMemcached };
+                yield return new object[] { TestManagers.WithRedisCache };
+                // yield return new object[] { TestManagers.WithSystemAndRedisCache }; yield return
+                // new object[] { TestManagers.WithMemcached }; yield return new object[] {
+                // TestManagers.WithCouchbaseMemcached };
             }
         }
 

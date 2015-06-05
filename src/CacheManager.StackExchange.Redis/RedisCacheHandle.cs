@@ -236,7 +236,7 @@ namespace CacheManager.Redis
 
                     if (item == null)
                     {
-                        return new UpdateItemResult<TCacheValue>(default(TCacheValue), false, false, 1);
+                        return UpdateItemResult.ForItemDidNotExist<TCacheValue>();
                     }
 
                     var oldValue = ToRedisValue(item.Value);
@@ -253,7 +253,7 @@ namespace CacheManager.Redis
 
                     if (committed)
                     {
-                        return new UpdateItemResult<TCacheValue>(newValue, tries > 1, true, tries);
+                        return UpdateItemResult.ForSuccess<TCacheValue>(newValue, tries > 1, tries);
                     }
                     else
                     {
@@ -267,7 +267,7 @@ namespace CacheManager.Redis
                 }
                 while (committed == false && tries <= config.MaxRetries);
 
-                return new UpdateItemResult<TCacheValue>(default(TCacheValue), false, false, tries);
+                return UpdateItemResult.ForTooManyRetries<TCacheValue>(tries);
             });
         }
 

@@ -273,7 +273,7 @@ namespace CacheManager.Core.Cache
                 var item = this.GetCacheItemInternal(key, region);
                 if (item == null)
                 {
-                    break;
+                    return UpdateItemResult.ForItemDidNotExist<TCacheValue>();
                 }
 
                 var newValue = updateValue(item.Value);
@@ -281,12 +281,12 @@ namespace CacheManager.Core.Cache
 
                 if (this.cache.TryUpdate(fullKey, newItem, item))
                 {
-                    return new UpdateItemResult<TCacheValue>(newItem.Value, retries > 1, true, retries);
+                    return UpdateItemResult.ForSuccess<TCacheValue>(newItem.Value, retries > 1, retries);
                 }
             }
             while (retries <= config.MaxRetries);
 
-            return new UpdateItemResult<TCacheValue>(default(TCacheValue), retries > 0, false, retries);
+            return UpdateItemResult.ForTooManyRetries<TCacheValue>(retries);
         }
     }
 }

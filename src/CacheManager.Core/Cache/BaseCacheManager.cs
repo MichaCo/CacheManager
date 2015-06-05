@@ -57,7 +57,7 @@ namespace CacheManager.Core.Cache
             if (this.Configuration.HasBackPlate)
             {
                 this.RegisterCacheBackPlate(CacheReflectionHelper.CreateBackPlate(this));
-            }            
+            }
         }
 
         /// <summary>
@@ -722,12 +722,26 @@ namespace CacheManager.Core.Cache
             }
 
             var result = false;
-            foreach (var handle in this.cacheHandles)
+
+            // also inverse it, so that the lowest level gets invoked first
+            for (int handleIndex = this.cacheHandles.Length - 1; handleIndex >= 0; handleIndex--)
             {
-                // do not set result back to false if one handle didn't add the item.
+                var handle = this.cacheHandles[handleIndex];
                 if (AddItemToHandle(item, handle))
                 {
                     result = true;
+                }
+                else
+                {
+                    // this means, the item exists already, maybe with a different value already
+                    // lets evict the item from all other handles so that we might get a fresh copy
+                    // whenever the item gets requested evict from other is more passive than adding
+                    // the version which exists to all others lets have the user decide what to do
+                    // when we return false...
+                    // Note: we might also just have added the item to a cache handel a level below,
+                    //       this will get removed, too!
+                    this.EvictFromOtherHandles(item.Key, item.Region, handleIndex);
+                    return false;
                 }
             }
 
@@ -945,20 +959,25 @@ namespace CacheManager.Core.Cache
         {
             foreach (var handle in handles)
             {
-                bool result;
-                if (string.IsNullOrWhiteSpace(region))
-                {
-                    result = handle.Remove(key);
-                }
-                else
-                {
-                    result = handle.Remove(key, region);
-                }
+                EvictFromHandle(key, region, handle);
+            }
+        }
 
-                if (result)
-                {
-                    handle.Stats.OnRemove(region);
-                }
+        private static void EvictFromHandle(string key, string region, BaseCacheHandle<TCacheValue> handle)
+        {
+            bool result;
+            if (string.IsNullOrWhiteSpace(region))
+            {
+                result = handle.Remove(key);
+            }
+            else
+            {
+                result = handle.Remove(key, region);
+            }
+
+            if (result)
+            {
+                handle.Stats.OnRemove(region);
             }
         }
 
@@ -982,34 +1001,32 @@ namespace CacheManager.Core.Cache
         /// <returns>The added or updated value.</returns>
         private TCacheValue AddOrUpdateInternal(CacheItem<TCacheValue> item, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config)
         {
-            var addResult = false;
+            TCacheValue returnValue;
+            bool updated = string.IsNullOrWhiteSpace(item.Region) ?
+                this.TryUpdate(item.Key, updateValue, out returnValue) :
+                this.TryUpdate(item.Key, item.Region, updateValue, out returnValue);
 
-            var updateHandles = new List<BaseCacheHandle<TCacheValue>>();
-            foreach (var handle in this.cacheHandles)
+            if (updated)
             {
-                if (AddItemToHandle(item, handle))
+                return returnValue;
+            }
+            else
+            {
+                // if the update didn't work, lets try to add it
+                if (this.AddInternal(item))
                 {
-                    addResult = true;
+                    return item.Value;
                 }
                 else
                 {
-                    updateHandles.Add(handle);
+                    // Add also didn't work, meaning the item is already there/someone added it in
+                    // the meantime, lets try it again... yes this is recursive, but it is an edge
+                    // case anyways. Otherwise we could just try another update because the failed
+                    // Add means, the item is now present and an update can be made.
+                    // TODO: test to find an endless loop edge case
+                    return this.AddOrUpdateInternal(item, updateValue, config);
                 }
             }
-
-            if (addResult)
-            {
-                this.TriggerOnAdd(item.Key, item.Region);
-            }
-
-            if (updateHandles.Any())
-            {
-                TCacheValue value;
-                this.UpdateInternal(updateHandles.ToArray(), item.Key, item.Region, updateValue, config, out value);
-                return value;
-            }
-
-            return item.Value;
         }
 
         /// <summary>
@@ -1054,6 +1071,22 @@ namespace CacheManager.Core.Cache
                     }
 
                     break;
+            }
+        }
+
+        private void AddToHandlesBelow(CacheItem<TCacheValue> item, int foundIndex)
+        {
+            if (item == null)
+            {
+                return;
+            }
+
+            for (int handleIndex = 0; handleIndex < this.cacheHandles.Length; handleIndex++)
+            {
+                if (handleIndex > foundIndex)
+                {
+                    this.cacheHandles[handleIndex].Add(item);
+                }
             }
         }
 
@@ -1106,21 +1139,23 @@ namespace CacheManager.Core.Cache
             {
                 if (handleIndex != excludeIndex)
                 {
-                    var handle = this.cacheHandles[handleIndex];
-                    bool result;
-                    if (string.IsNullOrWhiteSpace(region))
-                    {
-                        result = handle.Remove(key);
-                    }
-                    else
-                    {
-                        result = handle.Remove(key, region);
-                    }
+                    EvictFromHandle(key, region, this.cacheHandles[handleIndex]);
+                }
+            }
+        }
 
-                    if (result)
-                    {
-                        handle.Stats.OnRemove(region);
-                    }
+        private void EvictFromHandlesAbove(string key, string region, int excludeIndex)
+        {
+            if (excludeIndex < 0 || excludeIndex >= this.cacheHandles.Length)
+            {
+                throw new ArgumentOutOfRangeException("excludeIndex");
+            }
+
+            for (int handleIndex = 0; handleIndex < this.cacheHandles.Length; handleIndex++)
+            {
+                if (handleIndex < excludeIndex)
+                {
+                    EvictFromHandle(key, region, this.cacheHandles[handleIndex]);
                 }
             }
         }
@@ -1305,6 +1340,15 @@ namespace CacheManager.Core.Cache
 
         /// <summary>
         /// Private implementation of Update.
+        /// <para>
+        /// Change: 6/6/15: inverted the handle loop so that the lowest gets updated first,
+        /// Otherwise, it could happen that an in memory cache has the item and updates it, but the
+        /// second handle doesn't have it Still, overall result would be true, but if the second
+        /// handle is the back plate, the item would get flushed. If the item was updated
+        /// successfully, If the manager is configured with CacheUpdateMode.None, we'll proceed,
+        /// otherwise (up, or All), we'll flush all handles above the current one; the next get will
+        /// add the items back.
+        /// </para>
         /// </summary>
         /// <param name="handles">The handles.</param>
         /// <param name="key">The key.</param>
@@ -1315,84 +1359,96 @@ namespace CacheManager.Core.Cache
         /// <returns><c>True</c> if the item has been updated.</returns>
         private bool UpdateInternal(BaseCacheHandle<TCacheValue>[] handles, string key, string region, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config, out TCacheValue value)
         {
-            bool overallResult = false;
+            UpdateItemResultState overallResult = UpdateItemResultState.Success;
             bool overallVersionConflictOccurred = false;
             int overallTries = 1;
-            UpdateItemResult<TCacheValue> result = new UpdateItemResult<TCacheValue>(default(TCacheValue), false, false, 0);
+
+            // assign null
             value = default(TCacheValue);
 
-            for (int handleIndex = 0; handleIndex < handles.Length; handleIndex++)
+            if (handles.Length == 0)
+            {
+                return false;
+            }
+
+            // lowest level goes first...
+            for (int handleIndex = handles.Length - 1; handleIndex >= 0; handleIndex--)
             {
                 var handle = handles[handleIndex];
-                if (string.IsNullOrWhiteSpace(region))
-                {
-                    result = handle.Update(key, updateValue, config);
-                }
-                else
-                {
-                    result = handle.Update(key, region, updateValue, config);
-                }
 
-                if (result.Success)
-                {
-                    overallResult = true;
-                    value = result.Value;
-                    handle.Stats.OnUpdate(key, region, result);
-                }
+                UpdateItemResult<TCacheValue> result = string.IsNullOrWhiteSpace(region) ?
+                    handle.Update(key, updateValue, config) :
+                    handle.Update(key, region, updateValue, config);
 
                 if (result.VersionConflictOccurred)
                 {
                     overallVersionConflictOccurred = true;
                 }
 
+                overallResult = result.UpdateState;
                 overallTries += result.NumberOfTriesNeeded > 1 ? result.NumberOfTriesNeeded - 1 : 0;
 
-                if (result.VersionConflictOccurred && config.VersionConflictOperation != VersionConflictHandling.Ignore)
+                if (result.UpdateState == UpdateItemResultState.Success)
                 {
-                    if (!result.Success)
-                    {
-                        // return false in this case
-                        overallResult = false;
+                    // only on success, the returned value will not be null
+                    value = result.Value;
+                    handle.Stats.OnUpdate(key, region, result);
 
-                        // set to null in this case
-                        value = default(TCacheValue);
+                    // evict others, we don't know if the update on other handles could actually
+                    // succeed... There is a risk the update on other handles could create a
+                    // different version than we created with the first successful update... we can
+                    // safely add the item to handles below us though.
+                    this.EvictFromHandlesAbove(key, region, handleIndex);
 
-                        //// Not returning here anymore, this is a change, now we are evicting or updating othe handles if the update didn't work
-                        //// but this should be valid, because distributed update could fail (due to retries or anything) and
-                        //// int this case we don't want invalid date in other handles.
-                        //// TODO: double check why this was here
-                        //// this.TriggerOnUpdate(key, region, config, new UpdateItemResult<TCacheValue>(result.Value, overallVersionConflictOccurred, false, overallTries));
-                        //// return result.Value;
-                    }
-
-                    switch (config.VersionConflictOperation)
-                    {
-                        case VersionConflictHandling.EvictItemFromOtherCaches:
-                            this.EvictFromOtherHandles(key, region, handleIndex);
-                            break;
-
-                        case VersionConflictHandling.UpdateOtherCaches:
-                            CacheItem<TCacheValue> item;
-                            if (string.IsNullOrWhiteSpace(region))
-                            {
-                                item = handle.GetCacheItem(key);
-                            }
-                            else
-                            {
-                                item = handle.GetCacheItem(key, region);
-                            }
-
-                            this.UpdateOtherHandles(item, handleIndex);
-                            break;
-                    }
-
-                    // stop loop because we already handled everything.
+                    var item = string.IsNullOrWhiteSpace(region) ? handle.GetCacheItem(key) : handle.GetCacheItem(key, region);
+                    this.AddToHandlesBelow(item, handleIndex);
                     break;
                 }
+                else if (result.UpdateState != UpdateItemResultState.ItemDidNotExist)
+                {
+                    // only if the item does not exist in the current handle, we procceed the
+                    // loop... otherwise, we had too many retries... this basically indicates an
+                    // invalide state of the cache: The item is there, but we couldn't update it and
+                    // it most likely has a different version
+                    // TODO: logging
+                    this.EvictFromOtherHandles(key, region, handleIndex);
+                    break;
+                }
+
+                // TODO: revist this, but I think the version conflict handling was a mistake and leeds to errors. Default
+                // was evict other handles, anyways, what we now always do
+                //// if (result.VersionConflictOccurred && config.VersionConflictOperation != VersionConflictHandling.Ignore)
+                //// {
+                ////    switch (config.VersionConflictOperation)
+                ////    {
+                ////        // default behavior
+                ////        case VersionConflictHandling.EvictItemFromOtherCaches:
+                ////            this.EvictFromOtherHandles(key, region, handleIndex);
+                ////            break;
+
+                ////        // update other caches could potentially leed to inconsitency because we only use Put to update the handles...
+                ////        case VersionConflictHandling.UpdateOtherCaches:
+                ////            CacheItem<TCacheValue> item;
+                ////            if (string.IsNullOrWhiteSpace(region))
+                ////            {
+                ////                item = handle.GetCacheItem(key);
+                ////            }
+                ////            else
+                ////            {
+                ////                item = handle.GetCacheItem(key, region);
+                ////            }
+
+                ////            this.UpdateOtherHandles(item, handleIndex);
+                ////            break;
+                ////    }
+
+                ////    // stop loop because we already handled everything.
+                ////    break;
+                //// }
             }
 
             // update back plate
-            if (overallResult && this.Configuration.HasBackPlate)
+            if (overallResult == UpdateItemResultState.Success && this.Configuration.HasBackPlate)
             {
                 if (string.IsNullOrWhiteSpace(region))
                 {
@@ -1404,9 +1460,10 @@ namespace CacheManager.Core.Cache
                 }
             }
 
-            this.TriggerOnUpdate(key, region, config, new UpdateItemResult<TCacheValue>(value, overallVersionConflictOccurred, overallResult, overallTries));
+            // trigger update event with the overall results
+            this.TriggerOnUpdate(key, region, config, new UpdateItemResult<TCacheValue>(value, overallResult, overallVersionConflictOccurred, overallTries));
 
-            return overallResult;
+            return overallResult == UpdateItemResultState.Success;
         }
 
         /// <summary>

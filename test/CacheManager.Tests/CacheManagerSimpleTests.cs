@@ -23,6 +23,8 @@ namespace CacheManager.Tests
 #endif
     public class CacheManagerSimpleTests : BaseCacheManagerTest
     {
+        private static object runLock = new object();
+
         #region general
 
         [Fact]
@@ -1272,6 +1274,7 @@ namespace CacheManager.Tests
         {
             using (cache)
             {
+                cache.Configuration.CacheUpdateMode = CacheUpdateMode.Full;
                 // arrange
                 var keys = new List<string>() { Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString() };
                 var values = new List<object>() { 10, 20, 30 };
@@ -1284,11 +1287,14 @@ namespace CacheManager.Tests
 
                     foreach (var key in keys)
                     {
-                        cache.Update(key, item =>
+                        var result = cache.Update(key, item =>
                         {
                             int val = (int)item + 1;
                             return val;
                         });
+
+                        var value = cache.Get(key);
+                        value.Should().NotBeNull();
                     }
                 };
 
@@ -1298,7 +1304,6 @@ namespace CacheManager.Tests
             }
         }
 
-        private static object runLock = new object();
         private static void PopulateCache<T>(ICacheManager<T> cache, IList<string> keys, IList<T> values, int mode)
         {
             // let us make this safe per run so cache doesn't get cleared/populated from ultiple tests

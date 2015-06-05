@@ -107,15 +107,15 @@ namespace CacheManager.Core.Cache
                 throw new ArgumentNullException("updateValue");
             }
 
-            var original = this.Get(key);
+            var original = this.GetCacheItem(key);
             if (original == null)
             {
-                return new UpdateItemResult<TCacheValue>(original, false, false, 1);
+                return UpdateItemResult.ForItemDidNotExist<TCacheValue>();
             }
 
-            var value = updateValue(original);
+            var value = updateValue(original.Value);
             this.Put(key, value);
-            return new UpdateItemResult<TCacheValue>(value, false, true, 1);
+            return UpdateItemResult.ForSuccess<TCacheValue>(value);
         }
 
         /// <summary>
@@ -151,15 +151,15 @@ namespace CacheManager.Core.Cache
             {
                 throw new ArgumentNullException("updateValue");
             }
-            var original = this.Get(key, region);
+            var original = this.GetCacheItem(key, region);
             if (original == null)
             {
-                return new UpdateItemResult<TCacheValue>(original, false, false, 1);
+                return UpdateItemResult.ForItemDidNotExist<TCacheValue>();
             }
 
-            var value = updateValue(original);
+            var value = updateValue(original.Value);
             this.Put(key, value, region);
-            return new UpdateItemResult<TCacheValue>(value, false, true, 1);
+            return UpdateItemResult.ForSuccess<TCacheValue>(value);
         }
 
         /// <summary>

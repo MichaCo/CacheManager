@@ -312,7 +312,7 @@ namespace CacheManager.Memcached
                 // break operation if we cannot retrieve the object (maybe it has expired already).
                 if (getStatus != StatusCode.Success || item == null)
                 {
-                    return new UpdateItemResult<TCacheValue>(default(TCacheValue), tries > 1, false, tries);
+                    return UpdateItemResult.ForItemDidNotExist<TCacheValue>();
                 }
 
                 item = item.WithValue(updateValue(item.Value));
@@ -333,12 +333,12 @@ namespace CacheManager.Memcached
 
                 if (result.Success)
                 {
-                    return new UpdateItemResult<TCacheValue>(item.Value, tries > 1, result.Success, tries);
+                    return UpdateItemResult.ForSuccess<TCacheValue>(item.Value, tries > 1, tries);
                 }
             }
             while (!result.Success && result.StatusCode.HasValue && result.StatusCode.Value == 2 && tries <= config.MaxRetries);
             
-            return new UpdateItemResult<TCacheValue>(default(TCacheValue), tries > 1, result.Success, tries);
+            return UpdateItemResult.ForTooManyRetries<TCacheValue>(tries);
         }
     }
 }

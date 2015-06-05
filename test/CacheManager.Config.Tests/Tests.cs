@@ -92,7 +92,7 @@ namespace CacheManager.Config.Tests
                         throw new InvalidOperationException("really?");
                     }
 
-                    ////cache.Add(key + ta, "val" + ta);
+                    //// cache.Add(key + ta, "val" + ta);
                 }
 
                 for (var t = 0; t < threads; t++)
