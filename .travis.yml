@@ -1,12 +1,9 @@
 language: csharp
-env:
-  global:
-    - EnableNuGetPackageRestore=true
-# solution: CacheManager.sln
-# install:
-# - nuget restore CacheManager.sln		   
-# - nuget install xunit.runner.console -Version 2.0.0 -OutputDirectory testrunner		   
 sudo: false
+services:
+  - redis-server
+before_install:
+  - redis-cli info
 script:
   - chmod a+x ./build.sh
   - ./build.sh --quiet verify

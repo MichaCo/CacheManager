@@ -338,7 +338,7 @@ namespace CacheManager.Tests
         public void CacheFactory_Build_WithRedisConfigurationConnectionString()
         {
             // arrange
-            var connection = "localhost:8080,allowAdmin=true,name=myName,ssl=true";
+            var connection = "127.0.0.1:8080,allowAdmin=true,name=myName,ssl=true";
             // act
             CacheFactory.Build<object>("cacheName", settings =>
             {
@@ -364,7 +364,7 @@ namespace CacheManager.Tests
                     config.WithAllowAdmin()
                         .WithConnectionTimeout(221113)
                         .WithDatabase(22)
-                        .WithEndpoint("localhost", 2323)
+                        .WithEndpoint("127.0.0.1", 2323)
                         .WithEndpoint("nohost", 99999)
                         .WithPassword("secret")
                         .WithSsl("mySslHost");
@@ -380,7 +380,7 @@ namespace CacheManager.Tests
             configuration.Password.Should().Be("secret");
             configuration.IsSsl.Should().BeTrue();
             configuration.SslHost.Should().Be("mySslHost");
-            configuration.Endpoints.ShouldBeEquivalentTo(new[] { new ServerEndPoint("localhost", 2323), new ServerEndPoint("nohost", 99999) });
+            configuration.Endpoints.ShouldBeEquivalentTo(new[] { new ServerEndPoint("127.0.0.1", 2323), new ServerEndPoint("nohost", 99999) });
         }
 
         [Fact]
@@ -395,7 +395,7 @@ namespace CacheManager.Tests
                     {
                         config.WithAllowAdmin()
                             .WithDatabase(0)
-                            .WithEndpoint("localhost", 6379);
+                            .WithEndpoint("127.0.0.1", 6379);
                     })
                     .WithMaxRetries(22)
                     .WithRetryTimeout(2223)

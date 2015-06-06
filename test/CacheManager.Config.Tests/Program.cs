@@ -39,6 +39,7 @@ namespace CacheManager.Config.Tests
             var cacheConfiguration = ConfigurationBuilder.BuildConfiguration(cfg =>
             {
                 cfg.WithUpdateMode(CacheUpdateMode.Up);
+                cfg.WithMaxRetries(10);
 
 #if DNXCORE50
                 cfg.WithDictionaryHandle("default")
@@ -56,10 +57,11 @@ namespace CacheManager.Config.Tests
 
                 cfg.WithRedisConfiguration("redis", config =>
                 {
-                    config.WithAllowAdmin()
+                    config
+                        .WithAllowAdmin()
                         .WithDatabase(0)
-                        .WithEndpoint("localhost", 6379)
-                        .WithConnectionTimeout(1000);
+                        .WithConnectionTimeout(100)
+                        .WithEndpoint("127.0.0.1", 6379);
                 });
 #endif
             });

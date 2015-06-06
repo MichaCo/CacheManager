@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Text;
 using CacheManager.Core;
 using StackRedis = StackExchange.Redis;
 
@@ -26,11 +28,18 @@ namespace CacheManager.Redis
             {
                 if (!connections.TryGetValue(connectionString, out connection))
                 {
-                    connection = StackRedis.ConnectionMultiplexer.Connect(connectionString);
+                    var builder = new StringBuilder();
+                    using (var log = new StringWriter(builder))                        
+                    {
+                        connection = StackRedis.ConnectionMultiplexer.Connect(connectionString, log);
+                    }
 
-                    ////connection.ErrorMessage += (sender, args) =>
-                    ////{
-                    ////};
+                    var logg = builder.ToString();
+
+                    connection.ErrorMessage += (sender, args) =>
+                    {
+                        var error = args;
+                    };
 
                     connection.ConnectionFailed += (sender, args) =>
                     {
@@ -39,7 +48,7 @@ namespace CacheManager.Redis
 
                     if (!connection.IsConnected)
                     {
-                        throw new InvalidOperationException("Connection failed.");
+                        throw new InvalidOperationException("Connection failed.\n" + builder.ToString());
                     }
 
                     connection.PreserveAsyncOrder = false;
@@ -59,7 +68,7 @@ namespace CacheManager.Redis
                 Password = configuration.Password,
                 Ssl = configuration.IsSsl,
                 SslHost = configuration.SslHost,
-                ConnectRetry = cacheConfig.MaxRetries,
+                ConnectRetry = 10,
                 AbortOnConnectFail = false,
             };
 

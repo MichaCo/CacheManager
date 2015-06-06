@@ -106,7 +106,7 @@ namespace CacheManager.Tests
                 TestManagers.CreateRedisAndSystemCacheWithBackPlate(3));
         }
 
-        [Fact]
+        [Fact(Skip = "needs clear")]
         [Trait("IntegrationTest", "Redis")]
         public void Redis_Multiple_PubSub_Clear()
         {
@@ -198,7 +198,7 @@ namespace CacheManager.Tests
                 {
                     config.WithAllowAdmin()
                         .WithDatabase(7)
-                        .WithEndpoint("localhost", 6379);
+                        .WithEndpoint("127.0.0.1", 6379);
                 });
             }))
             {
@@ -247,7 +247,7 @@ namespace CacheManager.Tests
                 {
                     config.WithAllowAdmin()
                         .WithDatabase(8)
-                        .WithEndpoint("localhost", 6379);
+                        .WithEndpoint("127.0.0.1", 6379);
                 });
             }))
             {
