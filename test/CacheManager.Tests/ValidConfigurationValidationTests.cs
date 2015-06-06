@@ -22,7 +22,7 @@ namespace CacheManager.Tests
         public void Cfg_Valid_AppConfig_ByNameByLoader()
         {
             // arrange
-            string fileName = GetCfgFileName(@"\app.config");
+            string fileName = GetCfgFileName(@"/app.config");
             string cacheName = "C1";
 
             // act
@@ -41,7 +41,7 @@ namespace CacheManager.Tests
         public void Cfg_Valid_AppConfig_ByName()
         {
             // arrange
-            string fileName = GetCfgFileName(@"\app.config");
+            string fileName = GetCfgFileName(@"/app.config");
             string cacheName = "C1";
 
             // act
@@ -60,7 +60,7 @@ namespace CacheManager.Tests
         public void Cfg_Valid_CfgFile_ExpirationVariances()
         {
             // arrange
-            string fileName = GetCfgFileName(@"\Configuration\configuration.valid.allFeatures.config");
+            string fileName = GetCfgFileName(@"/Configuration/configuration.valid.allFeatures.config");
             string cacheName = "ExpirationVariances";
 
             // act
@@ -84,7 +84,7 @@ namespace CacheManager.Tests
         public void Cfg_Valid_CfgFile_DefaultSysMemCache()
         {
             // arrange
-            string fileName = GetCfgFileName(@"\Configuration\configuration.valid.allFeatures.config");
+            string fileName = GetCfgFileName(@"/Configuration/configuration.valid.allFeatures.config");
             string cacheName = "DefaultSysMemCache";
 
             // act
@@ -107,7 +107,7 @@ namespace CacheManager.Tests
         public void Cfg_Valid_CfgFile_EnabledStatsAndPerformanceCounters()
         {
             // arrange
-            string fileName = GetCfgFileName(@"\Configuration\configuration.valid.allFeatures.config");
+            string fileName = GetCfgFileName(@"/Configuration/configuration.valid.allFeatures.config");
             string cacheName = "ExpirationVariances";
 
             // act
@@ -129,7 +129,7 @@ namespace CacheManager.Tests
         public void Cfg_Valid_CfgFile_EnabledStatsPerformanceCountersDefaults()
         {
             // arrange
-            string fileName = GetCfgFileName(@"\Configuration\configuration.valid.allFeatures.config");
+            string fileName = GetCfgFileName(@"/Configuration/configuration.valid.allFeatures.config");
             string cacheName = "DefaultSysMemCache";
 
             // act
@@ -147,7 +147,7 @@ namespace CacheManager.Tests
         public void Cfg_Valid_CfgFile_DisableStatsAndPerformanceCounters()
         {
             // arrange
-            string fileName = GetCfgFileName(@"\Configuration\configuration.valid.allFeatures.config");
+            string fileName = GetCfgFileName(@"/Configuration/configuration.valid.allFeatures.config");
             string cacheName = "c3";
 
             // act

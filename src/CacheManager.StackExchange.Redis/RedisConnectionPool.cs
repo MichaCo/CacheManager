@@ -69,7 +69,7 @@ namespace CacheManager.Redis
                 Ssl = configuration.IsSsl,
                 SslHost = configuration.SslHost,
                 ConnectRetry = 10,
-                AbortOnConnectFail = false,
+                AbortOnConnectFail = false
             };
 
             foreach (var endpoint in configuration.Endpoints)

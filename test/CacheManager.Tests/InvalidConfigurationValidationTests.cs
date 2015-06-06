@@ -175,7 +175,7 @@ namespace CacheManager.Tests
         public void Cfg_InvalidCfgFile_MissingCacheManagerCfgName()
         {
             // arrange
-            string fileName = GetCfgFileName(@"\Configuration\configuration.invalid.missingName.config");
+            string fileName = GetCfgFileName(@"/Configuration/configuration.invalid.missingName.config");
 
             // act
             Action act = () => ConfigurationBuilder.LoadConfigurationFile(fileName, "configName");
@@ -190,7 +190,7 @@ namespace CacheManager.Tests
         public void Cfg_InvalidCfgFile_NoSection()
         {
             // arrange
-            string fileName = GetCfgFileName(@"\Configuration\configuration.invalid.NoSection.config");
+            string fileName = GetCfgFileName(@"/Configuration/configuration.invalid.NoSection.config");
 
             // act
             Action act = () => ConfigurationBuilder.LoadConfigurationFile(fileName, "configName");
@@ -207,7 +207,7 @@ namespace CacheManager.Tests
         public void Cfg_InvalidCfgFile_MissingDefId()
         {
             // arrange
-            string fileName = GetCfgFileName(@"\Configuration\configuration.invalid.missingDefId.config");
+            string fileName = GetCfgFileName(@"/Configuration/configuration.invalid.missingDefId.config");
 
             // act
             Action act = () => ConfigurationBuilder.LoadConfigurationFile(fileName, "configName");
@@ -222,7 +222,7 @@ namespace CacheManager.Tests
         public void Cfg_InvalidCfgFile_MissingType()
         {
             // arrange
-            string fileName = GetCfgFileName(@"\Configuration\configuration.invalid.missingType.config");
+            string fileName = GetCfgFileName(@"/Configuration/configuration.invalid.missingType.config");
 
             // act
             Action act = () => ConfigurationBuilder.LoadConfigurationFile(fileName, "configName");
@@ -237,7 +237,7 @@ namespace CacheManager.Tests
         public void Cfg_InvalidCfgFile_InvalidType()
         {
             // arrange
-            string fileName = GetCfgFileName(@"\Configuration\configuration.invalid.invalidType.config");
+            string fileName = GetCfgFileName(@"/Configuration/configuration.invalid.invalidType.config");
 
             // act
             Action act = () => ConfigurationBuilder.LoadConfigurationFile(fileName, "configName");
@@ -252,7 +252,7 @@ namespace CacheManager.Tests
         public void Cfg_InvalidCfgFile_InvalidType_NumberOfGenericArgs()
         {
             // arrange
-            string fileName = GetCfgFileName(@"\Configuration\configuration.invalid.invalidType.config");
+            string fileName = GetCfgFileName(@"/Configuration/configuration.invalid.invalidType.config");
 
             // act
             var cfg = ConfigurationBuilder.LoadConfigurationFile(fileName, "cacheManager2", "configName");
@@ -268,7 +268,7 @@ namespace CacheManager.Tests
         public void Cfg_InvalidCfgFile_InvalidType_HandleType()
         {
             // arrange
-            string fileName = GetCfgFileName(@"\Configuration\configuration.invalid.invalidType.config");
+            string fileName = GetCfgFileName(@"/Configuration/configuration.invalid.invalidType.config");
 
             // act
             var cfg = ConfigurationBuilder.LoadConfigurationFile(fileName, "cacheManager4", "configName");
@@ -285,7 +285,7 @@ namespace CacheManager.Tests
         public void Cfg_InvalidCfgFile_InvalidType_WrongNumberOfGenericTypeArgs()
         {
             // arrange
-            string fileName = GetCfgFileName(@"\Configuration\configuration.invalid.invalidType.config");
+            string fileName = GetCfgFileName(@"/Configuration/configuration.invalid.invalidType.config");
 
             // act
             Action act = () => ConfigurationBuilder.LoadConfigurationFile(fileName, "configName");
@@ -300,7 +300,7 @@ namespace CacheManager.Tests
         public void Cfg_InvalidCfgFile_NoHandleDef()
         {
             // arrange
-            string fileName = GetCfgFileName(@"\Configuration\configuration.invalid.emptyHandleDefinition.config");
+            string fileName = GetCfgFileName(@"/Configuration/configuration.invalid.emptyHandleDefinition.config");
 
             // act
             Action act = () => ConfigurationBuilder.LoadConfigurationFile(fileName, "configName");
@@ -315,7 +315,7 @@ namespace CacheManager.Tests
         public void Cfg_InvalidCfgFile_CacheManagerWithoutLinkedHandles()
         {
             // arrange
-            string fileName = GetCfgFileName(@"\Configuration\configuration.invalid.managerWithoutHandles.config");
+            string fileName = GetCfgFileName(@"/Configuration/configuration.invalid.managerWithoutHandles.config");
 
             // act
             Action act = () => ConfigurationBuilder.LoadConfigurationFile(fileName, "c1");
@@ -330,7 +330,7 @@ namespace CacheManager.Tests
         public void Cfg_InvalidCfgFile_CacheManagerWithOneInvalidRef()
         {
             // arrange
-            string fileName = GetCfgFileName(@"\Configuration\configuration.invalid.InvalidRef.config");
+            string fileName = GetCfgFileName(@"/Configuration/configuration.invalid.InvalidRef.config");
 
             // act
             Action act = () => ConfigurationBuilder.LoadConfigurationFile(fileName, "c1");
@@ -345,7 +345,7 @@ namespace CacheManager.Tests
         public void Cfg_InvalidCfgFile_HandleDefInvalidExpirationMode()
         {
             // arrange
-            string fileName = GetCfgFileName(@"\Configuration\configuration.invalid.invalidDefExpMode.config");
+            string fileName = GetCfgFileName(@"/Configuration/configuration.invalid.invalidDefExpMode.config");
 
             // act
             Action act = () => ConfigurationBuilder.LoadConfigurationFile(fileName, "c1");
@@ -360,7 +360,7 @@ namespace CacheManager.Tests
         public void Cfg_InvalidCfgFile_HandleDefInvalidTimeout()
         {
             // arrange
-            string fileName = GetCfgFileName(@"\Configuration\configuration.invalid.invalidDefTimeout.config");
+            string fileName = GetCfgFileName(@"/Configuration/configuration.invalid.invalidDefTimeout.config");
 
             // act
             Action act = () => ConfigurationBuilder.LoadConfigurationFile(fileName, "c1");
@@ -375,7 +375,7 @@ namespace CacheManager.Tests
         public void Cfg_InvalidCfgFile_InvalidExpirationMode()
         {
             // arrange
-            string fileName = GetCfgFileName(@"\Configuration\configuration.invalid.InvalidExpMode.config");
+            string fileName = GetCfgFileName(@"/Configuration/configuration.invalid.InvalidExpMode.config");
 
             // act
             Action act = () => ConfigurationBuilder.LoadConfigurationFile(fileName, "c1");
@@ -390,7 +390,7 @@ namespace CacheManager.Tests
         public void Cfg_InvalidCfgFile_InvalidEnableStats()
         {
             // arrange
-            string fileName = GetCfgFileName(@"\Configuration\configuration.invalid.InvalidEnableStats.config");
+            string fileName = GetCfgFileName(@"/Configuration/configuration.invalid.InvalidEnableStats.config");
 
             // act
             Action act = () => ConfigurationBuilder.LoadConfigurationFile(fileName, "c1");
@@ -405,7 +405,7 @@ namespace CacheManager.Tests
         public void Cfg_InvalidCfgFile_InvalidEnablePerfCounters()
         {
             // arrange
-            string fileName = GetCfgFileName(@"\Configuration\configuration.invalid.InvalidEnablePerfCounters.config");
+            string fileName = GetCfgFileName(@"/Configuration/configuration.invalid.InvalidEnablePerfCounters.config");
 
             // act
             Action act = () => ConfigurationBuilder.LoadConfigurationFile(fileName, "c1");
@@ -420,7 +420,7 @@ namespace CacheManager.Tests
         public void Cfg_InvalidCfgFile_ManagerInvalidTimeout()
         {
             // arrange
-            string fileName = GetCfgFileName(@"\Configuration\configuration.invalid.InvalidTimeout.config");
+            string fileName = GetCfgFileName(@"/Configuration/configuration.invalid.InvalidTimeout.config");
 
             // act
             Action act = () => ConfigurationBuilder.LoadConfigurationFile(fileName, "c1");
@@ -435,7 +435,7 @@ namespace CacheManager.Tests
         public void Cfg_InvalidCfgFile_ManagerInvalidUpdateMode()
         {
             // arrange
-            string fileName = GetCfgFileName(@"\Configuration\configuration.invalid.InvalidUpdateMode.config");
+            string fileName = GetCfgFileName(@"/Configuration/configuration.invalid.InvalidUpdateMode.config");
 
             // act
             Action act = () => ConfigurationBuilder.LoadConfigurationFile(fileName, "c1");
@@ -450,7 +450,7 @@ namespace CacheManager.Tests
         public void Cfg_InvalidCfgFile_ExpirationModeWithoutTimeout()
         {
             // arrange
-            string fileName = GetCfgFileName(@"\Configuration\configuration.invalid.ExpirationWithoutTimeout.config");
+            string fileName = GetCfgFileName(@"/Configuration/configuration.invalid.ExpirationWithoutTimeout.config");
 
             // act
             Action act = () => ConfigurationBuilder.LoadConfigurationFile(fileName, "c1");
@@ -465,7 +465,7 @@ namespace CacheManager.Tests
         public void Cfg_InvalidCfgFile_MaxRetriesLessThanOne()
         {
             // arrange
-            string fileName = GetCfgFileName(@"\Configuration\configuration.invalid.MaxRetries.config");
+            string fileName = GetCfgFileName(@"/Configuration/configuration.invalid.MaxRetries.config");
 
             // act
             Action act = () => ConfigurationBuilder.LoadConfigurationFile(fileName, "c1");
@@ -480,7 +480,7 @@ namespace CacheManager.Tests
         public void Cfg_InvalidCfgFile_RetryTimeoutLessThanZero()
         {
             // arrange
-            string fileName = GetCfgFileName(@"\Configuration\configuration.invalid.RetryTimeout.config");
+            string fileName = GetCfgFileName(@"/Configuration/configuration.invalid.RetryTimeout.config");
 
             // act
             Action act = () => ConfigurationBuilder.LoadConfigurationFile(fileName, "c1");
@@ -495,7 +495,7 @@ namespace CacheManager.Tests
         public void Cfg_InvalidCfgFile_BackPlateNameButNoType()
         {
             // arrange
-            string fileName = GetCfgFileName(@"\Configuration\configuration.invalid.backPlateNameNoType.config");
+            string fileName = GetCfgFileName(@"/Configuration/configuration.invalid.backPlateNameNoType.config");
 
             // act
             Action act = () => ConfigurationBuilder.LoadConfigurationFile(fileName, "c1");
@@ -510,7 +510,7 @@ namespace CacheManager.Tests
         public void Cfg_InvalidCfgFile_BackPlateTypeButNoName()
         {
             // arrange
-            string fileName = GetCfgFileName(@"\Configuration\configuration.invalid.backPlateTypeNoName.config");
+            string fileName = GetCfgFileName(@"/Configuration/configuration.invalid.backPlateTypeNoName.config");
 
             // act
             Action act = () => ConfigurationBuilder.LoadConfigurationFile(fileName, "c1");
