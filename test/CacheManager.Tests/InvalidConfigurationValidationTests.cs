@@ -190,7 +190,7 @@ namespace CacheManager.Tests
         public void Cfg_InvalidCfgFile_NoSection()
         {
             // arrange
-            string fileName = GetCfgFileName(@"/Configuration/configuration.invalid.NoSection.config");
+            string fileName = GetCfgFileName(@"/Configuration/configuration.invalid.noSection.config");
 
             // act
             Action act = () => ConfigurationBuilder.LoadConfigurationFile(fileName, "configName");
@@ -352,7 +352,7 @@ namespace CacheManager.Tests
 
             // assert
             act.ShouldThrow<ConfigurationErrorsException>()
-                .WithMessage("The value of the property 'defaultExpirationMode' cannot be parsed. The error is: The enumeration value must be one of the following:*");
+                .WithMessage("*defaultExpirationMode*");
         }
 
         [Fact]
@@ -382,7 +382,7 @@ namespace CacheManager.Tests
 
             // assert
             act.ShouldThrow<ConfigurationErrorsException>()
-                .WithMessage("The value of the property 'expirationMode' cannot be parsed.*");
+                .WithMessage("*expirationMode*");
         }
 
         [Fact]
@@ -397,7 +397,7 @@ namespace CacheManager.Tests
 
             // assert
             act.ShouldThrow<ConfigurationErrorsException>()
-                .WithMessage("The value of the property 'enableStatistics' cannot be parsed.*");
+                .WithMessage("*enableStatistics*");
         }
 
         [Fact]
@@ -412,7 +412,7 @@ namespace CacheManager.Tests
 
             // assert
             act.ShouldThrow<ConfigurationErrorsException>()
-                .WithMessage("The value of the property 'enablePerformanceCounters' cannot be parsed.*");
+                .WithMessage("*enablePerformanceCounters*");
         }
 
         [Fact]
