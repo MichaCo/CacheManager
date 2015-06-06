@@ -240,7 +240,7 @@ namespace CacheManager.Tests
             string fileName = GetCfgFileName(@"/Configuration/configuration.invalid.invalidType.config");
 
             // act
-            Action act = () => ConfigurationBuilder.LoadConfigurationFile(fileName, "configName");
+            Action act = () => CacheFactory.FromConfiguration<object>("configName", ConfigurationBuilder.LoadConfigurationFile(fileName, "configName"));
 
             // assert
             act.ShouldThrow<ConfigurationErrorsException>()
@@ -288,7 +288,7 @@ namespace CacheManager.Tests
             string fileName = GetCfgFileName(@"/Configuration/configuration.invalid.invalidType.config");
 
             // act
-            Action act = () => ConfigurationBuilder.LoadConfigurationFile(fileName, "configName");
+            Action act = () => CacheFactory.FromConfiguration<object>("configName", ConfigurationBuilder.LoadConfigurationFile(fileName, "configName"));
 
             // assert
             act.ShouldThrow<ConfigurationErrorsException>()
@@ -366,7 +366,7 @@ namespace CacheManager.Tests
             Action act = () => ConfigurationBuilder.LoadConfigurationFile(fileName, "c1");
 
             // assert
-            act.ShouldThrow<ConfigurationErrorsException>()
+            act.ShouldThrow<InvalidOperationException>()
                 .WithMessage("The value of the property 'defaultTimeout' cannot be parsed [20Invalid].");
         }
 
@@ -381,8 +381,8 @@ namespace CacheManager.Tests
             Action act = () => ConfigurationBuilder.LoadConfigurationFile(fileName, "c1");
 
             // assert
-            act.ShouldThrow<ConfigurationErrorsException>()
-                .WithMessage("*expirationMode*");
+            act.ShouldThrow<InvalidOperationException>()
+                .WithMessage("*ThisIsInvalid*");
         }
 
         [Fact]
@@ -426,7 +426,7 @@ namespace CacheManager.Tests
             Action act = () => ConfigurationBuilder.LoadConfigurationFile(fileName, "c1");
 
             // assert
-            act.ShouldThrow<ConfigurationErrorsException>()
+            act.ShouldThrow<InvalidOperationException>()
                 .WithMessage("The value of the property 'timeout' cannot be parsed [thisisinvalid].");
         }
 
@@ -442,7 +442,7 @@ namespace CacheManager.Tests
 
             // assert
             act.ShouldThrow<ConfigurationErrorsException>()
-                .WithMessage("The value of the property 'updateMode' cannot be parsed*");
+                .WithMessage("*updateMode*");
         }
 
         [Fact]
@@ -456,7 +456,7 @@ namespace CacheManager.Tests
             Action act = () => ConfigurationBuilder.LoadConfigurationFile(fileName, "c1");
 
             // assert
-            act.ShouldThrow<ConfigurationErrorsException>()
+            act.ShouldThrow<InvalidOperationException>()
                 .WithMessage("Expiration mode set without a valid timeout specified for handle [h1]");
         }
 
@@ -557,14 +557,14 @@ namespace CacheManager.Tests
             {
                 IsBackPlateSource = true,
                 Name = "name",
-                ExpirationMode = ExpirationMode.Absolute,
+                ExpirationMode = ExpirationMode.Absolute.ToString(),
                 Timeout = "22m",
                 RefHandleId = "ref"
             };
 
             // assert
             col.Name.Should().Be("name");
-            col.ExpirationMode.Should().Be(ExpirationMode.Absolute);
+            col.ExpirationMode.Should().Be(ExpirationMode.Absolute.ToString());
             col.Timeout.Should().Be("22m");
             col.RefHandleId.Should().Be("ref");
             col.IsBackPlateSource.Should().BeTrue();

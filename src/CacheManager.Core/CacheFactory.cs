@@ -123,10 +123,8 @@ namespace CacheManager.Core
         /// <exception cref="System.ArgumentNullException">
         /// Thrown if the <paramref name="cacheName"/> is null or an empty string.
         /// </exception>
-        /// <exception cref="System.Configuration.ConfigurationErrorsException">
-        /// Thrown if there are configuration errors within the cacheManager section.
-        /// </exception>
         /// <exception cref="System.InvalidOperationException">
+        /// Thrown if there are configuration errors within the cacheManager section.
         /// Thrown if no cacheManager section is defined or on certain configuration errors related
         /// to the cache handles.
         /// </exception>
@@ -164,10 +162,8 @@ namespace CacheManager.Core
         /// <exception cref="System.ArgumentNullException">
         /// Thrown if the <paramref name="cacheName"/> is null or an empty string.
         /// </exception>
-        /// <exception cref="System.Configuration.ConfigurationErrorsException">
-        /// Thrown if there are configuration errors within the cacheManager section.
-        /// </exception>
         /// <exception cref="System.InvalidOperationException">
+        /// Thrown if there are configuration errors within the cacheManager section.
         /// Thrown if no cacheManager section is defined or on certain configuration errors related
         /// to the cache handles.
         /// </exception>

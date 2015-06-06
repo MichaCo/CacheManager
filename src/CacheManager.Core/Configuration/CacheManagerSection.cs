@@ -199,12 +199,12 @@
         /// Gets or sets the expiration mode.
         /// </summary>
         /// <value>The expiration mode.</value>
-        [ConfigurationProperty("expirationMode", IsRequired = false, DefaultValue = ExpirationMode.None)]
-        public ExpirationMode ExpirationMode
+        [ConfigurationProperty("expirationMode", IsRequired = false)]
+        public string ExpirationMode
         {
             get
             {
-                return (ExpirationMode)this["expirationMode"];
+                return (string)this["expirationMode"];
             }
             set
             {
@@ -216,7 +216,7 @@
         /// Gets or sets a value indicating whether this instance is back plate source.
         /// </summary>
         /// <value><c>true</c> if this instance is back plate source; otherwise, <c>false</c>.</value>
-        [ConfigurationProperty("isBackPlateSource", IsRequired = false, DefaultValue = false)]
+        [ConfigurationProperty("isBackPlateSource", IsRequired = false)]
         public bool IsBackPlateSource
         {
             get

@@ -13,6 +13,7 @@ namespace CacheManager.Core.Configuration
     using System.Text.RegularExpressions;
 
 #endif
+
     /// <summary>
     /// Helper class to load cache manager configurations from file or to build new configurations
     /// in a fluent way.
@@ -280,20 +281,27 @@ namespace CacheManager.Core.Configuration
                 };
 
                 // override default timeout if it is defined in this section.
-                if (ParameterIsModified(handleItem, "timeout"))
+                if (!string.IsNullOrWhiteSpace(handleItem.Timeout))
                 {
                     handle.ExpirationTimeout = GetTimeSpan(handleItem.Timeout, "timeout");
                 }
 
                 // override default expiration mode if it is defined in this section.
-                if (ParameterIsModified(handleItem, "expirationMode"))
+                if (!string.IsNullOrWhiteSpace(handleItem.ExpirationMode))
                 {
-                    handle.ExpirationMode = handleItem.ExpirationMode;
+                    try
+                    {
+                        handle.ExpirationMode = (ExpirationMode)Enum.Parse(typeof(ExpirationMode), handleItem.ExpirationMode);
+                    }
+                    catch (ArgumentException ex)
+                    {
+                        throw new InvalidOperationException("Invalid value '" + handleItem.ExpirationMode + "'for expiration mode", ex);
+                    }
                 }
 
                 if (handle.ExpirationMode != ExpirationMode.None && handle.ExpirationTimeout == TimeSpan.Zero)
                 {
-                    throw new ConfigurationErrorsException(
+                    throw new InvalidOperationException(
                         string.Format(
                             CultureInfo.InvariantCulture,
                             "Expiration mode set without a valid timeout specified for handle [{0}]",
@@ -332,7 +340,7 @@ namespace CacheManager.Core.Configuration
             int timeoutValue = 0;
             if (!int.TryParse(hasSuffix ? normValue.Substring(0, normValue.Length - 1) : normValue, out timeoutValue))
             {
-                throw new ConfigurationErrorsException(
+                throw new InvalidOperationException(
                     string.Format(CultureInfo.InvariantCulture, "The value of the property '{1}' cannot be parsed [{0}].", timespanCfgValue, propName));
             }
 
@@ -351,18 +359,6 @@ namespace CacheManager.Core.Configuration
             // last option would be seconds
             return TimeSpan.FromSeconds(timeoutValue);
         }
-
-        private static bool ParameterIsModified(ConfigurationElement elem, string property)
-        {
-            var propInfo = elem.ElementInformation.Properties[property];
-            if (propInfo == null)
-            {
-                throw new InvalidOperationException("Looking for a non existing attribute");
-            }
-
-            return propInfo.IsModified;
-        }
-
 #endif
     }
 
