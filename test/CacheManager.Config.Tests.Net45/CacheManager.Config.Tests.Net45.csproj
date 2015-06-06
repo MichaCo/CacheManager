@@ -32,18 +32,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="CacheManager.Core, Version=0.6.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\CacheManager.Core.0.6.0.0\lib\net45\CacheManager.Core.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="CacheManager.StackExchange.Redis, Version=0.6.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\CacheManager.StackExchange.Redis.0.6.0.0\lib\net45\CacheManager.StackExchange.Redis.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="CacheManager.SystemRuntimeCaching, Version=0.6.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\CacheManager.SystemRuntimeCaching.0.6.0\lib\net45\CacheManager.SystemRuntimeCaching.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="StackExchange.Redis, Version=1.0.316.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\packages\StackExchange.Redis.1.0.450\lib\net45\StackExchange.Redis.dll</HintPath>
       <Private>True</Private>
@@ -69,6 +57,20 @@
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\CacheManager.Core\CacheManager.Core.csproj">
+      <Project>{701df657-8670-4313-a06b-63d8485b18f9}</Project>
+      <Name>CacheManager.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\CacheManager.StackExchange.Redis\CacheManager.StackExchange.Redis.csproj">
+      <Project>{3930c89d-c16b-4c88-b946-0c22e10cd263}</Project>
+      <Name>CacheManager.StackExchange.Redis</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\CacheManager.SystemRuntimeCaching\CacheManager.SystemRuntimeCaching.csproj">
+      <Project>{d292fd01-c6f3-4600-abe7-7bba2b81bfd5}</Project>
+      <Name>CacheManager.SystemRuntimeCaching</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
