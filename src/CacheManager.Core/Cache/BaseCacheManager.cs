@@ -1001,32 +1001,35 @@ namespace CacheManager.Core.Cache
         /// <returns>The added or updated value.</returns>
         private TCacheValue AddOrUpdateInternal(CacheItem<TCacheValue> item, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config)
         {
-            TCacheValue returnValue;
-            bool updated = string.IsNullOrWhiteSpace(item.Region) ?
-                this.TryUpdate(item.Key, updateValue, out returnValue) :
-                this.TryUpdate(item.Key, item.Region, updateValue, out returnValue);
+            var tries = 0;
+            do
+            {
+                tries++;
+                TCacheValue returnValue;
+                bool updated = string.IsNullOrWhiteSpace(item.Region) ?
+                    this.TryUpdate(item.Key, updateValue, config, out returnValue) :
+                    this.TryUpdate(item.Key, item.Region, updateValue, config, out returnValue);
 
-            if (updated)
-            {
-                return returnValue;
-            }
-            else
-            {
-                // if the update didn't work, lets try to add it
-                if (this.AddInternal(item))
+                if (updated)
                 {
-                    return item.Value;
+                    return returnValue;
                 }
                 else
                 {
-                    // Add also didn't work, meaning the item is already there/someone added it in
-                    // the meantime, lets try it again... yes this is recursive, but it is an edge
-                    // case anyways. Otherwise we could just try another update because the failed
-                    // Add means, the item is now present and an update can be made.
-                    // TODO: test to find an endless loop edge case
-                    return this.AddOrUpdateInternal(item, updateValue, config);
+                    // if the update didn't work, lets try to add it
+                    if (this.AddInternal(item))
+                    {
+                        return item.Value;
+                    }
+                    //// Continue looping otherwise...
+                    //// Add also didn't work, meaning the item is already there/someone added it in
+                    //// the meantime, lets try it again... 
                 }
             }
+            while (tries <= this.Configuration.MaxRetries);
+
+            // exceeded max retries, failing the operation... (should not happen in 99,99% of the cases though, better throw?)
+            return default(TCacheValue);
         }
 
         /// <summary>

@@ -136,7 +136,7 @@ namespace CacheManager.Tests
                     databaseCount = StartDbCount;
                 }
 
-                return CreateRedisCache(databaseCount);
+                return CreateRedisCache(databaseCount, false);
             }
         }
 
@@ -150,7 +150,7 @@ namespace CacheManager.Tests
                     databaseCount = StartDbCount;
                 }
 
-                return CreateRedisAndSystemCacheWithBackPlate(databaseCount);
+                return CreateRedisAndSystemCacheWithBackPlate(databaseCount, false);
             }
         }
 
@@ -212,11 +212,13 @@ namespace CacheManager.Tests
                 return cache;
             }
         }
+
 #endif
 
-        public static ICacheManager<object> CreateRedisAndSystemCacheWithBackPlate(int database = 0)
+        public static ICacheManager<object> CreateRedisAndSystemCacheWithBackPlate(int database = 0, bool sharedRedisConfig = true)
         {
-            return CacheFactory.Build("redisCache", settings =>
+            var redisKey = sharedRedisConfig ? "redisConfig" : Guid.NewGuid().ToString();
+            return CacheFactory.Build(redisKey, settings =>
             {
                 settings
                     .WithUpdateMode(CacheUpdateMode.Up)
@@ -225,33 +227,34 @@ namespace CacheManager.Tests
                 settings
                     .WithMaxRetries(100)
                     .WithRetryTimeout(1000)
-                    .WithRedisConfiguration("redisCache", config =>
+                    .WithRedisConfiguration(redisKey, config =>
                     {
                         config.WithAllowAdmin()
                             .WithDatabase(database)
                             .WithEndpoint("localhost", 6379);
                     })
-                    .WithRedisBackPlate("redisCache")
-                    .WithRedisCacheHandle("redisCache", true)
+                    .WithRedisBackPlate(redisKey)
+                    .WithRedisCacheHandle(redisKey, true)
                     .EnableStatistics();
             });
         }
 
-        public static ICacheManager<object> CreateRedisCache(int database = 0)
+        public static ICacheManager<object> CreateRedisCache(int database = 0, bool sharedRedisConfig = true)
         {
+            var redisKey = sharedRedisConfig ? "redisConfig" : Guid.NewGuid().ToString();
             var cache = CacheFactory.Build(NewKey(), settings =>
             {
                 settings
                     .WithMaxRetries(100)
                     .WithRetryTimeout(1000)
-                    .WithRedisConfiguration("redisCache", config =>
+                    .WithRedisConfiguration(redisKey, config =>
                     {
                         config.WithAllowAdmin()
                             .WithDatabase(database)
                             .WithEndpoint("localhost", 6379);
                     })
-                    // .WithRedisBackPlate("redisCache")
-                    .WithRedisCacheHandle("redisCache", true)
+                    // .WithRedisBackPlate(redisKey)
+                    .WithRedisCacheHandle(redisKey, true)
                     .EnableStatistics();
             });
 
@@ -277,10 +280,10 @@ namespace CacheManager.Tests
                 yield return new object[] { TestManagers.WithMemoryAndDictionaryHandles };
                 yield return new object[] { TestManagers.WithManyDictionaryHandles };
                 yield return new object[] { TestManagers.WithTwoNamedMemoryCaches };
-                yield return new object[] { TestManagers.WithRedisCache };
-                // yield return new object[] { TestManagers.WithSystemAndRedisCache }; yield return
-                // new object[] { TestManagers.WithMemcached }; yield return new object[] {
-                // TestManagers.WithCouchbaseMemcached };
+                //// yield return new object[] { TestManagers.WithRedisCache };
+                //// yield return new object[] { TestManagers.WithSystemAndRedisCache };
+                //// yield return new object[] { TestManagers.WithMemcached };
+                //// yield return new object[] { TestManagers.WithCouchbaseMemcached };
             }
         }
 

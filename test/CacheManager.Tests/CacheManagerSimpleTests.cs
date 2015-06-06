@@ -56,9 +56,9 @@ namespace CacheManager.Tests
             Action act = () => cache.Add(new CacheItem<object>(key, "something", ExpirationMode.Absolute, default(TimeSpan)));
 
             act.ShouldThrow<InvalidOperationException>()
-                .WithMessage("Expiration mode is defined without timeout.");            
+                .WithMessage("Expiration mode is defined without timeout.");
         }
-        
+
         [Fact]
         [ReplaceCulture]
         public void CacheManager_Ctor_Cfg_WithoutName()
@@ -341,7 +341,7 @@ namespace CacheManager.Tests
         {
             using (cache)
             {
-                // arrange 
+                // arrange
                 var key = Guid.NewGuid().ToString();
 
                 // act
@@ -1078,6 +1078,149 @@ namespace CacheManager.Tests
 
         #endregion indexer
 
+        /// <summary>
+        /// Testing edge case, cache manager configuration without any handles It should at least not
+        /// throw or produce unexpected results.
+        /// </summary>
+        #region testing empty handle list
+
+        [Fact]
+        public void CacheManager_Add_NoCacheHandles()
+        {
+            // arrange
+            using (var cache = new BaseCacheManager<string>("name", new CacheManagerConfiguration() { MaxRetries = 1000 }))
+            {
+                // act
+                Func<bool> act = () => cache.Add("key", "value");
+
+                // assert
+                act().Should().BeFalse("there are not cache handles configured to store the key");
+            }
+        }
+
+        [Fact]
+        public void CacheManager_AddOrUpdate_NoCacheHandles()
+        {
+            // arrange
+            using (var cache = new BaseCacheManager<string>("name", new CacheManagerConfiguration() { MaxRetries = 1000 }))
+            {
+                // act
+                Func<object> act = () => cache.AddOrUpdate("key", "value", item => item + " more");
+
+                // assert
+                act().Should().BeNull("there are not cache handles configured to store the key");
+            }
+        }
+
+        [Fact]
+        public void CacheManager_Clear_NoCacheHandles()
+        {
+            // arrange
+            using (var cache = new BaseCacheManager<string>("name", new CacheManagerConfiguration() { MaxRetries = 1000 }))
+            {
+                // act
+                Action act = () => cache.Clear();
+
+                // assert
+                act.ShouldNotThrow();
+            }
+        }
+
+        [Fact]
+        public void CacheManager_ClearRegion_NoCacheHandles()
+        {
+            // arrange
+            using (var cache = new BaseCacheManager<string>("name", new CacheManagerConfiguration() { MaxRetries = 1000 }))
+            {
+                // act
+                Action act = () => cache.ClearRegion("region");
+
+                // assert
+                act.ShouldNotThrow();
+            }
+        }
+
+        [Fact]
+        public void CacheManager_Get_NoCacheHandles()
+        {
+            // arrange
+            using (var cache = new BaseCacheManager<string>("name", new CacheManagerConfiguration() { MaxRetries = 1000 }))
+            {
+                // act
+                cache.Put("key", "value");
+                Func<string> act = () => cache["key"];
+                Func<string> act2 = () => cache.Get("key");
+                Func<string> act3 = () => cache.Get<string>("key");
+                Func<CacheItem<string>> act4 = () => cache.GetCacheItem("key");
+
+                // assert
+                act().Should().BeNull("there are not cache handles configured to store the key");
+                act2().Should().BeNull();
+                act3().Should().BeNull();
+                act4().Should().BeNull();
+            }
+        }
+
+        [Fact]
+        public void CacheManager_Put_NoCacheHandles()
+        {
+            // arrange
+            using (var cache = new BaseCacheManager<string>("name", new CacheManagerConfiguration() { MaxRetries = 1000 }))
+            {
+                // act
+                Func<string> act = () => { cache.Put("key", "value"); return cache["key"]; };
+
+                // assert
+                act().Should().BeNull("there are not cache handles configured to store the key");
+            }
+        }
+
+        [Fact]
+        public void CacheManager_Remove_NoCacheHandles()
+        {
+            // arrange
+            using (var cache = new BaseCacheManager<string>("name", new CacheManagerConfiguration() { MaxRetries = 1000 }))
+            {
+                // act
+                Func<bool> act = () => cache.Remove("region");
+
+                // assert
+                act().Should().BeFalse();
+            }
+        }
+
+        [Fact]
+        public void CacheManager_TryUpdate_NoCacheHandles()
+        {
+            // arrange
+            using (var cache = new BaseCacheManager<string>("name", new CacheManagerConfiguration() { MaxRetries = 1000 }))
+            {
+                // act
+                string value = string.Empty;
+                Func<bool> act = () => cache.TryUpdate("region", p => p, out value);
+
+                // assert
+                act().Should().BeFalse();
+                value.Should().BeNull();
+            }
+        }
+
+        [Fact]
+        public void CacheManager_Update_NoCacheHandles()
+        {
+            // arrange
+            using (var cache = new BaseCacheManager<string>("name", new CacheManagerConfiguration() { MaxRetries = 1000 }))
+            {
+                // act
+                Func<string> act = () => cache.Update("region", p => p);
+
+                // assert
+                act().Should().BeNull();
+            }
+        }
+
+        #endregion testing empty handle list
+
         [Theory]
         [MemberData("TestCacheManagers")]
         [ReplaceCulture]
@@ -1085,8 +1228,10 @@ namespace CacheManager.Tests
         {
             using (cache)
             {
-                // arrange act
+                // arrange
                 var key = Guid.NewGuid().ToString();
+
+                // act
                 Func<bool> actA = () => cache.Add(key, "some value", "region");
                 Func<string> act = () => cache.Get<string>(key, "region");
 

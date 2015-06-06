@@ -1,9 +1,12 @@
 language: csharp
-solution: CacheManager.sln
-install:
-  - nuget restore CacheManager.sln
-  - nuget install xunit.runner.console -Version 2.0.0 -OutputDirectory testrunner
+env:
+  global:
+    - EnableNuGetPackageRestore=true
+# solution: CacheManager.sln
+# install:
+# - nuget restore CacheManager.sln		   
+# - nuget install xunit.runner.console -Version 2.0.0 -OutputDirectory testrunner		   
+sudo: false
 script:
-  - xbuild /p:Configuration=Release CacheManager.sln
-#  - mono ./testrunner/xunit.runner.console.2.0.0/tools/xunit.console.exe ./tests/CacheManager.Tests/bin/Release/CacheManager.Tests.dll -notrait "IntegrationTest=Memcached" -notrait "IntegrationTest=Redis"
-# not working till https://github.com/xunit/xunit/issues/158 is resolved
+  - chmod a+x ./build.sh
+  - ./build.sh --quiet verify

@@ -215,9 +215,12 @@ namespace CacheManager.Tests
                     iterations);
             }
 
-            // item should have been added only once
-            adds.ShouldAllBeEquivalentTo(
-                    Enumerable.Repeat(1, cache.CacheHandles.Count));
+            // item should have been added only once (not true in back plate scenarios)
+            if (!cache.Configuration.HasBackPlate)
+            {
+                adds.ShouldAllBeEquivalentTo(
+                        Enumerable.Repeat(1, cache.CacheHandles.Count));
+            }
 
             puts.ShouldAllBeEquivalentTo(
                     Enumerable.Repeat(threads * iterations, cache.CacheHandles.Count));
