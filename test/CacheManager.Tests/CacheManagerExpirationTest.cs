@@ -20,7 +20,7 @@ namespace CacheManager.Tests
         // Issue #9 - item still expires
         [Theory]
         [MemberData("TestCacheManagers")]
-        [Trait("Unreliable", "Timing")]
+        [Trait("category", "Unreliable")]
         public void CacheManager_RemoveExpiration_DoesNotExpire<T>(T cache) where T : ICacheManager<object>
         {
             using (cache)
@@ -41,7 +41,7 @@ namespace CacheManager.Tests
         }
 
         [Fact]
-        [Trait("Unreliable", "Timing")]
+        [Trait("category", "Unreliable")]
         [ReplaceCulture]
         public void CacheManager_Configuration_AbsoluteExpires()
         {

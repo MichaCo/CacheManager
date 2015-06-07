@@ -17,8 +17,8 @@ namespace CacheManager.Tests
     public class RedisTests
     {
         [Fact]
-        [Trait("IntegrationTest", "Redis")]
-        [Trait("Unreliable", "Timing")]
+        [Trait("category", "Redis")]
+        [Trait("category", "Unreliable")]
         public void Redis_Absolute_DoesExpire()
         {
             // arrange
@@ -44,8 +44,8 @@ namespace CacheManager.Tests
         }
 
         [Fact]
-        [Trait("IntegrationTest", "Redis")]
-        [Trait("Unreliable", "Timing")]
+        [Trait("category", "Redis")]
+        [Trait("category", "Unreliable")]
         public void Redis_Absolute_DoesExpire_MultiClients()
         {
             // arrange
@@ -79,7 +79,7 @@ namespace CacheManager.Tests
         }
 
         [Fact]
-        [Trait("IntegrationTest", "Redis")]
+        [Trait("category", "Redis")]
         public void Redis_Multiple_PubSub_Change()
         {
             // arrange
@@ -109,7 +109,7 @@ namespace CacheManager.Tests
         }
 
         [Fact(Skip = "needs clear")]
-        [Trait("IntegrationTest", "Redis")]
+        [Trait("category", "Redis")]
         public void Redis_Multiple_PubSub_Clear()
         {
             // arrange
@@ -135,7 +135,7 @@ namespace CacheManager.Tests
         }
 
         [Fact]
-        [Trait("IntegrationTest", "Redis")]
+        [Trait("category", "Redis")]
         public void Redis_Multiple_PubSub_ClearRegion()
         {
             // arrange
@@ -160,7 +160,7 @@ namespace CacheManager.Tests
         }
 
         [Fact]
-        [Trait("IntegrationTest", "Redis")]
+        [Trait("category", "Redis")]
         public void Redis_Multiple_PubSub_Remove()
         {
             // arrange
@@ -188,8 +188,8 @@ namespace CacheManager.Tests
         }
 
         [Fact]
-        [Trait("IntegrationTest", "Redis")]
-        [Trait("Unreliable", "Timing")]
+        [Trait("category", "Redis")]
+        [Trait("category", "Unreliable")]
         public void Redis_NoRaceCondition_WithUpdate()
         {
             using (var cache = CacheFactory.Build<RaceConditionTestElement>("myCache", settings =>
@@ -238,8 +238,8 @@ namespace CacheManager.Tests
         }
 
         [Fact]
-        [Trait("IntegrationTest", "Redis")]
-        [Trait("Unreliable", "Timing")]
+        [Trait("category", "Redis")]
+        [Trait("category", "Unreliable")]
         public void Redis_RaceCondition_WithoutUpdate()
         {
             using (var cache = CacheFactory.Build<RaceConditionTestElement>("myCache", settings =>
@@ -284,8 +284,8 @@ namespace CacheManager.Tests
         }
 
         [Fact]
-        [Trait("IntegrationTest", "Redis")]
-        [Trait("Unreliable", "Timing")]
+        [Trait("category", "Redis")]
+        [Trait("category", "Unreliable")]
         public void Redis_Sliding_DoesExpire()
         {
             // arrange
@@ -316,8 +316,8 @@ namespace CacheManager.Tests
         }
 
         [Fact]
-        [Trait("IntegrationTest", "Redis")]
-        [Trait("Unreliable", "Timing")]
+        [Trait("category", "Redis")]
+        [Trait("category", "Unreliable")]
         public void Redis_Sliding_DoesExpire_MultiClients()
         {
             // arrange
@@ -353,8 +353,8 @@ namespace CacheManager.Tests
         }
 
         [Fact]
-        [Trait("IntegrationTest", "Redis")]
-        [Trait("Unreliable", "Timing")]
+        [Trait("category", "Redis")]
+        [Trait("category", "Unreliable")]
         public void Redis_Sliding_DoesExpire_WithRegion()
         {
             // arrange
@@ -385,7 +385,7 @@ namespace CacheManager.Tests
         }
 
         [Fact]
-        [Trait("IntegrationTest", "Redis")]
+        [Trait("category", "Redis")]
         public void Redis_Valid_CfgFile_LoadWithRedisBackPlate()
         {
             // arrange
@@ -401,7 +401,7 @@ namespace CacheManager.Tests
         }
 
         [Fact]
-        [Trait("IntegrationTest", "Redis")]
+        [Trait("category", "Redis")]
         public void Redis_ValueConverter_ObjectCacheTypeConversion_Bool()
         {
             var cache = TestManagers.CreateRedisCache(12);
@@ -418,7 +418,7 @@ namespace CacheManager.Tests
         }
 
         [Fact]
-        [Trait("IntegrationTest", "Redis")]
+        [Trait("category", "Redis")]
         public void Redis_ValueConverter_ObjectCacheTypeConversion_Bytes()
         {
             var cache = TestManagers.CreateRedisCache(13);
@@ -435,7 +435,7 @@ namespace CacheManager.Tests
         }
 
         [Fact]
-        [Trait("IntegrationTest", "Redis")]
+        [Trait("category", "Redis")]
         public void Redis_ValueConverter_ObjectCacheTypeConversion_Double()
         {
             var cache = TestManagers.CreateRedisCache(14);
@@ -452,7 +452,7 @@ namespace CacheManager.Tests
         }
 
         [Fact]
-        [Trait("IntegrationTest", "Redis")]
+        [Trait("category", "Redis")]
         public void Redis_ValueConverter_ObjectCacheTypeConversion_Int32()
         {
             var cache = TestManagers.CreateRedisCache(15);
@@ -469,7 +469,7 @@ namespace CacheManager.Tests
         }
 
         [Fact]
-        [Trait("IntegrationTest", "Redis")]
+        [Trait("category", "Redis")]
         public void Redis_ValueConverter_ObjectCacheTypeConversion_Long()
         {
             var cache = TestManagers.CreateRedisCache(16);
@@ -486,7 +486,7 @@ namespace CacheManager.Tests
         }
 
         [Fact]
-        [Trait("IntegrationTest", "Redis")]
+        [Trait("category", "Redis")]
         public void Redis_ValueConverter_ObjectCacheTypeConversion_Poco()
         {
             var cache = TestManagers.CreateRedisCache(17);
@@ -503,7 +503,7 @@ namespace CacheManager.Tests
         }
 
         [Fact]
-        [Trait("IntegrationTest", "Redis")]
+        [Trait("category", "Redis")]
         public void Redis_ValueConverter_ObjectCacheTypeConversion_String()
         {
             var cache = TestManagers.CreateRedisCache(18);

@@ -18,7 +18,7 @@ namespace CacheManager.Tests
     public class MemoryCacheTests
     {
         [Fact]
-        [Trait("Unreliable", "Timing")]
+        [Trait("category", "Unreliable")]
         public void SysRuntime_MemoryCache_Absolute_DoesExpire()
         {
             // arrange
@@ -76,7 +76,7 @@ namespace CacheManager.Tests
         }
 
         [Fact]
-        [Trait("Unreliable", "Timing")]
+        [Trait("category", "Unreliable")]
         public void SysRuntime_MemoryCache_Sliding_DoesExpire()
         {
             // arrange
@@ -96,7 +96,7 @@ namespace CacheManager.Tests
         }
 
         [Fact]
-        [Trait("Unreliable", "Timing")]
+        [Trait("category", "Unreliable")]
         public void SysRuntime_MemoryCache_Sliding_DoesSlide()
         {
             // arrange

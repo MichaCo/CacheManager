@@ -20,6 +20,6 @@
     "dnx50": { }
   },
   "commands": {
-    "test": "xunit.runner.aspnet -notrait IntegrationTest=Memcached -notrait IntegrationTest=Redis -notrait Unreliable=Timing -notrait Unreliable=Mono"
+    "test": "xunit.runner.aspnet -notrait category=Memcached -notrait category=Redis -notrait category=Unreliable -notrait category=Mono"
   }
 }

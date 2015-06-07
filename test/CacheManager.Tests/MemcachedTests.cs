@@ -36,7 +36,7 @@ namespace CacheManager.Tests
         }
 
         [Fact(Skip = "memcached")]
-        [Trait("IntegrationTest", "Memcached")]
+        [Trait("category", "Memcached")]
         public void Memcached_KeySizeLimit()
         {
             // arrange
@@ -64,7 +64,7 @@ namespace CacheManager.Tests
         }
 
         [Fact(Skip = "memcached")]
-        [Trait("IntegrationTest", "Memcached")]
+        [Trait("category", "Memcached")]
         public void Memcached_KeySizeLimit_WithRegion()
         {
             // arrange
@@ -92,8 +92,8 @@ namespace CacheManager.Tests
         }
 
         [Fact(Skip = "memcached")]
-        [Trait("IntegrationTest", "Memcached")]
-        [Trait("Unreliable", "Timing")]
+        [Trait("category", "Memcached")]
+        [Trait("category", "Unreliable")]
         public void Memcached_Absolute_DoesExpire()
         {
             // act
@@ -125,7 +125,7 @@ namespace CacheManager.Tests
         }
 
         [Fact(Skip = "memcached")]
-        [Trait("IntegrationTest", "Memcached")]
+        [Trait("category", "Memcached")]
         public void Memcached_RaceCondition_WithoutCasHandling()
         {
             // arrange
@@ -167,7 +167,7 @@ namespace CacheManager.Tests
         }
 
         [Fact(Skip = "memcached")]
-        [Trait("IntegrationTest", "Memcached")]
+        [Trait("category", "Memcached")]
         public void Memcached_NoRaceCondition_WithCasHandling()
         {
             // arrange
@@ -215,7 +215,7 @@ namespace CacheManager.Tests
         }
 
         [Fact(Skip = "memcached")]
-        [Trait("IntegrationTest", "Memcached")]
+        [Trait("category", "Memcached")]
         public void Memcached_NoRaceCondition_WithCasHandling_WithRegion()
         {
             // arrange
@@ -265,7 +265,7 @@ namespace CacheManager.Tests
         }
 
         [Fact(Skip = "memcached")]
-        [Trait("IntegrationTest", "Memcached")]
+        [Trait("category", "Memcached")]
         public void Memcached_NoRaceCondition_WithCasButTooFiewRetries()
         {
             // arrange
@@ -313,7 +313,7 @@ namespace CacheManager.Tests
         }
 
         [Fact(Skip = "memcached")]
-        [Trait("IntegrationTest", "Memcached")]
+        [Trait("category", "Memcached")]
         public void Memcached_Update_ItemNotAdded()
         {
             // arrange

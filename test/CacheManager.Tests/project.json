@@ -20,7 +20,7 @@
     }
   },
   "commands": {
-    "test": "xunit.runner.aspnet -notrait IntegrationTest=Memcached -notrait Unreliable=Timing",
+    "test": "xunit.runner.aspnet -notrait category=Memcached -notrait category=Unreliable",
     "test-all": "xunit.runner.aspnet"
   }
 }
