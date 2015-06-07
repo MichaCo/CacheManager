@@ -280,8 +280,10 @@ namespace CacheManager.Tests
                 yield return new object[] { TestManagers.WithMemoryAndDictionaryHandles };
                 yield return new object[] { TestManagers.WithManyDictionaryHandles };
                 yield return new object[] { TestManagers.WithTwoNamedMemoryCaches };
-                //// yield return new object[] { TestManagers.WithRedisCache };
-                //// yield return new object[] { TestManagers.WithSystemAndRedisCache };
+#if REDISENABLED
+                yield return new object[] { TestManagers.WithRedisCache };
+                yield return new object[] { TestManagers.WithSystemAndRedisCache };
+#endif
                 //// yield return new object[] { TestManagers.WithMemcached };
                 //// yield return new object[] { TestManagers.WithCouchbaseMemcached };
             }

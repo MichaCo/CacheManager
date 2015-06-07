@@ -8,6 +8,14 @@ CacheManager is not just an interface to unify the programming model for various
 make it very easy to change the caching strategy later on in a project. It also offers additional features, like cache synchronization, concurrent updates, events, performance counters... 
 The developer can opt-in to those features only if needed.
 
+## Build Status
+
+Build Server | Status
+--- | ---
+Windows, KoreBuild | [![Build status](https://ci.appveyor.com/api/projects/status/lbi004cv6idhbr26?svg=true)](https://ci.appveyor.com/project/MichaCo/cachemanager)
+Windows, MSBuild | [![Build status](https://ci.appveyor.com/api/projects/status/0uxi3saj5prdyulg?svg=true)](https://ci.appveyor.com/project/MichaCo/cachemanager-at86a)
+Linux, Mono | [![Build Status](https://travis-ci.org/MichaCo/CacheManager.svg?branch=master)](https://travis-ci.org/MichaCo/CacheManager) 
+
 ## Documentation
  
 Documentation can be found within the [articles folder][articles] of the Cache Manager's repository and  hosted on my [website][mcweb]:
@@ -34,18 +42,16 @@ There is also from source generated [html documentation][help] available online.
 
 ## CacheManager Nuget Packages
 
-| Package Name         | .Net 4.0         | .Net 4.5
-|----------------------| :--------------: | :----------------:
-| [CacheManager.Core] [Core.nuget] | x | x
-| [CacheManager.StackExchange.Redis] [Redis.nuget] | x | x 
-| [CacheManager.SystemRuntimeCaching] [SystemRuntimeCaching.nuget]  | x | x 
-| [CacheManager.AppFabricCache] [AppFabricCache.nuget]  | - | x 
-| [CacheManager.WindowsAzureCaching] [WindowsAzureCaching.nuget]  | - | x 
-| [CacheManager.Memcached] [Memcached.nuget]  | x | x
-| [CacheManager.Web] [Web.nuget]  | - | x
-| [CacheManager.Couchbase] [Couchbase.nuget]  | - | x
+| Package Name | .Net 4.0  | .Net 4.5  | DNX 4.5.1 | DNX Core
+|--------------| :-------: | :-------: | :-------: | :-------:
+| [CacheManager.Core] [Core.nuget] | x | x | x | x
+| [CacheManager.StackExchange.Redis] [Redis.nuget] | x | x | x | -
+| [CacheManager.SystemRuntimeCaching] [SystemRuntimeCaching.nuget]  | x | x | x | -
+| [CacheManager.Memcached] [Memcached.nuget]  | x | x | x | -
+| [CacheManager.Web] [Web.nuget]  | - | x | x | -
+| [CacheManager.Couchbase] [Couchbase.nuget]  | - | x | x | -
 
-## Features in Version: [0.5.x][releases] [![Build Status](https://travis-ci.org/MichaCo/CacheManager.svg?branch=master)](https://travis-ci.org/MichaCo/CacheManager) 
+## Features in Version: [0.6.x][releases] 
 
 * One common interface for handling different caching technologies: `ICache<T>`
 * Configurable via app/web.config or by code.
@@ -54,8 +60,6 @@ There is also from source generated [html documentation][help] available online.
     * **Redis** using [StackExchange.Redis](https://github.com/StackExchange/StackExchange.Redis)
     * **Memcached** using [Enyim.Memcached](https://github.com/enyim/EnyimMemcached)
     * **Couchbase** using [Couchbase.Net.Client v2](https://github.com/couchbase/couchbase-net-client)
-    * AppFabric cache (might get removed)
-    * Azure cache (might get removed)
 * **Update values with lock or transaction** for distributed caches. 
 The interfaced provides a simple update method which internally ensures you work with the latest version.
 And CacheManager handles version conflicts for you.
@@ -82,7 +86,7 @@ OnGet, OnAdd, OnPut, OnRemove, OnClear, OnClearRegion
 * **Cache clients synchronization** 
     * Implemented with the Redis pub/sub feature
     * (Other implementations without Redis might be an option for a later version)
-* Supports .Net 4.0, .Net 4.5
+* Supports .Net 4.0, .Net 4.5, **ASP.NET DNX 4.5.1 and Core**
 
 [releases]: https://github.com/MichaCo/CacheManager/releases
 [Core.nuget]: https://www.nuget.org/packages/CacheManager.Core

@@ -1,0 +1,9 @@
+version: 0.6.0.{build}
+os: Visual Studio 2015 RC
+clone_depth: 10
+install:
+- C:\projects\cachemanager\tools\redis\install-service.cmd
+build_script:
+- C:\projects\cachemanager\build.cmd --quiet verify
+test: off
+deploy: off

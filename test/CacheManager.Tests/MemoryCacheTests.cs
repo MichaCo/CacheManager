@@ -17,12 +17,13 @@ namespace CacheManager.Tests
 #endif
     public class MemoryCacheTests
     {
-        [Fact(Skip = "unreliable")]
+        [Fact]
+        [Trait("Unreliable", "Timing")]
         public void SysRuntime_MemoryCache_Absolute_DoesExpire()
         {
             // arrange
             var key = Guid.NewGuid().ToString();
-            var item = new CacheItem<object>(key, "something", ExpirationMode.Absolute, new TimeSpan(0, 0, 0, 0, 50));
+            var item = new CacheItem<object>(key, "something", ExpirationMode.Absolute, new TimeSpan(0, 0, 0, 0, 100));
             // act
             using (var act = this.GetHandle("Default"))
             {
@@ -31,7 +32,7 @@ namespace CacheManager.Tests
                 Thread.Sleep(15);
                 act[key].Should().NotBeNull();
 
-                Thread.Sleep(40);
+                Thread.Sleep(100);
 
                 // assert
                 act[key].Should().BeNull();
@@ -75,6 +76,7 @@ namespace CacheManager.Tests
         }
 
         [Fact]
+        [Trait("Unreliable", "Timing")]
         public void SysRuntime_MemoryCache_Sliding_DoesExpire()
         {
             // arrange
@@ -93,7 +95,8 @@ namespace CacheManager.Tests
             }
         }
 
-        [Fact(Skip = "unreliable")]
+        [Fact]
+        [Trait("Unreliable", "Timing")]
         public void SysRuntime_MemoryCache_Sliding_DoesSlide()
         {
             // arrange

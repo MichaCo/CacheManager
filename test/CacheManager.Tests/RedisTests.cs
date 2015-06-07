@@ -18,6 +18,7 @@ namespace CacheManager.Tests
     {
         [Fact]
         [Trait("IntegrationTest", "Redis")]
+        [Trait("Unreliable", "Timing")]
         public void Redis_Absolute_DoesExpire()
         {
             // arrange
@@ -44,6 +45,7 @@ namespace CacheManager.Tests
 
         [Fact]
         [Trait("IntegrationTest", "Redis")]
+        [Trait("Unreliable", "Timing")]
         public void Redis_Absolute_DoesExpire_MultiClients()
         {
             // arrange
@@ -187,6 +189,7 @@ namespace CacheManager.Tests
 
         [Fact]
         [Trait("IntegrationTest", "Redis")]
+        [Trait("Unreliable", "Timing")]
         public void Redis_NoRaceCondition_WithUpdate()
         {
             using (var cache = CacheFactory.Build<RaceConditionTestElement>("myCache", settings =>
@@ -236,6 +239,7 @@ namespace CacheManager.Tests
 
         [Fact]
         [Trait("IntegrationTest", "Redis")]
+        [Trait("Unreliable", "Timing")]
         public void Redis_RaceCondition_WithoutUpdate()
         {
             using (var cache = CacheFactory.Build<RaceConditionTestElement>("myCache", settings =>
@@ -281,6 +285,7 @@ namespace CacheManager.Tests
 
         [Fact]
         [Trait("IntegrationTest", "Redis")]
+        [Trait("Unreliable", "Timing")]
         public void Redis_Sliding_DoesExpire()
         {
             // arrange
@@ -310,8 +315,9 @@ namespace CacheManager.Tests
             }
         }
 
-        [Fact(Skip = "unreliable")]
+        [Fact]
         [Trait("IntegrationTest", "Redis")]
+        [Trait("Unreliable", "Timing")]
         public void Redis_Sliding_DoesExpire_MultiClients()
         {
             // arrange
@@ -348,6 +354,7 @@ namespace CacheManager.Tests
 
         [Fact]
         [Trait("IntegrationTest", "Redis")]
+        [Trait("Unreliable", "Timing")]
         public void Redis_Sliding_DoesExpire_WithRegion()
         {
             // arrange

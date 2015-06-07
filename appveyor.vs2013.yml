@@ -1,0 +1,17 @@
+version: 0.6.0.{build}
+os: Visual Studio 2015 RC
+clone_depth: 10
+clone_folder: C:\projects\CacheManager\
+install:
+- C:\projects\CacheManager\tools\redis\install-service.cmd
+before_build:
+- nuget restore C:\projects\cachemanager\CacheManager.VS2013.sln
+build:
+  project: C:\projects\cachemanager\CacheManager.VS2013.sln
+  verbosity: minimal
+test:
+  categories:
+    except:
+    - Memcached
+    - Redis
+    - Timing

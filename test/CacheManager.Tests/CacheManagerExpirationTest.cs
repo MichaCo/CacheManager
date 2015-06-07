@@ -17,9 +17,10 @@ namespace CacheManager.Tests
 #endif
     public class CacheManagerExpirationTest : BaseCacheManagerTest
     {
-        // Issue #9 - item still expires validate
+        // Issue #9 - item still expires
         [Theory]
         [MemberData("TestCacheManagers")]
+        [Trait("Unreliable", "Timing")]
         public void CacheManager_RemoveExpiration_DoesNotExpire<T>(T cache) where T : ICacheManager<object>
         {
             using (cache)
@@ -29,6 +30,7 @@ namespace CacheManager.Tests
                     .Should().BeTrue();
 
                 var item = cache.GetCacheItem(key);
+                item.Should().NotBeNull();
 
                 cache.Put(item.WithExpiration(ExpirationMode.None, default(TimeSpan)));
 
@@ -39,6 +41,7 @@ namespace CacheManager.Tests
         }
 
         [Fact]
+        [Trait("Unreliable", "Timing")]
         [ReplaceCulture]
         public void CacheManager_Configuration_AbsoluteExpires()
         {

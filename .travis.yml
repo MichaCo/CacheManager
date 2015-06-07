@@ -1,9 +1,12 @@
 language: csharp
+mono:
+  - alpha
 sudo: false
 services:
   - redis-server
 before_install:
   - redis-cli info
 script:
+  - mv test/CacheManager.Tests/project.mono.json test/CacheManager.Tests/project.json -f
   - chmod a+x ./build.sh
   - ./build.sh --quiet verify

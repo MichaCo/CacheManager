@@ -48,18 +48,6 @@
       <HintPath>..\..\packages\Antlr.3.4.1.9004\lib\Antlr3.Runtime.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="CacheManager.Core, Version=0.6.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\CacheManager.Core.0.6.0.0\lib\net45\CacheManager.Core.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="CacheManager.SystemRuntimeCaching, Version=0.6.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\CacheManager.SystemRuntimeCaching.0.6.0\lib\net45\CacheManager.SystemRuntimeCaching.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="CacheManager.Web, Version=0.6.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\CacheManager.Web.0.6.0.0\lib\net45\CacheManager.Web.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Microsoft.Practices.Unity, Version=3.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Unity.3.5.1404.0\lib\net45\Microsoft.Practices.Unity.dll</HintPath>
@@ -182,6 +170,20 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\CacheManager.Core\CacheManager.Core.csproj">
+      <Project>{701df657-8670-4313-a06b-63d8485b18f9}</Project>
+      <Name>CacheManager.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\CacheManager.SystemRuntimeCaching\CacheManager.SystemRuntimeCaching.csproj">
+      <Project>{d292fd01-c6f3-4600-abe7-7bba2b81bfd5}</Project>
+      <Name>CacheManager.SystemRuntimeCaching</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\CacheManager.Web\CacheManager.Web.csproj">
+      <Project>{56ee8576-6d0e-469d-a522-35788110dc1c}</Project>
+      <Name>CacheManager.Web</Name>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

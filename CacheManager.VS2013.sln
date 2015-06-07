@@ -12,6 +12,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "common", "common", "{A8DA8B90-61EA-43AB-AD71-22C248780401}"
 	ProjectSection(SolutionItems) = preProject
 		.travis.yml = .travis.yml
+		appveyor.vs2013.yml = appveyor.vs2013.yml
+		appveyor.yml = appveyor.yml
 		common\CacheManager.ruleset = common\CacheManager.ruleset
 		common\CacheManager.Test.ruleset = common\CacheManager.Test.ruleset
 		CacheManagerCfg.xsd = CacheManagerCfg.xsd
@@ -44,8 +46,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CacheManager.Samples.Mvc", "samples\CacheManager.Samples.Mvc\CacheManager.Samples.Mvc.csproj", "{99076511-0166-4FC0-BD39-3B4E37A84D7B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CacheManager.StackExchange.Redis", "src\CacheManager.StackExchange.Redis\CacheManager.StackExchange.Redis.csproj", "{3930C89D-C16B-4C88-B946-0C22E10CD263}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CacheManager.Serialization", "src\CacheManager.Serialization\CacheManager.Serialization.csproj", "{8B2F185D-F20E-4C74-B4AA-76AC7074F9B1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CacheManager.Memcached", "src\CacheManager.MemCached\CacheManager.Memcached.csproj", "{680FF75C-6EEB-4EB6-BB46-B6E465F3EDBF}"
 EndProject
@@ -109,10 +109,6 @@ Global
 		{3930C89D-C16B-4C88-B946-0C22E10CD263}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3930C89D-C16B-4C88-B946-0C22E10CD263}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3930C89D-C16B-4C88-B946-0C22E10CD263}.Release|Any CPU.Build.0 = Release|Any CPU
-		{8B2F185D-F20E-4C74-B4AA-76AC7074F9B1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8B2F185D-F20E-4C74-B4AA-76AC7074F9B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8B2F185D-F20E-4C74-B4AA-76AC7074F9B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8B2F185D-F20E-4C74-B4AA-76AC7074F9B1}.Release|Any CPU.Build.0 = Release|Any CPU
 		{680FF75C-6EEB-4EB6-BB46-B6E465F3EDBF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{680FF75C-6EEB-4EB6-BB46-B6E465F3EDBF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{680FF75C-6EEB-4EB6-BB46-B6E465F3EDBF}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -164,7 +160,6 @@ Global
 		{2188F6EE-064E-4268-8D85-77EFB39F0511} = {3F174B69-A4CC-4241-839D-6CCA83CADB47}
 		{99076511-0166-4FC0-BD39-3B4E37A84D7B} = {3F174B69-A4CC-4241-839D-6CCA83CADB47}
 		{3930C89D-C16B-4C88-B946-0C22E10CD263} = {8099505D-0783-4352-8BAD-F7F5E7D709FD}
-		{8B2F185D-F20E-4C74-B4AA-76AC7074F9B1} = {8099505D-0783-4352-8BAD-F7F5E7D709FD}
 		{680FF75C-6EEB-4EB6-BB46-B6E465F3EDBF} = {8099505D-0783-4352-8BAD-F7F5E7D709FD}
 		{4F3C4713-183E-4181-8B1A-E4192D964894} = {8099505D-0783-4352-8BAD-F7F5E7D709FD}
 		{997BFD2D-1FA6-43A9-AB39-3040ED69397F} = {3CBC4C94-1EE1-44E8-BB56-620B8A7F7777}

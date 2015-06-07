@@ -93,6 +93,7 @@ namespace CacheManager.Tests
 
         [Fact(Skip = "memcached")]
         [Trait("IntegrationTest", "Memcached")]
+        [Trait("Unreliable", "Timing")]
         public void Memcached_Absolute_DoesExpire()
         {
             // act
