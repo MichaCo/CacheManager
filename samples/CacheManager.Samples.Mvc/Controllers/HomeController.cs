@@ -47,20 +47,20 @@ namespace CacheManager.Samples.Mvc.Controllers
 
         public ActionResult About()
         {
-            this.cache.Update("about", (o) => o + 1);
+            this.cache.AddOrUpdate("about", 1, (o) => o + 1);
             return this.View(new CounterModel(this.cache, adds));
         }
 
         [OutputCache(NoStore = true, Location = OutputCacheLocation.None)]
         public ActionResult Contact()
         {
-            this.cache.Update("contact", (o) => o + 1);
+            this.cache.AddOrUpdate("contact", 1, (o) => o + 1);
             return this.View(new CounterModel(this.cache, adds));
         }
 
         public ActionResult Index()
         {
-            this.cache.Update("index", (o) => o + 1);
+            this.cache.AddOrUpdate("index", 1, (o) => o + 1);
             return this.View(new CounterModel(this.cache, adds));
         }
 
@@ -68,7 +68,7 @@ namespace CacheManager.Samples.Mvc.Controllers
         [OutputCache(NoStore = true, Location = OutputCacheLocation.None)]
         public int Like()
         {
-            this.cache.Update("like", (o) => o + 1);
+            this.cache.AddOrUpdate("like", 1, (o) => o + 1);
 
             CacheManagerOutputCacheProvider.Cache.Clear();
             return this.cache.Get("like");
