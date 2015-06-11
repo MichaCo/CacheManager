@@ -141,7 +141,7 @@ namespace CacheManager.Web
         private static CacheItem<object> GetCacheItem(string key, object entry, DateTime utcExpiry)
         {
             CacheItem<object> newItem;
-            if (utcExpiry == default(DateTime) && utcExpiry != DateTime.MaxValue)
+            if (utcExpiry != default(DateTime) && utcExpiry != DateTime.MaxValue)
             {
                 var timeout = TimeSpan.FromTicks(utcExpiry.Ticks - DateTime.UtcNow.Ticks);
                 newItem = new CacheItem<object>(key, entry, ExpirationMode.Absolute, timeout);
