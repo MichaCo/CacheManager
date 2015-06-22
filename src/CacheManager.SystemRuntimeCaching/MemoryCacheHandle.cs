@@ -4,7 +4,7 @@ using CacheManager.Core.Configuration;
 namespace CacheManager.SystemRuntimeCaching
 {
     /// <summary>
-    /// Cache handle implementation based on System.Runtime.Caching.MemoryCache.
+    /// Internal handle implementation based on System.Runtime.Caching.MemoryCache.
     /// </summary>
     public class MemoryCacheHandle : MemoryCacheHandle<object>
     {

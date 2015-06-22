@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace CacheManager.Core.Cache
+namespace CacheManager.Core.Internal
 {
     /// <summary>
     /// The <c>BaseCacheHandle</c> implements all the logic which might be common for all the cache

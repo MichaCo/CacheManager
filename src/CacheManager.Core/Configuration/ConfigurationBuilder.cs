@@ -2,15 +2,16 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using CacheManager.Core.Cache;
+using CacheManager.Core.Internal;
 
-namespace CacheManager.Core.Configuration
+namespace CacheManager.Core
 {
 #if !PORTABLE
 
     using System.Configuration;
     using System.IO;
     using System.Text.RegularExpressions;
+    using CacheManager.Core.Configuration;
 
 #endif
 
@@ -359,6 +360,7 @@ namespace CacheManager.Core.Configuration
             // last option would be seconds
             return TimeSpan.FromSeconds(timeoutValue);
         }
+
 #endif
     }
 

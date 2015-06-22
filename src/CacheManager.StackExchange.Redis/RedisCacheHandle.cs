@@ -3,14 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using CacheManager.Core;
-using CacheManager.Core.Cache;
-using CacheManager.Core.Configuration;
+using CacheManager.Core.Internal;
 using StackRedis = StackExchange.Redis;
 
 namespace CacheManager.Redis
 {
     /// <summary>
-    /// Cache handle implementation for Redis.
+    /// Internal handle implementation for Redis.
     /// </summary>
     public class RedisCacheHandle : RedisCacheHandle<object>
     {
@@ -26,7 +25,7 @@ namespace CacheManager.Redis
     }
 
     /// <summary>
-    /// Cache handle implementation for Redis.
+    /// Internal handle implementation for Redis.
     /// </summary>
     /// <typeparam name="TCacheValue">The type of the cache value.</typeparam>
     public class RedisCacheHandle<TCacheValue> : BaseCacheHandle<TCacheValue>
@@ -82,7 +81,7 @@ namespace CacheManager.Redis
         {
             get
             {
-                return RedisConnectionPool.Connect(this.Manager.Configuration, this.RedisConfiguration);
+                return RedisConnectionPool.Connect(this.RedisConfiguration);
             }
         }
 

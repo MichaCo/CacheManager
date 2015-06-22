@@ -50,11 +50,8 @@
     <Compile Include="..\CacheManager.MemCached\ConfigurationBuilderExtensions.cs">
       <Link>ConfigurationBuilderExtensions.cs</Link>
     </Compile>
-    <Compile Include="..\CacheManager.MemCached\MemcachedCacheHandle`1.cs">
-      <Link>MemcachedCacheHandle`1.cs</Link>
-    </Compile>
-    <Compile Include="..\CacheManager.MemCached\MemcachedClientHandle.cs">
-      <Link>MemcachedClientHandle.cs</Link>
+    <Compile Include="..\CacheManager.MemCached\MemcachedCacheHandle.cs">
+      <Link>MemcachedCacheHandle.cs</Link>
     </Compile>
     <Compile Include="..\CacheManager.MemCached\StatusCode.cs">
       <Link>StatusCode.cs</Link>

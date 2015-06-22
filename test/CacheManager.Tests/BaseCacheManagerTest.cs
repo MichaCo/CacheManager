@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using CacheManager.Core;
-using CacheManager.Core.Cache;
+using CacheManager.Core.Internal;
 
 #if !NET40
 

@@ -4,8 +4,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using CacheManager.Core;
-using CacheManager.Core.Cache;
-using CacheManager.Core.Configuration;
+using CacheManager.Core.Internal;
 using FluentAssertions;
 using Xunit;
 
@@ -1079,8 +1078,8 @@ namespace CacheManager.Tests
         #endregion indexer
 
         /// <summary>
-        /// Testing edge case, cache manager configuration without any handles It should at least not
-        /// throw or produce unexpected results.
+        /// Testing edge case, cache manager configuration without any handles It should at least
+        /// not throw or produce unexpected results.
         /// </summary>
         #region testing empty handle list
 
@@ -1485,7 +1484,7 @@ namespace CacheManager.Tests
 
         private static void ValidateCacheValues<T>(ICacheManager<T> cache, IList<string> keys, IList<T> values)
         {
-            var cacheCfgText = "Cache: " + cache.Name;
+            var cacheCfgText = "Internal: " + cache.Name;
             cacheCfgText += ", Handles: " + string.Join(
                 ",",
                 cache.CacheHandles.Select(p => p.Configuration.HandleName).ToArray());

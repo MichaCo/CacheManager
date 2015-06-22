@@ -2,8 +2,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using CacheManager.Core;
-using CacheManager.Core.Cache;
-using CacheManager.Core.Configuration;
+using CacheManager.Core.Internal;
 using CacheManager.SystemRuntimeCaching;
 using FluentAssertions;
 using Xunit;
@@ -79,6 +78,7 @@ namespace CacheManager.Tests
 #if DNX451
         [Fact(Skip = "DNX doesn't read from app.config")]
 #else
+
         [Fact]
 #endif
         public void Cfg_Valid_CfgFile_DefaultSysMemCache()

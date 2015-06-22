@@ -1,4 +1,4 @@
-﻿namespace CacheManager.Core.Cache
+﻿namespace CacheManager.Core.Internal
 {
     /// <summary>
     /// Defines the different counter types the cache manager supports.

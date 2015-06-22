@@ -232,6 +232,7 @@ namespace CacheManager.Core
 
         /// <summary>
         /// Creates a copy of the current cache item with different expiration options.
+        /// This method doesn't change the state of the item in the cache. Use <c>Put</c> or similar methods to update the cache with the returned copy of the item.
         /// </summary>
         /// <remarks>We do not clone the cache item or value.</remarks>
         /// <param name="mode">The expiration mode.</param>
@@ -243,7 +244,55 @@ namespace CacheManager.Core
         }
 
         /// <summary>
+        /// Creates a copy of the current cache item and sets a new absolute expiration date.
+        /// This method doesn't change the state of the item in the cache. Use <c>Put</c> or similar methods to update the cache with the returned copy of the item.
+        /// </summary>
+        /// <remarks>We do not clone the cache item or value.</remarks>
+        /// <param name="absoluteExpiration">The absolute expiration date.</param>
+        /// <returns>The new instance of the cache item.</returns>
+        public CacheItem<T> WithAbsoluteExpiration(DateTimeOffset absoluteExpiration)
+        {
+            TimeSpan timeout = absoluteExpiration.UtcDateTime - DateTime.UtcNow;
+            if (timeout <= TimeSpan.Zero)
+            {
+                throw new ArgumentException("Expiration value must be greater than zero.", "absoluteExpiration");
+            }
+
+            return new CacheItem<T>(this.Key, this.Region, this.Value, this.CreatedUtc, this.LastAccessedUtc, ExpirationMode.Absolute, timeout);
+        }
+
+        /// <summary>
+        /// Creates a copy of the current cache item and sets a new sliding expiration value.
+        /// This method doesn't change the state of the item in the cache. Use <c>Put</c> or similar methods to update the cache with the returned copy of the item.
+        /// </summary>
+        /// <remarks>We do not clone the cache item or value.</remarks>
+        /// <param name="slidingExpiration">The sliding expiration value.</param>
+        /// <returns>The new instance of the cache item.</returns>
+        public CacheItem<T> WithSlidingExpiration(TimeSpan slidingExpiration)
+        {
+            if (slidingExpiration <= TimeSpan.Zero)
+            {
+                throw new ArgumentException("Expiration value must be greater than zero.", "slidingExpiration");
+            }
+
+            return new CacheItem<T>(this.Key, this.Region, this.Value, this.CreatedUtc, this.LastAccessedUtc, ExpirationMode.Sliding, slidingExpiration);
+        }
+
+        /// <summary>
+        /// Creates a copy of the current cache item without expiration. Can be used to update the cache
+        /// and remove any previously configured expiration of the item.
+        /// This method doesn't change the state of the item in the cache. Use <c>Put</c> or similar methods to update the cache with the returned copy of the item.
+        /// </summary>
+        /// <remarks>We do not clone the cache item or value.</remarks>
+        /// <returns>The new instance of the cache item.</returns>
+        public CacheItem<T> WithNoExpiration()
+        {
+            return new CacheItem<T>(this.Key, this.Region, this.Value, this.CreatedUtc, this.LastAccessedUtc, ExpirationMode.None, default(TimeSpan));
+        }
+
+        /// <summary>
         /// Creates a copy of the current cache item with new value.
+        /// This method doesn't change the state of the item in the cache. Use <c>Put</c> or similar methods to update the cache with the returned copy of the item.
         /// </summary>
         /// <remarks>We do not clone the cache item or value.</remarks>
         /// <param name="value">The new value.</param>

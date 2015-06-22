@@ -1,4 +1,4 @@
-﻿namespace CacheManager.Core.Cache
+﻿namespace CacheManager.Core.Internal
 {
 #if !PORTABLE
     using System;
@@ -10,7 +10,7 @@
         private const string Category = ".NET CacheManager";
         private const string Entries = "Total cache items";
         private const string HitRatio = "Hit ratio";
-        private const string HitRatioBase = "Cache hit ratio Base";
+        private const string HitRatioBase = "Internal hit ratio Base";
         private const string Hits = "Total hits";
         private const string HitsPerSecond = "Avg hits per second";
         private const string Misses = "Total misses";
@@ -119,7 +119,7 @@
                     new CounterCreationData
                     {
                         CounterName = HitRatio,
-                        CounterHelp = "Cache hit ratio of the cache handle",
+                        CounterHelp = "Internal hit ratio of the cache handle",
                         CounterType = PerformanceCounterType.AverageCount64
                     },
                     new CounterCreationData
@@ -172,8 +172,6 @@
         {
             if (disposeManaged)
             {
-                this.counterTimer.Dispose();
-
                 try
                 {
                     this.ResetCounters();
@@ -182,16 +180,13 @@
                     {
                         this.counterTimer.Dispose();
                     }
-                }
-                catch
-                {
-                }
-                finally
-                {
                     foreach (var counter in this.counters)
                     {
                         counter.Dispose();
                     }
+                }
+                catch
+                {
                 }
             }
         }

@@ -2,7 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 
-namespace CacheManager.Core.Cache
+namespace CacheManager.Core.Internal
 {
     /// <summary>
     /// <para>Stores statistical information for a <see cref="BaseCacheHandle{TCacheValue}"/>.</para>

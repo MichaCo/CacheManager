@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Text;
 using CacheManager.Core;
@@ -13,13 +14,13 @@ namespace CacheManager.Redis
 
         private static object connectLock = new object();
 
-        public static StackRedis.ConnectionMultiplexer Connect(CacheManagerConfiguration cacheConfig, RedisConfiguration configuration)
+        public static StackRedis.ConnectionMultiplexer Connect(RedisConfiguration configuration)
         {
             string connectionString = configuration.ConnectionString;
 
             if (string.IsNullOrWhiteSpace(configuration.ConnectionString))
             {
-                var options = CreateConfigurationOptions(cacheConfig, configuration);
+                var options = CreateConfigurationOptions(configuration);
                 connectionString = options.ToString();
             }
 
@@ -29,17 +30,10 @@ namespace CacheManager.Redis
                 if (!connections.TryGetValue(connectionString, out connection))
                 {
                     var builder = new StringBuilder();
-                    using (var log = new StringWriter(builder))                        
+                    using (var log = new StringWriter(builder, CultureInfo.InvariantCulture))                        
                     {
                         connection = StackRedis.ConnectionMultiplexer.Connect(connectionString, log);
                     }
-
-                    var logg = builder.ToString();
-
-                    connection.ErrorMessage += (sender, args) =>
-                    {
-                        var error = args;
-                    };
 
                     connection.ConnectionFailed += (sender, args) =>
                     {
@@ -59,7 +53,7 @@ namespace CacheManager.Redis
             return connection;
         }
 
-        private static StackRedis.ConfigurationOptions CreateConfigurationOptions(CacheManagerConfiguration cacheConfig, RedisConfiguration configuration)
+        private static StackRedis.ConfigurationOptions CreateConfigurationOptions(RedisConfiguration configuration)
         {
             var configurationOptions = new StackRedis.ConfigurationOptions()
             {

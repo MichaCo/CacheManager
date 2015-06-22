@@ -2,7 +2,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using CacheManager.Core;
-using CacheManager.Core.Cache;
+using CacheManager.Core.Internal;
 using CacheManager.Redis;
 using FluentAssertions;
 using Xunit;

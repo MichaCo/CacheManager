@@ -1,5 +1,4 @@
 ﻿using System;
-using CacheManager.Core.Cache;
 using CacheManager.Core.Configuration;
 
 namespace CacheManager.Core

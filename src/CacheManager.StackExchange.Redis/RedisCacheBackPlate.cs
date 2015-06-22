@@ -2,8 +2,7 @@
 using System.Globalization;
 using System.Linq;
 using CacheManager.Core;
-using CacheManager.Core.Cache;
-using CacheManager.Core.Configuration;
+using CacheManager.Core.Internal;
 using StackRedis = StackExchange.Redis;
 
 namespace CacheManager.Redis
@@ -11,7 +10,7 @@ namespace CacheManager.Redis
     /// <summary>
     /// Implementation of the cache back plate with Redis Pub/Sub feature.
     /// <para>
-    /// Pub/Sub is used to send messages to the redis server on any Update, Cache Clear, Region
+    /// Pub/Sub is used to send messages to the redis server on any Update, Internal Clear, Region
     /// Clear or Remove operation. Every cache manager with the same configuration subscribes to the
     /// same chanel and can react on those messages to keep other cache handles in sync with the 'master'.
     /// </para>
@@ -48,7 +47,7 @@ namespace CacheManager.Redis
                     // throws an exception if not found for the name
                     var cfg = RedisConfigurations.GetConfiguration(this.Name);
 
-                    var connection = RedisConnectionPool.Connect(this.CacheConfiguration, cfg);
+                    var connection = RedisConnectionPool.Connect(cfg);
 
                     this.redisSubscriper = connection.GetSubscriber();
                 },

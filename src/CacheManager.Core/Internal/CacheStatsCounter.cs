@@ -1,6 +1,6 @@
 ﻿using System.Threading;
 
-namespace CacheManager.Core.Cache
+namespace CacheManager.Core.Internal
 {
     internal sealed class CacheStatsCounter
     {

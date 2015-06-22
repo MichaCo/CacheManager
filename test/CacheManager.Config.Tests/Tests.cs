@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using CacheManager.Core;
-using CacheManager.Core.Cache;
+using CacheManager.Core.Internal;
 
 namespace CacheManager.Config.Tests
 {

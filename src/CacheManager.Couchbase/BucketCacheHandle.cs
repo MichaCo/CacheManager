@@ -2,8 +2,7 @@
 using System.Security.Cryptography;
 using System.Text;
 using CacheManager.Core;
-using CacheManager.Core.Cache;
-using CacheManager.Core.Configuration;
+using CacheManager.Core.Internal;
 using Couchbase.Configuration.Client;
 using Couchbase.Core;
 using Newtonsoft.Json.Linq;
@@ -11,7 +10,7 @@ using Newtonsoft.Json.Linq;
 namespace CacheManager.Couchbase
 {
     /// <summary>
-    /// Cache handle implementation based on the couchbase .net client.
+    /// Internal handle implementation based on the couchbase .net client.
     /// </summary>
     public class BucketCacheHandle : BucketCacheHandle<object>
     {
@@ -27,7 +26,7 @@ namespace CacheManager.Couchbase
     }
 
     /// <summary>
-    /// Cache handle implementation based on the couchbase .net client.
+    /// Internal handle implementation based on the couchbase .net client.
     /// </summary>
     /// <typeparam name="TCacheValue">The type of the cache value.</typeparam>
     public class BucketCacheHandle<TCacheValue> : BaseCacheHandle<TCacheValue>

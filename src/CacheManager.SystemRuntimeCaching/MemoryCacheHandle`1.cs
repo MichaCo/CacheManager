@@ -4,8 +4,7 @@ using System.Globalization;
 using System.Runtime.Caching;
 using System.Text.RegularExpressions;
 using CacheManager.Core;
-using CacheManager.Core.Cache;
-using CacheManager.Core.Configuration;
+using CacheManager.Core.Internal;
 
 namespace CacheManager.SystemRuntimeCaching
 {

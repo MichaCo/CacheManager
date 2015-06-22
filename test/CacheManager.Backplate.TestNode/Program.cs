@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using CacheManager.Core;
-using CacheManager.Core.Cache;
-using CacheManager.Core.Configuration;
+using CacheManager.Core.Internal;
 
 namespace CacheManager.Backplate.TestNode
 {
@@ -27,12 +23,12 @@ namespace CacheManager.Backplate.TestNode
 
         internal static void Main(string[] args)
         {
-            //// README: 
+            //// README:
             //// Run me multiple times and at least once with some arguments so that the first condition hits
             //// You should see one the console with args adding and removing the key
             //// All other consoles should receive the remove event and counting the counter
             //// counter should reset each remove, because the key was removed
-            
+
             cache.OnAdd += CacheOnAdd;
             cache.OnRemove += CacheOnRemove;
 

@@ -55,22 +55,22 @@
     <Compile Include="..\..\common\GlobalAssemblyInfo.cs">
       <Link>Properties\GlobalAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="Cache\BackPlateMessage.cs" />
+    <Compile Include="Internal\BackPlateMessage.cs" />
     <Compile Include="CacheFactory.cs" />
-    <Compile Include="Cache\BaseCacheHandle.cs" />
-    <Compile Include="Cache\BaseCacheManager.cs" />
-    <Compile Include="Cache\BaseCache.cs" />
-    <Compile Include="Cache\CacheBackPlate.cs" />
-    <Compile Include="Cache\CacheEventArgs.cs" />
-    <Compile Include="Cache\CachePerformanceCounterType.cs" />
-    <Compile Include="Cache\CacheReflectionHelper.cs" />
-    <Compile Include="Cache\CacheStats.cs">
+    <Compile Include="Internal\BaseCacheHandle.cs" />
+    <Compile Include="BaseCacheManager.cs" />
+    <Compile Include="Internal\BaseCache.cs" />
+    <Compile Include="Internal\CacheBackPlate.cs" />
+    <Compile Include="Internal\CacheEventArgs.cs" />
+    <Compile Include="Internal\CachePerformanceCounterType.cs" />
+    <Compile Include="Internal\CacheReflectionHelper.cs" />
+    <Compile Include="Internal\CacheStats.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Cache\CacheStatsCounter.cs" />
-    <Compile Include="Cache\CacheStatsCounterType.cs" />
-    <Compile Include="Cache\DictionaryCacheHandle.cs" />
-    <Compile Include="Cache\DictionaryCacheHandle`1.cs" />
+    <Compile Include="Internal\CacheStatsCounter.cs" />
+    <Compile Include="Internal\CacheStatsCounterType.cs" />
+    <Compile Include="Internal\DictionaryCacheHandle.cs" />
+    <Compile Include="Internal\DictionaryCacheHandle`1.cs" />
     <Compile Include="ICache.cs" />
     <Compile Include="UpdateItemResult.cs">
       <SubType>Code</SubType>
@@ -84,7 +84,7 @@
     <Compile Include="Configuration\ConfigurationBuilder.cs" />
     <Compile Include="ExpirationMode.cs" />
     <Compile Include="GlobalSuppressions.cs" />
-    <Compile Include="Cache\CachePerformanceCounters.cs" />
+    <Compile Include="Internal\CachePerformanceCounters.cs" />
     <Compile Include="UpdateItemConfig.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

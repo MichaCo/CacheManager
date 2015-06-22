@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace CacheManager.Core.Cache
+namespace CacheManager.Core.Internal
 {
     /// <summary>
     /// Event arguments for cache actions.

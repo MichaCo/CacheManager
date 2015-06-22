@@ -46,6 +46,9 @@
     <Compile Include="..\..\common\GlobalAssemblyInfo.cs">
       <Link>Properties\GlobalAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="..\CacheManager.Core\BaseCacheManager.cs">
+      <Link>BaseCacheManager.cs</Link>
+    </Compile>
     <Compile Include="..\CacheManager.Core\CacheFactory.cs">
       <Link>CacheFactory.cs</Link>
     </Compile>
@@ -60,48 +63,6 @@
     </Compile>
     <Compile Include="..\CacheManager.Core\CacheUpdateMode.cs">
       <Link>CacheUpdateMode.cs</Link>
-    </Compile>
-    <Compile Include="..\CacheManager.Core\Cache\BackPlateMessage.cs">
-      <Link>Cache\BackPlateMessage.cs</Link>
-    </Compile>
-    <Compile Include="..\CacheManager.Core\Cache\BaseCache.cs">
-      <Link>Cache\BaseCache.cs</Link>
-    </Compile>
-    <Compile Include="..\CacheManager.Core\Cache\BaseCacheHandle.cs">
-      <Link>Cache\BaseCacheHandle.cs</Link>
-    </Compile>
-    <Compile Include="..\CacheManager.Core\Cache\BaseCacheManager.cs">
-      <Link>Cache\BaseCacheManager.cs</Link>
-    </Compile>
-    <Compile Include="..\CacheManager.Core\Cache\CacheBackPlate.cs">
-      <Link>Cache\CacheBackPlate.cs</Link>
-    </Compile>
-    <Compile Include="..\CacheManager.Core\Cache\CacheEventArgs.cs">
-      <Link>Cache\CacheEventArgs.cs</Link>
-    </Compile>
-    <Compile Include="..\CacheManager.Core\Cache\CachePerformanceCounters.cs">
-      <Link>Cache\CachePerformanceCounters.cs</Link>
-    </Compile>
-    <Compile Include="..\CacheManager.Core\Cache\CachePerformanceCounterType.cs">
-      <Link>Cache\CachePerformanceCounterType.cs</Link>
-    </Compile>
-    <Compile Include="..\CacheManager.Core\Cache\CacheReflectionHelper.cs">
-      <Link>Cache\CacheReflectionHelper.cs</Link>
-    </Compile>
-    <Compile Include="..\CacheManager.Core\Cache\CacheStats.cs">
-      <Link>Cache\CacheStats.cs</Link>
-    </Compile>
-    <Compile Include="..\CacheManager.Core\Cache\CacheStatsCounter.cs">
-      <Link>Cache\CacheStatsCounter.cs</Link>
-    </Compile>
-    <Compile Include="..\CacheManager.Core\Cache\CacheStatsCounterType.cs">
-      <Link>Cache\CacheStatsCounterType.cs</Link>
-    </Compile>
-    <Compile Include="..\CacheManager.Core\Cache\DictionaryCacheHandle.cs">
-      <Link>Cache\DictionaryCacheHandle.cs</Link>
-    </Compile>
-    <Compile Include="..\CacheManager.Core\Cache\DictionaryCacheHandle`1.cs">
-      <Link>Cache\DictionaryCacheHandle`1.cs</Link>
     </Compile>
     <Compile Include="..\CacheManager.Core\Configuration\CacheManagerSection.cs">
       <Link>Configuration\CacheManagerSection.cs</Link>
@@ -120,6 +81,45 @@
     </Compile>
     <Compile Include="..\CacheManager.Core\ICacheManager.cs">
       <Link>ICacheManager.cs</Link>
+    </Compile>
+    <Compile Include="..\CacheManager.Core\Internal\BackPlateMessage.cs">
+      <Link>Internal\BackPlateMessage.cs</Link>
+    </Compile>
+    <Compile Include="..\CacheManager.Core\Internal\BaseCache.cs">
+      <Link>Internal\BaseCache.cs</Link>
+    </Compile>
+    <Compile Include="..\CacheManager.Core\Internal\BaseCacheHandle.cs">
+      <Link>Internal\BaseCacheHandle.cs</Link>
+    </Compile>
+    <Compile Include="..\CacheManager.Core\Internal\CacheBackPlate.cs">
+      <Link>Internal\CacheBackPlate.cs</Link>
+    </Compile>
+    <Compile Include="..\CacheManager.Core\Internal\CacheEventArgs.cs">
+      <Link>Internal\CacheEventArgs.cs</Link>
+    </Compile>
+    <Compile Include="..\CacheManager.Core\Internal\CachePerformanceCounters.cs">
+      <Link>Internal\CachePerformanceCounters.cs</Link>
+    </Compile>
+    <Compile Include="..\CacheManager.Core\Internal\CachePerformanceCounterType.cs">
+      <Link>Internal\CachePerformanceCounterType.cs</Link>
+    </Compile>
+    <Compile Include="..\CacheManager.Core\Internal\CacheReflectionHelper.cs">
+      <Link>Internal\CacheReflectionHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\CacheManager.Core\Internal\CacheStats.cs">
+      <Link>Internal\CacheStats.cs</Link>
+    </Compile>
+    <Compile Include="..\CacheManager.Core\Internal\CacheStatsCounter.cs">
+      <Link>Internal\CacheStatsCounter.cs</Link>
+    </Compile>
+    <Compile Include="..\CacheManager.Core\Internal\CacheStatsCounterType.cs">
+      <Link>Internal\CacheStatsCounterType.cs</Link>
+    </Compile>
+    <Compile Include="..\CacheManager.Core\Internal\DictionaryCacheHandle.cs">
+      <Link>Internal\DictionaryCacheHandle.cs</Link>
+    </Compile>
+    <Compile Include="..\CacheManager.Core\Internal\DictionaryCacheHandle`1.cs">
+      <Link>Internal\DictionaryCacheHandle`1.cs</Link>
     </Compile>
     <Compile Include="..\CacheManager.Core\UpdateItemConfig.cs">
       <Link>UpdateItemConfig.cs</Link>

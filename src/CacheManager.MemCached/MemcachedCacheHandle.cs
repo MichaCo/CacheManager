@@ -1,34 +1,80 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Configuration;
+using System.Globalization;
+using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 using CacheManager.Core;
-using CacheManager.Core.Cache;
+using CacheManager.Core.Internal;
 using Enyim.Caching;
+using Enyim.Caching.Configuration;
 using Enyim.Caching.Memcached;
 using Enyim.Caching.Memcached.Results;
 
 namespace CacheManager.Memcached
 {
     /// <summary>
-    /// Base implementation of the cache handle.
+    /// Internal handle implementation based on the Enyim memcached client.
     /// </summary>
-    /// <typeparam name="TCacheValue">The type of the cache value.</typeparam>
-    public abstract class MemcachedClientHandle<TCacheValue> : BaseCacheHandle<TCacheValue>
+    public class MemcachedCacheHandle : MemcachedCacheHandle<object>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="MemcachedClientHandle{TCacheValue}"/> class.
+        /// Initializes a new instance of the <see cref="MemcachedCacheHandle"/> class.
         /// </summary>
         /// <param name="manager">The manager.</param>
         /// <param name="configuration">The configuration.</param>
-        /// <exception cref="System.InvalidOperationException">
-        /// The cache value type must be serializable but it is not.
-        /// </exception>
-        protected MemcachedClientHandle(ICacheManager<TCacheValue> manager, CacheHandleConfiguration configuration)
+        public MemcachedCacheHandle(ICacheManager<object> manager, CacheHandleConfiguration configuration)
             : base(manager, configuration)
         {
+        }
+    }
+
+    /// <summary>
+    /// Internal handle implementation based on the Enyim memcached client.
+    /// </summary>
+    /// <typeparam name="TCacheValue">The type of the cache value.</typeparam>
+    public class MemcachedCacheHandle<TCacheValue> : BaseCacheHandle<TCacheValue>
+    {
+        private static readonly string DefaultEnyimSectionName = "enyim.com/memcached";
+        private static readonly string DefaultSectionName = "default";
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MemcachedCacheHandle{TCacheValue}"/> class.
+        /// </summary>
+        /// <param name="manager">The manager.</param>
+        /// <param name="configuration">The configuration.</param>
+        /// <exception cref="System.ArgumentNullException">
+        /// If <paramref name="configuration"/> is null.
+        /// </exception>
+        /// <exception cref="System.InvalidOperationException">
+        /// The cache value type is not serializable or if the enyim configuration section could not
+        /// be initialized.
+        /// </exception>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Internal gets disposed correctly when the owner gets disposed.")]
+        public MemcachedCacheHandle(ICacheManager<TCacheValue> manager, CacheHandleConfiguration configuration)
+            : base(manager, configuration)
+        {
+            if (configuration == null)
+            {
+                throw new ArgumentNullException("configuration");
+            }
+
             if (!typeof(TCacheValue).IsSerializable)
             {
                 throw new InvalidOperationException("The cache value type must be serializable but " + typeof(TCacheValue).ToString() + " is not.");
+            }
+
+            // initialize memcached client with section name which must be equal to handle name...
+            // Default is "enyim.com/memcached"
+            try
+            {
+                var sectionName = GetEnyimSectionName(configuration.HandleName);
+                this.Cache = new MemcachedClient(sectionName);
+            }
+            catch (ConfigurationErrorsException ex)
+            {
+                throw new InvalidOperationException("Failed to initialize " + this.GetType().Name + ". " + ex.BareMessage, ex);
             }
         }
 
@@ -41,6 +87,45 @@ namespace CacheManager.Memcached
             get
             {
                 return (int)this.Stats.GetStatistic(CacheStatsCounterType.Items);
+            }
+        }
+
+        /// <summary>
+        /// Gets the get memcached client configuration.
+        /// </summary>
+        /// <value>The get memcached client configuration.</value>
+        public IMemcachedClientConfiguration GetMemcachedClientConfiguration
+        {
+            get
+            {
+                return this.GetSection();
+            }
+        }
+
+        /// <summary>
+        /// Gets the total number of items per server.
+        /// </summary>
+        /// <value>The total number of items per server.</value>
+        public IEnumerable<long> ServerItemCount
+        {
+            get
+            {
+                foreach (var count in this.Cache.Stats().GetRaw("total_items"))
+                {
+                    yield return long.Parse(count.Value, CultureInfo.InvariantCulture);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets the servers.
+        /// </summary>
+        /// <value>The servers.</value>
+        public IList<IPEndPoint> Servers
+        {
+            get
+            {
+                return this.GetServers();
             }
         }
 
@@ -226,6 +311,7 @@ namespace CacheManager.Memcached
 
             if (item.ExpirationMode == ExpirationMode.Absolute)
             {
+                // the implementation internally transforms it to UTC, we have to work with local time
                 var timeoutDate = DateTime.Now.Add(item.ExpirationTimeout);
                 var result = this.Cache.ExecuteStore(mode, key, item, timeoutDate);
                 return result;
@@ -239,6 +325,23 @@ namespace CacheManager.Memcached
             {
                 var result = this.Cache.ExecuteStore(mode, key, item);
                 return result;
+            }
+        }
+
+        /// <summary>
+        /// Gets the name of the enyim section.
+        /// </summary>
+        /// <param name="handleName">Name of the handle.</param>
+        /// <returns>The section name.</returns>
+        private static string GetEnyimSectionName(string handleName)
+        {
+            if (handleName.Equals(DefaultSectionName, StringComparison.OrdinalIgnoreCase))
+            {
+                return DefaultEnyimSectionName;
+            }
+            else
+            {
+                return handleName;
             }
         }
 
@@ -286,17 +389,49 @@ namespace CacheManager.Memcached
             return false;
         }
 
+        /// <summary>
+        /// Gets the section.
+        /// </summary>
+        /// <returns>The client configuration.</returns>
+        /// <exception cref="System.Configuration.ConfigurationErrorsException">
+        /// If memcached client section was not found or there are no servers defined for memcached.
+        /// </exception>
+        private IMemcachedClientConfiguration GetSection()
+        {
+            string sectionName = GetEnyimSectionName(this.Configuration.HandleName);
+            MemcachedClientSection section = (MemcachedClientSection)ConfigurationManager.GetSection(sectionName);
+
+            if (section == null)
+            {
+                throw new ConfigurationErrorsException("Client section " + sectionName + " is not found.");
+            }
+
+            // validate
+            if (section.Servers.Count <= 0)
+            {
+                throw new ConfigurationErrorsException("There are no servers defined.");
+            }
+
+            return section;
+        }
+
+        private IList<IPEndPoint> GetServers()
+        {
+            var section = this.GetSection();
+            return section.Servers;
+        }
+
         private UpdateItemResult<TCacheValue> Set(string key, string region, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config)
         {
             var fullyKey = GetKey(key, region);
             var tries = 0;
             IStoreOperationResult result;
-            
+
             do
             {
                 tries++;
                 var getTries = 0;
-                StatusCode getStatus; 
+                StatusCode getStatus;
                 CacheItem<TCacheValue> item;
                 CasResult<CacheItem<TCacheValue>> cas;
                 do
@@ -337,7 +472,7 @@ namespace CacheManager.Memcached
                 }
             }
             while (!result.Success && result.StatusCode.HasValue && result.StatusCode.Value == 2 && tries <= config.MaxRetries);
-            
+
             return UpdateItemResult.ForTooManyRetries<TCacheValue>(tries);
         }
     }

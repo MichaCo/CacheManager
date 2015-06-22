@@ -1,6 +1,6 @@
 ﻿using CacheManager.Core.Configuration;
 
-namespace CacheManager.Core.Cache
+namespace CacheManager.Core.Internal
 {
     /// <summary>
     /// Dictionary object cache.

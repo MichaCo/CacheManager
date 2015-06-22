@@ -2,10 +2,8 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using CacheManager.Core;
-using CacheManager.Core.Cache;
-using CacheManager.Core.Configuration;
+using CacheManager.Core.Internal;
 using FluentAssertions;
-using Moq;
 using Xunit;
 
 namespace CacheManager.Tests
@@ -57,7 +55,7 @@ namespace CacheManager.Tests
 
                 count++;
             }
-            
+
             cache.Get(key).Should().Be(value);
 
             return addCalls;

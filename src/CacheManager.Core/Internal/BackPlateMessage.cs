@@ -2,7 +2,7 @@
 using System.Globalization;
 using System.Text;
 
-namespace CacheManager.Core.Cache
+namespace CacheManager.Core.Internal
 {
     /// <summary>
     /// Defines the possible actions of the back plate message.

@@ -1,4 +1,4 @@
-﻿namespace CacheManager.Core.Cache
+﻿namespace CacheManager.Core.Internal
 {
     using System;
 

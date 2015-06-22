@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using CacheManager.Core.Internal;
 
-namespace CacheManager.Core.Cache
+namespace CacheManager.Core
 {
     /// <summary>
     /// The BaseCacheManager implements <see cref="ICacheManager{T}"/> and is the main class which

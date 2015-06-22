@@ -74,7 +74,7 @@ namespace CacheManager.Samples.Mvc.Controllers
             return this.cache.Get("like");
         }
 
-        private static void Cache_OnPut(object sender, Core.Cache.CacheActionEventArgs e)
+        private static void Cache_OnPut(object sender, Core.Internal.CacheActionEventArgs e)
         {
             adds++;
         }

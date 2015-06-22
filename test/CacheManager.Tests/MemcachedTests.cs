@@ -35,7 +35,7 @@ namespace CacheManager.Tests
                 .WithInnerMessage("The cache value type must be serializable*");
         }
 
-        [Fact(Skip = "memcached")]
+        [Fact]
         [Trait("category", "Memcached")]
         public void Memcached_KeySizeLimit()
         {
@@ -63,7 +63,7 @@ namespace CacheManager.Tests
             }
         }
 
-        [Fact(Skip = "memcached")]
+        [Fact]
         [Trait("category", "Memcached")]
         public void Memcached_KeySizeLimit_WithRegion()
         {
@@ -91,7 +91,7 @@ namespace CacheManager.Tests
             }
         }
 
-        [Fact(Skip = "memcached")]
+        [Fact]
         [Trait("category", "Memcached")]
         [Trait("category", "Unreliable")]
         public void Memcached_Absolute_DoesExpire()
@@ -124,7 +124,7 @@ namespace CacheManager.Tests
             }
         }
 
-        [Fact(Skip = "memcached")]
+        [Fact]
         [Trait("category", "Memcached")]
         public void Memcached_RaceCondition_WithoutCasHandling()
         {
@@ -166,7 +166,7 @@ namespace CacheManager.Tests
             }
         }
 
-        [Fact(Skip = "memcached")]
+        [Fact]
         [Trait("category", "Memcached")]
         public void Memcached_NoRaceCondition_WithCasHandling()
         {
@@ -214,7 +214,7 @@ namespace CacheManager.Tests
             }
         }
 
-        [Fact(Skip = "memcached")]
+        [Fact]
         [Trait("category", "Memcached")]
         public void Memcached_NoRaceCondition_WithCasHandling_WithRegion()
         {
@@ -264,7 +264,7 @@ namespace CacheManager.Tests
             }
         }
 
-        [Fact(Skip = "memcached")]
+        [Fact]
         [Trait("category", "Memcached")]
         public void Memcached_NoRaceCondition_WithCasButTooFiewRetries()
         {
@@ -312,7 +312,7 @@ namespace CacheManager.Tests
             }
         }
 
-        [Fact(Skip = "memcached")]
+        [Fact]
         [Trait("category", "Memcached")]
         public void Memcached_Update_ItemNotAdded()
         {

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Reflection;
 using CacheManager.Core.Configuration;
 
-namespace CacheManager.Core.Cache
+namespace CacheManager.Core.Internal
 {
     internal static class CacheReflectionHelper
     {
@@ -129,7 +129,7 @@ namespace CacheManager.Core.Cache
                 throw new InvalidOperationException(
                     string.Format(
                         CultureInfo.InvariantCulture,
-                        "Cache handle type [{0}] should not have any generic arguments defined.",
+                        "Internal handle type [{0}] should not have any generic arguments defined.",
                         handle.ToString()));                
             }
         }
