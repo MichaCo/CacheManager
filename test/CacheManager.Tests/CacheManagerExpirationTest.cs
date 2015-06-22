@@ -3,7 +3,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 using CacheManager.Core;
-using CacheManager.Core.Configuration;
 using FluentAssertions;
 using Xunit;
 
@@ -179,6 +178,56 @@ namespace CacheManager.Tests
 
                 cache.Get(key).Should().BeNull("Should be expired.");
             }
+        }
+
+        [Fact]
+        public void CacheItem_WithExpiration()
+        {
+            var item = new CacheItem<object>("key", "value", ExpirationMode.Absolute, TimeSpan.FromSeconds(1));
+
+            var absolute = item.WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMinutes(10));
+            var sliding = item.WithExpiration(ExpirationMode.Sliding, TimeSpan.FromMinutes(10));
+            var none = item.WithExpiration(ExpirationMode.None, default(TimeSpan));
+
+            absolute.ExpirationMode.Should().Be(ExpirationMode.Absolute);
+            absolute.ExpirationTimeout.Should().BeCloseTo(TimeSpan.FromMinutes(10));
+            sliding.ExpirationMode.Should().Be(ExpirationMode.Sliding);
+            sliding.ExpirationTimeout.Should().BeCloseTo(TimeSpan.FromMinutes(10));
+            none.ExpirationMode.Should().Be(ExpirationMode.None);
+            none.ExpirationTimeout.Should().BeCloseTo(default(TimeSpan));
+        }
+
+        [Fact]
+        public void CacheItem_WithAbsoluteExpiration()
+        {
+            var item = new CacheItem<object>("key", "value", ExpirationMode.Sliding, TimeSpan.FromSeconds(1));
+
+            var absolute = item.WithAbsoluteExpiration(DateTimeOffset.Now.AddMinutes(10));
+
+            absolute.ExpirationMode.Should().Be(ExpirationMode.Absolute);
+            absolute.ExpirationTimeout.Should().BeCloseTo(TimeSpan.FromMinutes(10));
+        }
+
+        [Fact]
+        public void CacheItem_WithSlidingExpiration()
+        {
+            var item = new CacheItem<object>("key", "value", ExpirationMode.Absolute, TimeSpan.FromSeconds(1));
+
+            var absolute = item.WithSlidingExpiration(TimeSpan.FromMinutes(10));
+
+            absolute.ExpirationMode.Should().Be(ExpirationMode.Sliding);
+            absolute.ExpirationTimeout.Should().BeCloseTo(TimeSpan.FromMinutes(10));
+        }
+
+        [Fact]
+        public void CacheItem_WithNoExpiration()
+        {
+            var item = new CacheItem<object>("key", "value", ExpirationMode.Absolute, TimeSpan.FromSeconds(1));
+
+            var absolute = item.WithNoExpiration();
+
+            absolute.ExpirationMode.Should().Be(ExpirationMode.None);
+            absolute.ExpirationTimeout.Should().BeCloseTo(default(TimeSpan));
         }
 
         [Fact]
