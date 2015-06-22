@@ -242,7 +242,7 @@ namespace CacheManager.Tests
 
             // assert
             act.ShouldThrow<InvalidOperationException>()
-                .WithMessage("Internal handle type* should not have any generic arguments*");
+                .WithMessage("Cache handle type* should not have any generic arguments*");
         }
 
         [Fact]

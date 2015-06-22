@@ -10,7 +10,7 @@ using Newtonsoft.Json.Linq;
 namespace CacheManager.Couchbase
 {
     /// <summary>
-    /// Internal handle implementation based on the couchbase .net client.
+    /// Cache handle implementation based on the couchbase .net client.
     /// </summary>
     public class BucketCacheHandle : BucketCacheHandle<object>
     {
@@ -26,7 +26,7 @@ namespace CacheManager.Couchbase
     }
 
     /// <summary>
-    /// Internal handle implementation based on the couchbase .net client.
+    /// Cache handle implementation based on the couchbase .net client.
     /// </summary>
     /// <typeparam name="TCacheValue">The type of the cache value.</typeparam>
     public class BucketCacheHandle<TCacheValue> : BaseCacheHandle<TCacheValue>

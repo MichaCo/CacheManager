@@ -1484,7 +1484,7 @@ namespace CacheManager.Tests
 
         private static void ValidateCacheValues<T>(ICacheManager<T> cache, IList<string> keys, IList<T> values)
         {
-            var cacheCfgText = "Internal: " + cache.Name;
+            var cacheCfgText = "Cache: " + cache.Name;
             cacheCfgText += ", Handles: " + string.Join(
                 ",",
                 cache.CacheHandles.Select(p => p.Configuration.HandleName).ToArray());

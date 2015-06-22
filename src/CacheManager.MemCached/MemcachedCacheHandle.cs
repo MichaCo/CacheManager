@@ -15,7 +15,7 @@ using Enyim.Caching.Memcached.Results;
 namespace CacheManager.Memcached
 {
     /// <summary>
-    /// Internal handle implementation based on the Enyim memcached client.
+    /// Cache handle implementation based on the Enyim memcached client.
     /// </summary>
     public class MemcachedCacheHandle : MemcachedCacheHandle<object>
     {
@@ -31,7 +31,7 @@ namespace CacheManager.Memcached
     }
 
     /// <summary>
-    /// Internal handle implementation based on the Enyim memcached client.
+    /// Cache handle implementation based on the Enyim memcached client.
     /// </summary>
     /// <typeparam name="TCacheValue">The type of the cache value.</typeparam>
     public class MemcachedCacheHandle<TCacheValue> : BaseCacheHandle<TCacheValue>
@@ -51,7 +51,7 @@ namespace CacheManager.Memcached
         /// The cache value type is not serializable or if the enyim configuration section could not
         /// be initialized.
         /// </exception>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Internal gets disposed correctly when the owner gets disposed.")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Cache gets disposed correctly when the owner gets disposed.")]
         public MemcachedCacheHandle(ICacheManager<TCacheValue> manager, CacheHandleConfiguration configuration)
             : base(manager, configuration)
         {

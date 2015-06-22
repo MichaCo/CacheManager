@@ -10,7 +10,7 @@ namespace CacheManager.Redis
     /// <summary>
     /// Implementation of the cache back plate with Redis Pub/Sub feature.
     /// <para>
-    /// Pub/Sub is used to send messages to the redis server on any Update, Internal Clear, Region
+    /// Pub/Sub is used to send messages to the redis server on any Update, cache Clear, Region
     /// Clear or Remove operation. Every cache manager with the same configuration subscribes to the
     /// same chanel and can react on those messages to keep other cache handles in sync with the 'master'.
     /// </para>

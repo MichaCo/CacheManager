@@ -129,7 +129,7 @@ namespace CacheManager.Core.Internal
                 throw new InvalidOperationException(
                     string.Format(
                         CultureInfo.InvariantCulture,
-                        "Internal handle type [{0}] should not have any generic arguments defined.",
+                        "Cache handle type [{0}] should not have any generic arguments defined.",
                         handle.ToString()));                
             }
         }

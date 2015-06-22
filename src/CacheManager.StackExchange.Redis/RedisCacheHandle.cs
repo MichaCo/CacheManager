@@ -9,7 +9,7 @@ using StackRedis = StackExchange.Redis;
 namespace CacheManager.Redis
 {
     /// <summary>
-    /// Internal handle implementation for Redis.
+    /// Cache handle implementation for Redis.
     /// </summary>
     public class RedisCacheHandle : RedisCacheHandle<object>
     {
@@ -25,7 +25,7 @@ namespace CacheManager.Redis
     }
 
     /// <summary>
-    /// Internal handle implementation for Redis.
+    /// Cache handle implementation for Redis.
     /// </summary>
     /// <typeparam name="TCacheValue">The type of the cache value.</typeparam>
     public class RedisCacheHandle<TCacheValue> : BaseCacheHandle<TCacheValue>
