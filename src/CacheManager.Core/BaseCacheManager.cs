@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.Linq;
 using CacheManager.Core.Internal;
 
@@ -412,6 +413,48 @@ namespace CacheManager.Core
             }
 
             this.TriggerOnClearRegion(region);
+        }
+
+        /// <summary>
+        /// Changes the expiration <paramref name="mode" /> and <paramref name="timeout" /> for the
+        /// given <paramref name="key" />.
+        /// </summary>
+        /// <param name="key">The cache key.</param>
+        /// <param name="mode">The expiration mode.</param>
+        /// <param name="timeout">The expiration timeout.</param>
+        public override void Expire(string key, ExpirationMode mode, TimeSpan timeout)
+        {
+            foreach (var handle in this.cacheHandles)
+            {
+                handle.Expire(key, mode, timeout);
+            }
+        }
+
+        /// <summary>
+        /// Changes the expiration <paramref name="mode" /> and <paramref name="timeout" /> for the
+        /// given <paramref name="key" />.
+        /// </summary>
+        /// <param name="key">The cache key.</param>
+        /// <param name="region">The cache region.</param>
+        /// <param name="mode">The expiration mode.</param>
+        /// <param name="timeout">The expiration timeout.</param>
+        public override void Expire(string key, string region, ExpirationMode mode, TimeSpan timeout)
+        {
+            foreach (var handle in this.cacheHandles)
+            {
+                handle.Expire(key, region, mode, timeout);
+            }
+        }
+
+        /// <summary>
+        /// Returns a <see cref="System.String" /> that represents this instance.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="System.String" /> that represents this instance.
+        /// </returns>
+        public override string ToString()
+        {
+            return string.Format(CultureInfo.InvariantCulture, "{0} Handles: {1}", this.Name, this.cacheHandles.Length);
         }
 
         /// <summary>

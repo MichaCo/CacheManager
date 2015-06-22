@@ -195,14 +195,7 @@ namespace CacheManager.Core.Internal
         /// <param name="key">The cache key.</param>
         /// <param name="mode">The expiration mode.</param>
         /// <param name="timeout">The expiration timeout.</param>
-        public virtual void Expire(string key, ExpirationMode mode, TimeSpan timeout)
-        {
-            CacheItem<TCacheValue> item = this.GetCacheItem(key);
-            if (item != null)
-            {
-                this.Put(item.WithExpiration(mode, timeout));
-            }
-        }
+        public abstract void Expire(string key, ExpirationMode mode, TimeSpan timeout);
 
         /// <summary>
         /// Changes the expiration <paramref name="mode"/> and <paramref name="timeout"/> for the
@@ -212,14 +205,7 @@ namespace CacheManager.Core.Internal
         /// <param name="region">The cache region.</param>
         /// <param name="mode">The expiration mode.</param>
         /// <param name="timeout">The expiration timeout.</param>
-        public virtual void Expire(string key, string region, ExpirationMode mode, TimeSpan timeout)
-        {
-            CacheItem<TCacheValue> item = this.GetCacheItem(key, region);
-            if (item != null)
-            {
-                this.Put(item.WithExpiration(mode, timeout));
-            }
-        }
+        public abstract void Expire(string key, string region, ExpirationMode mode, TimeSpan timeout);
 
         /// <summary>
         /// Sets an absolute expiration date for the cache <paramref name="key"/>.

@@ -75,6 +75,33 @@ namespace CacheManager.Core.Internal
         public virtual CacheStats<TCacheValue> Stats { get; private set; }
 
         /// <summary>
+        /// Changes the expiration <paramref name="mode" /> and <paramref name="timeout" /> for the
+        /// given <paramref name="key" />.
+        /// </summary>
+        /// <param name="key">The cache key.</param>
+        /// <param name="mode">The expiration mode.</param>
+        /// <param name="timeout">The expiration timeout.</param>
+        public override void Expire(string key, ExpirationMode mode, TimeSpan timeout)
+        {
+            var item = this.GetCacheItem(key);
+            this.PutInternalPrepared(item.WithExpiration(mode, timeout));
+        }
+
+        /// <summary>
+        /// Changes the expiration <paramref name="mode" /> and <paramref name="timeout" /> for the
+        /// given <paramref name="key" />.
+        /// </summary>
+        /// <param name="key">The cache key.</param>
+        /// <param name="region">The cache region.</param>
+        /// <param name="mode">The expiration mode.</param>
+        /// <param name="timeout">The expiration timeout.</param>
+        public override void Expire(string key, string region, ExpirationMode mode, TimeSpan timeout)
+        {
+            var item = this.GetCacheItem(key, region);
+            this.PutInternalPrepared(item.WithExpiration(mode, timeout));
+        }
+
+        /// <summary>
         /// Updates an existing key in the cache.
         /// <para>
         /// The cache manager will make sure the update will always happen on the most recent version.

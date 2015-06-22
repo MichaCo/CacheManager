@@ -40,6 +40,123 @@ namespace CacheManager.Tests
             }
         }
 
+        [Theory]
+        [MemberData("TestCacheManagers")]
+        public void CacheManager_Expire_Absolute_ForKey_Validate<T>(T cache) where T : ICacheManager<object>
+        {
+            using (cache)
+            {
+                var key = Guid.NewGuid().ToString();
+                cache.Add(new CacheItem<object>(key, "value", ExpirationMode.None, default(TimeSpan)))
+                    .Should().BeTrue();
+
+                cache.Expire(key, DateTimeOffset.UtcNow.AddMinutes(10));
+
+                var item = cache.GetCacheItem(key);
+
+                item.ExpirationTimeout.Should().BeCloseTo(TimeSpan.FromMinutes(10));
+                item.ExpirationMode.Should().Be(ExpirationMode.Absolute);
+            }
+        }
+
+        [Theory]
+        [MemberData("TestCacheManagers")]
+        public void CacheManager_Expire_Absolute_ForKeyRegion_Validate<T>(T cache) where T : ICacheManager<object>
+        {
+            using (cache)
+            {
+                var key = Guid.NewGuid().ToString();
+                var region = "region";
+                cache.Add(new CacheItem<object>(key, "value", region, ExpirationMode.None, default(TimeSpan)))
+                    .Should().BeTrue();
+
+                cache.Expire(key, region, DateTimeOffset.UtcNow.AddMinutes(10));
+
+                var item = cache.GetCacheItem(key, region);
+
+                item.ExpirationTimeout.Should().BeCloseTo(TimeSpan.FromMinutes(10));
+                item.ExpirationMode.Should().Be(ExpirationMode.Absolute);
+            }
+        }
+
+        [Theory]
+        [MemberData("TestCacheManagers")]
+        public void CacheManager_Expire_Sliding_ForKey_Validate<T>(T cache) where T : ICacheManager<object>
+        {
+            using (cache)
+            {
+                var key = Guid.NewGuid().ToString();
+                cache.Add(new CacheItem<object>(key, "value", ExpirationMode.None, default(TimeSpan)))
+                    .Should().BeTrue();
+
+                cache.Expire(key, TimeSpan.FromMinutes(10));
+
+                var item = cache.GetCacheItem(key);
+
+                item.ExpirationTimeout.Should().BeCloseTo(TimeSpan.FromMinutes(10));
+                item.ExpirationMode.Should().Be(ExpirationMode.Sliding);
+            }
+        }
+
+        [Theory]
+        [MemberData("TestCacheManagers")]
+        public void CacheManager_Expire_Sliding_ForKeyRegion_Validate<T>(T cache) where T : ICacheManager<object>
+        {
+            using (cache)
+            {
+                var key = Guid.NewGuid().ToString();
+                var region = "region";
+                cache.Add(new CacheItem<object>(key, "value", region, ExpirationMode.None, default(TimeSpan)))
+                    .Should().BeTrue();
+
+                cache.Expire(key, region, TimeSpan.FromMinutes(10));
+
+                var item = cache.GetCacheItem(key, region);
+
+                item.ExpirationTimeout.Should().BeCloseTo(TimeSpan.FromMinutes(10));
+                item.ExpirationMode.Should().Be(ExpirationMode.Sliding);
+            }
+        }
+
+        [Theory]
+        [MemberData("TestCacheManagers")]
+        public void CacheManager_RemoveExpiration_ForKey_Validate<T>(T cache) where T : ICacheManager<object>
+        {
+            using (cache)
+            {
+                var key = Guid.NewGuid().ToString();
+                cache.Add(new CacheItem<object>(key, "value", ExpirationMode.Absolute, TimeSpan.FromMinutes(30)))
+                    .Should().BeTrue();
+
+                cache.RemoveExpiration(key);
+
+                var item = cache.GetCacheItem(key);
+
+                item.ExpirationTimeout.Should().Be(default(TimeSpan));
+                item.ExpirationMode.Should().Be(ExpirationMode.None);
+            }
+        }
+
+        [Theory]
+        [MemberData("TestCacheManagers")]
+        public void CacheManager_RemoveExpiration_ForKeyRegion_Validate<T>(T cache) where T : ICacheManager<object>
+        {
+            using (cache)
+            {
+                var key = Guid.NewGuid().ToString();
+                var region = "region";
+                cache.Add(new CacheItem<object>(key, "value", region, ExpirationMode.Absolute, TimeSpan.FromMinutes(30)))
+                    .Should().BeTrue();
+
+                cache.RemoveExpiration(key, region);
+
+                var item = cache.GetCacheItem(key, region);
+
+                item.ExpirationTimeout.Should().Be(default(TimeSpan));
+                item.ExpirationMode.Should().Be(ExpirationMode.None);
+            }
+        }
+
         [Fact]
         [Trait("category", "Unreliable")]
         [ReplaceCulture]
