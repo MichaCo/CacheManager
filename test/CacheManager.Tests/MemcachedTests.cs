@@ -23,11 +23,11 @@ namespace CacheManager.Tests
         {
             // arrange act
             Action act = () => CacheFactory.Build<IAmNotSerializable>("myCache", settings =>
-                            {
-                                settings.WithUpdateMode(CacheUpdateMode.Full)
-                                    .WithMemcachedCacheHandle("default")
-                                    .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1));
-                            });
+            {
+                settings.WithUpdateMode(CacheUpdateMode.Full)
+                    .WithMemcachedCacheHandle("default")
+                    .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1));
+            });
 
             // assert
             act.ShouldThrow<TargetInvocationException>()
@@ -35,7 +35,7 @@ namespace CacheManager.Tests
                 .WithInnerMessage("The cache value type must be serializable*");
         }
 
-        [Fact]
+        [Fact(Skip = "memcached")]
         [Trait("category", "Memcached")]
         public void Memcached_KeySizeLimit()
         {
@@ -63,7 +63,7 @@ namespace CacheManager.Tests
             }
         }
 
-        [Fact]
+        [Fact(Skip = "memcached")]
         [Trait("category", "Memcached")]
         public void Memcached_KeySizeLimit_WithRegion()
         {
@@ -91,7 +91,7 @@ namespace CacheManager.Tests
             }
         }
 
-        [Fact]
+        [Fact(Skip = "memcached")]
         [Trait("category", "Memcached")]
         [Trait("category", "Unreliable")]
         public void Memcached_Absolute_DoesExpire()
@@ -124,7 +124,7 @@ namespace CacheManager.Tests
             }
         }
 
-        [Fact]
+        [Fact(Skip = "memcached")]
         [Trait("category", "Memcached")]
         public void Memcached_RaceCondition_WithoutCasHandling()
         {
@@ -153,8 +153,8 @@ namespace CacheManager.Tests
 
                         cache.Put("myCounter", val);
                     }
-                }, 
-                numThreads, 
+                },
+                numThreads,
                 iterations);
 
                 // assert
@@ -166,7 +166,7 @@ namespace CacheManager.Tests
             }
         }
 
-        [Fact]
+        [Fact(Skip = "memcached")]
         [Trait("category", "Memcached")]
         public void Memcached_NoRaceCondition_WithCasHandling()
         {
@@ -200,8 +200,8 @@ namespace CacheManager.Tests
                             return value;
                         }, new UpdateItemConfig(50, VersionConflictHandling.EvictItemFromOtherCaches));
                     }
-                }, 
-                numThreads, 
+                },
+                numThreads,
                 iterations);
 
                 // assert
@@ -214,7 +214,7 @@ namespace CacheManager.Tests
             }
         }
 
-        [Fact]
+        [Fact(Skip = "memcached")]
         [Trait("category", "Memcached")]
         public void Memcached_NoRaceCondition_WithCasHandling_WithRegion()
         {
@@ -241,8 +241,8 @@ namespace CacheManager.Tests
                     for (int i = 0; i < numInnerIterations; i++)
                     {
                         cache.Update(
-                            key, 
-                            region, 
+                            key,
+                            region,
                             (value) =>
                             {
                                 value.Counter++;
@@ -250,8 +250,8 @@ namespace CacheManager.Tests
                                 return value;
                             });
                     }
-                }, 
-                numThreads, 
+                },
+                numThreads,
                 iterations);
 
                 // assert
@@ -264,7 +264,7 @@ namespace CacheManager.Tests
             }
         }
 
-        [Fact]
+        [Fact(Skip = "memcached")]
         [Trait("category", "Memcached")]
         public void Memcached_NoRaceCondition_WithCasButTooFiewRetries()
         {
@@ -296,8 +296,8 @@ namespace CacheManager.Tests
                             return value;
                         }, new UpdateItemConfig(retries, VersionConflictHandling.EvictItemFromOtherCaches));
                     }
-                }, 
-                numThreads, 
+                },
+                numThreads,
                 iterations);
 
                 // assert
@@ -312,7 +312,7 @@ namespace CacheManager.Tests
             }
         }
 
-        [Fact]
+        [Fact(Skip = "memcached")]
         [Trait("category", "Memcached")]
         public void Memcached_Update_ItemNotAdded()
         {
