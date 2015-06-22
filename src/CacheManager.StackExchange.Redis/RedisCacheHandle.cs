@@ -497,19 +497,12 @@ namespace CacheManager.Redis
 
                 StackRedis.HashEntry[] metaValues = new[]
                 {
+                    new StackRedis.HashEntry(HashFieldType, item.ValueType.FullName),
+                    new StackRedis.HashEntry(HashFieldExpirationMode, (int)item.ExpirationMode),
+                    new StackRedis.HashEntry(HashFieldExpirationTimeout, item.ExpirationTimeout.Ticks),
+                    new StackRedis.HashEntry(HashFieldCreated, item.CreatedUtc.Ticks),
                     new StackRedis.HashEntry(HashFieldType, item.ValueType.FullName)
                 };
-
-                if (item.ExpirationMode != ExpirationMode.None)
-                {
-                    metaValues = new[]
-                    {
-                        new StackRedis.HashEntry(HashFieldExpirationMode, (int)item.ExpirationMode),
-                        new StackRedis.HashEntry(HashFieldExpirationTimeout, item.ExpirationTimeout.Ticks),
-                        new StackRedis.HashEntry(HashFieldCreated, item.CreatedUtc.Ticks),
-                        new StackRedis.HashEntry(HashFieldType, item.ValueType.FullName)
-                    };
-                }
 
                 var flags = sync ? StackRedis.CommandFlags.None : StackRedis.CommandFlags.FireAndForget;
 
