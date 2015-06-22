@@ -393,14 +393,16 @@ namespace CacheManager.Redis
         /// <param name="item">The <c>CacheItem</c> to be added to the cache.</param>
         protected override void PutInternalPrepared(CacheItem<TCacheValue> item)
         {
-            // try to set the item
-            var result = this.Set(item, StackRedis.When.NotExists, true);
+            ////// try to set the item
+            ////var result = this.Set(item, StackRedis.When.NotExists, true);
 
-            // it it does exist, lets try to modify it
-            if (!result)
-            {
-                this.Set(item, StackRedis.When.Always, false);
-            }
+            ////// it it does exist, lets try to modify it
+            ////if (!result)
+            ////{
+            ////    this.Set(item, StackRedis.When.Always, false);
+            ////}
+
+            this.Set(item, StackRedis.When.Always, false);
         }
 
         /// <summary>
@@ -490,6 +492,7 @@ namespace CacheManager.Redis
 
         private bool Set(CacheItem<TCacheValue> item, StackRedis.When when, bool sync = false)
         {
+            // TODO: move the whole logic into a script to make it atomic
             return this.Retry(() =>
             {
                 var fullKey = GetKey(item.Key, item.Region);
