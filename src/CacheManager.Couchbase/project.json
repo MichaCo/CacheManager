@@ -15,8 +15,6 @@
     "net45": {
       "frameworkAssemblies": {
         "System.Configuration": ""
-      },
-      "dependencies": {
       }
     },
     "dnx451": {
