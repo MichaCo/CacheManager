@@ -68,8 +68,8 @@ namespace CacheManager.Tests
             Action act = () => new BaseCacheManager<object>(null, new CacheManagerConfiguration());
 
             // assert
-            act.ShouldThrow<ArgumentException>()
-                    .WithMessage("*Name must not be empty*");
+            act.ShouldThrow<ArgumentNullException>()
+                    .WithMessage("*name*");
         }
 
         [Fact]

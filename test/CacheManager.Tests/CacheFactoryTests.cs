@@ -27,8 +27,8 @@ namespace CacheManager.Tests
             Action act = () => CacheFactory.FromConfiguration<object>(null, new CacheManagerConfiguration());
 
             // assert
-            act.ShouldThrow<ArgumentException>()
-                .WithMessage("*Name must not be empty*");
+            act.ShouldThrow<ArgumentNullException>()
+                .WithMessage("*name*");
         }
 
         [Fact]
@@ -69,8 +69,8 @@ namespace CacheManager.Tests
             Action act = () => CacheFactory.Build(null, settings => { });
 
             // assert
-            act.ShouldThrow<ArgumentException>()
-                .WithMessage("*Name must not be empty*");
+            act.ShouldThrow<ArgumentNullException>()
+                .WithMessage("*Parameter name: name*");
         }
 
         [Fact]

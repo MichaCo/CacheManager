@@ -43,9 +43,9 @@ namespace CacheManager.Core
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "nope")]
         public BaseCacheManager(string name, CacheManagerConfiguration configuration)
         {
-            if (string.IsNullOrEmpty(name))
+            if (string.IsNullOrWhiteSpace(name))
             {
-                throw new ArgumentException("Name must not be empty.", "name");
+                throw new ArgumentNullException("name");
             }
             if (configuration == null)
             {
