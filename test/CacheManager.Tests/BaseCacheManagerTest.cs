@@ -11,8 +11,8 @@ using Couchbase.Configuration.Client;
 
 #endif
 #if DNX451
-using Microsoft.Framework.Runtime;
-using Microsoft.Framework.Runtime.Infrastructure;
+using Microsoft.Dnx.Runtime.Infrastructure;
+using Microsoft.Dnx.Runtime;
 #endif
 
 namespace CacheManager.Tests

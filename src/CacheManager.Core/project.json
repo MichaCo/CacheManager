@@ -29,18 +29,18 @@
     "dnxcore50": {
       "compilationOptions": { "define": [ "PORTABLE" ] },
       "dependencies": {
-        "System.Collections": "4.0.10-beta-*",
-        "System.Linq": "4.0.0-beta-*",
-        "System.Diagnostics.Tools": "4.0.0-beta-*",
-        "System.Globalization": "4.0.10-beta-*",
-        "System.Threading": "4.0.10-beta-*",
-        "System.Threading.Timer": "4.0.0-beta-*",
-        "System.Collections.Concurrent": "4.0.10-beta-*",
-        "System.Text.Encoding": "4.0.10-beta-*",
-        "System.Runtime.Extensions": "4.0.10-beta-*",
-        "System.Runtime.InteropServices": "4.0.20-beta-*",
-        "System.Reflection": "4.0.10-beta-*",
-        "System.Reflection.TypeExtensions": "4.0.0-beta-*"
+        "System.Collections": "4.0.10-*",
+        "System.Linq": "4.0.0-*",
+        "System.Diagnostics.Tools": "4.0.0-*",
+        "System.Globalization": "4.0.10-*",
+        "System.Threading": "4.0.10-*",
+        "System.Threading.Timer": "4.0.0-*",
+        "System.Collections.Concurrent": "4.0.10-*",
+        "System.Text.Encoding": "4.0.10-*",
+        "System.Runtime.Extensions": "4.0.10-*",
+        "System.Runtime.InteropServices": "4.0.20-*",
+        "System.Reflection": "4.0.10-*",
+        "System.Reflection.TypeExtensions": "4.0.0-*"
       }
     },
     ".NETPortable,Version=v4.5,Profile=Profile111": {
