@@ -4,7 +4,7 @@
     "CacheManager.SystemRuntimeCaching": "0.6.0",
     "CacheManager.MemCached": "0.6.0",
     "CacheManager.Couchbase": "0.6.0",
-    "xunit.runner.aspnet": "2.0.0-aspnet-beta6-*",
+    "xunit.runner.aspnet": "2.0.0-aspnet-*",
     "FluentAssertions": "3.3.0",
     "Moq": "4.2.1502.911"
   },

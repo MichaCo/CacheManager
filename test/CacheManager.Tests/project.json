@@ -6,7 +6,7 @@
     "CacheManager.Couchbase": "0.6.0",
     "FluentAssertions": "3.3.0",
     "Moq": "4.2.1502.911",
-    "xunit.runner.aspnet": "2.0.0-aspnet-beta7-*"
+    "xunit.runner.aspnet": "2.0.0-aspnet-*"
   },
   "frameworks": {
     "dnx451": {
