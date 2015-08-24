@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using CacheManager.Core;
-using CacheManager.Core.Internal;
+using CacheManager.Core.Cache;
+using CacheManager.Core.Configuration;
 using StackRedis = StackExchange.Redis;
 
 namespace CacheManager.Redis
@@ -81,7 +82,7 @@ namespace CacheManager.Redis
         {
             get
             {
-                return RedisConnectionPool.Connect(this.RedisConfiguration);
+                return RedisConnectionPool.Connect(this.Manager.Configuration, this.RedisConfiguration);
             }
         }
 
@@ -151,6 +152,31 @@ namespace CacheManager.Redis
                 this.Database.KeyDelete(region);
             });
         }
+
+        /// <summary>
+        /// Clears the given hash set, assuming all its items are also cached keys and remove them as well
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="region"></param>
+        private void ClearDependentSet(string key, string region)
+        {
+            this.Retry(() =>
+            {
+                // we are storing all keys stored in the hash set in the hash for key=region
+                var hashKeys = this.Database.HashKeys(key);
+
+                if (hashKeys.Length > 0)
+                {
+                    // lets remove all keys which where in the hash set
+                    var keys = hashKeys.Select(k => (StackRedis.RedisKey) GetKey(k, region)).ToArray();
+                    this.Database.KeyDelete(keys);
+                }
+
+                // now delete the region
+                this.Database.KeyDelete(key);
+            });
+        }
+
 
         /// <summary>
         /// Gets the servers.
@@ -252,6 +278,10 @@ namespace CacheManager.Redis
 
                     if (committed)
                     {
+                        // clean up dependency
+                        var depKey = GetDependentSetKey(key, region);
+                        this.ClearDependentSet(depKey, region);
+
                         return UpdateItemResult.ForSuccess<TCacheValue>(newValue, tries > 1, tries);
                     }
                     else
@@ -393,16 +423,14 @@ namespace CacheManager.Redis
         /// <param name="item">The <c>CacheItem</c> to be added to the cache.</param>
         protected override void PutInternalPrepared(CacheItem<TCacheValue> item)
         {
-            ////// try to set the item
-            ////var result = this.Set(item, StackRedis.When.NotExists, true);
+            // try to set the item
+            var result = this.Set(item, StackRedis.When.NotExists, true);
 
-            ////// it it does exist, lets try to modify it
-            ////if (!result)
-            ////{
-            ////    this.Set(item, StackRedis.When.Always, false);
-            ////}
-
-            this.Set(item, StackRedis.When.Always, false);
+            // it it does exist, lets try to modify it
+            if (!result)
+            {
+                this.Set(item, StackRedis.When.Always, false);
+            }
         }
 
         /// <summary>
@@ -434,6 +462,10 @@ namespace CacheManager.Redis
                 {
                     this.Database.HashDelete(region, key, StackRedis.CommandFlags.FireAndForget);
                 }
+
+                // clean up dependency
+                var depKey = GetDependentSetKey(key, region);
+                this.ClearDependentSet(depKey, region);
 
                 // remove key
                 var fullKey = GetKey(key, region);
@@ -480,6 +512,11 @@ namespace CacheManager.Redis
             return fullKey;
         }
 
+        private static string GetDependentSetKey(string key, string region)
+        {
+            return GetKey(key, region) + ":depset";
+        }
+
         private T Retry<T>(Func<T> retryme)
         {
             return RetryHelper.Retry(retryme, this.Manager.Configuration.RetryTimeout, this.Manager.Configuration.MaxRetries);
@@ -492,35 +529,55 @@ namespace CacheManager.Redis
 
         private bool Set(CacheItem<TCacheValue> item, StackRedis.When when, bool sync = false)
         {
-            // TODO: move the whole logic into a script to make it atomic
             return this.Retry(() =>
             {
                 var fullKey = GetKey(item.Key, item.Region);
                 var value = ToRedisValue(item.Value);
-
-                StackRedis.HashEntry[] metaValues = new[]
-                {
-                    new StackRedis.HashEntry(HashFieldType, item.ValueType.FullName),
-                    new StackRedis.HashEntry(HashFieldExpirationMode, (int)item.ExpirationMode),
-                    new StackRedis.HashEntry(HashFieldExpirationTimeout, item.ExpirationTimeout.Ticks),
-                    new StackRedis.HashEntry(HashFieldCreated, item.CreatedUtc.Ticks),
-                    new StackRedis.HashEntry(HashFieldType, item.ValueType.FullName)
-                };
-
                 var flags = sync ? StackRedis.CommandFlags.None : StackRedis.CommandFlags.FireAndForget;
 
                 var setResult = this.Database.HashSet(fullKey, HashFieldValue, value, when, flags);
-
+                
                 // setResult from fire and forget is alwys false, so we have to assume it works...
                 setResult = flags == StackRedis.CommandFlags.FireAndForget ? true : setResult;
 
                 if (setResult)
                 {
+                    StackRedis.HashEntry[] metaValues = new[]
+                    {
+                        new StackRedis.HashEntry(HashFieldType, item.ValueType.FullName)
+                    };
+
+                    if (item.ExpirationMode != ExpirationMode.None)
+                    {
+                        metaValues = new[]
+                        {
+                            new StackRedis.HashEntry(HashFieldExpirationMode, (int) item.ExpirationMode),
+                            new StackRedis.HashEntry(HashFieldExpirationTimeout, item.ExpirationTimeout.Ticks),
+                            new StackRedis.HashEntry(HashFieldCreated, item.CreatedUtc.Ticks),
+                            new StackRedis.HashEntry(HashFieldType, item.ValueType.FullName)
+                        };
+                    }
+
                     // update region lookup
                     if (!string.IsNullOrWhiteSpace(item.Region))
                     {
                         this.Database.HashSet(item.Region, item.Key, "regionKey", when, StackRedis.CommandFlags.FireAndForget);
                     }
+
+                    // add this key to the parent keys dependent set, the parent keys must be in the same region
+                    if (item.ParentKeys != null)
+                    {
+                        foreach (var key in item.ParentKeys)
+                        {
+                            var parentKey = GetDependentSetKey(key, item.Region);
+                            this.Database.HashSet(parentKey, item.Key, StackRedis.RedisValue.EmptyString, when,
+                                StackRedis.CommandFlags.FireAndForget);
+                        }
+                    }
+
+                    // expire all associated child keys that depends on this key
+                    var depKey = GetDependentSetKey(item.Key, item.Region);
+                    this.ClearDependentSet(depKey, item.Region);
 
                     // set the additional fields in case sliding expiration should be used in this
                     // case we have to store the expiration mode and timeout on the hash, too so

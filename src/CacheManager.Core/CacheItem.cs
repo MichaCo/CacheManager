@@ -41,6 +41,7 @@ namespace CacheManager.Core
             this.ValueType = value.GetType();
             this.CreatedUtc = DateTime.UtcNow;
             this.LastAccessedUtc = DateTime.UtcNow;
+            this.ParentKeys = null;
         }
 
         /// <summary>
@@ -183,6 +184,12 @@ namespace CacheManager.Core
         public string Region { get; private set; }
 
         /// <summary>
+        /// Gets the parent keys for this cache item
+        /// NOTE: not serialized, only used on cache creation
+        /// </summary>
+        public string[] ParentKeys { get; set; }
+
+        /// <summary>
         /// Gets the cache value.
         /// </summary>
         /// <value>The cache value.</value>
@@ -240,7 +247,11 @@ namespace CacheManager.Core
         /// <returns>The new instance of the cache item.</returns>
         public CacheItem<T> WithExpiration(ExpirationMode mode, TimeSpan timeout)
         {
-            return new CacheItem<T>(this.Key, this.Region, this.Value, this.CreatedUtc, this.LastAccessedUtc, mode, timeout);
+            return new CacheItem<T>(this.Key, this.Region, this.Value, this.CreatedUtc, this.LastAccessedUtc, mode,
+                timeout)
+            {
+                ParentKeys = this.ParentKeys
+            };
         }
 
         /// <summary>
@@ -299,7 +310,11 @@ namespace CacheManager.Core
         /// <returns>The new instance of the cache item.</returns>
         public CacheItem<T> WithValue(T value)
         {
-            return new CacheItem<T>(this.Key, this.Region, value, this.CreatedUtc, this.LastAccessedUtc, this.ExpirationMode, this.ExpirationTimeout);
+            return new CacheItem<T>(this.Key, this.Region, value, this.CreatedUtc, this.LastAccessedUtc,
+                this.ExpirationMode, this.ExpirationTimeout)
+            {
+                ParentKeys = this.ParentKeys
+            };
         }
     }
 }

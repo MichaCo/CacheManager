@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Specialized;
 using System.Globalization;
+using System.Linq;
 using System.Runtime.Caching;
 using System.Text.RegularExpressions;
 using CacheManager.Core;
@@ -300,6 +301,8 @@ namespace CacheManager.SystemRuntimeCaching
                 }
                 monitorKeys = new[] { this.instanceKey, key };
             }
+
+            if (item.ParentKeys != null) monitorKeys = monitorKeys.Concat(item.ParentKeys).ToArray();
 
             var policy = new CacheItemPolicy()
             {
