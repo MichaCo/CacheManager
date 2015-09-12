@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading;
 using CacheManager.Core;
 using CacheManager.Core.Configuration;
+using CacheManager.Redis;
 using FluentAssertions;
 using Xunit;
 
@@ -83,6 +84,17 @@ namespace CacheManager.Tests
         public void Redis_Multiple_PubSub_Change()
         {
             // arrange
+            string fileName = BaseCacheManagerTest.GetCfgFileName(@"/Configuration/configuration.valid.allFeatures.config");
+            // redis config name must be same for all cache handles, configured via file and via code
+            // otherwise the pub sub channel name is different
+            string cacheName = "redisConfig";
+
+            RedisConfigurations.LoadConfiguration(fileName, RedisConfigurationSection.DefaultSectionName);
+
+            var cfg = ConfigurationBuilder.LoadConfigurationFile(fileName, cacheName);            
+            var cfgCache = CacheFactory.FromConfiguration<object>(cacheName, cfg);
+
+                
             var item = new CacheItem<object>(Guid.NewGuid().ToString(), "something");
 
             // act/assert
@@ -90,22 +102,22 @@ namespace CacheManager.Tests
                 (cacheA, cacheB) =>
                 {
                     cacheA.Put(item);
-                    Thread.Sleep(1);
+                    Thread.Sleep(10);
                     var value = cacheB.Get(item.Key);
-                    value.Should().Be(item.Value);
+                    value.Should().Be(item.Value, cacheB.ToString());
                     cacheB.Put(item.Key, "new value");
                 },
                 (cache) =>
                 {
-                    Thread.Sleep(1);
+                    Thread.Sleep(10);
                     var value = cache.Get(item.Key);
-                    value.Should().Be("new value");
+                    value.Should().Be("new value", cache.ToString());
                 }, 
                 3,
-                TestManagers.CreateRedisAndSystemCacheWithBackPlate(3),
-                TestManagers.CreateRedisAndSystemCacheWithBackPlate(3),
-                TestManagers.CreateRedisCache(3),
-                TestManagers.CreateRedisAndSystemCacheWithBackPlate(3));
+                TestManagers.CreateRedisAndSystemCacheWithBackPlate(69),
+                cfgCache,
+                TestManagers.CreateRedisCache(69),
+                TestManagers.CreateRedisAndSystemCacheWithBackPlate(69));
         }
 
         [Fact(Skip = "needs clear")]
@@ -390,7 +402,10 @@ namespace CacheManager.Tests
         {
             // arrange
             string fileName = BaseCacheManagerTest.GetCfgFileName(@"/Configuration/configuration.valid.allFeatures.config");
-            string cacheName = "redisWithBackPlate";
+            string cacheName = "redisConfig";
+
+            // have to load the configuration manually because the file is not avialbale to the default ConfigurtaionManager
+            RedisConfigurations.LoadConfiguration(fileName, RedisConfigurationSection.DefaultSectionName);
 
             // act
             var cfg = ConfigurationBuilder.LoadConfigurationFile(fileName, cacheName);
@@ -398,6 +413,47 @@ namespace CacheManager.Tests
 
             // assert
             cache.CacheHandles.Any(p => p.Configuration.IsBackPlateSource).Should().BeTrue();
+        }
+
+        [Fact]
+        [Trait("category", "Redis")]
+        public void Redis_LoadWithRedisBackPlate_FromAppConfig()
+        {
+            // RedisConfigurations should load this from default section from app.config
+
+            // arrange
+            string cacheName = "redisWithBackPlateAppConfig";
+
+            // act
+            var cfg = ConfigurationBuilder.LoadConfiguration(cacheName);
+            var cache = CacheFactory.FromConfiguration<object>(cacheName, cfg);
+            var handle = cache.CacheHandles.First(p => p.Configuration.IsBackPlateSource) as RedisCacheHandle<object>;
+            // test running something on the redis handle, Count should be enough to test the connection
+            Action count = () => { var x = handle.Count; };
+
+            // assert            
+            handle.Should().NotBeNull();
+            count.ShouldNotThrow();
+        }
+
+        [Fact]
+        [Trait("category", "Redis")]
+        public void Redis_LoadWithRedisBackPlate_FromAppConfigConnectionStrings()
+        {
+            // RedisConfigurations should load this from AppSettings from app.config
+            // arrange
+            string cacheName = "redisWithBackPlateAppConfigConnectionStrings";
+
+            // act
+            var cfg = ConfigurationBuilder.LoadConfiguration(cacheName);
+            var cache = CacheFactory.FromConfiguration<object>(cacheName, cfg);
+            var handle = cache.CacheHandles.First(p => p.Configuration.IsBackPlateSource) as RedisCacheHandle<object>;
+            // test running something on the redis handle, Count should be enough to test the connection
+            Action count = () => { var x = handle.Count; };
+
+            // assert            
+            handle.Should().NotBeNull();
+            count.ShouldNotThrow();
         }
 
         [Fact]
