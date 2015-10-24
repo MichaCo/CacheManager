@@ -81,8 +81,9 @@ namespace CacheManager.Tests
 
         [Fact]
         [Trait("category", "Redis")]
+        [Trait("category", "Unreliable")]
         public void Redis_Multiple_PubSub_Change()
-        {
+        {            
             // arrange
             string fileName = BaseCacheManagerTest.GetCfgFileName(@"/Configuration/configuration.valid.allFeatures.config");
             // redis config name must be same for all cache handles, configured via file and via code
@@ -91,10 +92,9 @@ namespace CacheManager.Tests
 
             RedisConfigurations.LoadConfiguration(fileName, RedisConfigurationSection.DefaultSectionName);
 
-            var cfg = ConfigurationBuilder.LoadConfigurationFile(fileName, cacheName);            
+            var cfg = ConfigurationBuilder.LoadConfigurationFile(fileName, cacheName);
             var cfgCache = CacheFactory.FromConfiguration<object>(cacheName, cfg);
 
-                
             var item = new CacheItem<object>(Guid.NewGuid().ToString(), "something");
 
             // act/assert

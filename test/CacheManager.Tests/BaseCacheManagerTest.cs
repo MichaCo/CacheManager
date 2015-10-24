@@ -242,7 +242,7 @@ namespace CacheManager.Tests
         public static ICacheManager<object> CreateRedisCache(int database = 0, bool sharedRedisConfig = true)
         {
             var redisKey = sharedRedisConfig ? "redisConfig" : Guid.NewGuid().ToString();
-            var cache = CacheFactory.Build(NewKey(), settings =>
+            var cache = CacheFactory.Build(redisKey, settings =>
             {
                 settings
                     .WithMaxRetries(100)
@@ -253,7 +253,7 @@ namespace CacheManager.Tests
                             .WithDatabase(database)
                             .WithEndpoint("127.0.0.1", 6379);
                     })
-                    // .WithRedisBackPlate(redisKey)
+                    .WithRedisBackPlate(redisKey)
                     .WithRedisCacheHandle(redisKey, true)
                     .EnableStatistics();
             });

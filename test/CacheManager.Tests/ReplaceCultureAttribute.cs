@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Reflection;
 using System.Threading;
+using Xunit.Sdk;
 
 namespace CacheManager.Tests
 {
@@ -10,8 +11,8 @@ namespace CacheManager.Tests
     /// Replaces the current culture and UI culture for the test.
     /// </summary>
     [ExcludeFromCodeCoverage]
-    [AttributeUsage(AttributeTargets.Method)]
-    public sealed class ReplaceCultureAttribute : Xunit.Sdk.BeforeAfterTestAttribute
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
+    public sealed class ReplaceCultureAttribute : BeforeAfterTestAttribute
     {
         private CultureInfo originalCulture;
         private CultureInfo originalUICulture;
