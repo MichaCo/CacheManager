@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+﻿#!/bin/bash
 cachedir=$HOME/.local/share
 mkdir -p $cachedir
 nugetVersion=latest
