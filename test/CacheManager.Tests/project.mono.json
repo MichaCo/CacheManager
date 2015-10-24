@@ -1,16 +1,17 @@
 ﻿{
   "dependencies": {
-    "CacheManager.StackExchange.Redis": "0.6.0",
-    "CacheManager.SystemRuntimeCaching": "0.6.0",
-    "CacheManager.MemCached": "0.6.0",
-    "CacheManager.Couchbase": "0.6.0",
-    "xunit.runner.aspnet": "2.0.0-aspnet-*",
+    "CacheManager.StackExchange.Redis": "0.6.1",
+    "CacheManager.SystemRuntimeCaching": "0.6.1",
+    "CacheManager.MemCached": "0.6.1",
+    "CacheManager.Couchbase": "0.6.1",
     "FluentAssertions": "3.3.0",
-    "Moq": "4.2.1502.911"
+    "Moq": "4.2.1502.911",
+    "xunit.runner.aspnet": "2.0.0-aspnet-*"
   },
   "frameworks": {
     "dnx451": {
-      "dependencies": {
+      "frameworkAssemblies": {
+        "System.Reflection": ""
       }
     },
     "dnx50": { }
