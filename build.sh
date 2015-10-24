@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-cachedir = .nuget
+cachedir=.nuget
 mkdir -p $cachedir
 nugetVersion=latest
 cachePath=$cachedir/nuget.$nugetVersion.exe
