@@ -623,5 +623,29 @@ namespace CacheManager.Core.Internal
             object changed = Convert.ChangeType(value, typeof(TOut), CultureInfo.InvariantCulture);
             return changed == null ? (TOut)value : (TOut)changed;
         }
+
+        public TCacheValue GetOrAdd(string key, Func<CacheItem<TCacheValue>> itemFunc)
+        {
+            if (key == null)
+            {
+                throw new ArgumentNullException("key");
+            }
+
+            return GetOrAddInternal(key, null, itemFunc);
+        }
+
+        private TCacheValue GetOrAddInternal(string key, string region, Func<CacheItem<TCacheValue>> itemFunc)
+        {
+            var item = string.IsNullOrWhiteSpace(region) ? GetCacheItem(key) : GetCacheItem(key, region);
+
+            // if the cache item doesn't already exist, add them
+            if (item == null)
+            {
+                item = itemFunc();
+                AddInternal(item);
+            }
+
+            return item.Value;
+        }
     }
 }

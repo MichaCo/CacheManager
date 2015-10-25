@@ -511,5 +511,7 @@ namespace CacheManager.Core
         /// as Get plus Put.
         /// </remarks>
         bool TryUpdate(string key, string region, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config, out TCacheValue value);
+        
+        TCacheValue GetOrAdd(string key, Func<CacheItem<TCacheValue>> itemFunc);
     }
 }
