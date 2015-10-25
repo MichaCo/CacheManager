@@ -1,8 +1,9 @@
-﻿#!/bin/bash
-cachedir=$HOME/.local/share
-mkdir -p $cachedir
+﻿#!/usr/bin/env bash
+
+cachedir=.nuget			
+mkdir -p $cachedir				
 nugetVersion=latest
-cachePath=$cachedir/nuget.$nugetVersion.exe
+cachePath=$cachedir/nuget.exe
 
 url=https://dist.nuget.org/win-x86-commandline/$nugetVersion/nuget.exe
 
@@ -10,13 +11,11 @@ if test ! -f $cachePath; then
     wget -O $cachePath $url 2>/dev/null || curl -o $cachePath --location $url /dev/null
 fi
 
-if test ! -e .nuget; then
-    mkdir .nuget
-    cp $cachePath .nuget/nuget.exe
-fi
-
+echo "testing sake"
 if test ! -d packages/Sake; then
-    mono .nuget/nuget.exe install KoreBuild -ExcludeVersion -o packages -nocache -pre
+    echo "installing kore build"
+    mono .nuget/nuget.exe install KoreBuild -ExcludeVersion -Source https://www.myget.org/F/aspnetvnext/api/v2 -o packages -nocache -pre
+    echo "installing sake"
     mono .nuget/nuget.exe install Sake -ExcludeVersion -Source https://www.nuget.org/api/v2/ -Out packages
 fi
 
