@@ -6,13 +6,9 @@ using CacheManager.Core;
 using CacheManager.Core.Internal;
 
 #if !NET40
-
 using Couchbase.Configuration.Client;
-
 #endif
 #if DNX451
-using Microsoft.Dnx.Runtime.Infrastructure;
-using Microsoft.Dnx.Runtime;
 #endif
 
 namespace CacheManager.Tests
@@ -292,9 +288,10 @@ namespace CacheManager.Tests
         public static string GetCfgFileName(string fileName)
         {
 #if DNX451
-            var appEnv = CallContextServiceLocator.Locator.ServiceProvider
-                .GetService(typeof(IApplicationEnvironment)) as IApplicationEnvironment;
-            var basePath = appEnv.ApplicationBasePath;
+            // var appEnv = CallContextServiceLocator.Locator.ServiceProvider
+            //    .GetService(typeof(IApplicationEnvironment)) as IApplicationEnvironment;
+            // var basePath = appEnv.ApplicationBasePath;
+            var basePath = Environment.CurrentDirectory;
 #else
             var basePath = AppDomain.CurrentDomain.BaseDirectory;
 #endif

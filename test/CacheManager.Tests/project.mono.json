@@ -13,8 +13,7 @@
       "frameworkAssemblies": {
         "System.Reflection": ""
       }
-    },
-    "dnx50": { }
+    }
   },
   "commands": {
     "test": "xunit.runner.aspnet -notrait category=Memcached -notrait category=Redis -notrait category=Unreliable -notrait category=Mono"
