@@ -29,6 +29,7 @@ namespace CacheManager.Examples
         {
             EventsExample();
             UnityInjectionExample();
+            UnityInjectionExample_Advanced();
             AppConfigLoadInstalledCacheCfg();
             SimpleCustomBuildConfigurationUsingConfigBuilder();
             SimpleCustomBuildConfigurationUsingFactory();
@@ -118,6 +119,35 @@ namespace CacheManager.Examples
             // previous step.
             var checkTarget = container.Resolve<UnityInjectionExampleTarget>();
             checkTarget.GetSomething();
+        }
+
+        private static void UnityInjectionExample_Advanced()
+        {
+            UnityContainer container = new UnityContainer();
+            container.RegisterType(
+                typeof(ICacheManager<>),
+                new ContainerControlledLifetimeManager(),
+                new InjectionFactory(
+                    (c, t, n) => CacheFactory.FromConfiguration(t.GetGenericArguments()[0],
+                    "myCache",
+                    ConfigurationBuilder.BuildConfiguration(cfg => cfg.WithSystemRuntimeCacheHandle("handle1")))));
+
+            var stringCache = container.Resolve<ICacheManager<string>>();
+            // testing if we create a singleton instance per type, every Resolve of the same type should return the same instance!
+            var stringCacheB = container.Resolve<ICacheManager<string>>();  
+            stringCache.Put("key", "something");
+
+            var intCache = container.Resolve<ICacheManager<int>>();
+            var intCacheB = container.Resolve<ICacheManager<int>>();
+            intCache.Put("key", 22);
+
+            var boolCache = container.Resolve<ICacheManager<bool>>();
+            var boolCacheB = container.Resolve<ICacheManager<bool>>();
+            boolCache.Put("key", false);
+
+            Console.WriteLine("Value type is: " + stringCache.GetType().GetGenericArguments()[0].Name + " test value: " + stringCacheB["key"]);
+            Console.WriteLine("Value type is: " + intCache.GetType().GetGenericArguments()[0].Name + " test value: " + intCacheB["key"]);
+            Console.WriteLine("Value type is: " + boolCache.GetType().GetGenericArguments()[0].Name + " test value: " + boolCacheB["key"]);
         }
 
         private static void UpdateTest()

@@ -10,25 +10,8 @@ namespace CacheManager.Config.Tests
 {
     internal class Program
     {
-        public Program(IApplicationEnvironment app,
-                       IRuntimeEnvironment runtime,
-                       IRuntimeOptions options,
-                       ILibraryManager libraryManager,
-                       IAssemblyLoaderContainer container,
-                       IAssemblyLoadContextAccessor accessor)
+        public Program()
         {
-            Console.WriteLine("ApplicationName: {0} {1}", app.ApplicationName, app.Version);
-            Console.WriteLine("ApplicationBasePath: {0}", app.ApplicationBasePath);
-            Console.WriteLine("Framework: {0}", app.RuntimeFramework.FullName);
-            Console.WriteLine("Runtime: {0} {1} {2}", runtime.RuntimeType, runtime.RuntimeArchitecture, runtime.RuntimeVersion);
-            Console.WriteLine("System: {0} {1}", runtime.OperatingSystem, runtime.OperatingSystemVersion);
-
-            var names = libraryManager
-                .GetLibraries()
-                .SelectMany(p => p.LoadableAssemblies)
-                .Select(p => p.FullName).ToArray();
-
-            var first = names.First();
         }
 
         public void Main(string[] args)
