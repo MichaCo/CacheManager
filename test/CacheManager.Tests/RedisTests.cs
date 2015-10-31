@@ -148,6 +148,7 @@ namespace CacheManager.Tests
 
         [Fact]
         [Trait("category", "Redis")]
+        [Trait("category", "Unreliable")]
         public void Redis_Multiple_PubSub_ClearRegion()
         {
             // arrange

@@ -19,21 +19,7 @@ namespace CacheManager.Tests
     {
         [Fact]
         [ReplaceCulture]
-        public void CacheFactory_FromConfig_C()
-        {
-            // arrange
-
-            // act
-            Action act = () => CacheFactory.FromConfiguration<object>(null, new CacheManagerConfiguration());
-
-            // assert
-            act.ShouldThrow<ArgumentNullException>()
-                .WithMessage("*name*");
-        }
-
-        [Fact]
-        [ReplaceCulture]
-        public void CacheFactory_FromConfig_A()
+        public void CacheFactory_FromConfig_NullCheck_A()
         {
             // arrange
 
@@ -47,7 +33,7 @@ namespace CacheManager.Tests
 
         [Fact]
         [ReplaceCulture]
-        public void CacheFactory_FromConfig_B()
+        public void CacheFactory_FromConfig_NullCheck_B()
         {
             // arrange
 
@@ -57,6 +43,62 @@ namespace CacheManager.Tests
             // assert
             act.ShouldThrow<ArgumentNullException>()
                 .WithMessage("*Parameter name: configName*");
+        }
+
+        [Fact]
+        [ReplaceCulture]
+        public void CacheFactory_FromConfig_NullCheck_C()
+        {
+            // arrange
+
+            // act
+            Action act = () => CacheFactory.FromConfiguration<object>(null, new CacheManagerConfiguration());
+
+            // assert
+            act.ShouldThrow<ArgumentNullException>()
+                .WithMessage("*name*");
+        }
+
+        [Fact]
+        [ReplaceCulture]
+        public void CacheFactory_FromConfig_NonGeneric_NullCheck_A()
+        {
+            // arrange
+
+            // act
+            Action act = () => CacheFactory.FromConfiguration((Type)null, "c1");
+
+            // assert
+            act.ShouldThrow<ArgumentNullException>()
+                .WithMessage("*cacheValueType*");
+        }
+
+        [Fact]
+        [ReplaceCulture]
+        public void CacheFactory_FromConfig_NonGeneric_NullCheck_B()
+        {
+            // arrange
+
+            // act
+            Action act = () => CacheFactory.FromConfiguration((Type)null, "c1", (CacheManagerConfiguration)null);
+
+            // assert
+            act.ShouldThrow<ArgumentNullException>()
+                .WithMessage("*cacheValueType*");
+        }
+
+        [Fact]
+        [ReplaceCulture]
+        public void CacheFactory_FromConfig_NonGeneric_NullCheck_C()
+        {
+            // arrange
+
+            // act
+            Action act = () => CacheFactory.FromConfiguration((Type)null, "c1", "cacheManager");
+
+            // assert
+            act.ShouldThrow<ArgumentNullException>()
+                .WithMessage("*cacheValueType*");
         }
 
         [Fact]
@@ -434,6 +476,56 @@ namespace CacheManager.Tests
             act.CacheHandles.ElementAt(2).Configuration.EnableStatistics.Should().BeTrue();
             act.CacheHandles.ElementAt(2).Configuration.ExpirationMode.Should().Be(ExpirationMode.Sliding);
             act.CacheHandles.ElementAt(2).Configuration.ExpirationTimeout.Should().Be(new TimeSpan(0, 0, 231));
+        }
+
+        [Fact]
+        [ReplaceCulture]
+        public void CacheFactory_Build_NonGenericWithType()
+        {
+            var cache = CacheFactory.Build(
+                typeof(string),
+                "myCache",
+                settings => settings.WithSystemRuntimeCacheHandle("h1")) as ICacheManager<string>;
+
+            cache.Should().NotBeNull();
+            cache.CacheHandles.Count.Should().Be(1);
+            cache.Name.Should().Be("myCache");
+        }
+
+        [Fact]
+        [ReplaceCulture]
+        public void CacheFactory_FromConfig_NonGeneric_A()
+        {
+            var cache = CacheFactory.FromConfiguration(typeof(string), "c1") as ICacheManager<string>;
+
+            cache.Should().NotBeNull();
+            cache.CacheHandles.Count.Should().Be(3);
+            cache.Name.Should().Be("c1");
+        }
+
+        [Fact]
+        [ReplaceCulture]
+        public void CacheFactory_FromConfig_NonGeneric_B()
+        {
+            var cache = CacheFactory.FromConfiguration(typeof(string), "c1", "cacheManager") as ICacheManager<string>;
+
+            cache.Should().NotBeNull();
+            cache.CacheHandles.Count.Should().Be(3);
+            cache.Name.Should().Be("c1");
+        }
+
+        [Fact]
+        [ReplaceCulture]
+        public void CacheFactory_FromConfig_NonGeneric_C()
+        {
+            var cache = CacheFactory.FromConfiguration(
+                typeof(string), 
+                "cacheName", 
+                ConfigurationBuilder.BuildConfiguration(cfg => cfg.WithSystemRuntimeCacheHandle("h1"))) as ICacheManager<string>;
+
+            cache.Should().NotBeNull();
+            cache.CacheHandles.Count.Should().Be(1);
+            cache.Name.Should().Be("cacheName");
         }
     }
 }
