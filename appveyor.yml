@@ -5,8 +5,11 @@ clone_folder: C:\projects\CacheManager\
 install:
 - cmd: C:\projects\CacheManager\tools\redis\install-service.cmd
 build_script:
-- cmd: C:\projects\CacheManager\build.cmd --quiet verify
+- cmd: >-
+    SET DNX_BUILD_VERSION=beta-%APPVEYOR_BUILD_NUMBER%
+
+    C:\projects\CacheManager\build.cmd --quiet verify
 test: off
 artifacts:
-- path: artifacts\build\
-deploy: off
+- path: artifacts\build\*.nupkg
+  name: nugetsdeploy: off
