@@ -64,15 +64,15 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\CacheManager.Core\CacheManager.Core.csproj">
+    <ProjectReference Include="..\..\src\CacheManager.Core.Net45\CacheManager.Core.csproj">
       <Project>{701df657-8670-4313-a06b-63d8485b18f9}</Project>
       <Name>CacheManager.Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\src\CacheManager.StackExchange.Redis\CacheManager.StackExchange.Redis.csproj">
+    <ProjectReference Include="..\..\src\CacheManager.StackExchange.Redis.Net45\CacheManager.StackExchange.Redis.csproj">
       <Project>{3930c89d-c16b-4c88-b946-0c22e10cd263}</Project>
       <Name>CacheManager.StackExchange.Redis</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\src\CacheManager.SystemRuntimeCaching\CacheManager.SystemRuntimeCaching.csproj">
+    <ProjectReference Include="..\..\src\CacheManager.SystemRuntimeCaching.Net45\CacheManager.SystemRuntimeCaching.csproj">
       <Project>{d292fd01-c6f3-4600-abe7-7bba2b81bfd5}</Project>
       <Name>CacheManager.SystemRuntimeCaching</Name>
     </ProjectReference>

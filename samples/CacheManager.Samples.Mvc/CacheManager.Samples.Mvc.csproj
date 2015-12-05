@@ -172,15 +172,15 @@
     <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\CacheManager.Core\CacheManager.Core.csproj">
+    <ProjectReference Include="..\..\src\CacheManager.Core.Net45\CacheManager.Core.csproj">
       <Project>{701df657-8670-4313-a06b-63d8485b18f9}</Project>
       <Name>CacheManager.Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\src\CacheManager.SystemRuntimeCaching\CacheManager.SystemRuntimeCaching.csproj">
+    <ProjectReference Include="..\..\src\CacheManager.SystemRuntimeCaching.Net45\CacheManager.SystemRuntimeCaching.csproj">
       <Project>{d292fd01-c6f3-4600-abe7-7bba2b81bfd5}</Project>
       <Name>CacheManager.SystemRuntimeCaching</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\src\CacheManager.Web\CacheManager.Web.csproj">
+    <ProjectReference Include="..\..\src\CacheManager.Web.Net45\CacheManager.Web.csproj">
       <Project>{56ee8576-6d0e-469d-a522-35788110dc1c}</Project>
       <Name>CacheManager.Web</Name>
     </ProjectReference>

@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{3930C89D-C16B-4C88-B946-0C22E10CD263}</ProjectGuid>
+    <ProjectGuid>{680FF75C-6EEB-4EB6-BB46-B6E465F3EDBF}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>CacheManager.Redis</RootNamespace>
-    <AssemblyName>CacheManager.StackExchange.Redis</AssemblyName>
+    <RootNamespace>CacheManager.Memcached</RootNamespace>
+    <AssemblyName>CacheManager.Memcached</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
@@ -21,7 +21,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\Debug\CacheManager.StackExchange.Redis.XML</DocumentationFile>
+    <DocumentationFile>bin\Debug\CacheManager.Memcached.XML</DocumentationFile>
     <CodeAnalysisRuleSet>..\..\common\CacheManager.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>true</RunCodeAnalysis>
   </PropertyGroup>
@@ -32,7 +32,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\Release\CacheManager.StackExchange.Redis.XML</DocumentationFile>
+    <DocumentationFile>bin\Release\CacheManager.Memcached.XML</DocumentationFile>
     <CodeAnalysisRuleSet>..\..\common\CacheManager.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>true</RunCodeAnalysis>
   </PropertyGroup>
@@ -44,40 +44,40 @@
     </AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="StackExchange.Redis, Version=1.0.316.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\StackExchange.Redis.1.0.450\lib\net45\StackExchange.Redis.dll</HintPath>
+    <Reference Include="Enyim.Caching">
+      <HintPath>..\..\packages\EnyimMemcached.2.13\lib\net35\Enyim.Caching.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
-    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Net" />
+    <Reference Include="System.XML" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\..\common\GlobalAssemblyInfo.cs">
       <Link>Properties\GlobalAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="ConfigurationBuilderExtensions.cs" />
-    <Compile Include="RedisCacheBackPlate.cs" />
-    <Compile Include="RedisCacheHandle.cs" />
+    <Compile Include="..\CacheManager.MemCached\ConfigurationBuilderExtensions.cs">
+      <Link>ConfigurationBuilderExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\CacheManager.MemCached\MemcachedCacheHandle.cs">
+      <Link>MemcachedCacheHandle.cs</Link>
+    </Compile>
+    <Compile Include="..\CacheManager.MemCached\StatusCode.cs">
+      <Link>StatusCode.cs</Link>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RedisConfiguration.cs" />
-    <Compile Include="RedisConfigurationBuilder.cs" />
-    <Compile Include="RedisConfigurations.cs" />
-    <Compile Include="RedisConfigurationSection.cs" />
-    <Compile Include="RedisConnectionPool.cs" />
-    <Compile Include="RedisValueConverter.cs" />
-    <Compile Include="RetryHelper.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CacheManager.Core.Net45\CacheManager.Core.csproj">
+      <Project>{701df657-8670-4313-a06b-63d8485b18f9}</Project>
+      <Name>CacheManager.Core</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
     <None Include="Settings.StyleCop" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\CacheManager.Core\CacheManager.Core.csproj">
-      <Project>{701df657-8670-4313-a06b-63d8485b18f9}</Project>
-      <Name>CacheManager.Core</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

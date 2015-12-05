@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{701DF657-8670-4313-A06B-63D8485B18F9}</ProjectGuid>
+    <ProjectGuid>{4F3C4713-183E-4181-8B1A-E4192D964894}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>CacheManager.Core</RootNamespace>
-    <AssemblyName>CacheManager.Core</AssemblyName>
+    <RootNamespace>CacheManager.Couchbase</RootNamespace>
+    <AssemblyName>CacheManager.Couchbase</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
@@ -21,9 +21,9 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Debug\CacheManager.Couchbase.XML</DocumentationFile>
     <CodeAnalysisRuleSet>..\..\common\CacheManager.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>true</RunCodeAnalysis>
-    <DocumentationFile>bin\Debug\CacheManager.Core.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -32,65 +32,58 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\Release\CacheManager.Core.XML</DocumentationFile>
+    <DocumentationFile>bin\Release\CacheManager.Couchbase.XML</DocumentationFile>
     <CodeAnalysisRuleSet>..\..\common\CacheManager.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>true</RunCodeAnalysis>
   </PropertyGroup>
-  <PropertyGroup>
-    <SignAssembly>false</SignAssembly>
-  </PropertyGroup>
-  <PropertyGroup>
-    <AssemblyOriginatorKeyFile>
-    </AssemblyOriginatorKeyFile>
-  </PropertyGroup>
-  <PropertyGroup>
-    <DelaySign>false</DelaySign>
-  </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Common.Logging">
+      <HintPath>..\..\packages\Common.Logging.3.0.0\lib\net40\Common.Logging.dll</HintPath>
+    </Reference>
+    <Reference Include="Common.Logging.Core">
+      <HintPath>..\..\packages\Common.Logging.Core.3.0.0\lib\net40\Common.Logging.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Couchbase.NetClient, Version=2.1.1.0, Culture=neutral, PublicKeyToken=05e9c6b5a9ec94c2, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\CouchbaseNetClient.2.1.1\lib\net45\Couchbase.NetClient.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\Newtonsoft.Json.6.0.8\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\..\common\GlobalAssemblyInfo.cs">
       <Link>Properties\GlobalAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="Internal\BackPlateMessage.cs" />
-    <Compile Include="CacheFactory.cs" />
-    <Compile Include="Internal\BaseCacheHandle.cs" />
-    <Compile Include="BaseCacheManager.cs" />
-    <Compile Include="Internal\BaseCache.cs" />
-    <Compile Include="Internal\CacheBackPlate.cs" />
-    <Compile Include="Internal\CacheEventArgs.cs" />
-    <Compile Include="Internal\CachePerformanceCounterType.cs" />
-    <Compile Include="Internal\CacheReflectionHelper.cs" />
-    <Compile Include="Internal\CacheStats.cs">
-      <SubType>Code</SubType>
+    <Compile Include="..\CacheManager.Couchbase\BucketCacheHandle.cs">
+      <Link>BucketCacheHandle.cs</Link>
     </Compile>
-    <Compile Include="Internal\CacheStatsCounter.cs" />
-    <Compile Include="Internal\CacheStatsCounterType.cs" />
-    <Compile Include="Internal\DictionaryCacheHandle.cs" />
-    <Compile Include="Internal\DictionaryCacheHandle`1.cs" />
-    <Compile Include="ICache.cs" />
-    <Compile Include="UpdateItemResult.cs">
-      <SubType>Code</SubType>
+    <Compile Include="..\CacheManager.Couchbase\ConfigurationBuilderExtensions.cs">
+      <Link>ConfigurationBuilderExtensions.cs</Link>
     </Compile>
-    <Compile Include="ICacheManager.cs" />
-    <Compile Include="CacheItem.cs" />
-    <Compile Include="CacheHandleConfiguration.cs" />
-    <Compile Include="CacheManagerConfiguration.cs" />
-    <Compile Include="Configuration\CacheManagerSection.cs" />
-    <Compile Include="CacheUpdateMode.cs" />
-    <Compile Include="Configuration\ConfigurationBuilder.cs" />
-    <Compile Include="ExpirationMode.cs" />
-    <Compile Include="GlobalSuppressions.cs" />
-    <Compile Include="Internal\CachePerformanceCounters.cs" />
-    <Compile Include="UpdateItemConfig.cs" />
+    <Compile Include="..\CacheManager.Couchbase\CouchbaseConfigurationManager.cs">
+      <Link>CouchbaseConfigurationManager.cs</Link>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="CacheManager.Core.csproj.nuspec" />
+    <None Include="packages.config" />
     <None Include="Settings.StyleCop" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CacheManager.Core.Net45\CacheManager.Core.csproj">
+      <Project>{701df657-8670-4313-a06b-63d8485b18f9}</Project>
+      <Name>CacheManager.Core</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

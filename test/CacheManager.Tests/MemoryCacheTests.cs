@@ -23,16 +23,15 @@ namespace CacheManager.Tests
         {
             // arrange
             var key = Guid.NewGuid().ToString();
-            var item = new CacheItem<object>(key, "something", ExpirationMode.Absolute, new TimeSpan(0, 0, 0, 0, 100));
+            var item = new CacheItem<object>(key, "something", ExpirationMode.Absolute, new TimeSpan(0, 0, 0, 0, 300));
             // act
             using (var act = this.GetHandle("Default"))
             {
                 // act
                 act.Add(item);
-                Thread.Sleep(15);
                 act[key].Should().NotBeNull();
 
-                Thread.Sleep(100);
+                Thread.Sleep(310);
 
                 // assert
                 act[key].Should().BeNull();
