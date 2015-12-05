@@ -1,1 +1,1 @@
-@packages\Redis-64\redis-server.exe slave.conf
+@packages\Redis-64\tools\redis-server.exe slave.conf
