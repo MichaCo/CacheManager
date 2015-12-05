@@ -1,12 +1,12 @@
 {
-  "version": "0.6.2",
+  "version": "0.6.2-*",
   "description": "CacheManager is an open source abstraction layer for caching written in C#. It supports various cache providers and implements many advanced features.",
   "authors": [ "MichaConrad" ],
   "tags": [ "Caching", "Cache", "CacheManager", "Distributed Cache", "StackExchange Redis", "Azure AppFabric", "Memcached" ],
   "projectUrl": "http://www.cachemanager.net",
   "licenseUrl": "https://github.com/MichaCo/CacheManager/blob/master/LICENSE",
   "dependencies": {
-    "CacheManager.Core": "0.6.2",
+    "CacheManager.Core": "0.6.2-*",
     "Microsoft.Dnx.Runtime.Abstractions": "1.0.0-*"
   },
   "commands": {
@@ -19,8 +19,8 @@
         "System.Configuration": ""
       },
       "dependencies": {
-        "CacheManager.SystemRuntimeCaching": "0.6.2",
-        "CacheManager.StackExchange.Redis": "0.6.2"
+        "CacheManager.SystemRuntimeCaching": "0.6.2-*",
+        "CacheManager.StackExchange.Redis": "0.6.2-*"
       }
     },
     "dnxcore50": {
@@ -33,5 +33,5 @@
         "System.Globalization": "4.0.10-beta-*"
       }
     }
-  }  
+  }
 }

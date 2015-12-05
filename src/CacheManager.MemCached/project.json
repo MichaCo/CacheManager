@@ -1,5 +1,5 @@
 ﻿{
-  "version": "0.6.2",
+  "version": "0.6.2-*",
   "description": "CacheManager is an open source abstraction layer for caching written in C#. It supports various cache providers and implements many advanced features. This package contains the specific Memcached handles.",
   "authors": [ "MichaConrad" ],
   "tags": [ "Caching", "Cache", "CacheManager", "Distributed Cache", "StackExchange Redis", "Azure AppFabric", "Memcached" ],
@@ -7,7 +7,7 @@
   "projectUrl": "http://www.cachemanager.net",
   "licenseUrl": "https://github.com/MichaCo/CacheManager/blob/master/LICENSE",
   "dependencies": {
-    "CacheManager.Core": "0.6.2",
+    "CacheManager.Core": "0.6.2-*",
     "EnyimMemcached": "2.13.0"
   },
   "frameworks": {

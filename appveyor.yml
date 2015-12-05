@@ -1,9 +1,12 @@
-version: 0.6.2.{build}
+version: 0.6.2-beta-{build}
 os: Visual Studio 2015
 clone_depth: 10
+clone_folder: C:\projects\CacheManager\
 install:
-- C:\projects\cachemanager\tools\redis\install-service.cmd
+- cmd: C:\projects\CacheManager\tools\redis\install-service.cmd
 build_script:
-- C:\projects\cachemanager\build.cmd --quiet verify
+- cmd: C:\projects\CacheManager\build.cmd --quiet verify
 test: off
+artifacts:
+- path: artifacts\build\
 deploy: off
