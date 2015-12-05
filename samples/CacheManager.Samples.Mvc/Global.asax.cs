@@ -7,6 +7,7 @@ using System.Web.Optimization;
 using System.Web.Routing;
 using CacheManager.Core;
 using Microsoft.Practices.Unity;
+using Microsoft.Practices.Unity.Mvc;
 
 namespace CacheManager.Samples.Mvc
 {
@@ -21,10 +22,13 @@ namespace CacheManager.Samples.Mvc
 
             var container = new UnityContainer();
 
-            System.Web.Mvc.DependencyResolver.SetResolver((t) => container.Resolve(t), (t) => container.ResolveAll(t));
+            DependencyResolver.SetResolver(new UnityDependencyResolver(container));
 
-            var cache = CacheFactory.FromConfiguration<int>("myCache");
-            container.RegisterInstance(cache);
+            container.RegisterType(typeof(ICacheManager<>), new ContainerControlledLifetimeManager(),
+                new InjectionFactory((c, targetType, name) =>
+                {
+                    return CacheFactory.FromConfiguration(targetType.GenericTypeArguments[0], "myCache");
+                }));
         }
     }
 }

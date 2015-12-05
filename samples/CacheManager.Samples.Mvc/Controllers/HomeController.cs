@@ -1,15 +1,17 @@
 ﻿using System;
 using System.Linq;
+using System.Threading;
 using System.Web.Mvc;
 using System.Web.UI;
 using CacheManager.Core;
+using CacheManager.Core.Internal;
 using CacheManager.Web;
 
 namespace CacheManager.Samples.Mvc.Controllers
 {
     public class CounterModel
     {
-        public CounterModel(ICacheManager<int> cache, long adds)
+        public CounterModel(ICacheManager<int> cache, int adds)
         {
             this.Adds = adds;
             this.AboutClicks = cache.Get("about");
@@ -18,21 +20,21 @@ namespace CacheManager.Samples.Mvc.Controllers
             this.Likes = cache.Get("like");
         }
 
-        public int AboutClicks { get; set; }
+        public int AboutClicks { get; }
 
-        public long Adds { get; set; }
+        public int Adds { get; }
 
-        public int ContactClicks { get; set; }
+        public int ContactClicks { get; }
 
-        public int IndexClicks { get; set; }
+        public int IndexClicks { get; }
 
-        public int Likes { get; set; }
+        public int Likes { get; }
     }
 
     [OutputCache(CacheProfile = "cacheManagerProfile")]
     public class HomeController : Controller
     {
-        private static long adds = 0L;
+        private static int adds = 0;
         private readonly ICacheManager<int> cache;
 
         static HomeController()
@@ -70,13 +72,13 @@ namespace CacheManager.Samples.Mvc.Controllers
         {
             this.cache.AddOrUpdate("like", 1, (o) => o + 1);
 
-            CacheManagerOutputCacheProvider.Cache.Clear();
+            // CacheManagerOutputCacheProvider.Cache.Clear();
             return this.cache.Get("like");
         }
 
-        private static void Cache_OnPut(object sender, Core.Internal.CacheActionEventArgs e)
+        private static void Cache_OnPut(object sender, CacheActionEventArgs e)
         {
-            adds++;
+            Interlocked.Increment(ref adds);
         }
     }
 }
