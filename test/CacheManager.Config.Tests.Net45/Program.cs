@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
 using CacheManager.Core;
-using CacheManager.Core.Configuration;
 
 namespace CacheManager.Config.Tests
 {

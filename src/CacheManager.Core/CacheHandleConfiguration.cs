@@ -54,7 +54,7 @@ namespace CacheManager.Core
         /// Gets the name for the cache handle which is also the identifier of the configuration.
         /// </summary>
         /// <value>The name of the handle.</value>
-        public string HandleName { get; private set; }
+        public string HandleName { get; }
 
         /// <summary>
         /// Gets a value indicating whether this instance is back plate source.

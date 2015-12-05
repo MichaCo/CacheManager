@@ -26,21 +26,20 @@
         "System.Configuration": ""
       }
     },
-    "dotnet5.3": {
+    "dotnet5.2": {
       "compilationOptions": { "define": [ "PORTABLE" ] },
       "dependencies": {
-        "System.Collections": "4.0.11-*",
-        "System.Linq": "4.0.1-*",
-        "System.Diagnostics.Tools": "4.0.1-*",
-        "System.Globalization": "4.0.11-*",
-        "System.Threading": "4.0.11-*",
-        "System.Threading.Timer": "4.0.1-*",
-        "System.Collections.Concurrent": "4.0.11-*",
-        "System.Text.Encoding": "4.0.11-*",
-        "System.Runtime.Extensions": "4.0.11-*",
-        "System.Runtime.InteropServices": "4.0.21-*",
-        "System.Reflection": "4.1.0-*",
-        "System.Reflection.TypeExtensions": "4.0.0-*"
+        "System.Collections": "4.0.10",
+        "System.Linq": "4.0.0",
+        "System.Diagnostics.Tools": "4.0.0",
+        "System.Globalization": "4.0.10",
+        "System.Threading": "4.0.10",
+        "System.Collections.Concurrent": "4.0.10",
+        "System.Text.Encoding": "4.0.10",
+        "System.Runtime.Extensions": "4.0.10",
+        "System.Runtime.InteropServices": "4.0.20",
+        "System.Reflection": "4.0.10",
+        "System.Reflection.TypeExtensions": "4.0.0"
       }
     },
     ".NETPortable,Version=v4.5,Profile=Profile111": {
@@ -55,7 +54,7 @@
         "System.Text.Encoding": "",
         "System.Runtime.Extensions": "",
         "System.Reflection": "",
-        "System.Reflection.Extensions": "",        
+        "System.Reflection.Extensions": "",
         "System.Runtime.InteropServices": "",
         "System.Runtime": "",
         "System.Text.Encoding.Extensions": ""

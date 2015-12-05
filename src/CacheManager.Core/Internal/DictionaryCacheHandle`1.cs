@@ -27,18 +27,12 @@ namespace CacheManager.Core.Internal
         /// Gets the count.
         /// </summary>
         /// <value>The count.</value>
-        public override int Count
-        {
-            get { return this.cache.Count; }
-        }
+        public override int Count => this.cache.Count;
 
         /// <summary>
         /// Clears this cache, removing all items in the base cache and all regions.
         /// </summary>
-        public override void Clear()
-        {
-            this.cache.Clear();
-        }
+        public override void Clear() => this.cache.Clear();
 
         /// <summary>
         /// Clears the cache region, removing all items from the specified <paramref name="region"/> only.
@@ -83,10 +77,10 @@ namespace CacheManager.Core.Internal
         /// If the cache does not use a distributed cache system. Update is doing exactly the same
         /// as Get plus Put.
         /// </remarks>
-        public override UpdateItemResult<TCacheValue> Update(string key, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config)
-        {
-            return this.UpdateInternal(key, null, updateValue, config);
-        }
+        public override UpdateItemResult<TCacheValue> Update(
+            string key, 
+            Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config) => 
+            this.UpdateInternal(key, null, updateValue, config);
 
         /// <summary>
         /// Updates an existing key in the cache.
@@ -113,10 +107,11 @@ namespace CacheManager.Core.Internal
         /// If the cache does not use a distributed cache system. Update is doing exactly the same
         /// as Get plus Put.
         /// </remarks>
-        public override UpdateItemResult<TCacheValue> Update(string key, string region, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config)
-        {
-            return this.UpdateInternal(key, region, updateValue, config);
-        }
+        public override UpdateItemResult<TCacheValue> Update(
+            string key, 
+            string region, 
+            Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config) =>
+            this.UpdateInternal(key, region, updateValue, config);
 
         /// <summary>
         /// Adds a value to the cache.
@@ -142,10 +137,8 @@ namespace CacheManager.Core.Internal
         /// </summary>
         /// <param name="key">The key being used to identify the item within the cache.</param>
         /// <returns>The <c>CacheItem</c>.</returns>
-        protected override CacheItem<TCacheValue> GetCacheItemInternal(string key)
-        {
-            return this.GetCacheItemInternal(key, null);
-        }
+        protected override CacheItem<TCacheValue> GetCacheItemInternal(string key) =>
+            this.GetCacheItemInternal(key, null);
 
         /// <summary>
         /// Gets a <c>CacheItem</c> for the specified key.
@@ -193,10 +186,7 @@ namespace CacheManager.Core.Internal
         /// <returns>
         /// <c>true</c> if the key was found and removed from the cache, <c>false</c> otherwise.
         /// </returns>
-        protected override bool RemoveInternal(string key)
-        {
-            return this.RemoveInternal(key, null);
-        }
+        protected override bool RemoveInternal(string key) => this.RemoveInternal(key, null);
 
         /// <summary>
         /// Removes a value from the cache for the specified key.

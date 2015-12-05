@@ -1,0 +1,28 @@
+﻿{
+  "version": "1.0.0-*",
+  "description": "CacheManager.Examples Console Application",
+  "authors": [ "MICHA" ],
+  "tags": [ "" ],
+  "projectUrl": "",
+  "licenseUrl": "",
+
+  "compilationOptions": {
+    "emitEntryPoint": true
+  },
+
+  "dependencies": {
+    "CacheManager.Core": "0.6.2",
+    "CacheManager.SystemRuntimeCaching": "0.6.2",
+    "CacheManager.StackExchange.Redis": "0.6.2",
+    "Unity": "4.0.2"
+  },
+
+  "commands": {
+    "CacheManager.Examples": "CacheManager.Examples"
+  },
+
+  "frameworks": {
+    "dnx451": {
+    }
+  }
+}

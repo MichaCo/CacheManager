@@ -65,65 +65,29 @@ namespace CacheManager.Redis
             }
         }
 
-        StackRedis.RedisValue IRedisValueConverter<byte[]>.ToRedisValue(byte[] value)
-        {
-            return value;
-        }
+        StackRedis.RedisValue IRedisValueConverter<byte[]>.ToRedisValue(byte[] value) => value;
 
-        byte[] IRedisValueConverter<byte[]>.FromRedisValue(StackRedis.RedisValue value, string valueType)
-        {
-            return value;
-        }
+        byte[] IRedisValueConverter<byte[]>.FromRedisValue(StackRedis.RedisValue value, string valueType) => value;
 
-        StackRedis.RedisValue IRedisValueConverter<string>.ToRedisValue(string value)
-        {
-            return value;
-        }
+        StackRedis.RedisValue IRedisValueConverter<string>.ToRedisValue(string value) => value;
 
-        string IRedisValueConverter<string>.FromRedisValue(StackRedis.RedisValue value, string valueType)
-        {
-            return value;
-        }
+        string IRedisValueConverter<string>.FromRedisValue(StackRedis.RedisValue value, string valueType) => value;
 
-        StackRedis.RedisValue IRedisValueConverter<int>.ToRedisValue(int value)
-        {
-            return value;
-        }
+        StackRedis.RedisValue IRedisValueConverter<int>.ToRedisValue(int value) => value;
 
-        int IRedisValueConverter<int>.FromRedisValue(StackRedis.RedisValue value, string valueType)
-        {
-            return (int)value;
-        }
+        int IRedisValueConverter<int>.FromRedisValue(StackRedis.RedisValue value, string valueType) => (int)value;
 
-        StackRedis.RedisValue IRedisValueConverter<double>.ToRedisValue(double value)
-        {
-            return value;
-        }
+        StackRedis.RedisValue IRedisValueConverter<double>.ToRedisValue(double value) => value;
 
-        double IRedisValueConverter<double>.FromRedisValue(StackRedis.RedisValue value, string valueType)
-        {
-            return (double)value;
-        }
+        double IRedisValueConverter<double>.FromRedisValue(StackRedis.RedisValue value, string valueType) => (double)value;
 
-        StackRedis.RedisValue IRedisValueConverter<bool>.ToRedisValue(bool value)
-        {
-            return value;
-        }
+        StackRedis.RedisValue IRedisValueConverter<bool>.ToRedisValue(bool value) => value;
 
-        bool IRedisValueConverter<bool>.FromRedisValue(StackRedis.RedisValue value, string valueType)
-        {
-            return (bool)value;
-        }
+        bool IRedisValueConverter<bool>.FromRedisValue(StackRedis.RedisValue value, string valueType) => (bool)value;
 
-        StackRedis.RedisValue IRedisValueConverter<long>.ToRedisValue(long value)
-        {
-            return value;
-        }
+        StackRedis.RedisValue IRedisValueConverter<long>.ToRedisValue(long value) => value;
 
-        long IRedisValueConverter<long>.FromRedisValue(StackRedis.RedisValue value, string valueType)
-        {
-            return (long)value;
-        }
+        long IRedisValueConverter<long>.FromRedisValue(StackRedis.RedisValue value, string valueType) => (long)value;
 
         // for object this could be epcial because the value could be any of the supported values or
         // any king of object... to also have the performance benefit from the known types, lets try

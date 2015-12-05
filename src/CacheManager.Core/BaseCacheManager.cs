@@ -457,10 +457,8 @@ namespace CacheManager.Core
         /// If the cache does not use a distributed cache system. Update is doing exactly the same
         /// as Get plus Put.
         /// </remarks>
-        public bool TryUpdate(string key, Func<TCacheValue, TCacheValue> updateValue, out TCacheValue value)
-        {
-            return this.TryUpdate(key, updateValue, new UpdateItemConfig(), out value);
-        }
+        public bool TryUpdate(string key, Func<TCacheValue, TCacheValue> updateValue, out TCacheValue value) => 
+            this.TryUpdate(key, updateValue, new UpdateItemConfig(), out value);
 
         /// <summary>
         /// Tries to update an existing key in the cache.
@@ -490,10 +488,8 @@ namespace CacheManager.Core
         /// If the cache does not use a distributed cache system. Update is doing exactly the same
         /// as Get plus Put.
         /// </remarks>
-        public bool TryUpdate(string key, string region, Func<TCacheValue, TCacheValue> updateValue, out TCacheValue value)
-        {
-            return this.TryUpdate(key, region, updateValue, new UpdateItemConfig(), out value);
-        }
+        public bool TryUpdate(string key, string region, Func<TCacheValue, TCacheValue> updateValue, out TCacheValue value) => 
+            this.TryUpdate(key, region, updateValue, new UpdateItemConfig(), out value);
 
         /// <summary>
         /// Tries to update an existing key in the cache.
@@ -618,10 +614,8 @@ namespace CacheManager.Core
         /// <exception cref="System.ArgumentNullException">
         /// If <paramref name="key"/> or <paramref name="updateValue"/> is null.
         /// </exception>
-        public TCacheValue Update(string key, Func<TCacheValue, TCacheValue> updateValue)
-        {
-            return this.Update(key, updateValue, new UpdateItemConfig());
-        }
+        public TCacheValue Update(string key, Func<TCacheValue, TCacheValue> updateValue) =>
+            this.Update(key, updateValue, new UpdateItemConfig());
 
         /// <summary>
         /// Updates an existing key in the cache.
@@ -650,10 +644,8 @@ namespace CacheManager.Core
         /// If <paramref name="key"/> or <paramref name="region"/> or <paramref name="updateValue"/>
         /// is null.
         /// </exception>
-        public TCacheValue Update(string key, string region, Func<TCacheValue, TCacheValue> updateValue)
-        {
-            return this.Update(key, region, updateValue, new UpdateItemConfig());
-        }
+        public TCacheValue Update(string key, string region, Func<TCacheValue, TCacheValue> updateValue) => 
+            this.Update(key, region, updateValue, new UpdateItemConfig());
 
         /// <summary>
         /// Updates an existing key in the cache.
@@ -846,10 +838,8 @@ namespace CacheManager.Core
         /// <param name="key">The key being used to identify the item within the cache.</param>
         /// <returns>The <c>CacheItem</c>.</returns>
         /// <exception cref="ArgumentNullException">If the <paramref name="key"/> is null.</exception>
-        protected override CacheItem<TCacheValue> GetCacheItemInternal(string key)
-        {
-            return this.GetCacheItemInternal(key, null);
-        }
+        protected override CacheItem<TCacheValue> GetCacheItemInternal(string key) =>
+            this.GetCacheItemInternal(key, null);
 
         /// <summary>
         /// Gets the <c>CacheItem</c> for the specified key and region.
@@ -906,10 +896,8 @@ namespace CacheManager.Core
         /// <c>true</c> if the key was found and removed from the cache, <c>false</c> otherwise.
         /// </returns>
         /// <exception cref="ArgumentNullException">If the <paramref name="key"/> is null.</exception>
-        protected override bool RemoveInternal(string key)
-        {
-            return this.RemoveInternal(key, null);
-        }
+        protected override bool RemoveInternal(string key) =>
+            this.RemoveInternal(key, null);
 
         /// <summary>
         /// Removes a value from the cache for the specified key and region.
@@ -1354,10 +1342,13 @@ namespace CacheManager.Core
         /// <param name="config">The configuration.</param>
         /// <param name="value">The value.</param>
         /// <returns><c>True</c> if the item has been updated.</returns>
-        private bool UpdateInternal(BaseCacheHandle<TCacheValue>[] handles, string key, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config, out TCacheValue value)
-        {
-            return this.UpdateInternal(handles, key, null, updateValue, config, out value);
-        }
+        private bool UpdateInternal(
+            BaseCacheHandle<TCacheValue>[] handles, 
+            string key, 
+            Func<TCacheValue, TCacheValue> updateValue, 
+            UpdateItemConfig config, 
+            out TCacheValue value) =>
+            this.UpdateInternal(handles, key, null, updateValue, config, out value);
 
         /// <summary>
         /// Private implementation of Update.

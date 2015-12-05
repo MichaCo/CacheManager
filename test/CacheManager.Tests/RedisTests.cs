@@ -109,7 +109,7 @@ namespace CacheManager.Tests
                 },
                 (cache) =>
                 {
-                    Thread.Sleep(10);
+                    Thread.Sleep(12);
                     var value = cache.Get(item.Key);
                     value.Should().Be("new value", cache.ToString());
                 }, 

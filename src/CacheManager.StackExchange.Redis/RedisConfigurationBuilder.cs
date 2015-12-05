@@ -38,10 +38,8 @@ namespace CacheManager.Redis
         /// if possible.
         /// </summary>
         /// <returns>The <c>RedisConfiguration</c></returns>
-        public RedisConfiguration Build()
-        {
-            return new RedisConfiguration(this.key, this.endpoints, this.database, this.password, this.isSsl, this.sslHost, this.connectionTimeout, this.allowAdmin);
-        }
+        public RedisConfiguration Build() =>
+            new RedisConfiguration(this.key, this.endpoints, this.database, this.password, this.isSsl, this.sslHost, this.connectionTimeout, this.allowAdmin);
 
         /// <summary>
         /// If set to true, commands which might be risky are enabled, like Clear which will delete

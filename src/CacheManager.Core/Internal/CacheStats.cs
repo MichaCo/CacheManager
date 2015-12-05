@@ -189,10 +189,7 @@ namespace CacheManager.Core.Internal
         /// </example>
         /// <param name="type">The stats type to retrieve the number for.</param>
         /// <returns>A number representing the counts for the specified <see cref="CacheStatsCounterType"/>.</returns>
-        public long GetStatistic(CacheStatsCounterType type)
-        {
-            return this.GetStatistic(type, NullRegionKey);
-        }
+        public long GetStatistic(CacheStatsCounterType type) => this.GetStatistic(type, NullRegionKey);
 
         /// <summary>
         /// Called when an item gets added to the cache.

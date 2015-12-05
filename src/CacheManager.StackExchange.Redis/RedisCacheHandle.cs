@@ -77,13 +77,7 @@ namespace CacheManager.Redis
             }
         }
 
-        private StackRedis.ConnectionMultiplexer Connection
-        {
-            get
-            {
-                return RedisConnectionPool.Connect(this.RedisConfiguration);
-            }
-        }
+        private StackRedis.ConnectionMultiplexer Connection => RedisConnectionPool.Connect(this.RedisConfiguration);
 
         private StackRedis.IDatabase Database
         {
@@ -190,10 +184,8 @@ namespace CacheManager.Redis
         /// If the cache does not use a distributed cache system. Update is doing exactly the same
         /// as Get plus Put.
         /// </remarks>
-        public override UpdateItemResult<TCacheValue> Update(string key, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config)
-        {
-            return this.Update(key, null, updateValue, config);
-        }
+        public override UpdateItemResult<TCacheValue> Update(string key, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config) =>
+            this.Update(key, null, updateValue, config);
 
         /// <summary>
         /// Updates an existing key in the cache.
@@ -282,31 +274,25 @@ namespace CacheManager.Redis
         /// <returns>
         /// <c>true</c> if the key was not already added to the cache, <c>false</c> otherwise.
         /// </returns>
-        protected override bool AddInternalPrepared(CacheItem<TCacheValue> item)
-        {
-            return this.Set(item, StackRedis.When.NotExists, true);
-        }
+        protected override bool AddInternalPrepared(CacheItem<TCacheValue> item) =>
+            this.Set(item, StackRedis.When.NotExists, true);
 
         /// <summary>
         /// Performs application-defined tasks associated with freeing, releasing, or resetting
         /// unmanaged resources.
         /// </summary>
         /// <param name="disposeManaged">Indicator if managed resources should be released.</param>
-        protected override void Dispose(bool disposeManaged)
-        {
-            base.Dispose(disposeManaged);
-        }
+        protected override void Dispose(bool disposeManaged) => base.Dispose(disposeManaged);
 
         /// <summary>
         /// Gets a <c>CacheItem</c> for the specified key.
         /// </summary>
         /// <param name="key">The key being used to identify the item within the cache.</param>
         /// <returns>The <c>CacheItem</c>.</returns>
-        protected override CacheItem<TCacheValue> GetCacheItemInternal(string key)
-        {
-            return this.GetCacheItemInternal(key, null);
-        }
+        protected override CacheItem<TCacheValue> GetCacheItemInternal(string key) 
+            => this.GetCacheItemInternal(key, null);
 
+#pragma warning disable CSE0003
         /// <summary>
         /// Gets a <c>CacheItem</c> for the specified key.
         /// </summary>
@@ -375,6 +361,7 @@ namespace CacheManager.Redis
                 return cacheItem;
             });
         }
+#pragma warning restore CSE0003
 
         /// <summary>
         /// Puts the <paramref name="item"/> into the cache. If the item exists it will get updated
@@ -382,28 +369,15 @@ namespace CacheManager.Redis
         /// </summary>
         /// <param name="item">The <c>CacheItem</c> to be added to the cache.</param>
         protected override void PutInternal(CacheItem<TCacheValue> item)
-        {
-            base.PutInternal(item);
-        }
+            => base.PutInternal(item);
 
         /// <summary>
         /// Puts the <paramref name="item"/> into the cache. If the item exists it will get updated
         /// with the new value. If the item doesn't exist, the item will be added to the cache.
         /// </summary>
         /// <param name="item">The <c>CacheItem</c> to be added to the cache.</param>
-        protected override void PutInternalPrepared(CacheItem<TCacheValue> item)
-        {
-            ////// try to set the item
-            ////var result = this.Set(item, StackRedis.When.NotExists, true);
-
-            ////// it it does exist, lets try to modify it
-            ////if (!result)
-            ////{
-            ////    this.Set(item, StackRedis.When.Always, false);
-            ////}
-
+        protected override void PutInternalPrepared(CacheItem<TCacheValue> item) =>
             this.Set(item, StackRedis.When.Always, false);
-        }
 
         /// <summary>
         /// Removes a value from the cache for the specified key.
@@ -412,11 +386,9 @@ namespace CacheManager.Redis
         /// <returns>
         /// <c>true</c> if the key was found and removed from the cache, <c>false</c> otherwise.
         /// </returns>
-        protected override bool RemoveInternal(string key)
-        {
-            return this.RemoveInternal(key, null);
-        }
+        protected override bool RemoveInternal(string key) => this.RemoveInternal(key, null);
 
+#pragma warning disable CSE0003
         /// <summary>
         /// Removes a value from the cache for the specified key.
         /// </summary>
@@ -442,6 +414,7 @@ namespace CacheManager.Redis
                 return result;
             });
         }
+#pragma warning restore CSE0003
 
         private static TCacheValue FromRedisValue(StackRedis.RedisValue value, string valueType)
         {
@@ -465,7 +438,7 @@ namespace CacheManager.Redis
                 return ValueConverter.ToRedisValue(value);
             }
 
-            return (StackRedis.RedisValue)RedisValueConverter.ToBytes(value);
+            return RedisValueConverter.ToBytes(value);
         }
 
         private static string GetKey(string key, string region = null)
@@ -480,16 +453,12 @@ namespace CacheManager.Redis
             return fullKey;
         }
 
-        private T Retry<T>(Func<T> retryme)
-        {
-            return RetryHelper.Retry(retryme, this.Manager.Configuration.RetryTimeout, this.Manager.Configuration.MaxRetries);
-        }
+        private T Retry<T>(Func<T> retryme) =>
+            RetryHelper.Retry(retryme, this.Manager.Configuration.RetryTimeout, this.Manager.Configuration.MaxRetries);
 
-        private void Retry(Action retryme)
-        {
-            this.Retry<bool>(() => { retryme(); return true; });
-        }
+        private void Retry(Action retryme) => this.Retry<bool>(() => { retryme(); return true; });
 
+#pragma warning disable CSE0003
         private bool Set(CacheItem<TCacheValue> item, StackRedis.When when, bool sync = false)
         {
             // TODO: move the whole logic into a script to make it atomic
@@ -544,5 +513,6 @@ namespace CacheManager.Redis
                 return setResult;
             });
         }
+#pragma warning restore CSE0003
     }
 }

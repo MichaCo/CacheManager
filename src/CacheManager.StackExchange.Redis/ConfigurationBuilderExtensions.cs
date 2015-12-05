@@ -99,10 +99,8 @@ namespace CacheManager.Core
         /// </param>
         /// <returns>The part.</returns>
         /// <exception cref="ArgumentNullException">Thrown if handleName is null.</exception>
-        public static ConfigurationBuilderCacheHandlePart WithRedisCacheHandle(this ConfigurationBuilderCachePart part, string redisConfigurationId)
-        {
-            return WithRedisCacheHandle(part, redisConfigurationId, false);
-        }
+        public static ConfigurationBuilderCacheHandlePart WithRedisCacheHandle(this ConfigurationBuilderCachePart part, string redisConfigurationId) =>
+            WithRedisCacheHandle(part, redisConfigurationId, false);
 
         /// <summary>
         /// Add a <see cref="RedisCacheHandle"/> with the required name.

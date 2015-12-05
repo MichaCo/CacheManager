@@ -2,7 +2,6 @@
 #if !PORTABLE
 using System.Runtime.Serialization;
 #endif
-using CacheManager.Core.Configuration;
 
 namespace CacheManager.Core
 {
@@ -119,14 +118,14 @@ namespace CacheManager.Core
                 throw new ArgumentNullException(nameof(info));
             }
 
-            this.Key = info.GetString("Key");
-            this.Value = (T)info.GetValue("Value", typeof(T));
-            this.ValueType = (Type)info.GetValue("ValueType", typeof(Type));
-            this.Region = info.GetString("Region");
-            this.ExpirationMode = (ExpirationMode)info.GetValue("ExpirationMode", typeof(ExpirationMode));
-            this.ExpirationTimeout = (TimeSpan)info.GetValue("ExpirationTimeout", typeof(TimeSpan));
-            this.CreatedUtc = info.GetDateTime("CreatedUtc");
-            this.LastAccessedUtc = info.GetDateTime("LastAccessedUtc");
+            this.Key = info.GetString(nameof(Key));
+            this.Value = (T)info.GetValue(nameof(Value), typeof(T));
+            this.ValueType = (Type)info.GetValue(nameof(ValueType), typeof(Type));
+            this.Region = info.GetString(nameof(Region));
+            this.ExpirationMode = (ExpirationMode)info.GetValue(nameof(ExpirationMode), typeof(ExpirationMode));
+            this.ExpirationTimeout = (TimeSpan)info.GetValue(nameof(ExpirationTimeout), typeof(TimeSpan));
+            this.CreatedUtc = info.GetDateTime(nameof(CreatedUtc));
+            this.LastAccessedUtc = info.GetDateTime(nameof(LastAccessedUtc));
         }
 #endif
 
@@ -199,14 +198,14 @@ namespace CacheManager.Core
                 throw new ArgumentNullException(nameof(info));
             }
 
-            info.AddValue("Key", this.Key);
-            info.AddValue("Value", this.Value);
-            info.AddValue("ValueType", this.ValueType);
-            info.AddValue("Region", this.Region);
-            info.AddValue("ExpirationMode", this.ExpirationMode);
-            info.AddValue("ExpirationTimeout", this.ExpirationTimeout);
-            info.AddValue("CreatedUtc", this.CreatedUtc);
-            info.AddValue("LastAccessedUtc", this.LastAccessedUtc);
+            info.AddValue(nameof(Key), this.Key);
+            info.AddValue(nameof(Value), this.Value);
+            info.AddValue(nameof(ValueType), this.ValueType);
+            info.AddValue(nameof(Region), this.Region);
+            info.AddValue(nameof(ExpirationMode), this.ExpirationMode);
+            info.AddValue(nameof(ExpirationTimeout), this.ExpirationTimeout);
+            info.AddValue(nameof(CreatedUtc), this.CreatedUtc);
+            info.AddValue(nameof(LastAccessedUtc), this.LastAccessedUtc);
         }
 #endif
 

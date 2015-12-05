@@ -139,12 +139,12 @@ namespace CacheManager.Tests
             }
         }
 
-        private ICacheManager<object> GetHandle(string name)
-        {
-            return CacheFactory.Build("cache1", settings =>
-            {
-                settings.WithSystemRuntimeCacheHandle(name);
-            });
-        }
+        private ICacheManager<object> GetHandle(string name) 
+            => CacheFactory.Build(
+                "cache1", 
+                settings =>
+                {
+                    settings.WithSystemRuntimeCacheHandle(name);
+                });
     }
 }

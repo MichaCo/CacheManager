@@ -35,8 +35,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{B50456
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{3F174B69-A4CC-4241-839D-6CCA83CADB47}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CacheManager.Examples", "samples\CacheManager.Examples\CacheManager.Examples.csproj", "{2188F6EE-064E-4268-8D85-77EFB39F0511}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CacheManager.Samples.Mvc", "samples\CacheManager.Samples.Mvc\CacheManager.Samples.Mvc.csproj", "{99076511-0166-4FC0-BD39-3B4E37A84D7B}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".Net40", ".Net40", "{3CBC4C94-1EE1-44E8-BB56-620B8A7F7777}"
@@ -79,16 +77,14 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CacheManager.SystemRuntimeC
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CacheManager.Web", "src\CacheManager.Web.Net45\CacheManager.Web.csproj", "{56EE8576-6D0E-469D-A522-35788110DC1C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CacheManager.Examples", "samples\CacheManager.Examples.Net45\CacheManager.Examples.csproj", "{2188F6EE-064E-4268-8D85-77EFB39F0511}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{2188F6EE-064E-4268-8D85-77EFB39F0511}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2188F6EE-064E-4268-8D85-77EFB39F0511}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2188F6EE-064E-4268-8D85-77EFB39F0511}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2188F6EE-064E-4268-8D85-77EFB39F0511}.Release|Any CPU.Build.0 = Release|Any CPU
 		{99076511-0166-4FC0-BD39-3B4E37A84D7B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{99076511-0166-4FC0-BD39-3B4E37A84D7B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{99076511-0166-4FC0-BD39-3B4E37A84D7B}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -149,12 +145,15 @@ Global
 		{56EE8576-6D0E-469D-A522-35788110DC1C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{56EE8576-6D0E-469D-A522-35788110DC1C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{56EE8576-6D0E-469D-A522-35788110DC1C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2188F6EE-064E-4268-8D85-77EFB39F0511}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2188F6EE-064E-4268-8D85-77EFB39F0511}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2188F6EE-064E-4268-8D85-77EFB39F0511}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2188F6EE-064E-4268-8D85-77EFB39F0511}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{2188F6EE-064E-4268-8D85-77EFB39F0511} = {3F174B69-A4CC-4241-839D-6CCA83CADB47}
 		{99076511-0166-4FC0-BD39-3B4E37A84D7B} = {3F174B69-A4CC-4241-839D-6CCA83CADB47}
 		{997BFD2D-1FA6-43A9-AB39-3040ED69397F} = {3CBC4C94-1EE1-44E8-BB56-620B8A7F7777}
 		{74ADF5EC-CC57-4C92-BCFF-14611530F8F7} = {3CBC4C94-1EE1-44E8-BB56-620B8A7F7777}
@@ -170,5 +169,6 @@ Global
 		{3930C89D-C16B-4C88-B946-0C22E10CD263} = {8099505D-0783-4352-8BAD-F7F5E7D709FD}
 		{D292FD01-C6F3-4600-ABE7-7BBA2B81BFD5} = {8099505D-0783-4352-8BAD-F7F5E7D709FD}
 		{56EE8576-6D0E-469D-A522-35788110DC1C} = {8099505D-0783-4352-8BAD-F7F5E7D709FD}
+		{2188F6EE-064E-4268-8D85-77EFB39F0511} = {3F174B69-A4CC-4241-839D-6CCA83CADB47}
 	EndGlobalSection
 EndGlobal

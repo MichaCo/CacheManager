@@ -4,11 +4,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("CacheManager.Config.Tests")]
+[assembly: AssemblyTitle("CacheManager.Examples")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("CacheManager.Config.Tests")]
+[assembly: AssemblyProduct("CacheManager.Examples")]
 [assembly: AssemblyCopyright("Copyright ©  2014")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -19,7 +19,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("87840943-10e5-454f-8fa3-54e65ef6b242")]
+[assembly: Guid("284a1286-54c9-4685-a7bf-9f732cc9de82")]
 
 // Version information for an assembly consists of the following four values:
 //

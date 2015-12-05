@@ -342,13 +342,7 @@ namespace CacheManager.Tests
 
         public UpdateItemResult<TCacheValue> UpdateValue { get; set; }
 
-        public override int Count
-        {
-            get
-            {
-                return 0;
-            }
-        }
+        public override int Count => 0;
 
         public override void Clear()
         {
@@ -370,25 +364,13 @@ namespace CacheManager.Tests
             return this.UpdateValue;
         }
 
-        protected override bool AddInternalPrepared(CacheItem<TCacheValue> item)
-        {
-            return this.AddCall();
-        }
+        protected override bool AddInternalPrepared(CacheItem<TCacheValue> item) => this.AddCall();
 
-        protected override CacheItem<TCacheValue> GetCacheItemInternal(string key)
-        {
-            return this.GetCallValue;
-        }
+        protected override CacheItem<TCacheValue> GetCacheItemInternal(string key) => this.GetCallValue;
 
-        protected override CacheItem<TCacheValue> GetCacheItemInternal(string key, string region)
-        {
-            return this.GetCallValue;
-        }
+        protected override CacheItem<TCacheValue> GetCacheItemInternal(string key, string region) => this.GetCallValue;
 
-        protected override void PutInternalPrepared(CacheItem<TCacheValue> item)
-        {
-            this.PutCall();
-        }
+        protected override void PutInternalPrepared(CacheItem<TCacheValue> item) => this.PutCall();
 
         protected override bool RemoveInternal(string key)
         {

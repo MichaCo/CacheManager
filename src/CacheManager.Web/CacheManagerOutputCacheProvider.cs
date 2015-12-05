@@ -61,10 +61,7 @@ namespace CacheManager.Web
         /// The <paramref name="key"/> value that identifies the specified entry in the cache, or
         /// null if the specified entry is not in the cache.
         /// </returns>
-        public override object Get(string key)
-        {
-            return Cache.Get(key);
-        }
+        public override object Get(string key) => Cache.Get(key);
 
         /// <summary>
         /// Initializes the provider.

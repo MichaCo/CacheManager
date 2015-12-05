@@ -103,10 +103,7 @@ namespace CacheManager.Redis
         /// When overridden in a derived class, creates a new <see cref="T:System.Configuration.ConfigurationElement"/>.
         /// </summary>
         /// <returns>A new <see cref="T:System.Configuration.ConfigurationElement"/>.</returns>
-        protected override ConfigurationElement CreateNewElement()
-        {
-            return new Endpoint();
-        }
+        protected override ConfigurationElement CreateNewElement() => new Endpoint();
 
         /// <summary>
         /// Gets the element key for a specified configuration element when overridden in a derived class.
@@ -142,13 +139,7 @@ namespace CacheManager.Redis
         /// <value>The connections.</value>
         [ConfigurationProperty(ConfigurationsName)]
         [ConfigurationCollection(typeof(RedisOptionCollection), AddItemName = "connection")]
-        public RedisOptionCollection Connections
-        {
-            get
-            {
-                return (RedisOptionCollection)base[ConfigurationsName];
-            }
-        }
+        public RedisOptionCollection Connections => (RedisOptionCollection)base[ConfigurationsName];
 
         /// <summary>
         /// Gets or sets the XMLNS.
@@ -192,10 +183,7 @@ namespace CacheManager.Redis
         /// When overridden in a derived class, creates a new <see cref="T:System.Configuration.ConfigurationElement"/>.
         /// </summary>
         /// <returns>A new <see cref="T:System.Configuration.ConfigurationElement"/>.</returns>
-        protected override ConfigurationElement CreateNewElement()
-        {
-            return new RedisOptions();
-        }
+        protected override ConfigurationElement CreateNewElement() => new RedisOptions();
 
         /// <summary>
         /// Gets the element key for a specified configuration element when overridden in a derived class.
@@ -206,10 +194,7 @@ namespace CacheManager.Redis
         /// <returns>
         /// An <see cref="T:System.Object"/> that acts as the key for the specified <see cref="T:System.Configuration.ConfigurationElement"/>.
         /// </returns>
-        protected override object GetElementKey(ConfigurationElement element)
-        {
-            return ((RedisOptions)element).Id;
-        }
+        protected override object GetElementKey(ConfigurationElement element) => ((RedisOptions)element).Id;
     }
 
     /// <summary>
@@ -293,13 +278,7 @@ namespace CacheManager.Redis
         /// <value>The endpoints.</value>
         [ConfigurationProperty(EndpointsName)]
         [ConfigurationCollection(typeof(EndpointCollection), AddItemName = "endpoint")]
-        public EndpointCollection Endpoints
-        {
-            get
-            {
-                return (EndpointCollection)base[EndpointsName];
-            }
-        }
+        public EndpointCollection Endpoints => (EndpointCollection)base[EndpointsName];
 
         /// <summary>
         /// Gets or sets the identifier.

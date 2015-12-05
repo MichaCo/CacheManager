@@ -20,43 +20,31 @@ namespace CacheManager.Tests
         private static int databaseCount = StartDbCount;
 
         public static ICacheManager<object> WithOneMemoryCacheHandleSliding
-        {
-            get
-            {
-                return CacheFactory.Build(NewKey(), settings => settings
+            => CacheFactory.Build(
+                NewKey(), 
+                settings => settings
                     .WithUpdateMode(CacheUpdateMode.Up)
                     .WithSystemRuntimeCacheHandle(NewKey())
                         .EnableStatistics()
                         .EnablePerformanceCounters()
                     .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(1000)));
-            }
-        }
 
         public static ICacheManager<object> WithOneDicCacheHandle
-        {
-            get
-            {
-                return CacheFactory.Build(NewKey(), settings => settings
+            => CacheFactory.Build(
+                NewKey(), 
+                settings => settings
                     .WithUpdateMode(CacheUpdateMode.Full)
                     .WithHandle(typeof(DictionaryCacheHandle<>), NewKey())
                         .EnableStatistics()
                     .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(1000)));
-            }
-        }
 
         public static ICacheManager<object> WithOneMemoryCacheHandle
-        {
-            get
-            {
-                return CacheFactory.Build(NewKey(), settings => settings.WithSystemRuntimeCacheHandle(NewKey()).EnableStatistics());
-            }
-        }
+            => CacheFactory.Build(NewKey(), settings => settings.WithSystemRuntimeCacheHandle(NewKey()).EnableStatistics());
 
         public static ICacheManager<object> WithMemoryAndDictionaryHandles
-        {
-            get
-            {
-                return CacheFactory.Build(NewKey(), settings =>
+            =>  CacheFactory.Build(
+                NewKey(), 
+                settings =>
                 {
                     settings
                         .WithUpdateMode(CacheUpdateMode.None)
@@ -71,14 +59,11 @@ namespace CacheManager.Tests
                             .EnableStatistics()
                             .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1000));
                 });
-            }
-        }
 
         public static ICacheManager<object> WithManyDictionaryHandles
-        {
-            get
-            {
-                return CacheFactory.Build(NewKey(), settings =>
+            => CacheFactory.Build(
+                NewKey(), 
+                settings =>
                 {
                     settings
                         .WithUpdateMode(CacheUpdateMode.Up)
@@ -103,14 +88,11 @@ namespace CacheManager.Tests
                             .EnableStatistics()
                             .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1000));
                 });
-            }
-        }
 
         public static ICacheManager<object> WithTwoNamedMemoryCaches
-        {
-            get
-            {
-                return CacheFactory.Build(NewKey(), settings =>
+            => CacheFactory.Build(
+                NewKey(), 
+                settings =>
                 {
                     settings
                         .WithUpdateMode(CacheUpdateMode.Full)
@@ -119,8 +101,6 @@ namespace CacheManager.Tests
                         .And.WithSystemRuntimeCacheHandle(NewKey())
                             .EnableStatistics();
                 });
-            }
-        }
 
         public static ICacheManager<object> WithRedisCache
         {
@@ -257,10 +237,7 @@ namespace CacheManager.Tests
             return cache;
         }
 
-        private static string NewKey()
-        {
-            return Guid.NewGuid().ToString();
-        }
+        private static string NewKey() => Guid.NewGuid().ToString();
     }
 
     [SuppressMessage("Microsoft.Design", "CA1053:StaticHolderTypesShouldNotHaveConstructors", Justification = "Needed for xunit"), ExcludeFromCodeCoverage]

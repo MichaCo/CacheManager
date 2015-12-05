@@ -109,10 +109,7 @@ namespace CacheManager.Couchbase
         /// </summary>
         /// <param name="clientConfiguration">The client configuration.</param>
         /// <returns>The couchbase cluster.</returns>
-        public static Cluster GetCluster(ClientConfiguration clientConfiguration)
-        {
-            return new Cluster(clientConfiguration);
-        }
+        public static Cluster GetCluster(ClientConfiguration clientConfiguration) => new Cluster(clientConfiguration);
 
         /// <summary>
         /// Gets a couchbase bucket from configuration.

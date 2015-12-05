@@ -17,9 +17,7 @@ namespace CacheManager.Core
         /// <returns>The part.</returns>
         /// <exception cref="ArgumentNullException">Thrown if handleName is null.</exception>
         public static ConfigurationBuilderCacheHandlePart WithSystemRuntimeCacheHandle(this ConfigurationBuilderCachePart part, string handleName)
-        {
-            return WithSystemRuntimeCacheHandle(part, handleName, false);
-        }
+            => WithSystemRuntimeCacheHandle(part, handleName, false);
 
         /// <summary>
         /// Add a <see cref="MemoryCacheHandle" /> with the required name.
@@ -35,8 +33,6 @@ namespace CacheManager.Core
         /// <exception cref="ArgumentNullException">Thrown if handleName or handleType are null.</exception>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0", Justification = "Not for extenions.")]
         public static ConfigurationBuilderCacheHandlePart WithSystemRuntimeCacheHandle(this ConfigurationBuilderCachePart part, string handleName, bool isBackPlateSource)
-        {
-            return part.WithHandle(typeof(MemoryCacheHandle<>), handleName, isBackPlateSource);
-        }
+            => part.WithHandle(typeof(MemoryCacheHandle<>), handleName, isBackPlateSource);
     }
 }

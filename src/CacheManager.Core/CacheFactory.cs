@@ -44,10 +44,8 @@ namespace CacheManager.Core
         /// <exception cref="System.InvalidOperationException">
         /// Thrown on certain configuration errors related to the cache handles.
         /// </exception>
-        public static ICacheManager<object> Build(string cacheName, Action<ConfigurationBuilderCachePart> settings)
-        {
-            return Build<object>(cacheName, settings);
-        }
+        public static ICacheManager<object> Build(string cacheName, Action<ConfigurationBuilderCachePart> settings) =>
+            Build<object>(cacheName, settings);
 
         /// <summary>
         /// <para>Instantiates a cache manager using the inline configuration defined by <paramref name="settings"/>.</para>
@@ -323,10 +321,8 @@ namespace CacheManager.Core
         /// <exception cref="System.InvalidOperationException">
         /// Thrown on certain configuration errors related to the cache handles.
         /// </exception>
-        public static ICacheManager<TCacheValue> FromConfiguration<TCacheValue>(string cacheName, CacheManagerConfiguration configuration)
-        {
-            return new BaseCacheManager<TCacheValue>(cacheName, configuration);
-        }
+        public static ICacheManager<TCacheValue> FromConfiguration<TCacheValue>(string cacheName, CacheManagerConfiguration configuration) =>
+            new BaseCacheManager<TCacheValue>(cacheName, configuration);
 
         /// <summary>
         /// Instantiates a cache manager using the given <paramref name="cacheValueType"/> and <paramref name="configuration"/>.

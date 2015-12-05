@@ -1,12 +1,31 @@
 ﻿using System;
 using CacheManager.Core;
-using CacheManager.Core.Configuration;
+#if NET45
 using Microsoft.Practices.Unity;
+#else
+using Unity;
+#endif
 
 namespace CacheManager.Examples
 {
     public class Program
     {
+        static void Main(string[] args)
+        {
+            EventsExample();
+            UnityInjectionExample();
+            UnityInjectionExample_Advanced();
+            AppConfigLoadInstalledCacheCfg();
+            SimpleCustomBuildConfigurationUsingConfigBuilder();
+            SimpleCustomBuildConfigurationUsingFactory();
+            UpdateTest();
+            UpdateCounterTest();
+
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Press any key to exit...");
+            Console.ReadKey();
+        }
+
         private static void AppConfigLoadInstalledCacheCfg()
         {
             var cache = CacheFactory.FromConfiguration<object>("myCache");
@@ -23,22 +42,6 @@ namespace CacheManager.Examples
             cache.Add("key", "value");
             var val = cache.Get("key");
             cache.Remove("key");
-        }
-
-        private static void Main(string[] args)
-        {
-            EventsExample();
-            UnityInjectionExample();
-            UnityInjectionExample_Advanced();
-            AppConfigLoadInstalledCacheCfg();
-            SimpleCustomBuildConfigurationUsingConfigBuilder();
-            SimpleCustomBuildConfigurationUsingFactory();
-            UpdateTest();
-            UpdateCounterTest();
-
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Press any key to exit...");
-            Console.ReadKey();
         }
 
         private static void RedisSample()

@@ -82,25 +82,13 @@ namespace CacheManager.Memcached
         /// Gets the number of items the cache handle currently maintains.
         /// </summary>
         /// <value>The count.</value>
-        public override int Count
-        {
-            get
-            {
-                return (int)this.Stats.GetStatistic(CacheStatsCounterType.Items);
-            }
-        }
+        public override int Count => (int)this.Stats.GetStatistic(CacheStatsCounterType.Items);
 
         /// <summary>
         /// Gets the get memcached client configuration.
         /// </summary>
         /// <value>The get memcached client configuration.</value>
-        public IMemcachedClientConfiguration GetMemcachedClientConfiguration
-        {
-            get
-            {
-                return this.GetSection();
-            }
-        }
+        public IMemcachedClientConfiguration GetMemcachedClientConfiguration => this.GetSection();
 
         /// <summary>
         /// Gets the total number of items per server.
@@ -121,13 +109,7 @@ namespace CacheManager.Memcached
         /// Gets the servers.
         /// </summary>
         /// <value>The servers.</value>
-        public IList<IPEndPoint> Servers
-        {
-            get
-            {
-                return this.GetServers();
-            }
-        }
+        public IList<IPEndPoint> Servers => this.GetServers();
 
         /// <summary>
         /// Gets or sets the cache.
@@ -138,10 +120,7 @@ namespace CacheManager.Memcached
         /// <summary>
         /// Clears this cache, removing all items in the base cache and all regions.
         /// </summary>
-        public override void Clear()
-        {
-            this.Cache.FlushAll();
-        }
+        public override void Clear() => this.Cache.FlushAll();
 
         /// <summary>
         /// Clears the cache region, removing all items from the specified <paramref name="region"/> only.
@@ -176,10 +155,8 @@ namespace CacheManager.Memcached
         /// If the cache does not use a distributed cache system. Update is doing exactly the same
         /// as Get plus Put.
         /// </remarks>
-        public override UpdateItemResult<TCacheValue> Update(string key, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config)
-        {
-            return this.Update(key, null, updateValue, config);
-        }
+        public override UpdateItemResult<TCacheValue> Update(string key, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config) =>
+            this.Update(key, null, updateValue, config);
 
         /// <summary>
         /// Updates an existing key in the cache.
@@ -205,10 +182,8 @@ namespace CacheManager.Memcached
         /// If the cache does not use a distributed cache system. Update is doing exactly the same
         /// as Get plus Put.
         /// </remarks>
-        public override UpdateItemResult<TCacheValue> Update(string key, string region, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config)
-        {
-            return this.Set(key, region, updateValue, config);
-        }
+        public override UpdateItemResult<TCacheValue> Update(string key, string region, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config) =>
+            this.Set(key, region, updateValue, config);
 
         /// <summary>
         /// Adds a value to the cache.
@@ -217,10 +192,8 @@ namespace CacheManager.Memcached
         /// <returns>
         /// <c>true</c> if the key was not already added to the cache, <c>false</c> otherwise.
         /// </returns>
-        protected override bool AddInternalPrepared(CacheItem<TCacheValue> item)
-        {
-            return this.Store(StoreMode.Add, item).Success;
-        }
+        protected override bool AddInternalPrepared(CacheItem<TCacheValue> item) =>
+            this.Store(StoreMode.Add, item).Success;
 
         /// <summary>
         /// Performs application-defined tasks associated with freeing, releasing, or resetting
@@ -242,10 +215,8 @@ namespace CacheManager.Memcached
         /// </summary>
         /// <param name="key">The key being used to identify the item within the cache.</param>
         /// <returns>The <c>CacheItem</c>.</returns>
-        protected override CacheItem<TCacheValue> GetCacheItemInternal(string key)
-        {
-            return this.GetCacheItemInternal(key, null);
-        }
+        protected override CacheItem<TCacheValue> GetCacheItemInternal(string key) =>
+            this.GetCacheItemInternal(key, null);
 
         /// <summary>
         /// Gets a <c>CacheItem</c> for the specified key.
@@ -264,10 +235,7 @@ namespace CacheManager.Memcached
         /// with the new value. If the item doesn't exist, the item will be added to the cache.
         /// </summary>
         /// <param name="item">The <c>CacheItem</c> to be added to the cache.</param>
-        protected override void PutInternalPrepared(CacheItem<TCacheValue> item)
-        {
-            this.Store(StoreMode.Set, item);
-        }
+        protected override void PutInternalPrepared(CacheItem<TCacheValue> item) => this.Store(StoreMode.Set, item);
 
         /// <summary>
         /// Removes a value from the cache for the specified key.
@@ -276,10 +244,7 @@ namespace CacheManager.Memcached
         /// <returns>
         /// <c>true</c> if the key was found and removed from the cache, <c>false</c> otherwise.
         /// </returns>
-        protected override bool RemoveInternal(string key)
-        {
-            return this.RemoveInternal(key, null);
-        }
+        protected override bool RemoveInternal(string key) => this.RemoveInternal(key, null);
 
         /// <summary>
         /// Removes a value from the cache for the specified key.
@@ -289,10 +254,7 @@ namespace CacheManager.Memcached
         /// <returns>
         /// <c>true</c> if the key was found and removed from the cache, <c>false</c> otherwise.
         /// </returns>
-        protected override bool RemoveInternal(string key, string region)
-        {
-            return this.Cache.Remove(GetKey(key, region));
-        }
+        protected override bool RemoveInternal(string key, string region) => this.Cache.Remove(GetKey(key, region));
 
         /// <summary>
         /// Stores the item with the specified mode.

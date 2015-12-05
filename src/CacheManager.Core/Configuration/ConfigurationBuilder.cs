@@ -233,12 +233,8 @@ namespace CacheManager.Core
             }
 
             // build configuration
-            var cfg = new CacheManagerConfiguration(maxRetries.HasValue ? maxRetries.Value : int.MaxValue, retryTimeout.HasValue ? retryTimeout.Value : 10);
-            cfg.CacheUpdateMode = managerCfg.UpdateMode;
-
-            // name can be null
-            cfg.BackPlateName = managerCfg.BackPlateName;
-
+            var cfg = new CacheManagerConfiguration(managerCfg.UpdateMode, maxRetries.HasValue ? maxRetries.Value : int.MaxValue, retryTimeout.HasValue ? retryTimeout.Value : 10);
+            
             if (string.IsNullOrWhiteSpace(managerCfg.BackPlateType))
             {
                 if (!string.IsNullOrWhiteSpace(managerCfg.BackPlateName))
@@ -248,12 +244,14 @@ namespace CacheManager.Core
             }
             else
             {
-                if (string.IsNullOrWhiteSpace(cfg.BackPlateName))
+                if (string.IsNullOrWhiteSpace(managerCfg.BackPlateName))
                 {
                     throw new InvalidOperationException("BackPlateName cannot be null if BackPlateType is specified.");
                 }
 
-                cfg.BackPlateType = Type.GetType(managerCfg.BackPlateType);
+                cfg = cfg.WithBackPlate(
+                    Type.GetType(managerCfg.BackPlateType, true), 
+                    managerCfg.BackPlateName);
             }
 
             foreach (CacheManagerHandle handleItem in managerCfg)
@@ -472,7 +470,7 @@ namespace CacheManager.Core
         /// Gets the configuration.
         /// </summary>
         /// <value>The configuration.</value>
-        internal CacheManagerConfiguration Configuration { get; }
+        internal CacheManagerConfiguration Configuration { get; set; }
 
         /// <summary>
         /// Configures the back plate for the cache manager.
@@ -498,8 +496,7 @@ namespace CacheManager.Core
                 throw new ArgumentNullException(nameof(name));
             }
 
-            this.Configuration.BackPlateName = name;
-            this.Configuration.BackPlateType = typeof(TBackPlate);
+            this.Configuration = this.Configuration.WithBackPlate(typeof(TBackPlate), name);
             return this;
         }
 

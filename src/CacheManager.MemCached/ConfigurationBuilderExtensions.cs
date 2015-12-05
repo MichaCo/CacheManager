@@ -16,10 +16,8 @@ namespace CacheManager.Core
         /// <param name="handleName">The name to be used for the cache handle.</param>
         /// <returns>The part.</returns>
         /// <exception cref="ArgumentNullException">Thrown if handleName is null.</exception>
-        public static ConfigurationBuilderCacheHandlePart WithMemcachedCacheHandle(this ConfigurationBuilderCachePart part, string handleName)
-        {
-            return WithMemcachedCacheHandle(part, handleName, false);
-        }
+        public static ConfigurationBuilderCacheHandlePart WithMemcachedCacheHandle(this ConfigurationBuilderCachePart part, string handleName) =>
+            WithMemcachedCacheHandle(part, handleName, false);
 
         /// <summary>
         /// Add a <see cref="MemcachedCacheHandle"/> with the required name.

@@ -59,22 +59,13 @@ namespace CacheManager.SystemRuntimeCaching
         /// Gets the cache settings.
         /// </summary>
         /// <value>The cache settings.</value>
-        public NameValueCollection CacheSettings
-        {
-            get
-            {
-                return GetSettings(this.cache);
-            }
-        }
+        public NameValueCollection CacheSettings => GetSettings(this.cache);
 
         /// <summary>
         /// Gets the number of items the cache handle currently maintains.
         /// </summary>
         /// <value>The count.</value>
-        public override int Count
-        {
-            get { return (int)this.cache.GetCount(); }
-        }
+        public override int Count => (int)this.cache.GetCount();
 
         /// <summary>
         /// Clears this cache, removing all items in the base cache and all regions.
@@ -89,10 +80,8 @@ namespace CacheManager.SystemRuntimeCaching
         /// Clears the cache region, removing all items from the specified <paramref name="region"/> only.
         /// </summary>
         /// <param name="region">The cache region.</param>
-        public override void ClearRegion(string region)
-        {
+        public override void ClearRegion(string region) =>
             this.cache.Remove(this.GetRegionTokenKey(region));
-        }
 
         /// <summary>
         /// Adds a value to the cache.
@@ -119,10 +108,7 @@ namespace CacheManager.SystemRuntimeCaching
         /// </summary>
         /// <param name="key">The key being used to identify the item within the cache.</param>
         /// <returns>The <c>CacheItem</c>.</returns>
-        protected override CacheItem<TCacheValue> GetCacheItemInternal(string key)
-        {
-            return this.GetCacheItemInternal(key, null);
-        }
+        protected override CacheItem<TCacheValue> GetCacheItemInternal(string key) => this.GetCacheItemInternal(key, null);
 
         /// <summary>
         /// Gets a <c>CacheItem</c> for the specified key.
@@ -180,10 +166,7 @@ namespace CacheManager.SystemRuntimeCaching
         /// <returns>
         /// <c>true</c> if the key was found and removed from the cache, <c>false</c> otherwise.
         /// </returns>
-        protected override bool RemoveInternal(string key)
-        {
-            return this.RemoveInternal(key, null);
-        }
+        protected override bool RemoveInternal(string key) => this.RemoveInternal(key, null);
 
         /// <summary>
         /// Removes a value from the cache for the specified key.
@@ -263,10 +246,7 @@ namespace CacheManager.SystemRuntimeCaching
             this.cache.Add(key, region, policy);
         }
 
-        private string GetItemKey(CacheItem<TCacheValue> item)
-        {
-            return this.GetItemKey(item.Key, item.Region);
-        }
+        private string GetItemKey(CacheItem<TCacheValue> item) => this.GetItemKey(item.Key, item.Region);
 
         private string GetItemKey(string key, string region = null)
         {

@@ -34,6 +34,20 @@ Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "CacheManager.Config.Tests",
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "CacheManager.Tests", "test\CacheManager.Tests\CacheManager.Tests.xproj", "{EEED5086-976C-4063-A61D-D5FAE7652758}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Articles", "Articles", "{E24CC0B1-4854-44B5-AC61-58BEEA768455}"
+	ProjectSection(SolutionItems) = preProject
+		Articles\cachemanager_architecture.md = Articles\cachemanager_architecture.md
+		Articles\cachemanager_backed_todo_web_app.md = Articles\cachemanager_backed_todo_web_app.md
+		Articles\cachemanager_configuration.md = Articles\cachemanager_configuration.md
+		Articles\cachemanager_getting_started.md = Articles\cachemanager_getting_started.md
+		Articles\cachemanager_synchronization.md = Articles\cachemanager_synchronization.md
+		Articles\cachemanager_update.md = Articles\cachemanager_update.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{C23C189C-3AFC-45D6-8E32-9B5E190BBA20}"
+EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "CacheManager.Examples", "samples\CacheManager.Examples\CacheManager.Examples.xproj", "{8F8E0F73-F11A-4F9A-91F5-9C8E798752D9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -174,6 +188,22 @@ Global
 		{EEED5086-976C-4063-A61D-D5FAE7652758}.Windows_Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EEED5086-976C-4063-A61D-D5FAE7652758}.Windows_Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EEED5086-976C-4063-A61D-D5FAE7652758}.Windows_Release|Any CPU.Build.0 = Release|Any CPU
+		{8F8E0F73-F11A-4F9A-91F5-9C8E798752D9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8F8E0F73-F11A-4F9A-91F5-9C8E798752D9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8F8E0F73-F11A-4F9A-91F5-9C8E798752D9}.Linux_Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8F8E0F73-F11A-4F9A-91F5-9C8E798752D9}.Linux_Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8F8E0F73-F11A-4F9A-91F5-9C8E798752D9}.Linux_Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8F8E0F73-F11A-4F9A-91F5-9C8E798752D9}.Linux_Release|Any CPU.Build.0 = Release|Any CPU
+		{8F8E0F73-F11A-4F9A-91F5-9C8E798752D9}.OSX_Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8F8E0F73-F11A-4F9A-91F5-9C8E798752D9}.OSX_Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8F8E0F73-F11A-4F9A-91F5-9C8E798752D9}.OSX_Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8F8E0F73-F11A-4F9A-91F5-9C8E798752D9}.OSX_Release|Any CPU.Build.0 = Release|Any CPU
+		{8F8E0F73-F11A-4F9A-91F5-9C8E798752D9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8F8E0F73-F11A-4F9A-91F5-9C8E798752D9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8F8E0F73-F11A-4F9A-91F5-9C8E798752D9}.Windows_Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8F8E0F73-F11A-4F9A-91F5-9C8E798752D9}.Windows_Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8F8E0F73-F11A-4F9A-91F5-9C8E798752D9}.Windows_Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8F8E0F73-F11A-4F9A-91F5-9C8E798752D9}.Windows_Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -187,5 +217,6 @@ Global
 		{4FBE8026-2FAE-462C-9446-33B49CA5A25D} = {58CC885F-40A7-4C82-990D-3F36AAA088A7}
 		{35A16A79-63DE-418E-AF5E-6865E5718008} = {C013E552-43F5-4496-BE29-DB401C3334BB}
 		{EEED5086-976C-4063-A61D-D5FAE7652758} = {C013E552-43F5-4496-BE29-DB401C3334BB}
+		{8F8E0F73-F11A-4F9A-91F5-9C8E798752D9} = {C23C189C-3AFC-45D6-8E32-9B5E190BBA20}
 	EndGlobalSection
 EndGlobal

@@ -35,10 +35,8 @@ namespace CacheManager.Core
         /// </summary>
         /// <typeparam name="TCacheValue">The type of the cache value.</typeparam>
         /// <returns>The item result.</returns>
-        public static UpdateItemResult<TCacheValue> ForItemDidNotExist<TCacheValue>()
-        {
-            return new UpdateItemResult<TCacheValue>(default(TCacheValue), UpdateItemResultState.ItemDidNotExist, false, 1);
-        }
+        public static UpdateItemResult<TCacheValue> ForItemDidNotExist<TCacheValue>() =>
+            new UpdateItemResult<TCacheValue>(default(TCacheValue), UpdateItemResultState.ItemDidNotExist, false, 1);
 
         /// <summary>
         /// Creates a new instance of the <see cref="UpdateItemResult{TCacheValue}"/> class with
@@ -49,10 +47,8 @@ namespace CacheManager.Core
         /// <param name="conflictOccurred">Set to <c>true</c> if a conflict occurred.</param>
         /// <param name="triesNeeded">The tries needed.</param>
         /// <returns>The item result.</returns>
-        public static UpdateItemResult<TCacheValue> ForSuccess<TCacheValue>(TCacheValue value, bool conflictOccurred = false, int triesNeeded = 1)
-        {
-            return new UpdateItemResult<TCacheValue>(value, UpdateItemResultState.Success, conflictOccurred, triesNeeded);
-        }
+        public static UpdateItemResult<TCacheValue> ForSuccess<TCacheValue>(TCacheValue value, bool conflictOccurred = false, int triesNeeded = 1) =>
+            new UpdateItemResult<TCacheValue>(value, UpdateItemResultState.Success, conflictOccurred, triesNeeded);
 
         /// <summary>
         /// Creates a new instance of the <see cref="UpdateItemResult{TCacheValue}"/> class with
@@ -61,10 +57,8 @@ namespace CacheManager.Core
         /// <typeparam name="TCacheValue">The type of the cache value.</typeparam>
         /// <param name="triesNeeded">The tries needed.</param>
         /// <returns>The item result.</returns>
-        public static UpdateItemResult<TCacheValue> ForTooManyRetries<TCacheValue>(int triesNeeded)
-        {
-            return new UpdateItemResult<TCacheValue>(default(TCacheValue), UpdateItemResultState.TooManyRetries, true, triesNeeded);
-        }
+        public static UpdateItemResult<TCacheValue> ForTooManyRetries<TCacheValue>(int triesNeeded) =>
+            new UpdateItemResult<TCacheValue>(default(TCacheValue), UpdateItemResultState.TooManyRetries, true, triesNeeded);
     }
 
     /// <summary>
