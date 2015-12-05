@@ -1,5 +1,5 @@
 version: 0.6.2.{build}
-os: Visual Studio 2015 Update 1
+os: Visual Studio 2015
 clone_depth: 10
 install:
 - C:\projects\cachemanager\tools\redis\install-service.cmd
