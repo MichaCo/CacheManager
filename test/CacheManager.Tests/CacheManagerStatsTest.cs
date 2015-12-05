@@ -49,10 +49,10 @@ namespace CacheManager.Tests
                 r1.Should().Be("something");
                 r2.Should().Be("something");
                 // each cachhandle stats should have one addCall increase
-                addCalls.ShouldAllBeEquivalentTo(Enumerable.Repeat(1, cache.CacheHandles.Count));
+                addCalls.ShouldAllBeEquivalentTo(Enumerable.Repeat(1, cache.CacheHandles.Count()));
 
                 items.ShouldAllBeEquivalentTo(
-                    Enumerable.Repeat(0, cache.CacheHandles.Count - 1).Concat(new[] { 1 }));
+                    Enumerable.Repeat(0, cache.CacheHandles.Count() - 1).Concat(new[] { 1 }));
             }
         }
 
@@ -76,7 +76,7 @@ namespace CacheManager.Tests
 
                 // assert all handles should have 2 clear increases.
                 clears.ShouldAllBeEquivalentTo(
-                    Enumerable.Repeat(2, cache.CacheHandles.Count));
+                    Enumerable.Repeat(2, cache.CacheHandles.Count()));
             }
         }
 
@@ -101,7 +101,7 @@ namespace CacheManager.Tests
 
                 // assert all handles should have 2 clearRegion increases.
                 clears.ShouldAllBeEquivalentTo(
-                    Enumerable.Repeat(2, cache.CacheHandles.Count));
+                    Enumerable.Repeat(2, cache.CacheHandles.Count()));
             }
         }
 
@@ -124,7 +124,7 @@ namespace CacheManager.Tests
 
                 // assert all handles should have 2 clearRegion increases.
                 puts.ShouldAllBeEquivalentTo(
-                    Enumerable.Repeat(3, cache.CacheHandles.Count));
+                    Enumerable.Repeat(3, cache.CacheHandles.Count()));
             }
         }
 
@@ -188,7 +188,7 @@ namespace CacheManager.Tests
 
                 // all handles should have 5 add increases.
                 adds.ShouldAllBeEquivalentTo(
-                    Enumerable.Repeat(5, cache.CacheHandles.Count));
+                    Enumerable.Repeat(5, cache.CacheHandles.Count()));
             }
         }
 
@@ -221,11 +221,11 @@ namespace CacheManager.Tests
             if (!cache.Configuration.HasBackPlate)
             {
                 adds.ShouldAllBeEquivalentTo(
-                        Enumerable.Repeat(1, cache.CacheHandles.Count));
+                        Enumerable.Repeat(1, cache.CacheHandles.Count()));
             }
 
             puts.ShouldAllBeEquivalentTo(
-                    Enumerable.Repeat(threads * iterations, cache.CacheHandles.Count));
+                    Enumerable.Repeat(threads * iterations, cache.CacheHandles.Count()));
         }
     }
 }

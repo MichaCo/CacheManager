@@ -23,7 +23,7 @@ namespace CacheManager.Tests
         {
             if (cache == null)
             {
-                throw new ArgumentNullException("cache");
+                throw new ArgumentNullException(nameof(cache));
             }
 
             foreach (var handle in cache.CacheHandles)
@@ -58,7 +58,7 @@ namespace CacheManager.Tests
                                 }
                                 else
                                 {
-                                    item = new CacheItem<object>(key, value, region, ExpirationMode.Absolute, TimeSpan.FromMilliseconds(10));
+                                    item = new CacheItem<object>(key, region, value, ExpirationMode.Absolute, TimeSpan.FromMilliseconds(10));
                                 }
 
                                 cache.Put(item);

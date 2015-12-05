@@ -36,7 +36,7 @@ namespace CacheManager.SystemRuntimeCaching
         {
             if (configuration == null)
             {
-                throw new ArgumentNullException("configuration");
+                throw new ArgumentNullException(nameof(configuration));
             }
 
             this.cacheName = configuration.HandleName;
@@ -272,7 +272,7 @@ namespace CacheManager.SystemRuntimeCaching
         {
             if (string.IsNullOrWhiteSpace(key))
             {
-                throw new ArgumentNullException("key");
+                throw new ArgumentNullException(nameof(key));
             }
 
             if (string.IsNullOrWhiteSpace(region))

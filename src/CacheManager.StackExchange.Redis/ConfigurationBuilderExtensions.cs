@@ -23,7 +23,7 @@ namespace CacheManager.Core
         {
             if (config == null)
             {
-                throw new ArgumentNullException("config");
+                throw new ArgumentNullException(nameof(config));
             }
             var builder = new RedisConfigurationBuilder(configurationKey);
             config(builder);
@@ -47,12 +47,12 @@ namespace CacheManager.Core
         {
             if (string.IsNullOrWhiteSpace(configurationKey))
             {
-                throw new ArgumentNullException("configurationKey");
+                throw new ArgumentNullException(nameof(configurationKey));
             }
 
             if (string.IsNullOrWhiteSpace(connectionString))
             {
-                throw new ArgumentNullException("connectionString");
+                throw new ArgumentNullException(nameof(connectionString));
             }
 
             RedisConfigurations.AddConfiguration(new RedisConfiguration(configurationKey, connectionString));
@@ -79,7 +79,7 @@ namespace CacheManager.Core
         {
             if (part == null)
             {
-                throw new ArgumentNullException("part");
+                throw new ArgumentNullException(nameof(part));
             }
 
             return part.WithBackPlate<RedisCacheBackPlate>(redisConfigurationId);
@@ -128,7 +128,7 @@ namespace CacheManager.Core
         {
             if (part == null)
             {
-                throw new ArgumentNullException("part");
+                throw new ArgumentNullException(nameof(part));
             }
 
             return part.WithHandle(typeof(RedisCacheHandle<>), redisConfigurationId, isBackPlateSource);

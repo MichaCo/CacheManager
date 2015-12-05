@@ -38,7 +38,7 @@ namespace CacheManager.Core
         {
             if (part == null)
             {
-                throw new ArgumentNullException("part");
+                throw new ArgumentNullException(nameof(part));
             }
 
             return part.WithHandle(typeof(MemcachedCacheHandle<>), handleName, isBackPlateSource);

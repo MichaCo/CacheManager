@@ -152,7 +152,7 @@ namespace CacheManager.Tests
         public void Redis_Multiple_PubSub_ClearRegion()
         {
             // arrange
-            var item = new CacheItem<object>(Guid.NewGuid().ToString(), "something", Guid.NewGuid().ToString());
+            var item = new CacheItem<object>(Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), "something");
 
             // act/assert
             RedisTests.RunMultipleCaches(

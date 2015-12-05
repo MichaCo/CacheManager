@@ -69,13 +69,7 @@ namespace CacheManager.Core
         /// This list is read only, any changes to the returned list instance will not affect the
         /// state of the cache manager instance.
         /// </remarks>
-#if NET40
-        ICollection<BaseCacheHandle<TCacheValue>> CacheHandles { get; }
-#else
-
-        IReadOnlyCollection<BaseCacheHandle<TCacheValue>> CacheHandles { get; }
-
-#endif
+        IEnumerable<BaseCacheHandle<TCacheValue>> CacheHandles { get; }
 
         /// <summary>
         /// Adds an item to the cache or, if the item already exists, updates the item using the

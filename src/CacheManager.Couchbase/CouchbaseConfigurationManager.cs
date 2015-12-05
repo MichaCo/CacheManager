@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Globalization;
 using Couchbase;
 using Couchbase.Configuration.Client;
 using Couchbase.Configuration.Client.Providers;
@@ -30,11 +31,11 @@ namespace CacheManager.Couchbase
         {
             if (string.IsNullOrWhiteSpace(name))
             {
-                throw new ArgumentNullException("name");
+                throw new ArgumentNullException(nameof(name));
             }
             if (configuration == null)
             {
-                throw new ArgumentNullException("configuration");
+                throw new ArgumentNullException(nameof(configuration));
             }
 
             if (!configurations.ContainsKey(name))
@@ -56,7 +57,7 @@ namespace CacheManager.Couchbase
         {
             if (string.IsNullOrWhiteSpace(name))
             {
-                throw new ArgumentNullException("name");
+                throw new ArgumentNullException(nameof(name));
             }
 
             if (configurations.ContainsKey(name))
@@ -67,7 +68,7 @@ namespace CacheManager.Couchbase
             var section = ConfigurationManager.GetSection(name) as CouchbaseClientSection;
             if (section == null)
             {
-                throw new InvalidOperationException("No configuration or section found for configuration " + name + ".");
+                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, "No configuration or section found for configuration: {0}.", name));
             }
 
             var clientConfiguration = new ClientConfiguration(section);
@@ -86,18 +87,18 @@ namespace CacheManager.Couchbase
         {
             if (clientConfiguration == null)
             {
-                throw new ArgumentNullException("clientConfiguration");
+                throw new ArgumentNullException(nameof(clientConfiguration));
             }
 
             if (string.IsNullOrWhiteSpace(bucketName))
             {
-                throw new ArgumentException("Bucket's name cannot be empty", "bucketName");
+                throw new ArgumentException("Bucket's name cannot be empty", nameof(bucketName));
             }
 
             BucketConfiguration configuration;
             if (!clientConfiguration.BucketConfigs.TryGetValue(bucketName, out configuration))
             {
-                throw new InvalidOperationException("No bucket with bucket name " + bucketName + " found.");
+                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, "No bucket with bucket name {0} found.", bucketName));
             }
 
             return configuration;
@@ -127,12 +128,12 @@ namespace CacheManager.Couchbase
         {
             if (string.IsNullOrWhiteSpace(bucketName))
             {
-                throw new ArgumentNullException("bucketName");
+                throw new ArgumentNullException(nameof(bucketName));
             }
 
             if (clientConfiguration == null)
             {
-                throw new ArgumentNullException("clientConfiguration");
+                throw new ArgumentNullException(nameof(clientConfiguration));
             }
 
             IBucket bucket;

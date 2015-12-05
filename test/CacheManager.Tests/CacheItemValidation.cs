@@ -14,6 +14,158 @@ namespace CacheManager.Tests
 #endif
     public class CacheItemValidation
     {
+        [Fact]
+        public void CacheItem_WithAbsoluteExpiration()
+        {
+            // arrange
+            var baseItem = new CacheItem<object>("key", "region", "value", ExpirationMode.Sliding, TimeSpan.FromDays(10));
+
+            // act
+            var result = baseItem.WithAbsoluteExpiration(DateTimeOffset.Now.AddMinutes(10));
+
+            // assert
+            result.ExpirationMode.Should().Be(ExpirationMode.Absolute);
+            result.ExpirationTimeout.Should().BeCloseTo(TimeSpan.FromMinutes(10));
+            result.Value.Should().Be(baseItem.Value);
+            result.Region.Should().Be(baseItem.Region);
+            result.Key.Should().Be(baseItem.Key);
+            result.CreatedUtc.Should().Be(baseItem.CreatedUtc);
+            result.LastAccessedUtc.Should().Be(baseItem.LastAccessedUtc);
+        }
+
+        [Fact]
+        public void CacheItem_WithCreated()
+        {
+            // arrange
+            var baseItem = new CacheItem<object>("key", "region", "value", ExpirationMode.Sliding, TimeSpan.FromDays(10));
+            var created = DateTime.UtcNow.AddMinutes(-10);
+            // act
+            var result = baseItem.WithCreated(created);
+
+            // assert
+            result.CreatedUtc.Should().Be(created);
+            result.Value.Should().Be(baseItem.Value);
+            result.Region.Should().Be(baseItem.Region);
+            result.Key.Should().Be(baseItem.Key);
+            result.LastAccessedUtc.Should().Be(baseItem.LastAccessedUtc);
+            result.ExpirationMode.Should().Be(baseItem.ExpirationMode);
+            result.ExpirationTimeout.Should().Be(baseItem.ExpirationTimeout);
+        }
+
+        [Fact]
+        public void CacheItem_WithExpiration_None()
+        {
+            // arrange
+            var baseItem = new CacheItem<object>("key", "region", "value", ExpirationMode.Sliding, TimeSpan.FromDays(10));
+
+            // act
+            var result = baseItem.WithExpiration(ExpirationMode.None, TimeSpan.FromMinutes(10));
+
+            // assert
+            result.ExpirationMode.Should().Be(ExpirationMode.None);
+            result.ExpirationTimeout.Should().Be(TimeSpan.Zero);    // should be zero although we set to to 10 minutes
+            result.Value.Should().Be(baseItem.Value);
+            result.Region.Should().Be(baseItem.Region);
+            result.Key.Should().Be(baseItem.Key);
+            result.CreatedUtc.Should().Be(baseItem.CreatedUtc);
+            result.LastAccessedUtc.Should().Be(baseItem.LastAccessedUtc);
+        }
+
+        [Fact]
+        public void CacheItem_WithExpiration_Sliding()
+        {
+            // arrange
+            var baseItem = new CacheItem<object>("key", "region", "value", ExpirationMode.Absolute, TimeSpan.FromDays(10));
+
+            // act
+            var result = baseItem.WithExpiration(ExpirationMode.Sliding, TimeSpan.FromMinutes(10));
+
+            // assert
+            result.ExpirationMode.Should().Be(ExpirationMode.Sliding);
+            result.ExpirationTimeout.Should().Be(TimeSpan.FromMinutes(10));
+            result.Value.Should().Be(baseItem.Value);
+            result.Region.Should().Be(baseItem.Region);
+            result.Key.Should().Be(baseItem.Key);
+            result.CreatedUtc.Should().Be(baseItem.CreatedUtc);
+            result.LastAccessedUtc.Should().Be(baseItem.LastAccessedUtc);
+        }
+
+        [Fact]
+        public void CacheItem_WithExpiration_Absolute()
+        {
+            // arrange
+            var baseItem = new CacheItem<object>("key", "region", "value", ExpirationMode.Sliding, TimeSpan.FromDays(10));
+
+            // act
+            var result = baseItem.WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMinutes(10));
+
+            // assert
+            result.ExpirationMode.Should().Be(ExpirationMode.Absolute);
+            result.ExpirationTimeout.Should().Be(TimeSpan.FromMinutes(10));
+            result.Value.Should().Be(baseItem.Value);
+            result.Region.Should().Be(baseItem.Region);
+            result.Key.Should().Be(baseItem.Key);
+            result.CreatedUtc.Should().Be(baseItem.CreatedUtc);
+            result.LastAccessedUtc.Should().Be(baseItem.LastAccessedUtc);
+        }
+
+        [Fact]
+        public void CacheItem_WithNoExpiration()
+        {
+            // arrange
+            var baseItem = new CacheItem<object>("key", "region", "value", ExpirationMode.Sliding, TimeSpan.FromDays(10));
+
+            // act
+            var result = baseItem.WithNoExpiration();
+
+            // assert
+            result.ExpirationMode.Should().Be(ExpirationMode.None);
+            result.ExpirationTimeout.Should().Be(TimeSpan.Zero);
+            result.Value.Should().Be(baseItem.Value);
+            result.Region.Should().Be(baseItem.Region);
+            result.Key.Should().Be(baseItem.Key);
+            result.CreatedUtc.Should().Be(baseItem.CreatedUtc);
+            result.LastAccessedUtc.Should().Be(baseItem.LastAccessedUtc);
+        }
+
+        [Fact]
+        public void CacheItem_WithSlidingExpiration()
+        {
+            // arrange
+            var baseItem = new CacheItem<object>("key", "region", "value", ExpirationMode.Absolute, TimeSpan.FromDays(10));
+
+            // act
+            var result = baseItem.WithSlidingExpiration(TimeSpan.FromHours(2));
+
+            // assert
+            result.ExpirationMode.Should().Be(ExpirationMode.Sliding);
+            result.ExpirationTimeout.Should().Be(TimeSpan.FromHours(2));
+            result.Value.Should().Be(baseItem.Value);
+            result.Region.Should().Be(baseItem.Region);
+            result.Key.Should().Be(baseItem.Key);
+            result.CreatedUtc.Should().Be(baseItem.CreatedUtc);
+            result.LastAccessedUtc.Should().Be(baseItem.LastAccessedUtc);
+        }
+
+        [Fact]
+        public void CacheItem_WithValue()
+        {
+            // arrange
+            var baseItem = new CacheItem<object>("key", "region", "value", ExpirationMode.Absolute, TimeSpan.FromDays(10));
+
+            // act
+            var result = baseItem.WithValue("new value");
+
+            // assert
+            result.Value.Should().Be("new value");
+            result.Region.Should().Be(baseItem.Region);
+            result.Key.Should().Be(baseItem.Key);
+            result.CreatedUtc.Should().Be(baseItem.CreatedUtc);
+            result.LastAccessedUtc.Should().Be(baseItem.LastAccessedUtc);
+            result.ExpirationMode.Should().Be(baseItem.ExpirationMode);
+            result.ExpirationTimeout.Should().Be(baseItem.ExpirationTimeout);
+        }
+
         #region ctor1
 
         [Fact]
@@ -110,7 +262,7 @@ namespace CacheManager.Tests
             string region = null;
 
             // act
-            Action act = () => new CacheItem<object>(key, value, region);
+            Action act = () => new CacheItem<object>(key, region, value);
 
             // assert
             act.ShouldThrow<ArgumentException>().WithMessage("*cannot be null.\r\nParameter name: key");
@@ -126,7 +278,7 @@ namespace CacheManager.Tests
             string region = null;
 
             // act
-            Action act = () => new CacheItem<object>(key, value, region);
+            Action act = () => new CacheItem<object>(key, region, value);
 
             // assert
             act.ShouldThrow<ArgumentException>().WithMessage("*cannot be null.\r\nParameter name: key");
@@ -142,7 +294,7 @@ namespace CacheManager.Tests
             string region = null;
 
             // act
-            Action act = () => new CacheItem<object>(key, value, region);
+            Action act = () => new CacheItem<object>(key, region, value);
 
             // assert
             act.ShouldThrow<ArgumentException>().WithMessage("*cannot be null.\r\nParameter name: key");
@@ -158,7 +310,7 @@ namespace CacheManager.Tests
             string region = null;
 
             // act
-            Action act = () => new CacheItem<object>(key, value, region);
+            Action act = () => new CacheItem<object>(key, region, value);
 
             // assert
             act.ShouldThrow<ArgumentException>().WithMessage("*cannot be null.\r\nParameter name: value");
@@ -174,7 +326,7 @@ namespace CacheManager.Tests
             string region = string.Empty;
 
             // act
-            Action act = () => new CacheItem<object>(key, value, region);
+            Action act = () => new CacheItem<object>(key, region, value);
 
             // assert
             act.ShouldThrow<ArgumentException>()
@@ -191,7 +343,7 @@ namespace CacheManager.Tests
             string region = null;
 
             // act
-            Action act = () => new CacheItem<object>(key, value, region);
+            Action act = () => new CacheItem<object>(key, region, value);
 
             // assert
             act.ShouldThrow<ArgumentException>()
@@ -208,7 +360,7 @@ namespace CacheManager.Tests
             string region = "  ";
 
             // act
-            Action act = () => new CacheItem<object>(key, value, region);
+            Action act = () => new CacheItem<object>(key, region, value);
 
             // assert
             act.ShouldThrow<ArgumentException>()
@@ -225,7 +377,7 @@ namespace CacheManager.Tests
             string region = "region";
 
             // act
-            var act = new CacheItem<object>(key, value, region);
+            var act = new CacheItem<object>(key, region, value);
 
             // assert
             act.Should()
@@ -346,7 +498,7 @@ namespace CacheManager.Tests
             TimeSpan timeout = default(TimeSpan);
 
             // act
-            Action act = () => new CacheItem<object>(key, value, region, mode, timeout);
+            Action act = () => new CacheItem<object>(key, region, value, mode, timeout);
 
             // assert
             act.ShouldThrow<ArgumentException>().WithMessage("*cannot be null.\r\nParameter name: key");
@@ -364,7 +516,7 @@ namespace CacheManager.Tests
             TimeSpan timeout = default(TimeSpan);
 
             // act
-            Action act = () => new CacheItem<object>(key, value, region, mode, timeout);
+            Action act = () => new CacheItem<object>(key, region, value, mode, timeout);
 
             // assert
             act.ShouldThrow<ArgumentException>().WithMessage("*cannot be null.\r\nParameter name: key");
@@ -382,7 +534,7 @@ namespace CacheManager.Tests
             TimeSpan timeout = default(TimeSpan);
 
             // act
-            Action act = () => new CacheItem<object>(key, value, region, mode, timeout);
+            Action act = () => new CacheItem<object>(key, region, value, mode, timeout);
 
             // assert
             act.ShouldThrow<ArgumentException>().WithMessage("*cannot be null.\r\nParameter name: key");
@@ -400,7 +552,7 @@ namespace CacheManager.Tests
             TimeSpan timeout = default(TimeSpan);
 
             // act
-            Action act = () => new CacheItem<object>(key, value, region, mode, timeout);
+            Action act = () => new CacheItem<object>(key, region, value, mode, timeout);
 
             // assert
             act.ShouldThrow<ArgumentException>().WithMessage("*cannot be null.\r\nParameter name: value");
@@ -418,7 +570,7 @@ namespace CacheManager.Tests
             TimeSpan timeout = default(TimeSpan);
 
             // act
-            Action act = () => new CacheItem<object>(key, value, region, mode, timeout);
+            Action act = () => new CacheItem<object>(key, region, value, mode, timeout);
 
             // assert
             act.ShouldThrow<ArgumentException>()
@@ -437,7 +589,7 @@ namespace CacheManager.Tests
             TimeSpan timeout = default(TimeSpan);
 
             // act
-            Action act = () => new CacheItem<object>(key, value, region, mode, timeout);
+            Action act = () => new CacheItem<object>(key, region, value, mode, timeout);
 
             // assert
             act.ShouldThrow<ArgumentException>()
@@ -456,7 +608,7 @@ namespace CacheManager.Tests
             TimeSpan timeout = default(TimeSpan);
 
             // act
-            Action act = () => new CacheItem<object>(key, value, region, mode, timeout);
+            Action act = () => new CacheItem<object>(key, region, value, mode, timeout);
 
             // assert
             act.ShouldThrow<ArgumentException>()
@@ -475,7 +627,7 @@ namespace CacheManager.Tests
             TimeSpan timeout = new TimeSpan(0, 23, 45);
 
             // act
-            var act = new CacheItem<object>(key, value, region, mode, timeout);
+            var act = new CacheItem<object>(key, region, value, mode, timeout);
 
             // assert
             act.Should()

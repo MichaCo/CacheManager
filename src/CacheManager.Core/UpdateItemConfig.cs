@@ -96,13 +96,13 @@ namespace CacheManager.Core
         /// <para>Default are <see cref="int.MaxValue"/></para>
         /// </summary>
         /// <value>The maximum retries.</value>
-        public int MaxRetries { get; private set; }
+        public int MaxRetries { get; }
 
         /// <summary>
         /// Gets the <see cref="VersionConflictHandling"/> which drives the cache manager if a
         /// version conflict occurs.
         /// </summary>
         /// <value>The version conflict operation.</value>
-        public VersionConflictHandling VersionConflictOperation { get; private set; }
+        public VersionConflictHandling VersionConflictOperation { get; }
     }
 }

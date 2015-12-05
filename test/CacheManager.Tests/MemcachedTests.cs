@@ -70,7 +70,7 @@ namespace CacheManager.Tests
             // arrange
             var longKey = string.Join(string.Empty, Enumerable.Repeat("a", 300));
 
-            var item = new CacheItem<string>(longKey, "something", "someRegion");
+            var item = new CacheItem<string>(longKey, "someRegion", "something");
             var cache = CacheFactory.Build<string>("myCache", settings =>
             {
                 settings.WithUpdateMode(CacheUpdateMode.Full)

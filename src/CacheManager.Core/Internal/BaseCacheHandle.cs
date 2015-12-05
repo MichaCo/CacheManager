@@ -26,12 +26,12 @@ namespace CacheManager.Core.Internal
         {
             if (configuration == null)
             {
-                throw new ArgumentNullException("configuration");
+                throw new ArgumentNullException(nameof(configuration));
             }
 
             if (manager == null)
             {
-                throw new ArgumentNullException("manager");
+                throw new ArgumentNullException(nameof(manager));
             }
 
             if (string.IsNullOrWhiteSpace(configuration.HandleName))
@@ -54,7 +54,7 @@ namespace CacheManager.Core.Internal
         /// Gets the cache handle configuration.
         /// </summary>
         /// <value>The configuration.</value>
-        public virtual CacheHandleConfiguration Configuration { get; private set; }
+        public virtual CacheHandleConfiguration Configuration { get; }
 
         /// <summary>
         /// Gets the number of items the cache handle currently maintains.
@@ -66,13 +66,13 @@ namespace CacheManager.Core.Internal
         /// Gets the cache manager the cache handle was added to.
         /// </summary>
         /// <value>The manager.</value>
-        public virtual ICacheManager<TCacheValue> Manager { get; private set; }
+        public virtual ICacheManager<TCacheValue> Manager { get; }
 
         /// <summary>
         /// Gets the cache stats object.
         /// </summary>
         /// <value>The stats.</value>
-        public virtual CacheStats<TCacheValue> Stats { get; private set; }
+        public virtual CacheStats<TCacheValue> Stats { get; }
 
         /// <summary>
         /// Changes the expiration <paramref name="mode" /> and <paramref name="timeout" /> for the
@@ -131,7 +131,7 @@ namespace CacheManager.Core.Internal
         {
             if (updateValue == null)
             {
-                throw new ArgumentNullException("updateValue");
+                throw new ArgumentNullException(nameof(updateValue));
             }
 
             var original = this.GetCacheItem(key);
@@ -176,7 +176,7 @@ namespace CacheManager.Core.Internal
         {
             if (updateValue == null)
             {
-                throw new ArgumentNullException("updateValue");
+                throw new ArgumentNullException(nameof(updateValue));
             }
             var original = this.GetCacheItem(key, region);
             if (original == null)
@@ -250,7 +250,7 @@ namespace CacheManager.Core.Internal
         {
             if (item == null)
             {
-                throw new ArgumentNullException("item");
+                throw new ArgumentNullException(nameof(item));
             }
 
             // logic should be that the item setting overrules the handle setting if the item

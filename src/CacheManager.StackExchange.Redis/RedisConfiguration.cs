@@ -44,12 +44,12 @@ namespace CacheManager.Redis
         {
             if (string.IsNullOrWhiteSpace(key))
             {
-                throw new ArgumentNullException("key");
+                throw new ArgumentNullException(nameof(key));
             }
 
             if (endpoints == null)
             {
-                throw new ArgumentNullException("endpoints");
+                throw new ArgumentNullException(nameof(endpoints));
             }
 
             if (endpoints.Count == 0)
@@ -94,7 +94,7 @@ namespace CacheManager.Redis
         /// <value>
         /// The key.
         /// </value>
-        public string Key { get; private set; }
+        public string Key { get; }
 
         /// <summary>
         /// Gets the connection string.
@@ -102,7 +102,7 @@ namespace CacheManager.Redis
         /// <value>
         /// The connection string.
         /// </value>
-        public string ConnectionString { get; private set; }
+        public string ConnectionString { get; }
 
         /// <summary>
         /// Gets the password to be used to connect to the Redis server.
@@ -110,7 +110,7 @@ namespace CacheManager.Redis
         /// <value>
         /// The password.
         /// </value>
-        public string Password { get; private set; }
+        public string Password { get; }
 
         /// <summary>
         /// Gets a value indicating whether to use SSL encryption.
@@ -118,7 +118,7 @@ namespace CacheManager.Redis
         /// <value>
         ///   <c>true</c> if this instance is SSL; otherwise, <c>false</c>.
         /// </value>
-        public bool IsSsl { get; private set; }
+        public bool IsSsl { get; }
 
         /// <summary>
         /// Gets the SSL Host.
@@ -127,7 +127,7 @@ namespace CacheManager.Redis
         /// <value>
         /// The SSL host.
         /// </value>
-        public string SslHost { get; private set; }
+        public string SslHost { get; }
 
         /// <summary>
         /// Gets the timeout for any connect operations.
@@ -135,7 +135,7 @@ namespace CacheManager.Redis
         /// <value>
         /// The connection timeout.
         /// </value>
-        public int ConnectionTimeout { get; private set; }
+        public int ConnectionTimeout { get; }
 
         /// <summary>
         /// Gets the list of endpoints to be used to connect to the Redis server.
@@ -143,7 +143,7 @@ namespace CacheManager.Redis
         /// <value>
         /// The endpoints.
         /// </value>
-        public IList<ServerEndPoint> Endpoints { get; private set; }
+        public IList<ServerEndPoint> Endpoints { get; }
 
         /// <summary>
         /// Gets a value indicating whether to allow the connection to run certain 'risky' commands, or not.
@@ -153,7 +153,7 @@ namespace CacheManager.Redis
         /// <value>
         ///   <c>true</c> if 'risky' commands are allowed; otherwise, <c>false</c>.
         /// </value>
-        public bool AllowAdmin { get; private set; }
+        public bool AllowAdmin { get; }
 
         /// <summary>
         /// Gets the Redis database index the cache will use.
@@ -161,7 +161,7 @@ namespace CacheManager.Redis
         /// <value>
         /// The database.
         /// </value>
-        public int Database { get; private set; }
+        public int Database { get; }
     }
 
     /// <summary>
@@ -179,7 +179,7 @@ namespace CacheManager.Redis
         {
             if (string.IsNullOrWhiteSpace(host))
             {
-                throw new ArgumentNullException("host");
+                throw new ArgumentNullException(nameof(host));
             }
 
             this.Host = host;
@@ -190,12 +190,12 @@ namespace CacheManager.Redis
         /// Gets the port.
         /// </summary>
         /// <value>The port.</value>
-        public int Port { get; private set; }
+        public int Port { get; }
 
         /// <summary>
         /// Gets the host.
         /// </summary>
         /// <value>The host.</value>
-        public string Host { get; private set; }
+        public string Host { get; }
     }
 }

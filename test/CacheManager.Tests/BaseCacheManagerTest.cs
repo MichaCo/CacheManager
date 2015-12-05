@@ -298,7 +298,7 @@ namespace CacheManager.Tests
 
             if (string.IsNullOrWhiteSpace(fileName))
             {
-                throw new ArgumentException("File name should not be empty", "fileName");
+                throw new ArgumentException("File name should not be empty", nameof(fileName));
             }
 
             return basePath + (fileName.StartsWith("/") ? fileName : "/" + fileName);

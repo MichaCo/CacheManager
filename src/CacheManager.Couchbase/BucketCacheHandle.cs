@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
 using CacheManager.Core;
@@ -50,7 +51,7 @@ namespace CacheManager.Couchbase
         {
             if (configuration == null)
             {
-                throw new ArgumentNullException("configuration");
+                throw new ArgumentNullException(nameof(configuration));
             }
 
             // we can configure the bucket name by having "<configKey>:<bucketName>" as handle's
@@ -58,7 +59,7 @@ namespace CacheManager.Couchbase
             var nameParts = configuration.HandleName.Split(new[] { ":" }, StringSplitOptions.RemoveEmptyEntries);
             if (nameParts.Length == 0)
             {
-                throw new InvalidOperationException("Handle name is not valid " + configuration.HandleName);
+                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, "Handle name is not valid {0}", configuration.HandleName));
             }
 
             this.configurationName = nameParts[0];
@@ -77,10 +78,7 @@ namespace CacheManager.Couchbase
         /// Gets the number of items the cache handle currently maintains.
         /// </summary>
         /// <value>The count.</value>
-        public override int Count
-        {
-            get { return (int)this.Stats.GetStatistic(CacheStatsCounterType.Items); }
-        }
+        public override int Count => (int)this.Stats.GetStatistic(CacheStatsCounterType.Items);
 
         /// <summary>
         /// Clears this cache, removing all items in the base cache and all regions.
@@ -117,7 +115,7 @@ namespace CacheManager.Couchbase
         {
             if (item == null)
             {
-                throw new ArgumentNullException("item");
+                throw new ArgumentNullException(nameof(item));
             }
 
             var fullKey = GetKey(item.Key, item.Region);
@@ -148,10 +146,8 @@ namespace CacheManager.Couchbase
         /// </summary>
         /// <param name="key">The key being used to identify the item within the cache.</param>
         /// <returns>The <c>CacheItem</c>.</returns>
-        protected override CacheItem<TCacheValue> GetCacheItemInternal(string key)
-        {
-            return this.GetCacheItemInternal(key, null);
-        }
+        protected override CacheItem<TCacheValue> GetCacheItemInternal(string key) => 
+            this.GetCacheItemInternal(key, null);
 
         /// <summary>
         /// Gets a <c>CacheItem</c> for the specified key.
@@ -196,7 +192,7 @@ namespace CacheManager.Couchbase
         {
             if (item == null)
             {
-                throw new ArgumentNullException("item");
+                throw new ArgumentNullException(nameof(item));
             }
 
             var fullKey = GetKey(item.Key, item.Region);
@@ -217,10 +213,7 @@ namespace CacheManager.Couchbase
         /// <returns>
         /// <c>true</c> if the key was found and removed from the cache, <c>false</c> otherwise.
         /// </returns>
-        protected override bool RemoveInternal(string key)
-        {
-            return this.RemoveInternal(key, null);
-        }
+        protected override bool RemoveInternal(string key) => this.RemoveInternal(key, null);
 
         /// <summary>
         /// Removes a value from the cache for the specified key.
@@ -239,7 +232,7 @@ namespace CacheManager.Couchbase
 
         private static string GetSHA256Key(string key)
         {
-            using (var sha = SHA256Managed.Create())
+            using (var sha = SHA256.Create())
             {
                 byte[] hashBytes = sha.ComputeHash(Encoding.UTF8.GetBytes(key));
                 return Convert.ToBase64String(hashBytes);

@@ -490,7 +490,7 @@ namespace CacheManager.Tests
                 settings => settings.WithSystemRuntimeCacheHandle("h1")) as ICacheManager<string>;
 
             cache.Should().NotBeNull();
-            cache.CacheHandles.Count.Should().Be(1);
+            cache.CacheHandles.Count().Should().Be(1);
             cache.Name.Should().Be("myCache");
         }
 
@@ -502,7 +502,7 @@ namespace CacheManager.Tests
             var cache = CacheFactory.FromConfiguration(typeof(string), "c1") as ICacheManager<string>;
 
             cache.Should().NotBeNull();
-            cache.CacheHandles.Count.Should().Be(3);
+            cache.CacheHandles.Count().Should().Be(3);
             cache.Name.Should().Be("c1");
         }
 
@@ -514,7 +514,7 @@ namespace CacheManager.Tests
             var cache = CacheFactory.FromConfiguration(typeof(string), "c1", "cacheManager") as ICacheManager<string>;
 
             cache.Should().NotBeNull();
-            cache.CacheHandles.Count.Should().Be(3);
+            cache.CacheHandles.Count().Should().Be(3);
             cache.Name.Should().Be("c1");
         }
 
@@ -528,7 +528,7 @@ namespace CacheManager.Tests
                 ConfigurationBuilder.BuildConfiguration(cfg => cfg.WithSystemRuntimeCacheHandle("h1"))) as ICacheManager<string>;
 
             cache.Should().NotBeNull();
-            cache.CacheHandles.Count.Should().Be(1);
+            cache.CacheHandles.Count().Should().Be(1);
             cache.Name.Should().Be("cacheName");
         }
     }

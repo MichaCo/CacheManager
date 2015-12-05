@@ -27,7 +27,7 @@ namespace CacheManager.Redis
         {
             if (string.IsNullOrWhiteSpace(configurationKey))
             {
-                throw new ArgumentNullException("configurationKey");
+                throw new ArgumentNullException(nameof(configurationKey));
             }
 
             this.key = configurationKey;

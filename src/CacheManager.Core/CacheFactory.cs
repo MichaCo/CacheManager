@@ -88,7 +88,7 @@ namespace CacheManager.Core
         {
             if (settings == null)
             {
-                throw new ArgumentNullException("settings");
+                throw new ArgumentNullException(nameof(settings));
             }
 
             var part = new ConfigurationBuilderCachePart();
@@ -134,7 +134,7 @@ namespace CacheManager.Core
         {
             if (cacheValueType == null)
             {
-                throw new ArgumentNullException("cacheValueType");
+                throw new ArgumentNullException(nameof(cacheValueType));
             }
 #if !NET40
             var factoryType = typeof(CacheFactory).GetTypeInfo();
@@ -350,7 +350,7 @@ namespace CacheManager.Core
         {
             if(cacheValueType == null)
             {
-                throw new ArgumentNullException("cacheValueType");
+                throw new ArgumentNullException(nameof(cacheValueType));
             }
 
             var type = typeof(BaseCacheManager<>).MakeGenericType(new[] { cacheValueType });

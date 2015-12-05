@@ -122,10 +122,7 @@
         /// When overridden in a derived class, creates a new <see cref="T:System.Configuration.ConfigurationElement"/>.
         /// </summary>
         /// <returns>A new <see cref="T:System.Configuration.ConfigurationElement"/>.</returns>
-        protected override ConfigurationElement CreateNewElement()
-        {
-            return new CacheHandleDefinition();
-        }
+        protected override ConfigurationElement CreateNewElement() => new CacheHandleDefinition();
 
         /// <summary>
         /// Gets the element key for a specified configuration element when overridden in a derived class.
@@ -136,10 +133,7 @@
         /// <returns>
         /// An <see cref="T:System.Object"/> that acts as the key for the specified <see cref="T:System.Configuration.ConfigurationElement"/>.
         /// </returns>
-        protected override object GetElementKey(ConfigurationElement element)
-        {
-            return ((CacheHandleDefinition)element).Id;
-        }
+        protected override object GetElementKey(ConfigurationElement element) => ((CacheHandleDefinition)element).Id;
     }
 
     /// <summary>
@@ -168,10 +162,7 @@
         /// When overridden in a derived class, creates a new <see cref="T:System.Configuration.ConfigurationElement"/>.
         /// </summary>
         /// <returns>A new <see cref="T:System.Configuration.ConfigurationElement"/>.</returns>
-        protected override ConfigurationElement CreateNewElement()
-        {
-            return new CacheManagerHandleCollection();
-        }
+        protected override ConfigurationElement CreateNewElement() => new CacheManagerHandleCollection();
 
         /// <summary>
         /// Gets the element key for a specified configuration element when overridden in a derived class.
@@ -182,10 +173,7 @@
         /// <returns>
         /// An <see cref="T:System.Object"/> that acts as the key for the specified <see cref="T:System.Configuration.ConfigurationElement"/>.
         /// </returns>
-        protected override object GetElementKey(ConfigurationElement element)
-        {
-            return ((CacheManagerHandleCollection)element).Name;
-        }
+        protected override object GetElementKey(ConfigurationElement element) => ((CacheManagerHandleCollection)element).Name;
     }
 
     /// <summary>
@@ -466,10 +454,7 @@
         /// When overridden in a derived class, creates a new <see cref="T:System.Configuration.ConfigurationElement"/>.
         /// </summary>
         /// <returns>A new <see cref="T:System.Configuration.ConfigurationElement"/>.</returns>
-        protected override ConfigurationElement CreateNewElement()
-        {
-            return new CacheManagerHandle();
-        }
+        protected override ConfigurationElement CreateNewElement() => new CacheManagerHandle();
 
         /// <summary>
         /// Gets the element key for a specified configuration element when overridden in a derived class.
@@ -480,10 +465,7 @@
         /// <returns>
         /// An <see cref="T:System.Object"/> that acts as the key for the specified <see cref="T:System.Configuration.ConfigurationElement"/>.
         /// </returns>
-        protected override object GetElementKey(ConfigurationElement element)
-        {
-            return ((CacheManagerHandle)element).Name;
-        }
+        protected override object GetElementKey(ConfigurationElement element) => ((CacheManagerHandle)element).Name;
     }
 
     /// <summary>
@@ -506,13 +488,7 @@
         /// <value>The cache handle definitions.</value>
         [ConfigurationProperty(HandlesName)]
         [ConfigurationCollection(typeof(CacheHandleDefinitionCollection), AddItemName = "handleDef")]
-        public CacheHandleDefinitionCollection CacheHandleDefinitions
-        {
-            get
-            {
-                return (CacheHandleDefinitionCollection)base[HandlesName];
-            }
-        }
+        public CacheHandleDefinitionCollection CacheHandleDefinitions => (CacheHandleDefinitionCollection)base[HandlesName];
 
         /// <summary>
         /// Gets the cache managers.
@@ -520,13 +496,7 @@
         /// <value>The cache managers.</value>
         [ConfigurationProperty(ManagersName)]
         [ConfigurationCollection(typeof(CacheManagerCollection), AddItemName = "cache")]
-        public CacheManagerCollection CacheManagers
-        {
-            get
-            {
-                return (CacheManagerCollection)base[ManagersName];
-            }
-        }
+        public CacheManagerCollection CacheManagers => (CacheManagerCollection)base[ManagersName];
 
         /// <summary>
         /// Gets or sets the XMLNS.

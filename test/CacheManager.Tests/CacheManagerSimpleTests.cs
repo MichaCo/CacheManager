@@ -39,7 +39,7 @@ namespace CacheManager.Tests
                 cache.Add(key, "something");
                 var result = cache.Get(key);
                 // assert
-                cache.CacheHandles.Count.Should().Be(0);
+                cache.CacheHandles.Count().Should().Be(0);
                 result.Should().Be(null, "No handles in the cache managers should yield to no items in the cache");
             }
         }
@@ -185,7 +185,7 @@ namespace CacheManager.Tests
                 // arrange
                 var key = "my key";
                 var item = new CacheItem<object>(key, value);
-                var itemRegion = new CacheItem<object>(key, value, "region");
+                var itemRegion = new CacheItem<object>(key, "region", value);
 
                 // act
                 Action act = () => cache.Put(item);
@@ -510,7 +510,7 @@ namespace CacheManager.Tests
                 act().Should().Be(value);
 
                 var addCalls = cache.CacheHandles.Select(h => h.Stats.GetStatistic(CacheStatsCounterType.AddCalls)).Sum();
-                addCalls.Should().Be(cache.CacheHandles.Count, "Item should be added to each handle");
+                addCalls.Should().Be(cache.CacheHandles.Count(), "Item should be added to each handle");
             }
         }
 

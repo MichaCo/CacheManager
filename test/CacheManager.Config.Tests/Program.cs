@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Linq;
 using System.Diagnostics;
 using CacheManager.Core;
-using CacheManager.Core.Configuration;
-using Microsoft.Framework.Runtime;
-using System.Reflection;
 
 namespace CacheManager.Config.Tests
 {

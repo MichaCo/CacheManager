@@ -30,7 +30,7 @@ namespace CacheManager.Tests
 
             // assert
             cache.Configuration.CacheUpdateMode.Should().Be(CacheUpdateMode.Up);
-            cache.CacheHandles.Count.Should().Be(3);
+            cache.CacheHandles.Count().Should().Be(3);
             AssertCacheHandleConfig(cache.CacheHandles.ElementAt(0), "h1", ExpirationMode.None, new TimeSpan(0, 0, 50));
             AssertCacheHandleConfig(cache.CacheHandles.ElementAt(1), "h2", ExpirationMode.Absolute, new TimeSpan(0, 20, 0));
             AssertCacheHandleConfig(cache.CacheHandles.ElementAt(2), "h3", ExpirationMode.Sliding, new TimeSpan(20, 0, 0));
@@ -49,7 +49,7 @@ namespace CacheManager.Tests
 
             // assert
             cache.Configuration.CacheUpdateMode.Should().Be(CacheUpdateMode.Up);
-            cache.CacheHandles.Count.Should().Be(3);
+            cache.CacheHandles.Count().Should().Be(3);
             AssertCacheHandleConfig(cache.CacheHandles.ElementAt(0), "h1", ExpirationMode.None, new TimeSpan(0, 0, 50));
             AssertCacheHandleConfig(cache.CacheHandles.ElementAt(1), "h2", ExpirationMode.Absolute, new TimeSpan(0, 20, 0));
             AssertCacheHandleConfig(cache.CacheHandles.ElementAt(2), "h3", ExpirationMode.Sliding, new TimeSpan(20, 0, 0));
@@ -68,7 +68,7 @@ namespace CacheManager.Tests
 
             // assert
             cache.Configuration.CacheUpdateMode.Should().Be(CacheUpdateMode.Full);
-            cache.CacheHandles.Count.Should().Be(4);
+            cache.CacheHandles.Count().Should().Be(4);
             AssertCacheHandleConfig(cache.CacheHandles.ElementAt(0), "h1", ExpirationMode.None, new TimeSpan(0, 0, 50));
             AssertCacheHandleConfig(cache.CacheHandles.ElementAt(1), "h2", ExpirationMode.Sliding, new TimeSpan(0, 5, 0));
             AssertCacheHandleConfig(cache.CacheHandles.ElementAt(2), "h3", ExpirationMode.None, new TimeSpan(0, 0, 0));
@@ -99,7 +99,7 @@ namespace CacheManager.Tests
 
             // assert
             cache.Configuration.CacheUpdateMode.Should().Be(CacheUpdateMode.None);
-            cache.CacheHandles.Count.Should().Be(1);
+            cache.CacheHandles.Count().Should().Be(1);
             AssertCacheHandleConfig(cache.CacheHandles.ElementAt(0), "default", ExpirationMode.Sliding, new TimeSpan(0, 5, 0));
         }
 
@@ -116,9 +116,9 @@ namespace CacheManager.Tests
 
             // assert
             cache.CacheHandles.Select(p => p.Configuration.EnableStatistics)
-                .ShouldAllBeEquivalentTo(Enumerable.Repeat(true, cache.CacheHandles.Count));
+                .ShouldAllBeEquivalentTo(Enumerable.Repeat(true, cache.CacheHandles.Count()));
             cache.CacheHandles.Select(p => p.Configuration.EnablePerformanceCounters)
-                .ShouldAllBeEquivalentTo(Enumerable.Repeat(true, cache.CacheHandles.Count));
+                .ShouldAllBeEquivalentTo(Enumerable.Repeat(true, cache.CacheHandles.Count()));
         }
 
         /// <summary>
@@ -138,9 +138,9 @@ namespace CacheManager.Tests
 
             // assert
             cache.CacheHandles.Select(p => p.Configuration.EnableStatistics)
-                .ShouldAllBeEquivalentTo(Enumerable.Repeat(true, cache.CacheHandles.Count));
+                .ShouldAllBeEquivalentTo(Enumerable.Repeat(true, cache.CacheHandles.Count()));
             cache.CacheHandles.Select(p => p.Configuration.EnablePerformanceCounters)
-                .ShouldAllBeEquivalentTo(Enumerable.Repeat(false, cache.CacheHandles.Count));
+                .ShouldAllBeEquivalentTo(Enumerable.Repeat(false, cache.CacheHandles.Count()));
         }
 
         [Fact]
@@ -156,9 +156,9 @@ namespace CacheManager.Tests
 
             // assert
             cache.CacheHandles.Select(p => p.Configuration.EnableStatistics)
-                .ShouldAllBeEquivalentTo(Enumerable.Repeat(false, cache.CacheHandles.Count));
+                .ShouldAllBeEquivalentTo(Enumerable.Repeat(false, cache.CacheHandles.Count()));
             cache.CacheHandles.Select(p => p.Configuration.EnablePerformanceCounters)
-                .ShouldAllBeEquivalentTo(Enumerable.Repeat(false, cache.CacheHandles.Count));
+                .ShouldAllBeEquivalentTo(Enumerable.Repeat(false, cache.CacheHandles.Count()));
         }
 
         private static void AssertCacheHandleConfig<T>(BaseCacheHandle<T> handle, string name, ExpirationMode mode, TimeSpan timeout)

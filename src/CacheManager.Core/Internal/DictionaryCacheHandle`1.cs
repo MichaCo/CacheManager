@@ -49,7 +49,7 @@ namespace CacheManager.Core.Internal
         {
             if (string.IsNullOrWhiteSpace(region))
             {
-                throw new ArgumentNullException("region");
+                throw new ArgumentNullException(nameof(region));
             }
 
             var key = string.Concat(region, ":");
@@ -130,7 +130,7 @@ namespace CacheManager.Core.Internal
         {
             if (item == null)
             {
-                throw new ArgumentNullException("item");
+                throw new ArgumentNullException(nameof(item));
             }
 
             var key = GetKey(item.Key, item.Region);
@@ -180,7 +180,7 @@ namespace CacheManager.Core.Internal
         {
             if (item == null)
             {
-                throw new ArgumentNullException("item");
+                throw new ArgumentNullException(nameof(item));
             }
 
             this.cache[GetKey(item.Key, item.Region)] = item;
@@ -224,7 +224,7 @@ namespace CacheManager.Core.Internal
         {
             if (string.IsNullOrWhiteSpace(key))
             {
-                throw new ArgumentException("Key should not be empty.", "key");
+                throw new ArgumentException("Key should not be empty.", nameof(key));
             }
 
             if (string.IsNullOrWhiteSpace(region))
@@ -256,12 +256,12 @@ namespace CacheManager.Core.Internal
         {
             if (updateValue == null)
             {
-                throw new ArgumentNullException("updateValue");
+                throw new ArgumentNullException(nameof(updateValue));
             }
 
             if (config == null)
             {
-                throw new ArgumentNullException("config");
+                throw new ArgumentNullException(nameof(config));
             }
 
             var retries = 0;

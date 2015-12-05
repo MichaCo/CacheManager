@@ -200,7 +200,7 @@ namespace CacheManager.Examples
         {
             if (cache == null)
             {
-                throw new ArgumentNullException("cache");
+                throw new ArgumentNullException(nameof(cache));
             }
 
             this.cache = cache;

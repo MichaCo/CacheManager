@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Globalization;
 using System.Text;
+using static CacheManager.Core.Internal.BackPlateAction;
 
 namespace CacheManager.Core.Internal
 {
@@ -39,7 +40,7 @@ namespace CacheManager.Core.Internal
         {
             if (string.IsNullOrWhiteSpace(owner))
             {
-                throw new ArgumentNullException("owner");
+                throw new ArgumentNullException(nameof(owner));
             }
 
             this.OwnerIdentity = owner;
@@ -51,7 +52,7 @@ namespace CacheManager.Core.Internal
         {
             if (string.IsNullOrWhiteSpace(key))
             {
-                throw new ArgumentNullException("key");
+                throw new ArgumentNullException(nameof(key));
             }
 
             this.Key = key;
@@ -62,7 +63,7 @@ namespace CacheManager.Core.Internal
         {
             if (string.IsNullOrWhiteSpace(region))
             {
-                throw new ArgumentNullException("region");
+                throw new ArgumentNullException(nameof(region));
             }
 
             this.Region = region;
@@ -112,13 +113,13 @@ namespace CacheManager.Core.Internal
             var ident = tokens[0];
             var action = (BackPlateAction)int.Parse(tokens[1], CultureInfo.InvariantCulture);
 
-            if (action == BackPlateAction.Clear)
+            if (action == Clear)
             {
-                return new BackPlateMessage(ident, BackPlateAction.Clear);
+                return new BackPlateMessage(ident, Clear);
             }
-            else if (action == BackPlateAction.ClearRegion)
+            else if (action == ClearRegion)
             {
-                return new BackPlateMessage(ident, BackPlateAction.ClearRegion) { Region = Decode(tokens[2]) };
+                return new BackPlateMessage(ident, ClearRegion) { Region = Decode(tokens[2]) };
             }
             else if (tokens.Length == 3)
             {
@@ -134,10 +135,8 @@ namespace CacheManager.Core.Internal
         /// <param name="owner">The owner.</param>
         /// <param name="key">The key.</param>
         /// <returns>The new <see cref="BackPlateMessage"/> instance.</returns>
-        public static BackPlateMessage ForChanged(string owner, string key)
-        {
-            return new BackPlateMessage(owner, BackPlateAction.Changed, key);
-        }
+        public static BackPlateMessage ForChanged(string owner, string key) =>
+            new BackPlateMessage(owner, Changed, key);
 
         /// <summary>
         /// Creates a new <see cref="BackPlateMessage"/> for the changed action.
@@ -146,20 +145,16 @@ namespace CacheManager.Core.Internal
         /// <param name="key">The key.</param>
         /// <param name="region">The region.</param>
         /// <returns>The new <see cref="BackPlateMessage"/> instance.</returns>
-        public static BackPlateMessage ForChanged(string owner, string key, string region)
-        {
-            return new BackPlateMessage(owner, BackPlateAction.Changed, key, region);
-        }
+        public static BackPlateMessage ForChanged(string owner, string key, string region) => 
+            new BackPlateMessage(owner, Changed, key, region);
 
         /// <summary>
         /// Creates a new <see cref="BackPlateMessage"/> for the clear action.
         /// </summary>
         /// <param name="owner">The owner.</param>
         /// <returns>The new <see cref="BackPlateMessage"/> instance.</returns>
-        public static BackPlateMessage ForClear(string owner)
-        {
-            return new BackPlateMessage(owner, BackPlateAction.Clear);
-        }
+        public static BackPlateMessage ForClear(string owner) =>
+            new BackPlateMessage(owner, Clear);
 
         /// <summary>
         /// Creates a new <see cref="BackPlateMessage"/> for the clear region action.
@@ -172,10 +167,10 @@ namespace CacheManager.Core.Internal
         {
             if (string.IsNullOrWhiteSpace(region))
             {
-                throw new ArgumentNullException("region");
+                throw new ArgumentNullException(nameof(region));
             }
 
-            return new BackPlateMessage(owner, BackPlateAction.ClearRegion)
+            return new BackPlateMessage(owner, ClearRegion)
             {
                 Region = region
             };
@@ -187,10 +182,8 @@ namespace CacheManager.Core.Internal
         /// <param name="owner">The owner.</param>
         /// <param name="key">The key.</param>
         /// <returns>The new <see cref="BackPlateMessage"/> instance.</returns>
-        public static BackPlateMessage ForRemoved(string owner, string key)
-        {
-            return new BackPlateMessage(owner, BackPlateAction.Removed, key);
-        }
+        public static BackPlateMessage ForRemoved(string owner, string key) => 
+            new BackPlateMessage(owner, Removed, key);
 
         /// <summary>
         /// Creates a new <see cref="BackPlateMessage"/> for the removed action.
@@ -199,10 +192,8 @@ namespace CacheManager.Core.Internal
         /// <param name="key">The key.</param>
         /// <param name="region">The region.</param>
         /// <returns>The new <see cref="BackPlateMessage"/> instance.</returns>
-        public static BackPlateMessage ForRemoved(string owner, string key, string region)
-        {
-            return new BackPlateMessage(owner, BackPlateAction.Removed, key, region);
-        }
+        public static BackPlateMessage ForRemoved(string owner, string key, string region) =>
+            new BackPlateMessage(owner, Removed, key, region);
 
         /// <summary>
         /// Serializes this instance.
@@ -211,11 +202,11 @@ namespace CacheManager.Core.Internal
         public string Serialize()
         {
             var action = (int)this.Action;
-            if (this.Action == BackPlateAction.Clear)
+            if (this.Action == Clear)
             {
                 return this.OwnerIdentity + ":" + action;
             }
-            else if (this.Action == BackPlateAction.ClearRegion)
+            else if (this.Action == ClearRegion)
             {
                 return this.OwnerIdentity + ":" + action + ":" + Encode(this.Region);
             }
@@ -233,9 +224,7 @@ namespace CacheManager.Core.Internal
             return Encoding.UTF8.GetString(bytes, 0, bytes.Length);
         }
 
-        private static string Encode(string value)
-        {
-            return Convert.ToBase64String(Encoding.UTF8.GetBytes(value));
-        }
+        private static string Encode(string value) =>
+            Convert.ToBase64String(Encoding.UTF8.GetBytes(value));
     }
 }

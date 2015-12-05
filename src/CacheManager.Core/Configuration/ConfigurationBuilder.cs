@@ -45,7 +45,7 @@ namespace CacheManager.Core
         {
             if (settings == null)
             {
-                throw new ArgumentNullException("settings");
+                throw new ArgumentNullException(nameof(settings));
             }
 
             var part = new ConfigurationBuilderCachePart();
@@ -65,10 +65,8 @@ namespace CacheManager.Core
         /// <param name="configName">The name of the cache element within the config file.</param>
         /// <returns>The <c>CacheManagerConfiguration</c></returns>
         /// <see cref="CacheManagerConfiguration"/>
-        public static CacheManagerConfiguration LoadConfiguration(string configName)
-        {
-            return LoadConfiguration(CacheManagerSection.DefaultSectionName, configName);
-        }
+        public static CacheManagerConfiguration LoadConfiguration(string configName) =>
+            LoadConfiguration(CacheManagerSection.DefaultSectionName, configName);
 
         /// <summary>
         /// Loads a configuration from web.config or app.config, by section and config name.
@@ -85,11 +83,11 @@ namespace CacheManager.Core
         {
             if (string.IsNullOrWhiteSpace(sectionName))
             {
-                throw new ArgumentNullException("sectionName");
+                throw new ArgumentNullException(nameof(sectionName));
             }
             if (string.IsNullOrWhiteSpace(configName))
             {
-                throw new ArgumentNullException("configName");
+                throw new ArgumentNullException(nameof(configName));
             }
 
             var section = ConfigurationManager.GetSection(sectionName) as CacheManagerSection;
@@ -118,10 +116,8 @@ namespace CacheManager.Core
         /// If the file specified by <paramref name="configFileName"/> does not exist.
         /// </exception>
         /// <see cref="CacheManagerConfiguration"/>
-        public static CacheManagerConfiguration LoadConfigurationFile(string configFileName, string configName)
-        {
-            return LoadConfigurationFile(configFileName, CacheManagerSection.DefaultSectionName, configName);
-        }
+        public static CacheManagerConfiguration LoadConfigurationFile(string configFileName, string configName) =>
+            LoadConfigurationFile(configFileName, CacheManagerSection.DefaultSectionName, configName);
 
         /// <summary>
         /// Loads a configuration from the given <paramref name="configFileName"/> and <paramref name="sectionName"/>.
@@ -145,17 +141,17 @@ namespace CacheManager.Core
         {
             if (string.IsNullOrWhiteSpace(configFileName))
             {
-                throw new ArgumentNullException("configFileName");
+                throw new ArgumentNullException(nameof(configFileName));
             }
 
             if (string.IsNullOrWhiteSpace(sectionName))
             {
-                throw new ArgumentNullException("sectionName");
+                throw new ArgumentNullException(nameof(sectionName));
             }
 
             if (string.IsNullOrWhiteSpace(configName))
             {
-                throw new ArgumentNullException("configName");
+                throw new ArgumentNullException(nameof(configName));
             }
 
             if (!File.Exists(configFileName))
@@ -187,7 +183,7 @@ namespace CacheManager.Core
         {
             if (string.IsNullOrWhiteSpace(configName))
             {
-                throw new ArgumentNullException("configName");
+                throw new ArgumentNullException(nameof(configName));
             }
 
             var handleDefsSection = section.CacheHandleDefinitions;
@@ -383,15 +379,9 @@ namespace CacheManager.Core
         /// multiple cache handles.
         /// </summary>
         /// <value>The parent builder part.</value>
-        public ConfigurationBuilderCachePart And
-        {
-            get
-            {
-                return this.parent;
-            }
-        }
+        public ConfigurationBuilderCachePart And => this.parent;
 
-        internal CacheHandleConfiguration Configuration { get; private set; }
+        internal CacheHandleConfiguration Configuration { get; }
 
         /// <summary>
         /// Disables performance counters for this cache handle.
@@ -482,7 +472,7 @@ namespace CacheManager.Core
         /// Gets the configuration.
         /// </summary>
         /// <value>The configuration.</value>
-        internal CacheManagerConfiguration Configuration { get; private set; }
+        internal CacheManagerConfiguration Configuration { get; }
 
         /// <summary>
         /// Configures the back plate for the cache manager.
@@ -505,7 +495,7 @@ namespace CacheManager.Core
         {
             if (string.IsNullOrWhiteSpace(name))
             {
-                throw new ArgumentNullException("name");
+                throw new ArgumentNullException(nameof(name));
             }
 
             this.Configuration.BackPlateName = name;
@@ -522,10 +512,8 @@ namespace CacheManager.Core
         /// <exception cref="ArgumentNullException">
         /// Thrown if handleName or cacheHandleBaseType are null.
         /// </exception>
-        public ConfigurationBuilderCacheHandlePart WithHandle(Type cacheHandleBaseType, string handleName)
-        {
-            return this.WithHandle(cacheHandleBaseType, handleName, false);
-        }
+        public ConfigurationBuilderCacheHandlePart WithHandle(Type cacheHandleBaseType, string handleName) =>
+            this.WithHandle(cacheHandleBaseType, handleName, false);
 
         /// <summary>
         /// Adds a cache dictionary cache handle with the required name.
@@ -533,10 +521,8 @@ namespace CacheManager.Core
         /// <param name="handleName">The name to be used for the cache handle.</param>
         /// <returns>The builder part.</returns>
         /// <exception cref="ArgumentNullException">Thrown if handleName is null.</exception>
-        public ConfigurationBuilderCacheHandlePart WithDictionaryHandle(string handleName)
-        {
-            return this.WithHandle(typeof(DictionaryCacheHandle<>), handleName, false);
-        }
+        public ConfigurationBuilderCacheHandlePart WithDictionaryHandle(string handleName) =>
+            this.WithHandle(typeof(DictionaryCacheHandle<>), handleName, false);
 
         /// <summary>
         /// Add a cache handle configuration with the required name and type attributes.
@@ -559,12 +545,12 @@ namespace CacheManager.Core
         {
             if (cacheHandleBaseType == null)
             {
-                throw new ArgumentNullException("cacheHandleBaseType");
+                throw new ArgumentNullException(nameof(cacheHandleBaseType));
             }
 
             if (string.IsNullOrWhiteSpace(handleName))
             {
-                throw new ArgumentNullException("handleName");
+                throw new ArgumentNullException(nameof(handleName));
             }
 
             var handleCfg = new CacheHandleConfiguration(handleName)

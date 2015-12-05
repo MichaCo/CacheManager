@@ -35,7 +35,7 @@
         {
             if (configuration == null)
             {
-                throw new ArgumentNullException("configuration");
+                throw new ArgumentNullException(nameof(configuration));
             }
             if (string.IsNullOrWhiteSpace(cacheName))
             {
@@ -61,20 +61,20 @@
         /// <value>
         /// The cache configuration.
         /// </value>
-        public CacheManagerConfiguration CacheConfiguration { get; private set; }
+        public CacheManagerConfiguration CacheConfiguration { get; }
 
         /// <summary>
         /// Gets the configuration.
         /// </summary>
         /// <value>The configuration.</value>
-        public string CacheName { get; private set; }
+        public string CacheName { get; }
 
         /// <summary>
         /// Gets the name.
         /// <para>The name might be used to find cache vendor specific configuration.</para>
         /// </summary>
         /// <value>The name.</value>
-        public string Name { get; private set; }
+        public string Name { get; }
 
         /// <summary>
         /// Performs application-defined tasks associated with freeing, releasing, or resetting
@@ -133,7 +133,7 @@
         {
             if (string.IsNullOrWhiteSpace(key))
             {
-                throw new ArgumentNullException("key");
+                throw new ArgumentNullException(nameof(key));
             }
 
             this.onChangeKey(key);
@@ -149,11 +149,11 @@
         {
             if (string.IsNullOrWhiteSpace(key))
             {
-                throw new ArgumentNullException("key");
+                throw new ArgumentNullException(nameof(key));
             }
             if (string.IsNullOrWhiteSpace(region))
             {
-                throw new ArgumentNullException("region");
+                throw new ArgumentNullException(nameof(region));
             }
 
             this.onChangeKeyRegion(key, region);
@@ -162,10 +162,7 @@
         /// <summary>
         /// Called when another client cleared the cache.
         /// </summary>
-        public void OnClear()
-        {
-            this.onClear();
-        }
+        public void OnClear() => this.onClear();
 
         /// <summary>
         /// Called when another client cleared a region.
@@ -176,7 +173,7 @@
         {
             if (string.IsNullOrWhiteSpace(region))
             {
-                throw new ArgumentNullException("region");
+                throw new ArgumentNullException(nameof(region));
             }
 
             this.onClearRegion(region);
@@ -191,7 +188,7 @@
         {
             if (string.IsNullOrWhiteSpace(key))
             {
-                throw new ArgumentNullException("key");
+                throw new ArgumentNullException(nameof(key));
             }
 
             this.onRemoveKey(key);
@@ -207,11 +204,11 @@
         {
             if (string.IsNullOrWhiteSpace(key))
             {
-                throw new ArgumentNullException("key");
+                throw new ArgumentNullException(nameof(key));
             }
             if (string.IsNullOrWhiteSpace(region))
             {
-                throw new ArgumentNullException("region");
+                throw new ArgumentNullException(nameof(region));
             }
 
             this.onRemoveKeyRegion(key, region);
@@ -227,7 +224,7 @@
         {
             if (change == null)
             {
-                throw new ArgumentNullException("change");
+                throw new ArgumentNullException(nameof(change));
             }
 
             this.onChangeKey = change;
@@ -243,7 +240,7 @@
         {
             if (change == null)
             {
-                throw new ArgumentNullException("change");
+                throw new ArgumentNullException(nameof(change));
             }
 
             this.onChangeKeyRegion = change;
@@ -259,7 +256,7 @@
         {
             if (clear == null)
             {
-                throw new ArgumentNullException("clear");
+                throw new ArgumentNullException(nameof(clear));
             }
 
             this.onClear = clear;
@@ -275,7 +272,7 @@
         {
             if (clearRegion == null)
             {
-                throw new ArgumentNullException("clearRegion");
+                throw new ArgumentNullException(nameof(clearRegion));
             }
 
             this.onClearRegion = clearRegion;
@@ -291,7 +288,7 @@
         {
             if (remove == null)
             {
-                throw new ArgumentNullException("remove");
+                throw new ArgumentNullException(nameof(remove));
             }
 
             this.onRemoveKey = remove;
@@ -307,7 +304,7 @@
         {
             if (remove == null)
             {
-                throw new ArgumentNullException("remove");
+                throw new ArgumentNullException(nameof(remove));
             }
 
             this.onRemoveKeyRegion = remove;

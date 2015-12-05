@@ -134,7 +134,7 @@ namespace CacheManager.Core.Internal
         public virtual bool Add(string key, TCacheValue value, string region)
         {
             // null checks are done within ctor of the item
-            var item = new CacheItem<TCacheValue>(key, value, region);
+            var item = new CacheItem<TCacheValue>(key, region, value);
             return this.Add(item);
         }
 
@@ -160,7 +160,7 @@ namespace CacheManager.Core.Internal
         {
             if (item == null)
             {
-                throw new ArgumentNullException("item");
+                throw new ArgumentNullException(nameof(item));
             }
 
             return this.AddInternal(item);
@@ -219,7 +219,7 @@ namespace CacheManager.Core.Internal
             TimeSpan timeout = absoluteExpiration.UtcDateTime - DateTime.UtcNow;
             if (timeout <= TimeSpan.Zero)
             {
-                throw new ArgumentException("Expiration value must be greater than zero.", "absoluteExpiration");
+                throw new ArgumentException("Expiration value must be greater than zero.", nameof(absoluteExpiration));
             }
 
             this.Expire(key, ExpirationMode.Absolute, timeout);
@@ -238,7 +238,7 @@ namespace CacheManager.Core.Internal
             TimeSpan timeout = absoluteExpiration.UtcDateTime - DateTime.UtcNow;
             if (timeout <= TimeSpan.Zero)
             {
-                throw new ArgumentException("Expiration value must be greater than zero.", "absoluteExpiration");
+                throw new ArgumentException("Expiration value must be greater than zero.", nameof(absoluteExpiration));
             }
 
             this.Expire(key, region, ExpirationMode.Absolute, timeout);
@@ -255,7 +255,7 @@ namespace CacheManager.Core.Internal
         {
             if (slidingExpiration <= TimeSpan.Zero)
             {
-                throw new ArgumentException("Expiration value must be greater than zero.", "slidingExpiration");
+                throw new ArgumentException("Expiration value must be greater than zero.", nameof(slidingExpiration));
             }
 
             this.Expire(key, ExpirationMode.Sliding, slidingExpiration);
@@ -273,7 +273,7 @@ namespace CacheManager.Core.Internal
         {
             if (slidingExpiration <= TimeSpan.Zero)
             {
-                throw new ArgumentException("Expiration value must be greater than zero.", "slidingExpiration");
+                throw new ArgumentException("Expiration value must be greater than zero.", nameof(slidingExpiration));
             }
 
             this.Expire(key, region, ExpirationMode.Sliding, slidingExpiration);
@@ -367,7 +367,7 @@ namespace CacheManager.Core.Internal
         {
             if (string.IsNullOrWhiteSpace(key))
             {
-                throw new ArgumentNullException("key");
+                throw new ArgumentNullException(nameof(key));
             }
 
             return this.GetCacheItemInternal(key);
@@ -386,12 +386,12 @@ namespace CacheManager.Core.Internal
         {
             if (string.IsNullOrWhiteSpace(key))
             {
-                throw new ArgumentNullException("key");
+                throw new ArgumentNullException(nameof(key));
             }
 
             if (string.IsNullOrWhiteSpace(region))
             {
-                throw new ArgumentNullException("region");
+                throw new ArgumentNullException(nameof(region));
             }
 
             return this.GetCacheItemInternal(key, region);
@@ -433,7 +433,7 @@ namespace CacheManager.Core.Internal
         /// </exception>
         public virtual void Put(string key, TCacheValue value, string region)
         {
-            var item = new CacheItem<TCacheValue>(key, value, region);
+            var item = new CacheItem<TCacheValue>(key, region, value);
             this.Put(item);
         }
 
@@ -456,7 +456,7 @@ namespace CacheManager.Core.Internal
         {
             if (item == null)
             {
-                throw new ArgumentNullException("item");
+                throw new ArgumentNullException(nameof(item));
             }
 
             this.PutInternal(item);
@@ -474,7 +474,7 @@ namespace CacheManager.Core.Internal
         {
             if (string.IsNullOrWhiteSpace(key))
             {
-                throw new ArgumentNullException("key");
+                throw new ArgumentNullException(nameof(key));
             }
 
             return this.RemoveInternal(key);
@@ -495,12 +495,12 @@ namespace CacheManager.Core.Internal
         {
             if (string.IsNullOrWhiteSpace(key))
             {
-                throw new ArgumentNullException("key");
+                throw new ArgumentNullException(nameof(key));
             }
 
             if (string.IsNullOrWhiteSpace(region))
             {
-                throw new ArgumentNullException("region");
+                throw new ArgumentNullException(nameof(region));
             }
 
             return this.RemoveInternal(key, region);

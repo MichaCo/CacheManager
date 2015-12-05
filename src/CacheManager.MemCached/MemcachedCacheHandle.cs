@@ -57,7 +57,7 @@ namespace CacheManager.Memcached
         {
             if (configuration == null)
             {
-                throw new ArgumentNullException("configuration");
+                throw new ArgumentNullException(nameof(configuration));
             }
 
             if (!typeof(TCacheValue).IsSerializable)
@@ -304,7 +304,7 @@ namespace CacheManager.Memcached
         {
             if (item == null)
             {
-                throw new ArgumentNullException("item");
+                throw new ArgumentNullException(nameof(item));
             }
 
             var key = GetKey(item.Key, item.Region);

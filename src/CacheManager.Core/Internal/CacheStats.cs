@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 
 namespace CacheManager.Core.Internal
@@ -22,7 +21,7 @@ namespace CacheManager.Core.Internal
     public sealed class CacheStats<TCacheValue> : IDisposable
     {
         private static readonly string NullRegionKey = Guid.NewGuid().ToString();
-        private readonly ConcurrentDictionary<string, CacheStatsCounter> counters;
+        private readonly IDictionary<string, CacheStatsCounter> counters;
         private readonly bool isPerformanceCounterEnabled;
         private readonly bool isStatsEnabled;
         private readonly object lockObject;
@@ -48,12 +47,12 @@ namespace CacheManager.Core.Internal
         {
             if (string.IsNullOrWhiteSpace(cacheName))
             {
-                throw new ArgumentNullException("cacheName");
+                throw new ArgumentNullException(nameof(cacheName));
             }
 
             if (string.IsNullOrWhiteSpace(handleName))
             {
-                throw new ArgumentNullException("handleName");
+                throw new ArgumentNullException(nameof(handleName));
             }
 
             this.lockObject = new object();
@@ -61,7 +60,7 @@ namespace CacheManager.Core.Internal
             // if performance counters are enabled, stats must be enabled, too.
             this.isStatsEnabled = enablePerformanceCounters ? true : enabled;
             this.isPerformanceCounterEnabled = enablePerformanceCounters;
-            this.counters = new ConcurrentDictionary<string, CacheStatsCounter>();
+            this.counters = new Dictionary<string, CacheStatsCounter>();
 
 #if !PORTABLE
             if (this.isPerformanceCounterEnabled)
@@ -144,7 +143,7 @@ namespace CacheManager.Core.Internal
 
             if (string.IsNullOrWhiteSpace(region))
             {
-                throw new ArgumentNullException("region");
+                throw new ArgumentNullException(nameof(region));
             }
 
             var counter = this.GetCounter(region);
@@ -209,7 +208,7 @@ namespace CacheManager.Core.Internal
 
             if (item == null)
             {
-                throw new ArgumentNullException("item");
+                throw new ArgumentNullException(nameof(item));
             }
 
             foreach (var counter in this.GetWorkingCounters(item.Region))
@@ -335,7 +334,7 @@ namespace CacheManager.Core.Internal
 
             if (item == null)
             {
-                throw new ArgumentNullException("item");
+                throw new ArgumentNullException(nameof(item));
             }
 
             foreach (var counter in this.GetWorkingCounters(item.Region))
@@ -383,12 +382,12 @@ namespace CacheManager.Core.Internal
 
             if (string.IsNullOrWhiteSpace(key))
             {
-                throw new ArgumentNullException("key");
+                throw new ArgumentNullException(nameof(key));
             }
 
             if (result == null)
             {
-                throw new ArgumentNullException("result");
+                throw new ArgumentNullException(nameof(result));
             }
 
             foreach (var counter in this.GetWorkingCounters(region))
@@ -431,10 +430,7 @@ namespace CacheManager.Core.Internal
                     if (!this.counters.TryGetValue(key, out counter))
                     {
                         counter = new CacheStatsCounter();
-                        if (!this.counters.TryAdd(key, counter))
-                        {
-                            throw new InvalidOperationException("Failed to initialize counter.");
-                        }
+                        this.counters.Add(key, counter);
                     }
                 }
             }

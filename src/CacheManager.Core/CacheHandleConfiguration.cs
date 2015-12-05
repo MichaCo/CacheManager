@@ -16,7 +16,7 @@ namespace CacheManager.Core
         {
             if (string.IsNullOrWhiteSpace(handleName))
             {
-                throw new ArgumentNullException("handleName");
+                throw new ArgumentNullException(nameof(handleName));
             }
 
             this.HandleName = handleName;

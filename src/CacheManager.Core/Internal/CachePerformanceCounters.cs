@@ -32,12 +32,12 @@
         {
             if (string.IsNullOrWhiteSpace(cacheName))
             {
-                throw new ArgumentNullException("cacheName");
+                throw new ArgumentNullException(nameof(cacheName));
             }
 
             if (string.IsNullOrWhiteSpace(handleName))
             {
-                throw new ArgumentNullException("handleName");
+                throw new ArgumentNullException(nameof(handleName));
             }
 
             string processName = Process.GetCurrentProcess().ProcessName;

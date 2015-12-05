@@ -23,11 +23,11 @@ namespace CacheManager.Core
         {
             if (string.IsNullOrWhiteSpace(key))
             {
-                throw new ArgumentNullException("key");
+                throw new ArgumentNullException(nameof(key));
             }
             if (config == null)
             {
-                throw new ArgumentNullException("config");
+                throw new ArgumentNullException(nameof(config));
             }
 
             CouchbaseConfigurationManager.AddConfiguration(key, config);
@@ -48,10 +48,10 @@ namespace CacheManager.Core
         /// </param>
         /// <returns>The part.</returns>
         /// <exception cref="ArgumentNullException">Thrown if handleName is null.</exception>
-        public static ConfigurationBuilderCacheHandlePart WithCouchbaseCacheHandle(this ConfigurationBuilderCachePart part, string couchbaseConfigurationKey)
-        {
-            return WithCouchbaseCacheHandle(part, couchbaseConfigurationKey, false);
-        }
+        public static ConfigurationBuilderCacheHandlePart WithCouchbaseCacheHandle(
+            this ConfigurationBuilderCachePart part, 
+            string couchbaseConfigurationKey) =>
+            WithCouchbaseCacheHandle(part, couchbaseConfigurationKey, false);
 
         /// <summary>
         /// Add a <see cref="BucketCacheHandle"/> with the required name.
@@ -73,11 +73,14 @@ namespace CacheManager.Core
         /// <exception cref="ArgumentNullException">
         /// Thrown if handleName or handleType are null.
         /// </exception>
-        public static ConfigurationBuilderCacheHandlePart WithCouchbaseCacheHandle(this ConfigurationBuilderCachePart part, string couchbaseConfigurationKey, bool isBackPlateSource)
+        public static ConfigurationBuilderCacheHandlePart WithCouchbaseCacheHandle(
+            this ConfigurationBuilderCachePart part, 
+            string couchbaseConfigurationKey, 
+            bool isBackPlateSource)
         {
             if (part == null)
             {
-                throw new ArgumentNullException("part");
+                throw new ArgumentNullException(nameof(part));
             }
 
             return part.WithHandle(typeof(BucketCacheHandle<>), couchbaseConfigurationKey, isBackPlateSource);
@@ -101,10 +104,11 @@ namespace CacheManager.Core
         /// <returns>The part.</returns>
         /// <exception cref="System.ArgumentNullException">If bucketName is null.</exception>
         /// <exception cref="ArgumentNullException">Thrown if handleName is null.</exception>
-        public static ConfigurationBuilderCacheHandlePart WithCouchbaseCacheHandle(this ConfigurationBuilderCachePart part, string couchbaseConfigurationKey, string bucketName)
-        {
-            return WithCouchbaseCacheHandle(part, couchbaseConfigurationKey, bucketName, false);
-        }
+        public static ConfigurationBuilderCacheHandlePart WithCouchbaseCacheHandle(
+            this ConfigurationBuilderCachePart part, 
+            string couchbaseConfigurationKey, 
+            string bucketName) =>
+            WithCouchbaseCacheHandle(part, couchbaseConfigurationKey, bucketName, false);
 
         /// <summary>
         /// Add a <see cref="BucketCacheHandle"/> with the required name.
@@ -134,12 +138,12 @@ namespace CacheManager.Core
         {
             if (part == null)
             {
-                throw new ArgumentNullException("part");
+                throw new ArgumentNullException(nameof(part));
             }
 
             if (string.IsNullOrWhiteSpace(bucketName))
             {
-                throw new ArgumentNullException("bucketName");
+                throw new ArgumentNullException(nameof(bucketName));
             }
 
             return part.WithHandle(typeof(BucketCacheHandle<>), couchbaseConfigurationKey + ":" + bucketName, isBackPlateSource);

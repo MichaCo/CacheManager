@@ -31,7 +31,7 @@ namespace CacheManager.Redis
         {
             if (configuration == null)
             {
-                throw new ArgumentNullException("configuration");
+                throw new ArgumentNullException(nameof(configuration));
             }
 
             this.channelName = string.Format(

@@ -46,8 +46,8 @@ namespace CacheManager.Backplate.TestNode
                 while (true)
                 {
                     var value = cache.AddOrUpdate("backplateTest", 0, v => v + 1);
-                    Console.WriteLine("Value: " + value);
-                    Thread.Sleep(50);
+                    //Console.WriteLine("Value: " + value);
+                    //Thread.Sleep(50);
                 }
             }
         }

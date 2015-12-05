@@ -17,7 +17,7 @@ namespace CacheManager.Core.Internal
         {
             if (string.IsNullOrWhiteSpace(key))
             {
-                throw new ArgumentNullException("key");
+                throw new ArgumentNullException(nameof(key));
             }
 
             this.Key = key;
@@ -28,13 +28,13 @@ namespace CacheManager.Core.Internal
         /// Gets the key.
         /// </summary>
         /// <value>The key.</value>
-        public string Key { get; private set; }
+        public string Key { get; }
 
         /// <summary>
         /// Gets the region.
         /// </summary>
         /// <value>The region.</value>
-        public string Region { get; private set; }
+        public string Region { get; }
     }
 
     /// <summary>
@@ -58,7 +58,7 @@ namespace CacheManager.Core.Internal
         {
             if (string.IsNullOrWhiteSpace(region))
             {
-                throw new ArgumentNullException("region");
+                throw new ArgumentNullException(nameof(region));
             }
 
             this.Region = region;
@@ -68,7 +68,7 @@ namespace CacheManager.Core.Internal
         /// Gets the region.
         /// </summary>
         /// <value>The region.</value>
-        public string Region { get; private set; }
+        public string Region { get; }
     }
 
     /// <summary>
@@ -95,24 +95,24 @@ namespace CacheManager.Core.Internal
         /// Gets the configuration.
         /// </summary>
         /// <value>The configuration.</value>
-        public UpdateItemConfig Config { get; private set; }
+        public UpdateItemConfig Config { get; }
 
         /// <summary>
         /// Gets the key.
         /// </summary>
         /// <value>The key.</value>
-        public string Key { get; private set; }
+        public string Key { get; }
 
         /// <summary>
         /// Gets the region.
         /// </summary>
         /// <value>The region.</value>
-        public string Region { get; private set; }
+        public string Region { get; }
 
         /// <summary>
         /// Gets the result.
         /// </summary>
         /// <value>The result.</value>
-        public UpdateItemResult<TCacheValue> Result { get; private set; }
+        public UpdateItemResult<TCacheValue> Result { get; }
     }
 }

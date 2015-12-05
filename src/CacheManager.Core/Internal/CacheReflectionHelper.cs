@@ -48,11 +48,11 @@ namespace CacheManager.Core.Internal
         {
             if (manager == null)
             {
-                throw new ArgumentNullException("manager");
+                throw new ArgumentNullException(nameof(manager));
             }
             if (manager.Configuration == null)
             {
-                throw new ArgumentException("Manager's configuration must not be null.", "manager");
+                throw new ArgumentException("Manager's configuration must not be null.", nameof(manager));
             }
 
             if (manager.Configuration.BackPlateType != null)

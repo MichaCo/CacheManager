@@ -78,7 +78,7 @@ namespace CacheManager.Core
         {
             if (triesNeeded == 0)
             {
-                throw new ArgumentOutOfRangeException("triesNeeded", "Value must be higher than 0.");
+                throw new ArgumentOutOfRangeException(nameof(triesNeeded), "Value must be higher than 0.");
             }
 
             this.VersionConflictOccurred = conflictOccurred;
@@ -91,24 +91,24 @@ namespace CacheManager.Core
         /// Gets the number of tries the cache needed to update the item.
         /// </summary>
         /// <value>The number of retries needed.</value>
-        public int NumberOfTriesNeeded { get; private set; }
+        public int NumberOfTriesNeeded { get; }
 
         /// <summary>
         /// Gets a value indicating whether the update operation was successful or not.
         /// </summary>
         /// <value>The current <see cref="UpdateItemResultState"/>.</value>
-        public UpdateItemResultState UpdateState { get; private set; }
+        public UpdateItemResultState UpdateState { get; }
 
         /// <summary>
         /// Gets the updated value.
         /// </summary>
         /// <value>The updated value.</value>
-        public TCacheValue Value { get; private set; }
+        public TCacheValue Value { get; }
 
         /// <summary>
         /// Gets a value indicating whether a version conflict occurred during an update operation.
         /// </summary>
         /// <value><c>true</c> if a version conflict occurred; otherwise, <c>false</c>.</value>
-        public bool VersionConflictOccurred { get; private set; }
+        public bool VersionConflictOccurred { get; }
     }
 }

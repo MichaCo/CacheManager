@@ -13,7 +13,7 @@ namespace CacheManager.Config.Tests
         public static void CacheThreadTest(ICacheManager<string> cache, int seed)
         {
             var threads = 10;
-            var numItems = 100;
+            var numItems = 1000;
             var eventAddCount = 0;
             var eventRemoveCount = 0;
             var eventGetCount = 0;
@@ -101,8 +101,6 @@ namespace CacheManager.Config.Tests
                     {
                         var x = cache.Get(key + ta);
                     }
-
-                    Thread.Sleep(0);
 
                     if (t % 1000 == 0)
                     {

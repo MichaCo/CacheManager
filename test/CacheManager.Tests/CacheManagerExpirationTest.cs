@@ -66,7 +66,7 @@ namespace CacheManager.Tests
             {
                 var key = Guid.NewGuid().ToString();
                 var region = "region";
-                cache.Add(new CacheItem<object>(key, "value", region, ExpirationMode.None, default(TimeSpan)))
+                cache.Add(new CacheItem<object>(key, region, "value", ExpirationMode.None, default(TimeSpan)))
                     .Should().BeTrue();
 
                 cache.Expire(key, region, DateTimeOffset.UtcNow.AddMinutes(10));
@@ -105,7 +105,7 @@ namespace CacheManager.Tests
             {
                 var key = Guid.NewGuid().ToString();
                 var region = "region";
-                cache.Add(new CacheItem<object>(key, "value", region, ExpirationMode.None, default(TimeSpan)))
+                cache.Add(new CacheItem<object>(key, region, "value", ExpirationMode.None, default(TimeSpan)))
                     .Should().BeTrue();
 
                 cache.Expire(key, region, TimeSpan.FromMinutes(10));
@@ -144,7 +144,7 @@ namespace CacheManager.Tests
             {
                 var key = Guid.NewGuid().ToString();
                 var region = "region";
-                cache.Add(new CacheItem<object>(key, "value", region, ExpirationMode.Absolute, TimeSpan.FromMinutes(30)))
+                cache.Add(new CacheItem<object>(key, region, "value", ExpirationMode.Absolute, TimeSpan.FromMinutes(30)))
                     .Should().BeTrue();
 
                 cache.RemoveExpiration(key, region);

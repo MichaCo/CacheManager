@@ -54,7 +54,7 @@ namespace CacheManager.Redis
             {
                 if (configuration == null)
                 {
-                    throw new ArgumentNullException("configuration");
+                    throw new ArgumentNullException(nameof(configuration));
                 }
 
                 if (!Configurations.ContainsKey(configuration.Key))
@@ -77,7 +77,7 @@ namespace CacheManager.Redis
         {
             if (string.IsNullOrWhiteSpace(configurationName))
             {
-                throw new ArgumentNullException("configurationName");
+                throw new ArgumentNullException(nameof(configurationName));
             }
 
             if (!Configurations.ContainsKey(configurationName))
@@ -111,11 +111,11 @@ namespace CacheManager.Redis
         {
             if (string.IsNullOrWhiteSpace(configFileName))
             {
-                throw new ArgumentNullException("configFileName");
+                throw new ArgumentNullException(nameof(configFileName));
             }
             if (string.IsNullOrWhiteSpace(sectionName))
             {
-                throw new ArgumentNullException("sectionName");
+                throw new ArgumentNullException(nameof(sectionName));
             }
 
             if (!File.Exists(configFileName))
@@ -150,7 +150,7 @@ namespace CacheManager.Redis
         {
             if (section == null)
             {
-                throw new ArgumentNullException("section");
+                throw new ArgumentNullException(nameof(section));
             }
 
             foreach (var redisOption in section.Connections)
@@ -193,7 +193,7 @@ namespace CacheManager.Redis
         {
             if (string.IsNullOrWhiteSpace(sectionName))
             {
-                throw new ArgumentNullException("sectionName");
+                throw new ArgumentNullException(nameof(sectionName));
             }
 
             var section = ConfigurationManager.GetSection(sectionName) as RedisConfigurationSection;

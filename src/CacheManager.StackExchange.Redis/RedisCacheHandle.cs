@@ -359,11 +359,11 @@ namespace CacheManager.Redis
 
                 var cacheItem = string.IsNullOrWhiteSpace(region) ?
                         new CacheItem<TCacheValue>(key, value, expirationMode, expirationTimeout) :
-                        new CacheItem<TCacheValue>(key, value, region, expirationMode, expirationTimeout);
+                        new CacheItem<TCacheValue>(key, region, value, expirationMode, expirationTimeout);
 
                 if (createdItem.HasValue)
                 {
-                    cacheItem.CreatedUtc = new DateTime((long)createdItem);
+                    cacheItem = cacheItem.WithCreated(new DateTime((long)createdItem));
                 }
 
                 // update sliding

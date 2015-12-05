@@ -45,11 +45,11 @@ namespace CacheManager.Core
         {
             if (string.IsNullOrWhiteSpace(name))
             {
-                throw new ArgumentNullException("name");
+                throw new ArgumentNullException(nameof(name));
             }
             if (configuration == null)
             {
-                throw new ArgumentNullException("configuration");
+                throw new ArgumentNullException(nameof(configuration));
             }
 
             this.Name = name;
@@ -103,11 +103,7 @@ namespace CacheManager.Core
         /// Gets the configuration.
         /// </summary>
         /// <value>The configuration.</value>
-        public CacheManagerConfiguration Configuration
-        {
-            get;
-            private set;
-        }
+        public CacheManagerConfiguration Configuration { get; }
 
         /// <summary>
         /// Gets a list of cache handles currently registered within the cache manager.
@@ -117,26 +113,16 @@ namespace CacheManager.Core
         /// This list is read only, any changes to the returned list instance will not affect the
         /// state of the cache manager instance.
         /// </remarks>
-#if NET40
-        public ICollection<BaseCacheHandle<TCacheValue>> CacheHandles
-#else
-
-        public IReadOnlyCollection<BaseCacheHandle<TCacheValue>> CacheHandles
-#endif
-        {
-            get
-            {
-                return new ReadOnlyCollection<BaseCacheHandle<TCacheValue>>(
-                    new List<BaseCacheHandle<TCacheValue>>(
-                        this.cacheHandles));
-            }
-        }
+        public IEnumerable<BaseCacheHandle<TCacheValue>> CacheHandles => 
+            new ReadOnlyCollection<BaseCacheHandle<TCacheValue>>(
+                new List<BaseCacheHandle<TCacheValue>>(
+                    this.cacheHandles));
 
         /// <summary>
         /// Gets the cache name.
         /// </summary>
         /// <value>The name of the cache.</value>
-        public string Name { get; private set; }
+        public string Name { get; }
 
         /// <summary>
         /// Adds an item to the cache or, if the item already exists, updates the item using the
@@ -171,10 +157,8 @@ namespace CacheManager.Core
         /// If the cache does not use a distributed cache system. Update is doing exactly the same
         /// as Get plus Put.
         /// </remarks>
-        public TCacheValue AddOrUpdate(string key, TCacheValue addValue, Func<TCacheValue, TCacheValue> updateValue)
-        {
-            return this.AddOrUpdate(key, addValue, updateValue, new UpdateItemConfig());
-        }
+        public TCacheValue AddOrUpdate(string key, TCacheValue addValue, Func<TCacheValue, TCacheValue> updateValue) => 
+            this.AddOrUpdate(key, addValue, updateValue, new UpdateItemConfig());
 
         /// <summary>
         /// Adds an item to the cache or, if the item already exists, updates the item using the
@@ -211,10 +195,8 @@ namespace CacheManager.Core
         /// If the cache does not use a distributed cache system. Update is doing exactly the same
         /// as Get plus Put.
         /// </remarks>
-        public TCacheValue AddOrUpdate(string key, string region, TCacheValue addValue, Func<TCacheValue, TCacheValue> updateValue)
-        {
-            return this.AddOrUpdate(key, region, addValue, updateValue, new UpdateItemConfig());
-        }
+        public TCacheValue AddOrUpdate(string key, string region, TCacheValue addValue, Func<TCacheValue, TCacheValue> updateValue) =>
+            this.AddOrUpdate(key, region, addValue, updateValue, new UpdateItemConfig());
 
         /// <summary>
         /// Adds an item to the cache or, if the item already exists, updates the item using the
@@ -251,10 +233,8 @@ namespace CacheManager.Core
         /// If the cache does not use a distributed cache system. Update is doing exactly the same
         /// as Get plus Put.
         /// </remarks>
-        public TCacheValue AddOrUpdate(string key, TCacheValue addValue, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config)
-        {
-            return this.AddOrUpdate(new CacheItem<TCacheValue>(key, addValue), updateValue, config);
-        }
+        public TCacheValue AddOrUpdate(string key, TCacheValue addValue, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config) => 
+            this.AddOrUpdate(new CacheItem<TCacheValue>(key, addValue), updateValue, config);
 
         /// <summary>
         /// Adds an item to the cache or, if the item already exists, updates the item using the
@@ -292,10 +272,8 @@ namespace CacheManager.Core
         /// If the cache does not use a distributed cache system. Update is doing exactly the same
         /// as Get plus Put.
         /// </remarks>
-        public TCacheValue AddOrUpdate(string key, string region, TCacheValue addValue, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config)
-        {
-            return this.AddOrUpdate(new CacheItem<TCacheValue>(key, addValue, region), updateValue, config);
-        }
+        public TCacheValue AddOrUpdate(string key, string region, TCacheValue addValue, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config) =>
+            this.AddOrUpdate(new CacheItem<TCacheValue>(key, region, addValue), updateValue, config);
 
         /// <summary>
         /// Adds an item to the cache or, if the item already exists, updates the item using the
@@ -321,10 +299,8 @@ namespace CacheManager.Core
         /// <exception cref="System.ArgumentNullException">
         /// If <paramref name="addItem"/> or <paramref name="updateValue"/> are null.
         /// </exception>
-        public TCacheValue AddOrUpdate(CacheItem<TCacheValue> addItem, Func<TCacheValue, TCacheValue> updateValue)
-        {
-            return this.AddOrUpdate(addItem, updateValue, new UpdateItemConfig());
-        }
+        public TCacheValue AddOrUpdate(CacheItem<TCacheValue> addItem, Func<TCacheValue, TCacheValue> updateValue) =>
+            this.AddOrUpdate(addItem, updateValue, new UpdateItemConfig());
 
         /// <summary>
         /// Adds an item to the cache or, if the item already exists, updates the item using the
@@ -356,15 +332,15 @@ namespace CacheManager.Core
         {
             if (addItem == null)
             {
-                throw new ArgumentNullException("addItem");
+                throw new ArgumentNullException(nameof(addItem));
             }
             if (updateValue == null)
             {
-                throw new ArgumentNullException("updateValue");
+                throw new ArgumentNullException(nameof(updateValue));
             }
             if (config == null)
             {
-                throw new ArgumentNullException("config");
+                throw new ArgumentNullException(nameof(config));
             }
 
             return this.AddOrUpdateInternal(addItem, updateValue, config);
@@ -398,7 +374,7 @@ namespace CacheManager.Core
         {
             if (string.IsNullOrWhiteSpace(region))
             {
-                throw new ArgumentNullException("region");
+                throw new ArgumentNullException(nameof(region));
             }
 
             foreach (var handle in this.cacheHandles)
@@ -452,10 +428,8 @@ namespace CacheManager.Core
         /// <returns>
         /// A <see cref="System.String" /> that represents this instance.
         /// </returns>
-        public override string ToString()
-        {
-            return string.Format(CultureInfo.InvariantCulture, "{0} Handles: {1}", this.Name, this.cacheHandles.Length);
-        }
+        public override string ToString() =>
+            string.Format(CultureInfo.InvariantCulture, "{0} Handles: {1}", this.Name, this.cacheHandles.Length);
 
         /// <summary>
         /// Tries to update an existing key in the cache.
@@ -553,15 +527,15 @@ namespace CacheManager.Core
         {
             if (string.IsNullOrWhiteSpace(key))
             {
-                throw new ArgumentNullException("key");
+                throw new ArgumentNullException(nameof(key));
             }
             if (updateValue == null)
             {
-                throw new ArgumentNullException("updateValue");
+                throw new ArgumentNullException(nameof(updateValue));
             }
             if (config == null)
             {
-                throw new ArgumentNullException("config");
+                throw new ArgumentNullException(nameof(config));
             }
 
             return this.UpdateInternal(this.cacheHandles, key, updateValue, config, out value);
@@ -600,20 +574,20 @@ namespace CacheManager.Core
         {
             if (string.IsNullOrWhiteSpace(key))
             {
-                throw new ArgumentNullException("key");
+                throw new ArgumentNullException(nameof(key));
             }
 
             if (string.IsNullOrWhiteSpace(region))
             {
-                throw new ArgumentNullException("region");
+                throw new ArgumentNullException(nameof(region));
             }
             if (updateValue == null)
             {
-                throw new ArgumentNullException("updateValue");
+                throw new ArgumentNullException(nameof(updateValue));
             }
             if (config == null)
             {
-                throw new ArgumentNullException("config");
+                throw new ArgumentNullException(nameof(config));
             }
 
             return this.UpdateInternal(this.cacheHandles, key, region, updateValue, config, out value);
@@ -762,7 +736,7 @@ namespace CacheManager.Core
         {
             if (item == null)
             {
-                throw new ArgumentNullException("item");
+                throw new ArgumentNullException(nameof(item));
             }
 
             var result = false;
@@ -807,7 +781,7 @@ namespace CacheManager.Core
         {
             if (item == null)
             {
-                throw new ArgumentNullException("item");
+                throw new ArgumentNullException(nameof(item));
             }
 
             foreach (var handle in this.cacheHandles)
@@ -1179,7 +1153,7 @@ namespace CacheManager.Core
         {
             if (excludeIndex < 0 || excludeIndex >= this.cacheHandles.Length)
             {
-                throw new ArgumentOutOfRangeException("excludeIndex");
+                throw new ArgumentOutOfRangeException(nameof(excludeIndex));
             }
 
             for (int handleIndex = 0; handleIndex < this.cacheHandles.Length; handleIndex++)
@@ -1195,7 +1169,7 @@ namespace CacheManager.Core
         {
             if (excludeIndex < 0 || excludeIndex >= this.cacheHandles.Length)
             {
-                throw new ArgumentOutOfRangeException("excludeIndex");
+                throw new ArgumentOutOfRangeException(nameof(excludeIndex));
             }
 
             for (int handleIndex = 0; handleIndex < this.cacheHandles.Length; handleIndex++)
@@ -1218,7 +1192,7 @@ namespace CacheManager.Core
         {
             if (backPlate == null)
             {
-                throw new ArgumentNullException("backPlate");
+                throw new ArgumentNullException(nameof(backPlate));
             }
 
             this.cacheBackPlate = backPlate;
@@ -1347,7 +1321,7 @@ namespace CacheManager.Core
         {
             if (string.IsNullOrWhiteSpace(key))
             {
-                throw new ArgumentNullException("key");
+                throw new ArgumentNullException(nameof(key));
             }
 
             if (this.OnRemove != null)
