@@ -328,7 +328,7 @@ namespace CacheManager.Tests
             });
 
             // assert
-            act.ShouldThrow<ArgumentNullException>()
+            act.ShouldThrow<ArgumentException>()
                 .WithMessage("*Parameter name: name*");
         }
 
@@ -343,7 +343,7 @@ namespace CacheManager.Tests
             });
 
             // assert
-            act.ShouldThrow<ArgumentNullException>()
+            act.ShouldThrow<ArgumentException>()
                 .WithMessage("*Parameter name: configurationKey*");
         }
 
@@ -358,7 +358,7 @@ namespace CacheManager.Tests
             });
 
             // assert
-            act.ShouldThrow<ArgumentNullException>()
+            act.ShouldThrow<ArgumentException>()
                 .WithMessage("*Parameter name: configurationKey*");
         }
 
@@ -373,7 +373,7 @@ namespace CacheManager.Tests
             });
 
             // assert
-            act.ShouldThrow<ArgumentNullException>()
+            act.ShouldThrow<ArgumentException>()
                 .WithMessage("*Parameter name: host*");
         }
 

@@ -1,7 +1,7 @@
 ﻿using System;
-using CacheManager.Core.Configuration;
 using CacheManager.Couchbase;
 using Couchbase.Configuration.Client;
+using static CacheManager.Core.Utility.Guard;
 
 namespace CacheManager.Core
 {
@@ -21,14 +21,8 @@ namespace CacheManager.Core
         /// <exception cref="System.ArgumentNullException">If key or config are null.</exception>
         public static ConfigurationBuilderCachePart WithCouchbaseConfiguration(this ConfigurationBuilderCachePart part, string key, ClientConfiguration config)
         {
-            if (string.IsNullOrWhiteSpace(key))
-            {
-                throw new ArgumentNullException(nameof(key));
-            }
-            if (config == null)
-            {
-                throw new ArgumentNullException(nameof(config));
-            }
+            NotNullOrWhiteSpace(key, nameof(key));
+            NotNull(config, nameof(config));
 
             CouchbaseConfigurationManager.AddConfiguration(key, config);
             return part;
@@ -78,10 +72,7 @@ namespace CacheManager.Core
             string couchbaseConfigurationKey,
             bool isBackPlateSource)
         {
-            if (part == null)
-            {
-                throw new ArgumentNullException(nameof(part));
-            }
+            NotNull(part, nameof(part));
 
             return part.WithHandle(typeof(BucketCacheHandle<>), couchbaseConfigurationKey, isBackPlateSource);
         }
@@ -136,15 +127,8 @@ namespace CacheManager.Core
         /// </exception>
         public static ConfigurationBuilderCacheHandlePart WithCouchbaseCacheHandle(this ConfigurationBuilderCachePart part, string couchbaseConfigurationKey, string bucketName, bool isBackPlateSource)
         {
-            if (part == null)
-            {
-                throw new ArgumentNullException(nameof(part));
-            }
-
-            if (string.IsNullOrWhiteSpace(bucketName))
-            {
-                throw new ArgumentNullException(nameof(bucketName));
-            }
+            NotNull(part, nameof(part));
+            NotNullOrWhiteSpace(bucketName, nameof(bucketName));
 
             return part.WithHandle(typeof(BucketCacheHandle<>), couchbaseConfigurationKey + ":" + bucketName, isBackPlateSource);
         }

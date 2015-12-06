@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Globalization;
 using System.Reflection;
+using static CacheManager.Core.Utility.Guard;
 
 namespace CacheManager.Core.Internal
 {
@@ -158,10 +159,7 @@ namespace CacheManager.Core.Internal
         /// </exception>
         public virtual bool Add(CacheItem<TCacheValue> item)
         {
-            if (item == null)
-            {
-                throw new ArgumentNullException(nameof(item));
-            }
+            NotNull(item, nameof(item));
 
             return this.AddInternal(item);
         }
@@ -365,10 +363,7 @@ namespace CacheManager.Core.Internal
         /// <exception cref="ArgumentNullException">If the <paramref name="key"/> is null.</exception>
         public virtual CacheItem<TCacheValue> GetCacheItem(string key)
         {
-            if (string.IsNullOrWhiteSpace(key))
-            {
-                throw new ArgumentNullException(nameof(key));
-            }
+            NotNullOrWhiteSpace(key, nameof(key));
 
             return this.GetCacheItemInternal(key);
         }
@@ -384,15 +379,8 @@ namespace CacheManager.Core.Internal
         /// </exception>
         public virtual CacheItem<TCacheValue> GetCacheItem(string key, string region)
         {
-            if (string.IsNullOrWhiteSpace(key))
-            {
-                throw new ArgumentNullException(nameof(key));
-            }
-
-            if (string.IsNullOrWhiteSpace(region))
-            {
-                throw new ArgumentNullException(nameof(region));
-            }
+            NotNullOrWhiteSpace(key, nameof(key));
+            NotNullOrWhiteSpace(region, nameof(region));
 
             return this.GetCacheItemInternal(key, region);
         }
@@ -454,10 +442,7 @@ namespace CacheManager.Core.Internal
         /// </exception>
         public virtual void Put(CacheItem<TCacheValue> item)
         {
-            if (item == null)
-            {
-                throw new ArgumentNullException(nameof(item));
-            }
+            NotNull(item, nameof(item));
 
             this.PutInternal(item);
         }
@@ -472,10 +457,7 @@ namespace CacheManager.Core.Internal
         /// <exception cref="ArgumentNullException">If the <paramref name="key"/> is null.</exception>
         public virtual bool Remove(string key)
         {
-            if (string.IsNullOrWhiteSpace(key))
-            {
-                throw new ArgumentNullException(nameof(key));
-            }
+            NotNullOrWhiteSpace(key, nameof(key));
 
             return this.RemoveInternal(key);
         }
@@ -493,15 +475,8 @@ namespace CacheManager.Core.Internal
         /// </exception>
         public virtual bool Remove(string key, string region)
         {
-            if (string.IsNullOrWhiteSpace(key))
-            {
-                throw new ArgumentNullException(nameof(key));
-            }
-
-            if (string.IsNullOrWhiteSpace(region))
-            {
-                throw new ArgumentNullException(nameof(region));
-            }
+            NotNullOrWhiteSpace(key, nameof(key));
+            NotNullOrWhiteSpace(region, nameof(region));
 
             return this.RemoveInternal(key, region);
         }

@@ -5,6 +5,7 @@ using System.Runtime.Caching;
 using System.Text.RegularExpressions;
 using CacheManager.Core;
 using CacheManager.Core.Internal;
+using static CacheManager.Core.Utility.Guard;
 
 namespace CacheManager.SystemRuntimeCaching
 {
@@ -34,10 +35,7 @@ namespace CacheManager.SystemRuntimeCaching
         public MemoryCacheHandle(ICacheManager<TCacheValue> manager, CacheHandleConfiguration configuration)
             : base(manager, configuration)
         {
-            if (configuration == null)
-            {
-                throw new ArgumentNullException(nameof(configuration));
-            }
+            NotNull(configuration, nameof(configuration));
 
             this.cacheName = configuration.HandleName;
 
@@ -250,10 +248,7 @@ namespace CacheManager.SystemRuntimeCaching
 
         private string GetItemKey(string key, string region = null)
         {
-            if (string.IsNullOrWhiteSpace(key))
-            {
-                throw new ArgumentNullException(nameof(key));
-            }
+            NotNullOrWhiteSpace(key, nameof(key));
 
             if (string.IsNullOrWhiteSpace(region))
             {

@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
-using System.Globalization;
 using Couchbase;
 using Couchbase.Configuration.Client;
 using Couchbase.Configuration.Client.Providers;
 using Couchbase.Core;
+using static CacheManager.Core.Utility.Guard;
 
 namespace CacheManager.Couchbase
 {
@@ -29,14 +29,8 @@ namespace CacheManager.Couchbase
         /// <exception cref="System.ArgumentNullException">If name or configuration are null.</exception>
         public static void AddConfiguration(string name, ClientConfiguration configuration)
         {
-            if (string.IsNullOrWhiteSpace(name))
-            {
-                throw new ArgumentNullException(nameof(name));
-            }
-            if (configuration == null)
-            {
-                throw new ArgumentNullException(nameof(configuration));
-            }
+            NotNullOrWhiteSpace(name, nameof(name));
+            NotNull(configuration, nameof(configuration));
 
             if (!configurations.ContainsKey(name))
             {
@@ -55,10 +49,7 @@ namespace CacheManager.Couchbase
         /// </exception>
         public static ClientConfiguration GetConfiguration(string name)
         {
-            if (string.IsNullOrWhiteSpace(name))
-            {
-                throw new ArgumentNullException(nameof(name));
-            }
+            NotNullOrWhiteSpace(name, nameof(name));
 
             if (configurations.ContainsKey(name))
             {
@@ -66,10 +57,7 @@ namespace CacheManager.Couchbase
             }
 
             var section = ConfigurationManager.GetSection(name) as CouchbaseClientSection;
-            if (section == null)
-            {
-                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, "No configuration or section found for configuration: {0}.", name));
-            }
+            EnsureNotNull(section, "No configuration or section found for configuration: {0}.", name);
 
             var clientConfiguration = new ClientConfiguration(section);
             configurations.Add(name, clientConfiguration);
@@ -85,21 +73,14 @@ namespace CacheManager.Couchbase
         /// <exception cref="System.InvalidOperationException">No bucket with the name found.</exception>
         public static BucketConfiguration GetBucketConfiguration(ClientConfiguration clientConfiguration, string bucketName)
         {
-            if (clientConfiguration == null)
-            {
-                throw new ArgumentNullException(nameof(clientConfiguration));
-            }
-
-            if (string.IsNullOrWhiteSpace(bucketName))
-            {
-                throw new ArgumentException("Bucket's name cannot be empty", nameof(bucketName));
-            }
+            NotNull(clientConfiguration, nameof(clientConfiguration));
+            NotNullOrWhiteSpace(bucketName, nameof(bucketName));
 
             BucketConfiguration configuration;
-            if (!clientConfiguration.BucketConfigs.TryGetValue(bucketName, out configuration))
-            {
-                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, "No bucket with bucket name {0} found.", bucketName));
-            }
+            Ensure(
+                clientConfiguration.BucketConfigs.TryGetValue(bucketName, out configuration),
+                "No bucket with bucket name {0} found.",
+                bucketName);
 
             return configuration;
         }
@@ -123,15 +104,8 @@ namespace CacheManager.Couchbase
         /// </exception>
         internal static IBucket GetBucket(ClientConfiguration clientConfiguration, string configurationName, string bucketName)
         {
-            if (string.IsNullOrWhiteSpace(bucketName))
-            {
-                throw new ArgumentNullException(nameof(bucketName));
-            }
-
-            if (clientConfiguration == null)
-            {
-                throw new ArgumentNullException(nameof(clientConfiguration));
-            }
+            NotNullOrWhiteSpace(bucketName, nameof(bucketName));
+            NotNull(clientConfiguration, nameof(clientConfiguration));
 
             IBucket bucket;
 

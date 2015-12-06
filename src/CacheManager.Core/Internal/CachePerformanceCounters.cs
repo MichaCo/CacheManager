@@ -4,6 +4,7 @@
     using System;
     using System.Diagnostics;
     using System.Threading;
+    using static CacheManager.Core.Utility.Guard;
 
     internal class CachePerformanceCounters<T> : IDisposable
     {
@@ -30,15 +31,9 @@
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Mobility", "CA1601:DoNotUseTimersThatPreventPowerStateChanges", Justification = "If perfCounters are enabled, we can live with the power consumption...")]
         public CachePerformanceCounters(string cacheName, string handleName, CacheStats<T> stats)
         {
-            if (string.IsNullOrWhiteSpace(cacheName))
-            {
-                throw new ArgumentNullException(nameof(cacheName));
-            }
+            NotNullOrWhiteSpace(cacheName, nameof(cacheName));
 
-            if (string.IsNullOrWhiteSpace(handleName))
-            {
-                throw new ArgumentNullException(nameof(handleName));
-            }
+            NotNullOrWhiteSpace(handleName, nameof(handleName));
 
             string processName = Process.GetCurrentProcess().ProcessName;
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using static CacheManager.Core.Utility.Guard;
 
 namespace CacheManager.Core.Internal
 {
@@ -24,20 +25,9 @@ namespace CacheManager.Core.Internal
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Not in this case.")]
         protected BaseCacheHandle(ICacheManager<TCacheValue> manager, CacheHandleConfiguration configuration)
         {
-            if (configuration == null)
-            {
-                throw new ArgumentNullException(nameof(configuration));
-            }
-
-            if (manager == null)
-            {
-                throw new ArgumentNullException(nameof(manager));
-            }
-
-            if (string.IsNullOrWhiteSpace(configuration.HandleName))
-            {
-                throw new ArgumentException("Configuration name cannot be empty.");
-            }
+            NotNull(configuration, nameof(configuration));
+            NotNull(manager, nameof(manager));
+            NotNullOrWhiteSpace(configuration.HandleName, nameof(configuration.HandleName));
 
             this.Configuration = configuration;
 
@@ -129,10 +119,7 @@ namespace CacheManager.Core.Internal
         /// </remarks>
         public virtual UpdateItemResult<TCacheValue> Update(string key, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config)
         {
-            if (updateValue == null)
-            {
-                throw new ArgumentNullException(nameof(updateValue));
-            }
+            NotNull(updateValue, nameof(updateValue));
 
             var original = this.GetCacheItem(key);
             if (original == null)
@@ -174,10 +161,8 @@ namespace CacheManager.Core.Internal
         /// </remarks>
         public virtual UpdateItemResult<TCacheValue> Update(string key, string region, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config)
         {
-            if (updateValue == null)
-            {
-                throw new ArgumentNullException(nameof(updateValue));
-            }
+            NotNull(updateValue, nameof(updateValue));
+
             var original = this.GetCacheItem(key, region);
             if (original == null)
             {
@@ -248,10 +233,7 @@ namespace CacheManager.Core.Internal
         /// </exception>
         protected virtual CacheItem<TCacheValue> GetItemExpiration(CacheItem<TCacheValue> item)
         {
-            if (item == null)
-            {
-                throw new ArgumentNullException(nameof(item));
-            }
+            NotNull(item, nameof(item));
 
             // logic should be that the item setting overrules the handle setting if the item
             // doesn't define a mode (value is None) it should use the handle's setting. if the

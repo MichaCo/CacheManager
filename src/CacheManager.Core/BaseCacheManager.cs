@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
 using CacheManager.Core.Internal;
+using static CacheManager.Core.Utility.Guard;
 
 namespace CacheManager.Core
 {
@@ -43,14 +44,8 @@ namespace CacheManager.Core
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "nope")]
         public BaseCacheManager(string name, CacheManagerConfiguration configuration)
         {
-            if (string.IsNullOrWhiteSpace(name))
-            {
-                throw new ArgumentNullException(nameof(name));
-            }
-            if (configuration == null)
-            {
-                throw new ArgumentNullException(nameof(configuration));
-            }
+            NotNullOrWhiteSpace(name, nameof(name));
+            NotNull(configuration, nameof(configuration));
 
             this.Name = name;
             this.Configuration = configuration;
@@ -330,18 +325,9 @@ namespace CacheManager.Core
         /// </exception>
         public TCacheValue AddOrUpdate(CacheItem<TCacheValue> addItem, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config)
         {
-            if (addItem == null)
-            {
-                throw new ArgumentNullException(nameof(addItem));
-            }
-            if (updateValue == null)
-            {
-                throw new ArgumentNullException(nameof(updateValue));
-            }
-            if (config == null)
-            {
-                throw new ArgumentNullException(nameof(config));
-            }
+            NotNull(addItem, nameof(addItem));
+            NotNull(updateValue, nameof(updateValue));
+            NotNull(config, nameof(config));
 
             return this.AddOrUpdateInternal(addItem, updateValue, config);
         }
@@ -372,10 +358,7 @@ namespace CacheManager.Core
         /// <exception cref="System.ArgumentNullException">If region is null.</exception>
         public override void ClearRegion(string region)
         {
-            if (string.IsNullOrWhiteSpace(region))
-            {
-                throw new ArgumentNullException(nameof(region));
-            }
+            NotNullOrWhiteSpace(region, nameof(region));
 
             foreach (var handle in this.cacheHandles)
             {
@@ -521,18 +504,9 @@ namespace CacheManager.Core
         /// </remarks>
         public bool TryUpdate(string key, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config, out TCacheValue value)
         {
-            if (string.IsNullOrWhiteSpace(key))
-            {
-                throw new ArgumentNullException(nameof(key));
-            }
-            if (updateValue == null)
-            {
-                throw new ArgumentNullException(nameof(updateValue));
-            }
-            if (config == null)
-            {
-                throw new ArgumentNullException(nameof(config));
-            }
+            NotNullOrWhiteSpace(key, nameof(key));
+            NotNull(updateValue, nameof(updateValue));
+            NotNull(config, nameof(config));
 
             return this.UpdateInternal(this.cacheHandles, key, updateValue, config, out value);
         }
@@ -568,23 +542,10 @@ namespace CacheManager.Core
         /// </remarks>
         public bool TryUpdate(string key, string region, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config, out TCacheValue value)
         {
-            if (string.IsNullOrWhiteSpace(key))
-            {
-                throw new ArgumentNullException(nameof(key));
-            }
-
-            if (string.IsNullOrWhiteSpace(region))
-            {
-                throw new ArgumentNullException(nameof(region));
-            }
-            if (updateValue == null)
-            {
-                throw new ArgumentNullException(nameof(updateValue));
-            }
-            if (config == null)
-            {
-                throw new ArgumentNullException(nameof(config));
-            }
+            NotNullOrWhiteSpace(key, nameof(key));
+            NotNullOrWhiteSpace(region, nameof(region));
+            NotNull(updateValue, nameof(updateValue));
+            NotNull(config, nameof(config));
 
             return this.UpdateInternal(this.cacheHandles, key, region, updateValue, config, out value);
         }
@@ -726,10 +687,7 @@ namespace CacheManager.Core
         /// <exception cref="System.ArgumentNullException">If item is null.</exception>
         protected internal override bool AddInternal(CacheItem<TCacheValue> item)
         {
-            if (item == null)
-            {
-                throw new ArgumentNullException(nameof(item));
-            }
+            NotNull(item, nameof(item));
 
             var result = false;
 
@@ -771,10 +729,7 @@ namespace CacheManager.Core
         /// <exception cref="System.ArgumentNullException">If item is null.</exception>
         protected internal override void PutInternal(CacheItem<TCacheValue> item)
         {
-            if (item == null)
-            {
-                throw new ArgumentNullException(nameof(item));
-            }
+            NotNull(item, nameof(item));
 
             foreach (var handle in this.cacheHandles)
             {
@@ -1178,10 +1133,7 @@ namespace CacheManager.Core
         /// </exception>
         private void RegisterCacheBackPlate(CacheBackPlate backPlate)
         {
-            if (backPlate == null)
-            {
-                throw new ArgumentNullException(nameof(backPlate));
-            }
+            NotNull(backPlate, nameof(backPlate));
 
             this.cacheBackPlate = backPlate;
 
@@ -1307,10 +1259,7 @@ namespace CacheManager.Core
         /// <exception cref="System.ArgumentNullException">If key is null.</exception>
         private void TriggerOnRemove(string key, string region)
         {
-            if (string.IsNullOrWhiteSpace(key))
-            {
-                throw new ArgumentNullException(nameof(key));
-            }
+            NotNullOrWhiteSpace(key, nameof(key));
 
             if (this.OnRemove != null)
             {

@@ -101,7 +101,7 @@ namespace CacheManager.Tests
             Action act = () => ConfigurationBuilder.LoadConfiguration("cacheManager", string.Empty);
 
             // assert
-            act.ShouldThrow<ArgumentNullException>()
+            act.ShouldThrow<ArgumentException>()
                 .WithMessage("*Parameter name: configName*");
         }
 

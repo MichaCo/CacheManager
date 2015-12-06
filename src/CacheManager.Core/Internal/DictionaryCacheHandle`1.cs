@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Linq;
+using static CacheManager.Core.Utility.Guard;
 
 namespace CacheManager.Core.Internal
 {
@@ -41,10 +42,7 @@ namespace CacheManager.Core.Internal
         /// <exception cref="System.ArgumentNullException">If region is null.</exception>
         public override void ClearRegion(string region)
         {
-            if (string.IsNullOrWhiteSpace(region))
-            {
-                throw new ArgumentNullException(nameof(region));
-            }
+            NotNullOrWhiteSpace(region, nameof(region));
 
             var key = string.Concat(region, ":");
             foreach (var item in this.cache.Where(p => p.Key.StartsWith(key, StringComparison.Ordinal)))
@@ -125,10 +123,7 @@ namespace CacheManager.Core.Internal
         /// <exception cref="System.ArgumentNullException">If item is null.</exception>
         protected override bool AddInternalPrepared(CacheItem<TCacheValue> item)
         {
-            if (item == null)
-            {
-                throw new ArgumentNullException(nameof(item));
-            }
+            NotNull(item, nameof(item));
 
             var key = GetKey(item.Key, item.Region);
             return this.cache.TryAdd(key, item);
@@ -173,10 +168,7 @@ namespace CacheManager.Core.Internal
         /// <exception cref="System.ArgumentNullException">If item is null.</exception>
         protected override void PutInternalPrepared(CacheItem<TCacheValue> item)
         {
-            if (item == null)
-            {
-                throw new ArgumentNullException(nameof(item));
-            }
+            NotNull(item, nameof(item));
 
             this.cache[GetKey(item.Key, item.Region)] = item;
         }
@@ -214,10 +206,7 @@ namespace CacheManager.Core.Internal
         /// <exception cref="System.ArgumentException">If Key is empty.</exception>
         private static string GetKey(string key, string region)
         {
-            if (string.IsNullOrWhiteSpace(key))
-            {
-                throw new ArgumentException("Key should not be empty.", nameof(key));
-            }
+            NotNullOrWhiteSpace(key, nameof(key));
 
             if (string.IsNullOrWhiteSpace(region))
             {
@@ -246,15 +235,8 @@ namespace CacheManager.Core.Internal
 
         private UpdateItemResult<TCacheValue> UpdateInternal(string key, string region, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config)
         {
-            if (updateValue == null)
-            {
-                throw new ArgumentNullException(nameof(updateValue));
-            }
-
-            if (config == null)
-            {
-                throw new ArgumentNullException(nameof(config));
-            }
+            NotNull(updateValue, nameof(updateValue));
+            NotNull(config, nameof(config));
 
             var retries = 0;
             do

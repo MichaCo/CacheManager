@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Reflection;
+using static CacheManager.Core.Utility.Guard;
 
 namespace CacheManager.Core
 {
@@ -84,10 +85,7 @@ namespace CacheManager.Core
         /// </exception>
         public static ICacheManager<TCacheValue> Build<TCacheValue>(string cacheName, Action<ConfigurationBuilderCachePart> settings)
         {
-            if (settings == null)
-            {
-                throw new ArgumentNullException(nameof(settings));
-            }
+            NotNull(settings, nameof(settings));
 
             var part = new ConfigurationBuilderCachePart();
             settings(part);
@@ -130,10 +128,7 @@ namespace CacheManager.Core
         /// </exception>
         public static object Build(Type cacheValueType, string cacheName, Action<ConfigurationBuilderCachePart> settings)
         {
-            if (cacheValueType == null)
-            {
-                throw new ArgumentNullException(nameof(cacheValueType));
-            }
+            NotNull(cacheValueType, nameof(cacheValueType));
 #if !NET40
             var factoryType = typeof(CacheFactory).GetTypeInfo();
             var buildMethod = factoryType.GetDeclaredMethods("Build").First(p => p.IsGenericMethod);
@@ -344,10 +339,7 @@ namespace CacheManager.Core
         /// </exception>
         public static object FromConfiguration(Type cacheValueType, string cacheName, CacheManagerConfiguration configuration)
         {
-            if (cacheValueType == null)
-            {
-                throw new ArgumentNullException(nameof(cacheValueType));
-            }
+            NotNull(cacheValueType, nameof(cacheValueType));
 
             var type = typeof(BaseCacheManager<>).MakeGenericType(new[] { cacheValueType });
             return Activator.CreateInstance(type, new object[] { cacheName, configuration });

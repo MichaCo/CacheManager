@@ -1,6 +1,6 @@
 ﻿using System;
-using CacheManager.Core.Configuration;
 using CacheManager.Redis;
+using static CacheManager.Core.Utility.Guard;
 
 namespace CacheManager.Core
 {
@@ -21,10 +21,8 @@ namespace CacheManager.Core
         /// <exception cref="System.ArgumentNullException">If config is null.</exception>
         public static ConfigurationBuilderCachePart WithRedisConfiguration(this ConfigurationBuilderCachePart part, string configurationKey, Action<RedisConfigurationBuilder> config)
         {
-            if (config == null)
-            {
-                throw new ArgumentNullException(nameof(config));
-            }
+            NotNull(config, nameof(config));
+
             var builder = new RedisConfigurationBuilder(configurationKey);
             config(builder);
             RedisConfigurations.AddConfiguration(builder.Build());
@@ -45,15 +43,9 @@ namespace CacheManager.Core
         /// </exception>
         public static ConfigurationBuilderCachePart WithRedisConfiguration(this ConfigurationBuilderCachePart part, string configurationKey, string connectionString)
         {
-            if (string.IsNullOrWhiteSpace(configurationKey))
-            {
-                throw new ArgumentNullException(nameof(configurationKey));
-            }
+            NotNullOrWhiteSpace(configurationKey, nameof(configurationKey));
 
-            if (string.IsNullOrWhiteSpace(connectionString))
-            {
-                throw new ArgumentNullException(nameof(connectionString));
-            }
+            NotNullOrWhiteSpace(connectionString, nameof(connectionString));
 
             RedisConfigurations.AddConfiguration(new RedisConfiguration(configurationKey, connectionString));
             return part;
@@ -77,10 +69,7 @@ namespace CacheManager.Core
         /// <returns>The builder instance.</returns>
         public static ConfigurationBuilderCachePart WithRedisBackPlate(this ConfigurationBuilderCachePart part, string redisConfigurationId)
         {
-            if (part == null)
-            {
-                throw new ArgumentNullException(nameof(part));
-            }
+            NotNull(part, nameof(part));
 
             return part.WithBackPlate<RedisCacheBackPlate>(redisConfigurationId);
         }
@@ -124,10 +113,7 @@ namespace CacheManager.Core
         /// </exception>
         public static ConfigurationBuilderCacheHandlePart WithRedisCacheHandle(this ConfigurationBuilderCachePart part, string redisConfigurationId, bool isBackPlateSource)
         {
-            if (part == null)
-            {
-                throw new ArgumentNullException(nameof(part));
-            }
+            NotNull(part, nameof(part));
 
             return part.WithHandle(typeof(RedisCacheHandle<>), redisConfigurationId, isBackPlateSource);
         }

@@ -4,6 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using CacheManager.Core;
 using Xunit;
+using static CacheManager.Core.Utility.Guard;
 
 namespace CacheManager.Tests
 {
@@ -22,10 +23,7 @@ namespace CacheManager.Tests
         [MemberData("TestCacheManagers")]
         public void Thread_RandomAccess(ICacheManager<object> cache)
         {
-            if (cache == null)
-            {
-                throw new ArgumentNullException(nameof(cache));
-            }
+            NotNull(cache, nameof(cache));
 
             foreach (var handle in cache.CacheHandles)
             {

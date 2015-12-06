@@ -3,6 +3,7 @@ using System.Collections.Specialized;
 using System.Reflection;
 using System.Web.Caching;
 using CacheManager.Core;
+using static CacheManager.Core.Utility.Guard;
 
 namespace CacheManager.Web
 {
@@ -27,10 +28,7 @@ namespace CacheManager.Web
         {
             get
             {
-                if (!isInitialized)
-                {
-                    throw new InvalidOperationException("Output cache provider has not yet been initialized.");
-                }
+                Ensure(isInitialized, "Output cache provider has not yet been initialized.");
 
                 return cacheInstance;
             }
@@ -74,6 +72,8 @@ namespace CacheManager.Web
         /// <exception cref="System.InvalidOperationException">Might be re thrown.</exception>
         public override void Initialize(string name, NameValueCollection config)
         {
+            NotNull(config, nameof(config));
+
             try
             {
                 if (!isInitialized)
@@ -82,10 +82,6 @@ namespace CacheManager.Web
                     {
                         if (!isInitialized)
                         {
-                            if (config == null)
-                            {
-                                throw new ArgumentNullException(nameof(config));
-                            }
 
                             var cacheName = config["cacheName"];
                             if (string.IsNullOrWhiteSpace(cacheName))

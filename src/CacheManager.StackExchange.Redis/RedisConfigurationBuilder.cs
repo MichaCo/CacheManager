@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using static CacheManager.Core.Utility.Guard;
 
 namespace CacheManager.Redis
 {
@@ -25,10 +26,7 @@ namespace CacheManager.Redis
         /// <exception cref="System.ArgumentNullException">If configurationKey is null.</exception>
         public RedisConfigurationBuilder(string configurationKey)
         {
-            if (string.IsNullOrWhiteSpace(configurationKey))
-            {
-                throw new ArgumentNullException(nameof(configurationKey));
-            }
+            NotNullOrWhiteSpace(configurationKey, nameof(configurationKey));
 
             this.key = configurationKey;
         }

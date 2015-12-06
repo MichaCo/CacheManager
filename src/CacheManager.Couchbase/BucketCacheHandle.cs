@@ -7,6 +7,7 @@ using CacheManager.Core.Internal;
 using Couchbase.Configuration.Client;
 using Couchbase.Core;
 using Newtonsoft.Json.Linq;
+using static CacheManager.Core.Utility.Guard;
 
 namespace CacheManager.Couchbase
 {
@@ -49,18 +50,12 @@ namespace CacheManager.Couchbase
         public BucketCacheHandle(ICacheManager<TCacheValue> manager, CacheHandleConfiguration configuration)
             : base(manager, configuration)
         {
-            if (configuration == null)
-            {
-                throw new ArgumentNullException(nameof(configuration));
-            }
+            NotNull(configuration, nameof(configuration));
 
             // we can configure the bucket name by having "<configKey>:<bucketName>" as handle's
             // name value
             var nameParts = configuration.HandleName.Split(new[] { ":" }, StringSplitOptions.RemoveEmptyEntries);
-            if (nameParts.Length == 0)
-            {
-                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, "Handle name is not valid {0}", configuration.HandleName));
-            }
+            Ensure(nameParts.Length > 0, "Handle name is not valid {0}", configuration.HandleName);
 
             this.configurationName = nameParts[0];
 
@@ -113,10 +108,7 @@ namespace CacheManager.Couchbase
         /// </returns>
         protected override bool AddInternalPrepared(CacheItem<TCacheValue> item)
         {
-            if (item == null)
-            {
-                throw new ArgumentNullException(nameof(item));
-            }
+            NotNull(item, nameof(item));
 
             var fullKey = GetKey(item.Key, item.Region);
             if (item.ExpirationMode != ExpirationMode.None)
@@ -190,10 +182,7 @@ namespace CacheManager.Couchbase
         /// <param name="item">The <c>CacheItem</c> to be added to the cache.</param>
         protected override void PutInternalPrepared(CacheItem<TCacheValue> item)
         {
-            if (item == null)
-            {
-                throw new ArgumentNullException(nameof(item));
-            }
+            NotNull(item, nameof(item));
 
             var fullKey = GetKey(item.Key, item.Region);
             if (item.ExpirationMode != ExpirationMode.None)

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using static CacheManager.Core.Utility.Guard;
 
 namespace CacheManager.Core.Internal
 {
@@ -46,15 +47,8 @@ namespace CacheManager.Core.Internal
         /// </exception>
         public CacheStats(string cacheName, string handleName, bool enabled = true, bool enablePerformanceCounters = false)
         {
-            if (string.IsNullOrWhiteSpace(cacheName))
-            {
-                throw new ArgumentNullException(nameof(cacheName));
-            }
-
-            if (string.IsNullOrWhiteSpace(handleName))
-            {
-                throw new ArgumentNullException(nameof(handleName));
-            }
+            NotNullOrWhiteSpace(cacheName, nameof(cacheName));
+            NotNullOrWhiteSpace(handleName, nameof(handleName));
 
             this.lockObject = new object();
 
@@ -142,10 +136,7 @@ namespace CacheManager.Core.Internal
                 return 0L;
             }
 
-            if (string.IsNullOrWhiteSpace(region))
-            {
-                throw new ArgumentNullException(nameof(region));
-            }
+            NotNullOrWhiteSpace(region, nameof(region));
 
             var counter = this.GetCounter(region);
             return counter.Get(type);
@@ -204,10 +195,7 @@ namespace CacheManager.Core.Internal
                 return;
             }
 
-            if (item == null)
-            {
-                throw new ArgumentNullException(nameof(item));
-            }
+            NotNull(item, nameof(item));
 
             foreach (var counter in this.GetWorkingCounters(item.Region))
             {
@@ -330,10 +318,7 @@ namespace CacheManager.Core.Internal
                 return;
             }
 
-            if (item == null)
-            {
-                throw new ArgumentNullException(nameof(item));
-            }
+            NotNull(item, nameof(item));
 
             foreach (var counter in this.GetWorkingCounters(item.Region))
             {
@@ -378,15 +363,8 @@ namespace CacheManager.Core.Internal
                 return;
             }
 
-            if (string.IsNullOrWhiteSpace(key))
-            {
-                throw new ArgumentNullException(nameof(key));
-            }
-
-            if (result == null)
-            {
-                throw new ArgumentNullException(nameof(result));
-            }
+            NotNullOrWhiteSpace(key, nameof(key));
+            NotNull(result, nameof(result));
 
             foreach (var counter in this.GetWorkingCounters(region))
             {
@@ -411,10 +389,7 @@ namespace CacheManager.Core.Internal
 
         private CacheStatsCounter GetCounter(string key)
         {
-            if (string.IsNullOrWhiteSpace(key))
-            {
-                throw new ArgumentNullException(key);
-            }
+            NotNullOrWhiteSpace(key, nameof(key));
 
             CacheStatsCounter counter = null;
             if (!this.counters.TryGetValue(key, out counter))

@@ -1,4 +1,5 @@
 ﻿using System;
+using static CacheManager.Core.Utility.Guard;
 
 namespace CacheManager.Core
 {
@@ -14,10 +15,7 @@ namespace CacheManager.Core
         /// <exception cref="System.ArgumentNullException">If handleName is null.</exception>
         public CacheHandleConfiguration(string handleName)
         {
-            if (string.IsNullOrWhiteSpace(handleName))
-            {
-                throw new ArgumentNullException(nameof(handleName));
-            }
+            NotNullOrWhiteSpace(handleName, nameof(handleName));
 
             this.HandleName = handleName;
         }

@@ -2,6 +2,7 @@
 using System.Globalization;
 using System.Text;
 using static CacheManager.Core.Internal.BackPlateAction;
+using static CacheManager.Core.Utility.Guard;
 
 namespace CacheManager.Core.Internal
 {
@@ -38,10 +39,7 @@ namespace CacheManager.Core.Internal
     {
         private BackPlateMessage(string owner, BackPlateAction action)
         {
-            if (string.IsNullOrWhiteSpace(owner))
-            {
-                throw new ArgumentNullException(nameof(owner));
-            }
+            NotNullOrWhiteSpace(owner, nameof(owner));
 
             this.OwnerIdentity = owner;
             this.Action = action;
@@ -50,10 +48,7 @@ namespace CacheManager.Core.Internal
         private BackPlateMessage(string owner, BackPlateAction action, string key)
             : this(owner, action)
         {
-            if (string.IsNullOrWhiteSpace(key))
-            {
-                throw new ArgumentNullException(nameof(key));
-            }
+            NotNullOrWhiteSpace(key, nameof(key));
 
             this.Key = key;
         }
@@ -61,10 +56,7 @@ namespace CacheManager.Core.Internal
         private BackPlateMessage(string owner, BackPlateAction action, string key, string region)
             : this(owner, action, key)
         {
-            if (string.IsNullOrWhiteSpace(region))
-            {
-                throw new ArgumentNullException(nameof(region));
-            }
+            NotNullOrWhiteSpace(region, nameof(region));
 
             this.Region = region;
         }
@@ -103,10 +95,7 @@ namespace CacheManager.Core.Internal
         /// <exception cref="System.ArgumentException">Parameter message cannot be null or empty.</exception>
         public static BackPlateMessage Deserialize(string message)
         {
-            if (string.IsNullOrWhiteSpace(message))
-            {
-                throw new ArgumentException("Parameter message cannot be null or empty.");
-            }
+            NotNullOrWhiteSpace(message, nameof(message));
 
             var tokens = message.Split(new[] { ":" }, StringSplitOptions.RemoveEmptyEntries);
 
@@ -165,10 +154,7 @@ namespace CacheManager.Core.Internal
         /// <exception cref="System.ArgumentNullException">If region is null.</exception>
         public static BackPlateMessage ForClearRegion(string owner, string region)
         {
-            if (string.IsNullOrWhiteSpace(region))
-            {
-                throw new ArgumentNullException(nameof(region));
-            }
+            NotNullOrWhiteSpace(region, nameof(region));
 
             return new BackPlateMessage(owner, ClearRegion)
             {

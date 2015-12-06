@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using static CacheManager.Core.Utility.Guard;
 
 namespace CacheManager.Core
 {
@@ -90,14 +91,8 @@ namespace CacheManager.Core
 
         internal CacheManagerConfiguration WithBackPlate(Type backPlateType, string backPlateName)
         {
-            if (backPlateType == null)
-            {
-                throw new ArgumentNullException(nameof(backPlateType));
-            }
-            if (string.IsNullOrWhiteSpace(backPlateName))
-            {
-                throw new ArgumentNullException(nameof(backPlateName));
-            }
+            NotNull(backPlateType, nameof(backPlateType));
+            NotNullOrWhiteSpace(backPlateName, nameof(backPlateName));
 
             return new CacheManagerConfiguration(this.CacheUpdateMode, this.MaxRetries, this.RetryTimeout, backPlateType, backPlateName);
         }

@@ -1060,7 +1060,7 @@ namespace CacheManager.Tests
                 Action act = () => result = cache["key", string.Empty];
 
                 // assert
-                act.ShouldThrow<ArgumentNullException>()
+                act.ShouldThrow<ArgumentException>()
                     .WithMessage("*Parameter name: region");
             }
         }

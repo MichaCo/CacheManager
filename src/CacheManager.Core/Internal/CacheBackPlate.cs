@@ -1,7 +1,8 @@
-﻿namespace CacheManager.Core.Internal
-{
-    using System;
+﻿using System;
+using static CacheManager.Core.Utility.Guard;
 
+namespace CacheManager.Core.Internal
+{
     /// <summary>
     /// In CacheManager, a cache back plate is used to keep in process and distributed caches in
     /// sync. <br/> If the cache manager runs inside multiple nodes or applications accessing the
@@ -33,14 +34,8 @@
         /// <exception cref="System.ArgumentException">Parameter cacheName cannot be null or empty.</exception>
         protected CacheBackPlate(CacheManagerConfiguration configuration, string cacheName)
         {
-            if (configuration == null)
-            {
-                throw new ArgumentNullException(nameof(configuration));
-            }
-            if (string.IsNullOrWhiteSpace(cacheName))
-            {
-                throw new ArgumentException("Parameter cacheName cannot be null or empty.");
-            }
+            NotNull(configuration, nameof(configuration));
+            NotNullOrWhiteSpace(cacheName, nameof(cacheName));
 
             this.CacheConfiguration = configuration;
             this.Name = configuration.BackPlateName;
@@ -131,10 +126,7 @@
         /// <exception cref="System.ArgumentNullException">If key is null.</exception>
         public void OnChange(string key)
         {
-            if (string.IsNullOrWhiteSpace(key))
-            {
-                throw new ArgumentNullException(nameof(key));
-            }
+            NotNullOrWhiteSpace(key, nameof(key));
 
             this.onChangeKey(key);
         }
@@ -147,14 +139,8 @@
         /// <exception cref="System.ArgumentNullException">If key or region are null.</exception>
         public void OnChange(string key, string region)
         {
-            if (string.IsNullOrWhiteSpace(key))
-            {
-                throw new ArgumentNullException(nameof(key));
-            }
-            if (string.IsNullOrWhiteSpace(region))
-            {
-                throw new ArgumentNullException(nameof(region));
-            }
+            NotNullOrWhiteSpace(key, nameof(key));
+            NotNullOrWhiteSpace(region, nameof(region));
 
             this.onChangeKeyRegion(key, region);
         }
@@ -171,10 +157,7 @@
         /// <exception cref="System.ArgumentNullException">If region is null.</exception>
         public void OnClearRegion(string region)
         {
-            if (string.IsNullOrWhiteSpace(region))
-            {
-                throw new ArgumentNullException(nameof(region));
-            }
+            NotNullOrWhiteSpace(region, nameof(region));
 
             this.onClearRegion(region);
         }
@@ -186,10 +169,7 @@
         /// <exception cref="System.ArgumentNullException">If key is null.</exception>
         public void OnRemove(string key)
         {
-            if (string.IsNullOrWhiteSpace(key))
-            {
-                throw new ArgumentNullException(nameof(key));
-            }
+            NotNullOrWhiteSpace(key, nameof(key));
 
             this.onRemoveKey(key);
         }
@@ -202,14 +182,8 @@
         /// <exception cref="System.ArgumentNullException">If key or region are null.</exception>
         public void OnRemove(string key, string region)
         {
-            if (string.IsNullOrWhiteSpace(key))
-            {
-                throw new ArgumentNullException(nameof(key));
-            }
-            if (string.IsNullOrWhiteSpace(region))
-            {
-                throw new ArgumentNullException(nameof(region));
-            }
+            NotNullOrWhiteSpace(key, nameof(key));
+            NotNullOrWhiteSpace(region, nameof(region));
 
             this.onRemoveKeyRegion(key, region);
         }
@@ -222,10 +196,7 @@
         /// <exception cref="System.ArgumentNullException">Id change is null.</exception>
         internal void SubscribeChanged(Action<string> change)
         {
-            if (change == null)
-            {
-                throw new ArgumentNullException(nameof(change));
-            }
+            NotNull(change, nameof(change));
 
             this.onChangeKey = change;
         }
@@ -238,10 +209,7 @@
         /// <exception cref="System.ArgumentNullException">If change is null.</exception>
         internal void SubscribeChanged(Action<string, string> change)
         {
-            if (change == null)
-            {
-                throw new ArgumentNullException(nameof(change));
-            }
+            NotNull(change, nameof(change));
 
             this.onChangeKeyRegion = change;
         }
@@ -254,10 +222,7 @@
         /// <exception cref="System.ArgumentNullException">If clear is null.</exception>
         internal void SubscribeClear(Action clear)
         {
-            if (clear == null)
-            {
-                throw new ArgumentNullException(nameof(clear));
-            }
+            NotNull(clear, nameof(clear));
 
             this.onClear = clear;
         }
@@ -270,10 +235,7 @@
         /// <exception cref="System.ArgumentNullException">If clearRegion is null.</exception>
         internal void SubscribeClearRegion(Action<string> clearRegion)
         {
-            if (clearRegion == null)
-            {
-                throw new ArgumentNullException(nameof(clearRegion));
-            }
+            NotNull(clearRegion, nameof(clearRegion));
 
             this.onClearRegion = clearRegion;
         }
@@ -286,10 +248,7 @@
         /// <exception cref="System.ArgumentNullException">If remove is null.</exception>
         internal void SubscribeRemove(Action<string> remove)
         {
-            if (remove == null)
-            {
-                throw new ArgumentNullException(nameof(remove));
-            }
+            NotNull(remove, nameof(remove));
 
             this.onRemoveKey = remove;
         }
@@ -302,10 +261,7 @@
         /// <exception cref="System.ArgumentNullException">If remove is null.</exception>
         internal void SubscribeRemove(Action<string, string> remove)
         {
-            if (remove == null)
-            {
-                throw new ArgumentNullException(nameof(remove));
-            }
+            NotNull(remove, nameof(remove));
 
             this.onRemoveKeyRegion = remove;
         }

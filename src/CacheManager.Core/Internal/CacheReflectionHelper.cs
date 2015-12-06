@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
-using CacheManager.Core.Configuration;
+using static CacheManager.Core.Utility.Guard;
 
 namespace CacheManager.Core.Internal
 {
@@ -46,10 +46,8 @@ namespace CacheManager.Core.Internal
 
         internal static CacheBackPlate CreateBackPlate<TCacheValue>(BaseCacheManager<TCacheValue> manager)
         {
-            if (manager == null)
-            {
-                throw new ArgumentNullException(nameof(manager));
-            }
+            NotNull(manager, nameof(manager));
+
             if (manager.Configuration == null)
             {
                 throw new ArgumentException("Manager's configuration must not be null.", nameof(manager));

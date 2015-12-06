@@ -1,6 +1,6 @@
 ﻿using System;
-using CacheManager.Core.Configuration;
 using CacheManager.Memcached;
+using static CacheManager.Core.Utility.Guard;
 
 namespace CacheManager.Core
 {
@@ -34,10 +34,7 @@ namespace CacheManager.Core
         /// </exception>
         public static ConfigurationBuilderCacheHandlePart WithMemcachedCacheHandle(this ConfigurationBuilderCachePart part, string handleName, bool isBackPlateSource)
         {
-            if (part == null)
-            {
-                throw new ArgumentNullException(nameof(part));
-            }
+            NotNull(part, nameof(part));
 
             return part.WithHandle(typeof(MemcachedCacheHandle<>), handleName, isBackPlateSource);
         }

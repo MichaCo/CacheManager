@@ -11,6 +11,8 @@ using Couchbase.Configuration.Client;
 #if DNX451
 #endif
 
+using static CacheManager.Core.Utility.Guard;
+
 namespace CacheManager.Tests
 {
     [ExcludeFromCodeCoverage]
@@ -265,6 +267,7 @@ namespace CacheManager.Tests
 
         public static string GetCfgFileName(string fileName)
         {
+            NotNullOrWhiteSpace(fileName, nameof(fileName));
 #if DNX451
             // var appEnv = CallContextServiceLocator.Locator.ServiceProvider
             //    .GetService(typeof(IApplicationEnvironment)) as IApplicationEnvironment;
@@ -273,11 +276,6 @@ namespace CacheManager.Tests
 #else
             var basePath = AppDomain.CurrentDomain.BaseDirectory;
 #endif
-
-            if (string.IsNullOrWhiteSpace(fileName))
-            {
-                throw new ArgumentException("File name should not be empty", nameof(fileName));
-            }
 
             return basePath + (fileName.StartsWith("/") ? fileName : "/" + fileName);
         }

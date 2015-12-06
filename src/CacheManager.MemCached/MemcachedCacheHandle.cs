@@ -11,6 +11,7 @@ using Enyim.Caching;
 using Enyim.Caching.Configuration;
 using Enyim.Caching.Memcached;
 using Enyim.Caching.Memcached.Results;
+using static CacheManager.Core.Utility.Guard;
 
 namespace CacheManager.Memcached
 {
@@ -55,15 +56,9 @@ namespace CacheManager.Memcached
         public MemcachedCacheHandle(ICacheManager<TCacheValue> manager, CacheHandleConfiguration configuration)
             : base(manager, configuration)
         {
-            if (configuration == null)
-            {
-                throw new ArgumentNullException(nameof(configuration));
-            }
+            NotNull(configuration, nameof(configuration));
 
-            if (!typeof(TCacheValue).IsSerializable)
-            {
-                throw new InvalidOperationException("The cache value type must be serializable but " + typeof(TCacheValue).ToString() + " is not.");
-            }
+            Ensure(typeof(TCacheValue).IsSerializable, "The cache value type must be serializable but {0} is not.", typeof(TCacheValue).ToString());
 
             // initialize memcached client with section name which must be equal to handle name...
             // Default is "enyim.com/memcached"
@@ -264,10 +259,7 @@ namespace CacheManager.Memcached
         /// <returns>The result.</returns>
         protected virtual IStoreOperationResult Store(StoreMode mode, CacheItem<TCacheValue> item)
         {
-            if (item == null)
-            {
-                throw new ArgumentNullException(nameof(item));
-            }
+            NotNull(item, nameof(item));
 
             var key = GetKey(item.Key, item.Region);
 

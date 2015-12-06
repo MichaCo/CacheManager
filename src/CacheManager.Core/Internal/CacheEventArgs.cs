@@ -1,4 +1,5 @@
 ﻿using System;
+using static CacheManager.Core.Utility.Guard;
 
 namespace CacheManager.Core.Internal
 {
@@ -15,10 +16,7 @@ namespace CacheManager.Core.Internal
         /// <exception cref="System.ArgumentNullException">If key is null.</exception>
         public CacheActionEventArgs(string key, string region)
         {
-            if (string.IsNullOrWhiteSpace(key))
-            {
-                throw new ArgumentNullException(nameof(key));
-            }
+            NotNullOrWhiteSpace(key, nameof(key));
 
             this.Key = key;
             this.Region = region;
@@ -56,10 +54,7 @@ namespace CacheManager.Core.Internal
         /// <exception cref="System.ArgumentNullException">If region is null.</exception>
         public CacheClearRegionEventArgs(string region)
         {
-            if (string.IsNullOrWhiteSpace(region))
-            {
-                throw new ArgumentNullException(nameof(region));
-            }
+            NotNullOrWhiteSpace(region, nameof(region));
 
             this.Region = region;
         }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Globalization;
 using System.IO;
+using static CacheManager.Core.Utility.Guard;
 
 namespace CacheManager.Redis
 {
@@ -52,10 +53,7 @@ namespace CacheManager.Redis
         {
             lock (configLock)
             {
-                if (configuration == null)
-                {
-                    throw new ArgumentNullException(nameof(configuration));
-                }
+                NotNull(configuration, nameof(configuration));
 
                 if (!Configurations.ContainsKey(configuration.Key))
                 {
@@ -75,10 +73,7 @@ namespace CacheManager.Redis
         /// </exception>
         public static RedisConfiguration GetConfiguration(string configurationName)
         {
-            if (string.IsNullOrWhiteSpace(configurationName))
-            {
-                throw new ArgumentNullException(nameof(configurationName));
-            }
+            NotNullOrWhiteSpace(configurationName, nameof(configurationName));
 
             if (!Configurations.ContainsKey(configurationName))
             {
@@ -109,20 +104,10 @@ namespace CacheManager.Redis
         /// </exception>
         public static void LoadConfiguration(string configFileName, string sectionName)
         {
-            if (string.IsNullOrWhiteSpace(configFileName))
-            {
-                throw new ArgumentNullException(nameof(configFileName));
-            }
-            if (string.IsNullOrWhiteSpace(sectionName))
-            {
-                throw new ArgumentNullException(nameof(sectionName));
-            }
+            NotNullOrWhiteSpace(configFileName, nameof(configFileName));
+            NotNullOrWhiteSpace(sectionName, nameof(sectionName));
 
-            if (!File.Exists(configFileName))
-            {
-                throw new InvalidOperationException(
-                    string.Format(CultureInfo.InvariantCulture, "Configuration file not found [{0}].", configFileName));
-            }
+            Ensure(File.Exists(configFileName), "Configuration file not found [{0}].", configFileName);
 
             var fileConfig = new ExeConfigurationFileMap();
             fileConfig.ExeConfigFilename = configFileName; // setting exe config file name, this is the one the GetSection method expects.
@@ -132,11 +117,7 @@ namespace CacheManager.Redis
 
             // use the opened configuration and load our section
             var section = cfg.GetSection(sectionName) as RedisConfigurationSection;
-            if (section == null)
-            {
-                throw new InvalidOperationException(
-                    string.Format(CultureInfo.InvariantCulture, "No section with name {1} found in file {0}", configFileName, sectionName));
-            }
+            EnsureNotNull(section, "No section with name {1} found in file {0}", configFileName, sectionName);
 
             LoadConfiguration(section);
         }
@@ -148,10 +129,7 @@ namespace CacheManager.Redis
         /// <exception cref="System.ArgumentNullException">If section is null.</exception>
         public static void LoadConfiguration(RedisConfigurationSection section)
         {
-            if (section == null)
-            {
-                throw new ArgumentNullException(nameof(section));
-            }
+            NotNull(section, nameof(section));
 
             foreach (var redisOption in section.Connections)
             {
@@ -191,10 +169,7 @@ namespace CacheManager.Redis
         /// <exception cref="System.ArgumentNullException">If sectionName is null.</exception>
         public static void LoadConfiguration(string sectionName)
         {
-            if (string.IsNullOrWhiteSpace(sectionName))
-            {
-                throw new ArgumentNullException(nameof(sectionName));
-            }
+            NotNullOrWhiteSpace(sectionName, nameof(sectionName));
 
             var section = ConfigurationManager.GetSection(sectionName) as RedisConfigurationSection;
             LoadConfiguration(section);

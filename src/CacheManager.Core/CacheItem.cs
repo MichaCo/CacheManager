@@ -2,6 +2,7 @@
 #if !PORTABLE
 using System.Runtime.Serialization;
 #endif
+using static CacheManager.Core.Utility.Guard;
 
 namespace CacheManager.Core
 {
@@ -38,10 +39,7 @@ namespace CacheManager.Core
         public CacheItem(string key, string region, T value)
             : this(key, region, value, null, null, null)
         {
-            if (string.IsNullOrWhiteSpace(region))
-            {
-                throw new ArgumentNullException(nameof(region));
-            }
+            NotNullOrWhiteSpace(region, nameof(region));
         }
 
         /// <summary>
@@ -69,10 +67,7 @@ namespace CacheManager.Core
         public CacheItem(string key, string region, T value,  ExpirationMode expiration, TimeSpan timeout)
             : this(key, region, value, expiration, timeout, null)
         {
-            if (string.IsNullOrWhiteSpace(region))
-            {
-                throw new ArgumentNullException(nameof(region));
-            }
+            NotNullOrWhiteSpace(region, nameof(region));
         }
 
         /// <summary>
@@ -91,10 +86,7 @@ namespace CacheManager.Core
         /// <exception cref="System.ArgumentNullException">If info is null.</exception>
         protected CacheItem(SerializationInfo info, StreamingContext context)
         {
-            if (info == null)
-            {
-                throw new ArgumentNullException(nameof(info));
-            }
+            NotNull(info, nameof(info));
 
             this.Key = info.GetString(nameof(this.Key));
             this.Value = (T)info.GetValue(nameof(this.Value), typeof(T));
@@ -109,15 +101,8 @@ namespace CacheManager.Core
 
         private CacheItem(string key, string region, T value, ExpirationMode? expiration, TimeSpan? timeout, DateTime? created, DateTime? lastAccessed = null)
         {
-            if (string.IsNullOrWhiteSpace(key))
-            {
-                throw new ArgumentNullException(nameof(key));
-            }
-
-            if (value == null)
-            {
-                throw new ArgumentNullException(nameof(value));
-            }
+            NotNullOrWhiteSpace(key, nameof(key));
+            NotNull(value, nameof(value));
 
             this.Key = key;
             this.Region = region;
@@ -193,10 +178,7 @@ namespace CacheManager.Core
         /// <exception cref="System.ArgumentNullException">If info is null.</exception>
         public virtual void GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            if (info == null)
-            {
-                throw new ArgumentNullException(nameof(info));
-            }
+            NotNull(info, nameof(info));
 
             info.AddValue(nameof(this.Key), this.Key);
             info.AddValue(nameof(this.Value), this.Value);

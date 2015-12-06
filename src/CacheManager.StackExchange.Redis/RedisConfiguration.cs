@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using static CacheManager.Core.Utility.Guard;
 
 namespace CacheManager.Redis
 {
@@ -42,15 +43,8 @@ namespace CacheManager.Redis
             int connectionTimeout = 5000,
             bool allowAdmin = false)
         {
-            if (string.IsNullOrWhiteSpace(key))
-            {
-                throw new ArgumentNullException(nameof(key));
-            }
-
-            if (endpoints == null)
-            {
-                throw new ArgumentNullException(nameof(endpoints));
-            }
+            NotNullOrWhiteSpace(key, nameof(key));
+            NotNull(endpoints, nameof(endpoints));
 
             if (endpoints.Count == 0)
             {
@@ -177,10 +171,7 @@ namespace CacheManager.Redis
         /// <exception cref="System.ArgumentNullException">If host is null.</exception>
         public ServerEndPoint(string host, int port)
         {
-            if (string.IsNullOrWhiteSpace(host))
-            {
-                throw new ArgumentNullException(nameof(host));
-            }
+            NotNullOrWhiteSpace(host, nameof(host));
 
             this.Host = host;
             this.Port = port;

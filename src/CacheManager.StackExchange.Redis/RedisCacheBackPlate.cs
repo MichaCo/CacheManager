@@ -4,6 +4,7 @@ using System.Linq;
 using CacheManager.Core;
 using CacheManager.Core.Internal;
 using StackRedis = StackExchange.Redis;
+using static CacheManager.Core.Utility.Guard;
 
 namespace CacheManager.Redis
 {
@@ -29,10 +30,7 @@ namespace CacheManager.Redis
         public RedisCacheBackPlate(CacheManagerConfiguration configuration, string cacheName)
             : base(configuration, cacheName)
         {
-            if (configuration == null)
-            {
-                throw new ArgumentNullException(nameof(configuration));
-            }
+            NotNull(configuration, nameof(configuration));
 
             this.channelName = string.Format(
                 CultureInfo.InvariantCulture,

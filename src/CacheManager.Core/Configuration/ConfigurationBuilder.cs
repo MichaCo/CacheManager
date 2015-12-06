@@ -4,16 +4,17 @@ using System.Globalization;
 using System.Linq;
 using CacheManager.Core.Internal;
 
+#if !PORTABLE
+using System.Configuration;
+using System.IO;
+using System.Text.RegularExpressions;
+using CacheManager.Core.Configuration;
+#endif
+
+using static CacheManager.Core.Utility.Guard;
+
 namespace CacheManager.Core
 {
-#if !PORTABLE
-
-    using System.Configuration;
-    using System.IO;
-    using System.Text.RegularExpressions;
-    using CacheManager.Core.Configuration;
-
-#endif
 
     /// <summary>
     /// Helper class to load cache manager configurations from file or to build new configurations
@@ -43,10 +44,7 @@ namespace CacheManager.Core
         /// <returns>The <c>CacheManagerConfiguration</c>.</returns>
         public static CacheManagerConfiguration BuildConfiguration(Action<ConfigurationBuilderCachePart> settings)
         {
-            if (settings == null)
-            {
-                throw new ArgumentNullException(nameof(settings));
-            }
+            NotNull(settings, nameof(settings));
 
             var part = new ConfigurationBuilderCachePart();
             settings(part);
@@ -81,20 +79,11 @@ namespace CacheManager.Core
         /// <see cref="CacheManagerConfiguration"/>
         public static CacheManagerConfiguration LoadConfiguration(string sectionName, string configName)
         {
-            if (string.IsNullOrWhiteSpace(sectionName))
-            {
-                throw new ArgumentNullException(nameof(sectionName));
-            }
-            if (string.IsNullOrWhiteSpace(configName))
-            {
-                throw new ArgumentNullException(nameof(configName));
-            }
+            NotNullOrWhiteSpace(sectionName, nameof(sectionName));
+            NotNullOrWhiteSpace(configName, nameof(configName));
 
             var section = ConfigurationManager.GetSection(sectionName) as CacheManagerSection;
-            if (section == null)
-            {
-                throw new InvalidOperationException("No section defined with name " + sectionName);
-            }
+            EnsureNotNull(section, "No section defined with name " + sectionName);
 
             return LoadFromSection(section, configName);
         }
@@ -139,26 +128,11 @@ namespace CacheManager.Core
         /// <see cref="CacheManagerConfiguration"/>
         public static CacheManagerConfiguration LoadConfigurationFile(string configFileName, string sectionName, string configName)
         {
-            if (string.IsNullOrWhiteSpace(configFileName))
-            {
-                throw new ArgumentNullException(nameof(configFileName));
-            }
+            NotNullOrWhiteSpace(configFileName, nameof(configFileName));
+            NotNullOrWhiteSpace(sectionName, nameof(sectionName));
+            NotNullOrWhiteSpace(configName, nameof(configName));
 
-            if (string.IsNullOrWhiteSpace(sectionName))
-            {
-                throw new ArgumentNullException(nameof(sectionName));
-            }
-
-            if (string.IsNullOrWhiteSpace(configName))
-            {
-                throw new ArgumentNullException(nameof(configName));
-            }
-
-            if (!File.Exists(configFileName))
-            {
-                throw new InvalidOperationException(
-                    string.Format(CultureInfo.InvariantCulture, "Configuration file not found [{0}].", configFileName));
-            }
+            Ensure(File.Exists(configFileName), "Configuration file not found [{0}].", configFileName);
 
             var fileConfig = new ExeConfigurationFileMap();
             fileConfig.ExeConfigFilename = configFileName; // setting exe config file name, this is the one the GetSection method expects.
@@ -168,11 +142,7 @@ namespace CacheManager.Core
 
             // use the opened configuration and load our section
             var section = cfg.GetSection(sectionName) as CacheManagerSection;
-            if (section == null)
-            {
-                throw new InvalidOperationException(
-                    string.Format(CultureInfo.InvariantCulture, "No section with name {1} found in file {0}", configFileName, sectionName));
-            }
+            EnsureNotNull(section, "No section with name {1} found in file {0}", configFileName, sectionName);
 
             return LoadFromSection(section, configName);
         }
@@ -182,17 +152,11 @@ namespace CacheManager.Core
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA2204:Literals should be spelled correctly", MessageId = "BackPlateType", Justification = "no")]
         internal static CacheManagerConfiguration LoadFromSection(CacheManagerSection section, string configName)
         {
-            if (string.IsNullOrWhiteSpace(configName))
-            {
-                throw new ArgumentNullException(nameof(configName));
-            }
+            NotNullOrWhiteSpace(configName, nameof(configName));
 
             var handleDefsSection = section.CacheHandleDefinitions;
 
-            if (handleDefsSection.Count == 0)
-            {
-                throw new InvalidOperationException("There are no cache handles defined.");
-            }
+            Ensure(handleDefsSection.Count > 0, "There are no cache handles defined.");
 
             // load handle definitions as lookup
             var handleDefs = new SortedList<string, CacheHandleConfiguration>();
@@ -215,11 +179,7 @@ namespace CacheManager.Core
             // retrieve the handles collection with the correct name
             CacheManagerHandleCollection managerCfg = section.CacheManagers.FirstOrDefault(p => p.Name.Equals(configName, StringComparison.OrdinalIgnoreCase));
 
-            if (managerCfg == null)
-            {
-                throw new InvalidOperationException(
-                    string.Format(CultureInfo.InvariantCulture, "No cache manager configuration found for name [{0}]", configName));
-            }
+            EnsureNotNull(managerCfg, "No cache manager configuration found for name [{0}]", configName);
 
             int? maxRetries = managerCfg.MaximumRetries;
             if (maxRetries.HasValue && maxRetries.Value <= 0)
@@ -258,11 +218,11 @@ namespace CacheManager.Core
             foreach (CacheManagerHandle handleItem in managerCfg)
             {
                 var normRefId = handleItem.RefHandleId.ToUpper(CultureInfo.InvariantCulture);
-                if (!handleDefs.ContainsKey(normRefId))
-                {
-                    throw new InvalidOperationException(
-                        string.Format(CultureInfo.InvariantCulture, "Referenced cache handle [{0}] cannot be found in cache handles definition.", handleItem.RefHandleId));
-                }
+
+                Ensure(
+                    handleDefs.ContainsKey(normRefId), 
+                    "Referenced cache handle [{0}] cannot be found in cache handles definition.", 
+                    handleItem.RefHandleId);
 
                 var handleDef = handleDefs[normRefId];
 
@@ -307,11 +267,7 @@ namespace CacheManager.Core
                 cfg.CacheHandleConfigurations.Add(handle);
             }
 
-            if (cfg.CacheHandleConfigurations.Count == 0)
-            {
-                throw new InvalidOperationException(
-                    string.Format(CultureInfo.InvariantCulture, "There are no valid cache handles linked to the cache manager configuration [{0}]", configName));
-            }
+            Ensure(cfg.CacheHandleConfigurations.Count > 0, "There are no valid cache handles linked to the cache manager configuration [{0}]", configName);
 
             return cfg;
         }
@@ -493,10 +449,7 @@ namespace CacheManager.Core
         public ConfigurationBuilderCachePart WithBackPlate<TBackPlate>(string name)
             where TBackPlate : CacheBackPlate
         {
-            if (string.IsNullOrWhiteSpace(name))
-            {
-                throw new ArgumentNullException(nameof(name));
-            }
+            NotNullOrWhiteSpace(name, nameof(name));
 
             this.Configuration = this.Configuration.WithBackPlate(typeof(TBackPlate), name);
             return this;
@@ -542,15 +495,8 @@ namespace CacheManager.Core
         /// </exception>
         public ConfigurationBuilderCacheHandlePart WithHandle(Type cacheHandleBaseType, string handleName, bool isBackPlateSource)
         {
-            if (cacheHandleBaseType == null)
-            {
-                throw new ArgumentNullException(nameof(cacheHandleBaseType));
-            }
-
-            if (string.IsNullOrWhiteSpace(handleName))
-            {
-                throw new ArgumentNullException(nameof(handleName));
-            }
+            NotNull(cacheHandleBaseType, nameof(cacheHandleBaseType));
+            NotNullOrWhiteSpace(handleName, nameof(handleName));
 
             var handleCfg = new CacheHandleConfiguration(handleName)
             {
@@ -583,10 +529,7 @@ namespace CacheManager.Core
         /// </exception>
         public ConfigurationBuilderCachePart WithMaxRetries(int retries)
         {
-            if (retries <= 0)
-            {
-                throw new InvalidOperationException("Maximum number of retries must be greater than 0.");
-            }
+            Ensure(retries > 0, "Maximum number of retries must be greater than 0.");
 
             this.Configuration.MaxRetries = retries;
             return this;
@@ -606,10 +549,7 @@ namespace CacheManager.Core
         /// </exception>
         public ConfigurationBuilderCachePart WithRetryTimeout(int timeoutMillis)
         {
-            if (timeoutMillis < 0)
-            {
-                throw new InvalidOperationException("Retry timeout must be greater than or equal to zero.");
-            }
+            Ensure(timeoutMillis >= 0, "Retry timeout must be greater than or equal to zero.");
 
             this.Configuration.RetryTimeout = timeoutMillis;
             return this;
