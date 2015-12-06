@@ -26,7 +26,7 @@ namespace CacheManager.Core.Internal
         private readonly bool isPerformanceCounterEnabled;
         private readonly bool isStatsEnabled;
         private readonly object lockObject;
-#if !PORTABLE
+#if !PORTABLE && !DOTNET5_2
         private readonly CachePerformanceCounters<TCacheValue> performanceCounters;
 #endif
 
@@ -57,7 +57,7 @@ namespace CacheManager.Core.Internal
             this.isPerformanceCounterEnabled = enablePerformanceCounters;
             this.counters = new Dictionary<string, CacheStatsCounter>();
 
-#if !PORTABLE
+#if !PORTABLE && !DOTNET5_2
             if (this.isPerformanceCounterEnabled)
             {
                 this.performanceCounters = new CachePerformanceCounters<TCacheValue>(cacheName, handleName, this);
@@ -378,7 +378,7 @@ namespace CacheManager.Core.Internal
         {
             if (disposeManaged)
             {
-#if !PORTABLE
+#if !PORTABLE && !DOTNET5_2
                 if (this.isPerformanceCounterEnabled)
                 {
                     this.performanceCounters.Dispose();

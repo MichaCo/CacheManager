@@ -1,5 +1,5 @@
 ﻿using System;
-#if !PORTABLE
+#if !PORTABLE && !DOTNET5_2
 using System.Runtime.Serialization;
 #endif
 using static CacheManager.Core.Utility.Guard;
@@ -11,7 +11,7 @@ namespace CacheManager.Core
     /// information needed by the cache handles and manager.
     /// </summary>
     /// <typeparam name="T">The type of the cache value.</typeparam>
-#if !PORTABLE
+#if !PORTABLE && !DOTNET5_2
     [Serializable]
     public class CacheItem<T> : ISerializable
 #else
@@ -77,7 +77,7 @@ namespace CacheManager.Core
         {
         }
 
-#if !PORTABLE
+#if !PORTABLE && !DOTNET5_2
         /// <summary>
         /// Initializes a new instance of the <see cref="CacheItem{T}"/> class.
         /// </summary>
@@ -163,7 +163,7 @@ namespace CacheManager.Core
         /// <value>The type of the cache value.</value>
         public Type ValueType { get; }
 
-#if !PORTABLE
+#if !PORTABLE && !DOTNET5_2
         /// <summary>
         /// Populates a <see cref="T:System.Runtime.Serialization.SerializationInfo"/> with the data
         /// needed to serialize the target object.

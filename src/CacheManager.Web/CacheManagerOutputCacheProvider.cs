@@ -82,7 +82,6 @@ namespace CacheManager.Web
                     {
                         if (!isInitialized)
                         {
-
                             var cacheName = config["cacheName"];
                             if (string.IsNullOrWhiteSpace(cacheName))
                             {

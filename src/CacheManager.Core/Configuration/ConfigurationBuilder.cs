@@ -4,7 +4,7 @@ using System.Globalization;
 using System.Linq;
 using CacheManager.Core.Internal;
 
-#if !PORTABLE
+#if !PORTABLE && !DOTNET5_2
 using System.Configuration;
 using System.IO;
 using System.Text.RegularExpressions;
@@ -15,7 +15,6 @@ using static CacheManager.Core.Utility.Guard;
 
 namespace CacheManager.Core
 {
-
     /// <summary>
     /// Helper class to load cache manager configurations from file or to build new configurations
     /// in a fluent way.
@@ -51,7 +50,7 @@ namespace CacheManager.Core
             return part.Configuration;
         }
 
-#if !PORTABLE
+#if !PORTABLE && !DOTNET5_2
 
         /// <summary>
         /// Loads a configuration from web.config or app.config.
@@ -83,7 +82,7 @@ namespace CacheManager.Core
             NotNullOrWhiteSpace(configName, nameof(configName));
 
             var section = ConfigurationManager.GetSection(sectionName) as CacheManagerSection;
-            EnsureNotNull(section, "No section defined with name " + sectionName);
+            EnsureNotNull(section, "No section defined with name {0}.", sectionName);
 
             return LoadFromSection(section, configName);
         }
@@ -220,8 +219,8 @@ namespace CacheManager.Core
                 var normRefId = handleItem.RefHandleId.ToUpper(CultureInfo.InvariantCulture);
 
                 Ensure(
-                    handleDefs.ContainsKey(normRefId), 
-                    "Referenced cache handle [{0}] cannot be found in cache handles definition.", 
+                    handleDefs.ContainsKey(normRefId),
+                    "Referenced cache handle [{0}] cannot be found in cache handles definition.",
                     handleItem.RefHandleId);
 
                 var handleDef = handleDefs[normRefId];

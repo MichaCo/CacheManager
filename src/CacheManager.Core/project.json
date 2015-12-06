@@ -26,8 +26,7 @@
         "System.Configuration": ""
       }
     },
-    "dotnet5.2": {
-      "compilationOptions": { "define": [ "PORTABLE" ] },
+    "dotnet5.2": {      
       "dependencies": {
         "System.Collections": "4.0.10",
         "System.Linq": "4.0.0",

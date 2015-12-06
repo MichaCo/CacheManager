@@ -3,8 +3,8 @@ using System.Globalization;
 using System.Linq;
 using CacheManager.Core;
 using CacheManager.Core.Internal;
-using StackRedis = StackExchange.Redis;
 using static CacheManager.Core.Utility.Guard;
+using StackRedis = StackExchange.Redis;
 
 namespace CacheManager.Redis
 {

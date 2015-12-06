@@ -1,6 +1,6 @@
 ﻿namespace CacheManager.Core.Configuration
 {
-#if !PORTABLE
+#if !PORTABLE && !DOTNET5_2
 
     using System;
     using System.Collections.Generic;

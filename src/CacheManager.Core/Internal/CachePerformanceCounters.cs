@@ -1,6 +1,6 @@
 ﻿namespace CacheManager.Core.Internal
 {
-#if !PORTABLE
+#if !PORTABLE && !DOTNET5_2
     using System;
     using System.Diagnostics;
     using System.Threading;

@@ -117,7 +117,7 @@ namespace CacheManager.Tests
 
             // assert
             act.ShouldThrow<InvalidOperationException>()
-                .WithMessage("*No section defined with name " + sectionName);
+                .WithMessage("*No section defined with name " + sectionName + ".");
         }
 
         [Fact]

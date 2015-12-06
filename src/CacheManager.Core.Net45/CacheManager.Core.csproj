@@ -136,6 +136,9 @@
     <Compile Include="..\CacheManager.Core\UpdateItemResult.cs">
       <Link>UpdateItemResult.cs</Link>
     </Compile>
+    <Compile Include="..\CacheManager.Core\Utility\Guard.cs">
+      <Link>Utility\Guard.cs</Link>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

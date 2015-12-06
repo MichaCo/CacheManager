@@ -113,7 +113,7 @@ namespace CacheManager.Core.Internal
                         handle.ToString()));
             }
 
-#if PORTABLE
+#if PORTABLE || DOTNET5_2
             var handleInfo = handle.GetTypeInfo();
             if (handleInfo.IsGenericType && !handleInfo.IsGenericTypeDefinition)
 #else

@@ -1,21 +1,50 @@
 ﻿using System;
 using System.Globalization;
+#if !PORTABLE
+    using System.Diagnostics;
+#endif
 
 namespace CacheManager.Core.Utility
 {
+    /// <summary>
+    /// Utility class to do <c>null</c> and other checks.
+    /// </summary>
     public static class Guard
     {
-        public static T NotNull<T>(T value, string name)
+        /// <summary>
+        /// Validates that <paramref name="value"/> is not <c>null</c> and otherwise throws an exception.
+        /// <c>Structs</c> are allowed although <paramref name="value"/> cannot be <c>null</c> in this case.
+        /// </summary>
+        /// <typeparam name="T">The type of <paramref name="value"/>.</typeparam>
+        /// <param name="value">The parameter value to validate.</param>
+        /// <param name="parameterName">The parameter name.</param>
+        /// <returns>The <paramref name="value"/>, if not <c>null</c>.</returns>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="value"/> is <c>null</c>.</exception>
+#if !PORTABLE
+        [DebuggerStepThrough]
+#endif
+        public static T NotNull<T>([ValidatedNotNull]T value, string parameterName)
         {
             if (value == null)
             {
-                throw new ArgumentNullException(name);
+                throw new ArgumentNullException(parameterName);
             }
 
             return value;
         }
-        
-        public static string NotNullOrEmpty(string value, string name)
+
+        /// <summary>
+        /// Validates that <paramref name="value"/> is not null or empty and otherwise throws an exception.
+        /// </summary>
+        /// <param name="value">The parameter value to validate.</param>
+        /// <param name="name">The parameter name.</param>
+        /// <returns>The <paramref name="value"/>, if not null or empty.</returns>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="value"/> is <c>null</c>.</exception>
+        /// <exception cref="ArgumentException">Thrown if <paramref name="value"/> is empty.</exception>
+#if !PORTABLE
+        [DebuggerStepThrough]
+#endif
+        public static string NotNullOrEmpty([ValidatedNotNull]string value, string name)
         {
             if (value == null)
             {
@@ -29,7 +58,19 @@ namespace CacheManager.Core.Utility
             return value;
         }
 
-        public static string NotNullOrWhiteSpace(string value, string name)
+        /// <summary>
+        /// Validates that <paramref name="value"/> is not null, empty or contains whitespaces only
+        /// and otherwise throws an exception.
+        /// </summary>
+        /// <param name="value">The parameter value to validate.</param>
+        /// <param name="name">The parameter name.</param>
+        /// <returns>The <paramref name="value"/> if not null or empty.</returns>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="value"/> is <c>null</c>.</exception>
+        /// <exception cref="ArgumentException">Thrown if <paramref name="value"/> is empty.</exception>
+#if !PORTABLE
+        [DebuggerStepThrough]
+#endif
+        public static string NotNullOrWhiteSpace([ValidatedNotNull]string value, string name)
         {
             NotNullOrEmpty(value, name);
             if (string.IsNullOrWhiteSpace(value))
@@ -40,6 +81,18 @@ namespace CacheManager.Core.Utility
             return value;
         }
 
+        /// <summary>
+        /// Validates that <paramref name="condition"/> is true and otherwise throws an exception.
+        /// </summary>
+        /// <param name="condition">The condition to validate.</param>
+        /// <param name="message">The message to throw if the configurtion is <c>false</c>.</param>
+        /// <param name="args"><c>string.Format</c> will be used to format <paramref name="message"/>
+        /// and <c>args</c> to create the exception message.</param>
+        /// <returns><c>true</c> if the <paramref name="condition"/> is valid.</returns>
+        /// <exception cref="InvalidOperationException">Thrown if <paramref name="condition"/> is false.</exception>
+#if !PORTABLE
+        [DebuggerStepThrough]
+#endif
         public static bool Ensure(bool condition, string message, params object[] args)
         {
             if (!condition)
@@ -51,7 +104,21 @@ namespace CacheManager.Core.Utility
             return true;
         }
 
-        public static T EnsureNotNull<T>(T value, string message, params object[] args)
+        /// <summary>
+        /// Validates that <paramref name="value"/> is not <c>null</c> and otherwise throws an exception.
+        /// <c>Structs</c> are allowed although <paramref name="value"/> cannot be <c>null</c> in this case.
+        /// </summary>
+        /// <typeparam name="T">The type of <paramref name="value"/>.</typeparam>
+        /// <param name="value">The value to validate.</param>
+        /// <param name="message">The message to throw if the <paramref name="value"/> is <c>null</c>.</param>
+        /// <param name="args"><c>string.Format</c> will be used to format <paramref name="message"/>
+        /// and <c>args</c> to create the exception message.</param>
+        /// <returns>The <paramref name="value"/> if not <c>null</c>.</returns>
+        /// <exception cref="InvalidOperationException">Thrown if <paramref name="value"/> is <c>null</c>.</exception>
+#if !PORTABLE
+        [DebuggerStepThrough]
+#endif
+        public static T EnsureNotNull<T>([ValidatedNotNull]T value, string message, params object[] args)
             where T : class
         {
             if (value == null)
@@ -61,6 +128,20 @@ namespace CacheManager.Core.Utility
             }
 
             return value;
+        }
+    }
+
+    /// <summary>
+    /// Indicates to Code Analysis that a method validates a particular parameter.
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false, Inherited = false)]
+    public sealed class ValidatedNotNullAttribute : Attribute
+    {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ValidatedNotNullAttribute"/> class.
+        /// </summary>
+        public ValidatedNotNullAttribute()
+        {
         }
     }
 }

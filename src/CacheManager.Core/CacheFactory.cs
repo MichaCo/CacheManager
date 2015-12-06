@@ -141,7 +141,7 @@ namespace CacheManager.Core
             return genericMethod.Invoke(null, new object[] { cacheName, settings });
         }
 
-#if !PORTABLE
+#if !PORTABLE && !DOTNET5_2
 
         /// <summary>
         /// <para>Instantiates a cache manager from app.config or web.config.</para>

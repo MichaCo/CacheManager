@@ -26,11 +26,11 @@ namespace CacheManager.Config.Tests
                 Console.WriteLine("Using Dictionary cache handle");
 #else
                 cfg.WithSystemRuntimeCacheHandle("default")
-                    .EnablePerformanceCounters();
+                    .DisableStatistics();
                 Console.WriteLine("Using System Runtime cache handle");
 
                 cfg.WithRedisCacheHandle("redis", true)
-                    .EnablePerformanceCounters();
+                    .DisableStatistics();
 
                 //cfg.WithRedisBackPlate("redis");
 
