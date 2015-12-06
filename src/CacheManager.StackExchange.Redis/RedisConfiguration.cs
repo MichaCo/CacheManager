@@ -9,7 +9,7 @@ namespace CacheManager.Redis
     /// <para>
     /// The element was added only because StackExchange.Redis doesn't support configuration via web/app.config
     /// </para>
-    /// </summary>    
+    /// </summary>
     public sealed class RedisConfiguration
     {
         /// <summary>

@@ -22,7 +22,8 @@ namespace CacheManager.Tests
     {
         [Theory]
         [MemberData("TestCacheManagers")]
-        public void CacheManager_Region_AddItems_UseSameKeys<T>(T cache) where T : ICacheManager<object>
+        public void CacheManager_Region_AddItems_UseSameKeys<T>(T cache)
+            where T : ICacheManager<object>
         {
             using (cache)
             {
@@ -60,7 +61,8 @@ namespace CacheManager.Tests
 
         [Theory]
         [MemberData("TestCacheManagers")]
-        public void CacheManager_Region_AddItems_UseDifferentKeys<T>(T cache) where T : ICacheManager<object>
+        public void CacheManager_Region_AddItems_UseDifferentKeys<T>(T cache)
+            where T : ICacheManager<object>
         {
             using (cache)
             {
@@ -91,7 +93,8 @@ namespace CacheManager.Tests
 
         [Theory]
         [MemberData("TestCacheManagers")]
-        public void CacheManager_Region_ClearRegion<T>(T cache) where T : ICacheManager<object>
+        public void CacheManager_Region_ClearRegion<T>(T cache)
+            where T : ICacheManager<object>
         {
             using (cache)
             {
@@ -129,7 +132,8 @@ namespace CacheManager.Tests
 
         [Theory]
         [MemberData("TestCacheManagers")]
-        public void CacheManager_Region_Put_ModifySomeItems<T>(T cache) where T : ICacheManager<object>
+        public void CacheManager_Region_Put_ModifySomeItems<T>(T cache)
+            where T : ICacheManager<object>
         {
             using (cache)
             {
@@ -180,7 +184,8 @@ namespace CacheManager.Tests
 
         [Theory]
         [MemberData("TestCacheManagers")]
-        public void CacheManager_Region_RemoveItem_RandomRemoveSomeItems<T>(T cache) where T : ICacheManager<object>
+        public void CacheManager_Region_RemoveItem_RandomRemoveSomeItems<T>(T cache)
+            where T : ICacheManager<object>
         {
             using (cache)
             {
@@ -238,7 +243,7 @@ namespace CacheManager.Tests
             for (var r = 0; r < numRegions; r++)
             {
                 var region = Guid.NewGuid().ToString();
-                
+
                 for (var i = 0; i < numItems; i++)
                 {
                     var key = sameKey ? sameKeyAllRegions + i : Guid.NewGuid().ToString();

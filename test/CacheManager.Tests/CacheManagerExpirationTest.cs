@@ -20,7 +20,8 @@ namespace CacheManager.Tests
         [Theory]
         [MemberData("TestCacheManagers")]
         [Trait("category", "Unreliable")]
-        public void CacheManager_RemoveExpiration_DoesNotExpire<T>(T cache) where T : ICacheManager<object>
+        public void CacheManager_RemoveExpiration_DoesNotExpire<T>(T cache)
+            where T : ICacheManager<object>
         {
             using (cache)
             {
@@ -41,7 +42,8 @@ namespace CacheManager.Tests
 
         [Theory]
         [MemberData("TestCacheManagers")]
-        public void CacheManager_Expire_Absolute_ForKey_Validate<T>(T cache) where T : ICacheManager<object>
+        public void CacheManager_Expire_Absolute_ForKey_Validate<T>(T cache)
+            where T : ICacheManager<object>
         {
             using (cache)
             {
@@ -60,7 +62,8 @@ namespace CacheManager.Tests
 
         [Theory]
         [MemberData("TestCacheManagers")]
-        public void CacheManager_Expire_Absolute_ForKeyRegion_Validate<T>(T cache) where T : ICacheManager<object>
+        public void CacheManager_Expire_Absolute_ForKeyRegion_Validate<T>(T cache)
+            where T : ICacheManager<object>
         {
             using (cache)
             {
@@ -80,7 +83,8 @@ namespace CacheManager.Tests
 
         [Theory]
         [MemberData("TestCacheManagers")]
-        public void CacheManager_Expire_Sliding_ForKey_Validate<T>(T cache) where T : ICacheManager<object>
+        public void CacheManager_Expire_Sliding_ForKey_Validate<T>(T cache)
+            where T : ICacheManager<object>
         {
             using (cache)
             {
@@ -99,7 +103,8 @@ namespace CacheManager.Tests
 
         [Theory]
         [MemberData("TestCacheManagers")]
-        public void CacheManager_Expire_Sliding_ForKeyRegion_Validate<T>(T cache) where T : ICacheManager<object>
+        public void CacheManager_Expire_Sliding_ForKeyRegion_Validate<T>(T cache)
+            where T : ICacheManager<object>
         {
             using (cache)
             {
@@ -119,7 +124,8 @@ namespace CacheManager.Tests
 
         [Theory]
         [MemberData("TestCacheManagers")]
-        public void CacheManager_RemoveExpiration_ForKey_Validate<T>(T cache) where T : ICacheManager<object>
+        public void CacheManager_RemoveExpiration_ForKey_Validate<T>(T cache)
+            where T : ICacheManager<object>
         {
             using (cache)
             {
@@ -138,7 +144,8 @@ namespace CacheManager.Tests
 
         [Theory]
         [MemberData("TestCacheManagers")]
-        public void CacheManager_RemoveExpiration_ForKeyRegion_Validate<T>(T cache) where T : ICacheManager<object>
+        public void CacheManager_RemoveExpiration_ForKeyRegion_Validate<T>(T cache)
+            where T : ICacheManager<object>
         {
             using (cache)
             {

@@ -43,7 +43,7 @@ namespace CacheManager.Tests
         /// The UI culture.
         /// </value>
         public string UICulture { get; set; }
-        
+
         public override void Before(MethodInfo methodUnderTest)
         {
             this.originalCulture = Thread.CurrentThread.CurrentCulture;

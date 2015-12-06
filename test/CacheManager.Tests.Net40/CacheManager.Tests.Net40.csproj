@@ -253,7 +253,6 @@
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>
-    <None Include="Settings.StyleCop" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\CacheManager.Core.Net40\CacheManager.Core.Net40.csproj">

@@ -19,7 +19,8 @@ namespace CacheManager.Tests
         [Theory]
         [MemberData("TestCacheManagers")]
         [ReplaceCulture]
-        public void CacheManager_Stats_AddGet<T>(T cache) where T : ICacheManager<object>
+        public void CacheManager_Stats_AddGet<T>(T cache)
+            where T : ICacheManager<object>
         {
             using (cache)
             {
@@ -48,6 +49,7 @@ namespace CacheManager.Tests
                 a2.Should().BeFalse();
                 r1.Should().Be("something");
                 r2.Should().Be("something");
+
                 // each cachhandle stats should have one addCall increase
                 addCalls.ShouldAllBeEquivalentTo(Enumerable.Repeat(1, cache.CacheHandles.Count()));
 
@@ -108,7 +110,8 @@ namespace CacheManager.Tests
         [Theory]
         [MemberData("TestCacheManagers")]
         [ReplaceCulture]
-        public void CacheManager_Stats_Put<T>(T cache) where T : ICacheManager<object>
+        public void CacheManager_Stats_Put<T>(T cache)
+            where T : ICacheManager<object>
         {
             using (cache)
             {
@@ -131,7 +134,8 @@ namespace CacheManager.Tests
         [Theory]
         [MemberData("TestCacheManagers")]
         [ReplaceCulture]
-        public void CacheManager_Stats_Update<T>(T cache) where T : ICacheManager<object>
+        public void CacheManager_Stats_Update<T>(T cache)
+            where T : ICacheManager<object>
         {
             using (cache)
             {
@@ -157,7 +161,8 @@ namespace CacheManager.Tests
         [Theory]
         [MemberData("TestCacheManagers")]
         [ReplaceCulture]
-        public void CacheManager_Stats_Remove<T>(T cache) where T : ICacheManager<object>
+        public void CacheManager_Stats_Remove<T>(T cache)
+            where T : ICacheManager<object>
         {
             using (cache)
             {
@@ -197,7 +202,8 @@ namespace CacheManager.Tests
         [Theory]
         [MemberData("TestCacheManagers")]
         [ReplaceCulture]
-        public void CacheManager_Stats_Threaded<T>(T cache) where T : ICacheManager<object>
+        public void CacheManager_Stats_Threaded<T>(T cache)
+            where T : ICacheManager<object>
         {
             var puts = cache.CacheHandles.Select(p => p.Stats.GetStatistic(CacheStatsCounterType.PutCalls));
             var adds = cache.CacheHandles.Select(p => p.Stats.GetStatistic(CacheStatsCounterType.AddCalls));

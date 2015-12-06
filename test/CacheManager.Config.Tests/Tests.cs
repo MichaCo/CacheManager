@@ -63,7 +63,8 @@ namespace CacheManager.Config.Tests
                             stats.GetStatistic(CacheStatsCounterType.GetCalls)));
             }
 
-            Console.WriteLine(string.Format("Event - Adds {0} Hits {1} Removes {2}",
+            Console.WriteLine(string.Format(
+                "Event - Adds {0} Hits {1} Removes {2}",
                 eventAddCount,
                 eventGetCount,
                 eventRemoveCount));

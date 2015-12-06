@@ -13,6 +13,7 @@ namespace CacheManager.Tests
 #else
     [Trait("Framework", "NET45")]
 #endif
+
     // This does run on Mono 4.2.x (alpha), disabling it for now TODO: enable if travis ci runs new version of mono
     [Trait("category", "Mono")]
     public class ThreadRandomReadWriteTestBase : BaseCacheManagerTest

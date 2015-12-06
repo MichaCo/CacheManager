@@ -228,7 +228,7 @@ namespace CacheManager.Tests
                     UpdateItemResult.ForItemDidNotExist<string>(),
                     UpdateItemResult.ForItemDidNotExist<string>(),
                     UpdateItemResult.ForItemDidNotExist<string>(),
-                    UpdateItemResult.ForSuccess<string>("some value", true, 100), 
+                    UpdateItemResult.ForSuccess("some value", true, 100),
                     UpdateItemResult.ForItemDidNotExist<string>()
                 },
                 putCalls: Enumerable.Repeat<Action>(() => putCalls++, 5).ToArray(),
@@ -236,7 +236,7 @@ namespace CacheManager.Tests
                 getCallValues: new CacheItem<string>[]
                 {
                     null,
-                    null,                    
+                    null,
                     null,
                     new CacheItem<string>("key", "updated value"),  // have to return an item for the second one
                     null
@@ -262,7 +262,7 @@ namespace CacheManager.Tests
                 updateResult.Should().BeTrue("updated successfully.");
             }
         }
-        
+
         private static ICacheManager<string> MockHandles(int count, Action[] updateCalls, UpdateItemResult<string>[] updateCallResults, Action[] putCalls, Action[] removeCalls, CacheItem<string>[] getCallValues = null, Func<bool>[] addCalls = null)
         {
             if (count <= 0)

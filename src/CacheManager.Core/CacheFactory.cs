@@ -188,7 +188,7 @@ namespace CacheManager.Core
 
         /// <summary>
         /// Instantiates a cache manager from app.config or web.config.
-        /// Use this overload only if you cannot use the generic overload. The return type will be <c>Object</c>. 
+        /// Use this overload only if you cannot use the generic overload. The return type will be <c>Object</c>.
         /// This method can be used for example in conjunction with dependency injection frameworks.
         /// <para>
         /// The <paramref name="cacheName"/> must match with one cache element defined in your
@@ -256,7 +256,7 @@ namespace CacheManager.Core
 
         /// <summary>
         /// Instantiates a cache manager from app.config or web.config.
-        /// Use this overload only if you cannot use the generic overload. The return type will be <c>Object</c>. 
+        /// Use this overload only if you cannot use the generic overload. The return type will be <c>Object</c>.
         /// This method can be used for example in conjunction with dependency injection frameworks.
         /// <para>
         /// The <paramref name="cacheName"/> must match with one cache element defined in your
@@ -270,7 +270,7 @@ namespace CacheManager.Core
         /// </param>
         /// <returns>The cache manager instance.</returns>
         /// <exception cref="System.ArgumentNullException">
-        /// Thrown if the <paramref name="cacheValueType"/>, <paramref name="cacheName"/> or <paramref name="sectionName"/> 
+        /// Thrown if the <paramref name="cacheValueType"/>, <paramref name="cacheName"/> or <paramref name="sectionName"/>
         /// is null or an empty.
         /// </exception>
         /// <exception cref="System.InvalidOperationException">
@@ -326,7 +326,7 @@ namespace CacheManager.Core
 
         /// <summary>
         /// Instantiates a cache manager using the given <paramref name="cacheValueType"/> and <paramref name="configuration"/>.
-        /// Use this overload only if you cannot use the generic overload. The return type will be <c>Object</c>. 
+        /// Use this overload only if you cannot use the generic overload. The return type will be <c>Object</c>.
         /// This method can be used for example in conjunction with dependency injection frameworks.
         /// </summary>
         /// <param name="cacheValueType">The type of the cache item value.</param>
@@ -344,7 +344,7 @@ namespace CacheManager.Core
         /// </exception>
         public static object FromConfiguration(Type cacheValueType, string cacheName, CacheManagerConfiguration configuration)
         {
-            if(cacheValueType == null)
+            if (cacheValueType == null)
             {
                 throw new ArgumentNullException(nameof(cacheValueType));
             }

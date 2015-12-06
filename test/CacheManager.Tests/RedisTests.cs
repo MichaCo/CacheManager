@@ -83,9 +83,10 @@ namespace CacheManager.Tests
         [Trait("category", "Redis")]
         [Trait("category", "Unreliable")]
         public void Redis_Multiple_PubSub_Change()
-        {            
+        {
             // arrange
             string fileName = BaseCacheManagerTest.GetCfgFileName(@"/Configuration/configuration.valid.allFeatures.config");
+
             // redis config name must be same for all cache handles, configured via file and via code
             // otherwise the pub sub channel name is different
             string cacheName = "redisConfig";
@@ -112,7 +113,7 @@ namespace CacheManager.Tests
                     Thread.Sleep(12);
                     var value = cache.Get(item.Key);
                     value.Should().Be("new value", cache.ToString());
-                }, 
+                },
                 3,
                 TestManagers.CreateRedisAndSystemCacheWithBackPlate(69),
                 cfgCache,
@@ -138,7 +139,7 @@ namespace CacheManager.Tests
                 (cache) =>
                 {
                     cache.Get(item.Key).Should().BeNull();
-                }, 
+                },
                 10,
                 TestManagers.CreateRedisAndSystemCacheWithBackPlate(4),
                 TestManagers.CreateRedisAndSystemCacheWithBackPlate(4),
@@ -192,11 +193,11 @@ namespace CacheManager.Tests
                     Thread.Sleep(10);
                     var value = cache.GetCacheItem(item.Key);
                     value.Should().BeNull();
-                }, 
-                2, 
-                TestManagers.CreateRedisAndSystemCacheWithBackPlate(6), 
-                TestManagers.CreateRedisAndSystemCacheWithBackPlate(6), 
-                TestManagers.CreateRedisCache(6), 
+                },
+                2,
+                TestManagers.CreateRedisAndSystemCacheWithBackPlate(6),
+                TestManagers.CreateRedisAndSystemCacheWithBackPlate(6),
+                TestManagers.CreateRedisCache(6),
                 TestManagers.CreateRedisAndSystemCacheWithBackPlate(6));
         }
 
@@ -227,18 +228,21 @@ namespace CacheManager.Tests
                 int countCasModifyCalls = 0;
 
                 // act
-                ThreadTestHelper.Run(() =>
-                {
-                    for (int i = 0; i < numInnerIterations; i++)
+                ThreadTestHelper.Run(
+                    () =>
                     {
-                        cache.Update(key, (value) =>
+                        for (int i = 0; i < numInnerIterations; i++)
                         {
-                            value.Counter++;
-                            Interlocked.Increment(ref countCasModifyCalls);
-                            return value;
-                        });
-                    }
-                }, numThreads, iterations);
+                            cache.Update(key, (value) =>
+                            {
+                                value.Counter++;
+                                Interlocked.Increment(ref countCasModifyCalls);
+                                return value;
+                            });
+                        }
+                    },
+                    numThreads,
+                    iterations);
 
                 // assert
                 Thread.Sleep(10);
@@ -275,17 +279,20 @@ namespace CacheManager.Tests
                 int numInnerIterations = 10;
 
                 // act
-                ThreadTestHelper.Run(() =>
-                {
-                    for (int i = 0; i < numInnerIterations; i++)
+                ThreadTestHelper.Run(
+                    () =>
                     {
-                        var val = cache.Get(key);
-                        val.Should().NotBeNull();
-                        val.Counter++;
+                        for (int i = 0; i < numInnerIterations; i++)
+                        {
+                            var val = cache.Get(key);
+                            val.Should().NotBeNull();
+                            val.Counter++;
 
-                        cache.Put(key, val);
-                    }
-                }, numThreads, iterations);
+                            cache.Put(key, val);
+                        }
+                    },
+                    numThreads,
+                    iterations);
 
                 // assert
                 Thread.Sleep(10);
@@ -429,10 +436,11 @@ namespace CacheManager.Tests
             var cfg = ConfigurationBuilder.LoadConfiguration(cacheName);
             var cache = CacheFactory.FromConfiguration<object>(cacheName, cfg);
             var handle = cache.CacheHandles.First(p => p.Configuration.IsBackPlateSource) as RedisCacheHandle<object>;
+
             // test running something on the redis handle, Count should be enough to test the connection
             Action count = () => { var x = handle.Count; };
 
-            // assert            
+            // assert
             handle.Should().NotBeNull();
             count.ShouldNotThrow();
         }
@@ -449,10 +457,11 @@ namespace CacheManager.Tests
             var cfg = ConfigurationBuilder.LoadConfiguration(cacheName);
             var cache = CacheFactory.FromConfiguration<object>(cacheName, cfg);
             var handle = cache.CacheHandles.First(p => p.Configuration.IsBackPlateSource) as RedisCacheHandle<object>;
+
             // test running something on the redis handle, Count should be enough to test the connection
             Action count = () => { var x = handle.Count; };
 
-            // assert            
+            // assert
             handle.Should().NotBeNull();
             count.ShouldNotThrow();
         }

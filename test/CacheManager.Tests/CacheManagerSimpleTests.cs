@@ -35,9 +35,11 @@ namespace CacheManager.Tests
             using (var cache = new BaseCacheManager<string>("cache", cfg))
             {
                 var key = "key";
+
                 // act
                 cache.Add(key, "something");
                 var result = cache.Get(key);
+
                 // assert
                 cache.CacheHandles.Count().Should().Be(0);
                 result.Should().Be(null, "No handles in the cache managers should yield to no items in the cache");
@@ -336,7 +338,8 @@ namespace CacheManager.Tests
 
         [Theory]
         [MemberData("TestCacheManagers")]
-        public void CacheManager_Update_ItemNotAdded<T>(T cache) where T : ICacheManager<object>
+        public void CacheManager_Update_ItemNotAdded<T>(T cache)
+            where T : ICacheManager<object>
         {
             using (cache)
             {
@@ -357,13 +360,15 @@ namespace CacheManager.Tests
 
         [Theory]
         [MemberData("TestCacheManagers")]
-        public void CacheManager_Update_Simple<T>(T cache) where T : ICacheManager<object>
+        public void CacheManager_Update_Simple<T>(T cache)
+            where T : ICacheManager<object>
         {
             using (cache)
             {
                 // arrange
                 var key = Guid.NewGuid().ToString();
                 cache.Add(key, "something");
+
                 // act
                 Func<object> act = () => cache.Update(key, item => item + " more");
 
@@ -495,7 +500,8 @@ namespace CacheManager.Tests
 
         [Theory]
         [MemberData("TestCacheManagers")]
-        public void CacheManager_AddOrUpdate_ItemNotAdded<T>(T cache) where T : ICacheManager<object>
+        public void CacheManager_AddOrUpdate_ItemNotAdded<T>(T cache)
+            where T : ICacheManager<object>
         {
             using (cache)
             {
@@ -516,13 +522,15 @@ namespace CacheManager.Tests
 
         [Theory]
         [MemberData("TestCacheManagers")]
-        public void CacheManager_AddOrUpdate_Update_Simple<T>(T cache) where T : ICacheManager<object>
+        public void CacheManager_AddOrUpdate_Update_Simple<T>(T cache)
+            where T : ICacheManager<object>
         {
             using (cache)
             {
                 // arrange
                 var key = Guid.NewGuid().ToString();
                 cache.Add(key, "something");
+
                 // act
                 Func<object> act = () => cache.AddOrUpdate(key, "does exist", item => item + " more");
                 Func<string> act2 = () => cache.Get<string>(key);
@@ -565,7 +573,8 @@ namespace CacheManager.Tests
         public void CacheManager_Add_InvalidValue()
         {
             // arrange
-            using (var cache = CacheFactory.Build("cache",
+            using (var cache = CacheFactory.Build(
+                "cache",
                 settings =>
                 {
                     settings.WithHandle(typeof(DictionaryCacheHandle<>), "h1");
@@ -589,7 +598,8 @@ namespace CacheManager.Tests
         public void CacheManager_Add_InvalidRegion()
         {
             // arrange
-            using (var cache = CacheFactory.Build("cache",
+            using (var cache = CacheFactory.Build(
+                "cache",
                 settings =>
                 {
                     settings.WithHandle(typeof(DictionaryCacheHandle<>), "h1");
@@ -1167,7 +1177,11 @@ namespace CacheManager.Tests
             using (var cache = new BaseCacheManager<string>("name", new CacheManagerConfiguration() { MaxRetries = 1000 }))
             {
                 // act
-                Func<string> act = () => { cache.Put("key", "value"); return cache["key"]; };
+                Func<string> act = () =>
+                {
+                    cache.Put("key", "value");
+                    return cache["key"];
+                };
 
                 // assert
                 act().Should().BeNull("there are not cache handles configured to store the key");
@@ -1223,7 +1237,8 @@ namespace CacheManager.Tests
         [Theory]
         [MemberData("TestCacheManagers")]
         [ReplaceCulture]
-        public void CacheManager_CastGet_Region<T>(T cache) where T : ICacheManager<object>
+        public void CacheManager_CastGet_Region<T>(T cache)
+            where T : ICacheManager<object>
         {
             using (cache)
             {
@@ -1243,7 +1258,8 @@ namespace CacheManager.Tests
         [Theory]
         [MemberData("TestCacheManagers")]
         [ReplaceCulture]
-        public void CacheManager_CastGet<T>(T cache) where T : ICacheManager<object>
+        public void CacheManager_CastGet<T>(T cache)
+            where T : ICacheManager<object>
         {
             using (cache)
             {
@@ -1285,7 +1301,8 @@ namespace CacheManager.Tests
         [Theory]
         [MemberData("TestCacheManagers")]
         [ReplaceCulture]
-        public void CacheManager_CastGet_InvalidTypeThrows<T>(T cache) where T : ICacheManager<object>
+        public void CacheManager_CastGet_InvalidTypeThrows<T>(T cache)
+            where T : ICacheManager<object>
         {
             using (cache)
             {
@@ -1303,7 +1320,8 @@ namespace CacheManager.Tests
         [Theory]
         [MemberData("TestCacheManagers")]
         [ReplaceCulture]
-        public void CacheManager_SimplePut<T>(T cache) where T : ICacheManager<object>
+        public void CacheManager_SimplePut<T>(T cache)
+            where T : ICacheManager<object>
         {
             using (cache)
             {
@@ -1325,7 +1343,8 @@ namespace CacheManager.Tests
 
         [Theory]
         [MemberData("TestCacheManagers")]
-        public void CacheManager_SimpleAdd<T>(T cache) where T : ICacheManager<object>
+        public void CacheManager_SimpleAdd<T>(T cache)
+            where T : ICacheManager<object>
         {
             using (cache)
             {
@@ -1347,7 +1366,8 @@ namespace CacheManager.Tests
 
         [Theory]
         [MemberData("TestCacheManagers")]
-        public void CacheManager_SimpleIndexPut<T>(T cache) where T : ICacheManager<object>
+        public void CacheManager_SimpleIndexPut<T>(T cache)
+            where T : ICacheManager<object>
         {
             using (cache)
             {
@@ -1369,7 +1389,8 @@ namespace CacheManager.Tests
 
         [Theory]
         [MemberData("TestCacheManagers")]
-        public void CacheManager_SimpleRemove<T>(T cache) where T : ICacheManager<object>
+        public void CacheManager_SimpleRemove<T>(T cache)
+            where T : ICacheManager<object>
         {
             using (cache)
             {
@@ -1414,11 +1435,13 @@ namespace CacheManager.Tests
 
         [Theory]
         [MemberData("TestCacheManagers")]
-        public void CacheManager_SimpleUpdate<T>(T cache) where T : ICacheManager<object>
+        public void CacheManager_SimpleUpdate<T>(T cache)
+            where T : ICacheManager<object>
         {
             using (cache)
             {
                 cache.Configuration.CacheUpdateMode = CacheUpdateMode.Full;
+
                 // arrange
                 var keys = new List<string>() { Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString() };
                 var values = new List<object>() { 10, 20, 30 };

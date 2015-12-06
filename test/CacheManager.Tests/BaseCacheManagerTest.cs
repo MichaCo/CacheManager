@@ -21,7 +21,7 @@ namespace CacheManager.Tests
 
         public static ICacheManager<object> WithOneMemoryCacheHandleSliding
             => CacheFactory.Build(
-                NewKey(), 
+                NewKey(),
                 settings => settings
                     .WithUpdateMode(CacheUpdateMode.Up)
                     .WithSystemRuntimeCacheHandle(NewKey())
@@ -31,7 +31,7 @@ namespace CacheManager.Tests
 
         public static ICacheManager<object> WithOneDicCacheHandle
             => CacheFactory.Build(
-                NewKey(), 
+                NewKey(),
                 settings => settings
                     .WithUpdateMode(CacheUpdateMode.Full)
                     .WithHandle(typeof(DictionaryCacheHandle<>), NewKey())
@@ -42,8 +42,8 @@ namespace CacheManager.Tests
             => CacheFactory.Build(NewKey(), settings => settings.WithSystemRuntimeCacheHandle(NewKey()).EnableStatistics());
 
         public static ICacheManager<object> WithMemoryAndDictionaryHandles
-            =>  CacheFactory.Build(
-                NewKey(), 
+            => CacheFactory.Build(
+                NewKey(),
                 settings =>
                 {
                     settings
@@ -62,7 +62,7 @@ namespace CacheManager.Tests
 
         public static ICacheManager<object> WithManyDictionaryHandles
             => CacheFactory.Build(
-                NewKey(), 
+                NewKey(),
                 settings =>
                 {
                     settings
@@ -91,7 +91,7 @@ namespace CacheManager.Tests
 
         public static ICacheManager<object> WithTwoNamedMemoryCaches
             => CacheFactory.Build(
-                NewKey(), 
+                NewKey(),
                 settings =>
                 {
                     settings
@@ -240,7 +240,8 @@ namespace CacheManager.Tests
         private static string NewKey() => Guid.NewGuid().ToString();
     }
 
-    [SuppressMessage("Microsoft.Design", "CA1053:StaticHolderTypesShouldNotHaveConstructors", Justification = "Needed for xunit"), ExcludeFromCodeCoverage]
+    [SuppressMessage("Microsoft.Design", "CA1053:StaticHolderTypesShouldNotHaveConstructors", Justification = "Needed for xunit")]
+    [ExcludeFromCodeCoverage]
     public class BaseCacheManagerTest
     {
         public static IEnumerable<object[]> TestCacheManagers

@@ -49,7 +49,7 @@ namespace CacheManager.Core
         /// <returns>The part.</returns>
         /// <exception cref="ArgumentNullException">Thrown if handleName is null.</exception>
         public static ConfigurationBuilderCacheHandlePart WithCouchbaseCacheHandle(
-            this ConfigurationBuilderCachePart part, 
+            this ConfigurationBuilderCachePart part,
             string couchbaseConfigurationKey) =>
             WithCouchbaseCacheHandle(part, couchbaseConfigurationKey, false);
 
@@ -74,8 +74,8 @@ namespace CacheManager.Core
         /// Thrown if handleName or handleType are null.
         /// </exception>
         public static ConfigurationBuilderCacheHandlePart WithCouchbaseCacheHandle(
-            this ConfigurationBuilderCachePart part, 
-            string couchbaseConfigurationKey, 
+            this ConfigurationBuilderCachePart part,
+            string couchbaseConfigurationKey,
             bool isBackPlateSource)
         {
             if (part == null)
@@ -105,8 +105,8 @@ namespace CacheManager.Core
         /// <exception cref="System.ArgumentNullException">If bucketName is null.</exception>
         /// <exception cref="ArgumentNullException">Thrown if handleName is null.</exception>
         public static ConfigurationBuilderCacheHandlePart WithCouchbaseCacheHandle(
-            this ConfigurationBuilderCachePart part, 
-            string couchbaseConfigurationKey, 
+            this ConfigurationBuilderCachePart part,
+            string couchbaseConfigurationKey,
             string bucketName) =>
             WithCouchbaseCacheHandle(part, couchbaseConfigurationKey, bucketName, false);
 

@@ -40,7 +40,7 @@ namespace CacheManager.Core.Internal
                 var instance = handleInstance as BaseCacheHandle<TCacheValue>;
                 handles.Add(instance);
             }
-            
+
             return handles;
         }
 
@@ -66,11 +66,7 @@ namespace CacheManager.Core.Internal
                 {
                     var backPlate = (CacheBackPlate)Activator.CreateInstance(
                         manager.Configuration.BackPlateType,
-                        new object[]
-                        {
-                            manager.Configuration,
-                            manager.Name
-                        });
+                        new object[] { manager.Configuration, manager.Name });
 
                     return backPlate;
                 }
@@ -130,7 +126,7 @@ namespace CacheManager.Core.Internal
                     string.Format(
                         CultureInfo.InvariantCulture,
                         "Cache handle type [{0}] should not have any generic arguments defined.",
-                        handle.ToString()));                
+                        handle.ToString()));
             }
         }
     }

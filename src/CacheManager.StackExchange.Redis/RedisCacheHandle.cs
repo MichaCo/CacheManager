@@ -289,7 +289,7 @@ namespace CacheManager.Redis
         /// </summary>
         /// <param name="key">The key being used to identify the item within the cache.</param>
         /// <returns>The <c>CacheItem</c>.</returns>
-        protected override CacheItem<TCacheValue> GetCacheItemInternal(string key) 
+        protected override CacheItem<TCacheValue> GetCacheItemInternal(string key)
             => this.GetCacheItemInternal(key, null);
 
 #pragma warning disable CSE0003
@@ -456,7 +456,13 @@ namespace CacheManager.Redis
         private T Retry<T>(Func<T> retryme) =>
             RetryHelper.Retry(retryme, this.Manager.Configuration.RetryTimeout, this.Manager.Configuration.MaxRetries);
 
-        private void Retry(Action retryme) => this.Retry<bool>(() => { retryme(); return true; });
+        private void Retry(Action retryme)
+            => this.Retry<bool>(
+                () =>
+                {
+                    retryme();
+                    return true;
+                });
 
 #pragma warning disable CSE0003
         private bool Set(CacheItem<TCacheValue> item, StackRedis.When when, bool sync = false)

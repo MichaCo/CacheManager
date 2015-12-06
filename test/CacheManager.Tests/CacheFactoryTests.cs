@@ -174,7 +174,7 @@ namespace CacheManager.Tests
             {
                 settings.WithUpdateMode(CacheUpdateMode.Full)
                     .WithHandle(typeof(DictionaryCacheHandle<>), "h1")
-                    .DisableStatistics()            // disable it first
+                    .DisableStatistics() // disable it first
                     .EnablePerformanceCounters();   // should enable stats
             });
 
@@ -383,6 +383,7 @@ namespace CacheManager.Tests
         {
             // arrange
             var connection = "127.0.0.1:8080,allowAdmin=true,name=myName,ssl=true";
+
             // act
             CacheFactory.Build<object>("cacheName", settings =>
             {
@@ -523,8 +524,8 @@ namespace CacheManager.Tests
         public void CacheFactory_FromConfig_NonGeneric_C()
         {
             var cache = CacheFactory.FromConfiguration(
-                typeof(string), 
-                "cacheName", 
+                typeof(string),
+                "cacheName",
                 ConfigurationBuilder.BuildConfiguration(cfg => cfg.WithSystemRuntimeCacheHandle("h1"))) as ICacheManager<string>;
 
             cache.Should().NotBeNull();

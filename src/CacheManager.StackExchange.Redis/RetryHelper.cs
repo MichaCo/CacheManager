@@ -76,7 +76,7 @@ namespace CacheManager.Redis
                         return false;
                     });
                 }
-            } 
+            }
             while (tries < retries);
 
             return default(T);
@@ -84,7 +84,14 @@ namespace CacheManager.Redis
 
         public static void Retry(Action retryme, int timeOut, int retries)
         {
-            Retry<bool>(() => { retryme(); return true; }, timeOut, retries);
+            Retry(
+                () =>
+                {
+                    retryme();
+                    return true;
+                },
+                timeOut,
+                retries);
         }
     }
 }

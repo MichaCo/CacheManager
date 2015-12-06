@@ -78,8 +78,9 @@ namespace CacheManager.Core.Internal
         /// as Get plus Put.
         /// </remarks>
         public override UpdateItemResult<TCacheValue> Update(
-            string key, 
-            Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config) => 
+            string key,
+            Func<TCacheValue, TCacheValue> updateValue,
+            UpdateItemConfig config) =>
             this.UpdateInternal(key, null, updateValue, config);
 
         /// <summary>
@@ -108,10 +109,11 @@ namespace CacheManager.Core.Internal
         /// as Get plus Put.
         /// </remarks>
         public override UpdateItemResult<TCacheValue> Update(
-            string key, 
-            string region, 
-            Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config) =>
-            this.UpdateInternal(key, region, updateValue, config);
+            string key,
+            string region,
+            Func<TCacheValue, TCacheValue> updateValue,
+            UpdateItemConfig config)
+                => this.UpdateInternal(key, region, updateValue, config);
 
         /// <summary>
         /// Adds a value to the cache.

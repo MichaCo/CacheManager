@@ -22,9 +22,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "common", "common", "{A8DA8B
 		Local.testsettings = Local.testsettings
 		README.md = README.md
 		RedisCfg.xsd = RedisCfg.xsd
-		Settings.StyleCop = Settings.StyleCop
-		WE-Markdown.css = WE-Markdown.css
-		WebEssentials-Settings.json = WebEssentials-Settings.json
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{B5045693-CB90-44E0-A4B8-9928E3965006}"

@@ -30,7 +30,7 @@ namespace CacheManager.Redis
                 if (!connections.TryGetValue(connectionString, out connection))
                 {
                     var builder = new StringBuilder();
-                    using (var log = new StringWriter(builder, CultureInfo.InvariantCulture))                        
+                    using (var log = new StringWriter(builder, CultureInfo.InvariantCulture))
                     {
                         connection = StackRedis.ConnectionMultiplexer.Connect(connectionString, log);
                     }
@@ -46,7 +46,7 @@ namespace CacheManager.Redis
                     }
 
                     connection.PreserveAsyncOrder = false;
-                    connections.Add(connectionString, connection);                    
+                    connections.Add(connectionString, connection);
                 }
             }
 

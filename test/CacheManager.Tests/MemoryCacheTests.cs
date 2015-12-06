@@ -24,6 +24,7 @@ namespace CacheManager.Tests
             // arrange
             var key = Guid.NewGuid().ToString();
             var item = new CacheItem<object>(key, "something", ExpirationMode.Absolute, new TimeSpan(0, 0, 0, 0, 300));
+
             // act
             using (var act = this.GetHandle("Default"))
             {
@@ -49,6 +50,7 @@ namespace CacheManager.Tests
             {
                 // arrange
                 var settings = ((MemoryCacheHandle<object>)act.CacheHandles.ElementAt(0)).CacheSettings;
+
                 // act assert
                 settings["CacheMemoryLimitMegabytes"].Should().Be("42");
                 settings["PhysicalMemoryLimitPercentage"].Should().Be("69");
@@ -67,6 +69,7 @@ namespace CacheManager.Tests
             {
                 // arrange
                 var settings = ((MemoryCacheHandle<object>)act.CacheHandles.ElementAt(0)).CacheSettings;
+
                 // act assert
                 settings["CacheMemoryLimitMegabytes"].Should().Be("12");
                 settings["PhysicalMemoryLimitPercentage"].Should().Be("23");
@@ -81,6 +84,7 @@ namespace CacheManager.Tests
             // arrange
             var key = Guid.NewGuid().ToString();
             var item = new CacheItem<object>(key, "something", ExpirationMode.Sliding, new TimeSpan(0, 0, 0, 0, 8));
+
             // act
             using (var act = this.GetHandle("Default"))
             {
@@ -101,6 +105,7 @@ namespace CacheManager.Tests
             // arrange
             var key = Guid.NewGuid().ToString();
             var item = new CacheItem<object>(key, "something", ExpirationMode.Sliding, new TimeSpan(0, 0, 0, 0, 50));
+
             // act
             var act = this.GetHandle("Default");
             {
@@ -139,9 +144,9 @@ namespace CacheManager.Tests
             }
         }
 
-        private ICacheManager<object> GetHandle(string name) 
+        private ICacheManager<object> GetHandle(string name)
             => CacheFactory.Build(
-                "cache1", 
+                "cache1",
                 settings =>
                 {
                     settings.WithSystemRuntimeCacheHandle(name);

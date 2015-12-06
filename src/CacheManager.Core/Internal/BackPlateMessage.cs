@@ -145,7 +145,7 @@ namespace CacheManager.Core.Internal
         /// <param name="key">The key.</param>
         /// <param name="region">The region.</param>
         /// <returns>The new <see cref="BackPlateMessage"/> instance.</returns>
-        public static BackPlateMessage ForChanged(string owner, string key, string region) => 
+        public static BackPlateMessage ForChanged(string owner, string key, string region) =>
             new BackPlateMessage(owner, Changed, key, region);
 
         /// <summary>
@@ -182,7 +182,7 @@ namespace CacheManager.Core.Internal
         /// <param name="owner">The owner.</param>
         /// <param name="key">The key.</param>
         /// <returns>The new <see cref="BackPlateMessage"/> instance.</returns>
-        public static BackPlateMessage ForRemoved(string owner, string key) => 
+        public static BackPlateMessage ForRemoved(string owner, string key) =>
             new BackPlateMessage(owner, Removed, key);
 
         /// <summary>

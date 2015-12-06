@@ -111,6 +111,7 @@ namespace CacheManager.Tests
         {
             // arrange
             var sectionName = Guid.NewGuid().ToString();
+
             // act
             Action act = () => ConfigurationBuilder.LoadConfiguration(sectionName, "configName");
 
@@ -224,7 +225,7 @@ namespace CacheManager.Tests
 
             // act
             var exception = Record.Exception(() => CacheFactory.FromConfiguration<object>("configName", ConfigurationBuilder.LoadConfigurationFile(fileName, "configName")));
-            
+
             // assert
             exception.Should().NotBeNull();
         }

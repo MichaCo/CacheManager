@@ -175,7 +175,7 @@
                 try
                 {
                     this.ResetCounters();
-                    
+
                     if (this.counterTimer != null)
                     {
                         this.counterTimer.Dispose();

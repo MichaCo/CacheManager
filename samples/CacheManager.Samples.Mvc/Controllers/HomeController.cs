@@ -13,6 +13,11 @@ namespace CacheManager.Samples.Mvc.Controllers
     {
         public CounterModel(ICacheManager<int> cache, int adds)
         {
+            if (cache == null)
+            {
+                throw new ArgumentNullException(nameof(cache));
+            }
+
             this.Adds = adds;
             this.AboutClicks = cache.Get("about");
             this.IndexClicks = cache.Get("index");
@@ -37,6 +42,7 @@ namespace CacheManager.Samples.Mvc.Controllers
         private static int adds = 0;
         private readonly ICacheManager<int> cache;
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1810:InitializeReferenceTypeStaticFieldsInline", Justification = "needed")]
         static HomeController()
         {
             CacheManagerOutputCacheProvider.Cache.OnPut += Cache_OnPut;

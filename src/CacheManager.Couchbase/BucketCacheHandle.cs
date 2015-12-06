@@ -146,7 +146,7 @@ namespace CacheManager.Couchbase
         /// </summary>
         /// <param name="key">The key being used to identify the item within the cache.</param>
         /// <returns>The <c>CacheItem</c>.</returns>
-        protected override CacheItem<TCacheValue> GetCacheItemInternal(string key) => 
+        protected override CacheItem<TCacheValue> GetCacheItemInternal(string key) =>
             this.GetCacheItemInternal(key, null);
 
         /// <summary>

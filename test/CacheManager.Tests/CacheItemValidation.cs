@@ -39,6 +39,7 @@ namespace CacheManager.Tests
             // arrange
             var baseItem = new CacheItem<object>("key", "region", "value", ExpirationMode.Sliding, TimeSpan.FromDays(10));
             var created = DateTime.UtcNow.AddMinutes(-10);
+
             // act
             var result = baseItem.WithCreated(created);
 
@@ -242,7 +243,7 @@ namespace CacheManager.Tests
             // assert
             act.Should()
                 .Match<CacheItem<object>>(p => p.ExpirationMode == ExpirationMode.None)
-                .And.Match<CacheItem<object>>(p => p.ExpirationTimeout == new TimeSpan())
+                .And.Match<CacheItem<object>>(p => p.ExpirationTimeout == TimeSpan.Zero)
                 .And.Match<CacheItem<object>>(p => p.Key == key)
                 .And.Match<CacheItem<object>>(p => p.Value == value)
                 .And.Match<CacheItem<object>>(p => p.Region == null);
@@ -382,7 +383,7 @@ namespace CacheManager.Tests
             // assert
             act.Should()
                 .Match<CacheItem<object>>(p => p.ExpirationMode == ExpirationMode.None)
-                .And.Match<CacheItem<object>>(p => p.ExpirationTimeout == new TimeSpan())
+                .And.Match<CacheItem<object>>(p => p.ExpirationTimeout == TimeSpan.Zero)
                 .And.Match<CacheItem<object>>(p => p.Key == key)
                 .And.Match<CacheItem<object>>(p => p.Value == value)
                 .And.Match<CacheItem<object>>(p => p.Region == region);

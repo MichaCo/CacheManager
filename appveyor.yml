@@ -12,4 +12,5 @@ build_script:
 test: off
 artifacts:
 - path: artifacts\build\*.nupkg
-  name: nugetsdeploy: off
+  name: nugets
+deploy: off

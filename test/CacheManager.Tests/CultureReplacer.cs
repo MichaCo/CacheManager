@@ -16,7 +16,7 @@ namespace CacheManager.Tests
         // Culture => Formatting of dates/times/money/etc, defaults to en-GB because en-US is the
         // same as InvariantCulture We want to be able to find issues where the InvariantCulture is
         // used, but a specific culture should be.
-        // 
+        //
         // UICulture => Language
         public CultureReplacer(string culture = "en-GB", string uiCulture = "en-US")
         {

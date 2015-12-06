@@ -505,7 +505,7 @@ namespace CacheManager.Core.Internal
 
             return this.RemoveInternal(key, region);
         }
-        
+
         /// <summary>
         /// Removes any expiration settings, previously defined, for the cache <paramref name="key"/>.
         /// </summary>
@@ -514,7 +514,7 @@ namespace CacheManager.Core.Internal
         {
             this.Expire(key, ExpirationMode.None, default(TimeSpan));
         }
-        
+
         /// <summary>
         /// Removes any expiration settings, previously defined, for the cache
         /// <paramref name="key"/> in <paramref name="region"/>.

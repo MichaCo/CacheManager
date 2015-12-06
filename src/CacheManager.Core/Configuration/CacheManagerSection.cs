@@ -8,6 +8,44 @@
     using System.Configuration;
 
     /// <summary>
+    /// Configuration section for the CacheManager.
+    /// </summary>
+    public sealed class CacheManagerSection : ConfigurationSection
+    {
+        /// <summary>
+        /// The default section name.
+        /// </summary>
+        public const string DefaultSectionName = "cacheManager";
+
+        private const string HandlesName = "cacheHandles";
+        private const string ManagersName = "managers";
+        private const string RedisName = "redis";
+
+        /// <summary>
+        /// Gets the cache handle definitions.
+        /// </summary>
+        /// <value>The cache handle definitions.</value>
+        [ConfigurationProperty(HandlesName)]
+        [ConfigurationCollection(typeof(CacheHandleDefinitionCollection), AddItemName = "handleDef")]
+        public CacheHandleDefinitionCollection CacheHandleDefinitions => (CacheHandleDefinitionCollection)this[HandlesName];
+
+        /// <summary>
+        /// Gets the cache managers.
+        /// </summary>
+        /// <value>The cache managers.</value>
+        [ConfigurationProperty(ManagersName)]
+        [ConfigurationCollection(typeof(CacheManagerCollection), AddItemName = "cache")]
+        public CacheManagerCollection CacheManagers => (CacheManagerCollection)this[ManagersName];
+
+        /// <summary>
+        /// Gets or sets the XMLNS.
+        /// </summary>
+        /// <value>The XMLNS.</value>
+        [ConfigurationProperty("xmlns", IsRequired = false)]
+        public string Xmlns { get; set; }
+    }
+
+    /// <summary>
     /// Part of the section defining the available cache handles.
     /// </summary>
     public sealed class CacheHandleDefinition : ConfigurationElement
@@ -306,7 +344,7 @@
         {
             get
             {
-                return (string)base[BackPlateNameKey];
+                return (string)this[BackPlateNameKey];
             }
             set
             {
@@ -323,7 +361,7 @@
         {
             get
             {
-                return (string)base[BackPlateTypeKey];
+                return (string)this[BackPlateTypeKey];
             }
             set
             {
@@ -374,7 +412,7 @@
         {
             get
             {
-                return (int?)base[MaxRetriesKey];
+                return (int?)this[MaxRetriesKey];
             }
             set
             {
@@ -408,7 +446,7 @@
         {
             get
             {
-                return (int?)base[RetryTimeoutKey];
+                return (int?)this[RetryTimeoutKey];
             }
             set
             {
@@ -466,44 +504,6 @@
         /// An <see cref="T:System.Object"/> that acts as the key for the specified <see cref="T:System.Configuration.ConfigurationElement"/>.
         /// </returns>
         protected override object GetElementKey(ConfigurationElement element) => ((CacheManagerHandle)element).Name;
-    }
-
-    /// <summary>
-    /// Configuration section for the CacheManager.
-    /// </summary>
-    public sealed class CacheManagerSection : ConfigurationSection
-    {
-        /// <summary>
-        /// The default section name.
-        /// </summary>
-        public const string DefaultSectionName = "cacheManager";
-
-        private const string HandlesName = "cacheHandles";
-        private const string ManagersName = "managers";
-        private const string RedisName = "redis";
-
-        /// <summary>
-        /// Gets the cache handle definitions.
-        /// </summary>
-        /// <value>The cache handle definitions.</value>
-        [ConfigurationProperty(HandlesName)]
-        [ConfigurationCollection(typeof(CacheHandleDefinitionCollection), AddItemName = "handleDef")]
-        public CacheHandleDefinitionCollection CacheHandleDefinitions => (CacheHandleDefinitionCollection)base[HandlesName];
-
-        /// <summary>
-        /// Gets the cache managers.
-        /// </summary>
-        /// <value>The cache managers.</value>
-        [ConfigurationProperty(ManagersName)]
-        [ConfigurationCollection(typeof(CacheManagerCollection), AddItemName = "cache")]
-        public CacheManagerCollection CacheManagers => (CacheManagerCollection)base[ManagersName];
-
-        /// <summary>
-        /// Gets or sets the XMLNS.
-        /// </summary>
-        /// <value>The XMLNS.</value>
-        [ConfigurationProperty("xmlns", IsRequired = false)]
-        public string Xmlns { get; set; }
     }
 
 #endif

@@ -10,7 +10,7 @@ namespace CacheManager.Examples
 {
     public class Program
     {
-        static void Main(string[] args)
+        private static void Main()
         {
             EventsExample();
             UnityInjectionExample();
@@ -131,13 +131,15 @@ namespace CacheManager.Examples
                 typeof(ICacheManager<>),
                 new ContainerControlledLifetimeManager(),
                 new InjectionFactory(
-                    (c, t, n) => CacheFactory.FromConfiguration(t.GetGenericArguments()[0],
-                    "myCache",
-                    ConfigurationBuilder.BuildConfiguration(cfg => cfg.WithSystemRuntimeCacheHandle("handle1")))));
+                    (c, t, n) => CacheFactory.FromConfiguration(
+                        t.GetGenericArguments()[0],
+                        "myCache",
+                        ConfigurationBuilder.BuildConfiguration(cfg => cfg.WithSystemRuntimeCacheHandle("handle1")))));
 
             var stringCache = container.Resolve<ICacheManager<string>>();
+
             // testing if we create a singleton instance per type, every Resolve of the same type should return the same instance!
-            var stringCacheB = container.Resolve<ICacheManager<string>>();  
+            var stringCacheB = container.Resolve<ICacheManager<string>>();
             stringCache.Put("key", "something");
 
             var intCache = container.Resolve<ICacheManager<int>>();
@@ -194,7 +196,7 @@ namespace CacheManager.Examples
             Console.WriteLine("Final value: {0}", cache.Get("counter"));
         }
     }
-    
+
     public class UnityInjectionExampleTarget
     {
         private ICacheManager<object> cache;

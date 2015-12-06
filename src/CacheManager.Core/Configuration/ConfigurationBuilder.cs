@@ -178,7 +178,8 @@ namespace CacheManager.Core
         }
 
         // todo: refactor -> high complexity
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA2204:Literals should be spelled correctly", MessageId = "BackPlateName", Justification = "no."), System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA2204:Literals should be spelled correctly", MessageId = "BackPlateType", Justification = "no")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA2204:Literals should be spelled correctly", MessageId = "BackPlateName", Justification = "no.")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA2204:Literals should be spelled correctly", MessageId = "BackPlateType", Justification = "no")]
         internal static CacheManagerConfiguration LoadFromSection(CacheManagerSection section, string configName)
         {
             if (string.IsNullOrWhiteSpace(configName))
@@ -234,7 +235,7 @@ namespace CacheManager.Core
 
             // build configuration
             var cfg = new CacheManagerConfiguration(managerCfg.UpdateMode, maxRetries.HasValue ? maxRetries.Value : int.MaxValue, retryTimeout.HasValue ? retryTimeout.Value : 10);
-            
+
             if (string.IsNullOrWhiteSpace(managerCfg.BackPlateType))
             {
                 if (!string.IsNullOrWhiteSpace(managerCfg.BackPlateName))
@@ -250,7 +251,7 @@ namespace CacheManager.Core
                 }
 
                 cfg = cfg.WithBackPlate(
-                    Type.GetType(managerCfg.BackPlateType, true), 
+                    Type.GetType(managerCfg.BackPlateType, true),
                     managerCfg.BackPlateName);
             }
 
@@ -467,7 +468,7 @@ namespace CacheManager.Core
         }
 
         /// <summary>
-        /// Gets the configuration.
+        /// Gets or sets the configuration.
         /// </summary>
         /// <value>The configuration.</value>
         internal CacheManagerConfiguration Configuration { get; set; }
@@ -489,7 +490,8 @@ namespace CacheManager.Core
         /// <returns>The builder instance.</returns>
         /// <exception cref="System.ArgumentNullException">If name is null.</exception>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1004:GenericMethodsShouldProvideTypeParameter", Justification = "Users should use the extensions.")]
-        public ConfigurationBuilderCachePart WithBackPlate<TBackPlate>(string name) where TBackPlate : CacheBackPlate
+        public ConfigurationBuilderCachePart WithBackPlate<TBackPlate>(string name)
+            where TBackPlate : CacheBackPlate
         {
             if (string.IsNullOrWhiteSpace(name))
             {

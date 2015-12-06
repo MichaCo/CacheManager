@@ -90,7 +90,8 @@ namespace CacheManager.Tests
         [Theory]
         [MemberData("TestCacheManagers")]
         [ReplaceCulture]
-        public void CacheManager_Events_OnGet<T>(T cache) where T : ICacheManager<object>
+        public void CacheManager_Events_OnGet<T>(T cache)
+            where T : ICacheManager<object>
         {
             using (cache)
             {
@@ -116,7 +117,8 @@ namespace CacheManager.Tests
         [Theory]
         [MemberData("TestCacheManagers")]
         [ReplaceCulture]
-        public void CacheManager_Events_OnGetWithRegion<T>(T cache) where T : ICacheManager<object>
+        public void CacheManager_Events_OnGetWithRegion<T>(T cache)
+            where T : ICacheManager<object>
         {
             using (cache)
             {
@@ -142,7 +144,8 @@ namespace CacheManager.Tests
         [Theory]
         [MemberData("TestCacheManagers")]
         [ReplaceCulture]
-        public void CacheManager_Events_OnGetMiss<T>(T cache) where T : ICacheManager<object>
+        public void CacheManager_Events_OnGetMiss<T>(T cache)
+            where T : ICacheManager<object>
         {
             using (cache)
             {
@@ -167,13 +170,15 @@ namespace CacheManager.Tests
         [Theory]
         [MemberData("TestCacheManagers")]
         [ReplaceCulture]
-        public void CacheManager_Events_OnGetManyHandles<T>(T cache) where T : ICacheManager<object>
+        public void CacheManager_Events_OnGetManyHandles<T>(T cache)
+            where T : ICacheManager<object>
         {
             using (cache)
             {
                 // arrange
                 var key1 = Guid.NewGuid().ToString();
                 var data = new EventCallbackData();
+
                 // all callbacks should be triggered, so result count should be 4
                 cache.OnGet += (sender, args) => data.AddCall(args);
                 cache.OnGet += (sender, args) => data.AddCall(args);
@@ -202,7 +207,8 @@ namespace CacheManager.Tests
         [Theory]
         [MemberData("TestCacheManagers")]
         [ReplaceCulture]
-        public void CacheManager_Events_OnRemoveMany<T>(T cache) where T : ICacheManager<object>
+        public void CacheManager_Events_OnRemoveMany<T>(T cache)
+            where T : ICacheManager<object>
         {
             using (cache)
             {
@@ -252,7 +258,8 @@ namespace CacheManager.Tests
         [Theory]
         [MemberData("TestCacheManagers")]
         [ReplaceCulture]
-        public void CacheManager_Events_OnAddMany<T>(T cache) where T : ICacheManager<object>
+        public void CacheManager_Events_OnAddMany<T>(T cache)
+            where T : ICacheManager<object>
         {
             using (cache)
             {
@@ -260,6 +267,7 @@ namespace CacheManager.Tests
                 var key1 = Guid.NewGuid().ToString();
                 var key2 = Guid.NewGuid().ToString();
                 var data = new EventCallbackData();
+
                 // all callbacks should be triggered, so result count should be 4
                 cache.OnAdd += (sender, args) => data.AddCall(args);
                 cache.OnAdd += (sender, args) => data.AddCall(args);
@@ -306,7 +314,8 @@ namespace CacheManager.Tests
         [Theory]
         [MemberData("TestCacheManagers")]
         [ReplaceCulture]
-        public void CacheManager_Events_OnPutMany<T>(T cache) where T : ICacheManager<object>
+        public void CacheManager_Events_OnPutMany<T>(T cache)
+            where T : ICacheManager<object>
         {
             using (cache)
             {
@@ -357,7 +366,8 @@ namespace CacheManager.Tests
         [Theory]
         [MemberData("TestCacheManagers")]
         [ReplaceCulture]
-        public void CacheManager_Events_OnUpdate<T>(T cache) where T : ICacheManager<object>
+        public void CacheManager_Events_OnUpdate<T>(T cache)
+            where T : ICacheManager<object>
         {
             using (cache)
             {
@@ -409,7 +419,8 @@ namespace CacheManager.Tests
         [Theory]
         [MemberData("TestCacheManagers")]
         [ReplaceCulture]
-        public void CacheManager_Events_OnClearRegion<T>(T cache) where T : ICacheManager<object>
+        public void CacheManager_Events_OnClearRegion<T>(T cache)
+            where T : ICacheManager<object>
         {
             using (cache)
             {

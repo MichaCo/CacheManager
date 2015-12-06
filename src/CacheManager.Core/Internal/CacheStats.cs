@@ -28,6 +28,7 @@ namespace CacheManager.Core.Internal
 #if !PORTABLE
         private readonly CachePerformanceCounters<TCacheValue> performanceCounters;
 #endif
+
         /// <summary>
         /// Initializes a new instance of the <see cref="CacheStats{TCacheValue}"/> class.
         /// </summary>
@@ -105,7 +106,7 @@ namespace CacheManager.Core.Internal
         /// <code>
         /// <![CDATA[
         /// var cache = CacheFactory.FromConfiguration("myCache");
-        /// 
+        ///
         /// foreach (var handle in cache.CacheHandles)
         /// {
         ///    var stats = handle.Stats;
@@ -167,7 +168,7 @@ namespace CacheManager.Core.Internal
         /// <code>
         /// <![CDATA[
         /// var cache = CacheFactory.FromConfiguration("myCache");
-        /// 
+        ///
         /// foreach (var handle in cache.CacheHandles)
         /// {
         ///    var stats = handle.Stats;

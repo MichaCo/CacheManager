@@ -143,19 +143,20 @@ namespace CacheManager.Tests
                 int numInnerIterations = 10;
 
                 // act
-                ThreadTestHelper.Run(() =>
-                {
-                    for (int i = 0; i < numInnerIterations; i++)
+                ThreadTestHelper.Run(
+                    () =>
                     {
-                        var val = cache.Get("myCounter");
-                        val.Should().NotBeNull();
-                        val.Counter++;
+                        for (int i = 0; i < numInnerIterations; i++)
+                        {
+                            var val = cache.Get("myCounter");
+                            val.Should().NotBeNull();
+                            val.Counter++;
 
-                        cache.Put("myCounter", val);
-                    }
-                },
-                numThreads,
-                iterations);
+                            cache.Put("myCounter", val);
+                        }
+                    },
+                    numThreads,
+                    iterations);
 
                 // assert
                 Thread.Sleep(10);
@@ -189,20 +190,24 @@ namespace CacheManager.Tests
                 int countCasModifyCalls = 0;
 
                 // act
-                ThreadTestHelper.Run(() =>
-                {
-                    for (int i = 0; i < numInnerIterations; i++)
+                ThreadTestHelper.Run(
+                    () =>
                     {
-                        cache.Update("myCounter", (value) =>
+                        for (int i = 0; i < numInnerIterations; i++)
                         {
-                            value.Counter++;
-                            Interlocked.Increment(ref countCasModifyCalls);
-                            return value;
-                        }, new UpdateItemConfig(50, VersionConflictHandling.EvictItemFromOtherCaches));
-                    }
-                },
-                numThreads,
-                iterations);
+                            cache.Update(
+                                "myCounter",
+                                (value) =>
+                                {
+                                    value.Counter++;
+                                    Interlocked.Increment(ref countCasModifyCalls);
+                                    return value;
+                                },
+                                new UpdateItemConfig(50, VersionConflictHandling.EvictItemFromOtherCaches));
+                        }
+                    },
+                    numThreads,
+                    iterations);
 
                 // assert
                 Thread.Sleep(10);
@@ -236,23 +241,24 @@ namespace CacheManager.Tests
                 int countCasModifyCalls = 0;
 
                 // act
-                ThreadTestHelper.Run(() =>
-                {
-                    for (int i = 0; i < numInnerIterations; i++)
+                ThreadTestHelper.Run(
+                    () =>
                     {
-                        cache.Update(
-                            key,
-                            region,
-                            (value) =>
-                            {
-                                value.Counter++;
-                                Interlocked.Increment(ref countCasModifyCalls);
-                                return value;
-                            });
-                    }
-                },
-                numThreads,
-                iterations);
+                        for (int i = 0; i < numInnerIterations; i++)
+                        {
+                            cache.Update(
+                                key,
+                                region,
+                                (value) =>
+                                {
+                                    value.Counter++;
+                                    Interlocked.Increment(ref countCasModifyCalls);
+                                    return value;
+                                });
+                        }
+                    },
+                    numThreads,
+                    iterations);
 
                 // assert
                 Thread.Sleep(10);
@@ -285,29 +291,35 @@ namespace CacheManager.Tests
                 int retries = 0;
 
                 // act
-                ThreadTestHelper.Run(() =>
-                {
-                    for (int i = 0; i < numInnerIterations; i++)
+                ThreadTestHelper.Run(
+                    () =>
                     {
-                        cache.Update("myCounter", (value) =>
+                        for (int i = 0; i < numInnerIterations; i++)
                         {
-                            value.Counter++;
-                            Interlocked.Increment(ref countCasModifyCalls);
-                            return value;
-                        }, new UpdateItemConfig(retries, VersionConflictHandling.EvictItemFromOtherCaches));
-                    }
-                },
-                numThreads,
-                iterations);
+                            cache.Update(
+                                "myCounter",
+                                (value) =>
+                                {
+                                    value.Counter++;
+                                    Interlocked.Increment(ref countCasModifyCalls);
+                                    return value;
+                                },
+                                new UpdateItemConfig(retries, VersionConflictHandling.EvictItemFromOtherCaches));
+                        }
+                    },
+                    numThreads,
+                    iterations);
 
                 // assert
                 Thread.Sleep(10);
                 var result = cache.Get("myCounter");
                 result.Should().NotBeNull();
                 Trace.TraceInformation("Counter increased to " + result.Counter + " cas calls needed " + countCasModifyCalls);
-                result.Counter.Should().BeLessThan(numThreads * numInnerIterations * iterations,
+                result.Counter.Should().BeLessThan(
+                    numThreads * numInnerIterations * iterations,
                     "counter should NOT be exactly the expected value");
-                countCasModifyCalls.Should().Be(numThreads * numInnerIterations * iterations,
+                countCasModifyCalls.Should().Be(
+                    numThreads * numInnerIterations * iterations,
                     "with one try, we exactly one update call per iteration");
             }
         }

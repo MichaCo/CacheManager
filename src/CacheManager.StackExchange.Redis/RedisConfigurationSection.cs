@@ -139,7 +139,7 @@ namespace CacheManager.Redis
         /// <value>The connections.</value>
         [ConfigurationProperty(ConfigurationsName)]
         [ConfigurationCollection(typeof(RedisOptionCollection), AddItemName = "connection")]
-        public RedisOptionCollection Connections => (RedisOptionCollection)base[ConfigurationsName];
+        public RedisOptionCollection Connections => (RedisOptionCollection)this[ConfigurationsName];
 
         /// <summary>
         /// Gets or sets the XMLNS.
@@ -278,7 +278,7 @@ namespace CacheManager.Redis
         /// <value>The endpoints.</value>
         [ConfigurationProperty(EndpointsName)]
         [ConfigurationCollection(typeof(EndpointCollection), AddItemName = "endpoint")]
-        public EndpointCollection Endpoints => (EndpointCollection)base[EndpointsName];
+        public EndpointCollection Endpoints => (EndpointCollection)this[EndpointsName];
 
         /// <summary>
         /// Gets or sets the identifier.

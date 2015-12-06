@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 using System.Web.Mvc;
 using System.Web.Optimization;
 using System.Web.Routing;
@@ -24,11 +22,10 @@ namespace CacheManager.Samples.Mvc
 
             DependencyResolver.SetResolver(new UnityDependencyResolver(container));
 
-            container.RegisterType(typeof(ICacheManager<>), new ContainerControlledLifetimeManager(),
-                new InjectionFactory((c, targetType, name) =>
-                {
-                    return CacheFactory.FromConfiguration(targetType.GenericTypeArguments[0], "myCache");
-                }));
+            container.RegisterType(
+                typeof(ICacheManager<>),
+                new ContainerControlledLifetimeManager(),
+                new InjectionFactory((c, targetType, name) => CacheFactory.FromConfiguration(targetType.GenericTypeArguments[0], "myCache")));
         }
     }
 }

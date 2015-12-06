@@ -3,7 +3,7 @@ using CacheManager.Core.Configuration;
 using CacheManager.SystemRuntimeCaching;
 
 namespace CacheManager.Core
-{    
+{
     /// <summary>
     /// Extensions for the configuration builder specific to System.Runtime.Caching cache handle.
     /// </summary>

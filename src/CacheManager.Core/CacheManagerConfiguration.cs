@@ -66,7 +66,7 @@ namespace CacheManager.Core
         public int RetryTimeout { get; set; } = 10;
 
         /// <summary>
-        /// Gets or sets the type of the back plate.
+        /// Gets the type of the back plate.
         /// </summary>
         /// <value>The type of the back plate.</value>
         public Type BackPlateType { get; }
@@ -90,7 +90,7 @@ namespace CacheManager.Core
 
         internal CacheManagerConfiguration WithBackPlate(Type backPlateType, string backPlateName)
         {
-            if(backPlateType == null)
+            if (backPlateType == null)
             {
                 throw new ArgumentNullException(nameof(backPlateType));
             }

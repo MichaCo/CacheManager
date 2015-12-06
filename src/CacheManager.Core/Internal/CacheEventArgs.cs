@@ -74,6 +74,7 @@ namespace CacheManager.Core.Internal
     /// <summary>
     /// Event arguments for cache update actions.
     /// </summary>
+    /// <typeparam name="TCacheValue">The type of the cache value.</typeparam>
     public sealed class CacheUpdateEventArgs<TCacheValue> : EventArgs
     {
         /// <summary>

@@ -6,7 +6,7 @@ namespace CacheManager.Config.Tests
 {
     internal class Program
     {
-        public static void Main(string[] args)
+        public static void Main()
         {
             var swatch = Stopwatch.StartNew();
             int iterations = int.MaxValue;
@@ -14,7 +14,7 @@ namespace CacheManager.Config.Tests
             var cacheConfiguration = ConfigurationBuilder.BuildConfiguration(cfg =>
             {
                 cfg.WithUpdateMode(CacheUpdateMode.Up);
-                
+
                 cfg.WithSystemRuntimeCacheHandle("default")
                     .EnablePerformanceCounters();
 
@@ -39,7 +39,6 @@ namespace CacheManager.Config.Tests
                 ////    i + 10);
 
                 Tests.SimpleAddGetTest(
-                    // CacheFactory.FromConfiguration(cacheConfiguration),
                     CacheFactory.FromConfiguration<object>("cache", cacheConfiguration));
 
                 //// CacheUpdateTest(cache);

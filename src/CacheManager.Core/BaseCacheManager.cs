@@ -113,8 +113,8 @@ namespace CacheManager.Core
         /// This list is read only, any changes to the returned list instance will not affect the
         /// state of the cache manager instance.
         /// </remarks>
-        public IEnumerable<BaseCacheHandle<TCacheValue>> CacheHandles => 
-            new ReadOnlyCollection<BaseCacheHandle<TCacheValue>>(
+        public IEnumerable<BaseCacheHandle<TCacheValue>> CacheHandles
+            => new ReadOnlyCollection<BaseCacheHandle<TCacheValue>>(
                 new List<BaseCacheHandle<TCacheValue>>(
                     this.cacheHandles));
 
@@ -157,7 +157,7 @@ namespace CacheManager.Core
         /// If the cache does not use a distributed cache system. Update is doing exactly the same
         /// as Get plus Put.
         /// </remarks>
-        public TCacheValue AddOrUpdate(string key, TCacheValue addValue, Func<TCacheValue, TCacheValue> updateValue) => 
+        public TCacheValue AddOrUpdate(string key, TCacheValue addValue, Func<TCacheValue, TCacheValue> updateValue) =>
             this.AddOrUpdate(key, addValue, updateValue, new UpdateItemConfig());
 
         /// <summary>
@@ -233,7 +233,7 @@ namespace CacheManager.Core
         /// If the cache does not use a distributed cache system. Update is doing exactly the same
         /// as Get plus Put.
         /// </remarks>
-        public TCacheValue AddOrUpdate(string key, TCacheValue addValue, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config) => 
+        public TCacheValue AddOrUpdate(string key, TCacheValue addValue, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config) =>
             this.AddOrUpdate(new CacheItem<TCacheValue>(key, addValue), updateValue, config);
 
         /// <summary>
@@ -423,10 +423,10 @@ namespace CacheManager.Core
         }
 
         /// <summary>
-        /// Returns a <see cref="System.String" /> that represents this instance.
+        /// Returns a <see cref="string" /> that represents this instance.
         /// </summary>
         /// <returns>
-        /// A <see cref="System.String" /> that represents this instance.
+        /// A <see cref="string" /> that represents this instance.
         /// </returns>
         public override string ToString() =>
             string.Format(CultureInfo.InvariantCulture, "{0} Handles: {1}", this.Name, this.cacheHandles.Length);
@@ -457,7 +457,7 @@ namespace CacheManager.Core
         /// If the cache does not use a distributed cache system. Update is doing exactly the same
         /// as Get plus Put.
         /// </remarks>
-        public bool TryUpdate(string key, Func<TCacheValue, TCacheValue> updateValue, out TCacheValue value) => 
+        public bool TryUpdate(string key, Func<TCacheValue, TCacheValue> updateValue, out TCacheValue value) =>
             this.TryUpdate(key, updateValue, new UpdateItemConfig(), out value);
 
         /// <summary>
@@ -488,7 +488,7 @@ namespace CacheManager.Core
         /// If the cache does not use a distributed cache system. Update is doing exactly the same
         /// as Get plus Put.
         /// </remarks>
-        public bool TryUpdate(string key, string region, Func<TCacheValue, TCacheValue> updateValue, out TCacheValue value) => 
+        public bool TryUpdate(string key, string region, Func<TCacheValue, TCacheValue> updateValue, out TCacheValue value) =>
             this.TryUpdate(key, region, updateValue, new UpdateItemConfig(), out value);
 
         /// <summary>
@@ -644,7 +644,7 @@ namespace CacheManager.Core
         /// If <paramref name="key"/> or <paramref name="region"/> or <paramref name="updateValue"/>
         /// is null.
         /// </exception>
-        public TCacheValue Update(string key, string region, Func<TCacheValue, TCacheValue> updateValue) => 
+        public TCacheValue Update(string key, string region, Func<TCacheValue, TCacheValue> updateValue) =>
             this.Update(key, region, updateValue, new UpdateItemConfig());
 
         /// <summary>
@@ -1029,7 +1029,7 @@ namespace CacheManager.Core
                     }
                     //// Continue looping otherwise...
                     //// Add also didn't work, meaning the item is already there/someone added it in
-                    //// the meantime, lets try it again... 
+                    //// the meantime, lets try it again...
                 }
             }
             while (tries <= this.Configuration.MaxRetries);
@@ -1343,10 +1343,10 @@ namespace CacheManager.Core
         /// <param name="value">The value.</param>
         /// <returns><c>True</c> if the item has been updated.</returns>
         private bool UpdateInternal(
-            BaseCacheHandle<TCacheValue>[] handles, 
-            string key, 
-            Func<TCacheValue, TCacheValue> updateValue, 
-            UpdateItemConfig config, 
+            BaseCacheHandle<TCacheValue>[] handles,
+            string key,
+            Func<TCacheValue, TCacheValue> updateValue,
+            UpdateItemConfig config,
             out TCacheValue value) =>
             this.UpdateInternal(handles, key, null, updateValue, config, out value);
 
