@@ -11,9 +11,9 @@
   },
 
   "dependencies": {
-    "CacheManager.Core": "0.6.2",
-    "CacheManager.SystemRuntimeCaching": "0.6.2",
-    "CacheManager.StackExchange.Redis": "0.6.2",
+    "CacheManager.Core": "",
+    "CacheManager.SystemRuntimeCaching": "",
+    "CacheManager.StackExchange.Redis": "",
     "Unity": "4.0.2"
   },
 

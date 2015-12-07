@@ -7,7 +7,7 @@
   "projectUrl": "http://www.cachemanager.net",
   "licenseUrl": "https://github.com/MichaCo/CacheManager/blob/master/LICENSE",
   "dependencies": {
-    "CacheManager.Core": "0.6.2-*",
+    "CacheManager.Core": "",
     "CouchbaseNetClient": "2.1.1",
     "Newtonsoft.Json": "6.0.8"
   },

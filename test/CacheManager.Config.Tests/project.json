@@ -6,9 +6,9 @@
   "projectUrl": "http://www.cachemanager.net",
   "licenseUrl": "https://github.com/MichaCo/CacheManager/blob/master/LICENSE",
   "dependencies": {
-    "CacheManager.Core": "0.6.2-*",
-    "Microsoft.Dnx.Runtime.Abstractions": "1.0.0-*",
-    "CacheManager.Serialization.Json": "0.6.2-*"
+    "CacheManager.Core": "",
+    "CacheManager.Serialization.Json": "",
+    "Microsoft.Dnx.Runtime.Abstractions": "1.0.0-*"
   },
   "commands": {
     "run": "CacheManager.Config.Tests"
@@ -20,8 +20,8 @@
         "System.Configuration": ""
       },
       "dependencies": {
-        "CacheManager.SystemRuntimeCaching": "0.6.2-*",
-        "CacheManager.StackExchange.Redis": "0.6.2-*"
+        "CacheManager.SystemRuntimeCaching": "",
+        "CacheManager.StackExchange.Redis": ""
       }
     },
     "dnxcore50": {
