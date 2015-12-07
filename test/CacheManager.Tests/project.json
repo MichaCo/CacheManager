@@ -7,8 +7,7 @@
     "CacheManager.Serialization.Json": "",
     "FluentAssertions": "4.1.0",
     "Moq": "4.2.1510.2205",
-    "xunit.runner.aspnet": "2.0.0-aspnet-rc1-*",
-    "Microsoft.Extensions.PlatformAbstractions": "1.0.0-rc1-*"
+    "xunit.runner.aspnet": "2.0.0-aspnet-rc1-*"
   },
   "frameworks": {
     "dnx451": {
