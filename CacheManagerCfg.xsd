@@ -28,6 +28,7 @@
       <xs:attribute name="retryTimeout" use="optional" type="xs:integer" />
       <xs:attribute name="backPlateType" use="optional" type="xs:string" />
       <xs:attribute name="backPlateName" use="optional" type="xs:string" />
+      <xs:attribute name="serializerType" use="optional" type="xs:string" />
     </xs:complexType>
   </xs:element>
   <xs:element name="handleDef">

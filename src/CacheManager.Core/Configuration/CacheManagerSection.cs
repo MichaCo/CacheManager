@@ -320,6 +320,7 @@
     {
         private const string BackPlateNameKey = "backPlateName";
         private const string BackPlateTypeKey = "backPlateType";
+        private const string SerializerTypeKey = "serializerType";
         private const string EnablePerformanceCountersKey = "enablePerformanceCounters";
         private const string EnableStatisticsKey = "enableStatistics";
         private const string MaxRetriesKey = "maxRetries";
@@ -366,6 +367,23 @@
             set
             {
                 this[BackPlateTypeKey] = value;
+            }
+        }
+        
+        /// <summary>
+        /// Gets or sets the type of the back plate.
+        /// </summary>
+        /// <value>The type of the back plate.</value>
+        [ConfigurationProperty(SerializerTypeKey, IsRequired = false)]
+        public string SerializerType
+        {
+            get
+            {
+                return (string)this[SerializerTypeKey];
+            }
+            set
+            {
+                this[SerializerTypeKey] = value;
             }
         }
 

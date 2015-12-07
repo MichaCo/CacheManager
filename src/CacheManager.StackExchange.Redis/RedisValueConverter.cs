@@ -1,7 +1,9 @@
 ﻿using System;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
+using CacheManager.Core.Internal;
 using StackRedis = StackExchange.Redis;
+using static CacheManager.Core.Utility.Guard;
 
 namespace CacheManager.Redis
 {
@@ -12,6 +14,14 @@ namespace CacheManager.Redis
     // basically I have to cast the values to and from RedisValue which has implicit conversions
     // to/from those types defined internally... I cannot simply cast to my TCacheValue, because its
     // generic, and not defined as class or struct or anything... so there is basically no other way
+
+    internal interface IRedisValueConverter
+    {
+        StackRedis.RedisValue ToRedisValue<T>(T value);
+
+        T FromRedisValue<T>(StackRedis.RedisValue value, string valueType);
+    }
+
     internal interface IRedisValueConverter<T>
     {
         StackRedis.RedisValue ToRedisValue(T value);
@@ -20,6 +30,7 @@ namespace CacheManager.Redis
     }
 
     internal class RedisValueConverter :
+        IRedisValueConverter,
         IRedisValueConverter<byte[]>,
         IRedisValueConverter<string>,
         IRedisValueConverter<int>,
@@ -34,35 +45,13 @@ namespace CacheManager.Redis
         private static readonly Type DoubleType = typeof(double);
         private static readonly Type BoolType = typeof(bool);
         private static readonly Type LongType = typeof(long);
+        private readonly ICacheSerializer serializer;
 
-        public static byte[] ToBytes(object obj)
+        public RedisValueConverter(ICacheSerializer serializer)
         {
-            if (obj == null)
-            {
-                return null;
-            }
+            NotNull(serializer, nameof(serializer));
 
-            BinaryFormatter binaryFormatter = new BinaryFormatter();
-            using (MemoryStream memoryStream = new MemoryStream())
-            {
-                binaryFormatter.Serialize(memoryStream, obj);
-                byte[] objectDataAsStream = memoryStream.ToArray();
-                return objectDataAsStream;
-            }
-        }
-
-        public static T FromBytes<T>(byte[] stream)
-        {
-            if (stream == null)
-            {
-                return default(T);
-            }
-
-            BinaryFormatter binaryFormatter = new BinaryFormatter();
-            using (MemoryStream memoryStream = new MemoryStream(stream))
-            {
-                return (T)binaryFormatter.Deserialize(memoryStream);
-            }
+            this.serializer = serializer;
         }
 
         StackRedis.RedisValue IRedisValueConverter<byte[]>.ToRedisValue(byte[] value) => value;
@@ -88,10 +77,7 @@ namespace CacheManager.Redis
         StackRedis.RedisValue IRedisValueConverter<long>.ToRedisValue(long value) => value;
 
         long IRedisValueConverter<long>.FromRedisValue(StackRedis.RedisValue value, string valueType) => (long)value;
-
-        // for object this could be epcial because the value could be any of the supported values or
-        // any king of object... to also have the performance benefit from the known types, lets try
-        // to use it for object based cache, too
+        
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0", Scope = "member", Target = "CacheManager.Redis.RedisValueConverter.#CacheManager.Redis.IRedisValueConverter`1<System.Object>.ToRedisValue(System.Object)", Justification = "For performance reasons we don't do checks at this point. Also, its internally used only.")]
         StackRedis.RedisValue IRedisValueConverter<object>.ToRedisValue(object value)
         {
@@ -127,43 +113,55 @@ namespace CacheManager.Redis
                 return converter.ToRedisValue((long)value);
             }
 
-            return ToBytes(value);
+            return this.serializer.Serialize(value);
         }
 
         object IRedisValueConverter<object>.FromRedisValue(StackRedis.RedisValue value, string valueType)
         {
-            if (valueType == ByteArrayType.FullName)
+            if (valueType == ByteArrayType.AssemblyQualifiedName)
             {
                 var converter = (IRedisValueConverter<byte[]>)this;
                 return converter.FromRedisValue(value, valueType);
             }
-            else if (valueType == StringType.FullName)
+            else if (valueType == StringType.AssemblyQualifiedName)
             {
                 var converter = (IRedisValueConverter<string>)this;
                 return converter.FromRedisValue(value, valueType);
             }
-            else if (valueType == IntType.FullName)
+            else if (valueType == IntType.AssemblyQualifiedName)
             {
                 var converter = (IRedisValueConverter<int>)this;
                 return converter.FromRedisValue(value, valueType);
             }
-            else if (valueType == DoubleType.FullName)
+            else if (valueType == DoubleType.AssemblyQualifiedName)
             {
                 var converter = (IRedisValueConverter<double>)this;
                 return converter.FromRedisValue(value, valueType);
             }
-            else if (valueType == BoolType.FullName)
+            else if (valueType == BoolType.AssemblyQualifiedName)
             {
                 var converter = (IRedisValueConverter<bool>)this;
                 return converter.FromRedisValue(value, valueType);
             }
-            else if (valueType == LongType.FullName)
+            else if (valueType == LongType.AssemblyQualifiedName)
             {
                 var converter = (IRedisValueConverter<long>)this;
                 return converter.FromRedisValue(value, valueType);
             }
+            
+            return this.Deserialize(value, valueType);
+        }
 
-            return FromBytes<object>(value);
+        public StackRedis.RedisValue ToRedisValue<T>(T value) => this.serializer.Serialize(value);
+
+        public T FromRedisValue<T>(StackRedis.RedisValue value, string valueType) => (T)this.Deserialize(value, valueType);
+
+        private object Deserialize(StackRedis.RedisValue value, string valueType)
+        {
+            var type = Type.GetType(valueType, false);
+            EnsureNotNull(type, "Type could not be loaded, {0}.", valueType);
+
+            return this.serializer.Deserialize(value, type);
         }
     }
 }

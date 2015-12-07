@@ -7,7 +7,8 @@
   "licenseUrl": "https://github.com/MichaCo/CacheManager/blob/master/LICENSE",
   "dependencies": {
     "CacheManager.Core": "0.6.2-*",
-    "Microsoft.Dnx.Runtime.Abstractions": "1.0.0-*"
+    "Microsoft.Dnx.Runtime.Abstractions": "1.0.0-*",
+    "CacheManager.Serialization.Json": "0.6.2-*"
   },
   "commands": {
     "run": "CacheManager.Config.Tests"

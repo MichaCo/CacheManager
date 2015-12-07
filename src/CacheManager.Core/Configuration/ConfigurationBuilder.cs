@@ -209,9 +209,19 @@ namespace CacheManager.Core
                     throw new InvalidOperationException("BackPlateName cannot be null if BackPlateType is specified.");
                 }
 
-                cfg = cfg.WithBackPlate(
+                cfg.WithBackPlate(
                     Type.GetType(managerCfg.BackPlateType, true),
                     managerCfg.BackPlateName);
+            }
+
+            // build serializer if set
+            if (!string.IsNullOrWhiteSpace(managerCfg.SerializerType))
+            {
+                var serializerType = Type.GetType(managerCfg.SerializerType, false);
+                EnsureNotNull(serializerType, "Serializer type cannot be loaded, {0}", managerCfg.SerializerType);
+
+                cfg.WithSerializer(CacheReflectionHelper.CreateSerializer(serializerType));
+
             }
 
             foreach (CacheManagerHandle handleItem in managerCfg)
@@ -426,7 +436,7 @@ namespace CacheManager.Core
         /// Gets or sets the configuration.
         /// </summary>
         /// <value>The configuration.</value>
-        internal CacheManagerConfiguration Configuration { get; set; }
+        internal CacheManagerConfiguration Configuration { get; }
 
         /// <summary>
         /// Configures the back plate for the cache manager.
@@ -450,7 +460,7 @@ namespace CacheManager.Core
         {
             NotNullOrWhiteSpace(name, nameof(name));
 
-            this.Configuration = this.Configuration.WithBackPlate(typeof(TBackPlate), name);
+            this.Configuration.WithBackPlate(typeof(TBackPlate), name);
             return this;
         }
 
@@ -564,6 +574,14 @@ namespace CacheManager.Core
         public ConfigurationBuilderCachePart WithUpdateMode(CacheUpdateMode updateMode)
         {
             this.Configuration.CacheUpdateMode = updateMode;
+            return this;
+        }
+
+        public ConfigurationBuilderCachePart WithSerializer(Type serializerType, params object[] args)
+        {
+            var instance = CacheReflectionHelper.CreateSerializer(serializerType, args);
+
+            this.Configuration.WithSerializer(instance);
             return this;
         }
     }

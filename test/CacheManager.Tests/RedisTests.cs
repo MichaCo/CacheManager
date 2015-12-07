@@ -4,7 +4,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 using CacheManager.Core;
-using CacheManager.Core.Configuration;
 using CacheManager.Redis;
 using FluentAssertions;
 using Xunit;
@@ -548,6 +547,23 @@ namespace CacheManager.Tests
                 cache.Add(key, value);
                 var result = (long)cache.Get(key);
                 value.Should().Be(result);
+            }
+        }
+
+        [Fact]
+        [Trait("category", "Redis")]
+        public void Redis_ValueConverter_CacheTypeConversion_Poco()
+        {
+            var cache = TestManagers.CreateRedisCache<Poco>(17);
+
+            // act/assert
+            using (cache)
+            {
+                var key = Guid.NewGuid().ToString();
+                var value = new Poco() { Id = 23, Something = "§asdad" };
+                cache.Add(key, value);
+                var result = (Poco)cache.Get(key);
+                value.ShouldBeEquivalentTo(result);
             }
         }
 

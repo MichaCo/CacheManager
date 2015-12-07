@@ -5,6 +5,7 @@ using System.Net;
 using CacheManager.Core;
 using CacheManager.Core.Internal;
 using StackRedis = StackExchange.Redis;
+using static CacheManager.Core.Utility.Guard;
 
 namespace CacheManager.Redis
 {
@@ -43,7 +44,7 @@ namespace CacheManager.Redis
         // the object value
         private const string HashFieldValue = "value";
 
-        private static readonly IRedisValueConverter<TCacheValue> ValueConverter = new RedisValueConverter() as IRedisValueConverter<TCacheValue>;
+        private readonly RedisValueConverter valueConverter;
         private StackRedis.IDatabase database = null;
         private RedisConfiguration redisConfiguration = null;
 
@@ -55,6 +56,8 @@ namespace CacheManager.Redis
         public RedisCacheHandle(ICacheManager<TCacheValue> manager, CacheHandleConfiguration configuration)
             : base(manager, configuration)
         {
+            EnsureNotNull(manager.Configuration.CacheSerializer, "Cache serializer must be defined for redis cache.");
+            this.valueConverter = new RedisValueConverter(manager.Configuration.CacheSerializer);
         }
 
         /// <summary>
@@ -416,29 +419,31 @@ namespace CacheManager.Redis
         }
 #pragma warning restore CSE0003
 
-        private static TCacheValue FromRedisValue(StackRedis.RedisValue value, string valueType)
+        private TCacheValue FromRedisValue(StackRedis.RedisValue value, string valueType)
         {
             if (value.IsNull || value.IsNullOrEmpty || !value.HasValue)
             {
                 return default(TCacheValue);
             }
 
-            if (ValueConverter != null)
+            var typedConverter = this.valueConverter as IRedisValueConverter<TCacheValue>;
+            if(typedConverter != null)
             {
-                return ValueConverter.FromRedisValue(value, valueType);
+                return typedConverter.FromRedisValue(value, valueType);
             }
-
-            return RedisValueConverter.FromBytes<TCacheValue>(value);
+            
+            return this.valueConverter.FromRedisValue<TCacheValue>(value, valueType);
         }
 
-        private static StackRedis.RedisValue ToRedisValue(TCacheValue value)
+        private StackRedis.RedisValue ToRedisValue(TCacheValue value)
         {
-            if (ValueConverter != null)
+            var typedConverter = this.valueConverter as IRedisValueConverter<TCacheValue>;
+            if (typedConverter != null)
             {
-                return ValueConverter.ToRedisValue(value);
+                return typedConverter.ToRedisValue(value);
             }
 
-            return RedisValueConverter.ToBytes(value);
+            return this.valueConverter.ToRedisValue(value);
         }
 
         private static string GetKey(string key, string region = null)
@@ -475,11 +480,10 @@ namespace CacheManager.Redis
 
                 StackRedis.HashEntry[] metaValues = new[]
                 {
-                    new StackRedis.HashEntry(HashFieldType, item.ValueType.FullName),
+                    new StackRedis.HashEntry(HashFieldType, item.ValueType.AssemblyQualifiedName),
                     new StackRedis.HashEntry(HashFieldExpirationMode, (int)item.ExpirationMode),
                     new StackRedis.HashEntry(HashFieldExpirationTimeout, item.ExpirationTimeout.Ticks),
-                    new StackRedis.HashEntry(HashFieldCreated, item.CreatedUtc.Ticks),
-                    new StackRedis.HashEntry(HashFieldType, item.ValueType.FullName)
+                    new StackRedis.HashEntry(HashFieldCreated, item.CreatedUtc.Ticks)
                 };
 
                 var flags = sync ? StackRedis.CommandFlags.None : StackRedis.CommandFlags.FireAndForget;

@@ -9,7 +9,20 @@ namespace CacheManager.Core.Internal
 {
     internal static class CacheReflectionHelper
     {
-        public static ICollection<BaseCacheHandle<TCacheValue>> CreateCacheHandles<TCacheValue>(BaseCacheManager<TCacheValue> manager)
+        internal static ICacheSerializer CreateSerializer(Type serializerType, params object[] args)
+        {
+            NotNull(serializerType, nameof(serializerType));
+
+            Ensure(
+                serializerType.GetInterfaces().Any(p => p == typeof(ICacheSerializer)),
+                "Serializer type must implement {0}, but {1} is not.",
+                nameof(ICacheSerializer),
+                nameof(serializerType));
+
+            return (ICacheSerializer)Activator.CreateInstance(serializerType, args);
+        }
+
+        internal static ICollection<BaseCacheHandle<TCacheValue>> CreateCacheHandles<TCacheValue>(BaseCacheManager<TCacheValue> manager)
         {
             var managerConfiguration = manager.Configuration;
             var handles = new List<BaseCacheHandle<TCacheValue>>();

@@ -26,7 +26,8 @@
         "System.Configuration": ""
       }
     },
-    "dotnet5.2": {      
+    "dotnet5.1": {
+      "compilationOptions": {"define": ["DOTNET5_2"]},
       "dependencies": {
         "System.Collections": "4.0.10",
         "System.Linq": "4.0.0",

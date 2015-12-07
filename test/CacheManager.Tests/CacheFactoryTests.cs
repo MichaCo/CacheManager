@@ -4,7 +4,9 @@ using System.Linq;
 using CacheManager.Core;
 using CacheManager.Core.Internal;
 using CacheManager.Redis;
+using CacheManager.Serialization.Json;
 using FluentAssertions;
+using Newtonsoft.Json;
 using Xunit;
 
 namespace CacheManager.Tests
@@ -531,6 +533,81 @@ namespace CacheManager.Tests
             cache.Should().NotBeNull();
             cache.CacheHandles.Count().Should().Be(1);
             cache.Name.Should().Be("cacheName");
+        }
+
+        [Fact]
+        [ReplaceCulture]
+        public void CacheFactory_Build_WithSerializer_TypeNull()
+        {
+            Action act = () => CacheFactory.Build(
+                "cacheName",
+                p => p.WithSerializer(null));
+
+            act.ShouldThrow<ArgumentNullException>().WithMessage("*serializerType*");
+        }
+
+        [Fact]
+        [ReplaceCulture]
+        public void CacheFactory_Build_WithSerializer_TypeInvalid()
+        {
+            Action act = () => CacheFactory.Build(
+                "cacheName",
+                p => p.WithSerializer(typeof(string)));
+
+            act.ShouldThrow<InvalidOperationException>().WithMessage("*must implement "+ nameof(ICacheSerializer) +"*");
+        }
+        
+        [Fact]
+        [ReplaceCulture]
+        public void CacheFactory_Build_WithJsonSerializer()
+        {
+            var cache = CacheFactory.Build(
+                "cacheName",
+                p => p
+                    .WithJsonSerializer()
+                    .WithSystemRuntimeCacheHandle("h1"));
+
+            cache.Configuration.CacheSerializer.Should().NotBeNull();
+            cache.Configuration.CacheSerializer.GetType().Should().Be(typeof(JsonCacheSerializer));
+        }
+
+        [Fact]
+        [ReplaceCulture]
+        public void CacheFactory_Build_WithJsonSerializerCustomSettings()
+        {
+            var serializationSettings = new JsonSerializerSettings()
+            {
+                DateFormatHandling = DateFormatHandling.MicrosoftDateFormat
+            };
+
+            var deserializationSettings = new JsonSerializerSettings()
+            {
+                FloatFormatHandling = FloatFormatHandling.Symbol
+            };
+
+            var cache = CacheFactory.Build(
+                "cacheName",
+                p => p
+                    .WithJsonSerializer(serializationSettings, deserializationSettings)
+                    .WithSystemRuntimeCacheHandle("h1"));
+            
+            var serializer = cache.Configuration.CacheSerializer as JsonCacheSerializer;
+            serializer.SerializationSettings.ShouldBeEquivalentTo(serializationSettings);
+            serializer.DeserializationSettings.ShouldBeEquivalentTo(deserializationSettings);
+        }
+
+        [Fact]
+        [ReplaceCulture]
+        public void CacheFactory_Build_WithSerializer_SimpleBinary()
+        {
+            var cache = CacheFactory.Build(
+                "cacheName",
+                p => 
+                p.WithSerializer(typeof(BinaryCacheSerializer))
+                    .WithSystemRuntimeCacheHandle("h1"));
+
+            cache.Configuration.CacheSerializer.Should().NotBeNull();
+            cache.Configuration.CacheSerializer.GetType().Should().Be(typeof(BinaryCacheSerializer));
         }
     }
 }

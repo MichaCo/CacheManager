@@ -1,0 +1,20 @@
+﻿{
+  "version": "0.6.2-*",
+  "description": "CacheManager is an open source abstraction layer for caching written in C#. It supports various cache providers and implements many advanced features. The Core library contains a Newtonsoft.Json based serializer implementation which can be used instead of the default binary serializer.",
+  "authors": [ "MichaConrad" ],
+  "tags": [ "Caching", "Cache", "CacheManager", "Distributed Cache", "StackExchange Redis", "Azure AppFabric", "Memcached" ],
+  "copyright": "Copyright © 2015 MichaConrad",
+  "projectUrl": "http://www.cachemanager.net",
+  "licenseUrl": "https://github.com/MichaCo/CacheManager/blob/master/LICENSE",
+  "dependencies": {
+    "CacheManager.Core": "0.6.2",
+    "Newtonsoft.Json": "6.0.8"
+  },
+
+  "frameworks": {
+    "net40": { },
+    "net45": { },
+    "dnx451": { },
+    "dotnet5.1": { }
+  }
+}

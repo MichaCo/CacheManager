@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Configuration;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using CacheManager.Core;
 using CacheManager.Core.Configuration;
+using CacheManager.Core.Internal;
 using FluentAssertions;
 using Xunit;
 
@@ -504,6 +504,36 @@ namespace CacheManager.Tests
 
         [Fact]
         [ReplaceCulture]
+        public void Cfg_InvalidCfgFile_SerializerType_A()
+        {
+            // arrange
+            string fileName = GetCfgFileName(@"/Configuration/configuration.invalid.serializerType.config");
+
+            // act
+            Action act = () => ConfigurationBuilder.LoadConfigurationFile(fileName, "c1");
+
+            // assert
+            act.ShouldThrow<InvalidOperationException>()
+                .WithMessage("*must implement " + nameof(ICacheSerializer) + "*");
+        }
+
+        [Fact]
+        [ReplaceCulture]
+        public void Cfg_InvalidCfgFile_SerializerType_B()
+        {
+            // arrange
+            string fileName = GetCfgFileName(@"/Configuration/configuration.invalid.serializerType.config");
+
+            // act
+            Action act = () => ConfigurationBuilder.LoadConfigurationFile(fileName, "c2");
+
+            // assert
+            act.ShouldThrow<InvalidOperationException>()
+                .WithMessage("*type cannot be loaded*");
+        }
+
+        [Fact]
+        [ReplaceCulture]
         public void Cfg_CreateConfig_CacheManagerHandleCollection()
         {
             // arrange act
@@ -516,13 +546,13 @@ namespace CacheManager.Tests
                 MaximumRetries = 10012,
                 RetryTimeout = 234,
                 BackPlateName = "backPlate",
-                BackPlateType = typeof(string).FullName
+                BackPlateType = typeof(string).AssemblyQualifiedName
             };
 
             // assert
             col.Name.Should().Be("name");
             col.BackPlateName.Should().Be("backPlate");
-            col.BackPlateType.Should().Be(typeof(string).FullName);
+            col.BackPlateType.Should().Be(typeof(string).AssemblyQualifiedName);
             col.UpdateMode.Should().Be(CacheUpdateMode.Up);
             col.EnablePerformanceCounters.Should().BeTrue();
             col.EnableStatistics.Should().BeTrue();

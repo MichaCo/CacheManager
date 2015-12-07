@@ -32,6 +32,8 @@ namespace CacheManager.Config.Tests
                 cfg.WithRedisCacheHandle("redis", true)
                     .DisableStatistics();
 
+                cfg.WithJsonSerializer();
+
                 //cfg.WithRedisBackPlate("redis");
 
                 cfg.WithRedisConfiguration("redis", config =>

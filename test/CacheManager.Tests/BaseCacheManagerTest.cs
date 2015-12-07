@@ -238,6 +238,28 @@ namespace CacheManager.Tests
 
             return cache;
         }
+        
+        public static ICacheManager<T> CreateRedisCache<T>(int database = 0, bool sharedRedisConfig = true)
+        {
+            var redisKey = sharedRedisConfig ? "redisConfig" : Guid.NewGuid().ToString();
+            var cache = CacheFactory.Build<T>(redisKey, settings =>
+            {
+                settings
+                    .WithMaxRetries(100)
+                    .WithRetryTimeout(1000)
+                    .WithRedisConfiguration(redisKey, config =>
+                    {
+                        config
+                            .WithDatabase(database)
+                            .WithEndpoint("127.0.0.1", 6379);
+                    })
+                    .WithRedisBackPlate(redisKey)
+                    .WithRedisCacheHandle(redisKey, true)
+                    .EnableStatistics();
+            });
+
+            return cache;
+        }
 
         private static string NewKey() => Guid.NewGuid().ToString();
     }
