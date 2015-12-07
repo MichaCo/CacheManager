@@ -65,6 +65,10 @@
       <HintPath>..\..\packages\Moq.4.2.1510.2205\lib\net40\Moq.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Newtonsoft.Json.6.0.8\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Ploeh.AutoFixture, Version=3.37.1.0, Culture=neutral, PublicKeyToken=b24654c590009d4f, processorArchitecture=MSIL">
       <HintPath>..\..\packages\AutoFixture.3.37.1\lib\net40\Ploeh.AutoFixture.dll</HintPath>
       <Private>True</Private>
@@ -146,6 +150,9 @@
     </Compile>
     <Compile Include="..\CacheManager.Tests\ReplaceCultureAttribute.cs">
       <Link>ReplaceCultureAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\CacheManager.Tests\SerializerTests.cs">
+      <Link>SerializerTests.cs</Link>
     </Compile>
     <Compile Include="..\CacheManager.Tests\ThreadRandomReadWriteTestBase.cs">
       <Link>ThreadRandomReadWriteTestBase.cs</Link>
@@ -243,6 +250,10 @@
       <Link>Configuration\configuration.invalid.RetryTimeout.config</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="..\CacheManager.Tests\Configuration\configuration.invalid.serializerType.config">
+      <Link>Configuration\configuration.invalid.serializerType.config</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="..\CacheManager.Tests\Configuration\configuration.valid.allFeatures.config">
       <Link>Configuration\configuration.valid.allFeatures.config</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -262,6 +273,10 @@
     <ProjectReference Include="..\..\src\CacheManager.Memcached.Net40\CacheManager.Memcached.Net40.csproj">
       <Project>{3cea3848-8c1a-41da-b65c-90e57a7447cb}</Project>
       <Name>CacheManager.Memcached.Net40</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\CacheManager.Serialization.Json.Net40\CacheManager.Serialization.Json.Net40.csproj">
+      <Project>{7a27c74a-461a-495b-aecb-254703a9f047}</Project>
+      <Name>CacheManager.Serialization.Json.Net40</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\src\CacheManager.StackExchange.Redis.Net40\CacheManager.StackExchange.Redis.Net40.csproj">
       <Project>{74adf5ec-cc57-4c92-bcff-14611530f8f7}</Project>

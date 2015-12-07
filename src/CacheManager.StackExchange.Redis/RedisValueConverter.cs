@@ -1,19 +1,16 @@
 ﻿using System;
-using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
 using CacheManager.Core.Internal;
-using StackRedis = StackExchange.Redis;
 using static CacheManager.Core.Utility.Guard;
+using StackRedis = StackExchange.Redis;
 
 namespace CacheManager.Redis
 {
-    // this looks strange but yes it has a reason. I could use a serializer to get and set values
-    // from redis but using the "native" supported types from Stackexchange.Redis, instead of using
-    // a serializer is up to 10x faster... so its more than worth the effort...
-
-    // basically I have to cast the values to and from RedisValue which has implicit conversions
-    // to/from those types defined internally... I cannot simply cast to my TCacheValue, because its
-    // generic, and not defined as class or struct or anything... so there is basically no other way
+    //// this looks strange but yes it has a reason. I could use a serializer to get and set values
+    //// from redis but using the "native" supported types from Stackexchange.Redis, instead of using
+    //// a serializer is up to 10x faster... so its more than worth the effort...
+    //// basically I have to cast the values to and from RedisValue which has implicit conversions
+    //// to/from those types defined internally... I cannot simply cast to my TCacheValue, because its
+    //// generic, and not defined as class or struct or anything... so there is basically no other way
 
     internal interface IRedisValueConverter
     {
@@ -77,7 +74,7 @@ namespace CacheManager.Redis
         StackRedis.RedisValue IRedisValueConverter<long>.ToRedisValue(long value) => value;
 
         long IRedisValueConverter<long>.FromRedisValue(StackRedis.RedisValue value, string valueType) => (long)value;
-        
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0", Scope = "member", Target = "CacheManager.Redis.RedisValueConverter.#CacheManager.Redis.IRedisValueConverter`1<System.Object>.ToRedisValue(System.Object)", Justification = "For performance reasons we don't do checks at this point. Also, its internally used only.")]
         StackRedis.RedisValue IRedisValueConverter<object>.ToRedisValue(object value)
         {
@@ -148,7 +145,7 @@ namespace CacheManager.Redis
                 var converter = (IRedisValueConverter<long>)this;
                 return converter.FromRedisValue(value, valueType);
             }
-            
+
             return this.Deserialize(value, valueType);
         }
 

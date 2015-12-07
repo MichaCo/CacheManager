@@ -73,9 +73,6 @@
     <Compile Include="..\CacheManager.Core\ExpirationMode.cs">
       <Link>ExpirationMode.cs</Link>
     </Compile>
-    <Compile Include="..\CacheManager.Core\GlobalSuppressions.cs">
-      <Link>GlobalSuppressions.cs</Link>
-    </Compile>
     <Compile Include="..\CacheManager.Core\ICache.cs">
       <Link>ICache.cs</Link>
     </Compile>
@@ -90,6 +87,9 @@
     </Compile>
     <Compile Include="..\CacheManager.Core\Internal\BaseCacheHandle.cs">
       <Link>Internal\BaseCacheHandle.cs</Link>
+    </Compile>
+    <Compile Include="..\CacheManager.Core\Internal\BinaryCacheSerializer.cs">
+      <Link>Internal\BinaryCacheSerializer.cs</Link>
     </Compile>
     <Compile Include="..\CacheManager.Core\Internal\CacheBackPlate.cs">
       <Link>Internal\CacheBackPlate.cs</Link>
@@ -120,6 +120,9 @@
     </Compile>
     <Compile Include="..\CacheManager.Core\Internal\DictionaryCacheHandle`1.cs">
       <Link>Internal\DictionaryCacheHandle`1.cs</Link>
+    </Compile>
+    <Compile Include="..\CacheManager.Core\Internal\ICacheValueSerializer.cs">
+      <Link>Internal\ICacheValueSerializer.cs</Link>
     </Compile>
     <Compile Include="..\CacheManager.Core\UpdateItemConfig.cs">
       <Link>UpdateItemConfig.cs</Link>

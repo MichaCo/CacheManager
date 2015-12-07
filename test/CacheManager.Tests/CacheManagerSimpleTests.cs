@@ -1470,7 +1470,7 @@ namespace CacheManager.Tests
                 ValidateCacheValues(cache, keys, newValues);
             }
         }
-        
+
         private static void PopulateCache<T>(ICacheManager<T> cache, IList<string> keys, IList<T> values, int mode)
         {
             // let us make this safe per run so cache doesn't get cleared/populated from ultiple tests

@@ -69,6 +69,7 @@ namespace CacheManager.Core
         /// This list is read only, any changes to the returned list instance will not affect the
         /// state of the cache manager instance.
         /// </remarks>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Will usually not be used in public API anyways.")]
         IEnumerable<BaseCacheHandle<TCacheValue>> CacheHandles { get; }
 
         /// <summary>

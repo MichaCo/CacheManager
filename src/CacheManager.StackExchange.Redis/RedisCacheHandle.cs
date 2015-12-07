@@ -4,8 +4,8 @@ using System.Linq;
 using System.Net;
 using CacheManager.Core;
 using CacheManager.Core.Internal;
-using StackRedis = StackExchange.Redis;
 using static CacheManager.Core.Utility.Guard;
+using StackRedis = StackExchange.Redis;
 
 namespace CacheManager.Redis
 {
@@ -56,7 +56,8 @@ namespace CacheManager.Redis
         public RedisCacheHandle(ICacheManager<TCacheValue> manager, CacheHandleConfiguration configuration)
             : base(manager, configuration)
         {
-            EnsureNotNull(manager.Configuration.CacheSerializer, "Cache serializer must be defined for redis cache.");
+            NotNull(manager, nameof(manager));
+            EnsureNotNull(manager.Configuration.CacheSerializer, "A cache serializer must be defined for this cache handle.");
             this.valueConverter = new RedisValueConverter(manager.Configuration.CacheSerializer);
         }
 
@@ -233,7 +234,7 @@ namespace CacheManager.Redis
                         return UpdateItemResult.ForItemDidNotExist<TCacheValue>();
                     }
 
-                    var oldValue = ToRedisValue(item.Value);
+                    var oldValue = this.ToRedisValue(item.Value);
 
                     var tran = this.Database.CreateTransaction();
                     tran.AddCondition(StackRedis.Condition.HashEqual(fullKey, HashFieldValue, oldValue));
@@ -241,7 +242,7 @@ namespace CacheManager.Redis
                     // run update
                     var newValue = updateValue(item.Value);
 
-                    tran.HashSetAsync(fullKey, HashFieldValue, ToRedisValue(newValue));
+                    tran.HashSetAsync(fullKey, HashFieldValue, this.ToRedisValue(newValue));
 
                     committed = tran.Execute();
 
@@ -344,7 +345,7 @@ namespace CacheManager.Redis
                     expirationTimeout = TimeSpan.FromTicks((long)timeoutItem);
                 }
 
-                var value = FromRedisValue(item, (string)valueTypeItem);
+                var value = this.FromRedisValue(item, (string)valueTypeItem);
 
                 var cacheItem = string.IsNullOrWhiteSpace(region) ?
                         new CacheItem<TCacheValue>(key, value, expirationMode, expirationTimeout) :
@@ -419,6 +420,18 @@ namespace CacheManager.Redis
         }
 #pragma warning restore CSE0003
 
+        private static string GetKey(string key, string region = null)
+        {
+            var fullKey = key;
+
+            if (!string.IsNullOrWhiteSpace(region))
+            {
+                fullKey = string.Concat(region, ":", key);
+            }
+
+            return fullKey;
+        }
+
         private TCacheValue FromRedisValue(StackRedis.RedisValue value, string valueType)
         {
             if (value.IsNull || value.IsNullOrEmpty || !value.HasValue)
@@ -427,11 +440,11 @@ namespace CacheManager.Redis
             }
 
             var typedConverter = this.valueConverter as IRedisValueConverter<TCacheValue>;
-            if(typedConverter != null)
+            if (typedConverter != null)
             {
                 return typedConverter.FromRedisValue(value, valueType);
             }
-            
+
             return this.valueConverter.FromRedisValue<TCacheValue>(value, valueType);
         }
 
@@ -444,18 +457,6 @@ namespace CacheManager.Redis
             }
 
             return this.valueConverter.ToRedisValue(value);
-        }
-
-        private static string GetKey(string key, string region = null)
-        {
-            var fullKey = key;
-
-            if (!string.IsNullOrWhiteSpace(region))
-            {
-                fullKey = string.Concat(region, ":", key);
-            }
-
-            return fullKey;
         }
 
         private T Retry<T>(Func<T> retryme) =>
@@ -476,7 +477,7 @@ namespace CacheManager.Redis
             return this.Retry(() =>
             {
                 var fullKey = GetKey(item.Key, item.Region);
-                var value = ToRedisValue(item.Value);
+                var value = this.ToRedisValue(item.Value);
 
                 StackRedis.HashEntry[] metaValues = new[]
                 {

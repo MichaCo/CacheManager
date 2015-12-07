@@ -29,13 +29,14 @@ namespace CacheManager.Core
         /// <param name="mode">The cache update mode.</param>
         /// <param name="backPlateName">The name of the cache back plate.</param>
         /// <param name="backPlateType">The type of the cache back plate implementation.</param>
+        /// <param name="serializer">The serializer to be used to serialize the cache item.</param>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "We use it for configuration only.")]
         public CacheManagerConfiguration(
-            CacheUpdateMode mode = CacheUpdateMode.None, 
-            int maxRetries = int.MaxValue, 
-            int retryTimeout = 10, 
-            Type backPlateType = null, 
-            string backPlateName = null, 
+            CacheUpdateMode mode = CacheUpdateMode.None,
+            int maxRetries = int.MaxValue,
+            int retryTimeout = 10,
+            Type backPlateType = null,
+            string backPlateName = null,
             ICacheSerializer serializer = null)
             : this()
         {
@@ -125,7 +126,7 @@ namespace CacheManager.Core
         {
             NotNull(instance, nameof(instance));
 
-            this.CacheSerializer = instance; ;
+            this.CacheSerializer = instance;
         }
     }
 }

@@ -238,7 +238,7 @@ namespace CacheManager.Tests
 
             return cache;
         }
-        
+
         public static ICacheManager<T> CreateRedisCache<T>(int database = 0, bool sharedRedisConfig = true)
         {
             var redisKey = sharedRedisConfig ? "redisConfig" : Guid.NewGuid().ToString();

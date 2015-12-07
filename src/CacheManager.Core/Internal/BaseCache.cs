@@ -283,6 +283,7 @@ namespace CacheManager.Core.Internal
         /// <param name="key">The key being used to identify the item within the cache.</param>
         /// <returns>The value being stored in the cache for the given <paramref name="key"/>.</returns>
         /// <exception cref="ArgumentNullException">If the <paramref name="key"/> is null.</exception>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Get", Justification = "Maybe at some point.")]
         public virtual TCacheValue Get(string key)
         {
             CacheItem<TCacheValue> item = this.GetCacheItem(key);
@@ -306,6 +307,7 @@ namespace CacheManager.Core.Internal
         /// <exception cref="ArgumentNullException">
         /// If the <paramref name="key"/> or <paramref name="region"/> is null.
         /// </exception>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Get", Justification = "Maybe at some point.")]
         public virtual TCacheValue Get(string key, string region)
         {
             CacheItem<TCacheValue> item = this.GetCacheItem(key, region);
@@ -328,6 +330,7 @@ namespace CacheManager.Core.Internal
         /// <exception cref="InvalidCastException">
         /// If no explicit cast is defined from <c>TCacheValue</c> to <c>TOut</c>.
         /// </exception>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Get", Justification = "Maybe at some point.")]
         public virtual TOut Get<TOut>(string key)
         {
             object value = this.Get(key);
@@ -349,6 +352,7 @@ namespace CacheManager.Core.Internal
         /// <exception cref="InvalidCastException">
         /// If no explicit cast is defined from <c>TCacheValue</c> to <c>TOut</c>.
         /// </exception>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Get", Justification = "Maybe at some point.")]
         public virtual TOut Get<TOut>(string key, string region)
         {
             object value = this.Get(key, region);

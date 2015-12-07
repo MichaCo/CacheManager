@@ -554,9 +554,9 @@ namespace CacheManager.Tests
                 "cacheName",
                 p => p.WithSerializer(typeof(string)));
 
-            act.ShouldThrow<InvalidOperationException>().WithMessage("*must implement "+ nameof(ICacheSerializer) +"*");
+            act.ShouldThrow<InvalidOperationException>().WithMessage("*must implement " + nameof(ICacheSerializer) + "*");
         }
-        
+
         [Fact]
         [ReplaceCulture]
         public void CacheFactory_Build_WithJsonSerializer()
@@ -590,7 +590,7 @@ namespace CacheManager.Tests
                 p => p
                     .WithJsonSerializer(serializationSettings, deserializationSettings)
                     .WithSystemRuntimeCacheHandle("h1"));
-            
+
             var serializer = cache.Configuration.CacheSerializer as JsonCacheSerializer;
             serializer.SerializationSettings.ShouldBeEquivalentTo(serializationSettings);
             serializer.DeserializationSettings.ShouldBeEquivalentTo(deserializationSettings);
@@ -602,7 +602,7 @@ namespace CacheManager.Tests
         {
             var cache = CacheFactory.Build(
                 "cacheName",
-                p => 
+                p =>
                 p.WithSerializer(typeof(BinaryCacheSerializer))
                     .WithSystemRuntimeCacheHandle("h1"));
 

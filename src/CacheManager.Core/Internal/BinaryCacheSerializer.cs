@@ -5,8 +5,15 @@ using System.Runtime.Serialization.Formatters.Binary;
 
 namespace CacheManager.Core.Internal
 {
+    /// <summary>
+    /// Basic binary serialization implementation of the <see cref="ICacheSerializer"/>.
+    /// This implementation will be used in case no other serializer is configured for the cache manager
+    /// and serialization is needed (only distributed caches will have to serialize the cache value).
+    /// Binary serialization will not be available in some environments.
+    /// </summary>
     public class BinaryCacheSerializer : ICacheSerializer
     {
+        /// <inheritdoc/>
         public object Deserialize(byte[] data, Type target)
         {
             if (data == null)
@@ -21,9 +28,11 @@ namespace CacheManager.Core.Internal
             }
         }
 
+        /// <inheritdoc/>
         public CacheItem<T> DeserializeCacheItem<T>(byte[] value, Type valueType)
-            => (CacheItem<T>)Deserialize(value, valueType);
+            => (CacheItem<T>)this.Deserialize(value, valueType);
 
+        /// <inheritdoc/>
         public byte[] Serialize<T>(T value)
         {
             if (value == null)
@@ -40,8 +49,9 @@ namespace CacheManager.Core.Internal
             }
         }
 
+        /// <inheritdoc/>
         public byte[] SerializeCacheItem<T>(CacheItem<T> value)
-            => Serialize(value);
+            => this.Serialize(value);
     }
 }
 #endif

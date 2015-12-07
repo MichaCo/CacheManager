@@ -21,10 +21,12 @@
     <Rule Id="CA1804" Action="None" />
     <Rule Id="CA1806" Action="None" />
     <Rule Id="CA1811" Action="None" />
+    <Rule Id="CA1819" Action="None" />
     <Rule Id="CA1822" Action="None" />
     <Rule Id="CA2000" Action="None" />
     <Rule Id="CA2204" Action="None" />
     <Rule Id="CA2210" Action="None" />
+    <Rule Id="CA2227" Action="None" />
   </Rules>
   <Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.Analyzers">
     <Rule Id="SA1025" Action="None" />

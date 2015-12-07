@@ -221,7 +221,6 @@ namespace CacheManager.Core
                 EnsureNotNull(serializerType, "Serializer type cannot be loaded, {0}", managerCfg.SerializerType);
 
                 cfg.WithSerializer(CacheReflectionHelper.CreateSerializer(serializerType));
-
             }
 
             foreach (CacheManagerHandle handleItem in managerCfg)
@@ -433,7 +432,7 @@ namespace CacheManager.Core
         }
 
         /// <summary>
-        /// Gets or sets the configuration.
+        /// Gets the configuration.
         /// </summary>
         /// <value>The configuration.</value>
         internal CacheManagerConfiguration Configuration { get; }
@@ -577,6 +576,12 @@ namespace CacheManager.Core
             return this;
         }
 
+        /// <summary>
+        /// Sets the serializer which should be used to serialize cache items.
+        /// </summary>
+        /// <param name="serializerType">The type of the serializer.</param>
+        /// <param name="args">The optional arguments to activate the serializer.</param>
+        /// <returns>The builder part.</returns>
         public ConfigurationBuilderCachePart WithSerializer(Type serializerType, params object[] args)
         {
             var instance = CacheReflectionHelper.CreateSerializer(serializerType, args);

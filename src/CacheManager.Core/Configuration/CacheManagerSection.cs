@@ -369,7 +369,7 @@
                 this[BackPlateTypeKey] = value;
             }
         }
-        
+
         /// <summary>
         /// Gets or sets the type of the back plate.
         /// </summary>

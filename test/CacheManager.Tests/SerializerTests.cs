@@ -58,7 +58,7 @@ namespace CacheManager.Tests
             var serializer = new BinaryCacheSerializer();
             var pocco = SerializerPoccoSerializable.Create();
             var item = new CacheItem<SerializerPoccoSerializable>("key", "region", pocco, ExpirationMode.Absolute, TimeSpan.FromDays(1));
-            
+
             // act
             var data = serializer.SerializeCacheItem(item);
             var result = serializer.DeserializeCacheItem<SerializerPoccoSerializable>(data, pocco.GetType());
@@ -156,6 +156,16 @@ namespace CacheManager.Tests
     [Serializable]
     public class SerializerPoccoSerializable
     {
+        public string StringProperty { get; set; }
+
+        public int IntProperty { get; set; }
+
+        public string[] StringArrayProperty { get; set; }
+
+        public IList<string> StringListProperty { get; set; }
+
+        public IDictionary<string, ChildPocco> ChildDictionaryProperty { get; set; }
+
         public static SerializerPoccoSerializable Create()
         {
             var rnd = new Random();
@@ -174,12 +184,6 @@ namespace CacheManager.Tests
                 }
             };
         }
-
-        public string StringProperty { get; set; }
-        public int IntProperty { get; set; }
-        public string[] StringArrayProperty { get; set; }
-        public IList<string> StringListProperty { get; set; }
-        public IDictionary<string, ChildPocco> ChildDictionaryProperty { get; set; }
     }
 
     [Serializable]
@@ -188,12 +192,14 @@ namespace CacheManager.Tests
         public string StringProperty { get; set; }
     }
 
-    class DataGenerator
+    internal class DataGenerator
     {
-        static Random random = new Random();
+        private static Random random = new Random();
 
         public static string GetString() => Guid.NewGuid().ToString();
+
         public static int GetInt() => random.Next();
+
         public static string[] GetStrings() => Enumerable.Repeat(0, 100).Select(p => GetString()).ToArray();
     }
 }

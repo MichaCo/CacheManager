@@ -7,15 +7,25 @@ using static CacheManager.Core.Utility.Guard;
 
 namespace CacheManager.Serialization.Json
 {
-    // This project can output the Class library as a NuGet Package.
-    // To enable this option, right-click on the project and select the Properties menu item. In the Build tab select "Produce outputs on build".
+    /// <summary>
+    /// Implements the <see cref="ICacheSerializer"/> contract using <c>Newtonsoft.Json</c>.
+    /// </summary>
     public class JsonCacheSerializer : ICacheSerializer
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="JsonCacheSerializer"/> class.
+        /// </summary>
         public JsonCacheSerializer()
             : this(new JsonSerializerSettings(), new JsonSerializerSettings())
         {
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="JsonCacheSerializer"/> class.
+        /// With this overload the settings for de-/serialization can be set independently.
+        /// </summary>
+        /// <param name="serializationSettings">The settings which should be used during serialization.</param>
+        /// <param name="deserializationSettings">The settings which should be used during deserialization.</param>
         public JsonCacheSerializer(JsonSerializerSettings serializationSettings, JsonSerializerSettings deserializationSettings)
         {
             NotNull(serializationSettings, nameof(serializationSettings));
@@ -25,32 +35,46 @@ namespace CacheManager.Serialization.Json
             this.DeserializationSettings = deserializationSettings;
         }
 
+        /// <summary>
+        /// Gets the settings which should be used during deserialization.
+        /// If nothing is specified the default <see cref="JsonSerializerSettings"/> will be used.
+        /// </summary>
+        /// <value>The deserialization settings.</value>
         public JsonSerializerSettings DeserializationSettings { get; }
 
+        /// <summary>
+        /// Gets the settings which should be used during serialization.
+        /// If nothing is specified the default <see cref="JsonSerializerSettings"/> will be used.
+        /// </summary>
+        /// <value>The serialization settings.</value>
         public JsonSerializerSettings SerializationSettings { get; }
 
+        /// <inheritdoc/>
         public object Deserialize(byte[] data, Type target)
         {
             var stringValue = Encoding.UTF8.GetString(data);
             return JsonConvert.DeserializeObject(stringValue, target, this.DeserializationSettings);
         }
 
+        /// <inheritdoc/>
         public CacheItem<T> DeserializeCacheItem<T>(byte[] value, Type valueType)
         {
             var valueItemType = typeof(JsonCacheItem<>);
             var closedItemType = valueItemType.MakeGenericType(valueType);
-            var jsonItem = Deserialize(value, closedItemType) as JsonCacheItem<T>;
+            var jsonItem = this.Deserialize(value, closedItemType) as JsonCacheItem<T>;
             EnsureNotNull(jsonItem, "Could not deserialize cache item");
 
             return jsonItem.ToCacheItem();
         }
 
+        /// <inheritdoc/>
         public byte[] Serialize<T>(T value)
         {
             var stringValue = JsonConvert.SerializeObject(value, this.SerializationSettings);
             return Encoding.UTF8.GetBytes(stringValue);
         }
 
+        /// <inheritdoc/>
         public byte[] SerializeCacheItem<T>(CacheItem<T> value)
         {
             var jsonItem = JsonCacheItem<T>.FromCacheItem(value);
