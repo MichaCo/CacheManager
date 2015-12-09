@@ -7,8 +7,7 @@ namespace CacheManager.Core
     /// The json cache item will be used to serialize a <see cref="CacheItem{T}"/>.
     /// A <see cref="CacheItem{T}"/> cannot be derserialized by Newtonsoft.Json because of the private setters.
     /// </summary>
-    /// <typeparam name="T">The type of the cache value.</typeparam>
-    internal class JsonCacheItem<T>
+    internal class JsonCacheItem
     {
         [JsonProperty("createdUtc")]
         public DateTime CreatedUtc { get; set; }
@@ -29,10 +28,10 @@ namespace CacheManager.Core
         public string Region { get; set; }
 
         [JsonProperty("value")]
-        public T Value { get; set; }
+        public byte[] Value { get; set; }
 
-        public static JsonCacheItem<TCacheValue> FromCacheItem<TCacheValue>(CacheItem<TCacheValue> item)
-            => new JsonCacheItem<TCacheValue>()
+        public static JsonCacheItem FromCacheItem<TCacheValue>(CacheItem<TCacheValue> item, byte[] value)
+            => new JsonCacheItem()
             {
                 CreatedUtc = item.CreatedUtc,
                 ExpirationMode = item.ExpirationMode,
@@ -40,16 +39,18 @@ namespace CacheManager.Core
                 Key = item.Key,
                 LastAccessedUtc = item.LastAccessedUtc,
                 Region = item.Region,
-                Value = item.Value
+                Value = value
             };
 
-        public CacheItem<T> ToCacheItem()
+        public CacheItem<T> ToCacheItem<T>(object value)
         {
-            var item = new CacheItem<T>(this.Key, this.Region, this.Value, this.ExpirationMode, this.ExpirationTimeout)
-                .WithCreated(this.CreatedUtc);
-
+            var item = string.IsNullOrWhiteSpace(this.Region) ?
+                new CacheItem<T>(this.Key, (T)value, this.ExpirationMode, this.ExpirationTimeout) :
+                new CacheItem<T>(this.Key, this.Region, (T)value, this.ExpirationMode, this.ExpirationTimeout);
+                
             item.LastAccessedUtc = this.LastAccessedUtc;
-            return item;
+
+            return item.WithCreated(this.CreatedUtc);
         }
     }
 }

@@ -104,6 +104,60 @@ namespace CacheManager.Tests
             result.Should().Be(value);
         }
 
+        [Theory]
+        [InlineData(true)]
+        [InlineData(float.MaxValue)]
+        [InlineData(int.MaxValue)]
+        [InlineData(long.MaxValue)]
+        [InlineData("some string")]
+        [ReplaceCulture]
+        public void JsonSerializer_CacheItem_Primitives<T>(T value)
+        {
+            // arrange
+            var serializer = new JsonCacheSerializer();
+            var item = new CacheItem<T>("key", value);
+
+            // act
+            var data = serializer.SerializeCacheItem(item);
+            var result = serializer.DeserializeCacheItem<T>(data, typeof(T));
+
+            result.Value.Should().Be(value);
+            result.ValueType.Should().Be(item.ValueType);
+            result.CreatedUtc.Should().Be(item.CreatedUtc);
+            result.ExpirationMode.Should().Be(item.ExpirationMode);
+            result.ExpirationTimeout.Should().Be(item.ExpirationTimeout);
+            result.Key.Should().Be(item.Key);
+            result.LastAccessedUtc.Should().Be(item.LastAccessedUtc);
+            result.Region.Should().Be(item.Region);
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(float.MaxValue)]
+        [InlineData(int.MaxValue)]
+        [InlineData(long.MaxValue)]
+        [InlineData("some string")]
+        [ReplaceCulture]
+        public void JsonSerializer_CacheItemOfObject_Primitives<T>(T value)
+        {
+            // arrange
+            var serializer = new JsonCacheSerializer();
+            var item = new CacheItem<object>("key", value);
+
+            // act
+            var data = serializer.SerializeCacheItem(item);
+            var result = serializer.DeserializeCacheItem<object>(data, typeof(T));
+
+            result.Value.Should().Be(value);
+            result.ValueType.Should().Be(item.ValueType);
+            result.CreatedUtc.Should().Be(item.CreatedUtc);
+            result.ExpirationMode.Should().Be(item.ExpirationMode);
+            result.ExpirationTimeout.Should().Be(item.ExpirationTimeout);
+            result.Key.Should().Be(item.Key);
+            result.LastAccessedUtc.Should().Be(item.LastAccessedUtc);
+            result.Region.Should().Be(item.Region);
+        }
+
         [Fact]
         public void JsonSerializer_Pocco()
         {

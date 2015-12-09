@@ -59,12 +59,12 @@ namespace CacheManager.Serialization.Json
         /// <inheritdoc/>
         public CacheItem<T> DeserializeCacheItem<T>(byte[] value, Type valueType)
         {
-            var valueItemType = typeof(JsonCacheItem<>);
-            var closedItemType = valueItemType.MakeGenericType(valueType);
-            var jsonItem = this.Deserialize(value, closedItemType) as JsonCacheItem<T>;
+            var jsonItem = (JsonCacheItem)this.Deserialize(value, typeof(JsonCacheItem));            
             EnsureNotNull(jsonItem, "Could not deserialize cache item");
 
-            return jsonItem.ToCacheItem();
+            var deserializedValue = this.Deserialize(jsonItem.Value, valueType);
+
+            return jsonItem.ToCacheItem<T>(deserializedValue);
         }
 
         /// <inheritdoc/>
@@ -77,7 +77,8 @@ namespace CacheManager.Serialization.Json
         /// <inheritdoc/>
         public byte[] SerializeCacheItem<T>(CacheItem<T> value)
         {
-            var jsonItem = JsonCacheItem<T>.FromCacheItem(value);
+            var jsonValue = this.Serialize(value.Value);
+            var jsonItem = JsonCacheItem.FromCacheItem(value, jsonValue);
 
             return this.Serialize(jsonItem);
         }
