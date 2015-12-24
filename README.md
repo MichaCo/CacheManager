@@ -16,6 +16,25 @@ Windows, KoreBuild | [![Build status](https://ci.appveyor.com/api/projects/statu
 Windows, MSBuild | [![Build status](https://ci.appveyor.com/api/projects/status/0uxi3saj5prdyulg?svg=true)](https://ci.appveyor.com/project/MichaCo/cachemanager-at86a)
 Linux, Mono | [![Build Status](https://travis-ci.org/MichaCo/CacheManager.svg?branch=master)](https://travis-ci.org/MichaCo/CacheManager) 
 
+## CacheManager Nuget Packages
+
+| Package Name | .Net 4.0  | .Net 4.5  | DNX 4.5.1 | DNX Core
+|--------------| :-------: | :-------: | :-------: | :-------:
+| [CacheManager.Core] [Core.nuget] | x | x | x | x
+| [CacheManager.StackExchange.Redis] [Redis.nuget] | x | x | x | -
+| [CacheManager.SystemRuntimeCaching] [SystemRuntimeCaching.nuget]  | x | x | x | -
+| [CacheManager.Memcached] [Memcached.nuget]  | x | x | x | -
+| [CacheManager.Web] [Web.nuget]  | - | x | x | -
+| [CacheManager.Couchbase] [Couchbase.nuget]  | - | x | x | -
+
+### Beta Packages
+Beta versions of the CacheManager packages are getting pushed to https://www.myget.org/gallery/cachemanager on each build. 
+Add the following feed, if you want to play with the not yet released bits: 
+
+    https://www.myget.org/F/cachemanager/api/v3/index.json
+
+To find which checkin created which build, use this [build history](https://ci.appveyor.com/project/MichaCo/cachemanager/history).
+
 ## Documentation
  
 Documentation can be found within the [articles folder][articles] of the Cache Manager's repository and  hosted on my [website][mcweb]:
@@ -38,18 +57,6 @@ There is also from source generated [html documentation][help] available online.
 	* [**Some usage examples**][program.cs]
 	* [**ASP.NET MVC website**][outputcachesample] showcasing usage of the Cache Manager `OutputCache` provider
 * [**Single Page Todo App with Cache Manager on Azure using Redis**][todosample]
-
-
-## CacheManager Nuget Packages
-
-| Package Name | .Net 4.0  | .Net 4.5  | DNX 4.5.1 | DNX Core
-|--------------| :-------: | :-------: | :-------: | :-------:
-| [CacheManager.Core] [Core.nuget] | x | x | x | x
-| [CacheManager.StackExchange.Redis] [Redis.nuget] | x | x | x | -
-| [CacheManager.SystemRuntimeCaching] [SystemRuntimeCaching.nuget]  | x | x | x | -
-| [CacheManager.Memcached] [Memcached.nuget]  | x | x | x | -
-| [CacheManager.Web] [Web.nuget]  | - | x | x | -
-| [CacheManager.Couchbase] [Couchbase.nuget]  | - | x | x | -
 
 ## Features in Version: [0.6.x][releases] 
 
