@@ -46,10 +46,10 @@ namespace CacheManager.Examples
 
         private static void RedisSample()
         {
-            var cache = CacheFactory.Build<int>("myCache", settings =>
+            var cache = CacheFactory.Build<int>(settings =>
             {
                 settings
-                    .WithSystemRuntimeCacheHandle("inProcessCache")
+                    .WithSystemRuntimeCacheHandle()
                     .And
                     .WithRedisConfiguration("redis", config =>
                     {
@@ -77,27 +77,27 @@ namespace CacheManager.Examples
             var cfg = ConfigurationBuilder.BuildConfiguration(settings =>
                 {
                     settings.WithUpdateMode(CacheUpdateMode.Up)
-                        .WithSystemRuntimeCacheHandle("handle1")
+                        .WithSystemRuntimeCacheHandle()
                             .EnablePerformanceCounters()
                             .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(10));
                 });
 
-            var cache = CacheFactory.FromConfiguration<string>("stringCache", cfg);
+            var cache = CacheFactory.FromConfiguration<string>(cfg);
             cache.Add("key", "value");
 
             // reusing the configuration and using the same cache for different types:
-            var numbers = CacheFactory.FromConfiguration<int>("numberCache", cfg);
+            var numbers = CacheFactory.FromConfiguration<int>(cfg);
             numbers.Add("intKey", 2323);
             numbers.Update("intKey", v => v + 1);
         }
 
         private static void SimpleCustomBuildConfigurationUsingFactory()
         {
-            var cache = CacheFactory.Build("myCacheName", settings =>
+            var cache = CacheFactory.Build(settings =>
             {
                 settings
                     .WithUpdateMode(CacheUpdateMode.Up)
-                    .WithSystemRuntimeCacheHandle("handle1")
+                    .WithSystemRuntimeCacheHandle()
                         .EnablePerformanceCounters()
                         .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(10));
             });
@@ -133,8 +133,7 @@ namespace CacheManager.Examples
                 new InjectionFactory(
                     (c, t, n) => CacheFactory.FromConfiguration(
                         t.GetGenericArguments()[0],
-                        "myCache",
-                        ConfigurationBuilder.BuildConfiguration(cfg => cfg.WithSystemRuntimeCacheHandle("handle1")))));
+                        ConfigurationBuilder.BuildConfiguration(cfg => cfg.WithSystemRuntimeCacheHandle()))));
 
             var stringCache = container.Resolve<ICacheManager<string>>();
 
@@ -157,7 +156,7 @@ namespace CacheManager.Examples
 
         private static void UpdateTest()
         {
-            var cache = CacheFactory.Build<string>("myCache", s => s.WithSystemRuntimeCacheHandle("handle"));
+            var cache = CacheFactory.Build<string>(s => s.WithSystemRuntimeCacheHandle());
 
             Console.WriteLine("Testing update...");
 
@@ -180,7 +179,7 @@ namespace CacheManager.Examples
 
         private static void UpdateCounterTest()
         {
-            var cache = CacheFactory.Build<long>("myCache", s => s.WithSystemRuntimeCacheHandle("handle"));
+            var cache = CacheFactory.Build<long>(s => s.WithSystemRuntimeCacheHandle());
 
             Console.WriteLine("Testing update counter...");
 

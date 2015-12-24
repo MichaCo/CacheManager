@@ -47,7 +47,7 @@ namespace CacheManager.Core
             var item = string.IsNullOrWhiteSpace(this.Region) ?
                 new CacheItem<T>(this.Key, (T)value, this.ExpirationMode, this.ExpirationTimeout) :
                 new CacheItem<T>(this.Key, this.Region, (T)value, this.ExpirationMode, this.ExpirationTimeout);
-                
+
             item.LastAccessedUtc = this.LastAccessedUtc;
 
             return item.WithCreated(this.CreatedUtc);

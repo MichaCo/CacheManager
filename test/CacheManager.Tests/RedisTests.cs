@@ -93,7 +93,7 @@ namespace CacheManager.Tests
             RedisConfigurations.LoadConfiguration(fileName, RedisConfigurationSection.DefaultSectionName);
 
             var cfg = ConfigurationBuilder.LoadConfigurationFile(fileName, cacheName);
-            var cfgCache = CacheFactory.FromConfiguration<object>(cacheName, cfg);
+            var cfgCache = CacheFactory.FromConfiguration<object>(cfg);
 
             var item = new CacheItem<object>(Guid.NewGuid().ToString(), "something");
 
@@ -174,6 +174,7 @@ namespace CacheManager.Tests
 
         [Fact]
         [Trait("category", "Redis")]
+        [Trait("category", "Unreliable")]
         public void Redis_Multiple_PubSub_Remove()
         {
             // arrange
@@ -205,7 +206,7 @@ namespace CacheManager.Tests
         [Trait("category", "Unreliable")]
         public void Redis_NoRaceCondition_WithUpdate()
         {
-            using (var cache = CacheFactory.Build<RaceConditionTestElement>("myCache", settings =>
+            using (var cache = CacheFactory.Build<RaceConditionTestElement>(settings =>
             {
                 settings.WithUpdateMode(CacheUpdateMode.Full)
                     .WithRedisCacheHandle("default")
@@ -258,7 +259,7 @@ namespace CacheManager.Tests
         [Trait("category", "Unreliable")]
         public void Redis_RaceCondition_WithoutUpdate()
         {
-            using (var cache = CacheFactory.Build<RaceConditionTestElement>("myCache", settings =>
+            using (var cache = CacheFactory.Build<RaceConditionTestElement>(settings =>
             {
                 settings.WithUpdateMode(CacheUpdateMode.Full)
                     .WithRedisCacheHandle("default")
@@ -416,7 +417,7 @@ namespace CacheManager.Tests
 
             // act
             var cfg = ConfigurationBuilder.LoadConfigurationFile(fileName, cacheName);
-            var cache = CacheFactory.FromConfiguration<object>(cacheName, cfg);
+            var cache = CacheFactory.FromConfiguration<object>(cfg);
 
             // assert
             cache.CacheHandles.Any(p => p.Configuration.IsBackPlateSource).Should().BeTrue();
@@ -433,7 +434,7 @@ namespace CacheManager.Tests
 
             // act
             var cfg = ConfigurationBuilder.LoadConfiguration(cacheName);
-            var cache = CacheFactory.FromConfiguration<object>(cacheName, cfg);
+            var cache = CacheFactory.FromConfiguration<object>(cfg);
             var handle = cache.CacheHandles.First(p => p.Configuration.IsBackPlateSource) as RedisCacheHandle<object>;
 
             // test running something on the redis handle, Count should be enough to test the connection
@@ -454,7 +455,7 @@ namespace CacheManager.Tests
 
             // act
             var cfg = ConfigurationBuilder.LoadConfiguration(cacheName);
-            var cache = CacheFactory.FromConfiguration<object>(cacheName, cfg);
+            var cache = CacheFactory.FromConfiguration<object>(cfg);
             var handle = cache.CacheHandles.First(p => p.Configuration.IsBackPlateSource) as RedisCacheHandle<object>;
 
             // test running something on the redis handle, Count should be enough to test the connection

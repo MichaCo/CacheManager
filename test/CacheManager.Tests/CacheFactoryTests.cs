@@ -26,7 +26,7 @@ namespace CacheManager.Tests
             // arrange
 
             // act
-            Action act = () => CacheFactory.FromConfiguration<object>("name", (CacheManagerConfiguration)null);
+            Action act = () => CacheFactory.FromConfiguration<object>((CacheManagerConfiguration)null);
 
             // assert
             act.ShouldThrow<ArgumentNullException>()
@@ -45,20 +45,6 @@ namespace CacheManager.Tests
             // assert
             act.ShouldThrow<ArgumentNullException>()
                 .WithMessage("*Parameter name: configName*");
-        }
-
-        [Fact]
-        [ReplaceCulture]
-        public void CacheFactory_FromConfig_NullCheck_C()
-        {
-            // arrange
-
-            // act
-            Action act = () => CacheFactory.FromConfiguration<object>(null, new CacheManagerConfiguration());
-
-            // assert
-            act.ShouldThrow<ArgumentNullException>()
-                .WithMessage("*name*");
         }
 
         [Fact]
@@ -83,7 +69,7 @@ namespace CacheManager.Tests
             // arrange
 
             // act
-            Action act = () => CacheFactory.FromConfiguration((Type)null, "something", (CacheManagerConfiguration)null);
+            Action act = () => CacheFactory.FromConfiguration((Type)null, (CacheManagerConfiguration)null);
 
             // assert
             act.ShouldThrow<ArgumentNullException>()
@@ -107,26 +93,12 @@ namespace CacheManager.Tests
 
         [Fact]
         [ReplaceCulture]
-        public void CacheFactory_Build_ParamA()
-        {
-            // arrange
-
-            // act
-            Action act = () => CacheFactory.Build(null, settings => { });
-
-            // assert
-            act.ShouldThrow<ArgumentNullException>()
-                .WithMessage("*Parameter name: name*");
-        }
-
-        [Fact]
-        [ReplaceCulture]
         public void CacheFactory_Build_WithHandle_WithoutName()
         {
             // arrange
 
             // act
-            Action act = () => CacheFactory.Build("cacheName", settings =>
+            Action act = () => CacheFactory.Build(settings =>
             {
                 settings.WithHandle(typeof(DictionaryCacheHandle<>), null);
             });
@@ -143,7 +115,7 @@ namespace CacheManager.Tests
             // arrange
 
             // act
-            Action act = () => CacheFactory.Build("myCache", null);
+            Action act = () => CacheFactory.Build(null);
 
             // assert
             act.ShouldThrow<ArgumentNullException>()
@@ -155,7 +127,7 @@ namespace CacheManager.Tests
         public void CacheFactory_Build_DisablePerfCounters()
         {
             // act
-            Func<ICacheManager<string>> act = () => CacheFactory.Build<string>("stringCache", settings =>
+            Func<ICacheManager<string>> act = () => CacheFactory.Build<string>(settings =>
             {
                 settings.WithUpdateMode(CacheUpdateMode.Full)
                     .WithHandle(typeof(DictionaryCacheHandle<>), "h1")
@@ -172,7 +144,7 @@ namespace CacheManager.Tests
         public void CacheFactory_Build_EnablePerfCounters()
         {
             // act
-            Func<ICacheManager<string>> act = () => CacheFactory.Build<string>("stringCache", settings =>
+            Func<ICacheManager<string>> act = () => CacheFactory.Build<string>(settings =>
             {
                 settings.WithUpdateMode(CacheUpdateMode.Full)
                     .WithHandle(typeof(DictionaryCacheHandle<>), "h1")
@@ -190,7 +162,7 @@ namespace CacheManager.Tests
         public void CacheFactory_Build_EnableStats()
         {
             // act
-            Func<ICacheManager<string>> act = () => CacheFactory.Build<string>("stringCache", settings =>
+            Func<ICacheManager<string>> act = () => CacheFactory.Build<string>(settings =>
             {
                 settings.WithUpdateMode(CacheUpdateMode.Full)
                     .WithHandle(typeof(DictionaryCacheHandle<>), "h1")
@@ -207,7 +179,7 @@ namespace CacheManager.Tests
         public void CacheFactory_Build_DefaultStatsAndPerf()
         {
             // act
-            Func<ICacheManager<string>> act = () => CacheFactory.Build<string>("stringCache", settings =>
+            Func<ICacheManager<string>> act = () => CacheFactory.Build<string>(settings =>
             {
                 settings.WithUpdateMode(CacheUpdateMode.Full)
                     .WithHandle(typeof(DictionaryCacheHandle<>), "h1");
@@ -223,7 +195,7 @@ namespace CacheManager.Tests
         public void CacheFactory_Build_WithInvalidExpiration()
         {
             // act
-            Action act = () => CacheFactory.Build<string>("stringCache", settings =>
+            Action act = () => CacheFactory.Build<string>(settings =>
             {
                 settings.WithUpdateMode(CacheUpdateMode.Full)
                     .WithHandle(typeof(DictionaryCacheHandle<>), "h1")
@@ -240,7 +212,7 @@ namespace CacheManager.Tests
         public void CacheFactory_Build_WithInvalidMaxRetries()
         {
             // act
-            Action act = () => CacheFactory.Build<string>("stringCache", settings =>
+            Action act = () => CacheFactory.Build<string>(settings =>
             {
                 settings.WithMaxRetries(0);
             });
@@ -255,7 +227,7 @@ namespace CacheManager.Tests
         public void CacheFactory_Build_WithInvalidRetryTimeout()
         {
             // act
-            Action act = () => CacheFactory.Build<string>("stringCache", settings =>
+            Action act = () => CacheFactory.Build<string>(settings =>
             {
                 settings.WithRetryTimeout(-1);
             });
@@ -272,10 +244,10 @@ namespace CacheManager.Tests
             // arrange act
             Action act = () =>
             {
-                var cache = CacheFactory.Build<object>("cacheName", settings =>
-                {
-                    settings.WithRedisBackPlate("redis");
-                });
+                var cache = CacheFactory.Build<object>(settings =>
+               {
+                   settings.WithRedisBackPlate("redis");
+               });
 
                 cache.Add("test", "test");
                 cache.Remove("test");
@@ -291,12 +263,12 @@ namespace CacheManager.Tests
         public void CacheFactory_Build_WithRedisBackPlateTooManyBackplateSources()
         {
             // arrange act
-            Action act = () => CacheFactory.Build<object>("cacheName", settings =>
-            {
-                settings.WithRedisBackPlate("redis");
-                settings.WithSystemRuntimeCacheHandle("h1", true);
-                settings.WithSystemRuntimeCacheHandle("h2", true);
-            });
+            Action act = () => CacheFactory.Build<object>(settings =>
+           {
+               settings.WithRedisBackPlate("redis");
+               settings.WithSystemRuntimeCacheHandle("redis", true);
+               settings.WithSystemRuntimeCacheHandle("redis", true);
+           });
 
             // assert
             act.ShouldThrow<InvalidOperationException>()
@@ -308,11 +280,11 @@ namespace CacheManager.Tests
         public void CacheFactory_Build_WithRedisBackPlateNoRedisConfig()
         {
             // arrange act
-            Action act = () => CacheFactory.Build<object>("cacheName", settings =>
-            {
-                settings.WithRedisBackPlate("redis");
-                settings.WithSystemRuntimeCacheHandle("h1", true);
-            });
+            Action act = () => CacheFactory.Build<object>(settings =>
+           {
+               settings.WithRedisBackPlate("redis");
+               settings.WithSystemRuntimeCacheHandle("redis", true);
+           });
 
             // assert
             act.ShouldThrow<InvalidOperationException>()
@@ -324,10 +296,10 @@ namespace CacheManager.Tests
         public void CacheFactory_Build_WithRedisBackPlateNoName()
         {
             // arrange act
-            Action act = () => CacheFactory.Build<object>("cacheName", settings =>
-            {
-                settings.WithRedisBackPlate(string.Empty);
-            });
+            Action act = () => CacheFactory.Build<object>(settings =>
+           {
+               settings.WithRedisBackPlate(string.Empty);
+           });
 
             // assert
             act.ShouldThrow<ArgumentException>()
@@ -339,10 +311,10 @@ namespace CacheManager.Tests
         public void CacheFactory_Build_WithRedisConfigurationNoKeyA()
         {
             // arrange act
-            Action act = () => CacheFactory.Build<object>("cacheName", settings =>
-            {
-                settings.WithRedisConfiguration(string.Empty, string.Empty);
-            });
+            Action act = () => CacheFactory.Build<object>(settings =>
+           {
+               settings.WithRedisConfiguration(string.Empty, string.Empty);
+           });
 
             // assert
             act.ShouldThrow<ArgumentException>()
@@ -354,10 +326,10 @@ namespace CacheManager.Tests
         public void CacheFactory_Build_WithRedisConfigurationNoKeyB()
         {
             // arrange act
-            Action act = () => CacheFactory.Build<object>("cacheName", settings =>
-            {
-                settings.WithRedisConfiguration(string.Empty, config => { });
-            });
+            Action act = () => CacheFactory.Build<object>(settings =>
+           {
+               settings.WithRedisConfiguration(string.Empty, config => { });
+           });
 
             // assert
             act.ShouldThrow<ArgumentException>()
@@ -369,10 +341,10 @@ namespace CacheManager.Tests
         public void CacheFactory_Build_WithRedisConfigurationInvalidEndpoint()
         {
             // arrange act
-            Action act = () => CacheFactory.Build<object>("cacheName", settings =>
-            {
-                settings.WithRedisConfiguration("redis", config => config.WithEndpoint(string.Empty, 0));
-            });
+            Action act = () => CacheFactory.Build<object>(settings =>
+           {
+               settings.WithRedisConfiguration("redis", config => config.WithEndpoint(string.Empty, 0));
+           });
 
             // assert
             act.ShouldThrow<ArgumentException>()
@@ -387,10 +359,10 @@ namespace CacheManager.Tests
             var connection = "127.0.0.1:8080,allowAdmin=true,name=myName,ssl=true";
 
             // act
-            CacheFactory.Build<object>("cacheName", settings =>
-            {
-                settings.WithRedisConfiguration("redisWithConnectionString", connection);
-            });
+            CacheFactory.Build<object>(settings =>
+           {
+               settings.WithRedisConfiguration("redisWithConnectionString", connection);
+           });
 
             var config = RedisConfigurations.GetConfiguration("redisWithConnectionString");
 
@@ -404,19 +376,19 @@ namespace CacheManager.Tests
         public void CacheFactory_Build_WithRedisConfigurationValidateBuilder()
         {
             // arrange act
-            CacheFactory.Build<object>("cacheName", settings =>
-            {
-                settings.WithRedisConfiguration("redisBuildUpConfiguration", config =>
-                {
-                    config.WithAllowAdmin()
-                        .WithConnectionTimeout(221113)
-                        .WithDatabase(22)
-                        .WithEndpoint("127.0.0.1", 2323)
-                        .WithEndpoint("nohost", 99999)
-                        .WithPassword("secret")
-                        .WithSsl("mySslHost");
-                });
-            });
+            CacheFactory.Build<object>(settings =>
+           {
+               settings.WithRedisConfiguration("redisBuildUpConfiguration", config =>
+               {
+                   config.WithAllowAdmin()
+                       .WithConnectionTimeout(221113)
+                       .WithDatabase(22)
+                       .WithEndpoint("127.0.0.1", 2323)
+                       .WithEndpoint("nohost", 99999)
+                       .WithPassword("secret")
+                       .WithSsl("mySslHost");
+               });
+           });
 
             var configuration = RedisConfigurations.GetConfiguration("redisBuildUpConfiguration");
 
@@ -435,7 +407,7 @@ namespace CacheManager.Tests
         public void CacheFactory_Build_ValidateSettings()
         {
             // act
-            var act = CacheFactory.Build<string>("stringCache", settings =>
+            var act = CacheFactory.Build<string>(settings =>
             {
                 settings
                     .WithRedisConfiguration("myRedis", config =>
@@ -463,7 +435,6 @@ namespace CacheManager.Tests
             act.Configuration.CacheUpdateMode.Should().Be(CacheUpdateMode.Full);
             act.Configuration.MaxRetries.Should().Be(22);
             act.Configuration.RetryTimeout.Should().Be(2223);
-            act.Name.Should().Be("stringCache");
             act.CacheHandles.ElementAt(0).Configuration.HandleName.Should().Be("h1");
             act.CacheHandles.ElementAt(0).Configuration.EnablePerformanceCounters.Should().BeTrue();
             act.CacheHandles.ElementAt(0).Configuration.EnableStatistics.Should().BeTrue();
@@ -489,12 +460,10 @@ namespace CacheManager.Tests
         {
             var cache = CacheFactory.Build(
                 typeof(string),
-                "myCache",
-                settings => settings.WithSystemRuntimeCacheHandle("h1")) as ICacheManager<string>;
+                settings => settings.WithSystemRuntimeCacheHandle()) as ICacheManager<string>;
 
             cache.Should().NotBeNull();
             cache.CacheHandles.Count().Should().Be(1);
-            cache.Name.Should().Be("myCache");
         }
 
         [Fact]
@@ -527,12 +496,10 @@ namespace CacheManager.Tests
         {
             var cache = CacheFactory.FromConfiguration(
                 typeof(string),
-                "cacheName",
-                ConfigurationBuilder.BuildConfiguration(cfg => cfg.WithSystemRuntimeCacheHandle("h1"))) as ICacheManager<string>;
+                ConfigurationBuilder.BuildConfiguration(cfg => cfg.WithSystemRuntimeCacheHandle())) as ICacheManager<string>;
 
             cache.Should().NotBeNull();
             cache.CacheHandles.Count().Should().Be(1);
-            cache.Name.Should().Be("cacheName");
         }
 
         [Fact]
@@ -540,7 +507,6 @@ namespace CacheManager.Tests
         public void CacheFactory_Build_WithSerializer_TypeNull()
         {
             Action act = () => CacheFactory.Build(
-                "cacheName",
                 p => p.WithSerializer(null));
 
             act.ShouldThrow<ArgumentNullException>().WithMessage("*serializerType*");
@@ -551,7 +517,6 @@ namespace CacheManager.Tests
         public void CacheFactory_Build_WithSerializer_TypeInvalid()
         {
             Action act = () => CacheFactory.Build(
-                "cacheName",
                 p => p.WithSerializer(typeof(string)));
 
             act.ShouldThrow<InvalidOperationException>().WithMessage("*must implement " + nameof(ICacheSerializer) + "*");
@@ -562,10 +527,9 @@ namespace CacheManager.Tests
         public void CacheFactory_Build_WithJsonSerializer()
         {
             var cache = CacheFactory.Build(
-                "cacheName",
                 p => p
                     .WithJsonSerializer()
-                    .WithSystemRuntimeCacheHandle("h1"));
+                    .WithSystemRuntimeCacheHandle());
 
             cache.Configuration.CacheSerializer.Should().NotBeNull();
             cache.Configuration.CacheSerializer.GetType().Should().Be(typeof(JsonCacheSerializer));
@@ -586,10 +550,9 @@ namespace CacheManager.Tests
             };
 
             var cache = CacheFactory.Build(
-                "cacheName",
                 p => p
                     .WithJsonSerializer(serializationSettings, deserializationSettings)
-                    .WithSystemRuntimeCacheHandle("h1"));
+                    .WithSystemRuntimeCacheHandle());
 
             var serializer = cache.Configuration.CacheSerializer as JsonCacheSerializer;
             serializer.SerializationSettings.ShouldBeEquivalentTo(serializationSettings);
@@ -601,10 +564,9 @@ namespace CacheManager.Tests
         public void CacheFactory_Build_WithSerializer_SimpleBinary()
         {
             var cache = CacheFactory.Build(
-                "cacheName",
                 p =>
                 p.WithSerializer(typeof(BinaryCacheSerializer))
-                    .WithSystemRuntimeCacheHandle("h1"));
+                    .WithSystemRuntimeCacheHandle());
 
             cache.Configuration.CacheSerializer.Should().NotBeNull();
             cache.Configuration.CacheSerializer.GetType().Should().Be(typeof(BinaryCacheSerializer));

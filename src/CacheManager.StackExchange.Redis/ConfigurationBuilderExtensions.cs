@@ -10,36 +10,36 @@ namespace CacheManager.Core
     public static class ConfigurationBuilderExtensions
     {
         /// <summary>
-        /// Adds a redis configuration.
+        /// Adds a redis configuration with the given <paramref name="configurationKey"/>.
         /// </summary>
-        /// <param name="part">The part.</param>
+        /// <param name="part">The builder instance.</param>
         /// <param name="configurationKey">
-        /// The configuration key which has to match with the cache handle name.
+        /// The configuration key which can be used to refernce this configuration by a redis cache handle or backplate.
         /// </param>
-        /// <param name="config">The redis configuration object.</param>
+        /// <param name="configuration">The redis configuration object.</param>
         /// <returns>The configuration builder.</returns>
-        /// <exception cref="System.ArgumentNullException">If config is null.</exception>
-        public static ConfigurationBuilderCachePart WithRedisConfiguration(this ConfigurationBuilderCachePart part, string configurationKey, Action<RedisConfigurationBuilder> config)
+        /// <exception cref="System.ArgumentNullException">If <paramref name="configuration"/> or <paramref name="configurationKey"/> are null.</exception>
+        public static ConfigurationBuilderCachePart WithRedisConfiguration(this ConfigurationBuilderCachePart part, string configurationKey, Action<RedisConfigurationBuilder> configuration)
         {
-            NotNull(config, nameof(config));
+            NotNull(configuration, nameof(configuration));
 
             var builder = new RedisConfigurationBuilder(configurationKey);
-            config(builder);
+            configuration(builder);
             RedisConfigurations.AddConfiguration(builder.Build());
             return part;
         }
 
         /// <summary>
-        /// Adds a redis configuration.
+        /// Adds a redis configuration with the given <paramref name="configurationKey"/>.
         /// </summary>
-        /// <param name="part">The part.</param>
+        /// <param name="part">The builder instance.</param>
         /// <param name="configurationKey">
-        /// The configuration key which has to match with the cache handle name.
+        /// The configuration key which can be used to refernce this configuration by a redis cache handle or backplate.
         /// </param>
         /// <param name="connectionString">The redis connection string.</param>
         /// <returns>The configuration builder.</returns>
         /// <exception cref="System.ArgumentNullException">
-        /// If configurationKey or connectionString are null.
+        /// If <paramref name="configurationKey"/> or <paramref name="connectionString"/> are null.
         /// </exception>
         public static ConfigurationBuilderCachePart WithRedisConfiguration(this ConfigurationBuilderCachePart part, string configurationKey, string connectionString)
         {
@@ -51,71 +51,61 @@ namespace CacheManager.Core
             return part;
         }
 
+#pragma warning disable SA1625
         /// <summary>
-        /// Configures the back plate for the cache manager.
-        /// <para>
-        /// The <paramref name="redisConfigurationId"/> is used to define the redis configuration,
-        /// the back plate should use to connect to the redis server.
-        /// </para>
+        /// Configures a cache back-plate for the cache manager.
+        /// The <paramref name="redisConfigurationKey"/> is used to find a matching redis configuration.
         /// <para>
         /// If a back plate is defined, at least one cache handle must be marked as back plate
         /// source. The cache manager then will try to synchronize multiple instances of the same configuration.
         /// </para>
         /// </summary>
-        /// <param name="part">The part.</param>
-        /// <param name="redisConfigurationId">
-        /// The id of the configuration the back plate should use.
+        /// <param name="part">The builder instance.</param>
+        /// <param name="redisConfigurationKey">
+        /// The redis configuration key will be used to find a matching redis connection configuration.
         /// </param>
         /// <returns>The builder instance.</returns>
-        public static ConfigurationBuilderCachePart WithRedisBackPlate(this ConfigurationBuilderCachePart part, string redisConfigurationId)
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="redisConfigurationKey"/> is null.</exception>
+        public static ConfigurationBuilderCachePart WithRedisBackPlate(this ConfigurationBuilderCachePart part, string redisConfigurationKey)
         {
             NotNull(part, nameof(part));
 
-            return part.WithBackPlate<RedisCacheBackPlate>(redisConfigurationId);
+            return part.WithBackPlate<RedisCacheBackPlate>(redisConfigurationKey);
         }
 
         /// <summary>
-        /// Add a <see cref="RedisCacheHandle"/> with the required name.
-        /// <para>
-        /// This handle requires a redis configuration to be defined with the
-        /// <paramref name="redisConfigurationId"/> matching the configuration's id.
-        /// </para>
+        /// Adds a <see cref="RedisCacheHandle"/>.
+        /// This handle requires a redis configuration to be defined with the given <paramref name="redisConfigurationKey"/>.
         /// </summary>
-        /// <param name="part">The builder part.</param>
-        /// <param name="redisConfigurationId">
-        /// The redis configuration identifier will be used as name for the cache handle and to
-        /// retrieve the connection configuration.
+        /// <param name="part">The builder instance.</param>
+        /// <param name="redisConfigurationKey">
+        /// The redis configuration key will be used to find a matching redis connection configuration.
         /// </param>
-        /// <returns>The part.</returns>
-        /// <exception cref="ArgumentNullException">Thrown if handleName is null.</exception>
-        public static ConfigurationBuilderCacheHandlePart WithRedisCacheHandle(this ConfigurationBuilderCachePart part, string redisConfigurationId) =>
-            WithRedisCacheHandle(part, redisConfigurationId, false);
+        /// <returns>The builder instance.</returns>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="redisConfigurationKey"/> is null.</exception>
+        public static ConfigurationBuilderCacheHandlePart WithRedisCacheHandle(this ConfigurationBuilderCachePart part, string redisConfigurationKey) =>
+            WithRedisCacheHandle(part, redisConfigurationKey, false);
 
         /// <summary>
-        /// Add a <see cref="RedisCacheHandle"/> with the required name.
-        /// <para>
-        /// This handle requires a redis configuration to be defined with the
-        /// <paramref name="redisConfigurationId"/> matching the configuration's id.
-        /// </para>
+        /// Adds a <see cref="RedisCacheHandle"/>.
+        /// This handle requires a redis configuration to be defined with the given <paramref name="redisConfigurationKey"/>.
         /// </summary>
-        /// <param name="part">The builder part.</param>
-        /// <param name="redisConfigurationId">
-        /// The redis configuration identifier will be used as name for the cache handle and to
-        /// retrieve the connection configuration.
+        /// <param name="part">The builder instance.</param>
+        /// <param name="redisConfigurationKey">
+        /// The redis configuration key will be used to find a matching redis connection configuration.
         /// </param>
         /// <param name="isBackPlateSource">
         /// Set this to true if this cache handle should be the source of the back plate.
-        /// <para>This setting will be ignored if no back plate is configured.</para>
+        /// This setting will be ignored if no back plate is configured.
         /// </param>
-        /// <returns>The part.</returns>
-        /// <exception cref="ArgumentNullException">
-        /// Thrown if handleName or handleType are null.
-        /// </exception>
-        public static ConfigurationBuilderCacheHandlePart WithRedisCacheHandle(this ConfigurationBuilderCachePart part, string redisConfigurationId, bool isBackPlateSource)
+        /// <returns>The builder instance.</returns>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="redisConfigurationKey"/> is null.</exception>
+        public static ConfigurationBuilderCacheHandlePart WithRedisCacheHandle(this ConfigurationBuilderCachePart part, string redisConfigurationKey, bool isBackPlateSource)
         {
             NotNull(part, nameof(part));
 
-            return part.WithHandle(typeof(RedisCacheHandle<>), redisConfigurationId, isBackPlateSource);
+            return part.WithHandle(typeof(RedisCacheHandle<>), redisConfigurationKey, isBackPlateSource);
         }
+#pragma warning restore SA1625
     }
 }

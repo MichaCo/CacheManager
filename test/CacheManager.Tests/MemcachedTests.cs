@@ -22,7 +22,7 @@ namespace CacheManager.Tests
         public void Memcached_Ctor()
         {
             // arrange act
-            Action act = () => CacheFactory.Build<IAmNotSerializable>("myCache", settings =>
+            Action act = () => CacheFactory.Build<IAmNotSerializable>(settings =>
             {
                 settings.WithUpdateMode(CacheUpdateMode.Full)
                     .WithMemcachedCacheHandle("default")
@@ -43,7 +43,7 @@ namespace CacheManager.Tests
             var longKey = string.Join(string.Empty, Enumerable.Repeat("a", 300));
 
             var item = new CacheItem<string>(longKey, "something");
-            var cache = CacheFactory.Build<string>("myCache", settings =>
+            var cache = CacheFactory.Build<string>(settings =>
             {
                 settings.WithUpdateMode(CacheUpdateMode.Full)
                     .WithMemcachedCacheHandle("default")
@@ -71,7 +71,7 @@ namespace CacheManager.Tests
             var longKey = string.Join(string.Empty, Enumerable.Repeat("a", 300));
 
             var item = new CacheItem<string>(longKey, "someRegion", "something");
-            var cache = CacheFactory.Build<string>("myCache", settings =>
+            var cache = CacheFactory.Build<string>(settings =>
             {
                 settings.WithUpdateMode(CacheUpdateMode.Full)
                     .WithMemcachedCacheHandle("default")
@@ -97,7 +97,7 @@ namespace CacheManager.Tests
         public void Memcached_Absolute_DoesExpire()
         {
             // act
-            var cache = CacheFactory.Build("myCache", settings =>
+            var cache = CacheFactory.Build(settings =>
             {
                 settings.WithUpdateMode(CacheUpdateMode.Full)
                     .WithMemcachedCacheHandle("default")
@@ -129,7 +129,7 @@ namespace CacheManager.Tests
         public void Memcached_RaceCondition_WithoutCasHandling()
         {
             // arrange
-            using (var cache = CacheFactory.Build<RaceConditionTestElement>("myCache", settings =>
+            using (var cache = CacheFactory.Build<RaceConditionTestElement>(settings =>
             {
                 settings.WithUpdateMode(CacheUpdateMode.Full)
                     .WithMemcachedCacheHandle("default")
@@ -172,10 +172,10 @@ namespace CacheManager.Tests
         public void Memcached_NoRaceCondition_WithCasHandling()
         {
             // arrange
-            using (var cache = CacheFactory.Build<RaceConditionTestElement>("myCache", settings =>
+            using (var cache = CacheFactory.Build<RaceConditionTestElement>(settings =>
             {
                 settings.WithUpdateMode(CacheUpdateMode.Full)
-                    .WithSystemRuntimeCacheHandle("default")
+                    .WithSystemRuntimeDefaultCacheHandle()
                         .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMilliseconds(1))
                     .And
                     .WithMemcachedCacheHandle("default")
@@ -224,7 +224,7 @@ namespace CacheManager.Tests
         public void Memcached_NoRaceCondition_WithCasHandling_WithRegion()
         {
             // arrange
-            using (var cache = CacheFactory.Build<RaceConditionTestElement>("myCache", settings =>
+            using (var cache = CacheFactory.Build<RaceConditionTestElement>(settings =>
             {
                 settings.WithUpdateMode(CacheUpdateMode.Full)
                     .WithMemcachedCacheHandle("default")
@@ -275,7 +275,7 @@ namespace CacheManager.Tests
         public void Memcached_NoRaceCondition_WithCasButTooFiewRetries()
         {
             // arrange
-            using (var cache = CacheFactory.Build<RaceConditionTestElement>("myCache", settings =>
+            using (var cache = CacheFactory.Build<RaceConditionTestElement>(settings =>
             {
                 settings.WithUpdateMode(CacheUpdateMode.Full)
                     .WithMemcachedCacheHandle("default")
@@ -329,7 +329,7 @@ namespace CacheManager.Tests
         public void Memcached_Update_ItemNotAdded()
         {
             // arrange
-            using (var cache = CacheFactory.Build<RaceConditionTestElement>("myCache", settings =>
+            using (var cache = CacheFactory.Build<RaceConditionTestElement>(settings =>
             {
                 settings.WithUpdateMode(CacheUpdateMode.Full)
                     .WithMemcachedCacheHandle("default")

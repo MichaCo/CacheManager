@@ -21,11 +21,11 @@ namespace CacheManager.Config.Tests
                 cfg.WithMaxRetries(10);
 
 #if DNXCORE50
-                cfg.WithDictionaryHandle("default")
+                cfg.WithDictionaryHandle()
                     .EnablePerformanceCounters();
                 Console.WriteLine("Using Dictionary cache handle");
 #else
-                cfg.WithSystemRuntimeCacheHandle("default")
+                cfg.WithSystemRuntimeCacheHandle()
                     .DisableStatistics();
                 Console.WriteLine("Using System Runtime cache handle");
 
@@ -50,12 +50,12 @@ namespace CacheManager.Config.Tests
             for (int i = 0; i < iterations; i++)
             {
                 Tests.CacheThreadTest(
-                    CacheFactory.FromConfiguration<string>("cache", cacheConfiguration),
+                    CacheFactory.FromConfiguration<string>(cacheConfiguration),
                     i + 10);
 
                 Tests.SimpleAddGetTest(
                     // CacheFactory.FromConfiguration(cacheConfiguration),
-                    CacheFactory.FromConfiguration<object>("cache", cacheConfiguration));
+                    CacheFactory.FromConfiguration<object>(cacheConfiguration));
                 // CacheUpdateTest(cache);
 
                 // Console.WriteLine(string.Format("Iterations ended after {0}ms.", swatch.ElapsedMilliseconds));

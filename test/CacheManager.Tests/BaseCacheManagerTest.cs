@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using CacheManager.Core;
-using CacheManager.Core.Internal;
 
 #if !NET40
 using Couchbase.Configuration.Client;
@@ -23,84 +22,79 @@ namespace CacheManager.Tests
 
         public static ICacheManager<object> WithOneMemoryCacheHandleSliding
             => CacheFactory.Build(
-                NewKey(),
                 settings => settings
                     .WithUpdateMode(CacheUpdateMode.Up)
-                    .WithSystemRuntimeCacheHandle(NewKey())
+                    .WithSystemRuntimeCacheHandle()
                         .EnableStatistics()
                         .EnablePerformanceCounters()
                     .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(1000)));
 
         public static ICacheManager<object> WithOneDicCacheHandle
             => CacheFactory.Build(
-                NewKey(),
                 settings => settings
                     .WithUpdateMode(CacheUpdateMode.Full)
-                    .WithHandle(typeof(DictionaryCacheHandle<>), NewKey())
+                    .WithDictionaryHandle()
                         .EnableStatistics()
                     .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(1000)));
 
         public static ICacheManager<object> WithOneMemoryCacheHandle
-            => CacheFactory.Build(NewKey(), settings => settings.WithSystemRuntimeCacheHandle(NewKey()).EnableStatistics());
+            => CacheFactory.Build(settings => settings.WithSystemRuntimeCacheHandle().EnableStatistics());
 
         public static ICacheManager<object> WithMemoryAndDictionaryHandles
             => CacheFactory.Build(
-                NewKey(),
                 settings =>
                 {
                     settings
                         .WithUpdateMode(CacheUpdateMode.None)
-                        .WithSystemRuntimeCacheHandle(NewKey())
+                        .WithSystemRuntimeCacheHandle()
                             .EnableStatistics()
-                        .And.WithSystemRuntimeCacheHandle("h2")
+                        .And.WithSystemRuntimeCacheHandle()
                             .EnableStatistics()
                             .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1000))
-                        .And.WithHandle(typeof(DictionaryCacheHandle<>), "h3")
+                        .And.WithDictionaryHandle()
                             .EnableStatistics()
-                        .And.WithHandle(typeof(DictionaryCacheHandle<>), "h4")
+                        .And.WithDictionaryHandle()
                             .EnableStatistics()
                             .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1000));
                 });
 
         public static ICacheManager<object> WithManyDictionaryHandles
             => CacheFactory.Build(
-                NewKey(),
                 settings =>
                 {
                     settings
                         .WithUpdateMode(CacheUpdateMode.Up)
-                        .WithHandle(typeof(DictionaryCacheHandle<>), NewKey())
+                        .WithDictionaryHandle()
                             .EnableStatistics()
-                        .And.WithHandle(typeof(DictionaryCacheHandle<>), NewKey())
+                        .And.WithDictionaryHandle()
                             .EnableStatistics()
                             .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(1000))
-                        .And.WithHandle(typeof(DictionaryCacheHandle<>), NewKey())
+                        .And.WithDictionaryHandle()
                             .EnableStatistics()
                             .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1000))
-                        .And.WithHandle(typeof(DictionaryCacheHandle<>), NewKey())
+                        .And.WithDictionaryHandle()
                             .EnableStatistics()
                             .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(1000))
-                        .And.WithHandle(typeof(DictionaryCacheHandle<>), NewKey())
+                        .And.WithDictionaryHandle()
                             .EnableStatistics()
                             .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1000))
-                        .And.WithHandle(typeof(DictionaryCacheHandle<>), NewKey())
+                        .And.WithDictionaryHandle()
                             .EnableStatistics()
                             .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(1000))
-                        .And.WithHandle(typeof(DictionaryCacheHandle<>), NewKey())
+                        .And.WithDictionaryHandle()
                             .EnableStatistics()
                             .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1000));
                 });
 
         public static ICacheManager<object> WithTwoNamedMemoryCaches
             => CacheFactory.Build(
-                NewKey(),
                 settings =>
                 {
                     settings
                         .WithUpdateMode(CacheUpdateMode.Full)
-                        .WithSystemRuntimeCacheHandle(NewKey())
+                        .WithSystemRuntimeCacheHandle("cacheHandleA")
                             .EnableStatistics()
-                        .And.WithSystemRuntimeCacheHandle(NewKey())
+                        .And.WithSystemRuntimeCacheHandle("cacheHandleB")
                             .EnableStatistics();
                 });
 
@@ -136,7 +130,7 @@ namespace CacheManager.Tests
         {
             get
             {
-                var cache = CacheFactory.Build(NewKey(), settings =>
+                var cache = CacheFactory.Build(settings =>
                 {
                     settings.WithUpdateMode(CacheUpdateMode.Full)
                         .WithMemcachedCacheHandle("enyim.com/memcached")
@@ -179,7 +173,7 @@ namespace CacheManager.Tests
                     }
                 };
 
-                var cache = CacheFactory.Build(NewKey(), settings =>
+                var cache = CacheFactory.Build(settings =>
                 {
                     settings
                         .WithCouchbaseConfiguration("couchbase", clientConfiguration)
@@ -196,11 +190,11 @@ namespace CacheManager.Tests
         public static ICacheManager<object> CreateRedisAndSystemCacheWithBackPlate(int database = 0, bool sharedRedisConfig = true)
         {
             var redisKey = sharedRedisConfig ? "redisConfig" : Guid.NewGuid().ToString();
-            return CacheFactory.Build(redisKey, settings =>
+            return CacheFactory.Build(settings =>
             {
                 settings
                     .WithUpdateMode(CacheUpdateMode.Up)
-                    .WithSystemRuntimeCacheHandle(NewKey())
+                    .WithSystemRuntimeCacheHandle()
                         .EnableStatistics();
                 settings
                     .WithMaxRetries(100)
@@ -220,7 +214,7 @@ namespace CacheManager.Tests
         public static ICacheManager<object> CreateRedisCache(int database = 0, bool sharedRedisConfig = true)
         {
             var redisKey = sharedRedisConfig ? "redisConfig" : Guid.NewGuid().ToString();
-            var cache = CacheFactory.Build(redisKey, settings =>
+            var cache = CacheFactory.Build(settings =>
             {
                 settings
                     .WithMaxRetries(100)
@@ -242,7 +236,7 @@ namespace CacheManager.Tests
         public static ICacheManager<T> CreateRedisCache<T>(int database = 0, bool sharedRedisConfig = true)
         {
             var redisKey = sharedRedisConfig ? "redisConfig" : Guid.NewGuid().ToString();
-            var cache = CacheFactory.Build<T>(redisKey, settings =>
+            var cache = CacheFactory.Build<T>(settings =>
             {
                 settings
                     .WithMaxRetries(100)

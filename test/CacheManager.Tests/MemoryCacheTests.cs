@@ -26,7 +26,7 @@ namespace CacheManager.Tests
             var item = new CacheItem<object>(key, "something", ExpirationMode.Absolute, new TimeSpan(0, 0, 0, 0, 300));
 
             // act
-            using (var act = this.GetHandle("Default"))
+            using (var act = CacheFactory.Build(_ => _.WithSystemRuntimeDefaultCacheHandle()))
             {
                 // act
                 act.Add(item);
@@ -46,7 +46,7 @@ namespace CacheManager.Tests
 #endif
         public void SysRuntime_MemoryCache_CreateDefaultCache()
         {
-            using (var act = this.GetHandle("Default"))
+            using (var act = CacheFactory.Build(_ => _.WithSystemRuntimeDefaultCacheHandle()))
             {
                 // arrange
                 var settings = ((MemoryCacheHandle<object>)act.CacheHandles.ElementAt(0)).CacheSettings;
@@ -65,7 +65,7 @@ namespace CacheManager.Tests
 #endif
         public void SysRuntime_MemoryCache_CreateNamedCache()
         {
-            using (var act = this.GetHandle("NamedTest"))
+            using (var act = CacheFactory.Build(_ => _.WithSystemRuntimeCacheHandle("NamedTest")))
             {
                 // arrange
                 var settings = ((MemoryCacheHandle<object>)act.CacheHandles.ElementAt(0)).CacheSettings;
@@ -86,7 +86,7 @@ namespace CacheManager.Tests
             var item = new CacheItem<object>(key, "something", ExpirationMode.Sliding, new TimeSpan(0, 0, 0, 0, 8));
 
             // act
-            using (var act = this.GetHandle("Default"))
+            using (var act = CacheFactory.Build(_ => _.WithSystemRuntimeDefaultCacheHandle()))
             {
                 // act
                 act.Add(item);
@@ -107,7 +107,7 @@ namespace CacheManager.Tests
             var item = new CacheItem<object>(key, "something", ExpirationMode.Sliding, new TimeSpan(0, 0, 0, 0, 50));
 
             // act
-            var act = this.GetHandle("Default");
+            var act = CacheFactory.Build(_ => _.WithSystemRuntimeDefaultCacheHandle());
             {
                 // act
                 act.Add(item);
@@ -143,13 +143,5 @@ namespace CacheManager.Tests
                 valid.Should().BeTrue("State: " + state);
             }
         }
-
-        private ICacheManager<object> GetHandle(string name)
-            => CacheFactory.Build(
-                "cache1",
-                settings =>
-                {
-                    settings.WithSystemRuntimeCacheHandle(name);
-                });
     }
 }

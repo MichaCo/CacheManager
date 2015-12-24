@@ -15,16 +15,16 @@ namespace CacheManager.Core
         /// <para>The key will be matched with the Couchbase cache handle name.</para>
         /// </summary>
         /// <param name="part">The part.</param>
-        /// <param name="key">The key which has to match with the cache handle name.</param>
+        /// <param name="configurationKey">The key which has to match with the cache handle name.</param>
         /// <param name="config">The Couchbase configuration object.</param>
         /// <returns>The configuration builder.</returns>
         /// <exception cref="System.ArgumentNullException">If key or config are null.</exception>
-        public static ConfigurationBuilderCachePart WithCouchbaseConfiguration(this ConfigurationBuilderCachePart part, string key, ClientConfiguration config)
+        public static ConfigurationBuilderCachePart WithCouchbaseConfiguration(this ConfigurationBuilderCachePart part, string configurationKey, ClientConfiguration config)
         {
-            NotNullOrWhiteSpace(key, nameof(key));
+            NotNullOrWhiteSpace(configurationKey, nameof(configurationKey));
             NotNull(config, nameof(config));
 
-            CouchbaseConfigurationManager.AddConfiguration(key, config);
+            CouchbaseConfigurationManager.AddConfiguration(configurationKey, config);
             return part;
         }
 

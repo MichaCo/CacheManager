@@ -168,9 +168,9 @@ namespace CacheManager.Tests
         [ReplaceCulture]
         public void CacheManager_Configuration_AbsoluteExpires()
         {
-            using (var cache = CacheFactory.Build("testCache", settings =>
+            using (var cache = CacheFactory.Build(settings =>
             {
-                settings.WithSystemRuntimeCacheHandle(Guid.NewGuid().ToString())
+                settings.WithSystemRuntimeCacheHandle()
                         .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMilliseconds(50));
             }))
             {
@@ -240,12 +240,12 @@ namespace CacheManager.Tests
         [Fact]
         public void BaseCacheHandle_ExpirationInherits_Issue_1()
         {
-            using (var cache = CacheFactory.Build("testCache", settings =>
+            using (var cache = CacheFactory.Build(settings =>
             {
-                settings.WithSystemRuntimeCacheHandle(Guid.NewGuid().ToString())
+                settings.WithSystemRuntimeCacheHandle()
                         .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(10))
                     .And
-                    .WithSystemRuntimeCacheHandle("handleB");
+                    .WithSystemRuntimeCacheHandle();
             }))
             {
                 cache.Add("something", "stuip");

@@ -28,7 +28,6 @@ namespace CacheManager.Tests
             var handles = new List<BaseCacheHandle<object>>();
 
             var cache = CacheFactory.Build<object>(
-                "cache",
                 settings =>
                 {
                     settings.WithUpdateMode(mode);

@@ -464,30 +464,18 @@ namespace CacheManager.Core
         }
 
         /// <summary>
-        /// Add a cache handle configuration with the required name and type attributes.
-        /// </summary>
-        /// <param name="cacheHandleBaseType">The handle's type without generic attribute.</param>
-        /// <param name="handleName">The name to be used for the cache handle.</param>
-        /// <returns>The builder part.</returns>
-        /// <exception cref="ArgumentNullException">
-        /// Thrown if handleName or cacheHandleBaseType are null.
-        /// </exception>
-        public ConfigurationBuilderCacheHandlePart WithHandle(Type cacheHandleBaseType, string handleName) =>
-            this.WithHandle(cacheHandleBaseType, handleName, false);
-
-        /// <summary>
         /// Adds a cache dictionary cache handle with the required name.
         /// </summary>
-        /// <param name="handleName">The name to be used for the cache handle.</param>
         /// <returns>The builder part.</returns>
         /// <exception cref="ArgumentNullException">Thrown if handleName is null.</exception>
-        public ConfigurationBuilderCacheHandlePart WithDictionaryHandle(string handleName) =>
-            this.WithHandle(typeof(DictionaryCacheHandle<>), handleName, false);
+        public ConfigurationBuilderCacheHandlePart WithDictionaryHandle() =>
+            this.WithHandle(typeof(DictionaryCacheHandle<>));
 
         /// <summary>
-        /// Add a cache handle configuration with the required name and type attributes.
+        /// Adds a cache handle with the given <c>Type</c> and name.
+        /// The type must be an open generic.
         /// </summary>
-        /// <param name="cacheHandleBaseType">The handle's type without generic attribute.</param>
+        /// <param name="cacheHandleBaseType">The cache handle type.</param>
         /// <param name="handleName">The name to be used for the cache handle.</param>
         /// <param name="isBackPlateSource">
         /// Set this to true if this cache handle should be the source of the back plate.
@@ -522,6 +510,31 @@ namespace CacheManager.Core
             var part = new ConfigurationBuilderCacheHandlePart(handleCfg, this);
             return part;
         }
+
+        /// <summary>
+        /// Adds a cache handle with the given <c>Type</c> and name.
+        /// The type must be an open generic.
+        /// </summary>
+        /// <param name="cacheHandleBaseType">The cache handle type.</param>
+        /// <param name="handleName">The name to be used for the cache handle.</param>
+        /// <returns>The builder part.</returns>
+        /// <exception cref="ArgumentNullException">
+        /// Thrown if handleName or cacheHandleBaseType are null.
+        /// </exception>
+        public ConfigurationBuilderCacheHandlePart WithHandle(Type cacheHandleBaseType, string handleName)
+            => this.WithHandle(cacheHandleBaseType, handleName, false);
+
+        /// <summary>
+        /// Adds a cache handle with the given <c>Type</c>.
+        /// The type must be an open generic.
+        /// </summary>
+        /// <param name="cacheHandleBaseType">The cache handle type.</param>
+        /// <returns>The builder part.</returns>
+        /// <exception cref="ArgumentNullException">
+        /// Thrown if handleName or cacheHandleBaseType are null.
+        /// </exception>
+        public ConfigurationBuilderCacheHandlePart WithHandle(Type cacheHandleBaseType)
+            => this.WithHandle(cacheHandleBaseType, Guid.NewGuid().ToString("N"), false);
 
         /// <summary>
         /// Sets the maximum number of retries per action.

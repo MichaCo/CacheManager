@@ -26,7 +26,7 @@ namespace CacheManager.Tests
 
             // act
             var cfg = ConfigurationBuilder.LoadConfigurationFile(fileName, cacheName);
-            var cache = CacheFactory.FromConfiguration<object>(cacheName, cfg);
+            var cache = CacheFactory.FromConfiguration<object>(cfg);
 
             // assert
             cache.Configuration.CacheUpdateMode.Should().Be(CacheUpdateMode.Up);
@@ -45,7 +45,7 @@ namespace CacheManager.Tests
 
             // act
             var cfg = ConfigurationBuilder.LoadConfigurationFile(fileName, cacheName);
-            var cache = CacheFactory.FromConfiguration<object>(cacheName, cfg);
+            var cache = CacheFactory.FromConfiguration<object>(cfg);
 
             // assert
             cache.Configuration.CacheUpdateMode.Should().Be(CacheUpdateMode.Up);
@@ -64,7 +64,7 @@ namespace CacheManager.Tests
 
             // act
             var cfg = ConfigurationBuilder.LoadConfigurationFile(fileName, cacheName);
-            var cache = CacheFactory.FromConfiguration<object>(cacheName, cfg);
+            var cache = CacheFactory.FromConfiguration<object>(cfg);
 
             // assert
             cache.Configuration.CacheUpdateMode.Should().Be(CacheUpdateMode.Full);
@@ -89,7 +89,7 @@ namespace CacheManager.Tests
 
             // act
             var cfg = ConfigurationBuilder.LoadConfigurationFile(fileName, cacheName);
-            var cache = CacheFactory.FromConfiguration<object>(cacheName, cfg);
+            var cache = CacheFactory.FromConfiguration<object>(cfg);
 
             var memHandle = cache.CacheHandles.ElementAt(0) as MemoryCacheHandle<object>;
 
@@ -112,7 +112,7 @@ namespace CacheManager.Tests
 
             // act
             var cfg = ConfigurationBuilder.LoadConfigurationFile(fileName, cacheName);
-            var cache = CacheFactory.FromConfiguration<object>(cacheName, cfg);
+            var cache = CacheFactory.FromConfiguration<object>(cfg);
 
             // assert
             cache.CacheHandles.Select(p => p.Configuration.EnableStatistics)
@@ -134,7 +134,7 @@ namespace CacheManager.Tests
 
             // act
             var cfg = ConfigurationBuilder.LoadConfigurationFile(fileName, cacheName);
-            var cache = CacheFactory.FromConfiguration<object>(cacheName, cfg);
+            var cache = CacheFactory.FromConfiguration<object>(cfg);
 
             // assert
             cache.CacheHandles.Select(p => p.Configuration.EnableStatistics)
@@ -152,7 +152,7 @@ namespace CacheManager.Tests
 
             // act
             var cfg = ConfigurationBuilder.LoadConfigurationFile(fileName, cacheName);
-            var cache = CacheFactory.FromConfiguration<object>(cacheName, cfg);
+            var cache = CacheFactory.FromConfiguration<object>(cfg);
 
             // assert
             cache.CacheHandles.Select(p => p.Configuration.EnableStatistics)

@@ -10,20 +10,20 @@ namespace CacheManager.Core
     public static class ConfigurationBuilderExtensions
     {
         /// <summary>
-        /// Add a <see cref="MemcachedCacheHandle"/> with the required name.
+        /// Adds a <see cref="MemcachedCacheHandle"/>. The <paramref name="configurationName"/> must match with cache configured via enyim configuration section.
         /// </summary>
         /// <param name="part">The builder part.</param>
-        /// <param name="handleName">The name to be used for the cache handle.</param>
+        /// <param name="configurationName">The configuration name.</param>
         /// <returns>The part.</returns>
         /// <exception cref="ArgumentNullException">Thrown if handleName is null.</exception>
-        public static ConfigurationBuilderCacheHandlePart WithMemcachedCacheHandle(this ConfigurationBuilderCachePart part, string handleName) =>
-            WithMemcachedCacheHandle(part, handleName, false);
+        public static ConfigurationBuilderCacheHandlePart WithMemcachedCacheHandle(this ConfigurationBuilderCachePart part, string configurationName) =>
+            WithMemcachedCacheHandle(part, configurationName, false);
 
         /// <summary>
-        /// Add a <see cref="MemcachedCacheHandle"/> with the required name.
+        /// Adds a <see cref="MemcachedCacheHandle"/>. The <paramref name="configurationName"/> must match with cache configured via enyim configuration section.
         /// </summary>
         /// <param name="part">The builder part.</param>
-        /// <param name="handleName">The name to be used for the cache handle.</param>
+        /// <param name="configurationName">The configuration name.</param>
         /// <param name="isBackPlateSource">
         /// Set this to true if this cache handle should be the source of the back plate.
         /// <para>This setting will be ignored if no back plate is configured.</para>
@@ -32,11 +32,11 @@ namespace CacheManager.Core
         /// <exception cref="ArgumentNullException">
         /// Thrown if handleName or handleType are null.
         /// </exception>
-        public static ConfigurationBuilderCacheHandlePart WithMemcachedCacheHandle(this ConfigurationBuilderCachePart part, string handleName, bool isBackPlateSource)
+        public static ConfigurationBuilderCacheHandlePart WithMemcachedCacheHandle(this ConfigurationBuilderCachePart part, string configurationName, bool isBackPlateSource)
         {
             NotNull(part, nameof(part));
 
-            return part.WithHandle(typeof(MemcachedCacheHandle<>), handleName, isBackPlateSource);
+            return part.WithHandle(typeof(MemcachedCacheHandle<>), configurationName, isBackPlateSource);
         }
     }
 }

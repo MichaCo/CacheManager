@@ -275,10 +275,7 @@ namespace CacheManager.Tests
                 throw new InvalidOperationException("Count and arrays must match");
             }
 
-            var cacheName = "myCache";
-
             var manager = CacheFactory.Build<string>(
-                cacheName,
                 settings =>
                 {
                     for (int i = 0; i < count; i++)

@@ -32,10 +32,7 @@ namespace CacheManager.Redis
         {
             NotNull(configuration, nameof(configuration));
 
-            this.channelName = string.Format(
-                CultureInfo.InvariantCulture,
-                "CacheManagerBackPlate_{0}",
-                cacheName);
+            this.channelName = "CacheManagerBackPlate";
 
             this.identifier = Guid.NewGuid().ToString();
 

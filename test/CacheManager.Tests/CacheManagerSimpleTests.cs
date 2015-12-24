@@ -96,7 +96,7 @@ namespace CacheManager.Tests
         [ReplaceCulture]
         public void CacheManager_Put_InvalidKey()
         {
-            using (var cache = CacheFactory.Build("cache", settings =>
+            using (var cache = CacheFactory.Build(settings =>
             {
                 settings.WithHandle(typeof(DictionaryCacheHandle<>), "h1");
             }))
@@ -118,7 +118,7 @@ namespace CacheManager.Tests
         [ReplaceCulture]
         public void CacheManager_Put_InvalidValue()
         {
-            using (var cache = CacheFactory.Build("cache", settings =>
+            using (var cache = CacheFactory.Build(settings =>
                 {
                     settings.WithHandle(typeof(DictionaryCacheHandle<>), "h1");
                 }))
@@ -140,7 +140,7 @@ namespace CacheManager.Tests
         [ReplaceCulture]
         public void CacheManager_Put_InvalidCacheItem()
         {
-            using (var cache = CacheFactory.Build("cache", settings =>
+            using (var cache = CacheFactory.Build(settings =>
                 {
                     settings.WithHandle(typeof(DictionaryCacheHandle<>), "h1");
                 }))
@@ -158,7 +158,7 @@ namespace CacheManager.Tests
         [ReplaceCulture]
         public void CacheManager_Put_InvalidRegion()
         {
-            using (var cache = CacheFactory.Build("cache", settings =>
+            using (var cache = CacheFactory.Build(settings =>
             {
                 settings.WithHandle(typeof(DictionaryCacheHandle<>), "h1");
             }))
@@ -179,7 +179,7 @@ namespace CacheManager.Tests
         [InlineData(0.223f)]
         public void CacheManager_Put_CacheItem_Positive<T>(T value)
         {
-            using (var cache = CacheFactory.Build("cache", settings =>
+            using (var cache = CacheFactory.Build(settings =>
                 {
                     settings.WithHandle(typeof(DictionaryCacheHandle<>), "h1");
                 }))
@@ -208,7 +208,7 @@ namespace CacheManager.Tests
         [InlineData(0.223f)]
         public void CacheManager_Put_KeyValue_Positive<T>(T value)
         {
-            using (var cache = CacheFactory.Build("cache", settings =>
+            using (var cache = CacheFactory.Build(settings =>
                 {
                     settings.WithHandle(typeof(DictionaryCacheHandle<>), "h1");
                 }))
@@ -236,7 +236,7 @@ namespace CacheManager.Tests
         [ReplaceCulture]
         public void CacheManager_Update_InvalidKey()
         {
-            using (var cache = CacheFactory.Build("cache", settings =>
+            using (var cache = CacheFactory.Build(settings =>
             {
                 settings.WithHandle(typeof(DictionaryCacheHandle<>), "h1");
             }))
@@ -266,7 +266,7 @@ namespace CacheManager.Tests
         [ReplaceCulture]
         public void CacheManager_Update_InvalidUpdateFunc()
         {
-            using (var cache = CacheFactory.Build("cache", settings =>
+            using (var cache = CacheFactory.Build(settings =>
             {
                 settings.WithHandle(typeof(DictionaryCacheHandle<>), "h1");
             }))
@@ -296,7 +296,7 @@ namespace CacheManager.Tests
         [ReplaceCulture]
         public void CacheManager_Update_InvalidRegion()
         {
-            using (var cache = CacheFactory.Build("cache", settings =>
+            using (var cache = CacheFactory.Build(settings =>
             {
                 settings.WithHandle(typeof(DictionaryCacheHandle<>), "h1");
             }))
@@ -318,7 +318,7 @@ namespace CacheManager.Tests
         [ReplaceCulture]
         public void CacheManager_Update_InvalidConfig()
         {
-            using (var cache = CacheFactory.Build("cache", settings =>
+            using (var cache = CacheFactory.Build(settings =>
             {
                 settings.WithHandle(typeof(DictionaryCacheHandle<>), "h1");
             }))
@@ -392,7 +392,7 @@ namespace CacheManager.Tests
         [ReplaceCulture]
         public void CacheManager_AddOrUpdate_InvalidKey()
         {
-            using (var cache = CacheFactory.Build("cache", settings =>
+            using (var cache = CacheFactory.Build(settings =>
             {
                 settings.WithHandle(typeof(DictionaryCacheHandle<>), "h1");
             }))
@@ -422,7 +422,7 @@ namespace CacheManager.Tests
         [ReplaceCulture]
         public void CacheManager_AddOrUpdate_InvalidUpdateFunc()
         {
-            using (var cache = CacheFactory.Build("cache", settings =>
+            using (var cache = CacheFactory.Build(settings =>
             {
                 settings.WithHandle(typeof(DictionaryCacheHandle<>), "h1");
             }))
@@ -454,7 +454,7 @@ namespace CacheManager.Tests
         [ReplaceCulture]
         public void CacheManager_AddOrUpdate_InvalidRegion()
         {
-            using (var cache = CacheFactory.Build("cache", settings =>
+            using (var cache = CacheFactory.Build(settings =>
             {
                 settings.WithHandle(typeof(DictionaryCacheHandle<>), "h1");
             }))
@@ -476,7 +476,7 @@ namespace CacheManager.Tests
         [ReplaceCulture]
         public void CacheManager_AddOrUpdate_InvalidConfig()
         {
-            using (var cache = CacheFactory.Build("cache", settings =>
+            using (var cache = CacheFactory.Build(settings =>
             {
                 settings.WithHandle(typeof(DictionaryCacheHandle<>), "h1");
             }))
@@ -550,7 +550,7 @@ namespace CacheManager.Tests
         public void CacheManager_Add_InvalidKey()
         {
             // arrange
-            using (var cache = CacheFactory.Build("cache", settings =>
+            using (var cache = CacheFactory.Build(settings =>
                 {
                     settings.WithHandle(typeof(DictionaryCacheHandle<>), "h1");
                 }))
@@ -574,7 +574,6 @@ namespace CacheManager.Tests
         {
             // arrange
             using (var cache = CacheFactory.Build(
-                "cache",
                 settings =>
                 {
                     settings.WithHandle(typeof(DictionaryCacheHandle<>), "h1");
@@ -599,7 +598,6 @@ namespace CacheManager.Tests
         {
             // arrange
             using (var cache = CacheFactory.Build(
-                "cache",
                 settings =>
                 {
                     settings.WithHandle(typeof(DictionaryCacheHandle<>), "h1");
@@ -619,7 +617,7 @@ namespace CacheManager.Tests
         public void CacheManager_Add_InvalidCacheItem()
         {
             // arrange
-            using (var cache = CacheFactory.Build("cache", settings =>
+            using (var cache = CacheFactory.Build(settings =>
                 {
                     settings.WithHandle(typeof(DictionaryCacheHandle<>), "h1");
                 }))
@@ -641,7 +639,7 @@ namespace CacheManager.Tests
         public void CacheManager_Add_CacheItem_Positive<T>(T value)
         {
             // arrange
-            using (var cache = CacheFactory.Build("cache", settings =>
+            using (var cache = CacheFactory.Build(settings =>
                 {
                     settings.WithHandle(typeof(DictionaryCacheHandle<>), "h1");
                 }))
@@ -666,7 +664,7 @@ namespace CacheManager.Tests
         public void CacheManager_Add_KeyValue_Positive<T>(T value)
         {
             // arrange
-            using (var cache = CacheFactory.Build("cache", settings =>
+            using (var cache = CacheFactory.Build(settings =>
                 {
                     settings.WithHandle(typeof(DictionaryCacheHandle<>), "h1");
                 }))
@@ -691,7 +689,7 @@ namespace CacheManager.Tests
         public void CacheManager_Get_InvalideKey()
         {
             // arrange
-            using (var cache = CacheFactory.Build("cache", settings =>
+            using (var cache = CacheFactory.Build(settings =>
             {
                 settings.WithHandle(typeof(DictionaryCacheHandle<>), "h1");
             }))
@@ -714,7 +712,7 @@ namespace CacheManager.Tests
         public void CacheManager_Get_InvalideRegion()
         {
             // arrange
-            using (var cache = CacheFactory.Build("cache", settings =>
+            using (var cache = CacheFactory.Build(settings =>
             {
                 settings.WithHandle(typeof(DictionaryCacheHandle<>), "h1");
             }))
@@ -733,7 +731,7 @@ namespace CacheManager.Tests
         public void CacheManager_GetItem_InvalideKey()
         {
             // arrange
-            using (var cache = CacheFactory.Build("cache", settings =>
+            using (var cache = CacheFactory.Build(settings =>
             {
                 settings.WithHandle(typeof(DictionaryCacheHandle<>), "h1");
             }))
@@ -756,7 +754,7 @@ namespace CacheManager.Tests
         public void CacheManager_GetItem_InvalideRegion()
         {
             // arrange
-            using (var cache = CacheFactory.Build("cache", settings =>
+            using (var cache = CacheFactory.Build(settings =>
             {
                 settings.WithHandle(typeof(DictionaryCacheHandle<>), "h1");
             }))
@@ -775,7 +773,7 @@ namespace CacheManager.Tests
         public void CacheManager_GetT_InvalideKey()
         {
             // arrange
-            using (var cache = CacheFactory.Build("cache", settings =>
+            using (var cache = CacheFactory.Build(settings =>
             {
                 settings.WithHandle(typeof(DictionaryCacheHandle<>), "h1");
             }))
@@ -798,7 +796,7 @@ namespace CacheManager.Tests
         public void CacheManager_GetT_InvalideRegion()
         {
             // arrange
-            using (var cache = CacheFactory.Build("cache", settings =>
+            using (var cache = CacheFactory.Build(settings =>
             {
                 settings.WithHandle(typeof(DictionaryCacheHandle<>), "h1");
             }))
@@ -817,7 +815,7 @@ namespace CacheManager.Tests
         public void CacheManager_Get_KeyNotAvailable()
         {
             // arrange
-            using (var cache = CacheFactory.Build("cache", settings =>
+            using (var cache = CacheFactory.Build(settings =>
                 {
                     settings.WithHandle(typeof(DictionaryCacheHandle<>), "h1");
                 }))
@@ -837,7 +835,7 @@ namespace CacheManager.Tests
         public void CacheManager_GetAdd_Positive()
         {
             // arrange
-            using (var cache = CacheFactory.Build("cache", settings =>
+            using (var cache = CacheFactory.Build(settings =>
                 {
                     settings.WithHandle(typeof(DictionaryCacheHandle<>), "h1");
                 }))
@@ -862,7 +860,7 @@ namespace CacheManager.Tests
         public void CacheManager_GetCacheItem_Positive()
         {
             // arrange
-            using (var cache = CacheFactory.Build("cache", settings =>
+            using (var cache = CacheFactory.Build(settings =>
             {
                 settings.WithHandle(typeof(DictionaryCacheHandle<>), "h1");
             }))
@@ -891,7 +889,7 @@ namespace CacheManager.Tests
         public void CacheManager_Remove_InvalideKey()
         {
             // arrange
-            using (var cache = CacheFactory.Build("cache", settings =>
+            using (var cache = CacheFactory.Build(settings =>
                 {
                     settings.WithHandle(typeof(DictionaryCacheHandle<>), "h1");
                 }))
@@ -914,7 +912,7 @@ namespace CacheManager.Tests
         public void CacheManager_Remove_InvalideRegion()
         {
             // arrange
-            using (var cache = CacheFactory.Build("cache", settings =>
+            using (var cache = CacheFactory.Build(settings =>
             {
                 settings.WithHandle(typeof(DictionaryCacheHandle<>), "h1");
             }))
@@ -933,7 +931,7 @@ namespace CacheManager.Tests
         public void CacheManager_Remove_KeyEmpty()
         {
             // arrange
-            using (var cache = CacheFactory.Build("cache", settings =>
+            using (var cache = CacheFactory.Build(settings =>
                 {
                     settings.WithHandle(typeof(DictionaryCacheHandle<>), "h1");
                 }))
@@ -954,7 +952,7 @@ namespace CacheManager.Tests
         public void CacheManager_Remove_KeyWhiteSpace()
         {
             // arrange
-            using (var cache = CacheFactory.Build("cache", settings =>
+            using (var cache = CacheFactory.Build(settings =>
                 {
                     settings.WithHandle(typeof(DictionaryCacheHandle<>), "h1");
                 }))
@@ -975,7 +973,7 @@ namespace CacheManager.Tests
         public void CacheManager_Remove_KeyNotAvailable()
         {
             // arrange
-            using (var cache = CacheFactory.Build("cache", settings =>
+            using (var cache = CacheFactory.Build(settings =>
                 {
                     settings.WithHandle(typeof(DictionaryCacheHandle<>), "h1");
                 }))
@@ -997,7 +995,7 @@ namespace CacheManager.Tests
         public void CacheManager_Remove_Positive()
         {
             // arrange
-            using (var cache = CacheFactory.Build("cache", settings =>
+            using (var cache = CacheFactory.Build(settings =>
                 {
                     settings.WithHandle(typeof(DictionaryCacheHandle<>), "h1");
                 }))
@@ -1024,7 +1022,7 @@ namespace CacheManager.Tests
         public void CacheManager_Index_InvalideKey()
         {
             // arrange
-            using (var cache = CacheFactory.Build("cache", settings =>
+            using (var cache = CacheFactory.Build(settings =>
                 {
                     settings.WithHandle(typeof(DictionaryCacheHandle<>), "h1");
                 }))
@@ -1050,7 +1048,7 @@ namespace CacheManager.Tests
         public void CacheManager_Index_Key_RegionEmpty()
         {
             // arrange
-            using (var cache = CacheFactory.Build("cache", settings =>
+            using (var cache = CacheFactory.Build(settings =>
             {
                 settings.WithHandle(typeof(DictionaryCacheHandle<>), "h1");
             }))
@@ -1070,7 +1068,7 @@ namespace CacheManager.Tests
         public void CacheManager_Index_KeyNotAvailable()
         {
             // arrange
-            using (var cache = CacheFactory.Build("cache", settings =>
+            using (var cache = CacheFactory.Build(settings =>
                 {
                     settings.WithHandle(typeof(DictionaryCacheHandle<>), "h1");
                 }))

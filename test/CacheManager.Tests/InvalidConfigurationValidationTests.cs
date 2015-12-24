@@ -224,7 +224,8 @@ namespace CacheManager.Tests
             string fileName = GetCfgFileName(@"/Configuration/configuration.invalid.invalidType.config");
 
             // act
-            var exception = Record.Exception(() => CacheFactory.FromConfiguration<object>("configName", ConfigurationBuilder.LoadConfigurationFile(fileName, "configName")));
+            var exception = Record.Exception(() => CacheFactory.FromConfiguration<object>(
+                ConfigurationBuilder.LoadConfigurationFile(fileName, "configName")));
 
             // assert
             exception.Should().NotBeNull();
@@ -239,7 +240,7 @@ namespace CacheManager.Tests
 
             // act
             var cfg = ConfigurationBuilder.LoadConfigurationFile(fileName, "cacheManager2", "configName");
-            Action act = () => CacheFactory.FromConfiguration<string>("mycache", cfg);
+            Action act = () => CacheFactory.FromConfiguration<string>(cfg);
 
             // assert
             act.ShouldThrow<InvalidOperationException>()
@@ -256,7 +257,7 @@ namespace CacheManager.Tests
             // act
             var cfg = ConfigurationBuilder.LoadConfigurationFile(fileName, "cacheManager4", "configName");
 
-            Action act = () => CacheFactory.FromConfiguration<object>("mycache", cfg);
+            Action act = () => CacheFactory.FromConfiguration<object>(cfg);
 
             // assert
             act.ShouldThrow<InvalidOperationException>()
@@ -271,7 +272,8 @@ namespace CacheManager.Tests
             string fileName = GetCfgFileName(@"/Configuration/configuration.invalid.invalidType.config");
 
             // act
-            var exception = Record.Exception(() => CacheFactory.FromConfiguration<object>("configName", ConfigurationBuilder.LoadConfigurationFile(fileName, "configName")));
+            var exception = Record.Exception(() => CacheFactory.FromConfiguration<object>(
+                ConfigurationBuilder.LoadConfigurationFile(fileName, "configName")));
 
             // assert
             exception.Should().NotBeNull();
