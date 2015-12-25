@@ -12,22 +12,6 @@ namespace CacheManager.Redis
     /// <summary>
     /// Cache handle implementation for Redis.
     /// </summary>
-    public class RedisCacheHandle : RedisCacheHandle<object>
-    {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="RedisCacheHandle"/> class.
-        /// </summary>
-        /// <param name="manager">The manager.</param>
-        /// <param name="configuration">The configuration.</param>
-        public RedisCacheHandle(ICacheManager<object> manager, CacheHandleConfiguration configuration)
-            : base(manager, configuration)
-        {
-        }
-    }
-
-    /// <summary>
-    /// Cache handle implementation for Redis.
-    /// </summary>
     /// <typeparam name="TCacheValue">The type of the cache value.</typeparam>
     public class RedisCacheHandle<TCacheValue> : BaseCacheHandle<TCacheValue>
     {

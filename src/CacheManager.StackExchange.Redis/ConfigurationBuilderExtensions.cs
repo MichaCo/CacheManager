@@ -74,7 +74,7 @@ namespace CacheManager.Core
         }
 
         /// <summary>
-        /// Adds a <see cref="RedisCacheHandle"/>.
+        /// Adds a <see cref="RedisCacheHandle{TCacheValue}"/>.
         /// This handle requires a redis configuration to be defined with the given <paramref name="redisConfigurationKey"/>.
         /// </summary>
         /// <param name="part">The builder instance.</param>
@@ -87,7 +87,7 @@ namespace CacheManager.Core
             WithRedisCacheHandle(part, redisConfigurationKey, false);
 
         /// <summary>
-        /// Adds a <see cref="RedisCacheHandle"/>.
+        /// Adds a <see cref="RedisCacheHandle{TCacheValue}"/>.
         /// This handle requires a redis configuration to be defined with the given <paramref name="redisConfigurationKey"/>.
         /// </summary>
         /// <param name="part">The builder instance.</param>

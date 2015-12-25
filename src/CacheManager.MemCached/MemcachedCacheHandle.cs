@@ -18,22 +18,6 @@ namespace CacheManager.Memcached
     /// <summary>
     /// Cache handle implementation based on the Enyim memcached client.
     /// </summary>
-    public class MemcachedCacheHandle : MemcachedCacheHandle<object>
-    {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MemcachedCacheHandle"/> class.
-        /// </summary>
-        /// <param name="manager">The manager.</param>
-        /// <param name="configuration">The configuration.</param>
-        public MemcachedCacheHandle(ICacheManager<object> manager, CacheHandleConfiguration configuration)
-            : base(manager, configuration)
-        {
-        }
-    }
-
-    /// <summary>
-    /// Cache handle implementation based on the Enyim memcached client.
-    /// </summary>
     /// <typeparam name="TCacheValue">The type of the cache value.</typeparam>
     public class MemcachedCacheHandle<TCacheValue> : BaseCacheHandle<TCacheValue>
     {

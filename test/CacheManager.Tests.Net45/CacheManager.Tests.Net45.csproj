@@ -82,6 +82,7 @@
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Web" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="xunit.abstractions">
@@ -151,6 +152,9 @@
     </Compile>
     <Compile Include="..\CacheManager.Tests\SerializerTests.cs">
       <Link>SerializerTests.cs</Link>
+    </Compile>
+    <Compile Include="..\CacheManager.Tests\SystemWebCacheHandleWrapper.cs">
+      <Link>SystemWebCacheHandleWrapper.cs</Link>
     </Compile>
     <Compile Include="..\CacheManager.Tests\ThreadRandomReadWriteTestBase.cs">
       <Link>ThreadRandomReadWriteTestBase.cs</Link>

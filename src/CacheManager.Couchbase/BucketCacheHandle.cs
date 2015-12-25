@@ -14,22 +14,6 @@ namespace CacheManager.Couchbase
     /// <summary>
     /// Cache handle implementation based on the couchbase .net client.
     /// </summary>
-    public class BucketCacheHandle : BucketCacheHandle<object>
-    {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="BucketCacheHandle"/> class.
-        /// </summary>
-        /// <param name="manager">The manager.</param>
-        /// <param name="configuration">The configuration.</param>
-        public BucketCacheHandle(ICacheManager<object> manager, CacheHandleConfiguration configuration)
-            : base(manager, configuration)
-        {
-        }
-    }
-
-    /// <summary>
-    /// Cache handle implementation based on the couchbase .net client.
-    /// </summary>
     /// <typeparam name="TCacheValue">The type of the cache value.</typeparam>
     public class BucketCacheHandle<TCacheValue> : BaseCacheHandle<TCacheValue>
     {

@@ -81,6 +81,7 @@
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Net" />
+    <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -153,6 +154,9 @@
     </Compile>
     <Compile Include="..\CacheManager.Tests\SerializerTests.cs">
       <Link>SerializerTests.cs</Link>
+    </Compile>
+    <Compile Include="..\CacheManager.Tests\SystemWebCacheHandleWrapper.cs">
+      <Link>SystemWebCacheHandleWrapper.cs</Link>
     </Compile>
     <Compile Include="..\CacheManager.Tests\ThreadRandomReadWriteTestBase.cs">
       <Link>ThreadRandomReadWriteTestBase.cs</Link>

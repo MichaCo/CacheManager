@@ -29,7 +29,7 @@ namespace CacheManager.Core
         }
 
         /// <summary>
-        /// Add a <see cref="BucketCacheHandle"/> with the required name.
+        /// Adds a <see cref="BucketCacheHandle{TCacheValue}"/> with the required name.
         /// <para>
         /// This handle requires a Couchbase <see cref="ClientConfiguration"/> to be defined with
         /// the <paramref name="couchbaseConfigurationKey"/> matching the configuration's key.
@@ -48,7 +48,7 @@ namespace CacheManager.Core
             WithCouchbaseCacheHandle(part, couchbaseConfigurationKey, false);
 
         /// <summary>
-        /// Add a <see cref="BucketCacheHandle"/> with the required name.
+        /// Adds a <see cref="BucketCacheHandle{TCacheValue}"/> with the required name.
         /// <para>
         /// This handle requires a Couchbase <see cref="ClientConfiguration"/> to be defined with
         /// the <paramref name="couchbaseConfigurationKey"/> matching the configuration's key.
@@ -78,7 +78,7 @@ namespace CacheManager.Core
         }
 
         /// <summary>
-        /// Add a <see cref="BucketCacheHandle"/> with the required name.
+        /// Adds a <see cref="BucketCacheHandle{TCacheValue}"/> with the required name.
         /// <para>
         /// This handle requires a Couchbase <see cref="ClientConfiguration"/> to be defined with
         /// the <paramref name="couchbaseConfigurationKey"/> matching the configuration's key.
@@ -102,7 +102,7 @@ namespace CacheManager.Core
             WithCouchbaseCacheHandle(part, couchbaseConfigurationKey, bucketName, false);
 
         /// <summary>
-        /// Add a <see cref="BucketCacheHandle"/> with the required name.
+        /// Adds a <see cref="BucketCacheHandle{TCacheValue}"/> with the required name.
         /// <para>
         /// This handle requires a Couchbase <see cref="ClientConfiguration"/> to be defined with
         /// the <paramref name="couchbaseConfigurationKey"/> matching the configuration's key.

@@ -58,9 +58,6 @@
     <Compile Include="..\CacheManager.SystemRuntimeCaching\GlobalSuppressions.cs">
       <Link>GlobalSuppressions.cs</Link>
     </Compile>
-    <Compile Include="..\CacheManager.SystemRuntimeCaching\MemoryCacheHandle.cs">
-      <Link>MemoryCacheHandle.cs</Link>
-    </Compile>
     <Compile Include="..\CacheManager.SystemRuntimeCaching\MemoryCacheHandle`1.cs">
       <Link>MemoryCacheHandle`1.cs</Link>
     </Compile>

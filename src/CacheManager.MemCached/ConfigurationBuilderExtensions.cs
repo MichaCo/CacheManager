@@ -10,7 +10,7 @@ namespace CacheManager.Core
     public static class ConfigurationBuilderExtensions
     {
         /// <summary>
-        /// Adds a <see cref="MemcachedCacheHandle"/>. The <paramref name="configurationName"/> must match with cache configured via enyim configuration section.
+        /// Adds a <see cref="MemcachedCacheHandle{TCacheValue}"/>. The <paramref name="configurationName"/> must match with cache configured via enyim configuration section.
         /// </summary>
         /// <param name="part">The builder part.</param>
         /// <param name="configurationName">The configuration name.</param>
@@ -20,7 +20,7 @@ namespace CacheManager.Core
             WithMemcachedCacheHandle(part, configurationName, false);
 
         /// <summary>
-        /// Adds a <see cref="MemcachedCacheHandle"/>. The <paramref name="configurationName"/> must match with cache configured via enyim configuration section.
+        /// Adds a <see cref="MemcachedCacheHandle{TCacheValue}"/>. The <paramref name="configurationName"/> must match with cache configured via enyim configuration section.
         /// </summary>
         /// <param name="part">The builder part.</param>
         /// <param name="configurationName">The configuration name.</param>

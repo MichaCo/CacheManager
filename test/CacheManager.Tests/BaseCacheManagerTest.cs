@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Threading;
+using System.Web;
 using CacheManager.Core;
 
 #if !NET40
@@ -97,6 +99,17 @@ namespace CacheManager.Tests
                         .And.WithSystemRuntimeCacheHandle("cacheHandleB")
                             .EnableStatistics();
                 });
+
+#if !NET40
+        public static ICacheManager<object> WithSystemWebCache
+            => CacheFactory.Build(
+                settings =>
+                {
+                    settings
+                    .WithHandle(typeof(SystemWebCacheHandleWrapper<>))
+                        .EnableStatistics();
+                });
+#endif
 
         public static ICacheManager<object> WithRedisCache
         {
@@ -278,6 +291,9 @@ namespace CacheManager.Tests
 #endif
                 //// yield return new object[] { TestManagers.WithMemcached };
                 //// yield return new object[] { TestManagers.WithCouchbaseMemcached };
+#if !NET40
+                yield return new object[] { TestManagers.WithSystemWebCache };
+#endif
             }
         }
 

@@ -10,7 +10,7 @@ namespace CacheManager.Core
     {
 #pragma warning disable SA1625
         /// <summary>
-        /// Adds a <see cref="MemoryCacheHandle" /> using a <see cref="System.Runtime.Caching.MemoryCache"/> instance with the given <paramref name="instanceName"/>.
+        /// Adds a <see cref="MemoryCacheHandle{TCacheValue}" /> using a <see cref="System.Runtime.Caching.MemoryCache"/> instance with the given <paramref name="instanceName"/>.
         /// The named cache instance can be configured via <c>app/web.config</c> <c>system.runtime.caching</c> section.
         /// </summary>
         /// <param name="part">The builder part.</param>
@@ -21,7 +21,7 @@ namespace CacheManager.Core
             => WithSystemRuntimeCacheHandle(part, instanceName, false);
 
         /// <summary>
-        /// Adds a <see cref="MemoryCacheHandle" /> using a <see cref="System.Runtime.Caching.MemoryCache"/>.
+        /// Adds a <see cref="MemoryCacheHandle{TCacheValue}" /> using a <see cref="System.Runtime.Caching.MemoryCache"/>.
         /// </summary>
         /// <param name="part">The builder part.</param>
         /// <returns>The builder part.</returns>
@@ -29,7 +29,7 @@ namespace CacheManager.Core
             => part?.WithHandle(typeof(MemoryCacheHandle<>), Guid.NewGuid().ToString("N"), false);
 
         /// <summary>
-        /// Adds a <see cref="MemoryCacheHandle" /> using the <see cref="System.Runtime.Caching.MemoryCache"/> default instance.
+        /// Adds a <see cref="MemoryCacheHandle{TCacheValue}" /> using the <see cref="System.Runtime.Caching.MemoryCache"/> default instance.
         /// The deafult cache instance can be configured via <c>app/web.config</c> <c>system.runtime.caching</c> section.
         /// </summary>
         /// <param name="part">The builder part.</param>
@@ -38,7 +38,7 @@ namespace CacheManager.Core
             => part?.WithHandle(typeof(MemoryCacheHandle<>), "default", false);
 
         /// <summary>
-        /// Adds a <see cref="MemoryCacheHandle" /> using a <see cref="System.Runtime.Caching.MemoryCache"/> instance with the given <paramref name="instanceName"/>.
+        /// Adds a <see cref="MemoryCacheHandle{TCacheValue}" /> using a <see cref="System.Runtime.Caching.MemoryCache"/> instance with the given <paramref name="instanceName"/>.
         /// The named cache instance can be configured via <c>app/web.config</c> <c>system.runtime.caching</c> section.
         /// </summary>
         /// <param name="part">The builder part.</param>

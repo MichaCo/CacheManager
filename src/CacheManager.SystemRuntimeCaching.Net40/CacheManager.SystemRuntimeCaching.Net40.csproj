@@ -51,9 +51,6 @@
     <Compile Include="..\CacheManager.SystemRuntimeCaching\ConfigurationBuilderExtensions.cs">
       <Link>ConfigurationBuilderExtensions.cs</Link>
     </Compile>
-    <Compile Include="..\CacheManager.SystemRuntimeCaching\MemoryCacheHandle.cs">
-      <Link>MemoryCacheHandle.cs</Link>
-    </Compile>
     <Compile Include="..\CacheManager.SystemRuntimeCaching\MemoryCacheHandle`1.cs">
       <Link>MemoryCacheHandle`1.cs</Link>
     </Compile>
