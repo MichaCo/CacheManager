@@ -41,6 +41,7 @@
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Runtime.Caching" />
+    <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -71,6 +72,10 @@
     <ProjectReference Include="..\..\src\CacheManager.Memcached.Net45\CacheManager.Memcached.csproj">
       <Project>{680ff75c-6eeb-4eb6-bb46-b6e465f3edbf}</Project>
       <Name>CacheManager.Memcached</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\CacheManager.Serialization.Json.Net45\CacheManager.Serialization.Json.csproj">
+      <Project>{6efe6b78-df24-4fec-8e45-ece790f16dfc}</Project>
+      <Name>CacheManager.Serialization.Json</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\src\CacheManager.StackExchange.Redis.Net45\CacheManager.StackExchange.Redis.csproj">
       <Project>{3930c89d-c16b-4c88-b946-0c22e10cd263}</Project>

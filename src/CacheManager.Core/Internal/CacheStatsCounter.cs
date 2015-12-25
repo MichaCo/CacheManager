@@ -4,12 +4,7 @@ namespace CacheManager.Core.Internal
 {
     internal sealed class CacheStatsCounter
     {
-        private long[] counters = null;
-
-        public CacheStatsCounter()
-        {
-            this.counters = new long[9];
-        }
+        private volatile long[] counters = new long[9];
 
         public void Add(CacheStatsCounterType type, long value)
         {
@@ -21,11 +16,7 @@ namespace CacheManager.Core.Internal
             Interlocked.Decrement(ref this.counters[(int)type]);
         }
 
-        public long Get(CacheStatsCounterType type)
-        {
-            var result = this.counters[(int)type];
-            return result;
-        }
+        public long Get(CacheStatsCounterType type) => this.counters[(int)type];
 
         public void Increment(CacheStatsCounterType type)
         {

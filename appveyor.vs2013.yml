@@ -1,4 +1,4 @@
-version: 0.6.2.{build}
+version: 0.7.0.{build}
 os: Visual Studio 2015
 clone_depth: 10
 clone_folder: C:\projects\CacheManager\

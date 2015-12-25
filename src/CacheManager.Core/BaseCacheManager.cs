@@ -888,22 +888,22 @@ namespace CacheManager.Core
                 }
             }
 
-            // update back plate
-            if (this.Configuration.HasBackPlate)
-            {
-                if (string.IsNullOrWhiteSpace(region))
-                {
-                    this.cacheBackPlate.NotifyRemove(key);
-                }
-                else
-                {
-                    this.cacheBackPlate.NotifyRemove(key, region);
-                }
-            }
-
-            // trigger only once and not per handle
             if (result)
             {
+                // update back plate
+                if (this.Configuration.HasBackPlate)
+                {
+                    if (string.IsNullOrWhiteSpace(region))
+                    {
+                        this.cacheBackPlate.NotifyRemove(key);
+                    }
+                    else
+                    {
+                        this.cacheBackPlate.NotifyRemove(key, region);
+                    }
+                }
+
+                // trigger only once and not per handle
                 this.TriggerOnRemove(key, region);
             }
 
@@ -1049,7 +1049,10 @@ namespace CacheManager.Core
             {
                 if (handleIndex > foundIndex)
                 {
-                    this.cacheHandles[handleIndex].Add(item);
+                    if (this.cacheHandles[handleIndex].Add(item))
+                    {
+                        this.cacheHandles[handleIndex].Stats.OnAdd(item);
+                    }
                 }
             }
         }

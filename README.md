@@ -4,8 +4,7 @@ CacheManager is an open source abstraction layer for caching written in C#. It s
 The main goal of the CacheManager package is to make developer's life easier to handle even very complex caching scenarios.  
 With CacheManager it is possible to implement multiple layers of caching, e.g. in-process caching in front of a distributed cache, in just a few lines of code.
 
-CacheManager is not just an interface to unify the programming model for various cache providers, which will 
-make it very easy to change the caching strategy later on in a project. It also offers additional features, like cache synchronization, concurrent updates, events, performance counters... 
+CacheManager is not just an interface to unify the programming model for various cache providers, which will make it very easy to change the caching strategy later on in a project. It also offers additional features, like cache synchronization, concurrent updates, serialization, events, performance counters... 
 The developer can opt-in to those features only if needed.
 
 ## Build Status
@@ -18,9 +17,10 @@ Linux, Mono | [![Build Status](https://travis-ci.org/MichaCo/CacheManager.svg?br
 
 ## CacheManager Nuget Packages
 
-| Package Name | .Net 4.0  | .Net 4.5  | DNX 4.5.1 | DNX Core
+| Package Name | .Net 4.0  | .Net 4.5  | DNX 4.5.1 | Dotnet 5.2
 |--------------| :-------: | :-------: | :-------: | :-------:
 | [CacheManager.Core] [Core.nuget] | x | x | x | x
+| [CacheManager.Serialization.Json] [Json.nuget] | x | x | x | x
 | [CacheManager.StackExchange.Redis] [Redis.nuget] | x | x | x | -
 | [CacheManager.SystemRuntimeCaching] [SystemRuntimeCaching.nuget]  | x | x | x | -
 | [CacheManager.Memcached] [Memcached.nuget]  | x | x | x | -
@@ -58,7 +58,7 @@ There is also from source generated [html documentation][help] available online.
 	* [**ASP.NET MVC website**][outputcachesample] showcasing usage of the Cache Manager `OutputCache` provider
 * [**Single Page Todo App with Cache Manager on Azure using Redis**][todosample]
 
-## Features in Version: [0.6.x][releases] 
+## Features in Version: [0.7.x][releases] 
 
 * One common interface for handling different caching technologies: `ICache<T>`
 * Configurable via app/web.config or by code.
@@ -67,6 +67,9 @@ There is also from source generated [html documentation][help] available online.
     * **Redis** using [StackExchange.Redis](https://github.com/StackExchange/StackExchange.Redis)
     * **Memcached** using [Enyim.Memcached](https://github.com/enyim/EnyimMemcached)
     * **Couchbase** using [Couchbase.Net.Client v2](https://github.com/couchbase/couchbase-net-client)
+    * **System.Web.Caching** based (included in the Web package)
+* **Serialization** can be configured per cache handle.
+Serialization is only needed in distributed caches. The default implementation uses binary serialization. The *Serialization.Json* packages provides a Newtonsoft.Json based alternative.
 * **Update values with lock or transaction** for distributed caches. 
 The interfaced provides a simple update method which internally ensures you work with the latest version.
 And CacheManager handles version conflicts for you.
@@ -115,5 +118,6 @@ OnGet, OnAdd, OnPut, OnRemove, OnClear, OnClearRegion
 [program.cs]: https://github.com/MichaCo/CacheManager/blob/master/samples/CacheManager.Examples/Program.cs
 [outputcachesample]: https://github.com/MichaCo/CacheManager/tree/master/samples/CacheManager.Samples.Mvc
 [todosample]: http://cachemanager.net/Documentation/Index/cachemanager_backed_todo_web_app
+[Json.nuget]: https://www.nuget.org/packages/CacheManager.Serialization.Json
 
 [TOC]
