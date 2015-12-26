@@ -100,7 +100,7 @@ namespace CacheManager.Tests
                             .EnableStatistics();
                 });
 
-#if !NET40
+#if !NET40 && MOCK_HTTPCONTEXTE_ENABLED
         public static ICacheManager<object> WithSystemWebCache
             => CacheFactory.Build(
                 settings =>
@@ -291,7 +291,7 @@ namespace CacheManager.Tests
 #endif
                 //// yield return new object[] { TestManagers.WithMemcached };
                 //// yield return new object[] { TestManagers.WithCouchbaseMemcached };
-#if !NET40
+#if !NET40 && MOCK_HTTPCONTEXTE_ENABLED
                 yield return new object[] { TestManagers.WithSystemWebCache };
 #endif
             }

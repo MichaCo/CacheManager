@@ -17,7 +17,7 @@
       },
       "compilationOptions": {
         "define": [
-          "REDISENABLED"
+          "REDISENABLED", "MOCK_HTTPCONTEXTE_ENABLED"
         ]
       }
     }
