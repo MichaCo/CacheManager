@@ -239,16 +239,6 @@ namespace CacheManager.Config.Tests
     {
         private static Random random = new Random();
 
-        public static Item Generate()
-        {
-            return new Item()
-            {
-                Name = Guid.NewGuid().ToString(),
-                Number = random.Next(0, int.MaxValue),
-                SomeStrings = new List<string>() { "Something", "more", "or", "less" }
-            };
-        }
-
         public Item()
         {
             this.SomeStrings = new List<string>();
@@ -259,5 +249,15 @@ namespace CacheManager.Config.Tests
         public IList<string> SomeStrings { get; set; }
 
         public long Number { get; set; }
+
+        public static Item Generate()
+        {
+            return new Item()
+            {
+                Name = Guid.NewGuid().ToString(),
+                Number = random.Next(0, int.MaxValue),
+                SomeStrings = new List<string>() { "Something", "more", "or", "less" }
+            };
+        }
     }
 }

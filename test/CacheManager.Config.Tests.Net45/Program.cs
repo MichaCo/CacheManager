@@ -47,8 +47,8 @@ namespace CacheManager.Config.Tests
 
                 cfg.WithJsonSerializer();
 
-                //cfg.WithSystemRuntimeCacheHandle("default")
-                //    .EnablePerformanceCounters();
+                ////cfg.WithSystemRuntimeCacheHandle("default")
+                ////    .EnablePerformanceCounters();
 
                 cfg.WithRedisCacheHandle("redis", true)
                     .EnablePerformanceCounters();
