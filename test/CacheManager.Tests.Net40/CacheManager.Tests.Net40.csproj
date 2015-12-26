@@ -21,7 +21,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;NET40;REDISENABLED;MOCK_HTTPCONTEXTE_ENABLED</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;NET40;REDISENABLED;MOCK_HTTPCONTEXT_ENABLED</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>

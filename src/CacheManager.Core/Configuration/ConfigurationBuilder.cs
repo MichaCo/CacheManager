@@ -464,12 +464,20 @@ namespace CacheManager.Core
         }
 
         /// <summary>
-        /// Adds a cache dictionary cache handle with the required name.
+        /// Adds a cache dictionary cache handle to the cache manager.
         /// </summary>
         /// <returns>The builder part.</returns>
-        /// <exception cref="ArgumentNullException">Thrown if handleName is null.</exception>
         public ConfigurationBuilderCacheHandlePart WithDictionaryHandle() =>
             this.WithHandle(typeof(DictionaryCacheHandle<>));
+
+        /// <summary>
+        /// Adds a cache dictionary cache handle to the cache manager.
+        /// </summary>
+        /// <returns>The builder part.</returns>
+        /// <param name="handleName">The name of the cache handle.</param>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="handleName"/> is null.</exception>
+        public ConfigurationBuilderCacheHandlePart WithDictionaryHandle(string handleName) =>
+            this.WithHandle(typeof(DictionaryCacheHandle<>), handleName);
 
         /// <summary>
         /// Adds a cache handle with the given <c>Type</c> and name.
