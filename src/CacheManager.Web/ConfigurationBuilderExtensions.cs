@@ -10,7 +10,8 @@ namespace CacheManager.Core
     {
 #pragma warning disable SA1625
         /// <summary>
-        /// Adds a <see cref="SystemWebCacheHandle{TCacheValue}" /> using a <see cref="System.Web.Caching.Cache"/>.
+        /// Adds a <see cref="SystemWebCacheHandle{TCacheValue}" /> to the cache manager.
+        /// This handle uses <c>System.Web.Caching.Cache</c> and requires <c>HttpContext.Current</c> to be not null.
         /// </summary>
         /// <param name="part">The builder part.</param>
         /// <returns>The builder part.</returns>
@@ -18,22 +19,22 @@ namespace CacheManager.Core
             => WithSystemWebCacheHandle(part, Guid.NewGuid().ToString("N"));
 
         /// <summary>
-        /// Adds a <see cref="SystemWebCacheHandle{TCacheValue}" /> using a <see cref="System.Web.Caching.Cache"/> instance with the given <paramref name="instanceName"/>.
-        /// The named cache instance can be configured via <c>app/web.config</c> <c>system.runtime.caching</c> section.
+        /// Adds a <see cref="SystemWebCacheHandle{TCacheValue}" /> to the cache manager.
+        /// This handle uses <c>System.Web.Caching.Cache</c> and requires <c>HttpContext.Current</c> to be not null.
         /// </summary>
         /// <param name="part">The builder part.</param>
-        /// <param name="instanceName">The name to be used for the <see cref="System.Web.Caching.Cache"/> instance.</param>
+        /// <param name="instanceName">The name to be used for the cache handle instance.</param>
         /// <returns>The builder part.</returns>
         /// <exception cref="ArgumentNullException">Thrown if handleName is null.</exception>
         public static ConfigurationBuilderCacheHandlePart WithSystemWebCacheHandle(this ConfigurationBuilderCachePart part, string instanceName)
             => WithSystemWebCacheHandle(part, instanceName, false);
 
         /// <summary>
-        /// Adds a <see cref="SystemWebCacheHandle{TCacheValue}" /> using a <see cref="System.Web.Caching.Cache"/> instance with the given <paramref name="instanceName"/>.
-        /// The named cache instance can be configured via <c>app/web.config</c> <c>system.runtime.caching</c> section.
+        /// Adds a <see cref="SystemWebCacheHandle{TCacheValue}" /> to the cache manager.
+        /// This handle uses <c>System.Web.Caching.Cache</c> and requires <c>HttpContext.Current</c> to be not null.
         /// </summary>
         /// <param name="part">The builder part.</param>
-        /// <param name="instanceName">The name to be used for the cache instance.</param>
+        /// <param name="instanceName">The name to be used for the cache handle instance.</param>
         /// <param name="isBackPlateSource">Set this to true if this cache handle should be the source of the back plate.
         /// This setting will be ignored if no back plate is configured.</param>
         /// <returns>
