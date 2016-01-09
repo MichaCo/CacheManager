@@ -6,6 +6,28 @@
   "copyright": "Copyright © 2015 MichaConrad",
   "projectUrl": "http://www.cachemanager.net",
   "licenseUrl": "https://github.com/MichaCo/CacheManager/blob/master/LICENSE",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MichaCo/CacheManager"
+  },
+  "compilationOptions": {
+    "warningsAsErrors": true,
+    "languageVersion": "csharp6",
+    "allowUnsafe": false
+  },
+  "configurations": {
+    "Debug": {
+      "compilationOptions": {
+        "define": [ "DEBUG" ]
+      }
+    },
+    "Release": {
+      "compilationOptions": {
+        "define": [ "RELEASE" ],
+        "optimize": true
+      }
+    }
+  },
   "dependencies": {
     "CacheManager.Core": "",
     "Newtonsoft.Json": "6.0.8"

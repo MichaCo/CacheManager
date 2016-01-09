@@ -49,14 +49,14 @@ namespace CacheManager.Config.Tests
             
             for (int i = 0; i < iterations; i++)
             {
+                ////Tests.RandomRWTest(CacheFactory.FromConfiguration<Item>(cacheConfiguration));
+
                 Tests.CacheThreadTest(
                     CacheFactory.FromConfiguration<string>(cacheConfiguration),
                     i + 10);
 
                 Tests.SimpleAddGetTest(
-                    // CacheFactory.FromConfiguration(cacheConfiguration),
                     CacheFactory.FromConfiguration<object>(cacheConfiguration));
-                // CacheUpdateTest(cache);
 
                 // Console.WriteLine(string.Format("Iterations ended after {0}ms.", swatch.ElapsedMilliseconds));
                 Console.WriteLine("---------------------------------------------------------");

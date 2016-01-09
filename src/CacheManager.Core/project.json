@@ -6,7 +6,27 @@
   "copyright": "Copyright © 2015 MichaConrad",
   "projectUrl": "http://www.cachemanager.net",
   "licenseUrl": "https://github.com/MichaCo/CacheManager/blob/master/LICENSE",
-  "dependencies": {
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MichaCo/CacheManager"
+  },
+  "compilationOptions": {
+    "warningsAsErrors": true,
+    "languageVersion": "csharp6",
+    "allowUnsafe": false
+  },
+  "configurations": {
+    "Debug": {
+      "compilationOptions": {
+        "define": [ "DEBUG" ]
+      }
+    },
+    "Release": {
+      "compilationOptions": {
+        "define": [ "RELEASE" ],
+        "optimize": true
+      }
+    }
   },
   "frameworks": {
     "net40": {
@@ -27,7 +47,7 @@
       }
     },
     "dotnet5.1": {
-      "compilationOptions": {"define": ["DOTNET5_2"]},
+      "compilationOptions": { "define": [ "DOTNET5_2" ] },
       "dependencies": {
         "System.Collections": "4.0.10",
         "System.Linq": "4.0.0",
