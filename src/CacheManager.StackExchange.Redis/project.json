@@ -1,4 +1,4 @@
-﻿{
+{
   "version": "0.7.1-*",
   "description": "CacheManager is an open source abstraction layer for caching written in C#. It supports various cache providers and implements many advanced features. This package contains the specific cache handle for Redis.",
   "authors": [ "MichaConrad" ],
@@ -30,7 +30,7 @@
   },
   "dependencies": {
     "CacheManager.Core": "",
-    "StackExchange.Redis": "1.0.450"
+    "StackExchange.Redis": "1.0.488"
   },
   "frameworks": {
     "net40": {

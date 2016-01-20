@@ -8,7 +8,7 @@
     "CacheManager.Web": "",
     "FluentAssertions": "4.1.0",
     "Moq": "4.2.1510.2205",
-    "xunit.runner.aspnet": "2.0.0-aspnet-rc1-*"
+    "xunit.runner.aspnet": "2.0.0-aspnet-*"
   },
   "frameworks": {
     "dnx451": {

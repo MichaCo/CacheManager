@@ -54,14 +54,14 @@ namespace CacheManager.Redis
         {
             get
             {
-                var server = this.GetServers(this.Connection).First(p => !p.IsSlave && p.IsConnected);
-                if (server == null)
+                var count = 0;
+                foreach(var server in this.GetServers().Where(p => !p.IsSlave && p.IsConnected))
                 {
-                    throw new InvalidOperationException("No active master found.");
+                    count += (int)server.DatabaseSize(this.RedisConfiguration.Database);
                 }
-
+                
                 // aprox size, only size on the master..
-                return (int)server.DatabaseSize(this.RedisConfiguration.Database);
+                return count;
             }
         }
 
@@ -104,10 +104,10 @@ namespace CacheManager.Redis
         /// </summary>
         public override void Clear()
         {
-            foreach (var server in this.GetServers(this.Connection)
+            foreach (var server in this.GetServers()
                 .Where(p => !p.IsSlave))
             {
-                server.FlushDatabase(this.RedisConfiguration.Database);
+                this.Retry(() => server.FlushDatabase(this.RedisConfiguration.Database));
             }
         }
 
@@ -139,12 +139,14 @@ namespace CacheManager.Redis
         /// </summary>
         /// <param name="muxer">The muxer.</param>
         /// <returns>The list of servers.</returns>
-        public IEnumerable<StackRedis.IServer> GetServers(StackRedis.ConnectionMultiplexer muxer)
+        public IEnumerable<StackRedis.IServer> GetServers()
         {
-            EndPoint[] endpoints = muxer.GetEndPoints();
+            var connection = this.Connection;
+            
+            EndPoint[] endpoints = connection.GetEndPoints();
             foreach (var endpoint in endpoints)
             {
-                var server = muxer.GetServer(endpoint);
+                var server = connection.GetServer(endpoint);                
                 yield return server;
             }
         }
