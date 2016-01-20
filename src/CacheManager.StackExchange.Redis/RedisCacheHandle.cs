@@ -55,11 +55,11 @@ namespace CacheManager.Redis
             get
             {
                 var count = 0;
-                foreach(var server in this.GetServers().Where(p => !p.IsSlave && p.IsConnected))
+                foreach (var server in this.GetServers().Where(p => !p.IsSlave && p.IsConnected))
                 {
                     count += (int)server.DatabaseSize(this.RedisConfiguration.Database);
                 }
-                
+
                 // aprox size, only size on the master..
                 return count;
             }
@@ -141,11 +141,11 @@ namespace CacheManager.Redis
         public IEnumerable<StackRedis.IServer> GetServers()
         {
             var connection = this.Connection;
-            
+
             EndPoint[] endpoints = connection.GetEndPoints();
             foreach (var endpoint in endpoints)
             {
-                var server = connection.GetServer(endpoint);                
+                var server = connection.GetServer(endpoint);
                 yield return server;
             }
         }
