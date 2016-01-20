@@ -137,7 +137,6 @@ namespace CacheManager.Redis
         /// <summary>
         /// Gets the servers.
         /// </summary>
-        /// <param name="muxer">The muxer.</param>
         /// <returns>The list of servers.</returns>
         public IEnumerable<StackRedis.IServer> GetServers()
         {
