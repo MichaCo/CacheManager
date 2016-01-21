@@ -23,40 +23,49 @@ namespace CacheManager.Config.Tests
 #if DNXCORE50
                 cfg.WithDictionaryHandle()
                     .EnablePerformanceCounters();
+
                 Console.WriteLine("Using Dictionary cache handle");
 #else
                 cfg.WithSystemRuntimeCacheHandle()
                     .DisableStatistics();
+
                 Console.WriteLine("Using System Runtime cache handle");
 
                 cfg.WithRedisCacheHandle("redis", true)
                     .DisableStatistics();
-
-                cfg.WithJsonSerializer();
-
-                //cfg.WithRedisBackPlate("redis");
 
                 cfg.WithRedisConfiguration("redis", config =>
                 {
                     config
                         .WithAllowAdmin()
                         .WithDatabase(0)
-                        .WithConnectionTimeout(100)
+                        .WithConnectionTimeout(1000)
+                        // .WithEndpoint("127.0.0.1", 6380)
                         .WithEndpoint("127.0.0.1", 6379);
                 });
+
+                Console.WriteLine("Using Redis cache handle");
 #endif
             });
-            
+
             for (int i = 0; i < iterations; i++)
             {
                 ////Tests.RandomRWTest(CacheFactory.FromConfiguration<Item>(cacheConfiguration));
 
-                Tests.CacheThreadTest(
-                    CacheFactory.FromConfiguration<string>(cacheConfiguration),
-                    i + 10);
+                try
+                {
+                    Tests.SimpleAddGetTest(
+                        CacheFactory.FromConfiguration<object>(cacheConfiguration));
 
-                Tests.SimpleAddGetTest(
-                    CacheFactory.FromConfiguration<object>(cacheConfiguration));
+                    Tests.CacheThreadTest(
+                        CacheFactory.FromConfiguration<string>(cacheConfiguration),
+                        i + 10);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("Error: " + e.Message);
+                    break;
+                }
 
                 // Console.WriteLine(string.Format("Iterations ended after {0}ms.", swatch.ElapsedMilliseconds));
                 Console.WriteLine("---------------------------------------------------------");

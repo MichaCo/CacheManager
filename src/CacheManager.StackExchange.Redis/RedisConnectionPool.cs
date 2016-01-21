@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Text;
-using CacheManager.Core;
+using static CacheManager.Core.Utility.Guard;
 using StackRedis = StackExchange.Redis;
 
 namespace CacheManager.Redis
@@ -14,7 +15,76 @@ namespace CacheManager.Redis
 
         private static object connectLock = new object();
 
+        public static void DisposeConnection(string connectionString)
+        {
+            NotNullOrWhiteSpace(connectionString, nameof(connectionString));
+
+            lock (connectLock)
+            {
+                StackRedis.ConnectionMultiplexer connection;
+                if (connections.TryGetValue(connectionString, out connection))
+                {
+                    // don't dispose the connection, might still be used somewhere
+                    // just remove it from the pool so that new connects create new instances
+                    connections.Remove(connectionString);
+                }
+            }
+        }
+
+        public static void DisposeConnection(RedisConfiguration configuration)
+        {
+            NotNull(configuration, nameof(configuration));
+            DisposeConnection(GetConnectionString(configuration));
+        }
+
+        public static StackRedis.ConnectionMultiplexer Connect(string connectionString)
+        {
+            if (!connections.ContainsKey(connectionString))
+            {
+                lock (connectLock)
+                {
+                    StackRedis.ConnectionMultiplexer connection;
+                    if (!connections.TryGetValue(connectionString, out connection))
+                    {
+                        var builder = new StringBuilder();
+                        using (var log = new StringWriter(builder, CultureInfo.InvariantCulture))
+                        {
+                            connection = StackRedis.ConnectionMultiplexer.Connect(connectionString, log);
+                        }
+
+                        connection.ConnectionFailed += (sender, args) =>
+                        {
+                            connections.Remove(connectionString);
+                        };
+
+                        if (!connection.IsConnected)
+                        {
+                            throw new InvalidOperationException("Connection failed.\n" + builder.ToString());
+                        }
+
+                        var endpoints = connection.GetEndPoints();
+                        if (!endpoints.Select(p => connection.GetServer(p))
+                            .Any(p => !p.IsSlave || p.AllowSlaveWrites))
+                        {
+                            throw new InvalidOperationException("No writeable endpoint found.");
+                        }
+
+                        connection.PreserveAsyncOrder = false;
+                        connections.Add(connectionString, connection);
+                    }
+                }
+            }
+
+            return connections[connectionString];
+        }
+
         public static StackRedis.ConnectionMultiplexer Connect(RedisConfiguration configuration)
+        {
+            NotNull(configuration, nameof(configuration));
+            return Connect(GetConnectionString(configuration));
+        }
+
+        public static string GetConnectionString(RedisConfiguration configuration)
         {
             string connectionString = configuration.ConnectionString;
 
@@ -24,33 +94,7 @@ namespace CacheManager.Redis
                 connectionString = options.ToString();
             }
 
-            StackRedis.ConnectionMultiplexer connection;
-            lock (connectLock)
-            {
-                if (!connections.TryGetValue(connectionString, out connection))
-                {
-                    var builder = new StringBuilder();
-                    using (var log = new StringWriter(builder, CultureInfo.InvariantCulture))
-                    {
-                        connection = StackRedis.ConnectionMultiplexer.Connect(connectionString, log);
-                    }
-
-                    connection.ConnectionFailed += (sender, args) =>
-                    {
-                        connections.Remove(connectionString);
-                    };
-
-                    if (!connection.IsConnected)
-                    {
-                        throw new InvalidOperationException("Connection failed.\n" + builder.ToString());
-                    }
-
-                    connection.PreserveAsyncOrder = false;
-                    connections.Add(connectionString, connection);
-                }
-            }
-
-            return connection;
+            return connectionString;
         }
 
         private static StackRedis.ConfigurationOptions CreateConfigurationOptions(RedisConfiguration configuration)
@@ -63,7 +107,7 @@ namespace CacheManager.Redis
                 Ssl = configuration.IsSsl,
                 SslHost = configuration.SslHost,
                 ConnectRetry = 10,
-                AbortOnConnectFail = false
+                AbortOnConnectFail = false,
             };
 
             foreach (var endpoint in configuration.Endpoints)

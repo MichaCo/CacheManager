@@ -55,13 +55,32 @@ namespace CacheManager.Redis
             get
             {
                 var count = 0;
-                foreach (var server in this.GetServers().Where(p => !p.IsSlave && p.IsConnected))
+                foreach (var server in this.Servers.Where(p => !p.IsSlave && p.IsConnected))
                 {
                     count += (int)server.DatabaseSize(this.RedisConfiguration.Database);
                 }
 
                 // aprox size, only size on the master..
                 return count;
+            }
+        }
+
+        /// <summary>
+        /// Gets the servers.
+        /// </summary>
+        /// <returns>The list of servers.</returns>
+        public IEnumerable<StackRedis.IServer> Servers
+        {
+            get
+            {
+                var connection = this.Connection;
+
+                EndPoint[] endpoints = connection.GetEndPoints();
+                foreach (var endpoint in endpoints)
+                {
+                    var server = connection.GetServer(endpoint);
+                    yield return server;
+                }
             }
         }
 
@@ -104,8 +123,7 @@ namespace CacheManager.Redis
         /// </summary>
         public override void Clear()
         {
-            foreach (var server in this.GetServers()
-                .Where(p => !p.IsSlave))
+            foreach (var server in this.Servers.Where(p => !p.IsSlave))
             {
                 this.Retry(() => server.FlushDatabase(this.RedisConfiguration.Database));
             }
@@ -132,22 +150,6 @@ namespace CacheManager.Redis
                 // now delete the region
                 this.Database.KeyDelete(region);
             });
-        }
-
-        /// <summary>
-        /// Gets the servers.
-        /// </summary>
-        /// <returns>The list of servers.</returns>
-        public IEnumerable<StackRedis.IServer> GetServers()
-        {
-            var connection = this.Connection;
-
-            EndPoint[] endpoints = connection.GetEndPoints();
-            foreach (var endpoint in endpoints)
-            {
-                var server = connection.GetServer(endpoint);
-                yield return server;
-            }
         }
 
         /// <summary>
@@ -271,7 +273,14 @@ namespace CacheManager.Redis
         /// unmanaged resources.
         /// </summary>
         /// <param name="disposeManaged">Indicator if managed resources should be released.</param>
-        protected override void Dispose(bool disposeManaged) => base.Dispose(disposeManaged);
+        protected override void Dispose(bool disposeManaged)
+        {
+            base.Dispose(disposeManaged);
+            if (disposeManaged)
+            {
+                RedisConnectionPool.DisposeConnection(this.RedisConfiguration);
+            }
+        }
 
         /// <summary>
         /// Gets a <c>CacheItem</c> for the specified key.

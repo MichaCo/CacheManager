@@ -113,40 +113,42 @@ namespace CacheManager.Redis
             return this.serializer.Serialize(value);
         }
 
-        object IRedisValueConverter<object>.FromRedisValue(StackRedis.RedisValue value, string valueType)
+        object IRedisValueConverter<object>.FromRedisValue(StackRedis.RedisValue value, string type)
         {
-            if (valueType == ByteArrayType.AssemblyQualifiedName)
+            var valueType = Type.GetType(type);
+
+            if (valueType == ByteArrayType)
             {
                 var converter = (IRedisValueConverter<byte[]>)this;
-                return converter.FromRedisValue(value, valueType);
+                return converter.FromRedisValue(value, type);
             }
-            else if (valueType == StringType.AssemblyQualifiedName)
+            else if (valueType == StringType)
             {
                 var converter = (IRedisValueConverter<string>)this;
-                return converter.FromRedisValue(value, valueType);
+                return converter.FromRedisValue(value, type);
             }
-            else if (valueType == IntType.AssemblyQualifiedName)
+            else if (valueType == IntType)
             {
                 var converter = (IRedisValueConverter<int>)this;
-                return converter.FromRedisValue(value, valueType);
+                return converter.FromRedisValue(value, type);
             }
-            else if (valueType == DoubleType.AssemblyQualifiedName)
+            else if (valueType == DoubleType)
             {
                 var converter = (IRedisValueConverter<double>)this;
-                return converter.FromRedisValue(value, valueType);
+                return converter.FromRedisValue(value, type);
             }
-            else if (valueType == BoolType.AssemblyQualifiedName)
+            else if (valueType == BoolType)
             {
                 var converter = (IRedisValueConverter<bool>)this;
-                return converter.FromRedisValue(value, valueType);
+                return converter.FromRedisValue(value, type);
             }
-            else if (valueType == LongType.AssemblyQualifiedName)
+            else if (valueType == LongType)
             {
                 var converter = (IRedisValueConverter<long>)this;
-                return converter.FromRedisValue(value, valueType);
+                return converter.FromRedisValue(value, type);
             }
 
-            return this.Deserialize(value, valueType);
+            return this.Deserialize(value, type);
         }
 
         public StackRedis.RedisValue ToRedisValue<T>(T value) => this.serializer.Serialize(value);
