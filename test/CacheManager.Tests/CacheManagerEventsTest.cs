@@ -206,6 +206,7 @@ namespace CacheManager.Tests
         /// <param name="cache">The cache instance.</param>
         [Theory]
         [MemberData("TestCacheManagers")]
+        [Trait("category", "Unreliable")]
         [ReplaceCulture]
         public void CacheManager_Events_OnRemoveMany<T>(T cache)
             where T : ICacheManager<object>
@@ -418,6 +419,7 @@ namespace CacheManager.Tests
         /// <param name="cache">The cache instance.</param>
         [Theory]
         [MemberData("TestCacheManagers")]
+        [Trait("category", "Unreliable")]
         [ReplaceCulture]
         public void CacheManager_Events_OnClearRegion<T>(T cache)
             where T : ICacheManager<object>
