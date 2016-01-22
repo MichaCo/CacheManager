@@ -101,6 +101,7 @@ namespace CacheManager.Redis
                 }
 
                 return this.database;
+                //// return this.Connection.GetDatabase(this.RedisConfiguration.Database);
             }
         }
 
@@ -125,7 +126,13 @@ namespace CacheManager.Redis
         {
             foreach (var server in this.Servers.Where(p => !p.IsSlave))
             {
-                this.Retry(() => server.FlushDatabase(this.RedisConfiguration.Database));
+                this.Retry(() =>
+                {
+                    if (server.IsConnected)
+                    {
+                        server.FlushDatabase(this.RedisConfiguration.Database);
+                    }
+                });
             }
         }
 

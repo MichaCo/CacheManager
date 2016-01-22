@@ -60,11 +60,12 @@ namespace CacheManager.Config.Tests
                     config.WithAllowAdmin()
                         .WithDatabase(0)
                         .WithEndpoint("localhost", 6379)
+                        .WithEndpoint("localhost", 6380)
                         .WithConnectionTimeout(1000);
                 });
 
                 cfg.WithMaxRetries(10);
-                cfg.WithRetryTimeout(1000);
+                cfg.WithRetryTimeout(10);
             });
 
             for (int i = 0; i < iterations; i++)

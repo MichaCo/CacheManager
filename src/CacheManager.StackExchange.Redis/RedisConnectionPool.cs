@@ -47,7 +47,7 @@ namespace CacheManager.Redis
 
                         connection.ConnectionFailed += (sender, args) =>
                         {
-                            connections.Remove(connectionString);
+                            // connections.Remove(connectionString);
                         };
 
                         if (!connection.IsConnected)

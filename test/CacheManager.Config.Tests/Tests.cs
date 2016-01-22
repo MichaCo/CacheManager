@@ -13,6 +13,8 @@ namespace CacheManager.Config.Tests
     {
         public static void CacheThreadTest(ICacheManager<string> cache, int seed)
         {
+            cache.Clear();
+
             var threads = 10;
             var numItems = 1000;
             var eventAddCount = 0;
@@ -69,15 +71,12 @@ namespace CacheManager.Config.Tests
                 eventAddCount,
                 eventGetCount,
                 eventRemoveCount));
-
-            cache.Clear();
-            cache.Dispose();
         }
 
         public static void SimpleAddGetTest(params ICacheManager<object>[] caches)
         {
             var swatch = Stopwatch.StartNew();
-            var threads = 10000;
+            var threads = 1000;
             var items = 1000;
             var ops = threads * items * caches.Length;
 
@@ -86,15 +85,17 @@ namespace CacheManager.Config.Tests
 
             foreach (var cache in caches)
             {
+                cache.Clear();
+
                 for (var ta = 0; ta < items; ta++)
                 {
-                    var value = cache.AddOrUpdate(key + ta, "val" + ta, (v) => "val" + ta);
-                    if (value == null)
-                    {
-                        throw new InvalidOperationException("really?");
-                    }
+                    ////var value = cache.AddOrUpdate(key + ta, "val" + ta, (v) => "val" + ta);
+                    ////if (value == null)
+                    ////{
+                    ////    throw new InvalidOperationException("really?");
+                    ////}
 
-                    //// cache.Add(key + ta, "val" + ta);
+                    cache.Add(key + ta, "val" + ta);
                 }
 
                 for (var t = 0; t < threads; t++)
@@ -109,14 +110,13 @@ namespace CacheManager.Config.Tests
                         Console.Write(".");
                     }
 
-                    object value;
-                    if (!cache.TryUpdate("key" + rand.Next(0, items - 1), v => Guid.NewGuid().ToString(), out value))
-                    {
-                    }
+                    ////object value;
+                    ////if (!cache.TryUpdate("key" + rand.Next(0, items - 1), v => Guid.NewGuid().ToString(), out value))
+                    ////{
+                    ////}
                 }
 
                 cache.Clear();
-                cache.Dispose();
             }
 
             var elapsed = swatch.ElapsedMilliseconds;

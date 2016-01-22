@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using CacheManager.Core;
+using System.Threading;
 
 namespace CacheManager.Config.Tests
 {
@@ -18,8 +19,8 @@ namespace CacheManager.Config.Tests
             var cacheConfiguration = ConfigurationBuilder.BuildConfiguration(cfg =>
             {
                 cfg.WithUpdateMode(CacheUpdateMode.Up);
-                cfg.WithRetryTimeout(100);
-                cfg.WithMaxRetries(1000);
+                cfg.WithRetryTimeout(10);
+                cfg.WithMaxRetries(10);
 
 #if DNXCORE50
                 cfg.WithDictionaryHandle()
@@ -41,7 +42,7 @@ namespace CacheManager.Config.Tests
                         .WithAllowAdmin()
                         .WithDatabase(0)
                         .WithConnectionTimeout(1000)
-                        // .WithEndpoint("127.0.0.1", 6380)
+                        .WithEndpoint("127.0.0.1", 6380)
                         .WithEndpoint("127.0.0.1", 6379);
                 });
 
@@ -52,7 +53,7 @@ namespace CacheManager.Config.Tests
             for (int i = 0; i < iterations; i++)
             {
                 ////Tests.RandomRWTest(CacheFactory.FromConfiguration<Item>(cacheConfiguration));
-
+                
                 try
                 {
                     Tests.SimpleAddGetTest(
@@ -64,8 +65,8 @@ namespace CacheManager.Config.Tests
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine("Error: " + e.Message);
-                    break;
+                    Console.WriteLine("Error: " + e.Message + "\n" + e.StackTrace);
+                    Thread.Sleep(1000);
                 }
 
                 // Console.WriteLine(string.Format("Iterations ended after {0}ms.", swatch.ElapsedMilliseconds));
