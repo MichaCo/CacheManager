@@ -225,12 +225,20 @@ namespace CacheManager.Config.Tests
 
             while (true)
             {
-                create();
-                create();
-                read();
-                remove();
-                remove();
-                iterations++;
+                try
+                {
+                    create();
+                    create();
+                    read();
+                    remove();
+                    remove();
+                    iterations++;
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("Error: " + e.Message + "\n" + e.StackTrace);
+                    Thread.Sleep(1000);
+                }
             }
         }
     }
