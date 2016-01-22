@@ -18,7 +18,8 @@ namespace CacheManager.Config.Tests
             var cacheConfiguration = ConfigurationBuilder.BuildConfiguration(cfg =>
             {
                 cfg.WithUpdateMode(CacheUpdateMode.Up);
-                cfg.WithMaxRetries(10);
+                cfg.WithRetryTimeout(100);
+                cfg.WithMaxRetries(1000);
 
 #if DNXCORE50
                 cfg.WithDictionaryHandle()

@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
 using System.Linq;
-using System.Text;
 using static CacheManager.Core.Utility.Guard;
 using StackRedis = StackExchange.Redis;
 
@@ -46,11 +43,7 @@ namespace CacheManager.Redis
                     StackRedis.ConnectionMultiplexer connection;
                     if (!connections.TryGetValue(connectionString, out connection))
                     {
-                        var builder = new StringBuilder();
-                        using (var log = new StringWriter(builder, CultureInfo.InvariantCulture))
-                        {
-                            connection = StackRedis.ConnectionMultiplexer.Connect(connectionString, log);
-                        }
+                        connection = StackRedis.ConnectionMultiplexer.Connect(connectionString);
 
                         connection.ConnectionFailed += (sender, args) =>
                         {
@@ -59,7 +52,7 @@ namespace CacheManager.Redis
 
                         if (!connection.IsConnected)
                         {
-                            throw new InvalidOperationException("Connection failed.\n" + builder.ToString());
+                            throw new InvalidOperationException("Connection failed.");
                         }
 
                         var endpoints = connection.GetEndPoints();
