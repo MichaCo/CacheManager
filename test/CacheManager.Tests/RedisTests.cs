@@ -18,7 +18,7 @@ namespace CacheManager.Tests
     {
         [Fact]
         [Trait("category", "Redis")]
-        ////[Trait("category", "Unreliable")]
+        [Trait("category", "Unreliable")]
         public void Redis_Absolute_DoesExpire()
         {
             // arrange
@@ -382,7 +382,7 @@ namespace CacheManager.Tests
 
         [Fact]
         [Trait("category", "Redis")]
-        ////[Trait("category", "Unreliable")]
+        [Trait("category", "Unreliable")]
         public void Redis_Sliding_DoesExpire_WithRegion()
         {
             // arrange
