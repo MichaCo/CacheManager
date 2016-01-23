@@ -18,6 +18,21 @@ namespace CacheManager.Redis
                 {
                     return retryme();
                 }
+
+                // might occur on lua script excecution on a readonly slave because the master just died.
+                // Should recover via fail over
+                catch (StackRedis.RedisServerException)
+                {
+                    if (tries >= retries)
+                    {
+                        throw;
+                    }
+#if NET40
+                    TaskEx.Delay(timeOut).Wait();
+#else
+                    Task.Delay(timeOut).Wait();
+#endif
+                }
                 catch (StackRedis.RedisConnectionException)
                 {
                     if (tries >= retries)

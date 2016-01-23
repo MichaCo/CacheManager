@@ -1,7 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 #if !PORTABLE
-    using System.Diagnostics;
+using System.Diagnostics;
 #endif
 
 namespace CacheManager.Core.Utility
@@ -51,6 +52,32 @@ namespace CacheManager.Core.Utility
                 throw new ArgumentNullException(name);
             }
             if (value.Length == 0)
+            {
+                throw new ArgumentException("Value must not be empty", name);
+            }
+
+            return value;
+        }
+
+        /// <summary>
+        /// Validates that <paramref name="value"/> is not null or empty and otherwise throws an exception.
+        /// </summary>
+        /// <param name="value">The parameter value to validate.</param>
+        /// <param name="name">The parameter name.</param>
+        /// <returns>The <paramref name="value"/>, if not null or empty.</returns>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="value"/> is <c>null</c>.</exception>
+        /// <exception cref="ArgumentException">Thrown if <paramref name="value"/> is empty.</exception>
+        /// <typeparam name="T">Type of the collection.</typeparam>
+#if !PORTABLE
+        [DebuggerStepThrough]
+#endif
+        public static ICollection<T> NotNullOrEmpty<T>([ValidatedNotNull]ICollection<T> value, string name)
+        {
+            if (value == null)
+            {
+                throw new ArgumentNullException(name);
+            }
+            if (value.Count == 0)
             {
                 throw new ArgumentException("Value must not be empty", name);
             }

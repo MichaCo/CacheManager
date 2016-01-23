@@ -76,12 +76,13 @@ namespace CacheManager.Config.Tests
         public static void SimpleAddGetTest(params ICacheManager<object>[] caches)
         {
             var swatch = Stopwatch.StartNew();
-            var threads = 1000;
-            var items = 1000;
-            var ops = threads * items * caches.Length;
+            var threads = 50;
+            var items = 20000;
+            long ops = 0;
 
             var rand = new Random();
             var key = "key";
+            var region = "myRegion";
 
             foreach (var cache in caches)
             {
@@ -89,32 +90,43 @@ namespace CacheManager.Config.Tests
 
                 for (var ta = 0; ta < items; ta++)
                 {
-                    ////var value = cache.AddOrUpdate(key + ta, "val" + ta, (v) => "val" + ta);
-                    ////if (value == null)
-                    ////{
-                    ////    throw new InvalidOperationException("really?");
-                    ////}
-
-                    cache.Add(key + ta, "val" + ta);
-                }
-
-                for (var t = 0; t < threads; t++)
-                {
-                    for (var ta = 0; ta < items; ta++)
-                    {
-                        var x = cache.Get(key + ta);
-                    }
-
-                    if (t % 1000 == 0)
+                    Interlocked.Increment(ref ops);
+                    cache.Put(key + ta, "val" + ta, region);
+                    if (ta % 1000 == 0)
                     {
                         Console.Write(".");
                     }
-
-                    ////object value;
-                    ////if (!cache.TryUpdate("key" + rand.Next(0, items - 1), v => Guid.NewGuid().ToString(), out value))
-                    ////{
-                    ////}
                 }
+
+                var actions = new List<Action>();
+                for (var t = 0; t < threads; t++)
+                {
+                    actions.Add(() =>
+                    {
+                        for (var ta = 0; ta < items; ta++)
+                        {
+                            Interlocked.Increment(ref ops);
+                            var x = cache.Get(key + ta, region);
+
+                            if (x == null)
+                            {
+                                Console.Write("-");
+                            }
+                        }
+
+                        object value;
+                        Interlocked.Increment(ref ops);
+                        Interlocked.Increment(ref ops); // update does a get and then set = 2 ops
+                        if (!cache.TryUpdate("key" + rand.Next(0, items - 1), region, v => Guid.NewGuid().ToString(), out value))
+                        {
+                            throw new InvalidOperationException("really?");
+                        }
+
+                        Console.Write(".");
+                    });
+                }
+
+                Parallel.Invoke(new ParallelOptions() { MaxDegreeOfParallelism = 8 }, actions.ToArray());
 
                 cache.Clear();
             }

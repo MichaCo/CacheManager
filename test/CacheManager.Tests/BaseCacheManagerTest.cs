@@ -200,7 +200,7 @@ namespace CacheManager.Tests
 
 #endif
 
-        public static ICacheManager<object> CreateRedisAndSystemCacheWithBackPlate(int database = 0, bool sharedRedisConfig = true)
+        public static ICacheManager<object> CreateRedisAndSystemCacheWithBackPlate(int database = 0, bool sharedRedisConfig = true, string channelName = null)
         {
             var redisKey = sharedRedisConfig ? "redisConfig" : Guid.NewGuid().ToString();
             return CacheFactory.Build(settings =>
@@ -218,9 +218,17 @@ namespace CacheManager.Tests
                             .WithDatabase(database)
                             .WithEndpoint("127.0.0.1", 6379);
                     })
-                    .WithRedisBackPlate(redisKey)
                     .WithRedisCacheHandle(redisKey, true)
                     .EnableStatistics();
+
+                if (channelName != null)
+                {
+                    settings.WithRedisBackPlate(redisKey, channelName);
+                }
+                else
+                {
+                    settings.WithRedisBackPlate(redisKey);
+                }
             });
         }
 
@@ -238,7 +246,7 @@ namespace CacheManager.Tests
                             .WithDatabase(database)
                             .WithEndpoint("127.0.0.1", 6379);
                     })
-                    .WithRedisBackPlate(redisKey)
+                    ////.WithRedisBackPlate(redisKey)
                     .WithRedisCacheHandle(redisKey, true)
                     .EnableStatistics();
             });

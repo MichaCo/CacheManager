@@ -441,7 +441,7 @@ namespace CacheManager.Core
         /// Configures the back plate for the cache manager.
         /// <para>
         /// This is an optional feature. If specified, see the documentation for the
-        /// <typeparamref name="TBackPlate"/>. The <paramref name="name"/> might be used to
+        /// <typeparamref name="TBackPlate"/>. The <paramref name="configurationKey"/> might be used to
         /// reference another configuration item.
         /// </para>
         /// <para>
@@ -450,16 +450,46 @@ namespace CacheManager.Core
         /// </para>
         /// </summary>
         /// <typeparam name="TBackPlate">The type of the back plate implementation.</typeparam>
-        /// <param name="name">The name.</param>
+        /// <param name="configurationKey">The name.</param>
         /// <returns>The builder instance.</returns>
-        /// <exception cref="System.ArgumentNullException">If name is null.</exception>
+        /// <exception cref="System.ArgumentNullException">If <paramref name="configurationKey"/> is null.</exception>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1004:GenericMethodsShouldProvideTypeParameter", Justification = "Users should use the extensions.")]
-        public ConfigurationBuilderCachePart WithBackPlate<TBackPlate>(string name)
+        public ConfigurationBuilderCachePart WithBackPlate<TBackPlate>(string configurationKey)
             where TBackPlate : CacheBackPlate
         {
-            NotNullOrWhiteSpace(name, nameof(name));
+            NotNullOrWhiteSpace(configurationKey, nameof(configurationKey));
 
-            this.Configuration.WithBackPlate(typeof(TBackPlate), name);
+            this.Configuration.WithBackPlate(typeof(TBackPlate), configurationKey);
+            return this;
+        }
+
+        /// <summary>
+        /// Configures the back plate for the cache manager.
+        /// <para>
+        /// This is an optional feature. If specified, see the documentation for the
+        /// <typeparamref name="TBackPlate"/>. The <paramref name="configurationKey"/> might be used to
+        /// reference another configuration item.
+        /// </para>
+        /// <para>
+        /// If a back plate is defined, at least one cache handle must be marked as back plate
+        /// source. The cache manager then will try to synchronize multiple instances of the same configuration.
+        /// </para>
+        /// </summary>
+        /// <typeparam name="TBackPlate">The type of the back plate implementation.</typeparam>
+        /// <param name="configurationKey">The configuration key.</param>
+        /// <param name="channelName">The back plate channel name.</param>
+        /// <returns>The builder instance.</returns>
+        /// <exception cref="System.ArgumentNullException">
+        /// If <paramref name="configurationKey"/> or <paramref name="channelName"/> is null.
+        /// </exception>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1004:GenericMethodsShouldProvideTypeParameter", Justification = "Users should use the extensions.")]
+        public ConfigurationBuilderCachePart WithBackPlate<TBackPlate>(string configurationKey, string channelName)
+            where TBackPlate : CacheBackPlate
+        {
+            NotNullOrWhiteSpace(configurationKey, nameof(configurationKey));
+            NotNullOrWhiteSpace(channelName, nameof(channelName));
+
+            this.Configuration.WithBackPlate(typeof(TBackPlate), configurationKey, channelName);
             return this;
         }
 

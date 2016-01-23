@@ -74,6 +74,28 @@ namespace CacheManager.Core
         }
 
         /// <summary>
+        /// Configures a cache back-plate for the cache manager.
+        /// The <paramref name="redisConfigurationKey"/> is used to find a matching redis configuration.
+        /// <para>
+        /// If a back plate is defined, at least one cache handle must be marked as back plate
+        /// source. The cache manager then will try to synchronize multiple instances of the same configuration.
+        /// </para>
+        /// </summary>
+        /// <param name="part">The builder instance.</param>
+        /// <param name="redisConfigurationKey">
+        /// The redis configuration key will be used to find a matching redis connection configuration.
+        /// </param>
+        /// <param name="channelName">The pub sub channel name the back plate should use.</param>
+        /// <returns>The builder instance.</returns>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="redisConfigurationKey"/> is null.</exception>
+        public static ConfigurationBuilderCachePart WithRedisBackPlate(this ConfigurationBuilderCachePart part, string redisConfigurationKey, string channelName)
+        {
+            NotNull(part, nameof(part));
+
+            return part.WithBackPlate<RedisCacheBackPlate>(redisConfigurationKey, channelName);
+        }
+
+        /// <summary>
         /// Adds a <see cref="RedisCacheHandle{TCacheValue}"/>.
         /// This handle requires a redis configuration to be defined with the given <paramref name="redisConfigurationKey"/>.
         /// </summary>

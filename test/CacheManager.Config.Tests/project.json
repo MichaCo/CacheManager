@@ -8,6 +8,7 @@
   "dependencies": {
     "CacheManager.Core": "",
     "CacheManager.Serialization.Json": "",
+    "Newtonsoft.Json": "8.0.2",
     "Microsoft.Dnx.Runtime.Abstractions": "1.0.0-*"
   },
   "commands": {
@@ -26,12 +27,9 @@
     },
     "dnxcore50": {
       "dependencies": {
-        "System.Threading": "4.0.10",
         "System.Threading.Thread": "4.0.0-*",
-        "System.Threading.Tasks": "4.0.10-*",
-        "System.Threading.Tasks.Parallel": "4.0.0-*",
-        "System.Console": "4.0.0-*",
-        "System.Globalization": "4.0.10-*"
+        "System.Threading.Tasks.Parallel": "4.0.1-*",
+        "System.Console": "4.0.0-*"
       }
     }
   }

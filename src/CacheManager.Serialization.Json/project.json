@@ -33,9 +33,9 @@
     "Newtonsoft.Json": "6.0.8"
   },
   "frameworks": {
-    "net40": { },
-    "net45": { },
     "dnx451": { },
-    "dotnet5.1": { }
+    "dotnet5.2": { },
+    "net40": { },
+    "net45": { }
   }
 }

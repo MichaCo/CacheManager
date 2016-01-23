@@ -18,7 +18,7 @@ namespace CacheManager.Tests
     {
         [Fact]
         [Trait("category", "Redis")]
-        [Trait("category", "Unreliable")]
+        ////[Trait("category", "Unreliable")]
         public void Redis_Absolute_DoesExpire()
         {
             // arrange
@@ -45,7 +45,7 @@ namespace CacheManager.Tests
 
         [Fact]
         [Trait("category", "Redis")]
-        [Trait("category", "Unreliable")]
+        ////[Trait("category", "Unreliable")]
         public void Redis_Absolute_DoesExpire_MultiClients()
         {
             // arrange
@@ -80,11 +80,12 @@ namespace CacheManager.Tests
 
         [Fact]
         [Trait("category", "Redis")]
-        [Trait("category", "Unreliable")]
+        ////[Trait("category", "Unreliable")]
         public void Redis_Multiple_PubSub_Change()
         {
             // arrange
             string fileName = BaseCacheManagerTest.GetCfgFileName(@"/Configuration/configuration.valid.allFeatures.config");
+            var channelName = Guid.NewGuid().ToString();
 
             // redis config name must be same for all cache handles, configured via file and via code
             // otherwise the pub sub channel name is different
@@ -93,6 +94,8 @@ namespace CacheManager.Tests
             RedisConfigurations.LoadConfiguration(fileName, RedisConfigurationSection.DefaultSectionName);
 
             var cfg = ConfigurationBuilder.LoadConfigurationFile(fileName, cacheName);
+            cfg.BackPlateChannelName = channelName;
+
             var cfgCache = CacheFactory.FromConfiguration<object>(cfg);
 
             var item = new CacheItem<object>(Guid.NewGuid().ToString(), "something");
@@ -113,19 +116,20 @@ namespace CacheManager.Tests
                     var value = cache.Get(item.Key);
                     value.Should().Be("new value", cache.ToString());
                 },
-                3,
-                TestManagers.CreateRedisAndSystemCacheWithBackPlate(69),
+                2,
+                TestManagers.CreateRedisAndSystemCacheWithBackPlate(69, true, channelName),
                 cfgCache,
                 TestManagers.CreateRedisCache(69),
-                TestManagers.CreateRedisAndSystemCacheWithBackPlate(69));
+                TestManagers.CreateRedisAndSystemCacheWithBackPlate(69, true, channelName));
         }
 
-        [Fact(Skip = "needs clear")]
+        ////[Fact(Skip = "needs clear")]
         [Trait("category", "Redis")]
         public void Redis_Multiple_PubSub_Clear()
         {
             // arrange
             var item = new CacheItem<object>(Guid.NewGuid().ToString(), "something");
+            var channelName = Guid.NewGuid().ToString();
 
             // act/assert
             RedisTests.RunMultipleCaches(
@@ -139,20 +143,21 @@ namespace CacheManager.Tests
                 {
                     cache.Get(item.Key).Should().BeNull();
                 },
-                10,
-                TestManagers.CreateRedisAndSystemCacheWithBackPlate(4),
-                TestManagers.CreateRedisAndSystemCacheWithBackPlate(4),
-                TestManagers.CreateRedisCache(4),
-                TestManagers.CreateRedisAndSystemCacheWithBackPlate(4));
+                2,
+                TestManagers.CreateRedisAndSystemCacheWithBackPlate(444, true, channelName),
+                TestManagers.CreateRedisAndSystemCacheWithBackPlate(444, true, channelName),
+                TestManagers.CreateRedisCache(444),
+                TestManagers.CreateRedisAndSystemCacheWithBackPlate(444, true, channelName));
         }
 
         [Fact]
         [Trait("category", "Redis")]
-        [Trait("category", "Unreliable")]
+        ////[Trait("category", "Unreliable")]
         public void Redis_Multiple_PubSub_ClearRegion()
         {
             // arrange
             var item = new CacheItem<object>(Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), "something");
+            var channelName = Guid.NewGuid().ToString();
 
             // act/assert
             RedisTests.RunMultipleCaches(
@@ -165,20 +170,22 @@ namespace CacheManager.Tests
                 (cache) =>
                 {
                     cache.Get(item.Key, item.Region).Should().BeNull();
-                }, 10,
-                TestManagers.CreateRedisAndSystemCacheWithBackPlate(5),
-                TestManagers.CreateRedisAndSystemCacheWithBackPlate(5),
+                },
+                2,
                 TestManagers.CreateRedisCache(5),
-                TestManagers.CreateRedisAndSystemCacheWithBackPlate(5));
+                TestManagers.CreateRedisCache(5),
+                TestManagers.CreateRedisCache(5),
+                TestManagers.CreateRedisCache(5));
         }
 
         [Fact]
         [Trait("category", "Redis")]
-        [Trait("category", "Unreliable")]
+        ////[Trait("category", "Unreliable")]
         public void Redis_Multiple_PubSub_Remove()
         {
             // arrange
             var item = new CacheItem<object>(Guid.NewGuid().ToString(), "something");
+            var channelName = Guid.NewGuid().ToString();
 
             // act/assert
             RedisTests.RunMultipleCaches(
@@ -195,15 +202,15 @@ namespace CacheManager.Tests
                     value.Should().BeNull();
                 },
                 2,
-                TestManagers.CreateRedisAndSystemCacheWithBackPlate(6),
-                TestManagers.CreateRedisAndSystemCacheWithBackPlate(6),
+                TestManagers.CreateRedisAndSystemCacheWithBackPlate(6, true, channelName),
+                TestManagers.CreateRedisAndSystemCacheWithBackPlate(6, true, channelName),
                 TestManagers.CreateRedisCache(6),
-                TestManagers.CreateRedisAndSystemCacheWithBackPlate(6));
+                TestManagers.CreateRedisAndSystemCacheWithBackPlate(6, true, channelName));
         }
 
         [Fact]
         [Trait("category", "Redis")]
-        [Trait("category", "Unreliable")]
+        ////[Trait("category", "Unreliable")]
         public void Redis_NoRaceCondition_WithUpdate()
         {
             using (var cache = CacheFactory.Build<RaceConditionTestElement>(settings =>
@@ -256,7 +263,7 @@ namespace CacheManager.Tests
 
         [Fact]
         [Trait("category", "Redis")]
-        [Trait("category", "Unreliable")]
+        ////[Trait("category", "Unreliable")]
         public void Redis_RaceCondition_WithoutUpdate()
         {
             using (var cache = CacheFactory.Build<RaceConditionTestElement>(settings =>
@@ -324,7 +331,7 @@ namespace CacheManager.Tests
                 // 450ms added so absolute would be expired on the 2nd go
                 for (int s = 0; s < 3; s++)
                 {
-                    Thread.Sleep(30);
+                    Thread.Sleep(20);
                     var value = cache.GetCacheItem(item.Key);
                     value.Should().NotBeNull();
                 }
@@ -342,8 +349,9 @@ namespace CacheManager.Tests
         {
             // arrange
             var item = new CacheItem<object>(Guid.NewGuid().ToString(), "something", ExpirationMode.Sliding, TimeSpan.FromMilliseconds(50));
-            var cacheA = TestManagers.CreateRedisAndSystemCacheWithBackPlate(10);
-            var cacheB = TestManagers.CreateRedisAndSystemCacheWithBackPlate(10);
+            var channelName = Guid.NewGuid().ToString();
+            var cacheA = TestManagers.CreateRedisAndSystemCacheWithBackPlate(10, true, channelName);
+            var cacheB = TestManagers.CreateRedisAndSystemCacheWithBackPlate(10, true, channelName);
 
             // act/assert
             using (cacheA)
@@ -374,7 +382,7 @@ namespace CacheManager.Tests
 
         [Fact]
         [Trait("category", "Redis")]
-        [Trait("category", "Unreliable")]
+        ////[Trait("category", "Unreliable")]
         public void Redis_Sliding_DoesExpire_WithRegion()
         {
             // arrange
@@ -622,7 +630,7 @@ namespace CacheManager.Tests
                     stepA(caches[0], caches[1]);
                 }
 
-                Thread.Sleep(10);
+                Thread.Sleep(100);
 
                 foreach (var cache in caches)
                 {
@@ -641,10 +649,10 @@ namespace CacheManager.Tests
     [ExcludeFromCodeCoverage]
     internal class Poco
     {
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "For testing only")]
+        [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "For testing only")]
         public int Id { get; set; }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "For testing only")]
+        [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "For testing only")]
         public string Something { get; set; }
     }
 }

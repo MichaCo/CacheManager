@@ -27,7 +27,7 @@ namespace CacheManager.Core
         /// <param name="maxRetries">The maximum retries.</param>
         /// <param name="retryTimeout">The retry timeout.</param>
         /// <param name="mode">The cache update mode.</param>
-        /// <param name="backPlateName">The name of the cache back plate.</param>
+        /// <param name="backPlateConfigurationKey">The name of the cache back plate's configuration.</param>
         /// <param name="backPlateType">The type of the cache back plate implementation.</param>
         /// <param name="serializer">The serializer to be used to serialize the cache item.</param>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "We use it for configuration only.")]
@@ -36,7 +36,7 @@ namespace CacheManager.Core
             int maxRetries = int.MaxValue,
             int retryTimeout = 10,
             Type backPlateType = null,
-            string backPlateName = null,
+            string backPlateConfigurationKey = null,
             ICacheSerializer serializer = null)
             : this()
         {
@@ -44,7 +44,7 @@ namespace CacheManager.Core
             this.MaxRetries = maxRetries;
             this.RetryTimeout = retryTimeout;
             this.BackPlateType = backPlateType;
-            this.BackPlateName = backPlateName;
+            this.BackPlateConfigurationKey = backPlateConfigurationKey;
 #if !PORTABLE && !DOTNET5_2
             // default to binary serialization if available
             this.CacheSerializer = serializer ?? new BinaryCacheSerializer();
@@ -85,16 +85,22 @@ namespace CacheManager.Core
         public int RetryTimeout { get; set; } = 10;
 
         /// <summary>
-        /// Gets the name of the back plate.
+        /// Gets the configuration key the back plate might use.
         /// </summary>
-        /// <value>The name of the back plate.</value>
-        public string BackPlateName { get; private set; }
+        /// <value>The key of the back plate configuration.</value>
+        public string BackPlateConfigurationKey { get; private set; }
 
         /// <summary>
         /// Gets the type of the back plate.
         /// </summary>
         /// <value>The type of the back plate.</value>
         public Type BackPlateType { get; private set; }
+
+        /// <summary>
+        /// Gets or sets the back plate channel name.
+        /// </summary>
+        /// <value>The channel name.</value>
+        public string BackPlateChannelName { get; set; }
 
         /// <summary>
         /// Gets a value indicating whether this instance has a back plate defined.
@@ -104,22 +110,16 @@ namespace CacheManager.Core
         /// </value>
         public bool HasBackPlate => this.BackPlateType != null;
 
-        /// <summary>
-        /// Gets the list of cache handle configurations.
-        /// <para>Internally used only.</para>
-        /// </summary>
-        /// <value>
-        /// The cache handle configurations.
-        /// </value>
         internal IList<CacheHandleConfiguration> CacheHandleConfigurations { get; } = new List<CacheHandleConfiguration>();
 
-        internal void WithBackPlate(Type backPlateType, string backPlateName)
+        internal void WithBackPlate(Type backPlateType, string backPlateName, string channelName = null)
         {
             NotNull(backPlateType, nameof(backPlateType));
             NotNullOrWhiteSpace(backPlateName, nameof(backPlateName));
 
-            this.BackPlateName = backPlateName;
+            this.BackPlateConfigurationKey = backPlateName;
             this.BackPlateType = backPlateType;
+            this.BackPlateChannelName = channelName;
         }
 
         internal void WithSerializer(ICacheSerializer instance)

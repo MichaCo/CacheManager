@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using CacheManager.Core.Internal;
 using static CacheManager.Core.Utility.Guard;
 using StackRedis = StackExchange.Redis;
@@ -43,6 +44,8 @@ namespace CacheManager.Redis
         private static readonly Type BoolType = typeof(bool);
         private static readonly Type LongType = typeof(long);
         private readonly ICacheSerializer serializer;
+        private readonly Hashtable types = new Hashtable();
+        private readonly object typesLock = new object();
 
         public RedisValueConverter(ICacheSerializer serializer)
         {
@@ -115,7 +118,7 @@ namespace CacheManager.Redis
 
         object IRedisValueConverter<object>.FromRedisValue(StackRedis.RedisValue value, string type)
         {
-            var valueType = Type.GetType(type);
+            var valueType = this.GetType(type);
 
             if (valueType == ByteArrayType)
             {
@@ -157,10 +160,26 @@ namespace CacheManager.Redis
 
         private object Deserialize(StackRedis.RedisValue value, string valueType)
         {
-            var type = Type.GetType(valueType, false);
+            var type = this.GetType(valueType);
             EnsureNotNull(type, "Type could not be loaded, {0}.", valueType);
 
             return this.serializer.Deserialize(value, type);
+        }
+
+        private Type GetType(string type)
+        {
+            if (!this.types.ContainsKey(type))
+            {
+                lock (this.typesLock)
+                {
+                    if (!this.types.ContainsKey(type))
+                    {
+                        this.types.Add(type, Type.GetType(type));
+                    }
+                }
+            }
+
+            return (Type)this.types[type];
         }
     }
 }

@@ -26,21 +26,19 @@ namespace CacheManager.Redis
         /// Initializes a new instance of the <see cref="RedisCacheBackPlate"/> class.
         /// </summary>
         /// <param name="configuration">The cache manager configuration.</param>
-        /// <param name="cacheName">The cache name.</param>
-        public RedisCacheBackPlate(CacheManagerConfiguration configuration, string cacheName)
-            : base(configuration, cacheName)
+        public RedisCacheBackPlate(CacheManagerConfiguration configuration)
+            : base(configuration)
         {
             NotNull(configuration, nameof(configuration));
 
-            this.channelName = "CacheManagerBackPlate";
-
+            this.channelName = configuration.BackPlateChannelName ?? "CacheManagerBackPlate";
             this.identifier = Guid.NewGuid().ToString();
 
             RetryHelper.Retry(
                 () =>
                 {
                     // throws an exception if not found for the name
-                    var cfg = RedisConfigurations.GetConfiguration(this.Name);
+                    var cfg = RedisConfigurations.GetConfiguration(this.ConfigurationKey);
 
                     var connection = RedisConnectionPool.Connect(cfg);
 

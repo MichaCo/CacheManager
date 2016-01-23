@@ -13,8 +13,14 @@ namespace CacheManager.Core.Internal
         {
             NotNull(serializerType, nameof(serializerType));
 
+#if DOTNET5_2
+            var typeInfo = serializerType.GetTypeInfo();
+            var interfaces = typeInfo.ImplementedInterfaces;
+#else
+            var interfaces = serializerType.GetInterfaces();
+#endif
             Ensure(
-                serializerType.GetInterfaces().Any(p => p == typeof(ICacheSerializer)),
+                interfaces.Any(p => p == typeof(ICacheSerializer)),
                 "Serializer type must implement {0}, but {1} is not.",
                 nameof(ICacheSerializer),
                 nameof(serializerType));
@@ -77,7 +83,7 @@ namespace CacheManager.Core.Internal
                 {
                     var backPlate = (CacheBackPlate)Activator.CreateInstance(
                         manager.Configuration.BackPlateType,
-                        new object[] { manager.Configuration, manager.Name });
+                        new object[] { manager.Configuration });
 
                     return backPlate;
                 }

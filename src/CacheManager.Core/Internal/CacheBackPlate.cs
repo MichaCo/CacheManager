@@ -29,17 +29,12 @@ namespace CacheManager.Core.Internal
         /// Initializes a new instance of the <see cref="CacheBackPlate" /> class.
         /// </summary>
         /// <param name="configuration">The cache manager configuration.</param>
-        /// <param name="cacheName">The cache name.</param>
         /// <exception cref="System.ArgumentNullException">If configuration is null.</exception>
-        /// <exception cref="System.ArgumentException">Parameter cacheName cannot be null or empty.</exception>
-        protected CacheBackPlate(CacheManagerConfiguration configuration, string cacheName)
+        protected CacheBackPlate(CacheManagerConfiguration configuration)
         {
             NotNull(configuration, nameof(configuration));
-            NotNullOrWhiteSpace(cacheName, nameof(cacheName));
-
             this.CacheConfiguration = configuration;
-            this.Name = configuration.BackPlateName;
-            this.CacheName = cacheName;
+            this.ConfigurationKey = configuration.BackPlateConfigurationKey;
         }
 
         /// <summary>
@@ -59,17 +54,11 @@ namespace CacheManager.Core.Internal
         public CacheManagerConfiguration CacheConfiguration { get; }
 
         /// <summary>
-        /// Gets the configuration.
+        /// Gets the name of the configuration to be used.
+        /// <para>The key might be used to find cache vendor specific configuration.</para>
         /// </summary>
-        /// <value>The configuration.</value>
-        public string CacheName { get; }
-
-        /// <summary>
-        /// Gets the name.
-        /// <para>The name might be used to find cache vendor specific configuration.</para>
-        /// </summary>
-        /// <value>The name.</value>
-        public string Name { get; }
+        /// <value>The configuration key.</value>
+        public string ConfigurationKey { get; }
 
         /// <summary>
         /// Performs application-defined tasks associated with freeing, releasing, or resetting

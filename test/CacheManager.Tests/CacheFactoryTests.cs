@@ -303,7 +303,7 @@ namespace CacheManager.Tests
 
             // assert
             act.ShouldThrow<ArgumentException>()
-                .WithMessage("*Parameter name: name*");
+                .WithMessage("*Parameter name: configurationKey*");
         }
 
         [Fact]
