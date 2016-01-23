@@ -77,7 +77,7 @@ namespace CacheManager.Config.Tests
         {
             var swatch = Stopwatch.StartNew();
             var threads = 50;
-            var items = 20000;
+            var items = 30000;
             long ops = 0;
 
             var rand = new Random();
@@ -127,6 +127,8 @@ namespace CacheManager.Config.Tests
                 }
 
                 Parallel.Invoke(new ParallelOptions() { MaxDegreeOfParallelism = 8 }, actions.ToArray());
+
+                cache.ClearRegion(region);
 
                 cache.Clear();
             }

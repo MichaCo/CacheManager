@@ -29,49 +29,45 @@ namespace CacheManager.Redis
         // the object value
         private const string HashFieldValue = "value";
 
-        private const string ScriptAdd = @"
-if redis.call('HSETNX', @key, @valField, @val) == 1 then
-    local result=redis.call('HMSET', @key, @typeField, @type, @modeField, @mode, @timeoutField, @timeout, @createdField, @created)    
-    local resultExp, resultReg
-    if @expireMilli ~= '' then
-        resultExp = redis.call('PEXPIRE', @key, @expireMilli)        
+        // Script to add values: return null if value exists, otherwise return HMSET result of meta data.
+        // ARGV [1]: value, [2]: type, [3]: expirationMode, [4]: expirationTimeout(millis), [5]: created(ticks)
+        private static readonly string ScriptAdd = $@"
+if redis.call('HSETNX', KEYS[1], '{HashFieldValue}', ARGV[1]) == 1 then
+    local result=redis.call('HMSET', KEYS[1], '{HashFieldType}', ARGV[2], '{HashFieldExpirationMode}', ARGV[3], '{HashFieldExpirationTimeout}', ARGV[4], '{HashFieldCreated}', ARGV[5])
+    if ARGV[3] ~= '0' and ARGV[4] ~= '0' then
+        redis.call('PEXPIRE', KEYS[1], ARGV[4])
     else
-        resultExp = redis.call('PERSIST', @key)
+        redis.call('PERSIST', KEYS[1])
     end
-    if @region ~= '' then
-        resultReg = redis.call('HSET', @region, @key, 'regionKey')
-    end
-    return { result, resultExp, resultReg }
+    return result
 else 
     return nil
 end";
 
-        private const string ScriptPut = @"
-local result = redis.call('HMSET', @key, @valField, @val, @typeField, @type, @modeField, @mode, @timeoutField, @timeout, @createdField, @created)
-local resultExp, resultReg
-if @expireMilli ~= '' then
-    resultExp = redis.call('PEXPIRE', @key, @expireMilli)        
+        // ARGV [1]: value, [2]: type, [3]: expirationMode, [4]: expirationTimeout(millis), [5]: created(ticks)
+        private static readonly string ScriptPut = $@"
+local result=redis.call('HMSET', KEYS[1], '{HashFieldValue}', ARGV[1], '{HashFieldType}', ARGV[2], '{HashFieldExpirationMode}', ARGV[3], '{HashFieldExpirationTimeout}', ARGV[4], '{HashFieldCreated}', ARGV[5])
+if ARGV[3] ~= '0' and ARGV[4] ~= '0' then
+    redis.call('PEXPIRE', KEYS[1], ARGV[4])
 else
-    resultExp = redis.call('PERSIST', @key)
+    redis.call('PERSIST', KEYS[1])
 end
-if @region ~= '' then
-    resultReg = redis.call('HSET', @region, @key, 'regionKey')
-end
-return { result, resultExp, resultReg }
-";
+return result";
 
-        private const string ScriptUpdate = @"
+        // TODO: use edit flag on the hash to increment and check on that instead of the full value
+        private static readonly string ScriptUpdate = @"
 if redis.call('HGET', @key, @valField) == @oldVal then
     return redis.call('HSET', @key, @valField, @val)
 else
     return nil
 end";
 
+        // get should also update the sliding experiation in one go
         private static readonly string ScriptGet = $@"
-local result = redis.call('HMGET', @key, '{HashFieldValue}', '{HashFieldExpirationMode}', '{HashFieldExpirationTimeout}', '{HashFieldCreated}', '{HashFieldType}')
+local result = redis.call('HMGET', KEYS[1], '{HashFieldValue}', '{HashFieldExpirationMode}', '{HashFieldExpirationTimeout}', '{HashFieldCreated}', '{HashFieldType}')
 if (result[2] and result[2] == '1') then 
     if (result[3] and result[3] ~= '' and result[3] ~= '0') then
-        redis.call('PEXPIRE', @key, result[3])
+        redis.call('PEXPIRE', KEYS[1], result[3])
     end
 end
 return result";
@@ -213,8 +209,11 @@ return result";
                 if (hashKeys.Length > 0)
                 {
                     // lets remove all keys which where in the region
-                    var keys = hashKeys.Where(p => p.HasValue).Select(p => (StackRedis.RedisKey)p.ToString()).ToArray();
-                    this.Database.KeyDelete(keys);
+                    // 01/32/16 changed to remove one by one because on clusters the keys could belong to multiple slots
+                    foreach (var key in hashKeys.Where(p => p.HasValue))
+                    {
+                        this.Database.KeyDelete(key.ToString(), StackRedis.CommandFlags.FireAndForget);
+                    }
                     //// TODO: log result <> key length
                 }
 
@@ -365,7 +364,7 @@ return result";
             {
                 var fullKey = GetKey(key, region);
 
-                var result = this.Eval(ScriptType.Get, new { key = fullKey });
+                var result = this.Eval(ScriptType.Get, fullKey);
                 if (result == null || result.IsNull)
                 {
                     // something went wrong. HMGET should return at least a null result for each requested field
@@ -530,33 +529,24 @@ return result";
 
             var flags = sync ? StackRedis.CommandFlags.None : StackRedis.CommandFlags.FireAndForget;
 
-            var parameters = new
+            // ARGV [1]: value, [2]: type, [3]: expirationMode, [4]: expirationTimeout(millis), [5]: created(ticks)
+            var parameters = new StackRedis.RedisValue[]
             {
-                key = (StackRedis.RedisKey)fullKey,
-                valField = HashFieldValue,
-                typeField = HashFieldType,
-                modeField = HashFieldExpirationMode,
-                timeoutField = HashFieldExpirationTimeout,
-                createdField = HashFieldCreated,
-                val = value,
-                type = item.ValueType.AssemblyQualifiedName,
-                mode = (int)item.ExpirationMode,
-                timeout = item.ExpirationTimeout.TotalMilliseconds, // changed to millis
-                created = item.CreatedUtc.Ticks,
-                expireMilli = item.ExpirationMode == ExpirationMode.None ?
-                    string.Empty :
-                    item.ExpirationTimeout.TotalMilliseconds.ToString(CultureInfo.InvariantCulture),
-                region = item.Region ?? string.Empty
+                value,
+                item.ValueType.AssemblyQualifiedName,
+                (int)item.ExpirationMode,
+                item.ExpirationTimeout.TotalMilliseconds,
+                item.CreatedUtc.Ticks
             };
 
             StackRedis.RedisResult result;
             if (when == StackRedis.When.NotExists)
             {
-                result = this.Eval(ScriptType.Add, parameters, flags);
+                result = this.Eval(ScriptType.Add, fullKey, parameters, flags);
             }
             else
             {
-                result = this.Eval(ScriptType.Put, parameters, flags);
+                result = this.Eval(ScriptType.Put, fullKey, parameters, flags);
             }
 
             if (result == null)
@@ -578,17 +568,55 @@ return result";
                     return false;
                 }
 
-                var results = (StackRedis.RedisValue[])result;
+                var resultValue = (StackRedis.RedisValue)result;
 
-                //// TODO: log
-                //// System.Diagnostics.Debug.WriteLine("Set results:" + string.Join(", ", results));
-
-                if (results[0].HasValue && results[0].ToString().Equals("OK", StringComparison.OrdinalIgnoreCase))
+                if (resultValue.HasValue && resultValue.ToString().Equals("OK", StringComparison.OrdinalIgnoreCase))
                 {
+                    // Added successfully:
+                    if (!string.IsNullOrWhiteSpace(item.Region))
+                    {
+                        // now update region lookup if region is set
+                        // we cannot do that within the lua because the region could be on another cluster node!
+                        this.Database.HashSet(item.Region, fullKey, "regionKey", when, StackRedis.CommandFlags.FireAndForget);
+                    }
+
                     return true;
                 }
 
                 return false;
+            }
+        }
+
+        private StackRedis.RedisResult Eval(ScriptType scriptType, StackRedis.RedisKey redisKey, StackRedis.RedisValue[] values = null, StackRedis.CommandFlags flags = StackRedis.CommandFlags.None)
+        {
+            if (!this.scriptsLoaded)
+            {
+                lock (this.loadScriptLock)
+                {
+                    if (!this.scriptsLoaded)
+                    {
+                        this.LoadScripts();
+                        this.scriptsLoaded = true;
+                    }
+                }
+            }
+
+            StackRedis.LoadedLuaScript script;
+            if (!this.shaScripts.TryGetValue(scriptType, out script))
+            {
+                throw new InvalidOperationException("Something went wrong during loading scripts to the server.");
+            }
+
+            try
+            {
+                return this.Database.ScriptEvaluate(script.Hash, new[] { redisKey }, values, flags);
+            }
+            catch (StackRedis.RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.OrdinalIgnoreCase))
+            {
+                this.LoadScripts();
+
+                // retry
+                throw;
             }
         }
 

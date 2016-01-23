@@ -8,7 +8,7 @@
   "dependencies": {
     "CacheManager.Core": "",
     "CacheManager.Serialization.Json": "",
-    "Newtonsoft.Json": "8.0.2",
+    "Newtonsoft.Json": "6.0.8",
     "Microsoft.Dnx.Runtime.Abstractions": "1.0.0-*"
   },
   "commands": {

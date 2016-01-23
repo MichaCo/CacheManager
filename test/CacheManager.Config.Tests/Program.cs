@@ -44,6 +44,7 @@ namespace CacheManager.Config.Tests
                         .WithConnectionTimeout(1000)
                         .WithEndpoint("127.0.0.1", 6380)
                         .WithEndpoint("127.0.0.1", 6379);
+                        ////.WithEndpoint("192.168.178.32", 6379);
                 });
 
                 cfg.WithJsonSerializer();
