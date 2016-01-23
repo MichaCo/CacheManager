@@ -22,7 +22,7 @@ namespace CacheManager.Tests
         public void Redis_Absolute_DoesExpire()
         {
             // arrange
-            var item = new CacheItem<object>(Guid.NewGuid().ToString(), "something", ExpirationMode.Absolute, TimeSpan.FromMilliseconds(50));
+            var item = new CacheItem<object>(Guid.NewGuid().ToString(), "something", ExpirationMode.Absolute, TimeSpan.FromMilliseconds(150));
             var cache = TestManagers.CreateRedisCache(1);
 
             // act/assert
@@ -37,7 +37,7 @@ namespace CacheManager.Tests
                 var value = cache.GetCacheItem(item.Key);
                 value.Should().NotBeNull();
 
-                Thread.Sleep(30);
+                Thread.Sleep(150);
                 var valueExpired = cache.GetCacheItem(item.Key);
                 valueExpired.Should().BeNull();
             }
@@ -45,7 +45,7 @@ namespace CacheManager.Tests
 
         [Fact]
         [Trait("category", "Redis")]
-        ////[Trait("category", "Unreliable")]
+        [Trait("category", "Unreliable")]
         public void Redis_Absolute_DoesExpire_MultiClients()
         {
             // arrange
@@ -210,7 +210,7 @@ namespace CacheManager.Tests
 
         [Fact]
         [Trait("category", "Redis")]
-        ////[Trait("category", "Unreliable")]
+        [Trait("category", "Unreliable")]
         public void Redis_NoRaceCondition_WithUpdate()
         {
             using (var cache = CacheFactory.Build<RaceConditionTestElement>(settings =>
@@ -263,7 +263,7 @@ namespace CacheManager.Tests
 
         [Fact]
         [Trait("category", "Redis")]
-        ////[Trait("category", "Unreliable")]
+        [Trait("category", "Unreliable")]
         public void Redis_RaceCondition_WithoutUpdate()
         {
             using (var cache = CacheFactory.Build<RaceConditionTestElement>(settings =>
