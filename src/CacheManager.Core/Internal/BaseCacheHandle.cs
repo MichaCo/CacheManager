@@ -12,6 +12,8 @@ namespace CacheManager.Core.Internal
     /// <typeparam name="TCacheValue">The type of the cache value.</typeparam>
     public abstract class BaseCacheHandle<TCacheValue> : BaseCache<TCacheValue>, IDisposable
     {
+        private readonly object updateLock = new object();
+
         /// <summary>
         /// Initializes a new instance of the <see cref="BaseCacheHandle{TCacheValue}"/> class.
         /// </summary>
@@ -121,15 +123,18 @@ namespace CacheManager.Core.Internal
         {
             NotNull(updateValue, nameof(updateValue));
 
-            var original = this.GetCacheItem(key);
-            if (original == null)
+            lock (this.updateLock)
             {
-                return UpdateItemResult.ForItemDidNotExist<TCacheValue>();
-            }
+                var original = this.GetCacheItem(key);
+                if (original == null)
+                {
+                    return UpdateItemResult.ForItemDidNotExist<TCacheValue>();
+                }
 
-            var value = updateValue(original.Value);
-            this.Put(key, value);
-            return UpdateItemResult.ForSuccess<TCacheValue>(value);
+                var value = updateValue(original.Value);
+                this.Put(key, value);
+                return UpdateItemResult.ForSuccess<TCacheValue>(value);
+            }
         }
 
         /// <summary>
@@ -163,15 +168,18 @@ namespace CacheManager.Core.Internal
         {
             NotNull(updateValue, nameof(updateValue));
 
-            var original = this.GetCacheItem(key, region);
-            if (original == null)
+            lock (this.updateLock)
             {
-                return UpdateItemResult.ForItemDidNotExist<TCacheValue>();
-            }
+                var original = this.GetCacheItem(key, region);
+                if (original == null)
+                {
+                    return UpdateItemResult.ForItemDidNotExist<TCacheValue>();
+                }
 
-            var value = updateValue(original.Value);
-            this.Put(key, value, region);
-            return UpdateItemResult.ForSuccess<TCacheValue>(value);
+                var value = updateValue(original.Value);
+                this.Put(key, value, region);
+                return UpdateItemResult.ForSuccess<TCacheValue>(value);
+            }
         }
 
         /// <summary>

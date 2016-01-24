@@ -60,6 +60,11 @@ namespace CacheManager.Core.Internal
                 handles.Add(instance);
             }
 
+            if (handles.Count == 0)
+            {
+                throw new InvalidOperationException("No cache handles defined.");
+            }
+
             return handles;
         }
 

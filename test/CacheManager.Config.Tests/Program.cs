@@ -21,12 +21,13 @@ namespace CacheManager.Config.Tests
                 cfg.WithUpdateMode(CacheUpdateMode.Up);
                 cfg.WithRetryTimeout(100);
                 cfg.WithMaxRetries(50);
-
+                ////cfg.WithHandle(typeof(Core.Internal.DictionaryCacheHandle2<>))
+                ////    .DisableStatistics();
 #if DNXCORE50
                 cfg.WithDictionaryHandle()
-                    .EnablePerformanceCounters();
+                    .DisableStatistics();
 
-                Console.WriteLine("Using Dictionary cache handle");
+                //Console.WriteLine("Using Dictionary cache handle");
 #else
                 cfg.WithDictionaryHandle()
                     .DisableStatistics();
@@ -44,7 +45,7 @@ namespace CacheManager.Config.Tests
                         .WithConnectionTimeout(1000)
                         .WithEndpoint("127.0.0.1", 6380)
                         .WithEndpoint("127.0.0.1", 6379);
-                        ////.WithEndpoint("192.168.178.32", 6379);
+                    ////.WithEndpoint("192.168.178.32", 6379);
                 });
 
                 cfg.WithJsonSerializer();
@@ -86,7 +87,6 @@ namespace CacheManager.Config.Tests
                     Console.WriteLine("---------------------------------------------------------");
                     swatch.Restart();
                 }
-
             }
             catch
             {

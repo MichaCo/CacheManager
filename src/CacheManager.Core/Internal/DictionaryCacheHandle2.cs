@@ -1,6 +1,7 @@
 ﻿using System;
-using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using static CacheManager.Core.Utility.Guard;
 
 namespace CacheManager.Core.Internal
@@ -9,19 +10,20 @@ namespace CacheManager.Core.Internal
     /// This handle is for internal use and testing. It does not implement any expiration.
     /// </summary>
     /// <typeparam name="TCacheValue">The type of the cache value.</typeparam>
-    public class DictionaryCacheHandle<TCacheValue> : BaseCacheHandle<TCacheValue>
+    public class DictionaryCacheHandle2<TCacheValue> : BaseCacheHandle<TCacheValue>
     {
-        private ConcurrentDictionary<string, CacheItem<TCacheValue>> cache;
+        private readonly IDictionary<string, CacheItem<TCacheValue>> cache;
+        private readonly object cacheWriteLock = new object();
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="DictionaryCacheHandle{TCacheValue}"/> class.
+        /// Initializes a new instance of the <see cref="DictionaryCacheHandle2{TCacheValue}"/> class.
         /// </summary>
         /// <param name="manager">The manager.</param>
         /// <param name="configuration">The configuration.</param>
-        public DictionaryCacheHandle(ICacheManager<TCacheValue> manager, CacheHandleConfiguration configuration)
+        public DictionaryCacheHandle2(ICacheManager<TCacheValue> manager, CacheHandleConfiguration configuration)
             : base(manager, configuration)
         {
-            this.cache = new ConcurrentDictionary<string, CacheItem<TCacheValue>>();
+            this.cache = new Dictionary<string, CacheItem<TCacheValue>>();
         }
 
         /// <summary>
@@ -33,7 +35,13 @@ namespace CacheManager.Core.Internal
         /// <summary>
         /// Clears this cache, removing all items in the base cache and all regions.
         /// </summary>
-        public override void Clear() => this.cache.Clear();
+        public override void Clear()
+        {
+            lock (this.cacheWriteLock)
+            {
+                this.cache.Clear();
+            }
+        }
 
         /// <summary>
         /// Clears the cache region, removing all items from the specified <paramref name="region"/> only.
@@ -44,74 +52,17 @@ namespace CacheManager.Core.Internal
         {
             NotNullOrWhiteSpace(region, nameof(region));
 
-            var key = string.Concat(region, ":");
-            foreach (var item in this.cache.Where(p => p.Key.StartsWith(key, StringComparison.Ordinal)))
+            var regionKey = string.Concat(region, ":");
+            lock (this.cacheWriteLock)
             {
-                CacheItem<TCacheValue> val = null;
-                this.cache.TryRemove(item.Key, out val);
+                foreach (var item in this.cache
+                    .Where(p => p.Key.StartsWith(regionKey, StringComparison.Ordinal))
+                    .ToArray())
+                {
+                    this.cache.Remove(item.Key);
+                }
             }
         }
-
-        /// <summary>
-        /// Updates an existing key in the cache.
-        /// <para>
-        /// The cache manager will make sure the update will always happen on the most recent version.
-        /// </para>
-        /// <para>
-        /// If version conflicts occur, if for example multiple cache clients try to write the same
-        /// key, and during the update process, someone else changed the value for the key, the
-        /// cache manager will retry the operation.
-        /// </para>
-        /// <para>
-        /// The <paramref name="updateValue"/> function will get invoked on each retry with the most
-        /// recent value which is stored in cache.
-        /// </para>
-        /// </summary>
-        /// <param name="key">The key to update.</param>
-        /// <param name="updateValue">The function to perform the update.</param>
-        /// <param name="config">The cache configuration used to specify the update behavior.</param>
-        /// <returns>The update result which is interpreted by the cache manager.</returns>
-        /// <remarks>
-        /// If the cache does not use a distributed cache system. Update is doing exactly the same
-        /// as Get plus Put.
-        /// </remarks>
-        public override UpdateItemResult<TCacheValue> Update(
-            string key,
-            Func<TCacheValue, TCacheValue> updateValue,
-            UpdateItemConfig config) =>
-            this.UpdateInternal(key, null, updateValue, config);
-
-        /// <summary>
-        /// Updates an existing key in the cache.
-        /// <para>
-        /// The cache manager will make sure the update will always happen on the most recent version.
-        /// </para>
-        /// <para>
-        /// If version conflicts occur, if for example multiple cache clients try to write the same
-        /// key, and during the update process, someone else changed the value for the key, the
-        /// cache manager will retry the operation.
-        /// </para>
-        /// <para>
-        /// The <paramref name="updateValue"/> function will get invoked on each retry with the most
-        /// recent value which is stored in cache.
-        /// </para>
-        /// </summary>
-        /// <param name="key">The key to update.</param>
-        /// <param name="region">The cache region.</param>
-        /// <param name="updateValue">The function to perform the update.</param>
-        /// <param name="config">The cache configuration used to specify the update behavior.</param>
-        /// <returns>The update result which is interpreted by the cache manager.</returns>
-        /// <exception cref="System.ArgumentNullException">If updateValue or config are null.</exception>
-        /// <remarks>
-        /// If the cache does not use a distributed cache system. Update is doing exactly the same
-        /// as Get plus Put.
-        /// </remarks>
-        public override UpdateItemResult<TCacheValue> Update(
-            string key,
-            string region,
-            Func<TCacheValue, TCacheValue> updateValue,
-            UpdateItemConfig config)
-                => this.UpdateInternal(key, region, updateValue, config);
 
         /// <summary>
         /// Adds a value to the cache.
@@ -125,8 +76,24 @@ namespace CacheManager.Core.Internal
         {
             NotNull(item, nameof(item));
 
-            var key = GetKey(item.Key, item.Region);
-            return this.cache.TryAdd(key, item);
+            var fullKey = GetKey(item.Key, item.Region);
+
+            // quick exit
+            if (this.cache.ContainsKey(fullKey))
+            {
+                return false;
+            }
+
+            lock (this.cacheWriteLock)
+            {
+                if (this.cache.ContainsKey(fullKey))
+                {
+                    return false;
+                }
+
+                this.cache.Add(fullKey, item);
+                return true;
+            }
         }
 
         /// <summary>
@@ -152,7 +119,7 @@ namespace CacheManager.Core.Internal
             {
                 if (IsExpired(result))
                 {
-                    this.cache.TryRemove(fullKey, out result);
+                    this.RemoveInternal(key, region);
                     return null;
                 }
             }
@@ -170,7 +137,9 @@ namespace CacheManager.Core.Internal
         {
             NotNull(item, nameof(item));
 
-            this.cache[GetKey(item.Key, item.Region)] = item;
+            var fullKey = GetKey(item.Key, item.Region);
+
+            this.cache[fullKey] = item;
         }
 
         /// <summary>
@@ -193,8 +162,11 @@ namespace CacheManager.Core.Internal
         protected override bool RemoveInternal(string key, string region)
         {
             var fullKey = GetKey(key, region);
-            CacheItem<TCacheValue> val = null;
-            return this.cache.TryRemove(fullKey, out val);
+
+            lock (this.cacheWriteLock)
+            {
+                return this.cache.Remove(fullKey);
+            }
         }
 
         /// <summary>
@@ -230,37 +202,8 @@ namespace CacheManager.Core.Internal
                 return true;
             }
 
+            //// TODO: schedule cleanup
             return false;
-        }
-
-        private UpdateItemResult<TCacheValue> UpdateInternal(string key, string region, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config)
-        {
-            NotNull(updateValue, nameof(updateValue));
-            NotNull(config, nameof(config));
-
-            var retries = 0;
-            do
-            {
-                retries++;
-
-                var fullKey = GetKey(key, region);
-                var item = this.GetCacheItemInternal(key, region);
-                if (item == null)
-                {
-                    return UpdateItemResult.ForItemDidNotExist<TCacheValue>();
-                }
-
-                var newValue = updateValue(item.Value);
-                var newItem = item.WithValue(newValue);
-
-                if (this.cache.TryUpdate(fullKey, newItem, item))
-                {
-                    return UpdateItemResult.ForSuccess<TCacheValue>(newItem.Value, retries > 1, retries);
-                }
-            }
-            while (retries <= config.MaxRetries);
-
-            return UpdateItemResult.ForTooManyRetries<TCacheValue>(retries);
         }
     }
 }

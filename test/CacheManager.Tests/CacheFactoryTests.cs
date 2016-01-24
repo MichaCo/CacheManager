@@ -100,7 +100,7 @@ namespace CacheManager.Tests
             // act
             Action act = () => CacheFactory.Build(settings =>
             {
-                settings.WithHandle(typeof(DictionaryCacheHandle<>), null);
+                settings.WithDictionaryHandle(null);
             });
 
             // assert
@@ -130,7 +130,7 @@ namespace CacheManager.Tests
             Func<ICacheManager<string>> act = () => CacheFactory.Build<string>(settings =>
             {
                 settings.WithUpdateMode(CacheUpdateMode.Full)
-                    .WithHandle(typeof(DictionaryCacheHandle<>), "h1")
+                    .WithDictionaryHandle("h1")
                     .DisablePerformanceCounters();
             });
 
@@ -147,7 +147,7 @@ namespace CacheManager.Tests
             Func<ICacheManager<string>> act = () => CacheFactory.Build<string>(settings =>
             {
                 settings.WithUpdateMode(CacheUpdateMode.Full)
-                    .WithHandle(typeof(DictionaryCacheHandle<>), "h1")
+                    .WithDictionaryHandle("h1")
                     .DisableStatistics() // disable it first
                     .EnablePerformanceCounters();   // should enable stats
             });
@@ -165,7 +165,7 @@ namespace CacheManager.Tests
             Func<ICacheManager<string>> act = () => CacheFactory.Build<string>(settings =>
             {
                 settings.WithUpdateMode(CacheUpdateMode.Full)
-                    .WithHandle(typeof(DictionaryCacheHandle<>), "h1")
+                    .WithDictionaryHandle("h1")
                     .EnableStatistics();
             });
 
@@ -182,7 +182,7 @@ namespace CacheManager.Tests
             Func<ICacheManager<string>> act = () => CacheFactory.Build<string>(settings =>
             {
                 settings.WithUpdateMode(CacheUpdateMode.Full)
-                    .WithHandle(typeof(DictionaryCacheHandle<>), "h1");
+                    .WithDictionaryHandle("h1");
             });
 
             // assert
@@ -198,7 +198,7 @@ namespace CacheManager.Tests
             Action act = () => CacheFactory.Build<string>(settings =>
             {
                 settings.WithUpdateMode(CacheUpdateMode.Full)
-                    .WithHandle(typeof(DictionaryCacheHandle<>), "h1")
+                    .WithDictionaryHandle("h1")
                         .WithExpiration(ExpirationMode.Absolute, TimeSpan.Zero);
             });
 
@@ -246,6 +246,7 @@ namespace CacheManager.Tests
             {
                 var cache = CacheFactory.Build<object>(settings =>
                {
+                   settings.WithDictionaryHandle();
                    settings.WithRedisBackPlate("redis");
                });
 
@@ -327,9 +328,9 @@ namespace CacheManager.Tests
         {
             // arrange act
             Action act = () => CacheFactory.Build<object>(settings =>
-           {
-               settings.WithRedisConfiguration(string.Empty, config => { });
-           });
+            {
+                settings.WithRedisConfiguration(string.Empty, config => { });
+            });
 
             // assert
             act.ShouldThrow<ArgumentException>()
@@ -342,9 +343,9 @@ namespace CacheManager.Tests
         {
             // arrange act
             Action act = () => CacheFactory.Build<object>(settings =>
-           {
-               settings.WithRedisConfiguration("redis", config => config.WithEndpoint(string.Empty, 0));
-           });
+            {
+                settings.WithRedisConfiguration("redis", config => config.WithEndpoint(string.Empty, 0));
+            });
 
             // assert
             act.ShouldThrow<ArgumentException>()
@@ -360,9 +361,10 @@ namespace CacheManager.Tests
 
             // act
             CacheFactory.Build<object>(settings =>
-           {
-               settings.WithRedisConfiguration("redisWithConnectionString", connection);
-           });
+            {
+                settings.WithDictionaryHandle();
+                settings.WithRedisConfiguration("redisWithConnectionString", connection);
+            });
 
             var config = RedisConfigurations.GetConfiguration("redisWithConnectionString");
 
@@ -377,18 +379,19 @@ namespace CacheManager.Tests
         {
             // arrange act
             CacheFactory.Build<object>(settings =>
-           {
-               settings.WithRedisConfiguration("redisBuildUpConfiguration", config =>
-               {
-                   config.WithAllowAdmin()
-                       .WithConnectionTimeout(221113)
-                       .WithDatabase(22)
-                       .WithEndpoint("127.0.0.1", 2323)
-                       .WithEndpoint("nohost", 99999)
-                       .WithPassword("secret")
-                       .WithSsl("mySslHost");
-               });
-           });
+            {
+                settings.WithDictionaryHandle();
+                settings.WithRedisConfiguration("redisBuildUpConfiguration", config =>
+                {
+                    config.WithAllowAdmin()
+                        .WithConnectionTimeout(221113)
+                        .WithDatabase(22)
+                        .WithEndpoint("127.0.0.1", 2323)
+                        .WithEndpoint("nohost", 99999)
+                        .WithPassword("secret")
+                        .WithSsl("mySslHost");
+                });
+            });
 
             var configuration = RedisConfigurations.GetConfiguration("redisBuildUpConfiguration");
 
@@ -419,13 +422,13 @@ namespace CacheManager.Tests
                     .WithMaxRetries(22)
                     .WithRetryTimeout(2223)
                     .WithUpdateMode(CacheUpdateMode.Full)
-                    .WithHandle(typeof(DictionaryCacheHandle<>), "h1")
+                    .WithDictionaryHandle("h1")
                         .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromHours(12))
                         .EnablePerformanceCounters()
-                    .And.WithHandle(typeof(DictionaryCacheHandle<>), "h2")
+                    .And.WithDictionaryHandle("h2")
                         .WithExpiration(ExpirationMode.None, TimeSpan.Zero)
                         .DisableStatistics()
-                    .And.WithHandle(typeof(DictionaryCacheHandle<>), "h3")
+                    .And.WithDictionaryHandle("h3")
                         .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(231))
                         .EnableStatistics();
             });
