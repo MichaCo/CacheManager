@@ -196,7 +196,7 @@ namespace CacheManager.Tests
                     Enumerable.Repeat(5, cache.CacheHandles.Count()));
             }
         }
-        
+
         [Theory]
         [MemberData("TestCacheManagers")]
         [ReplaceCulture]

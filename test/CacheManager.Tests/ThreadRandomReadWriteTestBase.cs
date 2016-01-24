@@ -16,7 +16,7 @@ namespace CacheManager.Tests
 #else
     [Trait("Framework", "NET45")]
 #endif
-    
+
     public class ThreadRandomReadWriteTestBase : BaseCacheManagerTest
     {
         [Theory]
