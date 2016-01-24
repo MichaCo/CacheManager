@@ -196,9 +196,7 @@ namespace CacheManager.Tests
                     Enumerable.Repeat(5, cache.CacheHandles.Count()));
             }
         }
-
-        // This does run on Mono 4.2.x (alpha), disabling it for now TODO: enable if travis ci runs new version of mono
-        [Trait("category", "Mono")]
+        
         [Theory]
         [MemberData("TestCacheManagers")]
         [ReplaceCulture]
