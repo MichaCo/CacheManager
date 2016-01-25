@@ -57,7 +57,7 @@ namespace CacheManager.Tests
             using (cacheB)
             {
                 // act
-                var item = new CacheItem<object>(Guid.NewGuid().ToString(), "something", ExpirationMode.Absolute, TimeSpan.FromMilliseconds(50));
+                var item = new CacheItem<object>(Guid.NewGuid().ToString(), "something", ExpirationMode.Absolute, TimeSpan.FromMilliseconds(100));
 
                 var result = cacheA.Add(item);
 
@@ -71,8 +71,8 @@ namespace CacheManager.Tests
                 cacheA.GetCacheItem(item.Key).Should().NotBeNull();
                 cacheB.GetCacheItem(item.Key).Should().NotBeNull();
 
-                // after 210ms both it should be expired
-                Thread.Sleep(30);
+                // after 130ms both it should be expired
+                Thread.Sleep(100);
                 cacheA.GetCacheItem(item.Key).Should().BeNull();
                 cacheB.GetCacheItem(item.Key).Should().BeNull();
             }

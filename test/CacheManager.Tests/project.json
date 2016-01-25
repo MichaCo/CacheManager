@@ -1,14 +1,16 @@
-﻿{
+{
   "dependencies": {
-    "CacheManager.AspNetCore.Logging": "",
     "CacheManager.Couchbase": "",
     "CacheManager.MemCached": "",
     "CacheManager.StackExchange.Redis": "",
     "CacheManager.SystemRuntimeCaching": "",
     "CacheManager.Serialization.Json": "",
+    "CacheManager.AspNetCore.Logging": "",
     "CacheManager.Web": "",
     "FluentAssertions": "4.1.0",
-    "Microsoft.Extensions.Logging.Debug": "1.0.0-*",
+    "Microsoft.Extensions.Logging.Console": "1.0.0-rc2-15958",
+    "Microsoft.Extensions.Logging.Debug": "1.0.0-rc2-15958",
+    "Microsoft.Extensions.Logging": "1.0.0-rc2-15958",
     "Moq": "4.2.1510.2205",
     "xunit.runner.aspnet": "2.0.0-aspnet-*"
   },

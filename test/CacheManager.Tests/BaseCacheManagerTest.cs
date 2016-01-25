@@ -48,7 +48,7 @@ namespace CacheManager.Tests
                 {
                     settings
 #if !NET40 && !NET45
-                        .WithAspNetLogging(f => f.AddDebug())
+                        .WithAspNetLogging(f => f.AddDebug().AddConsole())
 #endif
                         .WithUpdateMode(CacheUpdateMode.None)
                         .WithSystemRuntimeCacheHandle()
