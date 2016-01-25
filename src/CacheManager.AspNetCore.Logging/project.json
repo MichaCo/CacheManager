@@ -30,12 +30,17 @@
   },
   "dependencies": {
     "CacheManager.Core": "",
-    "Microsoft.Extensions.Logging": "1.0.0-rc2-15958",
-    "System.Runtime":  "4.0.21-rc2-23623"
+    "Microsoft.Extensions.Logging": "1.0.0-rc2-15958"
   },
   "frameworks": {
     "net451": { },
-    "dotnet5.4": { },
-    "netcore50": { }
+    "dotnet5.4": {
+      "dependencies": {
+      }
+    },
+    "netcore50": {
+      "dependencies": {
+      }
+    }
   }
 }
