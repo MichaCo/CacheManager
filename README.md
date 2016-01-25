@@ -17,15 +17,16 @@ Linux, Mono | [![Build Status](https://travis-ci.org/MichaCo/CacheManager.svg?br
 
 ## CacheManager Nuget Packages
 
-| Package Name | .Net 4.0  | .Net 4.5  | DNX 4.5.1 | Dotnet 5.2
-|--------------| :-------: | :-------: | :-------: | :-------:
-| [CacheManager.Core] [Core.nuget] | x | x | x | x
-| [CacheManager.Serialization.Json] [Json.nuget] | x | x | x | x
-| [CacheManager.StackExchange.Redis] [Redis.nuget] | x | x | x | -
-| [CacheManager.SystemRuntimeCaching] [SystemRuntimeCaching.nuget]  | x | x | x | -
-| [CacheManager.Memcached] [Memcached.nuget]  | x | x | x | -
-| [CacheManager.Web] [Web.nuget]  | - | x | x | -
-| [CacheManager.Couchbase] [Couchbase.nuget]  | - | x | x | -
+| Package Name | .Net 4.0  | .Net 4.5  | DNX 4.5.1 | Dotnet 5.2 | Dotnet 5.4
+|--------------| :-------: | :-------: | :-------: | :-------:  | :--------:
+| [CacheManager.AspNetCore.Logging] [Logging.nuget] | - | - | x | - | x
+| [CacheManager.Core] [Core.nuget] | x | x | x | x | x
+| [CacheManager.Serialization.Json] [Json.nuget] | x | x | x | x | x
+| [CacheManager.StackExchange.Redis] [Redis.nuget] | x | x | x | - | -
+| [CacheManager.SystemRuntimeCaching] [SystemRuntimeCaching.nuget]  | x | x | x | - | -
+| [CacheManager.Memcached] [Memcached.nuget]  | x | x | x | - | -
+| [CacheManager.Web] [Web.nuget]  | - | x | x | - | -
+| [CacheManager.Couchbase] [Couchbase.nuget]  | - | x | x | - | -
 
 ### Beta Packages
 Beta versions of the CacheManager packages are getting pushed to https://www.myget.org/gallery/cachemanager on each build. 
@@ -119,5 +120,6 @@ OnGet, OnAdd, OnPut, OnRemove, OnClear, OnClearRegion
 [outputcachesample]: https://github.com/MichaCo/CacheManager/tree/master/samples/CacheManager.Samples.Mvc
 [todosample]: http://cachemanager.net/Documentation/Index/cachemanager_backed_todo_web_app
 [Json.nuget]: https://www.nuget.org/packages/CacheManager.Serialization.Json
+[Logging.nuget]: https://
 
 [TOC]
