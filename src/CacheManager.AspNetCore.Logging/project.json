@@ -36,10 +36,12 @@
     "net451": { },
     "dotnet5.4": {
       "dependencies": {
+        "System.Runtime": "4.0.21-rc2-23623"
       }
     },
     "netcore50": {
       "dependencies": {
+        "System.Runtime": "4.0.21-rc2-23623"
       }
     }
   }

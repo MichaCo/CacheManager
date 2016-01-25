@@ -32,7 +32,8 @@
       "dependencies": {
         "System.Threading.Thread": "4.0.0-*",
         "System.Threading.Tasks.Parallel": "4.0.1-*",
-        "System.Console": "4.0.0-*"
+        "System.Console": "4.0.0-*",
+        "System.Runtime": "4.0.21-rc2-23623"
       }
     }
   }
