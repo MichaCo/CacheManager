@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.IO;
 using System.Threading;
-using System.Web;
 using CacheManager.Core;
-
+#if !NET40 && !NET45
+using Microsoft.Extensions.Logging;
+#endif
 #if !NET40
 using Couchbase.Configuration.Client;
 #endif
@@ -47,6 +47,9 @@ namespace CacheManager.Tests
                 settings =>
                 {
                     settings
+#if !NET40 && !NET45
+                        .WithAspNetLogging(f => f.AddDebug())
+#endif
                         .WithUpdateMode(CacheUpdateMode.None)
                         .WithSystemRuntimeCacheHandle()
                             .EnableStatistics()

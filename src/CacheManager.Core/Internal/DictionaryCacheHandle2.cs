@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using CacheManager.Core.Logging;
 using static CacheManager.Core.Utility.Guard;
 
 namespace CacheManager.Core.Internal
@@ -23,6 +24,8 @@ namespace CacheManager.Core.Internal
         public DictionaryCacheHandle2(ICacheManager<TCacheValue> manager, CacheHandleConfiguration configuration)
             : base(manager, configuration)
         {
+            NotNull(manager, nameof(manager));
+            this.Logger = manager.Configuration.LoggerFactory.CreateLogger(this);
             this.cache = new Dictionary<string, CacheItem<TCacheValue>>();
         }
 
@@ -31,6 +34,9 @@ namespace CacheManager.Core.Internal
         /// </summary>
         /// <value>The count.</value>
         public override int Count => this.cache.Count;
+
+        /// <inheritdoc />
+        protected override ILogger Logger { get; }
 
         /// <summary>
         /// Clears this cache, removing all items in the base cache and all regions.

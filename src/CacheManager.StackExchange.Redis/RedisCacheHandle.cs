@@ -5,11 +5,20 @@ using System.Linq;
 using System.Net;
 using CacheManager.Core;
 using CacheManager.Core.Internal;
+using CacheManager.Core.Logging;
 using static CacheManager.Core.Utility.Guard;
 using StackRedis = StackExchange.Redis;
 
 namespace CacheManager.Redis
 {
+    internal enum ScriptType
+    {
+        Put,
+        Add,
+        Update,
+        Get
+    }
+
     /// <summary>
     /// Cache handle implementation for Redis.
     /// </summary>
@@ -93,15 +102,8 @@ return result";
         {
             NotNull(manager, nameof(manager));
             EnsureNotNull(manager.Configuration.CacheSerializer, "A cache serializer must be defined for this cache handle.");
+            this.Logger = manager.Configuration.LoggerFactory.CreateLogger(this);
             this.valueConverter = new RedisValueConverter(manager.Configuration.CacheSerializer);
-        }
-
-        private enum ScriptType
-        {
-            Put,
-            Add,
-            Update,
-            Get
         }
 
         /// <summary>
@@ -142,6 +144,9 @@ return result";
                 }
             }
         }
+
+        /// <inheritdoc />
+        protected override ILogger Logger { get; }
 
         private StackRedis.ConnectionMultiplexer Connection => RedisConnectionPool.Connect(this.RedisConfiguration);
 
@@ -512,7 +517,7 @@ return result";
         }
 
         private T Retry<T>(Func<T> retryme) =>
-            RetryHelper.Retry(retryme, this.Manager.Configuration.RetryTimeout, this.Manager.Configuration.MaxRetries);
+            RetryHelper.Retry(retryme, this.Manager.Configuration.RetryTimeout, this.Manager.Configuration.MaxRetries, this.Logger);
 
         private void Retry(Action retryme)
             => this.Retry<bool>(

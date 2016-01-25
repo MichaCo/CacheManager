@@ -1,4 +1,5 @@
 ﻿using System;
+using CacheManager.Core.Logging;
 using static CacheManager.Core.Utility.Guard;
 
 namespace CacheManager.Core.Internal
@@ -75,7 +76,14 @@ namespace CacheManager.Core.Internal
         /// <param name="timeout">The expiration timeout.</param>
         public override void Expire(string key, ExpirationMode mode, TimeSpan timeout)
         {
+            this.CheckDisposed();
             var item = this.GetCacheItem(key);
+            if (item == null)
+            {
+                this.Logger.LogTrace("Expire: item not found for key {0}", key);
+                return;
+            }
+
             this.PutInternalPrepared(item.WithExpiration(mode, timeout));
         }
 
@@ -89,7 +97,14 @@ namespace CacheManager.Core.Internal
         /// <param name="timeout">The expiration timeout.</param>
         public override void Expire(string key, string region, ExpirationMode mode, TimeSpan timeout)
         {
+            this.CheckDisposed();
             var item = this.GetCacheItem(key, region);
+            if (item == null)
+            {
+                this.Logger.LogTrace("Expire: item not found for key {0}:{1}", key, region);
+                return;
+            }
+
             this.PutInternalPrepared(item.WithExpiration(mode, timeout));
         }
 
@@ -122,6 +137,7 @@ namespace CacheManager.Core.Internal
         public virtual UpdateItemResult<TCacheValue> Update(string key, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config)
         {
             NotNull(updateValue, nameof(updateValue));
+            this.CheckDisposed();
 
             lock (this.updateLock)
             {
@@ -167,6 +183,7 @@ namespace CacheManager.Core.Internal
         public virtual UpdateItemResult<TCacheValue> Update(string key, string region, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config)
         {
             NotNull(updateValue, nameof(updateValue));
+            this.CheckDisposed();
 
             lock (this.updateLock)
             {
@@ -191,6 +208,7 @@ namespace CacheManager.Core.Internal
         /// </returns>
         protected internal override bool AddInternal(CacheItem<TCacheValue> item)
         {
+            this.CheckDisposed();
             item = this.GetItemExpiration(item);
             return this.AddInternalPrepared(item);
         }
@@ -202,6 +220,7 @@ namespace CacheManager.Core.Internal
         /// <param name="item">The <c>CacheItem</c> to be added to the cache.</param>
         protected internal override void PutInternal(CacheItem<TCacheValue> item)
         {
+            this.CheckDisposed();
             item = this.GetItemExpiration(item);
             this.PutInternalPrepared(item);
         }

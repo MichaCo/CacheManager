@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Linq;
 using CacheManager.Core;
 using CacheManager.Core.Internal;
+using CacheManager.Core.Logging;
 using static CacheManager.Core.Utility.Guard;
 using StackRedis = StackExchange.Redis;
 
@@ -20,6 +21,7 @@ namespace CacheManager.Redis
     {
         private readonly string channelName;
         private readonly string identifier;
+        private readonly ILogger logger;
         private StackRedis.ISubscriber redisSubscriper;
 
         /// <summary>
@@ -31,6 +33,7 @@ namespace CacheManager.Redis
         {
             NotNull(configuration, nameof(configuration));
 
+            this.logger = configuration.LoggerFactory.CreateLogger(this);
             this.channelName = configuration.BackPlateChannelName ?? "CacheManagerBackPlate";
             this.identifier = Guid.NewGuid().ToString();
 
@@ -45,7 +48,8 @@ namespace CacheManager.Redis
                     this.redisSubscriper = connection.GetSubscriber();
                 },
                 configuration.RetryTimeout,
-                configuration.MaxRetries);
+                configuration.MaxRetries,
+                this.logger);
 
             this.Subscribe();
         }

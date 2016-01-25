@@ -7,6 +7,7 @@ using System.Security.Cryptography;
 using System.Text;
 using CacheManager.Core;
 using CacheManager.Core.Internal;
+using CacheManager.Core.Logging;
 using Enyim.Caching;
 using Enyim.Caching.Configuration;
 using Enyim.Caching.Memcached;
@@ -41,8 +42,11 @@ namespace CacheManager.Memcached
             : base(manager, configuration)
         {
             NotNull(configuration, nameof(configuration));
+            NotNull(manager, nameof(manager));
 
             Ensure(typeof(TCacheValue).IsSerializable, "The cache value type must be serializable but {0} is not.", typeof(TCacheValue).ToString());
+
+            this.Logger = manager.Configuration.LoggerFactory.CreateLogger(this);
 
             // initialize memcached client with section name which must be equal to handle name...
             // Default is "enyim.com/memcached"
@@ -95,6 +99,9 @@ namespace CacheManager.Memcached
         /// </summary>
         /// <value>The cache.</value>
         protected MemcachedClient Cache { get; set; }
+
+        /// <inheritdoc />
+        protected override ILogger Logger { get; }
 
         /// <summary>
         /// Clears this cache, removing all items in the base cache and all regions.

@@ -4,6 +4,7 @@ using System.Security.Cryptography;
 using System.Text;
 using CacheManager.Core;
 using CacheManager.Core.Internal;
+using CacheManager.Core.Logging;
 using Couchbase.Configuration.Client;
 using Couchbase.Core;
 using Newtonsoft.Json.Linq;
@@ -35,6 +36,9 @@ namespace CacheManager.Couchbase
             : base(manager, configuration)
         {
             NotNull(configuration, nameof(configuration));
+            NotNull(manager, nameof(manager));
+
+            this.Logger = manager.Configuration.LoggerFactory.CreateLogger(this);
 
             // we can configure the bucket name by having "<configKey>:<bucketName>" as handle's
             // name value
@@ -58,6 +62,9 @@ namespace CacheManager.Couchbase
         /// </summary>
         /// <value>The count.</value>
         public override int Count => (int)this.Stats.GetStatistic(CacheStatsCounterType.Items);
+
+        /// <inheritdoc />
+        protected override ILogger Logger { get; }
 
         /// <summary>
         /// Clears this cache, removing all items in the base cache and all regions.

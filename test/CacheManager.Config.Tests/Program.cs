@@ -1,7 +1,7 @@
 ﻿using System;
-using System.Diagnostics;
-using CacheManager.Core;
 using System.Threading;
+using CacheManager.Core;
+using Microsoft.Extensions.Logging;
 
 namespace CacheManager.Config.Tests
 {
@@ -13,16 +13,14 @@ namespace CacheManager.Config.Tests
 
         public void Main(string[] args)
         {
-            var swatch = Stopwatch.StartNew();
             int iterations = int.MaxValue;
-            swatch.Restart();
             var cacheConfiguration = ConfigurationBuilder.BuildConfiguration(cfg =>
             {
+                cfg.WithAspNetLogging(f => f.AddConsole(LogLevel.Warning).AddDebug(LogLevel.Debug));
                 cfg.WithUpdateMode(CacheUpdateMode.Up);
                 cfg.WithRetryTimeout(100);
                 cfg.WithMaxRetries(50);
-                ////cfg.WithHandle(typeof(Core.Internal.DictionaryCacheHandle2<>))
-                ////    .DisableStatistics();
+                
 #if DNXCORE50
                 cfg.WithDictionaryHandle()
                     .DisableStatistics();
@@ -32,10 +30,10 @@ namespace CacheManager.Config.Tests
                 cfg.WithDictionaryHandle()
                     .DisableStatistics();
 
-                Console.WriteLine("Using System Runtime cache handle");
-
                 cfg.WithRedisCacheHandle("redis", true)
                     .DisableStatistics();
+
+                cfg.WithRedisBackPlate("redis");
 
                 cfg.WithRedisConfiguration("redis", config =>
                 {
@@ -55,46 +53,31 @@ namespace CacheManager.Config.Tests
             });
             try
             {
-                var cache = CacheFactory.FromConfiguration<object>(cacheConfiguration);
-
+                var cacheA = CacheFactory.FromConfiguration<object>(cacheConfiguration);
                 for (int i = 0; i < iterations; i++)
                 {
                     try
                     {
-                        cache.Clear();
-                        cache.Add("key", "value", "region");
-                        cache.Add(new CacheItem<object>("key2", "region", "value", ExpirationMode.Sliding, TimeSpan.FromMinutes(10)));
-                        cache.Add("key3", "value", "region");
-                        var val = cache.Get("key2", "region");
-
-                        cache.ClearRegion("region");
-
-                        Tests.SimpleAddGetTest(
-                            CacheFactory.FromConfiguration<object>(cacheConfiguration));
-                        ////Tests.RandomRWTest(
-                        ////    CacheFactory.FromConfiguration<Item>(cacheConfiguration));
-                        ////Tests.CacheThreadTest(
-                        ////    CacheFactory.FromConfiguration<string>(cacheConfiguration),
-                        ////    i + 10);
+                        Tests.TestEachMethod(cacheA);
+                        Tests.SimpleAddGetTest(cacheA);
                     }
                     catch (Exception e)
                     {
                         Console.WriteLine("Error: " + e.Message + "\n" + e.StackTrace);
                         Thread.Sleep(1000);
                     }
-
-                    // Console.WriteLine(string.Format("Iterations ended after {0}ms.", swatch.ElapsedMilliseconds));
+                    
                     Console.WriteLine("---------------------------------------------------------");
-                    swatch.Restart();
                 }
             }
             catch
             {
                 throw;
             }
+
             Console.ForegroundColor = ConsoleColor.DarkGreen;
             Console.WriteLine("We are done...");
-            Console.ReadLine();
+            Console.ReadKey();
         }
     }
 }

@@ -5,6 +5,7 @@ using System.Runtime.Caching;
 using System.Text.RegularExpressions;
 using CacheManager.Core;
 using CacheManager.Core.Internal;
+using CacheManager.Core.Logging;
 using static CacheManager.Core.Utility.Guard;
 
 namespace CacheManager.SystemRuntimeCaching
@@ -36,6 +37,9 @@ namespace CacheManager.SystemRuntimeCaching
             : base(manager, configuration)
         {
             NotNull(configuration, nameof(configuration));
+            NotNull(manager, nameof(manager));
+
+            this.Logger = manager.Configuration.LoggerFactory.CreateLogger(this);
 
             this.cacheName = configuration.HandleName;
 
@@ -64,6 +68,9 @@ namespace CacheManager.SystemRuntimeCaching
         /// </summary>
         /// <value>The count.</value>
         public override int Count => (int)this.cache.GetCount();
+
+        /// <inheritdoc />
+        protected override ILogger Logger { get; }
 
         /// <summary>
         /// Clears this cache, removing all items in the base cache and all regions.

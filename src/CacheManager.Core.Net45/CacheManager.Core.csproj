@@ -134,6 +134,18 @@
     <Compile Include="..\CacheManager.Core\Internal\ICacheValueSerializer.cs">
       <Link>Internal\ICacheValueSerializer.cs</Link>
     </Compile>
+    <Compile Include="..\CacheManager.Core\Logging\ILogger.cs">
+      <Link>Logging\ILogger.cs</Link>
+    </Compile>
+    <Compile Include="..\CacheManager.Core\Logging\ILoggerFactory.cs">
+      <Link>Logging\ILoggerFactory.cs</Link>
+    </Compile>
+    <Compile Include="..\CacheManager.Core\Logging\LoggerExtensions.cs">
+      <Link>Logging\LoggerExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\CacheManager.Core\Logging\LogLevel.cs">
+      <Link>Logging\LogLevel.cs</Link>
+    </Compile>
     <Compile Include="..\CacheManager.Core\UpdateItemConfig.cs">
       <Link>UpdateItemConfig.cs</Link>
     </Compile>

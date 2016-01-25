@@ -31,7 +31,7 @@ namespace CacheManager.Config.Tests
             {
                 for (int i = 0; i < numItems; i++)
                 {
-                    cache.Add(keyGet(i), i.ToString());
+                    cache.AddOrUpdate(keyGet(i), i.ToString(), _ => i.ToString() + "update");
                 }
 
                 for (int i = 0; i < numItems; i++)
@@ -66,6 +66,8 @@ namespace CacheManager.Config.Tests
                             stats.GetStatistic(CacheStatsCounterType.GetCalls)));
             }
 
+            cache.Dispose();
+
             Console.WriteLine(string.Format(
                 "Event - Adds {0} Hits {1} Removes {2}",
                 eventAddCount,
@@ -91,6 +93,8 @@ namespace CacheManager.Config.Tests
                 for (var ta = 0; ta < items; ta++)
                 {
                     Interlocked.Increment(ref ops);
+
+                    // cache.AddOrUpdate(key + ta, region, "val" + ta, _ => "updated" + ta);
                     cache.Put(key + ta, "val" + ta, region);
                     if (ta % 1000 == 0)
                     {
@@ -254,6 +258,30 @@ namespace CacheManager.Config.Tests
                     Thread.Sleep(1000);
                 }
             }
+        }
+
+        public static void TestEachMethod(ICacheManager<object> cache)
+        {
+            cache.Clear();
+
+            cache.Add("key", "value", "region");
+            cache.AddOrUpdate("key", "region", "value", _ => "update value", new UpdateItemConfig(2, VersionConflictHandling.EvictItemFromOtherCaches));
+
+            cache.Expire("key", "region", TimeSpan.FromDays(1));
+            var val = cache.Get("key", "region");
+            var item = cache.GetCacheItem("key", "region");
+            cache.Put("key", "region", "put value");
+            cache.RemoveExpiration("key", "region");
+
+            object update2;
+            cache.TryUpdate("key", "region", _ => "update 2 value", out update2);
+
+            object update3 = cache.Update("key", "region", _ => "update 3 value");
+
+            cache.Remove("key", "region");
+
+            cache.Clear();
+            cache.ClearRegion("region");
         }
     }
 

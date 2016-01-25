@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
 using CacheManager.Core.Internal;
+using CacheManager.Core.Logging;
 using static CacheManager.Core.Utility.Guard;
 
 namespace CacheManager.Core
@@ -19,15 +20,10 @@ namespace CacheManager.Core
     /// <typeparam name="TCacheValue">The type of the cache value.</typeparam>
     public sealed class BaseCacheManager<TCacheValue> : BaseCache<TCacheValue>, ICacheManager<TCacheValue>, IDisposable
     {
-        /// <summary>
-        /// The cache back plate.
-        /// </summary>
+        private readonly bool logDebug = false;
+        private readonly bool logTrace = false;
+        private readonly BaseCacheHandle<TCacheValue>[] cacheHandles;
         private CacheBackPlate cacheBackPlate;
-
-        /// <summary>
-        /// The cache handles collection.
-        /// </summary>
-        private BaseCacheHandle<TCacheValue>[] cacheHandles;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BaseCacheManager{TCacheValue}"/> class
@@ -46,13 +42,19 @@ namespace CacheManager.Core
         {
             NotNullOrWhiteSpace(name, nameof(name));
             NotNull(configuration, nameof(configuration));
+            EnsureNotNull(configuration.LoggerFactory, "Logger factory must not be null");
 
             this.Name = name;
             this.Configuration = configuration;
-            this.cacheHandles = CacheReflectionHelper.CreateCacheHandles(this).ToArray();
+            this.Logger = configuration.LoggerFactory.CreateLogger(this);
+            this.logDebug = this.Logger.IsEnabled(LogLevel.Debug);
+            this.logTrace = this.Logger.IsEnabled(LogLevel.Trace);
+            this.Logger.LogInfo("Creating CacheManager, adding cache handles...");
+            this.cacheHandles = CacheReflectionHelper.CreateCacheHandles(this, this.Logger).ToArray();
 
             if (this.Configuration.HasBackPlate)
             {
+                this.Logger.LogInfo("Registering cache back plate.");
                 this.RegisterCacheBackPlate(CacheReflectionHelper.CreateBackPlate(this));
             }
         }
@@ -118,6 +120,9 @@ namespace CacheManager.Core
         /// </summary>
         /// <value>The name of the cache.</value>
         public string Name { get; }
+
+        /// <inheritdoc />
+        protected override ILogger Logger { get; }
 
         /// <summary>
         /// Adds an item to the cache or, if the item already exists, updates the item using the
@@ -337,14 +342,30 @@ namespace CacheManager.Core
         /// </summary>
         public override void Clear()
         {
+            this.CheckDisposed();
+            if (this.logDebug)
+            {
+                this.Logger.LogDebug("Clear cache invoked.");
+            }
+
             foreach (var handle in this.cacheHandles)
             {
+                if (this.logTrace)
+                {
+                    this.Logger.LogTrace("Clearing handle {0}.", handle.Configuration.HandleName);
+                }
+
                 handle.Clear();
                 handle.Stats.OnClear();
             }
 
             if (this.Configuration.HasBackPlate)
             {
+                if (this.logDebug)
+                {
+                    this.Logger.LogDebug("Clear: notify back plate.");
+                }
+
                 this.cacheBackPlate.NotifyClear();
             }
 
@@ -360,14 +381,29 @@ namespace CacheManager.Core
         {
             NotNullOrWhiteSpace(region, nameof(region));
 
+            this.CheckDisposed();
+            if (this.logDebug)
+            {
+                this.Logger.LogDebug("Clear region {0}.", region);
+            }
+
             foreach (var handle in this.cacheHandles)
             {
+                if (this.logTrace)
+                {
+                    this.Logger.LogTrace("Clearing region {0} in handle {1}.", region, handle.Configuration.HandleName);
+                }
+
                 handle.ClearRegion(region);
                 handle.Stats.OnClearRegion(region);
             }
 
             if (this.Configuration.HasBackPlate)
             {
+                if (this.logDebug)
+                {
+                    this.Logger.LogDebug("Clear region {0}: notify backplate.", region);
+                }
                 this.cacheBackPlate.NotifyClearRegion(region);
             }
 
@@ -383,8 +419,19 @@ namespace CacheManager.Core
         /// <param name="timeout">The expiration timeout.</param>
         public override void Expire(string key, ExpirationMode mode, TimeSpan timeout)
         {
+            this.CheckDisposed();
+            if (this.logDebug)
+            {
+                this.Logger.LogDebug("Expire {0}.", key);
+            }
+
             foreach (var handle in this.cacheHandles)
             {
+                if (this.logTrace)
+                {
+                    this.Logger.LogTrace("Expire {0} on handle {1}.", key, handle.Configuration.HandleName);
+                }
+
                 handle.Expire(key, mode, timeout);
             }
         }
@@ -399,8 +446,19 @@ namespace CacheManager.Core
         /// <param name="timeout">The expiration timeout.</param>
         public override void Expire(string key, string region, ExpirationMode mode, TimeSpan timeout)
         {
+            this.CheckDisposed();
+            if (this.logDebug)
+            {
+                this.Logger.LogDebug("Expire {0} {1}.", key, region);
+            }
+
             foreach (var handle in this.cacheHandles)
             {
+                if (this.logTrace)
+                {
+                    this.Logger.LogTrace("Expire {0} {1} on handle {2}.", key, region, handle.Configuration.HandleName);
+                }
+
                 handle.Expire(key, region, mode, timeout);
             }
         }
@@ -689,14 +747,29 @@ namespace CacheManager.Core
         {
             NotNull(item, nameof(item));
 
+            this.CheckDisposed();
+            if (this.logDebug)
+            {
+                this.Logger.LogDebug("Add", item);
+            }
+
             var result = false;
 
             // also inverse it, so that the lowest level gets invoked first
             for (int handleIndex = this.cacheHandles.Length - 1; handleIndex >= 0; handleIndex--)
             {
                 var handle = this.cacheHandles[handleIndex];
+
                 if (AddItemToHandle(item, handle))
                 {
+                    if (this.logTrace)
+                    {
+                        this.Logger.LogTrace(
+                            "Add: added {0} {1} to handle {2}",
+                            item.Key,
+                            item.Region,
+                            handle.Configuration.HandleName);
+                    }
                     result = true;
                 }
                 else
@@ -708,6 +781,14 @@ namespace CacheManager.Core
                     // when we return false...
                     // Note: we might also just have added the item to a cache handel a level below,
                     //       this will get removed, too!
+                    if (this.logTrace)
+                    {
+                        this.Logger.LogTrace(
+                            "AddInternal: adding {0} {1} to handle {2} FAILED. Evicting items from other handles.",
+                            item.Key,
+                            item.Region,
+                            handle.Configuration.HandleName);
+                    }
                     this.EvictFromOtherHandles(item.Key, item.Region, handleIndex);
                     return false;
                 }
@@ -731,6 +812,12 @@ namespace CacheManager.Core
         {
             NotNull(item, nameof(item));
 
+            this.CheckDisposed();
+            if (this.logDebug)
+            {
+                this.Logger.LogDebug("Put", item);
+            }
+
             foreach (var handle in this.cacheHandles)
             {
                 if (handle.Configuration.EnableStatistics)
@@ -743,6 +830,15 @@ namespace CacheManager.Core
                         handle.GetCacheItem(item.Key, item.Region);
 
                     handle.Stats.OnPut(item, oldItem == null);
+                }
+
+                if (this.logTrace)
+                {
+                    this.Logger.LogTrace(
+                        "Putting {0} {1} to handle {2}.",
+                        item.Key,
+                        item.Region,
+                        handle.Configuration.HandleName);
                 }
 
                 handle.Put(item);
@@ -807,7 +903,14 @@ namespace CacheManager.Core
         /// </exception>
         protected override CacheItem<TCacheValue> GetCacheItemInternal(string key, string region)
         {
+            this.CheckDisposed();
+
             CacheItem<TCacheValue> cacheItem = null;
+
+            if (this.logDebug)
+            {
+                this.Logger.LogDebug("GetCacheItemInternal {0} {1}.", key, region);
+            }
 
             for (int handleIndex = 0; handleIndex < this.cacheHandles.Length; handleIndex++)
             {
@@ -825,6 +928,11 @@ namespace CacheManager.Core
 
                 if (cacheItem != null)
                 {
+                    if (this.logTrace)
+                    {
+                        this.Logger.LogTrace("Item {0} {1} found in handle {2}.", key, region, handle.Configuration.HandleName);
+                    }
+
                     // update last accessed, might be used for custom sliding implementations
                     cacheItem.LastAccessedUtc = DateTime.UtcNow;
 
@@ -836,6 +944,11 @@ namespace CacheManager.Core
                 }
                 else
                 {
+                    if (this.logTrace)
+                    {
+                        this.Logger.LogTrace("Item {0} {1} NOT found in handle {2}.", key, region, handle.Configuration.HandleName);
+                    }
+
                     handle.Stats.OnMiss(region);
                 }
             }
@@ -867,7 +980,14 @@ namespace CacheManager.Core
         /// </exception>
         protected override bool RemoveInternal(string key, string region)
         {
+            this.CheckDisposed();
+
             var result = false;
+
+            if (this.logTrace)
+            {
+                this.Logger.LogTrace("RemoveInternal {0} {1}.", key, region);
+            }
 
             foreach (var handle in this.cacheHandles)
             {
@@ -883,6 +1003,14 @@ namespace CacheManager.Core
 
                 if (handleResult)
                 {
+                    if (this.logTrace)
+                    {
+                        this.Logger.LogTrace(
+                            "RemoveInternal removed {0} {1} from handle {2}.",
+                            key,
+                            region,
+                            handle.Configuration.HandleName);
+                    }
                     result = true;
                     handle.Stats.OnRemove(region);
                 }
@@ -893,6 +1021,11 @@ namespace CacheManager.Core
                 // update back plate
                 if (this.Configuration.HasBackPlate)
                 {
+                    if (this.logTrace)
+                    {
+                        this.Logger.LogTrace("RemoveInternal noties backplate after removing {0} {1}.", key, region);
+                    }
+
                     if (string.IsNullOrWhiteSpace(region))
                     {
                         this.cacheBackPlate.NotifyRemove(key);
@@ -910,22 +1043,42 @@ namespace CacheManager.Core
             return result;
         }
 
+        private static bool AddItemToHandle(CacheItem<TCacheValue> item, BaseCacheHandle<TCacheValue> handle)
+        {
+            if (handle.Add(item))
+            {
+                handle.Stats.OnAdd(item);
+                return true;
+            }
+
+            return false;
+        }
+
         /// <summary>
         /// Evicts a cache item from <paramref name="handles"/>.
         /// </summary>
         /// <param name="key">The key.</param>
         /// <param name="region">The region.</param>
         /// <param name="handles">The handles.</param>
-        private static void EvictFromHandles(string key, string region, BaseCacheHandle<TCacheValue>[] handles)
+        private void EvictFromHandles(string key, string region, BaseCacheHandle<TCacheValue>[] handles)
         {
             foreach (var handle in handles)
             {
-                EvictFromHandle(key, region, handle);
+                this.EvictFromHandle(key, region, handle);
             }
         }
 
-        private static void EvictFromHandle(string key, string region, BaseCacheHandle<TCacheValue> handle)
+        private void EvictFromHandle(string key, string region, BaseCacheHandle<TCacheValue> handle)
         {
+            if (this.logTrace)
+            {
+                this.Logger.LogTrace(
+                    "EvictFromHandle got triggered for {0} {1} on handle {2}.",
+                    key,
+                    region,
+                    handle.Configuration.HandleName);
+            }
+
             bool result;
             if (string.IsNullOrWhiteSpace(region))
             {
@@ -942,17 +1095,6 @@ namespace CacheManager.Core
             }
         }
 
-        private static bool AddItemToHandle(CacheItem<TCacheValue> item, BaseCacheHandle<TCacheValue> handle)
-        {
-            if (handle.Add(item))
-            {
-                handle.Stats.OnAdd(item);
-                return true;
-            }
-
-            return false;
-        }
-
         /// <summary>
         /// Adds or updates an item.
         /// </summary>
@@ -962,25 +1104,60 @@ namespace CacheManager.Core
         /// <returns>The added or updated value.</returns>
         private TCacheValue AddOrUpdateInternal(CacheItem<TCacheValue> item, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config)
         {
+            this.CheckDisposed();
+            if (this.logTrace)
+            {
+                this.Logger.LogTrace("AddOrUpdateInternal for {0} {1}.", item.Key, item.Region);
+            }
+
             var tries = 0;
             do
             {
                 tries++;
-                TCacheValue returnValue;
-                bool updated = string.IsNullOrWhiteSpace(item.Region) ?
-                    this.TryUpdate(item.Key, updateValue, config, out returnValue) :
-                    this.TryUpdate(item.Key, item.Region, updateValue, config, out returnValue);
 
-                if (updated)
+                // if the update didn't work, lets try to add it
+                if (this.AddInternal(item))
                 {
-                    return returnValue;
+                    if (this.logTrace)
+                    {
+                        this.Logger.LogTrace("AddOrUpdateInternal added {0} {1}.", item.Key, item.Region);
+                    }
+
+                    return item.Value;
                 }
                 else
                 {
-                    // if the update didn't work, lets try to add it
-                    if (this.AddInternal(item))
+                    if (this.logTrace)
                     {
-                        return item.Value;
+                        this.Logger.LogTrace(
+                            "AddOrUpdateInternal Add failed for {0} {1}, trying to update.",
+                            item.Key,
+                            item.Region);
+                    }
+
+                    TCacheValue returnValue;
+                    bool updated = string.IsNullOrWhiteSpace(item.Region) ?
+                        this.TryUpdate(item.Key, updateValue, config, out returnValue) :
+                        this.TryUpdate(item.Key, item.Region, updateValue, config, out returnValue);
+
+                    if (updated)
+                    {
+                        if (this.logTrace)
+                        {
+                            this.Logger.LogTrace("AddOrUpdateInternal updated {0} {1}.", item.Key, item.Region);
+                        }
+
+                        return returnValue;
+                    }
+
+                    if (this.logTrace)
+                    {
+                        this.Logger.LogTrace(
+                            "AddOrUpdateInternal Update didn't work for {0} {1}, retrying {2} of {3}",
+                            item.Key,
+                            item.Region,
+                            tries,
+                            this.Configuration.MaxRetries);
                     }
                     //// Continue looping otherwise...
                     //// Add also didn't work, meaning the item is already there/someone added it in
@@ -1000,6 +1177,15 @@ namespace CacheManager.Core
         /// <param name="foundIndex">The index of the cache handle the item was found in.</param>
         private void AddToHandles(CacheItem<TCacheValue> item, int foundIndex)
         {
+            if (this.logTrace)
+            {
+                this.Logger.LogTrace(
+                    "AddToHandles {0} {1} with update mode {2}.",
+                    item.Key,
+                    item.Region,
+                    this.Configuration.CacheUpdateMode);
+            }
+
             switch (this.Configuration.CacheUpdateMode)
             {
                 case CacheUpdateMode.None:
@@ -1012,6 +1198,11 @@ namespace CacheManager.Core
                     {
                         if (handleIndex != foundIndex)
                         {
+                            if (this.logTrace)
+                            {
+                                this.Logger.LogTrace("AddToHandles {0} {1} to handle {2}", item.Key, item.Region, handleIndex);
+                            }
+
                             this.cacheHandles[handleIndex].Add(item);
                         }
                     }
@@ -1030,6 +1221,11 @@ namespace CacheManager.Core
                     {
                         if (handleIndex < foundIndex)
                         {
+                            if (this.logTrace)
+                            {
+                                this.Logger.LogTrace("AddToHandles {0} {1} to handle {2}", item.Key, item.Region, handleIndex);
+                            }
+
                             this.cacheHandles[handleIndex].Add(item);
                         }
                     }
@@ -1043,6 +1239,11 @@ namespace CacheManager.Core
             if (item == null)
             {
                 return;
+            }
+
+            if (this.logTrace)
+            {
+                this.Logger.LogTrace("AddToHandlesBelow {0} {1} found in {2}.", item.Key, item.Region, foundIndex);
             }
 
             for (int handleIndex = 0; handleIndex < this.cacheHandles.Length; handleIndex++)
@@ -1102,17 +1303,27 @@ namespace CacheManager.Core
                 throw new ArgumentOutOfRangeException(nameof(excludeIndex));
             }
 
+            if (this.logTrace)
+            {
+                this.Logger.LogTrace("EvictFromOtherHandles {0} {1} excluding {2}.", key, region, excludeIndex);
+            }
+
             for (int handleIndex = 0; handleIndex < this.cacheHandles.Length; handleIndex++)
             {
                 if (handleIndex != excludeIndex)
                 {
-                    EvictFromHandle(key, region, this.cacheHandles[handleIndex]);
+                    this.EvictFromHandle(key, region, this.cacheHandles[handleIndex]);
                 }
             }
         }
 
         private void EvictFromHandlesAbove(string key, string region, int excludeIndex)
         {
+            if (this.logTrace)
+            {
+                this.Logger.LogTrace("EvictFromHandlesAbove {0} {1} excluding {2}.", key, region, excludeIndex);
+            }
+
             if (excludeIndex < 0 || excludeIndex >= this.cacheHandles.Length)
             {
                 throw new ArgumentOutOfRangeException(nameof(excludeIndex));
@@ -1122,7 +1333,7 @@ namespace CacheManager.Core
             {
                 if (handleIndex < excludeIndex)
                 {
-                    EvictFromHandle(key, region, this.cacheHandles[handleIndex]);
+                    this.EvictFromHandle(key, region, this.cacheHandles[handleIndex]);
                 }
             }
         }
@@ -1158,34 +1369,64 @@ namespace CacheManager.Core
 
                 backPlate.SubscribeChanged((key) =>
                 {
-                    EvictFromHandles(key, null, handles());
+                    if (this.logDebug)
+                    {
+                        this.Logger.LogDebug("Back-plate event [Changed] on {0}.", key);
+                    }
+
+                    this.EvictFromHandles(key, null, handles());
                 });
 
                 backPlate.SubscribeChanged((key, region) =>
                 {
-                    EvictFromHandles(key, region, handles());
+                    if (this.logDebug)
+                    {
+                        this.Logger.LogDebug("Back-plate event [Changed] on {0} {1}.", key, region);
+                    }
+
+                    this.EvictFromHandles(key, region, handles());
                 });
 
                 backPlate.SubscribeRemove((key) =>
                 {
-                    EvictFromHandles(key, null, handles());
+                    if (this.logDebug)
+                    {
+                        this.Logger.LogDebug("Back-plate event [Remove] on {0}.", key);
+                    }
+
+                    this.EvictFromHandles(key, null, handles());
                     this.TriggerOnRemove(key, null);
                 });
 
                 backPlate.SubscribeRemove((key, region) =>
                 {
-                    EvictFromHandles(key, region, handles());
+                    if (this.logDebug)
+                    {
+                        this.Logger.LogDebug("Back-plate event [Remove] on {0} {1}.", key, region);
+                    }
+
+                    this.EvictFromHandles(key, region, handles());
                     this.TriggerOnRemove(key, region);
                 });
 
                 backPlate.SubscribeClear(() =>
                 {
+                    if (this.logDebug)
+                    {
+                        this.Logger.LogDebug("Back-plate event [Clear].");
+                    }
+
                     this.ClearHandles(handles());
                     this.TriggerOnClear();
                 });
 
                 backPlate.SubscribeClearRegion((region) =>
                 {
+                    if (this.logDebug)
+                    {
+                        this.Logger.LogDebug("Back-plate event [ClearRegion] region: {0}.", region);
+                    }
+
                     this.ClearRegionHandles(region, handles());
                     this.TriggerOnClearRegion(region);
                 });
@@ -1323,6 +1564,8 @@ namespace CacheManager.Core
         /// <returns><c>True</c> if the item has been updated.</returns>
         private bool UpdateInternal(BaseCacheHandle<TCacheValue>[] handles, string key, string region, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config, out TCacheValue value)
         {
+            this.CheckDisposed();
+
             UpdateItemResultState overallResult = UpdateItemResultState.Success;
             bool overallVersionConflictOccurred = false;
             int overallTries = 1;
@@ -1335,6 +1578,11 @@ namespace CacheManager.Core
                 return false;
             }
 
+            if (this.logDebug)
+            {
+                this.Logger.LogDebug("UpdateInternal {0} {1}", key, region);
+            }
+
             // lowest level goes first...
             for (int handleIndex = handles.Length - 1; handleIndex >= 0; handleIndex--)
             {
@@ -1343,6 +1591,16 @@ namespace CacheManager.Core
                 UpdateItemResult<TCacheValue> result = string.IsNullOrWhiteSpace(region) ?
                     handle.Update(key, updateValue, config) :
                     handle.Update(key, region, updateValue, config);
+
+                if (this.logTrace)
+                {
+                    this.Logger.LogTrace(
+                        "UpdateInternal {0} {1} on handle {2} result: {3}.",
+                        key,
+                        region,
+                        handle.Configuration.HandleName,
+                        result.UpdateState);
+                }
 
                 if (result.VersionConflictOccurred)
                 {
@@ -1414,6 +1672,11 @@ namespace CacheManager.Core
             // update back plate
             if (overallResult == UpdateItemResultState.Success && this.Configuration.HasBackPlate)
             {
+                if (this.logTrace)
+                {
+                    this.Logger.LogTrace("UpdateInternal: notify backplate {0} {1}.", key, region);
+                }
+
                 if (string.IsNullOrWhiteSpace(region))
                 {
                     this.cacheBackPlate.NotifyChange(key);

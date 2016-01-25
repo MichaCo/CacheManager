@@ -4,6 +4,7 @@ using System.Web;
 using System.Web.Caching;
 using CacheManager.Core;
 using CacheManager.Core.Internal;
+using CacheManager.Core.Logging;
 using static CacheManager.Core.Utility.Guard;
 
 namespace CacheManager.Web
@@ -30,6 +31,9 @@ namespace CacheManager.Web
             : base(manager, configuration)
         {
             NotNull(configuration, nameof(configuration));
+            NotNull(manager, nameof(manager));
+
+            this.Logger = manager.Configuration.LoggerFactory.CreateLogger(this);
 
             this.instanceKey = Guid.NewGuid().ToString();
 
@@ -48,6 +52,9 @@ namespace CacheManager.Web
         /// </summary>
         /// <value>The http context instance.</value>
         protected virtual HttpContextBase Context => ContextFactory.CreateContext();
+
+        /// <inheritdoc />
+        protected override ILogger Logger { get; }
 
         /// <summary>
         /// Clears this cache, removing all items in the base cache and all regions.

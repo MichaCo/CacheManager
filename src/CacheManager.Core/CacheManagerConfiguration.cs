@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using CacheManager.Core.Internal;
+using CacheManager.Core.Logging;
 using static CacheManager.Core.Utility.Guard;
 
 namespace CacheManager.Core
@@ -15,6 +16,7 @@ namespace CacheManager.Core
         /// </summary>
         public CacheManagerConfiguration()
         {
+            this.LoggerFactory = new NullLoggerFactory();
 #if !PORTABLE && !DOTNET5_2
             // default to binary serialization if available
             this.CacheSerializer = new BinaryCacheSerializer();
@@ -30,6 +32,7 @@ namespace CacheManager.Core
         /// <param name="backPlateConfigurationKey">The name of the cache back plate's configuration.</param>
         /// <param name="backPlateType">The type of the cache back plate implementation.</param>
         /// <param name="serializer">The serializer to be used to serialize the cache item.</param>
+        /// <param name="loggerFactory">The logger factory.</param>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "We use it for configuration only.")]
         public CacheManagerConfiguration(
             CacheUpdateMode mode = CacheUpdateMode.None,
@@ -37,7 +40,8 @@ namespace CacheManager.Core
             int retryTimeout = 10,
             Type backPlateType = null,
             string backPlateConfigurationKey = null,
-            ICacheSerializer serializer = null)
+            ICacheSerializer serializer = null,
+            ILoggerFactory loggerFactory = null)
             : this()
         {
             this.CacheUpdateMode = mode;
@@ -51,6 +55,7 @@ namespace CacheManager.Core
 #else
             this.CacheSerializer = serializer;
 #endif
+            this.LoggerFactory = loggerFactory ?? new NullLoggerFactory();
         }
 
         /// <summary>
@@ -110,6 +115,14 @@ namespace CacheManager.Core
         /// </value>
         public bool HasBackPlate => this.BackPlateType != null;
 
+        /// <summary>
+        /// Gets the logger factory.
+        /// </summary>
+        /// <value>
+        /// The logger factory.
+        /// </value>
+        public ILoggerFactory LoggerFactory { get; private set; }
+
         internal IList<CacheHandleConfiguration> CacheHandleConfigurations { get; } = new List<CacheHandleConfiguration>();
 
         internal void WithBackPlate(Type backPlateType, string backPlateName, string channelName = null)
@@ -127,6 +140,13 @@ namespace CacheManager.Core
             NotNull(instance, nameof(instance));
 
             this.CacheSerializer = instance;
+        }
+
+        internal void WithLoggerFactory(ILoggerFactory loggerFactory)
+        {
+            NotNull(loggerFactory, nameof(loggerFactory));
+
+            this.LoggerFactory = loggerFactory;
         }
     }
 }

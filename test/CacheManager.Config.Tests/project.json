@@ -6,10 +6,12 @@
   "projectUrl": "http://www.cachemanager.net",
   "licenseUrl": "https://github.com/MichaCo/CacheManager/blob/master/LICENSE",
   "dependencies": {
+    "CacheManager.AspNetCore.Logging": "",
     "CacheManager.Core": "",
     "CacheManager.Serialization.Json": "",
-    "Newtonsoft.Json": "6.0.8",
-    "Microsoft.Dnx.Runtime.Abstractions": "1.0.0-*"
+    "Microsoft.Extensions.Logging.Console": "1.0.0-*",
+    "Microsoft.Extensions.Logging.Debug": "1.0.0-*",
+    "Newtonsoft.Json": "6.0.8"
   },
   "commands": {
     "run": "CacheManager.Config.Tests"

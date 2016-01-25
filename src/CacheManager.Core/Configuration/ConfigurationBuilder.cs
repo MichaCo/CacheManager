@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using CacheManager.Core.Internal;
+using CacheManager.Core.Logging;
 
 #if !PORTABLE && !DOTNET5_2
 using System.Configuration;
@@ -638,6 +639,17 @@ namespace CacheManager.Core
             var instance = CacheReflectionHelper.CreateSerializer(serializerType, args);
 
             this.Configuration.WithSerializer(instance);
+            return this;
+        }
+
+        /// <summary>
+        /// Enables logging by setting the <see cref="ILoggerFactory"/> for the cache manager instance.
+        /// </summary>
+        /// <param name="loggerFactory">The logger factory to be used by the cache manager instance.</param>
+        /// <returns>The builder part.</returns>
+        public ConfigurationBuilderCachePart WithLogging(ILoggerFactory loggerFactory)
+        {
+            this.Configuration.WithLoggerFactory(loggerFactory);
             return this;
         }
     }

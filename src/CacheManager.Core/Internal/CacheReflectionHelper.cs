@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
+using CacheManager.Core.Logging;
 using static CacheManager.Core.Utility.Guard;
 
 namespace CacheManager.Core.Internal
@@ -28,13 +29,14 @@ namespace CacheManager.Core.Internal
             return (ICacheSerializer)Activator.CreateInstance(serializerType, args);
         }
 
-        internal static ICollection<BaseCacheHandle<TCacheValue>> CreateCacheHandles<TCacheValue>(BaseCacheManager<TCacheValue> manager)
+        internal static ICollection<BaseCacheHandle<TCacheValue>> CreateCacheHandles<TCacheValue>(BaseCacheManager<TCacheValue> manager, ILogger logger)
         {
             var managerConfiguration = manager.Configuration;
             var handles = new List<BaseCacheHandle<TCacheValue>>();
 
             foreach (var handleConfiguration in managerConfiguration.CacheHandleConfigurations)
             {
+                logger.LogInfo("Creating handle {0} of type {1}.", handleConfiguration.HandleName, handleConfiguration.HandleType);
                 Type handleType = handleConfiguration.HandleType;
                 Type instanceType = null;
 

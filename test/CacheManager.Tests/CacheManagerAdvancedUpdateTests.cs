@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using CacheManager.Core;
 using CacheManager.Core.Internal;
+using CacheManager.Core.Logging;
 using FluentAssertions;
 using Xunit;
 
@@ -321,6 +322,7 @@ namespace CacheManager.Tests
         public MockCacheHandle(ICacheManager<TCacheValue> manager, CacheHandleConfiguration configuration)
             : base(manager, configuration)
         {
+            this.Logger = manager.Configuration.LoggerFactory.CreateLogger(this);
             this.AddCall = () => true;
             this.PutCall = () => { };
             this.RemoveCall = () => { };
@@ -340,6 +342,8 @@ namespace CacheManager.Tests
         public UpdateItemResult<TCacheValue> UpdateValue { get; set; }
 
         public override int Count => 0;
+
+        protected override ILogger Logger { get; }
 
         public override void Clear()
         {
