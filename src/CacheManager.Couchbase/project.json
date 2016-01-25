@@ -30,7 +30,7 @@
   },
   "dependencies": {
     "CacheManager.Core": "",
-    "CouchbaseNetClient": "2.1.1",
+    "CouchbaseNetClient": "2.2.4",
     "Newtonsoft.Json": "6.0.8"
   },
   "frameworks": {

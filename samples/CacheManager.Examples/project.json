@@ -1,4 +1,4 @@
-﻿{
+{
   "version": "1.0.0-*",
   "description": "CacheManager.Examples Console Application",
   "authors": [ "MICHA" ],
@@ -11,9 +11,11 @@
   },
 
   "dependencies": {
+    "CacheManager.AspNetCore.Logging": "0.7.2-*",
     "CacheManager.Core": "",
-    "CacheManager.SystemRuntimeCaching": "",
     "CacheManager.StackExchange.Redis": "",
+    "CacheManager.SystemRuntimeCaching": "",
+    "Microsoft.Extensions.Logging.Console": "1.0.0-rc2-15958",
     "Unity": "4.0.2"
   },
 

@@ -848,7 +848,7 @@ namespace CacheManager.Core
             // update back plate
             if (this.Configuration.HasBackPlate)
             {
-                if (logTrace)
+                if (this.logTrace)
                 {
                     this.Logger.LogTrace("Put: notify backplate change {0} {1}", item.Key, item.Region);
                 }

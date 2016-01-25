@@ -1,5 +1,6 @@
 ﻿using System;
 using CacheManager.Core;
+using Microsoft.Extensions.Logging;
 #if NET45
 using Microsoft.Practices.Unity;
 #else
@@ -20,10 +21,24 @@ namespace CacheManager.Examples
             SimpleCustomBuildConfigurationUsingFactory();
             UpdateTest();
             UpdateCounterTest();
+            LoggingSample();
 
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Press any key to exit...");
             Console.ReadKey();
+        }
+
+        private static void LoggingSample()
+        {
+            var cache = CacheFactory.Build<string>(
+                c =>
+                c.WithAspNetLogging(log => log.AddConsole(LogLevel.Trace))
+                .WithSystemRuntimeDefaultCacheHandle());
+
+            cache.AddOrUpdate("myKey", "someregion", "value", _ => "new value");
+            cache.AddOrUpdate("myKey", "someregion", "value", _ => "new value");
+            cache.Expire("myKey", "someregion", TimeSpan.FromMinutes(10));
+            var val = cache.Get("myKey", "someregion");
         }
 
         private static void AppConfigLoadInstalledCacheCfg()
