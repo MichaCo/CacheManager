@@ -74,6 +74,10 @@ Serialization is only needed in distributed caches. The default implementation u
 * **Update values with lock or transaction** for distributed caches. 
 The interfaced provides a simple update method which internally ensures you work with the latest version.
 And CacheManager handles version conflicts for you.
+* **Logging** CacheManager comes with an extensible logging API ([see samples] (https://github.com/MichaCo/CacheManager/blob/master/samples/CacheManager.Examples/Program.cs#L31)).
+    * All standard cache operations are logged
+    * Based on log levels more or less information will be logged (try Trace and Debug)
+    * Current concrete implementation is based on the ASP.NET Core logging. Other implementation of CacheManager's ILoggerFactory might follow.
 * **Strongly typed** cache interface.
 * **Multiple layers**
 By having multiple cache handles managed by CacheManager, you can easily implement layered caches. For example an in process cache infront of your distributed cache, to make read access faster.
