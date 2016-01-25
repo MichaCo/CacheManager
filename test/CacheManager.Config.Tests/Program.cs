@@ -20,7 +20,7 @@ namespace CacheManager.Config.Tests
                 {
                     cfg.WithAspNetLogging(f => f
                         .AddConsole(LogLevel.Information)
-                        .AddDebug(LogLevel.Debug));
+                        .AddDebug(LogLevel.Trace));
 
                     cfg.WithUpdateMode(CacheUpdateMode.Up);
                     cfg.WithRetryTimeout(100);

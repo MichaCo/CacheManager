@@ -361,9 +361,9 @@ namespace CacheManager.Core
 
             if (this.Configuration.HasBackPlate)
             {
-                if (this.logDebug)
+                if (this.logTrace)
                 {
-                    this.Logger.LogDebug("Clear: notify back plate.");
+                    this.Logger.LogTrace("Clear: notify back plate.");
                 }
 
                 this.cacheBackPlate.NotifyClear();
@@ -400,10 +400,11 @@ namespace CacheManager.Core
 
             if (this.Configuration.HasBackPlate)
             {
-                if (this.logDebug)
+                if (this.logTrace)
                 {
-                    this.Logger.LogDebug("Clear region {0}: notify backplate.", region);
+                    this.Logger.LogTrace("Clear region {0}: notify backplate.", region);
                 }
+
                 this.cacheBackPlate.NotifyClearRegion(region);
             }
 
@@ -847,6 +848,11 @@ namespace CacheManager.Core
             // update back plate
             if (this.Configuration.HasBackPlate)
             {
+                if (logTrace)
+                {
+                    this.Logger.LogTrace("Put: notify backplate change {0} {1}", item.Key, item.Region);
+                }
+
                 if (string.IsNullOrWhiteSpace(item.Region))
                 {
                     this.cacheBackPlate.NotifyChange(item.Key);
@@ -984,9 +990,9 @@ namespace CacheManager.Core
 
             var result = false;
 
-            if (this.logTrace)
+            if (this.logDebug)
             {
-                this.Logger.LogTrace("RemoveInternal {0} {1}.", key, region);
+                this.Logger.LogDebug("RemoveInternal {0} {1}.", key, region);
             }
 
             foreach (var handle in this.cacheHandles)
@@ -1023,7 +1029,7 @@ namespace CacheManager.Core
                 {
                     if (this.logTrace)
                     {
-                        this.Logger.LogTrace("RemoveInternal noties backplate after removing {0} {1}.", key, region);
+                        this.Logger.LogTrace("RemoveInternal notify backplate remove {0} {1}.", key, region);
                     }
 
                     if (string.IsNullOrWhiteSpace(region))
@@ -1674,7 +1680,7 @@ namespace CacheManager.Core
             {
                 if (this.logTrace)
                 {
-                    this.Logger.LogTrace("UpdateInternal: notify backplate {0} {1}.", key, region);
+                    this.Logger.LogTrace("UpdateInternal: notify backplate change {0} {1}.", key, region);
                 }
 
                 if (string.IsNullOrWhiteSpace(region))
