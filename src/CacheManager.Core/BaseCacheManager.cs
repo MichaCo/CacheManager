@@ -782,14 +782,15 @@ namespace CacheManager.Core
                     // when we return false...
                     // Note: we might also just have added the item to a cache handel a level below,
                     //       this will get removed, too!
-                    if (this.logTrace)
+                    if (this.logDebug)
                     {
-                        this.Logger.LogTrace(
+                        this.Logger.LogDebug(
                             "AddInternal: adding {0} {1} to handle {2} FAILED. Evicting items from other handles.",
                             item.Key,
                             item.Region,
                             handle.Configuration.HandleName);
                     }
+
                     this.EvictFromOtherHandles(item.Key, item.Region, handleIndex);
                     return false;
                 }
@@ -1632,13 +1633,19 @@ namespace CacheManager.Core
                     this.AddToHandlesBelow(item, handleIndex);
                     break;
                 }
-                else if (result.UpdateState != UpdateItemResultState.ItemDidNotExist)
+                else if (result.UpdateState == UpdateItemResultState.TooManyRetries)
                 {
                     // only if the item does not exist in the current handle, we procceed the
                     // loop... otherwise, we had too many retries... this basically indicates an
                     // invalide state of the cache: The item is there, but we couldn't update it and
                     // it most likely has a different version
                     // TODO: logging
+                    this.Logger.LogWarn(
+                        "Update on handle {2} failed with too many retries. Evicting {0} {1} from other handles...",
+                        key,
+                        region,
+                        handleIndex);
+
                     this.EvictFromOtherHandles(key, region, handleIndex);
                     break;
                 }

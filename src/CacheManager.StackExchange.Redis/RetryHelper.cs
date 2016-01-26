@@ -29,7 +29,7 @@ namespace CacheManager.Redis
                         throw;
                     }
 
-                    logger.LogWarn("Exception occurred. Retrying...", ex);
+                    logger.LogWarn(ex, "Exception occurred. retrying... {0}/{1}", tries, retries);
 #if NET40
                     TaskEx.Delay(timeOut).Wait();
 #else
@@ -44,7 +44,7 @@ namespace CacheManager.Redis
                         throw;
                     }
 
-                    logger.LogWarn("Exception occurred. Retrying...", ex);
+                    logger.LogWarn(ex, "Exception occurred. retrying... {0}/{1}", tries, retries);
 #if NET40
                     TaskEx.Delay(timeOut).Wait();
 #else
@@ -59,7 +59,7 @@ namespace CacheManager.Redis
                         throw;
                     }
 
-                    logger.LogWarn("Exception occurred. Retrying...", ex);
+                    logger.LogWarn(ex, "Exception occurred. retrying... {0}/{1}", tries, retries);
 #if NET40
                     TaskEx.Delay(timeOut).Wait();
 #else
@@ -76,20 +76,9 @@ namespace CacheManager.Redis
 
                     aggregateException.Handle(e =>
                     {
-                        ////var connectionException = e as StackRedis.RedisConnectionException;
-                        ////if (connectionException != null)
-                        ////{
-                        ////    if (connectionException.FailureType == StackRedis.ConnectionFailureType.UnableToConnect
-                        ////        || connectionException.FailureType == StackRedis.ConnectionFailureType.AuthenticationFailure
-                        ////        || connectionException.FailureType == StackRedis.ConnectionFailureType.UnableToResolvePhysicalConnection)
-                        ////    {
-                        ////        throw connectionException;
-                        ////    }
-                        ////}
-
-                        if (e is StackRedis.RedisConnectionException || e is System.TimeoutException)
+                        if (e is StackRedis.RedisConnectionException || e is System.TimeoutException || e is StackRedis.RedisServerException)
                         {
-                            logger.LogWarn("Exception occurred. Retrying...", aggregateException);
+                            logger.LogWarn(e, "Exception occurred. retrying... {0}/{1}", tries, retries);
 #if NET40
                             TaskEx.Delay(timeOut).Wait();
 #else

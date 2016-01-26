@@ -64,9 +64,9 @@ end
 return result";
 
         // TODO: use edit flag on the hash to increment and check on that instead of the full value
-        private static readonly string ScriptUpdate = @"
-if redis.call('HGET', @key, @valField) == @oldVal then
-    return redis.call('HSET', @key, @valField, @val)
+        private static readonly string ScriptUpdate = $@"
+if redis.call('HGET', KEYS[1], '{HashFieldValue}') == ARGV[2] then
+    return redis.call('HSET', KEYS[1], '{HashFieldValue}', ARGV[1])
 else
     return nil
 end";
@@ -90,7 +90,7 @@ return result";
 
         // flag if scripts are initially loaded to the server
         private bool scriptsLoaded = false;
-        private object loadScriptLock = new object();
+        private object lockObject = new object();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RedisCacheHandle{TCacheValue}"/> class.
@@ -148,7 +148,13 @@ return result";
         /// <inheritdoc />
         protected override ILogger Logger { get; }
 
-        private StackRedis.ConnectionMultiplexer Connection => RedisConnectionPool.Connect(this.RedisConfiguration);
+        private StackRedis.ConnectionMultiplexer Connection
+        {
+            get
+            {
+                return RedisConnectionPool.Connect(this.RedisConfiguration);
+            }
+        }
 
         private StackRedis.IDatabase Database
         {
@@ -156,16 +162,21 @@ return result";
             {
                 if (this.database == null)
                 {
-                    this.Retry(() =>
+                    lock (this.lockObject)
                     {
-                        this.database = this.Connection.GetDatabase(this.RedisConfiguration.Database);
+                        if (this.database == null)
+                        {
+                            this.Retry(() =>
+                            {
+                                this.database = this.Connection.GetDatabase(this.RedisConfiguration.Database);
 
-                        this.database.Ping();
-                    });
+                                this.database.Ping();
+                            });
+                        }
+                    }
                 }
 
                 return this.database;
-                //// return this.Connection.GetDatabase(this.RedisConfiguration.Database);
             }
         }
 
@@ -288,6 +299,18 @@ return result";
                 {
                     tries++;
 
+                    ////// actually slower than using the real value field, maybe suffers if the value is larger
+                    ////var version = this.Database.HashIncrement(fullKey, "version", 1L);
+                    ////var oldValueAndType = this.Database.HashGet(fullKey, new StackRedis.RedisValue[] { HashFieldValue, HashFieldType });
+                    ////var oldValue = oldValueAndType[0];
+                    ////var valueType = oldValueAndType[1];
+                    ////if (oldValue.IsNull || !oldValue.HasValue || valueType.IsNull || !valueType.HasValue)
+                    ////{
+                    ////    return UpdateItemResult.ForItemDidNotExist<TCacheValue>();
+                    ////}
+                    ////var newValue = updateValue(
+                    ////    this.FromRedisValue(oldValue, valueType.ToString()));
+
                     var item = this.GetCacheItemInternal(key, region);
 
                     if (item == null)
@@ -300,18 +323,18 @@ return result";
                     // run update
                     var newValue = updateValue(item.Value);
 
-                    var result = this.Eval(ScriptType.Update, new
+                    var result = this.Eval(ScriptType.Update, fullKey, new[]
                     {
-                        key = (StackRedis.RedisKey)fullKey,
-                        valField = HashFieldValue,
-                        val = this.ToRedisValue(newValue),
-                        oldVal = oldValue
+                        this.ToRedisValue(newValue),
+                        oldValue
                     });
 
                     if (result != null && !result.IsNull)
                     {
                         return UpdateItemResult.ForSuccess<TCacheValue>(newValue, tries > 1, tries);
                     }
+
+                    this.Logger.LogInfo("Updated of {0} {1} failed with version conflict, retrying {2}/{3}", key, region, tries, config.MaxRetries);
                 }
                 while (tries <= config.MaxRetries);
 
@@ -592,11 +615,12 @@ return result";
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA2204:Literals should be spelled correctly", MessageId = "Lua", Justification = "That's the name")]
         private StackRedis.RedisResult Eval(ScriptType scriptType, StackRedis.RedisKey redisKey, StackRedis.RedisValue[] values = null, StackRedis.CommandFlags flags = StackRedis.CommandFlags.None)
         {
             if (!this.scriptsLoaded)
             {
-                lock (this.loadScriptLock)
+                lock (this.lockObject)
                 {
                     if (!this.scriptsLoaded)
                     {
@@ -609,7 +633,8 @@ return result";
             StackRedis.LoadedLuaScript script;
             if (!this.shaScripts.TryGetValue(scriptType, out script))
             {
-                throw new InvalidOperationException("Something went wrong during loading scripts to the server.");
+                this.Logger.LogCritical("Something is wrong with the Lua scripts. Seem to be not loaded.");
+                throw new InvalidOperationException("Something is wrong with the Lua scripts. Seem to be not loaded.");
             }
 
             try
@@ -618,6 +643,7 @@ return result";
             }
             catch (StackRedis.RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.OrdinalIgnoreCase))
             {
+                this.Logger.LogInfo("Received NOSCRIPT from server during Eval. Reloading scripts...");
                 this.LoadScripts();
 
                 // retry
@@ -625,41 +651,12 @@ return result";
             }
         }
 
-        private StackRedis.RedisResult Eval(ScriptType scriptType, object parameters, StackRedis.CommandFlags flags = StackRedis.CommandFlags.None)
-        {
-            if (!this.scriptsLoaded)
-            {
-                lock (this.loadScriptLock)
-                {
-                    if (!this.scriptsLoaded)
-                    {
-                        this.LoadScripts();
-                        this.scriptsLoaded = true;
-                    }
-                }
-            }
-
-            StackRedis.LoadedLuaScript script;
-            if (!this.shaScripts.TryGetValue(scriptType, out script))
-            {
-                throw new InvalidOperationException("Something went wrong during loading scripts to the server.");
-            }
-
-            try
-            {
-                return this.Database.ScriptEvaluate(script, parameters, flags);
-            }
-            catch (StackRedis.RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.OrdinalIgnoreCase))
-            {
-                this.LoadScripts();
-                throw;
-            }
-        }
-
         private void LoadScripts()
         {
-            lock (this.loadScriptLock)
+            lock (this.lockObject)
             {
+                this.Logger.LogInfo("Loading lua scripts.");
+
                 var putLua = StackRedis.LuaScript.Prepare(ScriptPut);
                 var addLua = StackRedis.LuaScript.Prepare(ScriptAdd);
                 var updateLua = StackRedis.LuaScript.Prepare(ScriptUpdate);

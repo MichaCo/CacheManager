@@ -81,6 +81,8 @@ namespace CacheManager.Config.Tests
             var threads = 50;
             var items = 30000;
             long ops = 0;
+            var misses = 0;
+            var fails = 0;
 
             var rand = new Random();
             var key = "key";
@@ -88,13 +90,18 @@ namespace CacheManager.Config.Tests
 
             foreach (var cache in caches)
             {
-                cache.Clear();
-
                 for (var ta = 0; ta < items; ta++)
                 {
                     Interlocked.Increment(ref ops);
+                    ////Interlocked.Increment(ref ops);
+                    ////Interlocked.Increment(ref ops);
 
-                    // cache.AddOrUpdate(key + ta, region, "val" + ta, _ => "updated" + ta);
+                    ////var added = cache.AddOrUpdate(key + ta, region, "val" + ta, _ => "updated" + ta);
+                    ////if (added == null)
+                    ////{
+                    ////    throw new InvalidOperationException("AddOrUpdate shouldn't return null");
+                    ////}
+
                     cache.Put(key + ta, "val" + ta, region);
                     if (ta % 1000 == 0)
                     {
@@ -114,7 +121,7 @@ namespace CacheManager.Config.Tests
 
                             if (x == null)
                             {
-                                Console.Write("-");
+                                Interlocked.Increment(ref misses);
                             }
                         }
 
@@ -123,7 +130,7 @@ namespace CacheManager.Config.Tests
                         Interlocked.Increment(ref ops); // update does a get and then set = 2 ops
                         if (!cache.TryUpdate("key" + rand.Next(0, items - 1), region, v => Guid.NewGuid().ToString(), out value))
                         {
-                            throw new InvalidOperationException("really?");
+                            Interlocked.Increment(ref fails);
                         }
 
                         Console.Write(".");
@@ -131,15 +138,11 @@ namespace CacheManager.Config.Tests
                 }
 
                 Parallel.Invoke(new ParallelOptions() { MaxDegreeOfParallelism = 8 }, actions.ToArray());
-
-                cache.ClearRegion(region);
-
-                cache.Clear();
             }
 
             var elapsed = swatch.ElapsedMilliseconds;
             var opsPerSec = Math.Round(ops / swatch.Elapsed.TotalSeconds, 0);
-            Console.WriteLine("\nSimpleAddGetTest completed \tafter: {0:N} ms. \twith {1:N0} Ops/s.", elapsed, opsPerSec);
+            Console.WriteLine("\nSimpleAddGetTest completed \tafter: {0:N} ms. \twith {1:N0} Ops/s m:{2}\t f:{3}", elapsed, opsPerSec, misses, fails);
         }
 
         public static void RandomRWTest(ICacheManager<Item> cache)
