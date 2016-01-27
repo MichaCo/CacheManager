@@ -80,9 +80,9 @@ And CacheManager handles version conflicts for you.
     * Current concrete implementation is based on the ASP.NET Core logging. Other implementation of CacheManager's ILoggerFactory might follow.
 * **Strongly typed** cache interface.
 * **Multiple layers**
-By having multiple cache handles managed by CacheManager, you can easily implement layered caches. For example an in process cache infront of your distributed cache, to make read access faster.
+By having multiple cache handles managed by CacheManager, you can easily implement layered caches. For example an in process cache in front of your distributed cache, to make read access faster.
 CacheManager will synchronize those layers for you. 
-    * `Put` and `Add` operations will always be excecuted on all cache handles registered on the manager.
+    * `Put` and `Add` operations will always be executed on all cache handles registered on the manager.
     * On `Get`, there are different configuration options defined by `CacheUpdateMode`, if the item was available in one cache handle:
         * None: No update across the cache handles on Get
         * Up: Updates the handles "above"
@@ -94,10 +94,10 @@ The following are the supported expiration modes:
 * **Cache Regions**: Even if some cache systems do not support or implement cache regions, the CacheManager implements the mechanism.
 This can be used to for example group elements and remove all of them at once.
 * **Statistics**: Counters for all kind of cache actions.
-* **Performance Counters**: To be able to inspect certain numbers with perfmon, CacheManager supports performance counters per instance of the manager and per cache handle.
+* **Performance Counters**: To be able to inspect certain numbers with `perfmon`, CacheManager supports performance counters per instance of the manager and per cache handle.
 * **Event System**: CacheManager triggers events for common cache actions:
 OnGet, OnAdd, OnPut, OnRemove, OnClear, OnClearRegion
-* **System.Web.OutputCache** implementation to use CacheManager as OutputCache provider which makes the OutputCache extremly flexible, for example by using a distributed cache like Redis across many web servers.
+* **System.Web.OutputCache** implementation to use CacheManager as OutputCache provider which makes the OutputCache extremely flexible, for example by using a distributed cache like Redis across many web servers.
 * **Cache clients synchronization** 
     * Implemented with the Redis pub/sub feature
     * (Other implementations without Redis might be an option for a later version)
