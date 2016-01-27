@@ -9,9 +9,9 @@
     "CacheManager.AspNetCore.Logging": "",
     "CacheManager.Core": "",
     "CacheManager.Serialization.Json": "",
-    "Microsoft.Extensions.Logging.Console": "1.0.0-rc2-15958",
-    "Microsoft.Extensions.Logging.Debug": "1.0.0-rc2-15958",
-    "Microsoft.Extensions.Logging": "1.0.0-rc2-15958",
+    "Microsoft.Extensions.Logging.Console": "1.0.0-rc2-16037",
+    "Microsoft.Extensions.Logging.Debug": "1.0.0-rc2-16037",
+    "Microsoft.Extensions.Logging": "1.0.0-rc2-16037",
     "Newtonsoft.Json": "6.0.8"
   },
   "commands": {

@@ -3,9 +3,9 @@
     "CacheManager.Serialization.Json": "",
     "CacheManager.AspNetCore.Logging": "",
     "FluentAssertions": "4.1.0",
-    "Microsoft.Extensions.Logging.Console": "1.0.0-rc2-15958",
-    "Microsoft.Extensions.Logging.Debug": "1.0.0-rc2-15958",
-    "Microsoft.Extensions.Logging": "1.0.0-rc2-15958",
+    "Microsoft.Extensions.Logging.Console": "1.0.0-rc2-16037",
+    "Microsoft.Extensions.Logging.Debug": "1.0.0-rc2-16037",
+    "Microsoft.Extensions.Logging": "1.0.0-rc2-16037",
     "xunit.runner.aspnet": "2.0.0-aspnet-rc2-16097"
   },
   "frameworks": {

@@ -15,7 +15,7 @@
     "CacheManager.Core": "",
     "CacheManager.StackExchange.Redis": "",
     "CacheManager.SystemRuntimeCaching": "",
-    "Microsoft.Extensions.Logging.Console": "1.0.0-rc2-15958",
+    "Microsoft.Extensions.Logging.Console": "1.0.0-rc2-16037",
     "Unity": "4.0.2"
   },
 
