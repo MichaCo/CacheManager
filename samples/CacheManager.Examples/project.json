@@ -11,7 +11,7 @@
   },
 
   "dependencies": {
-    "CacheManager.AspNetCore.Logging": "0.7.2-*",
+    "CacheManager.AspNetCore.Logging": "",
     "CacheManager.Core": "",
     "CacheManager.StackExchange.Redis": "",
     "CacheManager.SystemRuntimeCaching": "",
