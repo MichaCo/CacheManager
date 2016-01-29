@@ -40,7 +40,7 @@
     <RunCodeAnalysis>false</RunCodeAnalysis>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Enyim.Caching">
+    <Reference Include="EnyimMemcached">
       <HintPath>..\..\packages\EnyimMemcached.2.13.0\lib\net35\Enyim.Caching.dll</HintPath>
       <Private>True</Private>
     </Reference>
