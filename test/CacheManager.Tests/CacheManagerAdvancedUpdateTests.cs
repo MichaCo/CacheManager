@@ -19,40 +19,6 @@ namespace CacheManager.Tests
     {
         [Fact]
         [ReplaceCulture]
-        public void UpdateItemConfig_Default()
-        {
-            // arrange act
-            Func<UpdateItemConfig> act = () => new UpdateItemConfig();
-
-            // assert
-            act().ShouldBeEquivalentTo(new { MaxRetries = int.MaxValue, VersionConflictOperation = VersionConflictHandling.EvictItemFromOtherCaches });
-        }
-
-        [Fact]
-        [ReplaceCulture]
-        public void UpdateItemConfig_Ctor()
-        {
-            // arrange act
-            Func<UpdateItemConfig> act = () => new UpdateItemConfig(101, VersionConflictHandling.Ignore);
-
-            // assert
-            act().ShouldBeEquivalentTo(new { MaxRetries = 101, VersionConflictOperation = VersionConflictHandling.Ignore });
-        }
-
-        [Fact]
-        [ReplaceCulture]
-        public void UpdateItemConfig_Ctor_InvalidRetries()
-        {
-            // arrange act
-            Action act = () => new UpdateItemConfig(-10, VersionConflictHandling.Ignore);
-
-            // assert
-            act.ShouldThrow<ArgumentException>()
-                .WithMessage("maxRetries must be *0*");
-        }
-
-        [Fact]
-        [ReplaceCulture]
         public void UpdateItemResult_ForSuccess()
         {
             // arrange act
@@ -109,14 +75,11 @@ namespace CacheManager.Tests
 
             cache.Configuration.CacheUpdateMode = CacheUpdateMode.Up;
 
-            // the update config setting it to Ignore: update handling should be ignore, update was success, items shoudl get evicted from others
-            UpdateItemConfig updateConfig = new UpdateItemConfig(0, VersionConflictHandling.Ignore);
-
             // act
             using (cache)
             {
                 string value;
-                var updateResult = cache.TryUpdate("key", updateFunc, updateConfig, out value);
+                var updateResult = cache.TryUpdate("key", updateFunc, 1, out value);
 
                 // assert
                 updateCalls.Should().Be(1, "first handle should have been invoked");
@@ -151,14 +114,11 @@ namespace CacheManager.Tests
 
             cache.Configuration.CacheUpdateMode = CacheUpdateMode.Up;
 
-            // the update config setting it to Ignore
-            UpdateItemConfig updateConfig = new UpdateItemConfig(0, VersionConflictHandling.EvictItemFromOtherCaches);
-
             // act
             using (cache)
             {
                 string value;
-                var updateResult = cache.TryUpdate("key", updateFunc, updateConfig, out value);
+                var updateResult = cache.TryUpdate("key", updateFunc, 1, out value);
 
                 // assert
                 updateCalls.Should().Be(5, "should iterate through all of them");
@@ -193,14 +153,11 @@ namespace CacheManager.Tests
 
             cache.Configuration.CacheUpdateMode = CacheUpdateMode.Up;
 
-            // the update config setting it to EvictItemFromOtherCaches
-            UpdateItemConfig updateConfig = new UpdateItemConfig(0, VersionConflictHandling.EvictItemFromOtherCaches);
-
             // act
             using (cache)
             {
                 string value;
-                var updateResult = cache.TryUpdate("key", updateFunc, updateConfig, out value);
+                var updateResult = cache.TryUpdate("key", updateFunc, 1, out value);
 
                 // assert
                 updateCalls.Should().Be(2, "bottom to top");
@@ -246,14 +203,11 @@ namespace CacheManager.Tests
 
             cache.Configuration.CacheUpdateMode = CacheUpdateMode.Up;
 
-            // the update config setting it to UpdateOtherCaches
-            UpdateItemConfig updateConfig = new UpdateItemConfig(0, VersionConflictHandling.UpdateOtherCaches);
-
             // act
             using (cache)
             {
                 string value;
-                var updateResult = cache.TryUpdate("key", updateFunc, updateConfig, out value);
+                var updateResult = cache.TryUpdate("key", updateFunc, 1, out value);
 
                 // assert
                 updateCalls.Should().Be(2, "second from below did update");
@@ -353,13 +307,13 @@ namespace CacheManager.Tests
         {
         }
 
-        public override UpdateItemResult<TCacheValue> Update(string key, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config)
+        public override UpdateItemResult<TCacheValue> Update(string key, Func<TCacheValue, TCacheValue> updateValue, int maxRetries)
         {
             this.UpdateCall();
             return this.UpdateValue;
         }
 
-        public override UpdateItemResult<TCacheValue> Update(string key, string region, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config)
+        public override UpdateItemResult<TCacheValue> Update(string key, string region, Func<TCacheValue, TCacheValue> updateValue, int maxRetries)
         {
             this.UpdateCall();
             return this.UpdateValue;

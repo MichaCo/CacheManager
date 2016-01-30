@@ -147,9 +147,6 @@
     <Compile Include="..\CacheManager.Core\Logging\LogLevel.cs">
       <Link>Logging\LogLevel.cs</Link>
     </Compile>
-    <Compile Include="..\CacheManager.Core\UpdateItemConfig.cs">
-      <Link>UpdateItemConfig.cs</Link>
-    </Compile>
     <Compile Include="..\CacheManager.Core\UpdateItemResult.cs">
       <Link>UpdateItemResult.cs</Link>
     </Compile>

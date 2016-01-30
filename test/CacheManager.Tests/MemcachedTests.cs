@@ -203,7 +203,7 @@ namespace CacheManager.Tests
                                     Interlocked.Increment(ref countCasModifyCalls);
                                     return value;
                                 },
-                                new UpdateItemConfig(50, VersionConflictHandling.EvictItemFromOtherCaches));
+                                50);
                         }
                     },
                     numThreads,
@@ -304,7 +304,7 @@ namespace CacheManager.Tests
                                     Interlocked.Increment(ref countCasModifyCalls);
                                     return value;
                                 },
-                                new UpdateItemConfig(retries, VersionConflictHandling.EvictItemFromOtherCaches));
+                                retries);
                         }
                     },
                     numThreads,

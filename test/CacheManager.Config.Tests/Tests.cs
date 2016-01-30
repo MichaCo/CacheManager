@@ -268,7 +268,7 @@ namespace CacheManager.Config.Tests
             cache.Clear();
 
             cache.Add("key", "value", "region");
-            cache.AddOrUpdate("key", "region", "value", _ => "update value", new UpdateItemConfig(2, VersionConflictHandling.EvictItemFromOtherCaches));
+            cache.AddOrUpdate("key", "region", "value", _ => "update value", 22);
 
             cache.Expire("key", "region", TimeSpan.FromDays(1));
             var val = cache.Get("key", "region");

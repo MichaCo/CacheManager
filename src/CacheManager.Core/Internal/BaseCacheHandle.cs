@@ -125,16 +125,16 @@ namespace CacheManager.Core.Internal
         /// </summary>
         /// <param name="key">The key to update.</param>
         /// <param name="updateValue">The function to perform the update.</param>
-        /// <param name="config">The cache configuration used to specify the update behavior.</param>
+        /// <param name="maxRetries">The number of tries.</param>
         /// <returns>The update result which is interpreted by the cache manager.</returns>
         /// <exception cref="System.ArgumentNullException">
-        /// If key, updateValue or config are null.
+        /// If <paramref name="key"/> or <paramref name="updateValue"/> is null.
         /// </exception>
         /// <remarks>
         /// If the cache does not use a distributed cache system. Update is doing exactly the same
         /// as Get plus Put.
         /// </remarks>
-        public virtual UpdateItemResult<TCacheValue> Update(string key, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config)
+        public virtual UpdateItemResult<TCacheValue> Update(string key, Func<TCacheValue, TCacheValue> updateValue, int maxRetries)
         {
             NotNull(updateValue, nameof(updateValue));
             this.CheckDisposed();
@@ -171,16 +171,16 @@ namespace CacheManager.Core.Internal
         /// <param name="key">The key to update.</param>
         /// <param name="region">The cache region.</param>
         /// <param name="updateValue">The function to perform the update.</param>
-        /// <param name="config">The cache configuration used to specify the update behavior.</param>
+        /// <param name="maxRetries">The number of tries.</param>
         /// <returns>The update result which is interpreted by the cache manager.</returns>
         /// <exception cref="System.ArgumentNullException">
-        /// If key, region, updateValue or config are null.
+        /// If <paramref name="key"/>, <paramref name="region"/> or <paramref name="updateValue"/> is null.
         /// </exception>
         /// <remarks>
         /// If the cache does not use a distributed cache system. Update is doing exactly the same
         /// as Get plus Put.
         /// </remarks>
-        public virtual UpdateItemResult<TCacheValue> Update(string key, string region, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config)
+        public virtual UpdateItemResult<TCacheValue> Update(string key, string region, Func<TCacheValue, TCacheValue> updateValue, int maxRetries)
         {
             NotNull(updateValue, nameof(updateValue));
             this.CheckDisposed();

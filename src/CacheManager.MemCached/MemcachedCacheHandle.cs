@@ -118,58 +118,13 @@ namespace CacheManager.Memcached
             // TODO: find workaround this.Clear();
         }
 
-        /// <summary>
-        /// Updates an existing key in the cache.
-        /// <para>
-        /// The cache manager will make sure the update will always happen on the most recent version.
-        /// </para>
-        /// <para>
-        /// If version conflicts occur, if for example multiple cache clients try to write the same
-        /// key, and during the update process, someone else changed the value for the key, the
-        /// cache manager will retry the operation.
-        /// </para>
-        /// <para>
-        /// The <paramref name="updateValue"/> function will get invoked on each retry with the most
-        /// recent value which is stored in cache.
-        /// </para>
-        /// </summary>
-        /// <param name="key">The key to update.</param>
-        /// <param name="updateValue">The function to perform the update.</param>
-        /// <param name="config">The cache configuration used to specify the update behavior.</param>
-        /// <returns>The update result which is interpreted by the cache manager.</returns>
-        /// <remarks>
-        /// If the cache does not use a distributed cache system. Update is doing exactly the same
-        /// as Get plus Put.
-        /// </remarks>
-        public override UpdateItemResult<TCacheValue> Update(string key, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config) =>
-            this.Update(key, null, updateValue, config);
+        /// <inheritdoc />
+        public override UpdateItemResult<TCacheValue> Update(string key, Func<TCacheValue, TCacheValue> updateValue, int maxRetries) =>
+            this.Update(key, null, updateValue, maxRetries);
 
-        /// <summary>
-        /// Updates an existing key in the cache.
-        /// <para>
-        /// The cache manager will make sure the update will always happen on the most recent version.
-        /// </para>
-        /// <para>
-        /// If version conflicts occur, if for example multiple cache clients try to write the same
-        /// key, and during the update process, someone else changed the value for the key, the
-        /// cache manager will retry the operation.
-        /// </para>
-        /// <para>
-        /// The <paramref name="updateValue"/> function will get invoked on each retry with the most
-        /// recent value which is stored in cache.
-        /// </para>
-        /// </summary>
-        /// <param name="key">The key to update.</param>
-        /// <param name="region">The cache region.</param>
-        /// <param name="updateValue">The function to perform the update.</param>
-        /// <param name="config">The cache configuration used to specify the update behavior.</param>
-        /// <returns>The update result which is interpreted by the cache manager.</returns>
-        /// <remarks>
-        /// If the cache does not use a distributed cache system. Update is doing exactly the same
-        /// as Get plus Put.
-        /// </remarks>
-        public override UpdateItemResult<TCacheValue> Update(string key, string region, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config) =>
-            this.Set(key, region, updateValue, config);
+        /// <inheritdoc />
+        public override UpdateItemResult<TCacheValue> Update(string key, string region, Func<TCacheValue, TCacheValue> updateValue, int maxRetries) =>
+            this.Set(key, region, updateValue, maxRetries);
 
         /// <summary>
         /// Adds a value to the cache.
@@ -366,7 +321,7 @@ namespace CacheManager.Memcached
             return section.Servers;
         }
 
-        private UpdateItemResult<TCacheValue> Set(string key, string region, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config)
+        private UpdateItemResult<TCacheValue> Set(string key, string region, Func<TCacheValue, TCacheValue> updateValue, int maxRetries)
         {
             var fullyKey = GetKey(key, region);
             var tries = 0;
@@ -387,7 +342,7 @@ namespace CacheManager.Memcached
                     item = cas.Result;
                     getStatus = (StatusCode)cas.StatusCode;
                 }
-                while (ShouldRetry(getStatus) && getTries <= config.MaxRetries);
+                while (ShouldRetry(getStatus) && getTries <= maxRetries);
 
                 // break operation if we cannot retrieve the object (maybe it has expired already).
                 if (getStatus != StatusCode.Success || item == null)
@@ -416,7 +371,7 @@ namespace CacheManager.Memcached
                     return UpdateItemResult.ForSuccess<TCacheValue>(item.Value, tries > 1, tries);
                 }
             }
-            while (!result.Success && result.StatusCode.HasValue && result.StatusCode.Value == 2 && tries <= config.MaxRetries);
+            while (!result.Success && result.StatusCode.HasValue && result.StatusCode.Value == 2 && tries <= maxRetries);
 
             return UpdateItemResult.ForTooManyRetries<TCacheValue>(tries);
         }

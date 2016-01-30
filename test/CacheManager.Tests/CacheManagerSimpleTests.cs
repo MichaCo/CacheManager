@@ -224,8 +224,8 @@ namespace CacheManager.Tests
                 // arrange act
                 Action act = () => cache.Update(null, null);
                 Action actR = () => cache.Update(null, "r", null);
-                Action actU = () => cache.Update(null, (o) => o, null);
-                Action actRU = () => cache.Update(null, null, null, null);
+                Action actU = () => cache.Update(null, (o) => o, 33);
+                Action actRU = () => cache.Update(null, null, null, 33);
 
                 // assert
                 act.ShouldThrow<ArgumentException>()
@@ -254,8 +254,8 @@ namespace CacheManager.Tests
                 // arrange act
                 Action act = () => cache.Update("key", null);
                 Action actR = () => cache.Update("key", "region", null);
-                Action actU = () => cache.Update("key", null, new UpdateItemConfig());
-                Action actRU = () => cache.Update("key", "region", null, new UpdateItemConfig());
+                Action actU = () => cache.Update("key", null, 33);
+                Action actRU = () => cache.Update("key", "region", null, 33);
 
                 // assert
                 act.ShouldThrow<ArgumentException>()
@@ -283,7 +283,7 @@ namespace CacheManager.Tests
             {
                 // arrange act
                 Action actR = () => cache.Update("key", null, a => a);
-                Action actRU = () => cache.Update("key", null, a => a, new UpdateItemConfig());
+                Action actRU = () => cache.Update("key", null, a => a, 33);
 
                 // assert
                 actR.ShouldThrow<ArgumentException>()
@@ -304,15 +304,15 @@ namespace CacheManager.Tests
             }))
             {
                 // arrange act
-                Action act = () => cache.Update("key", a => a, null);
-                Action actR = () => cache.Update("key", "region", a => a, null);
+                Action act = () => cache.Update("key", a => a, -1);
+                Action actR = () => cache.Update("key", "region", a => a, -1);
 
                 // assert
-                act.ShouldThrow<ArgumentException>()
-                    .WithMessage("*Parameter name: config*");
+                act.ShouldThrow<InvalidOperationException>()
+                    .WithMessage("*retries must be greater than*");
 
-                actR.ShouldThrow<ArgumentException>()
-                    .WithMessage("*Parameter name: config*");
+                actR.ShouldThrow<InvalidOperationException>()
+                    .WithMessage("*retries must be greater than*");
             }
         }
 
@@ -380,8 +380,8 @@ namespace CacheManager.Tests
                 // arrange act
                 Action act = () => cache.AddOrUpdate(null, null, (o) => o);
                 Action actR = () => cache.AddOrUpdate(null, "r", null, (o) => o);
-                Action actU = () => cache.AddOrUpdate(null, null, (o) => o, new UpdateItemConfig());
-                Action actRU = () => cache.AddOrUpdate(null, "r", null, null, null);
+                Action actU = () => cache.AddOrUpdate(null, null, (o) => o, 33);
+                Action actRU = () => cache.AddOrUpdate(null, "r", null, null, 33);
 
                 // assert
                 act.ShouldThrow<ArgumentException>()
@@ -410,10 +410,10 @@ namespace CacheManager.Tests
                 // arrange act
                 Action act = () => cache.AddOrUpdate("key", "value", null);
                 Action actR = () => cache.AddOrUpdate("key", "region", "value", null);
-                Action actU = () => cache.AddOrUpdate("key", "value", null, new UpdateItemConfig());
-                Action actRU = () => cache.AddOrUpdate("key", "region", "value", null, null);
+                Action actU = () => cache.AddOrUpdate("key", "value", null, 1);
+                Action actRU = () => cache.AddOrUpdate("key", "region", "value", null, 1);
                 Action actI = () => cache.AddOrUpdate(new CacheItem<object>("k", "v"), null);
-                Action actIU = () => cache.AddOrUpdate(new CacheItem<object>("k", "v"), null, new UpdateItemConfig());
+                Action actIU = () => cache.AddOrUpdate(new CacheItem<object>("k", "v"), null, 1);
 
                 // assert
                 act.ShouldThrow<ArgumentException>()
@@ -441,7 +441,7 @@ namespace CacheManager.Tests
             {
                 // arrange act
                 Action actR = () => cache.AddOrUpdate("key", null, "value", a => a);
-                Action actRU = () => cache.AddOrUpdate("key", null, "value", a => a, new UpdateItemConfig());
+                Action actRU = () => cache.AddOrUpdate("key", null, "value", a => a, 1);
 
                 // assert
                 actR.ShouldThrow<ArgumentException>()
@@ -462,19 +462,19 @@ namespace CacheManager.Tests
             }))
             {
                 // arrange act
-                Action actU = () => cache.AddOrUpdate("key", "value", (o) => o, null);
-                Action actRU = () => cache.AddOrUpdate("key", "region", "value", (o) => o, null);
-                Action actIU = () => cache.AddOrUpdate(new CacheItem<object>("k", "v"), (o) => o, null);
+                Action actU = () => cache.AddOrUpdate("key", "value", (o) => o, -1);
+                Action actRU = () => cache.AddOrUpdate("key", "region", "value", (o) => o, -1);
+                Action actIU = () => cache.AddOrUpdate(new CacheItem<object>("k", "v"), (o) => o, -1);
 
                 // assert
-                actU.ShouldThrow<ArgumentException>()
-                    .WithMessage("*Parameter name: config*");
+                actU.ShouldThrow<InvalidOperationException>()
+                    .WithMessage("*retries must be greater than*");
 
-                actRU.ShouldThrow<ArgumentException>()
-                    .WithMessage("*Parameter name: config*");
+                actRU.ShouldThrow<InvalidOperationException>()
+                    .WithMessage("*retries must be greater than*");
 
-                actIU.ShouldThrow<ArgumentException>()
-                    .WithMessage("*Parameter name: config*");
+                actIU.ShouldThrow<InvalidOperationException>()
+                    .WithMessage("*retries must be greater than*");
             }
         }
 

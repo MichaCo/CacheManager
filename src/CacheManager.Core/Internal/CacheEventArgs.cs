@@ -77,21 +77,21 @@ namespace CacheManager.Core.Internal
         /// </summary>
         /// <param name="key">The key.</param>
         /// <param name="region">The region.</param>
-        /// <param name="config">The configuration.</param>
+        /// <param name="maxRetries">The number of retries configured.</param>
         /// <param name="result">The result.</param>
-        public CacheUpdateEventArgs(string key, string region, UpdateItemConfig config, UpdateItemResult<TCacheValue> result)
+        public CacheUpdateEventArgs(string key, string region, int maxRetries, UpdateItemResult<TCacheValue> result)
         {
             this.Key = key;
             this.Region = region;
             this.Result = result;
-            this.Config = config;
+            this.MaxRetries = maxRetries;
         }
 
         /// <summary>
-        /// Gets the configuration.
+        /// Gets the number of tries which were configured for the update operation.
         /// </summary>
-        /// <value>The configuration.</value>
-        public UpdateItemConfig Config { get; }
+        /// <value>The number of tries.</value>
+        public int MaxRetries { get; }
 
         /// <summary>
         /// Gets the key.

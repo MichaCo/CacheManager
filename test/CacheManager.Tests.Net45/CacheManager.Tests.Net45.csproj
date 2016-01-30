@@ -139,6 +139,9 @@
     <Compile Include="..\CacheManager.Tests\InvalidConfigurationValidationTests.cs">
       <Link>InvalidConfigurationValidationTests.cs</Link>
     </Compile>
+    <Compile Include="..\CacheManager.Tests\LoggingTests.cs">
+      <Link>LoggingTests.cs</Link>
+    </Compile>
     <Compile Include="..\CacheManager.Tests\MemcachedTests.cs">
       <Link>MemcachedTests.cs</Link>
     </Compile>

@@ -238,57 +238,12 @@ return result";
             });
         }
 
-        /// <summary>
-        /// Updates an existing key in the cache.
-        /// <para>
-        /// The cache manager will make sure the update will always happen on the most recent version.
-        /// </para>
-        /// <para>
-        /// If version conflicts occur, if for example multiple cache clients try to write the same
-        /// key, and during the update process, someone else changed the value for the key, the
-        /// cache manager will retry the operation.
-        /// </para>
-        /// <para>
-        /// The <paramref name="updateValue"/> function will get invoked on each retry with the most
-        /// recent value which is stored in cache.
-        /// </para>
-        /// </summary>
-        /// <param name="key">The key to update.</param>
-        /// <param name="updateValue">The function to perform the update.</param>
-        /// <param name="config">The cache configuration used to specify the update behavior.</param>
-        /// <returns>The update result which is interpreted by the cache manager.</returns>
-        /// <remarks>
-        /// If the cache does not use a distributed cache system. Update is doing exactly the same
-        /// as Get plus Put.
-        /// </remarks>
-        public override UpdateItemResult<TCacheValue> Update(string key, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config) =>
-            this.Update(key, null, updateValue, config);
+        /// <inheritdoc />
+        public override UpdateItemResult<TCacheValue> Update(string key, Func<TCacheValue, TCacheValue> updateValue, int maxRetries) =>
+            this.Update(key, null, updateValue, maxRetries);
 
-        /// <summary>
-        /// Updates an existing key in the cache.
-        /// <para>
-        /// The cache manager will make sure the update will always happen on the most recent version.
-        /// </para>
-        /// <para>
-        /// If version conflicts occur, if for example multiple cache clients try to write the same
-        /// key, and during the update process, someone else changed the value for the key, the
-        /// cache manager will retry the operation.
-        /// </para>
-        /// <para>
-        /// The <paramref name="updateValue"/> function will get invoked on each retry with the most
-        /// recent value which is stored in cache.
-        /// </para>
-        /// </summary>
-        /// <param name="key">The key to update.</param>
-        /// <param name="region">The cache region.</param>
-        /// <param name="updateValue">The function to perform the update.</param>
-        /// <param name="config">The cache configuration used to specify the update behavior.</param>
-        /// <returns>The update result which is interpreted by the cache manager.</returns>
-        /// <remarks>
-        /// If the cache does not use a distributed cache system. Update is doing exactly the same
-        /// as Get plus Put.
-        /// </remarks>
-        public override UpdateItemResult<TCacheValue> Update(string key, string region, Func<TCacheValue, TCacheValue> updateValue, UpdateItemConfig config)
+        /// <inheritdoc />
+        public override UpdateItemResult<TCacheValue> Update(string key, string region, Func<TCacheValue, TCacheValue> updateValue, int maxRetries)
         {
             var tries = 0;
             var fullKey = GetKey(key, region);
@@ -334,9 +289,9 @@ return result";
                         return UpdateItemResult.ForSuccess<TCacheValue>(newValue, tries > 1, tries);
                     }
 
-                    this.Logger.LogInfo("Updated of {0} {1} failed with version conflict, retrying {2}/{3}", key, region, tries, config.MaxRetries);
+                    this.Logger.LogInfo("Updated of {0} {1} failed with version conflict, retrying {2}/{3}", key, region, tries, maxRetries);
                 }
-                while (tries <= config.MaxRetries);
+                while (tries <= maxRetries);
 
                 return UpdateItemResult.ForTooManyRetries<TCacheValue>(tries);
             });
@@ -643,7 +598,7 @@ return result";
             }
             catch (StackRedis.RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.OrdinalIgnoreCase))
             {
-                this.Logger.LogInfo("Received NOSCRIPT from server during Eval. Reloading scripts...");
+                this.Logger.LogInfo("Received NOSCRIPT from server. Reloading scripts...");
                 this.LoadScripts();
 
                 // retry
@@ -655,7 +610,7 @@ return result";
         {
             lock (this.lockObject)
             {
-                this.Logger.LogInfo("Loading lua scripts.");
+                this.Logger.LogInfo("Loading scripts.");
 
                 var putLua = StackRedis.LuaScript.Prepare(ScriptPut);
                 var addLua = StackRedis.LuaScript.Prepare(ScriptAdd);

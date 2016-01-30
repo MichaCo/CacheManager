@@ -7,169 +7,255 @@ namespace CacheManager.Core.Logging
     public static class LoggerExtensions
     {
         //// Critical
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0", Justification = "Performance")]
-        public static void LogCritical(this ILogger logger, string message)
+
+        public static void LogCritical(this ILogger logger, string message, params object[] args)
         {
-            logger.Log(LogLevel.Critical, 0, message, null);
+            if (logger == null)
+            {
+                throw new ArgumentNullException(nameof(logger));
+            }
+
+            logger.Log(LogLevel.Critical, 0, new FormatMessage(message, args), null);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0", Justification = "Performance")]
-        public static void LogCritical(this ILogger logger, string message, Exception exception)
+        public static void LogCritical(this ILogger logger, int eventId, string message, params object[] args)
         {
-            logger.Log(LogLevel.Critical, 0, message, exception);
+            if (logger == null)
+            {
+                throw new ArgumentNullException(nameof(logger));
+            }
+
+            logger.Log(LogLevel.Critical, eventId, new FormatMessage(message, args), null);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0", Justification = "Performance")]
-        public static void LogCritical(this ILogger logger, int eventId, string message)
+        public static void LogCritical(this ILogger logger, Exception exception, string message, params object[] args)
         {
-            logger.Log(LogLevel.Critical, eventId, message, null);
+            if (logger == null)
+            {
+                throw new ArgumentNullException(nameof(logger));
+            }
+
+            logger.Log(LogLevel.Critical, 0, new FormatMessage(message, args), exception);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0", Justification = "Performance")]
-        public static void LogCritical(this ILogger logger, int eventId, string message, Exception exception)
+        public static void LogCritical(this ILogger logger, int eventId, Exception exception, string message, params object[] args)
         {
-            logger.Log(LogLevel.Critical, eventId, message, exception);
-        }
+            if (logger == null)
+            {
+                throw new ArgumentNullException(nameof(logger));
+            }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0", Justification = "Performance")]
-        public static void LogCritical(this ILogger logger, Exception exception, string format, params object[] args)
-        {
-            logger.Log(LogLevel.Critical, 0, new FormatMessage(format, args), exception);
+            logger.Log(LogLevel.Critical, eventId, new FormatMessage(message, args), exception);
         }
 
         //// DEBUG
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0", Justification = "Performance")]
-        public static void LogDebug(this ILogger logger, string message)
+
+        public static void LogDebug(this ILogger logger, string message, params object[] args)
         {
-            logger.Log(LogLevel.Debug, 0, message, null);
+            if (logger == null)
+            {
+                throw new ArgumentNullException(nameof(logger));
+            }
+
+            logger.Log(LogLevel.Debug, 0, new FormatMessage(message, args), null);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0", Justification = "Performance")]
-        public static void LogDebug(this ILogger logger, int eventId, string message)
+        public static void LogDebug(this ILogger logger, int eventId, string message, params object[] args)
         {
-            logger.Log(LogLevel.Debug, eventId, message, null);
+            if (logger == null)
+            {
+                throw new ArgumentNullException(nameof(logger));
+            }
+
+            logger.Log(LogLevel.Debug, eventId, new FormatMessage(message, args), null);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0", Justification = "Performance")]
-        public static void LogDebug(this ILogger logger, string format, params object[] args)
+        public static void LogDebug(this ILogger logger, Exception exception, string message, params object[] args)
         {
-            logger.Log(LogLevel.Debug, 0, new FormatMessage(format, args), null);
+            if (logger == null)
+            {
+                throw new ArgumentNullException(nameof(logger));
+            }
+
+            logger.Log(LogLevel.Debug, 0, new FormatMessage(message, args), exception);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0", Justification = "Performance")]
-        public static void LogDebug(this ILogger logger, int eventId, string format, params object[] args)
+        public static void LogDebug(this ILogger logger, int eventId, Exception exception, string message, params object[] args)
         {
-            logger.Log(LogLevel.Debug, eventId, new FormatMessage(format, args), null);
-        }
+            if (logger == null)
+            {
+                throw new ArgumentNullException(nameof(logger));
+            }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "2", Justification = "Performance")]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0", Justification = "Performance")]
-        public static void LogDebug<T>(this ILogger logger, string message, CacheItem<T> cacheItem)
-        {
-            logger.Log(LogLevel.Debug, 0, new FormatMessage("{0} [CacheItem: {1} {2}]", message, cacheItem.Key, cacheItem.Region), null);
+            logger.Log(LogLevel.Debug, eventId, new FormatMessage(message, args), exception);
         }
 
         //// Error
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0", Justification = "Performance")]
-        public static void LogError(this ILogger logger, string message)
+        public static void LogError(this ILogger logger, string message, params object[] args)
         {
-            logger.Log(LogLevel.Error, 0, message, null);
+            if (logger == null)
+            {
+                throw new ArgumentNullException(nameof(logger));
+            }
+
+            logger.Log(LogLevel.Error, 0, new FormatMessage(message, args), null);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0", Justification = "Performance")]
-        public static void LogError(this ILogger logger, int eventId, string message)
+        public static void LogError(this ILogger logger, int eventId, string message, params object[] args)
         {
-            logger.Log(LogLevel.Error, eventId, message, null);
+            if (logger == null)
+            {
+                throw new ArgumentNullException(nameof(logger));
+            }
+
+            logger.Log(LogLevel.Error, eventId, new FormatMessage(message, args), null);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0", Justification = "Performance")]
-        public static void LogError(this ILogger logger, string format, params object[] args)
+        public static void LogError(this ILogger logger, Exception exception, string message, params object[] args)
         {
-            logger.Log(LogLevel.Error, 0, new FormatMessage(format, args), null);
+            if (logger == null)
+            {
+                throw new ArgumentNullException(nameof(logger));
+            }
+
+            logger.Log(LogLevel.Error, 0, new FormatMessage(message, args), exception);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0", Justification = "Performance")]
-        public static void LogError(this ILogger logger, int eventId, string format, params object[] args)
+        public static void LogError(this ILogger logger, int eventId, Exception exception, string message, params object[] args)
         {
-            logger.Log(LogLevel.Error, eventId, new FormatMessage(format, args), null);
-        }
+            if (logger == null)
+            {
+                throw new ArgumentNullException(nameof(logger));
+            }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "2", Justification = "Performance")]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0", Justification = "Performance")]
-        public static void LogError<T>(this ILogger logger, string message, CacheItem<T> cacheItem)
-        {
-            logger.Log(LogLevel.Error, 0, new FormatMessage("{0} [CacheItem: {1} {2}]", message, cacheItem.Key, cacheItem.Region), null);
-        }
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0", Justification = "Performance")]
-        public static void LogError(this ILogger logger, string message, Exception exception)
-        {
-            logger.Log(LogLevel.Error, 0, message, exception);
-        }
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0", Justification = "Performance")]
-        public static void LogError(this ILogger logger, int eventId, string message, Exception exception)
-        {
-            logger.Log(LogLevel.Error, eventId, message, exception);
-        }
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0", Justification = "Performance")]
-        public static void LogError(this ILogger logger, Exception exception, string format, params object[] args)
-        {
-            logger.Log(LogLevel.Error, 0, new FormatMessage(format, args), exception);
+            logger.Log(LogLevel.Error, eventId, new FormatMessage(message, args), exception);
         }
 
         //// Information
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0", Justification = "Performance")]
-        public static void LogInfo(this ILogger logger, string format, params object[] args)
+
+        public static void LogInfo(this ILogger logger, string message, params object[] args)
         {
-            logger.Log(LogLevel.Information, 0, new FormatMessage(format, args), null);
+            if (logger == null)
+            {
+                throw new ArgumentNullException(nameof(logger));
+            }
+
+            logger.Log(LogLevel.Information, 0, new FormatMessage(message, args), null);
+        }
+
+        public static void LogInfo(this ILogger logger, int eventId, string message, params object[] args)
+        {
+            if (logger == null)
+            {
+                throw new ArgumentNullException(nameof(logger));
+            }
+
+            logger.Log(LogLevel.Information, eventId, new FormatMessage(message, args), null);
+        }
+
+        public static void LogInfo(this ILogger logger, Exception exception, string message, params object[] args)
+        {
+            if (logger == null)
+            {
+                throw new ArgumentNullException(nameof(logger));
+            }
+
+            logger.Log(LogLevel.Information, 0, new FormatMessage(message, args), exception);
+        }
+
+        public static void LogInfo(this ILogger logger, int eventId, Exception exception, string message, params object[] args)
+        {
+            if (logger == null)
+            {
+                throw new ArgumentNullException(nameof(logger));
+            }
+
+            logger.Log(LogLevel.Information, eventId, new FormatMessage(message, args), exception);
         }
 
         //// Trace
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0", Justification = "Performance")]
-        public static void LogTrace(this ILogger logger, string format, params object[] args)
+
+        public static void LogTrace(this ILogger logger, string message, params object[] args)
         {
-            logger.Log(LogLevel.Trace, 0, new FormatMessage(format, args), null);
+            if (logger == null)
+            {
+                throw new ArgumentNullException(nameof(logger));
+            }
+
+            logger.Log(LogLevel.Trace, 0, new FormatMessage(message, args), null);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "2", Justification = "Performance")]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0", Justification = "Performance")]
-        public static void LogTrace<T>(this ILogger logger, string message, CacheItem<T> cacheItem)
+        public static void LogTrace(this ILogger logger, int eventId, string message, params object[] args)
         {
-            logger.Log(LogLevel.Trace, 0, new FormatMessage("{0} [CacheItem: {1} {2}]", message, cacheItem.Key, cacheItem.Region), null);
+            if (logger == null)
+            {
+                throw new ArgumentNullException(nameof(logger));
+            }
+
+            logger.Log(LogLevel.Trace, eventId, new FormatMessage(message, args), null);
+        }
+
+        public static void LogTrace(this ILogger logger, Exception exception, string message, params object[] args)
+        {
+            if (logger == null)
+            {
+                throw new ArgumentNullException(nameof(logger));
+            }
+
+            logger.Log(LogLevel.Trace, 0, new FormatMessage(message, args), exception);
+        }
+
+        public static void LogTrace(this ILogger logger, int eventId, Exception exception, string message, params object[] args)
+        {
+            if (logger == null)
+            {
+                throw new ArgumentNullException(nameof(logger));
+            }
+
+            logger.Log(LogLevel.Trace, eventId, new FormatMessage(message, args), exception);
         }
 
         //// Warning
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0", Justification = "Performance")]
-        public static void LogWarn(this ILogger logger, string format, params object[] args)
+
+        public static void LogWarn(this ILogger logger, string message, params object[] args)
         {
-            logger.Log(LogLevel.Warning, 0, new FormatMessage(format, args), null);
+            if (logger == null)
+            {
+                throw new ArgumentNullException(nameof(logger));
+            }
+
+            logger.Log(LogLevel.Warning, 0, new FormatMessage(message, args), null);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0", Justification = "Performance")]
-        public static void LogWarn(this ILogger logger, string message, Exception exception)
+        public static void LogWarn(this ILogger logger, int eventId, string message, params object[] args)
         {
-            logger.Log(LogLevel.Warning, 0, message, exception);
+            if (logger == null)
+            {
+                throw new ArgumentNullException(nameof(logger));
+            }
+
+            logger.Log(LogLevel.Warning, eventId, new FormatMessage(message, args), null);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0", Justification = "Performance")]
-        public static void LogWarn(this ILogger logger, int eventId, string message)
+        public static void LogWarn(this ILogger logger, Exception exception, string message, params object[] args)
         {
-            logger.Log(LogLevel.Warning, eventId, message, null);
+            if (logger == null)
+            {
+                throw new ArgumentNullException(nameof(logger));
+            }
+
+            logger.Log(LogLevel.Warning, 0, new FormatMessage(message, args), exception);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0", Justification = "Performance")]
-        public static void LogWarn(this ILogger logger, int eventId, string message, Exception exception)
+        public static void LogWarn(this ILogger logger, int eventId, Exception exception, string message, params object[] args)
         {
-            logger.Log(LogLevel.Warning, eventId, message, exception);
-        }
+            if (logger == null)
+            {
+                throw new ArgumentNullException(nameof(logger));
+            }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0", Justification = "Performance")]
-        public static void LogWarn(this ILogger logger, Exception exception, string format, params object[] args)
-        {
-            logger.Log(LogLevel.Warning, 0, new FormatMessage(format, args), exception);
+            logger.Log(LogLevel.Warning, eventId, new FormatMessage(message, args), exception);
         }
 
         private class FormatMessage
@@ -185,6 +271,11 @@ namespace CacheManager.Core.Logging
 
             public override string ToString()
             {
+                if (this.args == null || this.args.Length == 0)
+                {
+                    return this.format;
+                }
+
                 return string.Format(CultureInfo.CurrentCulture, this.format, this.args);
             }
         }
