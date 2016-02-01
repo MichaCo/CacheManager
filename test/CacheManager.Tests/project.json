@@ -3,10 +3,10 @@
     "CacheManager.Serialization.Json": "",
     "CacheManager.AspNetCore.Logging": "",
     "FluentAssertions": "4.1.0",
-    "Microsoft.Extensions.Logging.Console": "1.0.0-rc2-16037",
-    "Microsoft.Extensions.Logging.Debug": "1.0.0-rc2-16037",
-    "Microsoft.Extensions.Logging": "1.0.0-rc2-16037",
-    "xunit.runner.aspnet": "2.0.0-aspnet-rc2-16097"
+    "Microsoft.Extensions.Logging.Console": "1.0.0-*",
+    "Microsoft.Extensions.Logging.Debug": "1.0.0-*",
+    "Microsoft.Extensions.Logging": "1.0.0-*",
+    "xunit": "2.1.0"
   },
   "frameworks": {
     "dnx451": {
@@ -22,7 +22,8 @@
         "CacheManager.StackExchange.Redis": "",
         "CacheManager.SystemRuntimeCaching": "",
         "CacheManager.Web": "",
-        "Moq": "4.2.1510.2205"
+        "Moq": "4.2.1510.2205",
+        "xunit.runner.aspnet": "2.0.0-aspnet-*"
       },
       "frameworkAssemblies": {
         "System.Runtime": "",
