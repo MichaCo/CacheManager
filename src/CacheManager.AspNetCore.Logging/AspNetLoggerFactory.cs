@@ -85,7 +85,7 @@ namespace CacheManager.AspNetCore.Logging
                 case LogLevel.Information:
                     return Microsoft.Extensions.Logging.LogLevel.Information;
                 case LogLevel.Trace:
-                    return Microsoft.Extensions.Logging.LogLevel.Trace;
+                    return Microsoft.Extensions.Logging.LogLevel.Verbose;
                 case LogLevel.Warning:
                     return Microsoft.Extensions.Logging.LogLevel.Warning;
             }

@@ -1,23 +1,27 @@
 ﻿{
   "dependencies": {
+    "CacheManager.AspNetCore.Logging": "",
     "CacheManager.Couchbase": "",
     "CacheManager.MemCached": "",
+    "CacheManager.Serialization.Json": "",
     "CacheManager.StackExchange.Redis": "",
     "CacheManager.SystemRuntimeCaching": "",
-    "CacheManager.Serialization.Json": "",
     "CacheManager.Web": "",
     "FluentAssertions": "4.1.0",
     "Moq": "4.2.1510.2205",
-    "xunit.runner.aspnet": "2.0.0-aspnet-rc1-*"
+    "xunit": "2.1.0",
+    "xunit.runner.dnx": "2.1.0-rc1-build204"
   },
   "frameworks": {
     "dnx451": {
       "frameworkAssemblies": {
+        "System.Runtime": "",
+        "System.Threading.Tasks": "",
         "System.Reflection": ""
       }
     }
   },
   "commands": {
-    "test": "xunit.runner.aspnet -notrait category=Memcached -notrait category=Redis -notrait category=Unreliable -notrait category=Mono"
+    "test": "xunit.runner.dnx -notrait category=Memcached -notrait category=Redis -notrait category=Unreliable -notrait category=Mono"
   }
 }

@@ -32,7 +32,7 @@ namespace CacheManager.Examples
         {
             var cache = CacheFactory.Build<string>(
                 c =>
-                c.WithAspNetLogging(log => log.AddConsole(LogLevel.Trace))
+                c.WithAspNetLogging(log => log.AddConsole(LogLevel.Verbose))
                 .WithSystemRuntimeDefaultCacheHandle());
 
             cache.AddOrUpdate("myKey", "someregion", "value", _ => "new value");

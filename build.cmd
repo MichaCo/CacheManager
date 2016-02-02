@@ -4,8 +4,8 @@ cd %~dp0
 SETLOCAL
 SET NUGET_VERSION=latest
 SET CACHED_NUGET=%LocalAppData%\NuGet\nuget.%NUGET_VERSION%.exe
-SET BUILDCMD_KOREBUILD_VERSION=
-SET BUILDCMD_DNX_VERSION=
+SET BUILDCMD_KOREBUILD_VERSION=0.2.1-rc1-final
+SET BUILDCMD_DNX_VERSION=1.0.0-rc1-update1
 
 IF EXIST %CACHED_NUGET% goto copynuget
 echo Downloading latest version of NuGet.exe...
@@ -32,7 +32,7 @@ IF "%BUILDCMD_DNX_VERSION%"=="" (
 )
 IF "%SKIP_DNX_INSTALL%"=="" (
     CALL packages\KoreBuild\build\dnvm install %BUILDCMD_DNX_VERSION% -runtime CoreCLR -arch x86 -alias default
-    CALL packages\KoreBuild\build\dnvm install default -runtime CLR -arch x86 -alias default
+    CALL packages\KoreBuild\build\dnvm install %BUILDCMD_DNX_VERSION% -runtime CLR -arch x86 -alias default
 ) ELSE (
     CALL packages\KoreBuild\build\dnvm use default -runtime CLR -arch x86
 )

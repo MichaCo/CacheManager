@@ -1,12 +1,16 @@
 {
   "dependencies": {
-    "CacheManager.Serialization.Json": "",
     "CacheManager.AspNetCore.Logging": "",
+    "CacheManager.Couchbase": "",
+    "CacheManager.MemCached": "",
+    "CacheManager.Serialization.Json": "",
+    "CacheManager.StackExchange.Redis": "",
+    "CacheManager.SystemRuntimeCaching": "",
+    "CacheManager.Web": "",
     "FluentAssertions": "4.1.0",
-    "Microsoft.Extensions.Logging.Console": "1.0.0-*",
-    "Microsoft.Extensions.Logging.Debug": "1.0.0-*",
-    "Microsoft.Extensions.Logging": "1.0.0-*",
-    "xunit": "2.1.0"
+    "Moq": "4.2.1510.2205",
+    "xunit": "2.1.0",
+    "xunit.runner.dnx": "2.1.0-rc1-build204"
   },
   "frameworks": {
     "dnx451": {
@@ -17,13 +21,6 @@
         ]
       },
       "dependencies": {
-        "CacheManager.Couchbase": "",
-        "CacheManager.MemCached": "",
-        "CacheManager.StackExchange.Redis": "",
-        "CacheManager.SystemRuntimeCaching": "",
-        "CacheManager.Web": "",
-        "Moq": "4.2.1510.2205",
-        "xunit.runner.aspnet": "2.0.0-aspnet-*"
       },
       "frameworkAssemblies": {
         "System.Runtime": "",
@@ -32,8 +29,7 @@
       }
     }
   },
-  "testRunner": "xunit",
   "commands": {
-    "test": "xunit.runner.aspnet -notrait category=Memcached -notrait category=Unreliable"
+    "test": "xunit.runner.dnx -notrait category=Memcached -notrait category=Unreliable"
   }
 }

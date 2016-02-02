@@ -16,6 +16,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		global.json = global.json
 		common\GlobalAssemblyInfo.cs = common\GlobalAssemblyInfo.cs
 		NuGet.Config = NuGet.Config
+		.nuget\NuGet.Config = .nuget\NuGet.Config
 		README.md = README.md
 		RedisCfg.xsd = RedisCfg.xsd
 	EndProjectSection
