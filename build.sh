@@ -36,5 +36,3 @@ fi
 mono packages/Sake/tools/Sake.exe -I packages/KoreBuild/build -f makefile.shade "$@"
 cd samples/CacheManager.Examples
 dnx run
-dnvm install -r coreclr latest
-dnx run
