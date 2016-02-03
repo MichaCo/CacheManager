@@ -30,7 +30,7 @@
   },
   "dependencies": {
     "CacheManager.Core": "",
-    "Microsoft.Extensions.Logging": "1.0.0-rc1-final"
+    "Microsoft.Extensions.Logging": "1.0.0-rc1-*"
   },
   "frameworks": {
     "net451": { },

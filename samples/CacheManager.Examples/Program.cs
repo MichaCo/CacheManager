@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 using CacheManager.Core;
 using Microsoft.Extensions.Logging;
 #if NET45
@@ -16,16 +17,11 @@ namespace CacheManager.Examples
             EventsExample();
             UnityInjectionExample();
             UnityInjectionExample_Advanced();
-            AppConfigLoadInstalledCacheCfg();
             SimpleCustomBuildConfigurationUsingConfigBuilder();
             SimpleCustomBuildConfigurationUsingFactory();
             UpdateTest();
             UpdateCounterTest();
             LoggingSample();
-
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Press any key to exit...");
-            Console.ReadKey();
         }
 
         private static void LoggingSample()
@@ -33,7 +29,7 @@ namespace CacheManager.Examples
             var cache = CacheFactory.Build<string>(
                 c =>
                 c.WithAspNetLogging(log => log.AddConsole(LogLevel.Verbose))
-                .WithSystemRuntimeDefaultCacheHandle());
+                .WithDictionaryHandle());
 
             cache.AddOrUpdate("myKey", "someregion", "value", _ => "new value");
             cache.AddOrUpdate("myKey", "someregion", "value", _ => "new value");
@@ -41,15 +37,17 @@ namespace CacheManager.Examples
             var val = cache.Get("myKey", "someregion");
         }
 
+#if !DNXCORE50
         private static void AppConfigLoadInstalledCacheCfg()
         {
             var cache = CacheFactory.FromConfiguration<object>("myCache");
             cache.Add("key", "value");
         }
+#endif
 
         private static void EventsExample()
         {
-            var cache = CacheFactory.FromConfiguration<object>("myCache");
+            var cache = CacheFactory.Build<string>(s => s.WithDictionaryHandle());
             cache.OnAdd += (sender, args) => Console.WriteLine("Added " + args.Key);
             cache.OnGet += (sender, args) => Console.WriteLine("Got " + args.Key);
             cache.OnRemove += (sender, args) => Console.WriteLine("Removed " + args.Key);
@@ -59,6 +57,7 @@ namespace CacheManager.Examples
             cache.Remove("key");
         }
 
+#if !DNXCORE50
         private static void RedisSample()
         {
             var cache = CacheFactory.Build<int>(settings =>
@@ -84,6 +83,7 @@ namespace CacheManager.Examples
 
             var result = cache.Get("test");
         }
+#endif
 
         private static void SimpleCustomBuildConfigurationUsingConfigBuilder()
         {
@@ -92,7 +92,7 @@ namespace CacheManager.Examples
             var cfg = ConfigurationBuilder.BuildConfiguration(settings =>
                 {
                     settings.WithUpdateMode(CacheUpdateMode.Up)
-                        .WithSystemRuntimeCacheHandle()
+                        .WithDictionaryHandle()
                             .EnablePerformanceCounters()
                             .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(10));
                 });
@@ -112,7 +112,7 @@ namespace CacheManager.Examples
             {
                 settings
                     .WithUpdateMode(CacheUpdateMode.Up)
-                    .WithSystemRuntimeCacheHandle()
+                    .WithDictionaryHandle()
                         .EnablePerformanceCounters()
                         .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(10));
             });
@@ -125,7 +125,7 @@ namespace CacheManager.Examples
             UnityContainer container = new UnityContainer();
             container.RegisterType<ICacheManager<object>>(
                 new ContainerControlledLifetimeManager(),
-                new InjectionFactory((c) => CacheFactory.FromConfiguration<object>("myCache")));
+                new InjectionFactory((c) => CacheFactory.Build(s => s.WithDictionaryHandle())));
 
             container.RegisterType<UnityInjectionExampleTarget>();
 
@@ -148,7 +148,7 @@ namespace CacheManager.Examples
                 new InjectionFactory(
                     (c, t, n) => CacheFactory.FromConfiguration(
                         t.GetGenericArguments()[0],
-                        ConfigurationBuilder.BuildConfiguration(cfg => cfg.WithSystemRuntimeCacheHandle()))));
+                        ConfigurationBuilder.BuildConfiguration(cfg => cfg.WithDictionaryHandle()))));
 
             var stringCache = container.Resolve<ICacheManager<string>>();
 
@@ -171,7 +171,7 @@ namespace CacheManager.Examples
 
         private static void UpdateTest()
         {
-            var cache = CacheFactory.Build<string>(s => s.WithSystemRuntimeCacheHandle());
+            var cache = CacheFactory.Build<string>(s => s.WithDictionaryHandle());
 
             Console.WriteLine("Testing update...");
 
@@ -194,7 +194,7 @@ namespace CacheManager.Examples
 
         private static void UpdateCounterTest()
         {
-            var cache = CacheFactory.Build<long>(s => s.WithSystemRuntimeCacheHandle());
+            var cache = CacheFactory.Build<long>(s => s.WithDictionaryHandle());
 
             Console.WriteLine("Testing update counter...");
 
