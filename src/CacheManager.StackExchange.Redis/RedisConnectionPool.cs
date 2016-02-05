@@ -46,10 +46,10 @@ namespace CacheManager.Redis
                     StackRedis.ConnectionMultiplexer connection;
                     if (!connections.TryGetValue(connectionString, out connection))
                     {
-                        //connection = StackRedis.ConnectionMultiplexer.Connect(connectionString);
-                        var builder = new StringBuilder();
-                        var log = new StringWriter(builder, CultureInfo.InvariantCulture);
-                        connection = StackRedis.ConnectionMultiplexer.Connect(connectionString, log);
+                        connection = StackRedis.ConnectionMultiplexer.Connect(connectionString);
+                        ////var builder = new StringBuilder();
+                        ////var log = new StringWriter(builder, CultureInfo.InvariantCulture);
+                        ////connection = StackRedis.ConnectionMultiplexer.Connect(connectionString, log);
 
                         connection.ConnectionFailed += (sender, args) =>
                         {

@@ -26,6 +26,8 @@ namespace CacheManager.Redis
         private readonly string identifier;
         private readonly ILogger logger;
         private StackRedis.ISubscriber redisSubscriper;
+        private long lastLog = 0L;
+        private long messagesCount = 0L;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RedisCacheBackPlate"/> class.
@@ -134,12 +136,9 @@ namespace CacheManager.Redis
             this.redisSubscriper.Publish(this.channelName, message, StackRedis.CommandFlags.FireAndForget);
         }
 
-        //private Stack<string> messages = new Stack<string>();
-        //private StringBuilder messages = null;
-        //private long lastRun = 0L;
-        private long lastLog = 0L;
-        private long messagesCount = 0L;
-
+        ////private Stack<string> messages = new Stack<string>();
+        ////private StringBuilder messages = null;
+        ////private long lastRun = 0L;
         private void PublishMessage(BackPlateMessage message)
         {
             this.Publish(message.Serialize());
@@ -147,42 +146,42 @@ namespace CacheManager.Redis
             if (this.logger.IsEnabled(LogLevel.Information))
             {
                 const int logInterval = 1000;
-                Interlocked.Increment(ref messagesCount);
+                Interlocked.Increment(ref this.messagesCount);
 
-                if(Environment.TickCount > lastLog + logInterval)
+                if (Environment.TickCount > this.lastLog + logInterval)
                 {
-                    lastLog = Environment.TickCount;
-                    this.logger.LogInfo("Backplate Received {0} int the past {1}sec.", messagesCount, logInterval / 1000);
-                    Interlocked.Exchange(ref messagesCount, 0);
+                    this.lastLog = Environment.TickCount;
+                    this.logger.LogInfo("Back-plate sent {0} messages in the past {1}sec.", this.messagesCount, logInterval / 1000);
+                    Interlocked.Exchange(ref this.messagesCount, 0);
                 }
             }
 
-            //if (Environment.TickCount > lastRun + 0 && messages != null)
-            //{
-            //    lock (messages)
-            //    {
-            //        if (Environment.TickCount > lastRun + 0 && messages != null)
-            //        {
-            //            var msgs = messages.ToString();
-            //            //this.logger.LogInfo("Backplate sending {0} messages.", msgs.Split(',').Length);
-            //            this.Publish(msgs);
-            //            lastRun = Environment.TickCount;
-            //            messages = null;                        
-            //        }
-            //    }
-            //}
-            //var msg = message.Serialize();
+            ////if (Environment.TickCount > lastRun + 0 && messages != null)
+            ////{
+            ////    lock (messages)
+            ////    {
+            ////        if (Environment.TickCount > lastRun + 0 && messages != null)
+            ////        {
+            ////            var msgs = messages.ToString();
+            ////            //this.logger.LogInfo("Backplate sending {0} messages.", msgs.Split(',').Length);
+            ////            this.Publish(msgs);
+            ////            lastRun = Environment.TickCount;
+            ////            messages = null;
+            ////        }
+            ////    }
+            ////}
+            ////var msg = message.Serialize();
 
-            //if (messages == null)
-            //{
-            //    messages = new StringBuilder(msg);
-            //}
-            //else
-            //{
-            //    messages.Append(",");
-            //    messages.Append(msg);
-            //    ////messages += "," + msg;
-            //}
+            ////if (messages == null)
+            ////{
+            ////    messages = new StringBuilder(msg);
+            ////}
+            ////else
+            ////{
+            ////    messages.Append(",");
+            ////    messages.Append(msg);
+            ////    ////messages += "," + msg;
+            ////}
         }
 
         private void Subscribe()
@@ -192,7 +191,7 @@ namespace CacheManager.Redis
                 (channel, msg) =>
                 {
                     var fullMessageStr = ((string)msg).Split(',');
-                    //this.logger.LogInfo("Backplate got notified with {0} new messages.", fullMessageStr.Length);
+                    ////this.logger.LogInfo("Back-plate got notified with {0} new messages.", fullMessageStr.Length);
 
                     foreach (var messageStr in fullMessageStr)
                     {
