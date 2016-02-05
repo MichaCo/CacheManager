@@ -289,10 +289,11 @@ return result";
                         return UpdateItemResult.ForSuccess<TCacheValue>(newValue, tries > 1, tries);
                     }
 
-                    this.Logger.LogInfo("Updated of {0} {1} failed with version conflict, retrying {2}/{3}", key, region, tries, maxRetries);
+                    this.Logger.LogDebug("Update of {0} {1} failed with version conflict, retrying {2}/{3}", key, region, tries, maxRetries);
                 }
                 while (tries <= maxRetries);
 
+                this.Logger.LogWarn("Update of {0} {1} failed with version conflict exiting because of too many retries.", key, region);
                 return UpdateItemResult.ForTooManyRetries<TCacheValue>(tries);
             });
         }

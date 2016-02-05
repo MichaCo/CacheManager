@@ -19,7 +19,7 @@ namespace CacheManager.Config.Tests
                 var cacheConfiguration = ConfigurationBuilder.BuildConfiguration(cfg =>
                 {
                     cfg.WithAspNetLogging(f => f
-                        .AddConsole(LogLevel.Error)
+                        .AddConsole(LogLevel.Information)
                         .AddDebug(LogLevel.Information));
 
                     cfg.WithUpdateMode(CacheUpdateMode.Up);
@@ -32,7 +32,7 @@ namespace CacheManager.Config.Tests
 
                     //Console.WriteLine("Using Dictionary cache handle");
 #else
-                    cfg.WithDictionaryHandle("dic")
+                    cfg.WithSystemRuntimeDefaultCacheHandle()
                         .DisableStatistics();
 
                     cfg.WithRedisCacheHandle("redis", true)
@@ -46,11 +46,11 @@ namespace CacheManager.Config.Tests
                             .WithAllowAdmin()
                             .WithDatabase(0)
                             .WithConnectionTimeout(1000)
-                            .WithEndpoint("127.0.0.1", 6380)
-                            .WithEndpoint("127.0.0.1", 6379);
-                        ////.WithEndpoint("192.168.178.32", 6379);
+                            //.WithEndpoint("127.0.0.1", 6380)
+                            //.WithEndpoint("127.0.0.1", 6379);
+                        .WithEndpoint("192.168.178.34", 7001);
                     });
-
+                    
                     cfg.WithJsonSerializer();
 
                     Console.WriteLine("Using Redis cache handle");
@@ -64,7 +64,7 @@ namespace CacheManager.Config.Tests
                 {
                     try
                     {
-                        Tests.SimpleAddGetTest(cacheA);
+                        Tests.PutAndMultiGetTest(cacheA);
                     }
                     catch (AggregateException ex)
                     {

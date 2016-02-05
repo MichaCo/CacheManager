@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Text;
+using System.Threading;
 using CacheManager.Core;
 using CacheManager.Core.Internal;
 using CacheManager.Core.Logging;
@@ -131,9 +134,55 @@ namespace CacheManager.Redis
             this.redisSubscriper.Publish(this.channelName, message, StackRedis.CommandFlags.FireAndForget);
         }
 
+        //private Stack<string> messages = new Stack<string>();
+        //private StringBuilder messages = null;
+        //private long lastRun = 0L;
+        private long lastLog = 0L;
+        private long messagesCount = 0L;
+
         private void PublishMessage(BackPlateMessage message)
         {
             this.Publish(message.Serialize());
+
+            if (this.logger.IsEnabled(LogLevel.Information))
+            {
+                const int logInterval = 1000;
+                Interlocked.Increment(ref messagesCount);
+
+                if(Environment.TickCount > lastLog + logInterval)
+                {
+                    lastLog = Environment.TickCount;
+                    this.logger.LogInfo("Backplate Received {0} int the past {1}sec.", messagesCount, logInterval / 1000);
+                    Interlocked.Exchange(ref messagesCount, 0);
+                }
+            }
+
+            //if (Environment.TickCount > lastRun + 0 && messages != null)
+            //{
+            //    lock (messages)
+            //    {
+            //        if (Environment.TickCount > lastRun + 0 && messages != null)
+            //        {
+            //            var msgs = messages.ToString();
+            //            //this.logger.LogInfo("Backplate sending {0} messages.", msgs.Split(',').Length);
+            //            this.Publish(msgs);
+            //            lastRun = Environment.TickCount;
+            //            messages = null;                        
+            //        }
+            //    }
+            //}
+            //var msg = message.Serialize();
+
+            //if (messages == null)
+            //{
+            //    messages = new StringBuilder(msg);
+            //}
+            //else
+            //{
+            //    messages.Append(",");
+            //    messages.Append(msg);
+            //    ////messages += "," + msg;
+            //}
         }
 
         private void Subscribe()
@@ -142,47 +191,51 @@ namespace CacheManager.Redis
                 this.channelName,
                 (channel, msg) =>
                 {
-                    string messageStr = (string)msg;
+                    var fullMessageStr = ((string)msg).Split(',');
+                    //this.logger.LogInfo("Backplate got notified with {0} new messages.", fullMessageStr.Length);
 
-                    if (messageStr.StartsWith(this.identifier, StringComparison.Ordinal))
+                    foreach (var messageStr in fullMessageStr)
                     {
-                        // do not notify ourself (might be faster than the second method?
-                        return;
-                    }
+                        if (messageStr.StartsWith(this.identifier, StringComparison.Ordinal))
+                        {
+                            // do not notify ourself (might be faster than the second method?
+                            return;
+                        }
 
-                    var message = BackPlateMessage.Deserialize(messageStr);
+                        var message = BackPlateMessage.Deserialize(messageStr);
 
-                    switch (message.Action)
-                    {
-                        case BackPlateAction.Clear:
-                            this.OnClear();
-                            break;
+                        switch (message.Action)
+                        {
+                            case BackPlateAction.Clear:
+                                this.OnClear();
+                                break;
 
-                        case BackPlateAction.ClearRegion:
-                            this.OnClearRegion(message.Region);
-                            break;
+                            case BackPlateAction.ClearRegion:
+                                this.OnClearRegion(message.Region);
+                                break;
 
-                        case BackPlateAction.Changed:
-                            if (string.IsNullOrWhiteSpace(message.Region))
-                            {
-                                this.OnChange(message.Key);
-                            }
-                            else
-                            {
-                                this.OnChange(message.Key, message.Region);
-                            }
-                            break;
+                            case BackPlateAction.Changed:
+                                if (string.IsNullOrWhiteSpace(message.Region))
+                                {
+                                    this.OnChange(message.Key);
+                                }
+                                else
+                                {
+                                    this.OnChange(message.Key, message.Region);
+                                }
+                                break;
 
-                        case BackPlateAction.Removed:
-                            if (string.IsNullOrWhiteSpace(message.Region))
-                            {
-                                this.OnRemove(message.Key);
-                            }
-                            else
-                            {
-                                this.OnRemove(message.Key, message.Region);
-                            }
-                            break;
+                            case BackPlateAction.Removed:
+                                if (string.IsNullOrWhiteSpace(message.Region))
+                                {
+                                    this.OnRemove(message.Key);
+                                }
+                                else
+                                {
+                                    this.OnRemove(message.Key, message.Region);
+                                }
+                                break;
+                        }
                     }
                 },
                 StackRedis.CommandFlags.FireAndForget);

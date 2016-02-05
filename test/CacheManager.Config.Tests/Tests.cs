@@ -75,7 +75,7 @@ namespace CacheManager.Config.Tests
                 eventRemoveCount));
         }
 
-        public static void SimpleAddGetTest(params ICacheManager<object>[] caches)
+        public static void PutAndMultiGetTest(params ICacheManager<object>[] caches)
         {
             var swatch = Stopwatch.StartNew();
             var threads = 50;
@@ -93,15 +93,6 @@ namespace CacheManager.Config.Tests
                 for (var ta = 0; ta < items; ta++)
                 {
                     Interlocked.Increment(ref ops);
-                    ////Interlocked.Increment(ref ops);
-                    ////Interlocked.Increment(ref ops);
-
-                    ////var added = cache.AddOrUpdate(key + ta, region, "val" + ta, _ => "updated" + ta);
-                    ////if (added == null)
-                    ////{
-                    ////    throw new InvalidOperationException("AddOrUpdate shouldn't return null");
-                    ////}
-
                     cache.Put(key + ta, "val" + ta, region);
                     if (ta % 1000 == 0)
                     {
@@ -131,6 +122,140 @@ namespace CacheManager.Config.Tests
                         if (!cache.TryUpdate("key" + rand.Next(0, items - 1), region, v => Guid.NewGuid().ToString(), out value))
                         {
                             Interlocked.Increment(ref fails);
+                        }
+
+                        Console.Write(".");
+                    });
+                }
+
+                Parallel.Invoke(new ParallelOptions() { MaxDegreeOfParallelism = 8 }, actions.ToArray());
+            }
+
+            var elapsed = swatch.ElapsedMilliseconds;
+            var opsPerSec = Math.Round(ops / swatch.Elapsed.TotalSeconds, 0);
+            Console.WriteLine("\nSimpleAddGetTest completed \tafter: {0:N} ms. \twith {1:N0} Ops/s m:{2}\t f:{3}", elapsed, opsPerSec, misses, fails);
+        }
+
+        public static void AddOrUpdateAndMultiGetTest(params ICacheManager<object>[] caches)
+        {
+            var swatch = Stopwatch.StartNew();
+            var threads = 50;
+            var items = 10000;
+            long ops = 0;
+            var misses = 0;
+            var fails = 0;
+
+            var rand = new Random();
+            var key = "key";
+            var region = "myRegion";
+
+            foreach (var cache in caches)
+            {
+                for (var ta = 0; ta < items; ta++)
+                {
+                    Interlocked.Increment(ref ops);
+                    Interlocked.Increment(ref ops);
+                    Interlocked.Increment(ref ops);
+
+                    var added = cache.AddOrUpdate(key + ta, region, "val" + ta, _ => "updated" + ta);
+                    if (added == null)
+                    {
+                        throw new InvalidOperationException("AddOrUpdate shouldn't return null");
+                    }
+
+                    if (ta % 1000 == 0)
+                    {
+                        Console.Write(".");
+                    }
+                }
+
+                var actions = new List<Action>();
+                for (var t = 0; t < threads; t++)
+                {
+                    actions.Add(() =>
+                    {
+                        for (var ta = 0; ta < items; ta++)
+                        {
+                            Interlocked.Increment(ref ops);
+                            var x = cache.Get(key + ta, region);
+
+                            if (x == null)
+                            {
+                                Interlocked.Increment(ref misses);
+                            }
+                        }
+
+                        object value;
+                        Interlocked.Increment(ref ops);
+                        Interlocked.Increment(ref ops); // update does a get and then set = 2 ops
+                        if (!cache.TryUpdate("key" + rand.Next(0, items - 1), region, v => Guid.NewGuid().ToString(), out value))
+                        {
+                            Interlocked.Increment(ref fails);
+                        }
+
+                        Console.Write(".");
+                    });
+                }
+
+                Parallel.Invoke(new ParallelOptions() { MaxDegreeOfParallelism = 8 }, actions.ToArray());
+            }
+
+            var elapsed = swatch.ElapsedMilliseconds;
+            var opsPerSec = Math.Round(ops / swatch.Elapsed.TotalSeconds, 0);
+            Console.WriteLine("\nSimpleAddGetTest completed \tafter: {0:N} ms. \twith {1:N0} Ops/s m:{2}\t f:{3}", elapsed, opsPerSec, misses, fails);
+        }
+
+        public static void AddThenGetAndUpdateTest(params ICacheManager<object>[] caches)
+        {
+            var swatch = Stopwatch.StartNew();
+            var threads = 50;
+            var items = 10000;
+            var ops = 0;
+            var misses = 0;
+            var fails = 0;
+
+            var rand = new Random();
+            const string key = "key";
+            const string region = "myRegion";
+
+            foreach (var cache in caches)
+            {
+                for (var ta = 0; ta < items; ta++)
+                {
+                    Interlocked.Increment(ref ops);
+
+                    cache.Add(key + ta, "val" + ta, region);
+
+                    if (ta % 1000 == 0)
+                    {
+                        Console.Write(".");
+                    }
+                }
+
+                var actions = new List<Action>();
+                for (var t = 0; t < threads; t++)
+                {
+                    actions.Add(() =>
+                    {
+                        for (var ta = 0; ta < items; ta++)
+                        {
+                            Interlocked.Increment(ref ops);
+                            var x = cache.Get(key + ta, region);
+
+                            if (x == null)
+                            {
+                                Interlocked.Increment(ref misses);
+                            }
+                            if (ta % 1000 == 0)
+                            {
+                                object value;
+                                Interlocked.Increment(ref ops);
+                                Interlocked.Increment(ref ops); // update does a get and then set = 2 ops
+                                if (!cache.TryUpdate("key" + rand.Next(0, items - 1), region, v => Guid.NewGuid().ToString(), out value))
+                                {
+                                    Interlocked.Increment(ref fails);
+                                }
+                            }
                         }
 
                         Console.Write(".");
