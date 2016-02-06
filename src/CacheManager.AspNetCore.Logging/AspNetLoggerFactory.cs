@@ -76,18 +76,23 @@ namespace CacheManager.AspNetCore.Logging
         {
             switch (level)
             {
-                case LogLevel.Critical:
-                    return Microsoft.Extensions.Logging.LogLevel.Critical;
-                case LogLevel.Debug:
+                //// TODO: Change on RC2 update
+                ////case LogLevel.Trace:
+                ////    return Microsoft.Extensions.Logging.LogLevel.Trace;
+                ////case LogLevel.Debug:
+                ////    return Microsoft.Extensions.Logging.LogLevel.Debug;
+                case LogLevel.Trace:
                     return Microsoft.Extensions.Logging.LogLevel.Debug;
-                case LogLevel.Error:
-                    return Microsoft.Extensions.Logging.LogLevel.Error;
+                case LogLevel.Debug:
+                    return Microsoft.Extensions.Logging.LogLevel.Verbose;
                 case LogLevel.Information:
                     return Microsoft.Extensions.Logging.LogLevel.Information;
-                case LogLevel.Trace:
-                    return Microsoft.Extensions.Logging.LogLevel.Verbose;
                 case LogLevel.Warning:
                     return Microsoft.Extensions.Logging.LogLevel.Warning;
+                case LogLevel.Error:
+                    return Microsoft.Extensions.Logging.LogLevel.Error;
+                case LogLevel.Critical:
+                    return Microsoft.Extensions.Logging.LogLevel.Critical;
             }
 
             return Microsoft.Extensions.Logging.LogLevel.None;

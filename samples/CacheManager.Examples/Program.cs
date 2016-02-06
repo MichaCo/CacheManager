@@ -25,10 +25,16 @@ namespace CacheManager.Examples
         }
 
         private static void LoggingSample()
-        {
+        {            
             var cache = CacheFactory.Build<string>(
                 c =>
-                c.WithAspNetLogging(log => log.AddConsole(LogLevel.Verbose))
+                c.WithAspNetLogging(log =>
+                {
+                    log.AddConsole(LogLevel.Debug);
+
+                    // TODO: remove after asp.net core RC2 upgrade.
+                    log.MinimumLevel = LogLevel.Debug;
+                })
                 .WithDictionaryHandle());
 
             cache.AddOrUpdate("myKey", "someregion", "value", _ => "new value");

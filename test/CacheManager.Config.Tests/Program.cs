@@ -18,9 +18,16 @@ namespace CacheManager.Config.Tests
             {
                 var cacheConfiguration = ConfigurationBuilder.BuildConfiguration(cfg =>
                 {
-                    cfg.WithAspNetLogging(f => f
-                        .AddConsole(LogLevel.Information)
-                        .AddDebug(LogLevel.Information));
+                    cfg.WithAspNetLogging(f =>
+                    {
+                        // TODO: remove after logging upgrade to RC2
+                        f.MinimumLevel = LogLevel.Debug;
+
+                        f.AddConsole(LogLevel.Information);
+
+                        // TODO: change to Debug after logging upgrade to RC2
+                        f.AddDebug(LogLevel.Verbose);
+                    });
 
                     cfg.WithUpdateMode(CacheUpdateMode.Up);
                     cfg.WithRetryTimeout(100);
@@ -46,9 +53,9 @@ namespace CacheManager.Config.Tests
                             .WithAllowAdmin()
                             .WithDatabase(0)
                             .WithConnectionTimeout(1000)
-                            //.WithEndpoint("127.0.0.1", 6380)
-                            //.WithEndpoint("127.0.0.1", 6379);
-                        .WithEndpoint("192.168.178.34", 7001);
+                            .WithEndpoint("127.0.0.1", 6380)
+                            .WithEndpoint("127.0.0.1", 6379);
+                        //.WithEndpoint("192.168.178.34", 7001);
                     });
                     
                     cfg.WithJsonSerializer();

@@ -1321,6 +1321,38 @@ namespace CacheManager.Tests
             }
         }
 
+        [Theory]
+        [MemberData("TestCacheManagers")]
+        public void CacheManager_IsCaseSensitive_Key<T>(T cache)
+            where T : ICacheManager<object>
+        {
+            using (cache)
+            {
+                cache.Remove("SomeKey");
+                cache.Add("SomeKey", "some value");
+
+                var result = cache.Get("somekeY");
+
+                result.Should().BeNull();
+            }
+        }
+
+        [Theory]
+        [MemberData("TestCacheManagers")]
+        public void CacheManager_IsCaseSensitive_Region<T>(T cache)
+            where T : ICacheManager<object>
+        {
+            using (cache)
+            {
+                cache.Remove("SomeKey", "Region");
+                cache.Add("SomeKey", "some value", "Region");
+
+                var result = cache.Get("SomeKey", "region");
+
+                result.Should().BeNull();
+            }
+        }
+
         private static void PopulateCache<T>(ICacheManager<T> cache, IList<string> keys, IList<T> values, int mode)
         {
             // let us make this safe per run so cache doesn't get cleared/populated from ultiple tests

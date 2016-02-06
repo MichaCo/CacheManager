@@ -49,12 +49,12 @@ namespace CacheManager.Core
             this.Logger = configuration.LoggerFactory.CreateLogger(this);
             this.logDebug = this.Logger.IsEnabled(LogLevel.Debug);
             this.logTrace = this.Logger.IsEnabled(LogLevel.Trace);
-            this.Logger.LogInfo("Creating cache manager, adding cache handles...");
+            this.Logger.LogInfo("Cache manager: adding cache handles...");
             this.cacheHandles = CacheReflectionHelper.CreateCacheHandles(this, this.Logger).ToArray();
 
             if (this.Configuration.HasBackPlate)
             {
-                this.Logger.LogInfo("Registering cache back plate.");
+                this.Logger.LogInfo("Cache manager: registering cache back plate.");
                 this.RegisterCacheBackPlate(CacheReflectionHelper.CreateBackPlate(this));
             }
         }
@@ -352,16 +352,16 @@ namespace CacheManager.Core
         public override void Clear()
         {
             this.CheckDisposed();
-            if (this.logDebug)
+            if (this.logTrace)
             {
-                this.Logger.LogDebug("Clear cache invoked.");
+                this.Logger.LogTrace("Clear: flushing cache...");
             }
 
             foreach (var handle in this.cacheHandles)
             {
                 if (this.logTrace)
                 {
-                    this.Logger.LogTrace("Clearing handle {0}.", handle.Configuration.HandleName);
+                    this.Logger.LogTrace("Clear: clearing handle {0}.", handle.Configuration.HandleName);
                 }
 
                 handle.Clear();
@@ -372,7 +372,7 @@ namespace CacheManager.Core
             {
                 if (this.logTrace)
                 {
-                    this.Logger.LogTrace("Clear: notify back plate.");
+                    this.Logger.LogTrace("Clear: notifies back plate.");
                 }
 
                 this.cacheBackPlate.NotifyClear();
@@ -391,16 +391,16 @@ namespace CacheManager.Core
             NotNullOrWhiteSpace(region, nameof(region));
 
             this.CheckDisposed();
-            if (this.logDebug)
+            if (this.logTrace)
             {
-                this.Logger.LogDebug("Clear region {0}.", region);
+                this.Logger.LogTrace("Clear region: {0}.", region);
             }
 
             foreach (var handle in this.cacheHandles)
             {
                 if (this.logTrace)
                 {
-                    this.Logger.LogTrace("Clearing region {0} in handle {1}.", region, handle.Configuration.HandleName);
+                    this.Logger.LogTrace("Clear region: {0} in handle {1}.", region, handle.Configuration.HandleName);
                 }
 
                 handle.ClearRegion(region);
@@ -411,7 +411,7 @@ namespace CacheManager.Core
             {
                 if (this.logTrace)
                 {
-                    this.Logger.LogTrace("Clear region {0}: notify back-plate.", region);
+                    this.Logger.LogTrace("Clear region: {0}: notifies back-plate [clear region].", region);
                 }
 
                 this.cacheBackPlate.NotifyClearRegion(region);
@@ -430,16 +430,16 @@ namespace CacheManager.Core
         public override void Expire(string key, ExpirationMode mode, TimeSpan timeout)
         {
             this.CheckDisposed();
-            if (this.logDebug)
+            if (this.logTrace)
             {
-                this.Logger.LogDebug("Expire {0}.", key);
+                this.Logger.LogTrace("Expire: {0}.", key);
             }
 
             foreach (var handle in this.cacheHandles)
             {
                 if (this.logTrace)
                 {
-                    this.Logger.LogTrace("Expire {0} on handle {1}.", key, handle.Configuration.HandleName);
+                    this.Logger.LogTrace("Expire: {0} on handle {1}.", key, handle.Configuration.HandleName);
                 }
 
                 handle.Expire(key, mode, timeout);
@@ -457,16 +457,16 @@ namespace CacheManager.Core
         public override void Expire(string key, string region, ExpirationMode mode, TimeSpan timeout)
         {
             this.CheckDisposed();
-            if (this.logDebug)
+            if (this.logTrace)
             {
-                this.Logger.LogDebug("Expire {0} {1}.", key, region);
+                this.Logger.LogTrace("Expire: {0} {1}.", key, region);
             }
 
             foreach (var handle in this.cacheHandles)
             {
                 if (this.logTrace)
                 {
-                    this.Logger.LogTrace("Expire {0} {1} on handle {2}.", key, region, handle.Configuration.HandleName);
+                    this.Logger.LogTrace("Expire: {0} {1} on handle {2}.", key, region, handle.Configuration.HandleName);
                 }
 
                 handle.Expire(key, region, mode, timeout);
@@ -770,9 +770,9 @@ namespace CacheManager.Core
             NotNull(item, nameof(item));
 
             this.CheckDisposed();
-            if (this.logDebug)
+            if (this.logTrace)
             {
-                this.Logger.LogDebug("Add", item);
+                this.Logger.LogTrace("Add: {0} {1}", item.Key, item.Region);
             }
 
             var result = false;
@@ -787,7 +787,7 @@ namespace CacheManager.Core
                     if (this.logTrace)
                     {
                         this.Logger.LogTrace(
-                            "Add: added {0} {1} to handle {2}",
+                            "Add: successfully added {0} {1} to handle {2}",
                             item.Key,
                             item.Region,
                             handle.Configuration.HandleName);
@@ -803,10 +803,10 @@ namespace CacheManager.Core
                     // when we return false...
                     // Note: we might also just have added the item to a cache handel a level below,
                     //       this will get removed, too!
-                    if (this.logDebug)
+                    if (this.logTrace)
                     {
-                        this.Logger.LogDebug(
-                            "Add: adding {0} {1} to handle {2} FAILED. Evicting items from other handles.",
+                        this.Logger.LogTrace(
+                            "Add: {0} {1} to handle {2} FAILED. Evicting items from other handles.",
                             item.Key,
                             item.Region,
                             handle.Configuration.HandleName);
@@ -836,9 +836,9 @@ namespace CacheManager.Core
             NotNull(item, nameof(item));
 
             this.CheckDisposed();
-            if (this.logDebug)
+            if (this.logTrace)
             {
-                this.Logger.LogDebug("Put", item);
+                this.Logger.LogTrace("Put: {0} {1}.", item.Key, item.Region);
             }
 
             foreach (var handle in this.cacheHandles)
@@ -858,7 +858,7 @@ namespace CacheManager.Core
                 if (this.logTrace)
                 {
                     this.Logger.LogTrace(
-                        "Putting {0} {1} to handle {2}.",
+                        "Put: {0} {1} to handle {2}.",
                         item.Key,
                         item.Region,
                         handle.Configuration.HandleName);
@@ -872,7 +872,7 @@ namespace CacheManager.Core
             {
                 if (this.logTrace)
                 {
-                    this.Logger.LogTrace("Put: notify back-plate change {0} {1}", item.Key, item.Region);
+                    this.Logger.LogTrace("Put: {0} {1}: notifies back-plate [change].", item.Key, item.Region);
                 }
 
                 if (string.IsNullOrWhiteSpace(item.Region))
@@ -935,9 +935,9 @@ namespace CacheManager.Core
 
             CacheItem<TCacheValue> cacheItem = null;
 
-            if (this.logDebug)
+            if (this.logTrace)
             {
-                this.Logger.LogDebug("Get {0} {1}.", key, region);
+                this.Logger.LogTrace("Get: {0} {1}.", key, region);
             }
 
             for (int handleIndex = 0; handleIndex < this.cacheHandles.Length; handleIndex++)
@@ -958,7 +958,7 @@ namespace CacheManager.Core
                 {
                     if (this.logTrace)
                     {
-                        this.Logger.LogTrace("Item {0} {1} found in handle {2}.", key, region, handle.Configuration.HandleName);
+                        this.Logger.LogTrace("Get: {0} {1}: item found in handle {2}.", key, region, handle.Configuration.HandleName);
                     }
 
                     // update last accessed, might be used for custom sliding implementations
@@ -974,7 +974,7 @@ namespace CacheManager.Core
                 {
                     if (this.logTrace)
                     {
-                        this.Logger.LogTrace("Item {0} {1} NOT found in handle {2}.", key, region, handle.Configuration.HandleName);
+                        this.Logger.LogTrace("Get: {0} {1}: item NOT found in handle {2}.", key, region, handle.Configuration.HandleName);
                     }
 
                     handle.Stats.OnMiss(region);
@@ -1012,9 +1012,9 @@ namespace CacheManager.Core
 
             var result = false;
 
-            if (this.logDebug)
+            if (this.logTrace)
             {
-                this.Logger.LogDebug("Remove {0} {1}.", key, region);
+                this.Logger.LogTrace("Remove: {0} {1}.", key, region);
             }
 
             foreach (var handle in this.cacheHandles)
@@ -1034,7 +1034,7 @@ namespace CacheManager.Core
                     if (this.logTrace)
                     {
                         this.Logger.LogTrace(
-                            "Remove removed {0} {1} from handle {2}.",
+                            "Remove: {0} {1}: removed from handle {2}.",
                             key,
                             region,
                             handle.Configuration.HandleName);
@@ -1051,7 +1051,7 @@ namespace CacheManager.Core
                 {
                     if (this.logTrace)
                     {
-                        this.Logger.LogTrace("Remove notify back-plate remove {0} {1}.", key, region);
+                        this.Logger.LogTrace("Remove: {0} {1}: notifies back-plate [remove].", key, region);
                     }
 
                     if (string.IsNullOrWhiteSpace(region))
@@ -1095,7 +1095,7 @@ namespace CacheManager.Core
             if (this.logTrace)
             {
                 this.Logger.LogTrace(
-                    "Evict from handle got triggered for {0} {1} on handle {2}.",
+                    "Evict from handle: {0} {1}: on handle {2}.",
                     key,
                     region,
                     handle.Configuration.HandleName);
@@ -1122,7 +1122,7 @@ namespace CacheManager.Core
             this.CheckDisposed();
             if (this.logTrace)
             {
-                this.Logger.LogTrace("Add or update for {0} {1}.", item.Key, item.Region);
+                this.Logger.LogTrace("Add or update: {0} {1}.", item.Key, item.Region);
             }
 
             var tries = 0;
@@ -1134,7 +1134,7 @@ namespace CacheManager.Core
                 {
                     if (this.logTrace)
                     {
-                        this.Logger.LogTrace("Add or update added {0} {1}.", item.Key, item.Region);
+                        this.Logger.LogTrace("Add or update: {0} {1}: successfully added the item.", item.Key, item.Region);
                     }
 
                     return item.Value;
@@ -1143,7 +1143,7 @@ namespace CacheManager.Core
                 if (this.logTrace)
                 {
                     this.Logger.LogTrace(
-                        "Add or update: Add failed for {0} {1}, trying to update.",
+                        "Add or update: {0} {1}: add failed, trying to update...",
                         item.Key,
                         item.Region);
                 }
@@ -1157,7 +1157,7 @@ namespace CacheManager.Core
                 {
                     if (this.logTrace)
                     {
-                        this.Logger.LogTrace("Add or update updated {0} {1}.", item.Key, item.Region);
+                        this.Logger.LogTrace("Add or update: {0} {1}: successfully updated.", item.Key, item.Region);
                     }
 
                     return returnValue;
@@ -1166,7 +1166,7 @@ namespace CacheManager.Core
                 if (this.logTrace)
                 {
                     this.Logger.LogTrace(
-                        "Add or update: Update didn't work for {0} {1}, retrying {2} of {3}",
+                        "Add or update: {0} {1}: update FAILED, retrying [{2}/{3}].",
                         item.Key,
                         item.Region,
                         tries,
@@ -1184,7 +1184,7 @@ namespace CacheManager.Core
             if (this.logTrace)
             {
                 this.Logger.LogTrace(
-                    "Add to handles: {0} {1} with update mode {2}.",
+                    "Add to handles: {0} {1}: with update mode {2}.",
                     item.Key,
                     item.Region,
                     this.Configuration.CacheUpdateMode);
@@ -1204,7 +1204,7 @@ namespace CacheManager.Core
                         {
                             if (this.logTrace)
                             {
-                                this.Logger.LogTrace("Add to handles: {0} {1} to handle {2}", item.Key, item.Region, handleIndex);
+                                this.Logger.LogTrace("Add to handles: {0} {1}: adding to handle {2}.", item.Key, item.Region, handleIndex);
                             }
 
                             this.cacheHandles[handleIndex].Add(item);
@@ -1227,7 +1227,7 @@ namespace CacheManager.Core
                         {
                             if (this.logTrace)
                             {
-                                this.Logger.LogTrace("Add to handles: {0} {1} to handle {2}", item.Key, item.Region, handleIndex);
+                                this.Logger.LogTrace("Add to handles: {0} {1}: adding to handle {2}.", item.Key, item.Region, handleIndex);
                             }
 
                             this.cacheHandles[handleIndex].Add(item);
@@ -1247,7 +1247,7 @@ namespace CacheManager.Core
 
             if (this.logTrace)
             {
-                this.Logger.LogTrace("Add to handles below: {0} {1} found in {2}.", item.Key, item.Region, foundIndex);
+                this.Logger.LogTrace("Add to handles below: {0} {1}: below handle {2}.", item.Key, item.Region, foundIndex);
             }
 
             for (int handleIndex = 0; handleIndex < this.cacheHandles.Length; handleIndex++)
@@ -1293,7 +1293,7 @@ namespace CacheManager.Core
 
             if (this.logTrace)
             {
-                this.Logger.LogTrace("Evict from other handles: {0} {1} excluding {2}.", key, region, excludeIndex);
+                this.Logger.LogTrace("Evict from other handles: {0} {1}: excluding handle {2}.", key, region, excludeIndex);
             }
 
             for (int handleIndex = 0; handleIndex < this.cacheHandles.Length; handleIndex++)
@@ -1309,7 +1309,7 @@ namespace CacheManager.Core
         {
             if (this.logTrace)
             {
-                this.Logger.LogTrace("Evict from handles above {2}: {0} {1}.", key, region, excludeIndex);
+                this.Logger.LogTrace("Evict from handles above: {0} {1}: above handle {2}.", key, region, excludeIndex);
             }
 
             if (excludeIndex < 0 || excludeIndex >= this.cacheHandles.Length)
@@ -1350,9 +1350,9 @@ namespace CacheManager.Core
 
                 backPlate.SubscribeChanged((key) =>
                 {
-                    if (this.logDebug)
+                    if (this.logTrace)
                     {
-                        this.Logger.LogDebug("Back-plate event [Changed] on {0}.", key);
+                        this.Logger.LogTrace("Back-plate event: [Changed] of {0}.", key);
                     }
 
                     this.EvictFromHandles(key, null, handles());
@@ -1360,9 +1360,9 @@ namespace CacheManager.Core
 
                 backPlate.SubscribeChanged((key, region) =>
                 {
-                    if (this.logDebug)
+                    if (this.logTrace)
                     {
-                        this.Logger.LogDebug("Back-plate event [Changed] on {0} {1}.", key, region);
+                        this.Logger.LogTrace("Back-plate event: [Changed] of {0} {1}.", key, region);
                     }
 
                     this.EvictFromHandles(key, region, handles());
@@ -1370,9 +1370,9 @@ namespace CacheManager.Core
 
                 backPlate.SubscribeRemove((key) =>
                 {
-                    if (this.logDebug)
+                    if (this.logTrace)
                     {
-                        this.Logger.LogDebug("Back-plate event [Remove] on {0}.", key);
+                        this.Logger.LogTrace("Back-plate event: [Remove] of {0}.", key);
                     }
 
                     this.EvictFromHandles(key, null, handles());
@@ -1381,9 +1381,9 @@ namespace CacheManager.Core
 
                 backPlate.SubscribeRemove((key, region) =>
                 {
-                    if (this.logDebug)
+                    if (this.logTrace)
                     {
-                        this.Logger.LogDebug("Back-plate event [Remove] on {0} {1}.", key, region);
+                        this.Logger.LogTrace("Back-plate event: [Remove] of {0} {1}.", key, region);
                     }
 
                     this.EvictFromHandles(key, region, handles());
@@ -1392,9 +1392,9 @@ namespace CacheManager.Core
 
                 backPlate.SubscribeClear(() =>
                 {
-                    if (this.logDebug)
+                    if (this.logTrace)
                     {
-                        this.Logger.LogDebug("Back-plate event [Clear].");
+                        this.Logger.LogTrace("Back-plate event: [Clear].");
                     }
 
                     this.ClearHandles(handles());
@@ -1403,9 +1403,9 @@ namespace CacheManager.Core
 
                 backPlate.SubscribeClearRegion((region) =>
                 {
-                    if (this.logDebug)
+                    if (this.logTrace)
                     {
-                        this.Logger.LogDebug("Back-plate event [Clear Region] region: {0}.", region);
+                        this.Logger.LogTrace("Back-plate event: [Clear Region] region: {0}.", region);
                     }
 
                     this.ClearRegionHandles(region, handles());
@@ -1480,9 +1480,9 @@ namespace CacheManager.Core
                 return false;
             }
 
-            if (this.logDebug)
+            if (this.logTrace)
             {
-                this.Logger.LogDebug("Update {0} {1}", key, region);
+                this.Logger.LogTrace("Update: {0} {1}.", key, region);
             }
 
             // lowest level goes first...
@@ -1497,7 +1497,7 @@ namespace CacheManager.Core
                 if (this.logTrace)
                 {
                     this.Logger.LogTrace(
-                        "Update {0} {1} on handle {2} result: {3}.",
+                        "Update: {0} {1}: tried on handle {2}: result: {3}.",
                         key,
                         region,
                         handle.Configuration.HandleName,
@@ -1536,7 +1536,7 @@ namespace CacheManager.Core
                     // it most likely has a different version
                     // TODO: logging
                     this.Logger.LogWarn(
-                        "Update on handle {2} failed with too many retries. Evicting {0} {1} from other handles...",
+                        "Update: {0} {1}: on handle {2} failed with too many retries! Evicting from other handles...",
                         key,
                         region,
                         handleIndex);
@@ -1551,7 +1551,7 @@ namespace CacheManager.Core
             {
                 if (this.logTrace)
                 {
-                    this.Logger.LogTrace("Update: notify back-plate change {0} {1}.", key, region);
+                    this.Logger.LogTrace("Update: {0} {1}: notifies back-plate [change].", key, region);
                 }
 
                 if (string.IsNullOrWhiteSpace(region))
