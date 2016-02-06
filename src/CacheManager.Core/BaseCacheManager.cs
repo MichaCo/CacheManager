@@ -20,7 +20,6 @@ namespace CacheManager.Core
     /// <typeparam name="TCacheValue">The type of the cache value.</typeparam>
     public sealed class BaseCacheManager<TCacheValue> : BaseCache<TCacheValue>, ICacheManager<TCacheValue>, IDisposable
     {
-        private readonly bool logDebug = false;
         private readonly bool logTrace = false;
         private readonly BaseCacheHandle<TCacheValue>[] cacheHandles;
         private CacheBackPlate cacheBackPlate;
@@ -47,7 +46,6 @@ namespace CacheManager.Core
             this.Name = name;
             this.Configuration = configuration;
             this.Logger = configuration.LoggerFactory.CreateLogger(this);
-            this.logDebug = this.Logger.IsEnabled(LogLevel.Debug);
             this.logTrace = this.Logger.IsEnabled(LogLevel.Trace);
             this.Logger.LogInfo("Cache manager: adding cache handles...");
             this.cacheHandles = CacheReflectionHelper.CreateCacheHandles(this, this.Logger).ToArray();

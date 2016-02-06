@@ -25,7 +25,7 @@ namespace CacheManager.Examples
         }
 
         private static void LoggingSample()
-        {            
+        {
             var cache = CacheFactory.Build<string>(
                 c =>
                 c.WithAspNetLogging(log =>
