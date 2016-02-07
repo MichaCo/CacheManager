@@ -30,7 +30,7 @@ namespace CacheManager.Config.Tests
                     });
 
                     cfg.WithUpdateMode(CacheUpdateMode.Up);
-                    cfg.WithRetryTimeout(100);
+                    cfg.WithRetryTimeout(500);
                     cfg.WithMaxRetries(50);
 
 #if DNXCORE50

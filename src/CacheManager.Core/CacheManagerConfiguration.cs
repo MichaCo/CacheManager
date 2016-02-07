@@ -36,8 +36,8 @@ namespace CacheManager.Core
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "We use it for configuration only.")]
         public CacheManagerConfiguration(
             CacheUpdateMode mode = CacheUpdateMode.None,
-            int maxRetries = int.MaxValue,
-            int retryTimeout = 10,
+            int maxRetries = 50,
+            int retryTimeout = 100,
             Type backPlateType = null,
             string backPlateConfigurationKey = null,
             ICacheSerializer serializer = null,
@@ -77,17 +77,17 @@ namespace CacheManager.Core
 
         /// <summary>
         /// Gets or sets the limit of the number of retry operations per action.
-        /// <para>Default is <see cref="int.MaxValue"/>.</para>
+        /// <para>Default is 50.</para>
         /// </summary>
         /// <value>The maximum retries.</value>
-        public int MaxRetries { get; set; } = int.MaxValue;
+        public int MaxRetries { get; set; } = 50;
 
         /// <summary>
         /// Gets or sets the number of milliseconds the cache should wait before it will retry an action.
-        /// <para>Default is 10.</para>
+        /// <para>Default is 100.</para>
         /// </summary>
         /// <value>The retry timeout.</value>
-        public int RetryTimeout { get; set; } = 10;
+        public int RetryTimeout { get; set; } = 100;
 
         /// <summary>
         /// Gets the configuration key the back plate might use.

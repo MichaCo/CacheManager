@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using CacheManager.Core;
 using CacheManager.Core.Internal;
@@ -26,8 +24,10 @@ namespace CacheManager.Redis
         private readonly string identifier;
         private readonly ILogger logger;
         private StackRedis.ISubscriber redisSubscriper;
-        private long lastLog = 0L;
-        private long messagesCount = 0L;
+        private Timer timer;
+        private HashSet<string> messages = new HashSet<string>();
+        private object messageLock = new object();
+        private int skippedMessages = 0;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RedisCacheBackPlate"/> class.
@@ -57,6 +57,37 @@ namespace CacheManager.Redis
                 this.logger);
 
             this.Subscribe();
+
+            this.timer = new Timer(
+                (obj) =>
+                {
+                    lock (this.messageLock)
+                    {
+                        try
+                        {
+                            if (this.messages != null && this.messages.Count > 0)
+                            {
+                                var msgs = string.Join(",", this.messages);
+                                if (this.logger.IsEnabled(LogLevel.Debug))
+                                {
+                                    this.logger.LogDebug("Back-plate is sending {0} messages ({1} skipped).", this.messages.Count, this.skippedMessages);
+                                }
+
+                                this.Publish(msgs);
+                                this.skippedMessages = 0;
+                                this.messages.Clear();
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            this.logger.LogError(ex, "Error occured sending back plate messages.");
+                            throw;
+                        }
+                    }
+                },
+                this,
+                TimeSpan.FromMilliseconds(100),
+                TimeSpan.FromMilliseconds(100));
         }
 
         /// <summary>
@@ -126,6 +157,7 @@ namespace CacheManager.Redis
             if (managed)
             {
                 this.redisSubscriper.Unsubscribe(this.channelName);
+                this.timer.Dispose();
             }
 
             base.Dispose(managed);
@@ -136,52 +168,27 @@ namespace CacheManager.Redis
             this.redisSubscriper.Publish(this.channelName, message, StackRedis.CommandFlags.FireAndForget);
         }
 
-        ////private Stack<string> messages = new Stack<string>();
-        ////private StringBuilder messages = null;
-        ////private long lastRun = 0L;
         private void PublishMessage(BackPlateMessage message)
         {
-            this.Publish(message.Serialize());
+            var msg = message.Serialize();
 
-            if (this.logger.IsEnabled(LogLevel.Information))
+            lock (this.messageLock)
             {
-                const int logInterval = 1000;
-                Interlocked.Increment(ref this.messagesCount);
-
-                if (Environment.TickCount > this.lastLog + logInterval)
+                if (message.Action == BackPlateAction.Clear)
                 {
-                    this.lastLog = Environment.TickCount;
-                    this.logger.LogInfo("Back-plate sent {0} messages in the past {1}sec.", this.messagesCount, logInterval / 1000);
-                    Interlocked.Exchange(ref this.messagesCount, 0);
+                    Interlocked.Exchange(ref this.skippedMessages, this.messages.Count);
+                    this.messages.Clear();
+                }
+
+                if (!this.messages.Add(msg))
+                {
+                    Interlocked.Increment(ref this.skippedMessages);
+                    if (this.logger.IsEnabled(LogLevel.Trace))
+                    {
+                        this.logger.LogTrace("Skipped duplicate message: {0}.", msg);
+                    }
                 }
             }
-
-            ////if (Environment.TickCount > lastRun + 0 && messages != null)
-            ////{
-            ////    lock (messages)
-            ////    {
-            ////        if (Environment.TickCount > lastRun + 0 && messages != null)
-            ////        {
-            ////            var msgs = messages.ToString();
-            ////            //this.logger.LogInfo("Backplate sending {0} messages.", msgs.Split(',').Length);
-            ////            this.Publish(msgs);
-            ////            lastRun = Environment.TickCount;
-            ////            messages = null;
-            ////        }
-            ////    }
-            ////}
-            ////var msg = message.Serialize();
-
-            ////if (messages == null)
-            ////{
-            ////    messages = new StringBuilder(msg);
-            ////}
-            ////else
-            ////{
-            ////    messages.Append(",");
-            ////    messages.Append(msg);
-            ////    ////messages += "," + msg;
-            ////}
         }
 
         private void Subscribe()
@@ -190,17 +197,23 @@ namespace CacheManager.Redis
                 this.channelName,
                 (channel, msg) =>
                 {
-                    var fullMessageStr = ((string)msg).Split(',');
-                    ////this.logger.LogInfo("Back-plate got notified with {0} new messages.", fullMessageStr.Length);
+                    var fullMessage = ((string)msg).Split(',')
+                        .Where(s => !s.StartsWith(this.identifier, StringComparison.Ordinal))
+                        .ToArray();
 
-                    foreach (var messageStr in fullMessageStr)
+                    if (fullMessage.Length == 0)
                     {
-                        if (messageStr.StartsWith(this.identifier, StringComparison.Ordinal))
-                        {
-                            // do not notify ourself (might be faster than the second method?
-                            return;
-                        }
+                        // no messages for this instance
+                        return;
+                    }
 
+                    if (this.logger.IsEnabled(LogLevel.Information))
+                    {
+                        this.logger.LogInfo("Back-plate got notified with {0} new messages.", fullMessage.Length);
+                    }
+
+                    foreach (var messageStr in fullMessage)
+                    {
                         var message = BackPlateMessage.Deserialize(messageStr);
 
                         switch (message.Action)

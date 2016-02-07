@@ -7,6 +7,9 @@ namespace CacheManager.Redis
 {
     internal static class RetryHelper
     {
+        private const string errorMessage = "Maximum number of trys exceeded to perform the action: {0}.";
+        private const string warningMessage = "Exception occured performing an action. Retrying... {0}/{1}";
+
         public static T Retry<T>(Func<T> retryme, int timeOut, int retries, ILogger logger)
         {
             var tries = 0;
@@ -25,11 +28,11 @@ namespace CacheManager.Redis
                 {
                     if (tries >= retries)
                     {
-                        logger.LogError(ex, "Retries exceeded max retries {0}", retries);
+                        logger.LogError(ex, errorMessage, retries);
                         throw;
                     }
 
-                    logger.LogWarn(ex, "Exception occurred. retrying... {0}/{1}", tries, retries);
+                    logger.LogWarn(ex, warningMessage, tries, retries);
 #if NET40
                     TaskEx.Delay(timeOut).Wait();
 #else
@@ -40,11 +43,11 @@ namespace CacheManager.Redis
                 {
                     if (tries >= retries)
                     {
-                        logger.LogError(ex, "Retries exceeded max retries {0}", retries);
+                        logger.LogError(ex, errorMessage, retries);
                         throw;
                     }
 
-                    logger.LogWarn(ex, "Exception occurred. retrying... {0}/{1}", tries, retries);
+                    logger.LogWarn(ex, warningMessage, tries, retries);
 #if NET40
                     TaskEx.Delay(timeOut).Wait();
 #else
@@ -55,11 +58,11 @@ namespace CacheManager.Redis
                 {
                     if (tries >= retries)
                     {
-                        logger.LogError(ex, "Retries exceeded max retries {0}", retries);
+                        logger.LogError(ex, errorMessage, retries);
                         throw;
                     }
 
-                    logger.LogWarn(ex, "Exception occurred. retrying... {0}/{1}", tries, retries);
+                    logger.LogWarn(ex, warningMessage, tries, retries);
 #if NET40
                     TaskEx.Delay(timeOut).Wait();
 #else
@@ -70,7 +73,7 @@ namespace CacheManager.Redis
                 {
                     if (tries >= retries)
                     {
-                        logger.LogError(aggregateException, "Retries exceeded max retries {0}", retries);
+                        logger.LogError(aggregateException, errorMessage, retries);
                         throw;
                     }
 
@@ -78,7 +81,7 @@ namespace CacheManager.Redis
                     {
                         if (e is StackRedis.RedisConnectionException || e is System.TimeoutException || e is StackRedis.RedisServerException)
                         {
-                            logger.LogWarn(e, "Exception occurred. retrying... {0}/{1}", tries, retries);
+                            logger.LogWarn(e, warningMessage, tries, retries);
 #if NET40
                             TaskEx.Delay(timeOut).Wait();
 #else
@@ -88,7 +91,7 @@ namespace CacheManager.Redis
                             return true;
                         }
 
-                        logger.LogCritical("Exception occurred.", aggregateException);
+                        logger.LogCritical("Unhandled exception occurred.", aggregateException);
                         return false;
                     });
                 }

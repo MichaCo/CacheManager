@@ -194,7 +194,9 @@ namespace CacheManager.Core
             }
 
             // build configuration
-            var cfg = new CacheManagerConfiguration(managerCfg.UpdateMode, maxRetries.HasValue ? maxRetries.Value : int.MaxValue, retryTimeout.HasValue ? retryTimeout.Value : 10);
+            var cfg = new CacheManagerConfiguration(
+                managerCfg.UpdateMode, maxRetries.HasValue ? maxRetries.Value : 50, 
+                retryTimeout.HasValue ? retryTimeout.Value : 100);
 
             if (string.IsNullOrWhiteSpace(managerCfg.BackPlateType))
             {
@@ -577,7 +579,7 @@ namespace CacheManager.Core
 
         /// <summary>
         /// Sets the maximum number of retries per action.
-        /// <para>Default is <see cref="int.MaxValue"/>.</para>
+        /// <para>Default is 50.</para>
         /// <para>
         /// Not every cache handle implements this, usually only distributed caches will use it.
         /// </para>
@@ -597,7 +599,7 @@ namespace CacheManager.Core
 
         /// <summary>
         /// Sets the timeout between each retry of an action in milliseconds.
-        /// <para>Default is 10.</para>
+        /// <para>Default is 100.</para>
         /// <para>
         /// Not every cache handle implements this, usually only distributed caches will use it.
         /// </para>
