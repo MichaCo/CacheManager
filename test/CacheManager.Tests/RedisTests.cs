@@ -17,6 +17,23 @@ namespace CacheManager.Tests
     public class RedisTests
     {
         [Fact]
+        public void Redis_Configuration_NoEndpoint()
+        {
+            Action act = () => ConfigurationBuilder.BuildConfiguration(
+                s => s.WithRedisConfiguration(
+                    "key",
+                    c => c.WithAllowAdmin()));
+
+            act.ShouldThrow<InvalidOperationException>().WithMessage("*endpoints*");
+        }
+
+        [Fact]
+        public void Redis_Configurations_LoadStandard()
+        {
+            RedisConfigurations.LoadConfiguration();
+        }
+
+        [Fact]
         [Trait("category", "Redis")]
         [Trait("category", "Unreliable")]
         public void Redis_Absolute_DoesExpire()

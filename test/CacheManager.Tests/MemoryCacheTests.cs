@@ -39,11 +39,7 @@ namespace CacheManager.Tests
             }
         }
 
-#if DNX451
-        [Fact(Skip = "DNX doesn't read from app.config")]
-#else
         [Fact]
-#endif
         public void SysRuntime_MemoryCache_CreateDefaultCache()
         {
             using (var act = CacheFactory.Build(_ => _.WithSystemRuntimeDefaultCacheHandle()))
@@ -58,11 +54,7 @@ namespace CacheManager.Tests
             }
         }
 
-#if DNX451
-        [Fact(Skip = "DNX doesn't read from app.config")]
-#else
         [Fact]
-#endif
         public void SysRuntime_MemoryCache_CreateNamedCache()
         {
             using (var act = CacheFactory.Build(_ => _.WithSystemRuntimeCacheHandle("NamedTest")))

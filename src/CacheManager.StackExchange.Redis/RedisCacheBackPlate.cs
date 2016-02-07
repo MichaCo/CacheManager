@@ -80,7 +80,7 @@ namespace CacheManager.Redis
                         }
                         catch (Exception ex)
                         {
-                            this.logger.LogError(ex, "Error occured sending back plate messages.");
+                            this.logger.LogError(ex, "Error occurred sending back plate messages.");
                             throw;
                         }
                     }

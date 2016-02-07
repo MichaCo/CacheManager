@@ -195,8 +195,7 @@ namespace CacheManager.Core
 
             // build configuration
             var cfg = new CacheManagerConfiguration(
-                managerCfg.UpdateMode, maxRetries.HasValue ? maxRetries.Value : 50, 
-                retryTimeout.HasValue ? retryTimeout.Value : 100);
+                managerCfg.UpdateMode, maxRetries.HasValue ? maxRetries.Value : 50, retryTimeout.HasValue ? retryTimeout.Value : 100);
 
             if (string.IsNullOrWhiteSpace(managerCfg.BackPlateType))
             {

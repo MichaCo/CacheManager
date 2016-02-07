@@ -75,12 +75,7 @@ namespace CacheManager.Tests
             AssertCacheHandleConfig(cache.CacheHandles.ElementAt(3), "h4", ExpirationMode.Absolute, new TimeSpan(0, 20, 0));
         }
 
-#if DNX451
-        [Fact(Skip = "DNX doesn't read from app.config")]
-#else
-
         [Fact]
-#endif
         public void Cfg_Valid_CfgFile_DefaultSysMemCache()
         {
             // arrange

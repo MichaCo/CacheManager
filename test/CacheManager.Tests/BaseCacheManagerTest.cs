@@ -6,9 +6,6 @@ using CacheManager.Core;
 #if !NET40
 using Couchbase.Configuration.Client;
 #endif
-#if DNX451
-#endif
-
 using static CacheManager.Core.Utility.Guard;
 
 namespace CacheManager.Tests
@@ -306,9 +303,6 @@ namespace CacheManager.Tests
         {
             NotNullOrWhiteSpace(fileName, nameof(fileName));
 #if DNX451
-            // var appEnv = CallContextServiceLocator.Locator.ServiceProvider
-            //    .GetService(typeof(IApplicationEnvironment)) as IApplicationEnvironment;
-            // var basePath = appEnv.ApplicationBasePath;
             var basePath = Environment.CurrentDirectory;
 #else
             var basePath = AppDomain.CurrentDomain.BaseDirectory;

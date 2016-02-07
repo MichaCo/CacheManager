@@ -62,11 +62,7 @@ namespace CacheManager.Tests
                 .WithMessage("*Parameter name: configName");
         }
 
-#if DNX451
-        [Fact(Skip = "DNX doesn't read from app.config")]
-#else
         [Fact]
-#endif
         [ReplaceCulture]
         public void Cfg_LoadConfiguration_NotExistingCacheCfgName()
         {
