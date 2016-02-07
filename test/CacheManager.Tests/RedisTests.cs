@@ -28,6 +28,7 @@ namespace CacheManager.Tests
         }
 
         [Fact]
+        [Trait("category", "NotOnMono")]
         public void Redis_Configurations_LoadStandard()
         {
             RedisConfigurations.LoadConfiguration();

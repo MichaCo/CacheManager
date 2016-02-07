@@ -24,6 +24,6 @@
     }
   },
   "commands": {
-    "test": "xunit.runner.dnx -notrait category=Memcached -notrait category=Redis -notrait category=Unreliable -notrait category=Mono"
+    "test": "xunit.runner.dnx -notrait category=Memcached -notrait category=Redis -notrait category=Unreliable -notrait category=NotOnMono"
   }
 }

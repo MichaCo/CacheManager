@@ -40,6 +40,7 @@ namespace CacheManager.Tests
         }
 
         [Fact]
+        [Trait("category", "NotOnMono")]
         public void SysRuntime_MemoryCache_CreateDefaultCache()
         {
             using (var act = CacheFactory.Build(_ => _.WithSystemRuntimeDefaultCacheHandle()))
@@ -55,6 +56,7 @@ namespace CacheManager.Tests
         }
 
         [Fact]
+        [Trait("category", "NotOnMono")]
         public void SysRuntime_MemoryCache_CreateNamedCache()
         {
             using (var act = CacheFactory.Build(_ => _.WithSystemRuntimeCacheHandle("NamedTest")))

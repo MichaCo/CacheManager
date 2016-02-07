@@ -76,6 +76,7 @@ namespace CacheManager.Tests
         }
 
         [Fact]
+        [Trait("category", "NotOnMono")]
         public void Cfg_Valid_CfgFile_DefaultSysMemCache()
         {
             // arrange

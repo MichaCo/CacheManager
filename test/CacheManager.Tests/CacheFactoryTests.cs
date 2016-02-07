@@ -49,7 +49,7 @@ namespace CacheManager.Tests
 
         [Fact]
         [ReplaceCulture]
-        [Trait("category", "Mono")]
+        [Trait("category", "NotOnMono")]
         public void CacheFactory_FromConfig_NonGeneric_NullCheck_A()
         {
             // arrange
@@ -78,7 +78,7 @@ namespace CacheManager.Tests
 
         [Fact]
         [ReplaceCulture]
-        [Trait("category", "Mono")]
+        [Trait("category", "NotOnMono")]
         public void CacheFactory_FromConfig_NonGeneric_NullCheck_C()
         {
             // arrange
@@ -471,7 +471,7 @@ namespace CacheManager.Tests
 
         [Fact]
         [ReplaceCulture]
-        [Trait("category", "Mono")]
+        [Trait("category", "NotOnMono")]
         public void CacheFactory_FromConfig_NonGeneric_A()
         {
             var cache = CacheFactory.FromConfiguration(typeof(string), "c1") as ICacheManager<string>;
@@ -483,7 +483,7 @@ namespace CacheManager.Tests
 
         [Fact]
         [ReplaceCulture]
-        [Trait("category", "Mono")]
+        [Trait("category", "NotOnMono")]
         public void CacheFactory_FromConfig_NonGeneric_B()
         {
             var cache = CacheFactory.FromConfiguration(typeof(string), "c1", "cacheManager") as ICacheManager<string>;

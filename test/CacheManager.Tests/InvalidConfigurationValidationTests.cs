@@ -64,6 +64,7 @@ namespace CacheManager.Tests
 
         [Fact]
         [ReplaceCulture]
+        [Trait("category", "NotOnMono")]
         public void Cfg_LoadConfiguration_NotExistingCacheCfgName()
         {
             // arrange
