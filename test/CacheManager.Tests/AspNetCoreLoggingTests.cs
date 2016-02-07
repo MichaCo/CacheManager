@@ -134,6 +134,16 @@ namespace CacheManager.Tests
         }
 
         [Fact]
+        public void AspNetCoreLogging_Builder_ValidFactory()
+        {
+            var cfg = ConfigurationBuilder.BuildConfiguration(
+                s => s.WithAspNetLogging(f => f.AddConsole()));
+
+            cfg.LoggerFactory.Should().NotBeNull();
+            cfg.LoggerFactory.CreateLogger("something").Should().NotBeNull();
+        }
+
+        [Fact]
         public void AspNetCoreLogging_TypedLogger()
         {
             var loggerFactory = new AspNetCore.Logging.AspNetLoggerFactory();

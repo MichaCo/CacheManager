@@ -247,6 +247,7 @@ namespace CacheManager.Tests
                     cacheA.Add(item);
                     cacheB.Get(item.Key).Should().Be(item.Value);
                     cacheB.Remove(item.Key);
+                    Thread.Sleep(10);
                 },
                 (cache) =>
                 {

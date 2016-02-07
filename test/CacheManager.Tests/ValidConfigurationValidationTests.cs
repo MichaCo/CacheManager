@@ -157,6 +157,30 @@ namespace CacheManager.Tests
                 .ShouldAllBeEquivalentTo(Enumerable.Repeat(false, cache.CacheHandles.Count()));
         }
 
+        [Fact]
+        [Trait("category", "NotOnMono")]
+        public void Cfg_Valid_CfgFile_AllDefaults()
+        {
+            // arrange
+            string fileName = GetCfgFileName(@"/Configuration/configuration.valid.allFeatures.config");
+            string cacheName = "onlyDefaultsCache";
+
+            // act
+            var cfg = ConfigurationBuilder.LoadConfigurationFile(fileName, cacheName);
+            var cache = CacheFactory.FromConfiguration<string>(cfg);
+
+            // assert
+            cache.Configuration.CacheUpdateMode.Should().Be(CacheUpdateMode.Up);
+            cache.Configuration.CacheSerializer.Should().NotBeNull();
+            cache.Configuration.LoggerFactory.Should().NotBeNull();
+            cache.Configuration.BackPlateType.Should().BeNull();
+            cache.Configuration.HasBackPlate.Should().BeFalse();
+            cache.Configuration.RetryTimeout.Should().Be(100);
+            cache.Configuration.MaxRetries.Should().Be(50);
+            cache.CacheHandles.Count().Should().Be(1);
+            AssertCacheHandleConfig(cache.CacheHandles.ElementAt(0), "defaultsHandle", ExpirationMode.None, TimeSpan.Zero);
+        }
+
         private static void AssertCacheHandleConfig<T>(BaseCacheHandle<T> handle, string name, ExpirationMode mode, TimeSpan timeout)
         {
             var cfg = handle.Configuration;

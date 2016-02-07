@@ -34,6 +34,32 @@ namespace CacheManager.Tests
         }
 
         [Fact]
+        public void CacheItem_WithAbsoluteExpiration_Invalid()
+        {
+            // arrange
+            var baseItem = new CacheItem<object>("key", "region", "value", ExpirationMode.Sliding, TimeSpan.FromDays(10));
+
+            // act
+            Action act = () => baseItem.WithAbsoluteExpiration(DateTimeOffset.Now.AddMinutes(-10));
+
+            // assert
+            act.ShouldThrow<ArgumentException>().WithMessage("*value must be greater*");
+        }
+
+        [Fact]
+        public void CacheItem_WithSlidingExpiration_Invalid()
+        {
+            // arrange
+            var baseItem = new CacheItem<object>("key", "region", "value", ExpirationMode.Sliding, TimeSpan.FromDays(10));
+
+            // act
+            Action act = () => baseItem.WithSlidingExpiration(TimeSpan.FromDays(-1));
+
+            // assert
+            act.ShouldThrow<ArgumentException>().WithMessage("*value must be greater*");
+        }
+
+        [Fact]
         public void CacheItem_WithCreated()
         {
             // arrange
@@ -640,5 +666,24 @@ namespace CacheManager.Tests
         }
 
         #endregion ctor4
+
+        [Fact]
+        [ReplaceCulture]
+        public void CacheItem_Ctor_ExpirationTimeoutDefaults()
+        {
+            // arrange
+            string key = "key";
+            object value = "value";
+
+            // act
+            var act = new CacheItem<object>(key, value, ExpirationMode.None, TimeSpan.FromDays(1));
+
+            // assert - should reset to TimeSpan.Zero because mode is "None"
+            act.Should()
+                .Match<CacheItem<object>>(p => p.ExpirationMode == ExpirationMode.None)
+                .And.Match<CacheItem<object>>(p => p.ExpirationTimeout == TimeSpan.Zero)
+                .And.Match<CacheItem<object>>(p => p.Key == key)
+                .And.Match<CacheItem<object>>(p => p.Value == value);
+        }
     }
 }

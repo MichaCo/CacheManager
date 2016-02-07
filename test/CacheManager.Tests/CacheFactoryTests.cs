@@ -459,6 +459,30 @@ namespace CacheManager.Tests
 
         [Fact]
         [ReplaceCulture]
+        [Trait("category", "NotOnMono")]
+        public void CacheFactory_FromConfig_Generic_A()
+        {
+            var cache = CacheFactory.FromConfiguration<byte[]>("c1");
+
+            cache.Should().NotBeNull();
+            cache.CacheHandles.Count().Should().Be(3);
+            cache.Name.Should().Be("c1");
+        }
+
+        [Fact]
+        [ReplaceCulture]
+        [Trait("category", "NotOnMono")]
+        public void CacheFactory_FromConfig_Generic_B()
+        {
+            var cache = CacheFactory.FromConfiguration<byte[]>("c1", "cacheManager");
+
+            cache.Should().NotBeNull();
+            cache.CacheHandles.Count().Should().Be(3);
+            cache.Name.Should().Be("c1");
+        }
+
+        [Fact]
+        [ReplaceCulture]
         public void CacheFactory_Build_NonGenericWithType()
         {
             var cache = CacheFactory.Build(

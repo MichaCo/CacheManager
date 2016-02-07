@@ -56,6 +56,7 @@ namespace CacheManager.Tests
 
         public static ICacheManager<object> WithManyDictionaryHandles
             => CacheFactory.Build(
+                "manyDicts",
                 settings =>
                 {
                     settings

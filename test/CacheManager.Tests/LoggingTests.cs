@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using CacheManager.Core;
 using CacheManager.Core.Logging;
 using FluentAssertions;
 using Xunit;
@@ -411,6 +412,35 @@ namespace CacheManager.Tests
             logger.Last.Exception.Should().BeOfType<InvalidCastException>();
             logger.Last.LogLevel.Should().Be(LogLevel.Warning);
             logger.Last.Message.ToString().Should().Be("message a b.");
+        }
+
+        [Fact]
+        public void Logging_Builder_InvalidFactory()
+        {
+            Action act = () => ConfigurationBuilder.BuildConfiguration(
+                s => s.WithLogging(null));
+
+            act.ShouldThrow<ArgumentNullException>().WithMessage("*factory*");
+        }
+
+        [Fact]
+        public void Logging_Builder_ValidFactory()
+        {
+            var cfg = ConfigurationBuilder.BuildConfiguration(
+                s => s.WithLogging(new NullLoggerFactory()));
+
+            cfg.LoggerFactory.Should().NotBeNull();
+            cfg.LoggerFactory.CreateLogger("something").Should().NotBeNull();
+        }
+
+        [Fact]
+        public void Logging_TypedLogger()
+        {
+            var cfg = ConfigurationBuilder.BuildConfiguration(
+                s => s.WithLogging(new NullLoggerFactory()));
+
+            cfg.LoggerFactory.Should().NotBeNull();
+            cfg.LoggerFactory.CreateLogger(this).Should().NotBeNull();
         }
     }
 

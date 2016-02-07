@@ -1567,31 +1567,5 @@ namespace CacheManager.Core
 
             return overallResult == UpdateItemResultState.Success;
         }
-
-        /// <summary>
-        /// Updates all cache handles except the one at <paramref name="excludeIndex"/>.
-        /// </summary>
-        /// <param name="item">The item.</param>
-        /// <param name="excludeIndex">Index of the exclude.</param>
-        private void UpdateOtherHandles(CacheItem<TCacheValue> item, int excludeIndex)
-        {
-            if (item == null)
-            {
-                return;
-            }
-
-            // .Where(p => p.Key != excludeIndex).Select(p => p.Value)
-            for (int handleIndex = 0; handleIndex < this.cacheHandles.Length; handleIndex++)
-            {
-                if (handleIndex != excludeIndex)
-                {
-                    this.cacheHandles[handleIndex].Put(item);
-                    //// handle.Stats.OnPut(item); don't update,
-                    //// we expect the item to be in the cache already at this point, so we should not increase the count...
-
-                    this.TriggerOnPut(item.Key, item.Region);
-                }
-            }
-        }
     }
 }
