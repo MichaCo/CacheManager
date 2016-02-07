@@ -8,20 +8,49 @@ using LogLevel = CacheManager.Core.Logging.LogLevel;
 namespace CacheManager.AspNetCore.Logging
 {
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
-    public class AspNetLoggerFactory : LoggerFactory, Core.Logging.ILoggerFactory
+    public class AspNetLoggerFactory : Core.Logging.ILoggerFactory, IDisposable
     {
+        private readonly ILoggerFactory parentFactory;
+
         public AspNetLoggerFactory()
         {
+            this.parentFactory = new LoggerFactory();
         }
 
-        ILogger Core.Logging.ILoggerFactory.CreateLogger(string categoryName)
+        public AspNetLoggerFactory(ILoggerFactory parentFactory)
         {
-            return new AspNetLoggerWrapper(this.CreateLogger(categoryName));
+            Guard.NotNull(parentFactory, nameof(parentFactory));
+            this.parentFactory = parentFactory;
         }
 
-        ILogger Core.Logging.ILoggerFactory.CreateLogger<T>(T instance)
+        ~AspNetLoggerFactory()
         {
-            return new AspNetLoggerWrapper(new Logger<T>(this));
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            this.Dispose(false);
+        }
+
+        public ILogger CreateLogger(string categoryName)
+        {
+            return new AspNetLoggerWrapper(this.parentFactory.CreateLogger(categoryName));
+        }
+
+        public ILogger CreateLogger<T>(T instance)
+        {
+            return new AspNetLoggerWrapper(new Logger<T>(this.parentFactory));
+        }
+
+        public void Dispose()
+        {
+            this.Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                this.parentFactory.Dispose();
+            }
         }
     }
 

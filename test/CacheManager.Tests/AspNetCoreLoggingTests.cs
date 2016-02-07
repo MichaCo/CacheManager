@@ -14,15 +14,15 @@ namespace CacheManager.Tests
         [Fact]
         public void AspNetCoreLogging_MinLogLevel_Trace()
         {
-            var loggerFactory = new AspNetCore.Logging.AspNetLoggerFactory();
+            var external = new LoggerFactory();
 
             // TODO: remove in RC2
-            loggerFactory.MinimumLevel = LogLevel.Debug;
-
+            external.MinimumLevel = LogLevel.Debug;
             // TODO: change Debug to Trace in RC2 (yes, in RC1 Verbose is higher than debug, and Verbose got renamed to Trace, later, too!)
-            loggerFactory.AddConsole(LogLevel.Debug);
+            external.AddConsole(LogLevel.Debug);
 
-            var logger = (loggerFactory as Core.Logging.ILoggerFactory).CreateLogger("cat") as Core.Logging.ILogger;
+            var loggerFactory = new AspNetCore.Logging.AspNetLoggerFactory(external);
+            var logger = loggerFactory.CreateLogger("cat");
 
             logger.Should().NotBeNull();
             logger.IsEnabled(Core.Logging.LogLevel.Trace).Should().BeTrue();
@@ -36,12 +36,15 @@ namespace CacheManager.Tests
         [Fact]
         public void AspNetCoreLogging_MinLogLevel_Debug()
         {
-            var loggerFactory = new AspNetCore.Logging.AspNetLoggerFactory();
+            var external = new LoggerFactory();
 
-            // TODO: change Verbose to Debug in RC2 (yes, in RC1 Verbose is higher than debug, and Verbose got renamed to Trace, later, too!)
-            loggerFactory.AddConsole(LogLevel.Verbose);
+            // TODO: remove in RC2
+            external.MinimumLevel = LogLevel.Debug;
+            // TODO: change Debug to Trace in RC2 (yes, in RC1 Verbose is higher than debug, and Verbose got renamed to Trace, later, too!)
+            external.AddConsole(LogLevel.Verbose);
 
-            var logger = (loggerFactory as Core.Logging.ILoggerFactory).CreateLogger("cat") as Core.Logging.ILogger;
+            var loggerFactory = new AspNetCore.Logging.AspNetLoggerFactory(external);
+            var logger = loggerFactory.CreateLogger("cat");
 
             logger.Should().NotBeNull();
             logger.IsEnabled(Core.Logging.LogLevel.Trace).Should().BeFalse();
@@ -55,11 +58,10 @@ namespace CacheManager.Tests
         [Fact]
         public void AspNetCoreLogging_MinLogLevel_Info()
         {
-            var loggerFactory = new AspNetCore.Logging.AspNetLoggerFactory();
-
-            loggerFactory.AddConsole(LogLevel.Information);
-
-            var logger = (loggerFactory as Core.Logging.ILoggerFactory).CreateLogger("cat") as Core.Logging.ILogger;
+            var external = new LoggerFactory();
+            external.AddConsole(LogLevel.Information);
+            var loggerFactory = new AspNetCore.Logging.AspNetLoggerFactory(external);
+            var logger = loggerFactory.CreateLogger("cat");
 
             logger.Should().NotBeNull();
             logger.IsEnabled(Core.Logging.LogLevel.Trace).Should().BeFalse();
@@ -73,11 +75,10 @@ namespace CacheManager.Tests
         [Fact]
         public void AspNetCoreLogging_MinLogLevel_Warn()
         {
-            var loggerFactory = new AspNetCore.Logging.AspNetLoggerFactory();
-
-            loggerFactory.AddConsole(LogLevel.Warning);
-
-            var logger = (loggerFactory as Core.Logging.ILoggerFactory).CreateLogger("cat") as Core.Logging.ILogger;
+            var external = new LoggerFactory();
+            external.AddConsole(LogLevel.Warning);
+            var loggerFactory = new AspNetCore.Logging.AspNetLoggerFactory(external);
+            var logger = loggerFactory.CreateLogger("cat");
 
             logger.Should().NotBeNull();
             logger.IsEnabled(Core.Logging.LogLevel.Trace).Should().BeFalse();
@@ -91,11 +92,10 @@ namespace CacheManager.Tests
         [Fact]
         public void AspNetCoreLogging_MinLogLevel_Error()
         {
-            var loggerFactory = new AspNetCore.Logging.AspNetLoggerFactory();
-
-            loggerFactory.AddConsole(LogLevel.Error);
-
-            var logger = (loggerFactory as Core.Logging.ILoggerFactory).CreateLogger("cat") as Core.Logging.ILogger;
+            var external = new LoggerFactory();
+            external.AddConsole(LogLevel.Error);
+            var loggerFactory = new AspNetCore.Logging.AspNetLoggerFactory(external);
+            var logger = loggerFactory.CreateLogger("cat");
 
             logger.Should().NotBeNull();
             logger.IsEnabled(Core.Logging.LogLevel.Trace).Should().BeFalse();
@@ -109,11 +109,10 @@ namespace CacheManager.Tests
         [Fact]
         public void AspNetCoreLogging_MinLogLevel_Critical()
         {
-            var loggerFactory = new AspNetCore.Logging.AspNetLoggerFactory();
-
-            loggerFactory.AddConsole(LogLevel.Critical);
-
-            var logger = (loggerFactory as Core.Logging.ILoggerFactory).CreateLogger("cat") as Core.Logging.ILogger;
+            var external = new LoggerFactory();
+            external.AddConsole(LogLevel.Critical);
+            var loggerFactory = new AspNetCore.Logging.AspNetLoggerFactory(external);
+            var logger = loggerFactory.CreateLogger("cat");
 
             logger.Should().NotBeNull();
             logger.IsEnabled(Core.Logging.LogLevel.Trace).Should().BeFalse();
@@ -128,9 +127,18 @@ namespace CacheManager.Tests
         public void AspNetCoreLogging_Builder_InvalidFactory()
         {
             Action act = () => ConfigurationBuilder.BuildConfiguration(
-                s => s.WithAspNetLogging(null));
+                s => s.WithAspNetLogging((Action<ILoggerFactory>) null));
 
             act.ShouldThrow<ArgumentNullException>().WithMessage("*factory*");
+        }
+
+        [Fact]
+        public void AspNetCoreLogging_Builder_InvalidLoggerFactory()
+        {
+            Action act = () => ConfigurationBuilder.BuildConfiguration(
+                s => s.WithAspNetLogging((ILoggerFactory)null));
+
+            act.ShouldThrow<ArgumentNullException>().WithMessage("*loggerFactory*");
         }
 
         [Fact]

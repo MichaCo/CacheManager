@@ -25,9 +25,25 @@ namespace CacheManager.Core
         {
             NotNull(part, nameof(part));
             NotNull(factory, nameof(factory));
-            var loggerFactory = new AspNetLoggerFactory();
-            factory(loggerFactory);
+            var externalFactory = new LoggerFactory();
+            factory(externalFactory);
+            var loggerFactory = new AspNetLoggerFactory(externalFactory);
             return part.WithLogging(loggerFactory);
+        }
+
+        /// <summary>
+        /// Enables logging for the cache manager instance.
+        /// This will add an <see cref="Logging.ILoggerFactory"/> using the <c>Microsoft.Extensions.Logging</c> framework.
+        /// </summary>
+        /// <param name="part">The builder part.</param>
+        /// <param name="loggerFactory">The logger factory which should be used.</param>
+        /// <returns>The builder.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "not owning it")]
+        public static ConfigurationBuilderCachePart WithAspNetLogging(this ConfigurationBuilderCachePart part, ILoggerFactory loggerFactory)
+        {
+            NotNull(part, nameof(part));
+            NotNull(loggerFactory, nameof(loggerFactory));
+            return part.WithLogging(new AspNetLoggerFactory(loggerFactory));
         }
     }
 }
