@@ -22,7 +22,7 @@
   <xs:element name="connection">
     <xs:complexType>
       <xs:sequence>
-        <xs:element ref="endpoints" />
+        <xs:element ref="endpoints" minOccurs="0"/>
       </xs:sequence>
       <xs:attribute name="id" use="required" type="xs:string" />
       <xs:attribute name="connectionString" use="optional" type="xs:string" />

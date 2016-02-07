@@ -4,6 +4,7 @@ using System.Linq;
 using FluentAssertions;
 using Xunit;
 using Microsoft.Extensions.Logging;
+using CacheManager.Core;
 
 namespace CacheManager.Tests
 {
@@ -121,6 +122,23 @@ namespace CacheManager.Tests
             logger.IsEnabled(Core.Logging.LogLevel.Warning).Should().BeFalse();
             logger.IsEnabled(Core.Logging.LogLevel.Error).Should().BeFalse();
             logger.IsEnabled(Core.Logging.LogLevel.Critical).Should().BeTrue();
+        }
+
+        [Fact]
+        public void AspNetCoreLogging_Builder_InvalidFactory()
+        {
+            Action act = () => ConfigurationBuilder.BuildConfiguration(
+                s => s.WithAspNetLogging(null));
+
+            act.ShouldThrow<ArgumentNullException>().WithMessage("*factory*");
+        }
+
+        [Fact]
+        public void AspNetCoreLogging_TypedLogger()
+        {
+            var loggerFactory = new AspNetCore.Logging.AspNetLoggerFactory();
+            var logger = (loggerFactory as Core.Logging.ILoggerFactory).CreateLogger(this) as Core.Logging.ILogger;
+            logger.Should().NotBeNull();
         }
     }
 }

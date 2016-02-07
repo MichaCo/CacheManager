@@ -35,6 +35,41 @@ namespace CacheManager.Tests
         }
 
         [Fact]
+        [Trait("category", "NotOnMono")]
+        public void Redis_Configurations_LoadWithConnectionString()
+        {
+            string fileName = BaseCacheManagerTest.GetCfgFileName(@"/Configuration/configuration.valid.allFeatures.config");
+
+            RedisConfigurations.LoadConfiguration(fileName, RedisConfigurationSection.DefaultSectionName);
+            var cfg = RedisConfigurations.GetConfiguration("redisConnectionString");
+            cfg.ConnectionString.Should().Be("127.0.0.1:6379,allowAdmin=true,ssl=true");
+        }
+
+        [Fact]
+        public void Redis_Configurations_LoadSection_InvalidSectionName()
+        {
+            Action act = () => RedisConfigurations.LoadConfiguration((string)null);
+
+            act.ShouldThrow<ArgumentNullException>().WithMessage("*sectionName*");
+        }
+
+        [Fact]
+        public void Redis_Configurations_LoadSection_InvalidFileName()
+        {
+            Action act = () => RedisConfigurations.LoadConfiguration((string)null, "section");
+
+            act.ShouldThrow<ArgumentNullException>().WithMessage("*fileName*");
+        }
+
+        [Fact]
+        public void Redis_Configurations_LoadSection_SectionDoesNotExist()
+        {
+            Action act = () => RedisConfigurations.LoadConfiguration(Guid.NewGuid().ToString());
+
+            act.ShouldThrow<ArgumentNullException>().WithMessage("*section*");
+        }
+
+        [Fact]
         [Trait("category", "Redis")]
         [Trait("category", "Unreliable")]
         public void Redis_Absolute_DoesExpire()
