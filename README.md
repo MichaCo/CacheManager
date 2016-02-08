@@ -124,6 +124,6 @@ OnGet, OnAdd, OnPut, OnRemove, OnClear, OnClearRegion
 [outputcachesample]: https://github.com/MichaCo/CacheManager/tree/master/samples/CacheManager.Samples.Mvc
 [todosample]: http://cachemanager.net/Documentation/Index/cachemanager_backed_todo_web_app
 [Json.nuget]: https://www.nuget.org/packages/CacheManager.Serialization.Json
-[Logging.nuget]: https://
+[Logging.nuget]: https://www.nuget.org/packages/CacheManager.AspNetCore.Logging
 
 [TOC]
