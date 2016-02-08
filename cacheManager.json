@@ -1,0 +1,298 @@
+{
+  "id": "http://cachemanager.net/cachemanager.json",
+  "title": "JSON schema for CacheManager configuration files",
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "definitions": {
+    "configurationKey": {
+      "type": "string",
+      "description": "The key to identify this entity by other parts of the configuration. The key must be unique for all entities of the collection.",
+      "minLength": 1
+    },
+    "expirationMode": {
+      "type": "string",
+      "enum": [ "None", "Absolute", "Sliding" ],
+      "description": "The expiration mode for the current configuration element"
+    },
+    "host": {
+      "type": "string",
+      "oneOf": [
+        { "format": "hostname" },
+        { "format": "ipv4" },
+        { "format": "ipv6" }
+      ],
+      "description": "The host name or IP address."
+    },
+    "expirationTimeout": {
+      "type": "integer",
+      "description": "The expiration timeout in milliseconds (only required if expirationMode is not None)",
+      "minimum": 0
+    },
+    "knownBackPlate": {
+      "type": "object",
+      "required": [ "backPlateConfigurationKey", "knownBackPlateType" ],
+      "properties": {
+        "backPlateConfigurationKey": {
+          "$ref": "#/definitions/configurationKey"
+        },
+        "knownBackPlateType": {
+          "type": "string",
+          "enum": [ "Redis" ],
+          "description": "Choose one of the known back-plate types instead of typing the full type name. The corresponding package for the back-plate implementation must be installed."
+        }
+      },
+      "additionalProperties": false
+    },
+    "unknownBackPlate": {
+      "type": "object",
+      "required": [ "backPlateType" ],
+      "properties": {
+        "backPlateType": {
+          "type": "string",
+          "description": "The clr type of a back-plate implementation."
+        },
+        "backPlateConfigurationKey": {
+          "$ref": "#/definitions/configurationKey"
+        }
+      },
+      "additionalProperties": false
+    },
+    "knownHandle": {
+      "type": "object",
+      "required": [ "knownType" ],
+      "properties": {
+        "knownType": {
+          "type": "string",
+          "enum": [ "SystemRuntime", "Dictionary" ],
+          "description": "Shortcut to the known cache handle types. This requires the corresponding packages are installed."
+        }
+      }
+    },
+    "knownHandleWithConfigurationKey": {
+      "type": "object",
+      "required": [ "knownType", "configurationKey" ],
+      "properties": {
+        "knownType": {
+          "type": "string",
+          "enum": [ "Redis", "Couchbase", "Memcached" ],
+          "description": "Shortcut to the known cache handle types. This requires the corresponding packages are installed."
+        },
+        "configurationKey": {
+          "$ref": "#/definitions/configurationKey"
+        }
+      }
+    },
+    "unknownHandle": {
+      "type": "object",
+      "required": [ "type" ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "The clr type of the cache handle. Must be an open generic type definition.",
+          "minLength": 1
+        },
+        "configurationKey": {
+          "$ref": "#/definitions/configurationKey"
+        }
+      }
+    },
+    "handle": {
+      "type": "object",
+      "oneOf": [
+        {
+          "$ref": "#/definitions/knownHandle"
+        },
+        {
+          "$ref": "#/definitions/knownHandleWithConfigurationKey"
+        },
+        {
+          "$ref": "#/definitions/unknownHandle"
+        }
+      ],
+      "uniqueItems": true,
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The name of the cache handle."
+        },
+        "expirationMode": {
+          "$ref": "#/definitions/expirationMode"
+        },
+        "expirationTimeout": {
+          "$ref": "#/definitions/expirationTimeout"
+        },
+        "isBackPlateSource": {
+          "type": "boolean",
+          "description": "Determines if the cache handle is the back-plate's source. (optional; if no back-plate is defined, this can stay empty. If a back-plate is defined, at least one handle must be flagged.)"
+        },
+        "enablePerformanceCounters": {
+          "type": "boolean",
+          "description": "Defines if windows performance counters should be enabled or not."
+        },
+        "enableStatistics": {
+          "type": "boolean",
+          "description": "Defines if statistics should be captured."
+        }
+      }
+    },
+    "manager": {
+      "description": "The configuration for one CacheManager instance.",
+      "type": "object",
+      "required": [ "handles" ],
+      "default": {
+        "handles": [ ]
+      },
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The name of the cache manager instance."
+        },
+        "updateMode": {
+          "type": "string",
+          "enum": [ "None", "Full", "Up" ],
+          "description": "The update mode (default is Up).",
+          "default": "Up"
+        },
+        "expirationMode": {
+          "$ref": "#/definitions/expirationMode"
+        },
+        "expirationTimeout": {
+          "$ref": "#/definitions/expirationTimeout"
+        },
+        "maxRetries": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "The number of retries in case the cache action fails before the cache manager throws the exception (default is 50)."
+        },
+        "retryTimeout": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "The time between retries (default is 100)."
+        },
+        "backPlate": {
+          "type": "object",
+          "description": "The back-plate configuration.",
+          "oneOf": [
+            {
+              "$ref": "#/definitions/knownBackPlate"
+            },
+            {
+              "$ref": "#/definitions/unknownBackPlate"
+            }
+          ]
+        },
+        "loggerFactoryType": {
+          "type": "string",
+          "description": "The clr type of a logger factory which should be used by CacheManager to log events."
+        },
+        "knownLoggerFactory": {
+          "type": "string",
+          "enum": [ "AspNetCore" ],
+          "description": "Choose one of the known logger factories instead of typing the full type name. The corresponding package for the logger factory must be installed."
+        },
+        "handles": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/handle"
+          },
+          "description": "The collection of cache handles the CacheManager instance should use.",
+          "minItems": 1
+        }
+      }
+    },
+    "redisConnectionString": {
+      "description": "A connection string based redis configuration.",
+      "additionalProperties": false,
+      "type": "object",
+      "required": [ "configurationKey", "connectionString" ],
+      "properties": {
+        "configurationKey": {
+          "$ref": "#/definitions/configurationKey"
+        },
+        "connectionString": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The StackExchange.Redis connection string, see https://github.com/StackExchange/StackExchange.Redis/blob/master/Docs/Configuration.md."
+        }
+      }
+    },
+    "redisConfiguration": {
+      "description": "A redis configuration.",
+      "additionalProperties": false,
+      "type": "object",
+      "required": [ "configurationKey", "endpoints" ],
+      "properties": {
+        "configurationKey": {
+          "$ref": "#/definitions/configurationKey"
+        },
+        "allowAdmin": {
+          "type": "boolean",
+          "description": "If set to true, enables certain commands which might be time intensive, e.g. FLUSHDB."
+        },
+        "ssl": {
+          "type": "boolean",
+          "description": "Defines if an ssl connection should be used."
+        },
+        "sslHost": {
+          "$ref": "#/definitions/host",
+          "description": "The ssl host to be used in conjunction with the ssl flag."
+        },
+        "database": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "The database to be used on the redis instance."
+        },
+        "connectionTimeout": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "The time in milliseconds before the connection attempt gets timed out."
+        },
+        "endpoints": {
+          "type": "array",
+          "minItems": 1,
+          "description": "The collection of redis hosts.",
+          "items": {
+            "required": [ "host", "port" ],
+            "type": "object",
+            "properties": {
+              "host": {
+                "$ref": "#/definitions/host"
+              },
+              "port": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 65535,
+                "description": "The port number of the redis host."
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "properties": {
+    "managers": {
+      "description": "The collection of CacheManager configurations.",
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/manager"
+      },
+      "minItems": 1,
+      "uniqueItems": true,
+      "default": [ ]
+    },
+    "redis": {
+      "type": "array",
+      "description": "The redis options. Use the 'configurationKey' of each item to reference them by other parts of the configuration.",
+      "items": {
+        "anyOf": [
+          { "$ref": "#/definitions/redisConfiguration" },
+          { "$ref": "#/definitions/redisConnectionString" }
+        ]
+      },
+      "uniqueItems": true,
+      "minItems": 1
+    }
+  },
+  "required": [ "managers" ]
+}
