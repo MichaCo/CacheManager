@@ -19,7 +19,7 @@ namespace CacheManager.Core
         {
             NotNull(part, nameof(part));
 
-            return part.WithSerializer<JsonCacheSerializer>();
+            return part.WithSerializer(typeof(JsonCacheSerializer));
         }
 
         /// <summary>
@@ -33,7 +33,7 @@ namespace CacheManager.Core
         {
             NotNull(part, nameof(part));
 
-            return part.WithSerializer<JsonCacheSerializer>(serializationSettings, deserializationSettings);
+            return part.WithSerializer(typeof(JsonCacheSerializer), serializationSettings, deserializationSettings);
         }
     }
 }

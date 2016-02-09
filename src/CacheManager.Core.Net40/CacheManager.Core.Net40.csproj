@@ -119,9 +119,6 @@
     <Compile Include="..\CacheManager.Core\Internal\DictionaryCacheHandle.cs">
       <Link>Internal\DictionaryCacheHandle.cs</Link>
     </Compile>
-    <Compile Include="..\CacheManager.Core\Internal\DictionaryCacheHandle2.cs">
-      <Link>Internal\DictionaryCacheHandle2.cs</Link>
-    </Compile>
     <Compile Include="..\CacheManager.Core\Internal\ICacheValueSerializer.cs">
       <Link>Internal\ICacheValueSerializer.cs</Link>
     </Compile>

@@ -27,7 +27,7 @@ namespace CacheManager.Core
             NotNull(factory, nameof(factory));
             var externalFactory = new LoggerFactory();
             factory(externalFactory);
-            return part.WithLogging<AspNetLoggerFactory>(externalFactory);
+            return part.WithLogging(typeof(AspNetLoggerFactory), externalFactory);
         }
 
         /// <summary>
@@ -37,12 +37,11 @@ namespace CacheManager.Core
         /// <param name="part">The builder part.</param>
         /// <param name="loggerFactory">The logger factory which should be used.</param>
         /// <returns>The builder.</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "not owning it")]
         public static ConfigurationBuilderCachePart WithAspNetLogging(this ConfigurationBuilderCachePart part, ILoggerFactory loggerFactory)
         {
             NotNull(part, nameof(part));
             NotNull(loggerFactory, nameof(loggerFactory));
-            return part.WithLogging<AspNetLoggerFactory>(loggerFactory);
+            return part.WithLogging(typeof(AspNetLoggerFactory), loggerFactory);
         }
     }
 }

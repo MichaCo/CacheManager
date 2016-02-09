@@ -70,7 +70,7 @@ namespace CacheManager.Core
         {
             NotNull(part, nameof(part));
 
-            return part.WithBackPlate<RedisCacheBackPlate>(redisConfigurationKey);
+            return part.WithBackPlate(typeof(RedisCacheBackPlate), redisConfigurationKey);
         }
 
         /// <summary>
@@ -92,7 +92,7 @@ namespace CacheManager.Core
         {
             NotNull(part, nameof(part));
 
-            return part.WithBackPlate<RedisCacheBackPlate>(redisConfigurationKey, channelName);
+            return part.WithBackPlate(typeof(RedisCacheBackPlate), redisConfigurationKey, channelName);
         }
 
         /// <summary>

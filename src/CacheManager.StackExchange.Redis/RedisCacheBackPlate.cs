@@ -33,10 +33,12 @@ namespace CacheManager.Redis
         /// Initializes a new instance of the <see cref="RedisCacheBackPlate"/> class.
         /// </summary>
         /// <param name="configuration">The cache manager configuration.</param>
+        /// <param name="loggerFactory">The logger factory</param>
         public RedisCacheBackPlate(CacheManagerConfiguration configuration, ILoggerFactory loggerFactory)
             : base(configuration)
         {
             NotNull(configuration, nameof(configuration));
+            NotNull(loggerFactory, nameof(loggerFactory));
 
             this.logger = loggerFactory.CreateLogger(this);
             this.channelName = configuration.BackPlateChannelName ?? "CacheManagerBackPlate";

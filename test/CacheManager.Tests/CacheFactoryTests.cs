@@ -528,7 +528,7 @@ namespace CacheManager.Tests
             cache.Should().NotBeNull();
             cache.CacheHandles.Count().Should().Be(1);
         }
-        
+
         [Fact]
         [ReplaceCulture]
         public void CacheFactory_Build_WithJsonSerializer()
@@ -568,7 +568,7 @@ namespace CacheManager.Tests
         {
             var cache = CacheFactory.Build(
                 p =>
-                p.WithSerializer<BinaryCacheSerializer>()
+                p.WithSerializer(typeof(BinaryCacheSerializer))
                     .WithSystemRuntimeCacheHandle());
 
             cache.Configuration.SerializerType.Should().NotBeNull();

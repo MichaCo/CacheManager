@@ -18,6 +18,10 @@ namespace CacheManager.Core
         {
         }
 
+        /// <summary>
+        /// Gets or sets the name of the cache.
+        /// </summary>
+        /// <value>The name of the cache.</value>
         public string Name { get; set; } = Guid.NewGuid().ToString();
 
         /// <summary>
@@ -50,7 +54,7 @@ namespace CacheManager.Core
         /// </summary>
         /// <value>The key of the back plate configuration.</value>
         public string BackPlateConfigurationKey { get; set; }
-        
+
         /// <summary>
         /// Gets or sets the back plate channel name.
         /// </summary>
@@ -63,7 +67,7 @@ namespace CacheManager.Core
         /// <value>
         /// <c>true</c> if this instance has cache back plate; otherwise, <c>false</c>.
         /// </value>
-        ////public bool HasBackPlate => this.BackPlateType != null;
+        public bool HasBackPlate => this.BackPlateType != null;
 
         /// <summary>
         /// Gets or sets the factory method for a cache back plate.
@@ -71,6 +75,11 @@ namespace CacheManager.Core
         /// <value>The back plate activator.</value>
         public Type BackPlateType { get; set; }
 
+        /// <summary>
+        /// Gets or sets additional arguments which should be used instantiating the back-plate.
+        /// </summary>
+        /// <value>The list of arguments.</value>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1819:PropertiesShouldNotReturnArrays", Justification = "nope")]
         public object[] BackPlateTypeArguments { get; set; }
 
         /// <summary>
@@ -79,6 +88,11 @@ namespace CacheManager.Core
         /// <value>The serializer activator.</value>
         public Type SerializerType { get; set; }
 
+        /// <summary>
+        /// Gets or sets additional arguments which should be used instantiating the serializer.
+        /// </summary>
+        /// <value>The list of arguments.</value>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1819:PropertiesShouldNotReturnArrays", Justification = "nope")]
         public object[] SerializerTypeArguments { get; set; }
 
         /// <summary>
@@ -89,8 +103,17 @@ namespace CacheManager.Core
         /// </value>
         public Type LoggerFactoryType { get; set; }
 
+        /// <summary>
+        /// Gets or sets additional arguments which should be used instantiating the logger factory.
+        /// </summary>
+        /// <value>The list of arguments.</value>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1819:PropertiesShouldNotReturnArrays", Justification = "nope")]
         public object[] LoggerFactoryTypeArguments { get; set; }
 
+        /// <summary>
+        /// Gets the list of cache handle configurations.
+        /// </summary>
+        /// <value>The list of cache handle configurations.</value>
         public IList<CacheHandleConfiguration> CacheHandleConfigurations { get; } = new List<CacheHandleConfiguration>();
     }
 }

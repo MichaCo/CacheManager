@@ -26,11 +26,11 @@ namespace CacheManager.Redis
     public class RedisCacheHandle<TCacheValue> : BaseCacheHandle<TCacheValue>
     {
         private const string HashFieldCreated = "created";
-        private const string HashFieldExpirationMode = "expiration";        
+        private const string HashFieldExpirationMode = "expiration";
         private const string HashFieldExpirationTimeout = "timeout";
-        private const string HashFieldType = "type";        
+        private const string HashFieldType = "type";
         private const string HashFieldValue = "value";
-                
+
         private static readonly string ScriptAdd = $@"
 if redis.call('HSETNX', KEYS[1], '{HashFieldValue}', ARGV[1]) == 1 then
     local result=redis.call('HMSET', KEYS[1], '{HashFieldType}', ARGV[2], '{HashFieldExpirationMode}', ARGV[3], '{HashFieldExpirationTimeout}', ARGV[4], '{HashFieldCreated}', ARGV[5])
@@ -43,7 +43,7 @@ if redis.call('HSETNX', KEYS[1], '{HashFieldValue}', ARGV[1]) == 1 then
 else 
     return nil
 end";
-        
+
         private static readonly string ScriptPut = $@"
 local result=redis.call('HMSET', KEYS[1], '{HashFieldValue}', ARGV[1], '{HashFieldType}', ARGV[2], '{HashFieldExpirationMode}', ARGV[3], '{HashFieldExpirationTimeout}', ARGV[4], '{HashFieldCreated}', ARGV[5])
 if ARGV[3] ~= '0' and ARGV[4] ~= '0' then
@@ -52,14 +52,14 @@ else
     redis.call('PERSIST', KEYS[1])
 end
 return result";
-        
+
         private static readonly string ScriptUpdate = $@"
 if redis.call('HGET', KEYS[1], '{HashFieldValue}') == ARGV[2] then
     return redis.call('HSET', KEYS[1], '{HashFieldValue}', ARGV[1])
 else
     return nil
 end";
-        
+
         private static readonly string ScriptGet = $@"
 local result = redis.call('HMGET', KEYS[1], '{HashFieldValue}', '{HashFieldExpirationMode}', '{HashFieldExpirationTimeout}', '{HashFieldCreated}', '{HashFieldType}')
 if (result[2] and result[2] == '1') then 
@@ -68,7 +68,7 @@ if (result[2] and result[2] == '1') then
     end
 end
 return result";
-        
+
         private readonly IDictionary<ScriptType, StackRedis.LoadedLuaScript> shaScripts = new Dictionary<ScriptType, StackRedis.LoadedLuaScript>();
         private readonly CacheManagerConfiguration managerConfiguration;
         private readonly RedisValueConverter valueConverter;
@@ -86,6 +86,7 @@ return result";
         /// <param name="configuration">The cache handle configuration.</param>
         /// <param name="loggerFactory">The logger factory.</param>
         /// <param name="serializer">The serializer.</param>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA2204:Literals should be spelled correctly", MessageId = "redis", Justification = "That's the name...")]
         public RedisCacheHandle(CacheManagerConfiguration managerConfiguration, CacheHandleConfiguration configuration, ILoggerFactory loggerFactory, ICacheSerializer serializer)
             : base(managerConfiguration, configuration)
         {

@@ -8,11 +8,12 @@ namespace CacheManager.Config.Tests
     using System.IO;
     using System.Web;
     using CacheManager.Web;
+    using Core.Logging;
 
     internal class SystemWebCacheHandleWrapper<TCacheValue> : SystemWebCacheHandle<TCacheValue>
     {
-        public SystemWebCacheHandleWrapper(ICacheManager<TCacheValue> manager, CacheHandleConfiguration configuration)
-            : base(manager, configuration)
+        public SystemWebCacheHandleWrapper(CacheManagerConfiguration managerConfiguration, CacheHandleConfiguration configuration, ILoggerFactory loggerFactory)
+            : base(managerConfiguration, configuration, loggerFactory)
         {
         }
 

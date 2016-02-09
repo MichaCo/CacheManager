@@ -11,6 +11,8 @@
     "CacheManager.Serialization.Json": "",
     "Microsoft.Extensions.Logging.Console": "1.0.0-rc1-*",
     "Microsoft.Extensions.Logging.Debug": "1.0.0-rc1-*",
+    "Microsoft.Extensions.Configuration.Json": "1.0.0-rc1-*",
+    "Microsoft.Extensions.Configuration.Binder": "1.0.0-rc1-*",
     "Newtonsoft.Json": "6.0.8"
   },
   "commands": {

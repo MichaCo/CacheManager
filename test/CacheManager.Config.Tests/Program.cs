@@ -2,6 +2,8 @@
 using System.Threading;
 using CacheManager.Core;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Configuration;
+
 
 namespace CacheManager.Config.Tests
 {
@@ -16,7 +18,11 @@ namespace CacheManager.Config.Tests
             int iterations = int.MaxValue;
             try
             {
-                var cacheConfiguration = ConfigurationBuilder.BuildConfiguration(cfg =>
+                var cfgBuilder = new Microsoft.Extensions.Configuration.ConfigurationBuilder();
+                cfgBuilder.AddJsonFile("cache.json");
+                var jsonConfig = cfgBuilder.Build();
+                
+                var cacheConfiguration = Core.ConfigurationBuilder.BuildConfiguration(cfg =>
                 {
                     cfg.WithAspNetLogging(f =>
                     {
@@ -66,6 +72,13 @@ namespace CacheManager.Config.Tests
 
                 var cacheA = CacheFactory.FromConfiguration<object>("myCache", cacheConfiguration);
                 cacheA.Clear();
+
+                var manualConfig = new CacheManagerConfiguration();
+                manualConfig.CacheHandleConfigurations.Add(new CacheHandleConfiguration()
+                {
+                    HandleType = typeof(Core.Internal.DictionaryCacheHandle<>)
+                });
+                var cacheB = new BaseCacheManager<string>("name", manualConfig);
 
                 for (int i = 0; i < iterations; i++)
                 {

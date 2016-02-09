@@ -449,7 +449,7 @@ namespace CacheManager.Core
         /// Configures the back plate for the cache manager.
         /// <para>
         /// This is an optional feature. If specified, see the documentation for the
-        /// <typeparamref name="TBackPlate"/>. The <paramref name="configurationKey"/> might be used to
+        /// <paramref name="backPlateType"/>. The <paramref name="configurationKey"/> might be used to
         /// reference another configuration item.
         /// </para>
         /// <para>
@@ -457,17 +457,17 @@ namespace CacheManager.Core
         /// source. The cache manager then will try to synchronize multiple instances of the same configuration.
         /// </para>
         /// </summary>
-        /// <typeparam name="TBackPlate">The type of the back plate implementation.</typeparam>
+        /// <param name="backPlateType">The type of the back plate implementation.</param>
         /// <param name="configurationKey">The name.</param>
         /// <param name="args">Additional arguments the type might need to get initialized.</param>
         /// <returns>The builder instance.</returns>
         /// <exception cref="System.ArgumentNullException">If <paramref name="configurationKey"/> is null.</exception>
-        public ConfigurationBuilderCachePart WithBackPlate<TBackPlate>(string configurationKey, params object[] args)
-            where TBackPlate : CacheBackPlate
+        public ConfigurationBuilderCachePart WithBackPlate(Type backPlateType, string configurationKey, params object[] args)
         {
+            NotNull(backPlateType, nameof(backPlateType));
             NotNullOrWhiteSpace(configurationKey, nameof(configurationKey));
 
-            this.Configuration.BackPlateType = typeof(TBackPlate);
+            this.Configuration.BackPlateType = backPlateType;
             this.Configuration.BackPlateTypeArguments = args;
             this.Configuration.BackPlateConfigurationKey = configurationKey;
             return this;
@@ -477,7 +477,7 @@ namespace CacheManager.Core
         /// Configures the back plate for the cache manager.
         /// <para>
         /// This is an optional feature. If specified, see the documentation for the
-        /// <typeparamref name="TBackPlate"/>. The <paramref name="configurationKey"/> might be used to
+        /// <paramref name="backPlateType"/>. The <paramref name="configurationKey"/> might be used to
         /// reference another configuration item.
         /// </para>
         /// <para>
@@ -485,7 +485,7 @@ namespace CacheManager.Core
         /// source. The cache manager then will try to synchronize multiple instances of the same configuration.
         /// </para>
         /// </summary>
-        /// <typeparam name="TBackPlate">The type of the back plate implementation.</typeparam>
+        /// <param name="backPlateType">The type of the back plate implementation.</param>
         /// <param name="configurationKey">The configuration key.</param>
         /// <param name="channelName">The back plate channel name.</param>
         /// <param name="args">Additional arguments the type might need to get initialized.</param>
@@ -493,13 +493,13 @@ namespace CacheManager.Core
         /// <exception cref="System.ArgumentNullException">
         /// If <paramref name="configurationKey"/> or <paramref name="channelName"/> is null.
         /// </exception>
-        public ConfigurationBuilderCachePart WithBackPlate<TBackPlate>(string configurationKey, string channelName, params object[] args)
-            where TBackPlate : CacheBackPlate
+        public ConfigurationBuilderCachePart WithBackPlate(Type backPlateType, string configurationKey, string channelName, params object[] args)
         {
+            NotNull(backPlateType, nameof(backPlateType));
             NotNullOrWhiteSpace(configurationKey, nameof(configurationKey));
             NotNullOrWhiteSpace(channelName, nameof(channelName));
 
-            this.Configuration.BackPlateType = typeof(TBackPlate);
+            this.Configuration.BackPlateType = backPlateType;
             this.Configuration.BackPlateTypeArguments = args;
             this.Configuration.BackPlateChannelName = channelName;
             this.Configuration.BackPlateConfigurationKey = configurationKey;
@@ -643,12 +643,14 @@ namespace CacheManager.Core
         /// <summary>
         /// Sets the serializer which should be used to serialize cache items.
         /// </summary>
+        /// <param name="serializerType">The type of the serializer.</param>
         /// <param name="args">Additional arguments the type might need to get initialized.</param>
         /// <returns>The builder part.</returns>
-        public ConfigurationBuilderCachePart WithSerializer<TSerializer>(params object[] args)
-            where TSerializer : ICacheSerializer
+        public ConfigurationBuilderCachePart WithSerializer(Type serializerType, params object[] args)
         {
-            this.Configuration.SerializerType = typeof(TSerializer);
+            NotNull(serializerType, nameof(serializerType));
+
+            this.Configuration.SerializerType = serializerType;
             this.Configuration.SerializerTypeArguments = args;
             return this;
         }
@@ -656,12 +658,14 @@ namespace CacheManager.Core
         /// <summary>
         /// Enables logging by setting the <see cref="ILoggerFactory"/> for the cache manager instance.
         /// </summary>
+        /// <param name="loggerFactoryType">The type of the logger factory.</param>
         /// <param name="args">Additional arguments the type might need to get initialized.</param>
         /// <returns>The builder part.</returns>
-        public ConfigurationBuilderCachePart WithLogging<TLoggerFactory>(params object[] args)
-            where TLoggerFactory : ILoggerFactory
+        public ConfigurationBuilderCachePart WithLogging(Type loggerFactoryType, params object[] args)
         {
-            this.Configuration.LoggerFactoryType = typeof(TLoggerFactory);
+            NotNull(loggerFactoryType, nameof(loggerFactoryType));
+
+            this.Configuration.LoggerFactoryType = loggerFactoryType;
             this.Configuration.LoggerFactoryTypeArguments = args;
             return this;
         }
