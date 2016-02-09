@@ -186,9 +186,13 @@ namespace CacheManager.Core.Internal
                 foreach (ParameterInfo param in parameters)
                 {
 #if NET40
-                    var paramValue = instances.FirstOrDefault(p => param.ParameterType.IsAssignableFrom(p.GetType()));
+                    var paramValue = instances
+                        .Where(p => p != null)
+                        .FirstOrDefault(p => param.ParameterType.IsAssignableFrom(p.GetType()));
 #else
-                    var paramValue = instances.FirstOrDefault(p => param.ParameterType.GetTypeInfo().IsAssignableFrom(p.GetType().GetTypeInfo()));
+                    var paramValue = instances
+                        .Where(p => p != null)
+                        .FirstOrDefault(p => param.ParameterType.GetTypeInfo().IsAssignableFrom(p.GetType().GetTypeInfo()));
 #endif
                     if (paramValue == null)
                     {
