@@ -289,7 +289,7 @@ namespace CacheManager.Tests
 
             // assert
             act.ShouldThrow<InvalidOperationException>()
-                .WithMessage("*No configuration added for configuration name redis*");
+                .WithInnerMessage("*No configuration added for configuration name redis*");
         }
 
         [Fact]
@@ -528,27 +528,7 @@ namespace CacheManager.Tests
             cache.Should().NotBeNull();
             cache.CacheHandles.Count().Should().Be(1);
         }
-
-        [Fact]
-        [ReplaceCulture]
-        public void CacheFactory_Build_WithSerializer_TypeNull()
-        {
-            Action act = () => CacheFactory.Build(
-                p => p.WithSerializer(null));
-
-            act.ShouldThrow<ArgumentNullException>().WithMessage("*serializerType*");
-        }
-
-        [Fact]
-        [ReplaceCulture]
-        public void CacheFactory_Build_WithSerializer_TypeInvalid()
-        {
-            Action act = () => CacheFactory.Build(
-                p => p.WithSerializer(typeof(string)));
-
-            act.ShouldThrow<InvalidOperationException>().WithMessage("*must implement " + nameof(ICacheSerializer) + "*");
-        }
-
+        
         [Fact]
         [ReplaceCulture]
         public void CacheFactory_Build_WithJsonSerializer()
@@ -558,8 +538,8 @@ namespace CacheManager.Tests
                     .WithJsonSerializer()
                     .WithSystemRuntimeCacheHandle());
 
-            cache.Configuration.CacheSerializer.Should().NotBeNull();
-            cache.Configuration.CacheSerializer.GetType().Should().Be(typeof(JsonCacheSerializer));
+            cache.Configuration.SerializerType.Should().NotBeNull();
+            cache.Configuration.SerializerType.Should().Be(typeof(JsonCacheSerializer));
         }
 
         [Fact]
@@ -580,10 +560,6 @@ namespace CacheManager.Tests
                 p => p
                     .WithJsonSerializer(serializationSettings, deserializationSettings)
                     .WithSystemRuntimeCacheHandle());
-
-            var serializer = cache.Configuration.CacheSerializer as JsonCacheSerializer;
-            serializer.SerializationSettings.ShouldBeEquivalentTo(serializationSettings);
-            serializer.DeserializationSettings.ShouldBeEquivalentTo(deserializationSettings);
         }
 
         [Fact]
@@ -592,11 +568,11 @@ namespace CacheManager.Tests
         {
             var cache = CacheFactory.Build(
                 p =>
-                p.WithSerializer(typeof(BinaryCacheSerializer))
+                p.WithSerializer<BinaryCacheSerializer>()
                     .WithSystemRuntimeCacheHandle());
 
-            cache.Configuration.CacheSerializer.Should().NotBeNull();
-            cache.Configuration.CacheSerializer.GetType().Should().Be(typeof(BinaryCacheSerializer));
+            cache.Configuration.SerializerType.Should().NotBeNull();
+            cache.Configuration.SerializerType.Should().Be(typeof(BinaryCacheSerializer));
         }
     }
 }

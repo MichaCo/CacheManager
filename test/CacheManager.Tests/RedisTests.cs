@@ -169,7 +169,7 @@ namespace CacheManager.Tests
                     var value = cache.Get(item.Key);
                     value.Should().Be("new value", cache.ToString());
                 },
-                2,
+                1,
                 TestManagers.CreateRedisAndSystemCacheWithBackPlate(69, true, channelName),
                 cfgCache,
                 TestManagers.CreateRedisCache(69),
@@ -255,7 +255,7 @@ namespace CacheManager.Tests
                     var value = cache.GetCacheItem(item.Key);
                     value.Should().BeNull();
                 },
-                2,
+                1,
                 TestManagers.CreateRedisAndSystemCacheWithBackPlate(6, true, channelName),
                 TestManagers.CreateRedisAndSystemCacheWithBackPlate(6, true, channelName),
                 TestManagers.CreateRedisCache(6),

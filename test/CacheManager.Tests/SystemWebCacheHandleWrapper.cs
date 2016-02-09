@@ -4,14 +4,15 @@
 using System.IO;
 using System.Web;
 using CacheManager.Core;
+using CacheManager.Core.Logging;
 using CacheManager.Web;
 
 namespace CacheManager.Tests
 {
     internal class SystemWebCacheHandleWrapper<TCacheValue> : SystemWebCacheHandle<TCacheValue>
     {
-        public SystemWebCacheHandleWrapper(ICacheManager<TCacheValue> manager, CacheHandleConfiguration configuration)
-            : base(manager, configuration)
+        public SystemWebCacheHandleWrapper(CacheManagerConfiguration managerConfiguration, CacheHandleConfiguration configuration, ILoggerFactory loggerFactory)
+            : base(managerConfiguration, configuration, loggerFactory)
         {
         }
 

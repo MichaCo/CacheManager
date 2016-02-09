@@ -2,7 +2,6 @@
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Reflection;
 using System.Threading;
 using CacheManager.Core;
 using FluentAssertions;
@@ -30,8 +29,7 @@ namespace CacheManager.Tests
             });
 
             // assert
-            act.ShouldThrow<TargetInvocationException>()
-                .WithInnerException<InvalidOperationException>()
+            act.ShouldThrow<InvalidOperationException>()
                 .WithInnerMessage("The cache value type must be serializable*");
         }
 

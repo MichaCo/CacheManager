@@ -22,7 +22,7 @@ namespace CacheManager.Core
     {
         private readonly bool logTrace = false;
         private readonly BaseCacheHandle<TCacheValue>[] cacheHandles;
-        private CacheBackPlate cacheBackPlate;
+        private readonly CacheBackPlate cacheBackPlate;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BaseCacheManager{TCacheValue}"/> class
@@ -41,19 +41,30 @@ namespace CacheManager.Core
         {
             NotNullOrWhiteSpace(name, nameof(name));
             NotNull(configuration, nameof(configuration));
-            EnsureNotNull(configuration.LoggerFactory, "Logger factory must not be null");
 
             this.Name = name;
             this.Configuration = configuration;
-            this.Logger = configuration.LoggerFactory.CreateLogger(this);
+
+            var loggerFactory = CacheReflectionHelper.CreateLoggerFactory(configuration);
+            var serializer = CacheReflectionHelper.CreateSerializer(configuration, loggerFactory);
+
+            this.Logger = loggerFactory.CreateLogger(this);
             this.logTrace = this.Logger.IsEnabled(LogLevel.Trace);
             this.Logger.LogInfo("Cache manager: adding cache handles...");
-            this.cacheHandles = CacheReflectionHelper.CreateCacheHandles(this, this.Logger).ToArray();
-
-            if (this.Configuration.HasBackPlate)
+            try
             {
-                this.Logger.LogInfo("Cache manager: registering cache back plate.");
-                this.RegisterCacheBackPlate(CacheReflectionHelper.CreateBackPlate(this));
+                this.cacheHandles = CacheReflectionHelper.CreateCacheHandles(this, loggerFactory, serializer).ToArray();
+
+                this.cacheBackPlate = CacheReflectionHelper.CreateBackPlate(configuration, loggerFactory);
+                if (this.cacheBackPlate != null)
+                {
+                    this.RegisterCacheBackPlate(this.cacheBackPlate);
+                }
+            }
+            catch (Exception ex)
+            {
+                this.Logger.LogError(ex, "Error occured while creating the cache managager.");
+                throw;
             }
         }
 
@@ -366,7 +377,7 @@ namespace CacheManager.Core
                 handle.Stats.OnClear();
             }
 
-            if (this.Configuration.HasBackPlate)
+            if (this.cacheBackPlate != null)
             {
                 if (this.logTrace)
                 {
@@ -405,7 +416,7 @@ namespace CacheManager.Core
                 handle.Stats.OnClearRegion(region);
             }
 
-            if (this.Configuration.HasBackPlate)
+            if (this.cacheBackPlate != null)
             {
                 if (this.logTrace)
                 {
@@ -866,7 +877,7 @@ namespace CacheManager.Core
             }
 
             // update back plate
-            if (this.Configuration.HasBackPlate)
+            if (this.cacheBackPlate != null)
             {
                 if (this.logTrace)
                 {
@@ -900,7 +911,7 @@ namespace CacheManager.Core
                     handle.Dispose();
                 }
 
-                if (this.Configuration.HasBackPlate)
+                if (this.cacheBackPlate != null)
                 {
                     this.cacheBackPlate.Dispose();
                 }
@@ -1045,7 +1056,7 @@ namespace CacheManager.Core
             if (result)
             {
                 // update back plate
-                if (this.Configuration.HasBackPlate)
+                if (this.cacheBackPlate != null)
                 {
                     if (this.logTrace)
                     {
@@ -1328,9 +1339,7 @@ namespace CacheManager.Core
         {
             NotNull(backPlate, nameof(backPlate));
 
-            this.cacheBackPlate = backPlate;
-
-            // TODO: better throw? Or at least log warn
+            // this should have been checked during activation already, just to be totally sure...
             if (this.cacheHandles.Any(p => p.Configuration.IsBackPlateSource))
             {
                 var handles = new Func<BaseCacheHandle<TCacheValue>[]>(() =>
@@ -1545,7 +1554,7 @@ namespace CacheManager.Core
             }
 
             // update back plate
-            if (overallResult == UpdateItemResultState.Success && this.Configuration.HasBackPlate)
+            if (overallResult == UpdateItemResultState.Success && this.cacheBackPlate != null)
             {
                 if (this.logTrace)
                 {

@@ -17,13 +17,14 @@ namespace CacheManager.Core.Internal
         /// <summary>
         /// Initializes a new instance of the <see cref="DictionaryCacheHandle{TCacheValue}"/> class.
         /// </summary>
-        /// <param name="manager">The manager.</param>
-        /// <param name="configuration">The configuration.</param>
-        public DictionaryCacheHandle(ICacheManager<TCacheValue> manager, CacheHandleConfiguration configuration)
-            : base(manager, configuration)
+        /// <param name="managerConfiguration">The manager configuration.</param>
+        /// <param name="configuration">The cache handle configuration.</param>
+        /// <param name="loggerFactory">The logger factory.</param>
+        public DictionaryCacheHandle(CacheManagerConfiguration managerConfiguration, CacheHandleConfiguration configuration, ILoggerFactory loggerFactory)
+            : base(managerConfiguration, configuration)
         {
-            NotNull(manager, nameof(manager));
-            this.Logger = manager.Configuration.LoggerFactory.CreateLogger(this);
+            NotNull(loggerFactory, nameof(loggerFactory));
+            this.Logger = loggerFactory.CreateLogger(this);
             this.cache = new ConcurrentDictionary<string, CacheItem<TCacheValue>>();
         }
 

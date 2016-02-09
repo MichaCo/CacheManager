@@ -28,25 +28,26 @@ namespace CacheManager.Memcached
         /// <summary>
         /// Initializes a new instance of the <see cref="MemcachedCacheHandle{TCacheValue}"/> class.
         /// </summary>
-        /// <param name="manager">The manager.</param>
-        /// <param name="configuration">The configuration.</param>
+        /// <param name="managerConfiguration">The manager configuration.</param>
+        /// <param name="configuration">The cache handle configuration.</param>
+        /// <param name="loggerFactory">The logger factory.</param>
         /// <exception cref="System.ArgumentNullException">
-        /// If <paramref name="configuration"/> is null.
+        /// If <paramref name="configuration"/> or <paramref name="loggerFactory"/> is null.
         /// </exception>
         /// <exception cref="System.InvalidOperationException">
         /// The cache value type is not serializable or if the enyim configuration section could not
         /// be initialized.
         /// </exception>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Cache gets disposed correctly when the owner gets disposed.")]
-        public MemcachedCacheHandle(ICacheManager<TCacheValue> manager, CacheHandleConfiguration configuration)
-            : base(manager, configuration)
+        public MemcachedCacheHandle(CacheManagerConfiguration managerConfiguration, CacheHandleConfiguration configuration, ILoggerFactory loggerFactory)
+            : base(managerConfiguration, configuration)
         {
             NotNull(configuration, nameof(configuration));
-            NotNull(manager, nameof(manager));
+            NotNull(loggerFactory, nameof(loggerFactory));
 
             Ensure(typeof(TCacheValue).IsSerializable, "The cache value type must be serializable but {0} is not.", typeof(TCacheValue).ToString());
 
-            this.Logger = manager.Configuration.LoggerFactory.CreateLogger(this);
+            this.Logger = loggerFactory.CreateLogger(this);
 
             // initialize memcached client with section name which must be equal to handle name...
             // Default is "enyim.com/memcached"

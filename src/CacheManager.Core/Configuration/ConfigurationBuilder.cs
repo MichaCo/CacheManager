@@ -194,8 +194,12 @@ namespace CacheManager.Core
             }
 
             // build configuration
-            var cfg = new CacheManagerConfiguration(
-                managerCfg.UpdateMode, maxRetries.HasValue ? maxRetries.Value : 50, retryTimeout.HasValue ? retryTimeout.Value : 100);
+            var cfg = new CacheManagerConfiguration()
+            {
+                CacheUpdateMode = managerCfg.UpdateMode,
+                MaxRetries = maxRetries.HasValue ? maxRetries.Value : 50,
+                RetryTimeout = retryTimeout.HasValue ? retryTimeout.Value : 100
+            };
 
             if (string.IsNullOrWhiteSpace(managerCfg.BackPlateType))
             {
@@ -211,18 +215,20 @@ namespace CacheManager.Core
                     throw new InvalidOperationException("BackPlateName cannot be null if BackPlateType is specified.");
                 }
 
-                cfg.WithBackPlate(
-                    Type.GetType(managerCfg.BackPlateType, true),
-                    managerCfg.BackPlateName);
+                var backPlateType = Type.GetType(managerCfg.BackPlateType, false);
+                EnsureNotNull(backPlateType, "Back-plate type not found, {0}.", managerCfg.BackPlateType);
+
+                cfg.BackPlateType = backPlateType;
+                cfg.BackPlateConfigurationKey = managerCfg.BackPlateName;
             }
 
             // build serializer if set
             if (!string.IsNullOrWhiteSpace(managerCfg.SerializerType))
             {
                 var serializerType = Type.GetType(managerCfg.SerializerType, false);
-                EnsureNotNull(serializerType, "Serializer type cannot be loaded, {0}", managerCfg.SerializerType);
+                EnsureNotNull(serializerType, "Serializer type not found, {0}.", managerCfg.SerializerType);
 
-                cfg.WithSerializer(CacheReflectionHelper.CreateSerializer(serializerType));
+                cfg.SerializerType = serializerType;
             }
 
             foreach (CacheManagerHandle handleItem in managerCfg)
@@ -453,15 +459,17 @@ namespace CacheManager.Core
         /// </summary>
         /// <typeparam name="TBackPlate">The type of the back plate implementation.</typeparam>
         /// <param name="configurationKey">The name.</param>
+        /// <param name="args">Additional arguments the type might need to get initialized.</param>
         /// <returns>The builder instance.</returns>
         /// <exception cref="System.ArgumentNullException">If <paramref name="configurationKey"/> is null.</exception>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1004:GenericMethodsShouldProvideTypeParameter", Justification = "Users should use the extensions.")]
-        public ConfigurationBuilderCachePart WithBackPlate<TBackPlate>(string configurationKey)
+        public ConfigurationBuilderCachePart WithBackPlate<TBackPlate>(string configurationKey, params object[] args)
             where TBackPlate : CacheBackPlate
         {
             NotNullOrWhiteSpace(configurationKey, nameof(configurationKey));
 
-            this.Configuration.WithBackPlate(typeof(TBackPlate), configurationKey);
+            this.Configuration.BackPlateType = typeof(TBackPlate);
+            this.Configuration.BackPlateTypeArguments = args;
+            this.Configuration.BackPlateConfigurationKey = configurationKey;
             return this;
         }
 
@@ -480,18 +488,21 @@ namespace CacheManager.Core
         /// <typeparam name="TBackPlate">The type of the back plate implementation.</typeparam>
         /// <param name="configurationKey">The configuration key.</param>
         /// <param name="channelName">The back plate channel name.</param>
+        /// <param name="args">Additional arguments the type might need to get initialized.</param>
         /// <returns>The builder instance.</returns>
         /// <exception cref="System.ArgumentNullException">
         /// If <paramref name="configurationKey"/> or <paramref name="channelName"/> is null.
         /// </exception>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1004:GenericMethodsShouldProvideTypeParameter", Justification = "Users should use the extensions.")]
-        public ConfigurationBuilderCachePart WithBackPlate<TBackPlate>(string configurationKey, string channelName)
+        public ConfigurationBuilderCachePart WithBackPlate<TBackPlate>(string configurationKey, string channelName, params object[] args)
             where TBackPlate : CacheBackPlate
         {
             NotNullOrWhiteSpace(configurationKey, nameof(configurationKey));
             NotNullOrWhiteSpace(channelName, nameof(channelName));
 
-            this.Configuration.WithBackPlate(typeof(TBackPlate), configurationKey, channelName);
+            this.Configuration.BackPlateType = typeof(TBackPlate);
+            this.Configuration.BackPlateTypeArguments = args;
+            this.Configuration.BackPlateChannelName = channelName;
+            this.Configuration.BackPlateConfigurationKey = configurationKey;
             return this;
         }
 
@@ -632,25 +643,26 @@ namespace CacheManager.Core
         /// <summary>
         /// Sets the serializer which should be used to serialize cache items.
         /// </summary>
-        /// <param name="serializerType">The type of the serializer.</param>
-        /// <param name="args">The optional arguments to activate the serializer.</param>
+        /// <param name="args">Additional arguments the type might need to get initialized.</param>
         /// <returns>The builder part.</returns>
-        public ConfigurationBuilderCachePart WithSerializer(Type serializerType, params object[] args)
+        public ConfigurationBuilderCachePart WithSerializer<TSerializer>(params object[] args)
+            where TSerializer : ICacheSerializer
         {
-            var instance = CacheReflectionHelper.CreateSerializer(serializerType, args);
-
-            this.Configuration.WithSerializer(instance);
+            this.Configuration.SerializerType = typeof(TSerializer);
+            this.Configuration.SerializerTypeArguments = args;
             return this;
         }
 
         /// <summary>
         /// Enables logging by setting the <see cref="ILoggerFactory"/> for the cache manager instance.
         /// </summary>
-        /// <param name="loggerFactory">The logger factory to be used by the cache manager instance.</param>
+        /// <param name="args">Additional arguments the type might need to get initialized.</param>
         /// <returns>The builder part.</returns>
-        public ConfigurationBuilderCachePart WithLogging(ILoggerFactory loggerFactory)
+        public ConfigurationBuilderCachePart WithLogging<TLoggerFactory>(params object[] args)
+            where TLoggerFactory : ILoggerFactory
         {
-            this.Configuration.WithLoggerFactory(loggerFactory);
+            this.Configuration.LoggerFactoryType = typeof(TLoggerFactory);
+            this.Configuration.LoggerFactoryTypeArguments = args;
             return this;
         }
     }

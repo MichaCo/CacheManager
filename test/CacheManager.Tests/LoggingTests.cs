@@ -413,34 +413,24 @@ namespace CacheManager.Tests
             logger.Last.LogLevel.Should().Be(LogLevel.Warning);
             logger.Last.Message.ToString().Should().Be("message a b.");
         }
-
-        [Fact]
-        public void Logging_Builder_InvalidFactory()
-        {
-            Action act = () => ConfigurationBuilder.BuildConfiguration(
-                s => s.WithLogging(null));
-
-            act.ShouldThrow<ArgumentNullException>().WithMessage("*factory*");
-        }
-
+        
         [Fact]
         public void Logging_Builder_ValidFactory()
         {
             var cfg = ConfigurationBuilder.BuildConfiguration(
-                s => s.WithLogging(new NullLoggerFactory()));
+                s => s.WithLogging<NullLoggerFactory>());
 
-            cfg.LoggerFactory.Should().NotBeNull();
-            cfg.LoggerFactory.CreateLogger("something").Should().NotBeNull();
+            cfg.LoggerFactoryType.Should().NotBeNull();
+            cfg.LoggerFactoryType.Should().Be(typeof(NullLoggerFactory));
         }
 
         [Fact]
         public void Logging_TypedLogger()
         {
             var cfg = ConfigurationBuilder.BuildConfiguration(
-                s => s.WithLogging(new NullLoggerFactory()));
+                s => s.WithLogging<NullLoggerFactory>());
 
-            cfg.LoggerFactory.Should().NotBeNull();
-            cfg.LoggerFactory.CreateLogger(this).Should().NotBeNull();
+            cfg.LoggerFactoryType.Should().NotBeNull();
         }
     }
 

@@ -26,20 +26,11 @@ namespace CacheManager.Redis
     public class RedisCacheHandle<TCacheValue> : BaseCacheHandle<TCacheValue>
     {
         private const string HashFieldCreated = "created";
-
-        // expiration mode enum stored as int
-        private const string HashFieldExpirationMode = "expiration";
-
-        // expiration timeout stored as long
+        private const string HashFieldExpirationMode = "expiration";        
         private const string HashFieldExpirationTimeout = "timeout";
-
-        private const string HashFieldType = "type";
-
-        // the object value
+        private const string HashFieldType = "type";        
         private const string HashFieldValue = "value";
-
-        // Script to add values: return null if value exists, otherwise return HMSET result of meta data.
-        // ARGV [1]: value, [2]: type, [3]: expirationMode, [4]: expirationTimeout(millis), [5]: created(ticks)
+                
         private static readonly string ScriptAdd = $@"
 if redis.call('HSETNX', KEYS[1], '{HashFieldValue}', ARGV[1]) == 1 then
     local result=redis.call('HMSET', KEYS[1], '{HashFieldType}', ARGV[2], '{HashFieldExpirationMode}', ARGV[3], '{HashFieldExpirationTimeout}', ARGV[4], '{HashFieldCreated}', ARGV[5])
@@ -52,8 +43,7 @@ if redis.call('HSETNX', KEYS[1], '{HashFieldValue}', ARGV[1]) == 1 then
 else 
     return nil
 end";
-
-        // ARGV [1]: value, [2]: type, [3]: expirationMode, [4]: expirationTimeout(millis), [5]: created(ticks)
+        
         private static readonly string ScriptPut = $@"
 local result=redis.call('HMSET', KEYS[1], '{HashFieldValue}', ARGV[1], '{HashFieldType}', ARGV[2], '{HashFieldExpirationMode}', ARGV[3], '{HashFieldExpirationTimeout}', ARGV[4], '{HashFieldCreated}', ARGV[5])
 if ARGV[3] ~= '0' and ARGV[4] ~= '0' then
@@ -62,16 +52,14 @@ else
     redis.call('PERSIST', KEYS[1])
 end
 return result";
-
-        // TODO: use edit flag on the hash to increment and check on that instead of the full value
+        
         private static readonly string ScriptUpdate = $@"
 if redis.call('HGET', KEYS[1], '{HashFieldValue}') == ARGV[2] then
     return redis.call('HSET', KEYS[1], '{HashFieldValue}', ARGV[1])
 else
     return nil
 end";
-
-        // get should also update the sliding experiation in one go
+        
         private static readonly string ScriptGet = $@"
 local result = redis.call('HMGET', KEYS[1], '{HashFieldValue}', '{HashFieldExpirationMode}', '{HashFieldExpirationTimeout}', '{HashFieldCreated}', '{HashFieldType}')
 if (result[2] and result[2] == '1') then 
@@ -80,10 +68,9 @@ if (result[2] and result[2] == '1') then
     end
 end
 return result";
-
-        // the loaded lua script references
+        
         private readonly IDictionary<ScriptType, StackRedis.LoadedLuaScript> shaScripts = new Dictionary<ScriptType, StackRedis.LoadedLuaScript>();
-
+        private readonly CacheManagerConfiguration managerConfiguration;
         private readonly RedisValueConverter valueConverter;
         private StackRedis.IDatabase database = null;
         private RedisConfiguration redisConfiguration = null;
@@ -95,15 +82,20 @@ return result";
         /// <summary>
         /// Initializes a new instance of the <see cref="RedisCacheHandle{TCacheValue}"/> class.
         /// </summary>
-        /// <param name="manager">The manager.</param>
-        /// <param name="configuration">The configuration.</param>
-        public RedisCacheHandle(ICacheManager<TCacheValue> manager, CacheHandleConfiguration configuration)
-            : base(manager, configuration)
+        /// <param name="managerConfiguration">The manager configuration.</param>
+        /// <param name="configuration">The cache handle configuration.</param>
+        /// <param name="loggerFactory">The logger factory.</param>
+        /// <param name="serializer">The serializer.</param>
+        public RedisCacheHandle(CacheManagerConfiguration managerConfiguration, CacheHandleConfiguration configuration, ILoggerFactory loggerFactory, ICacheSerializer serializer)
+            : base(managerConfiguration, configuration)
         {
-            NotNull(manager, nameof(manager));
-            EnsureNotNull(manager.Configuration.CacheSerializer, "A cache serializer must be defined for this cache handle.");
-            this.Logger = manager.Configuration.LoggerFactory.CreateLogger(this);
-            this.valueConverter = new RedisValueConverter(manager.Configuration.CacheSerializer);
+            NotNull(loggerFactory, nameof(loggerFactory));
+            NotNull(managerConfiguration, nameof(managerConfiguration));
+            EnsureNotNull(serializer, "A serializer is required for the redis cache handle");
+
+            this.managerConfiguration = managerConfiguration;
+            this.Logger = loggerFactory.CreateLogger(this);
+            this.valueConverter = new RedisValueConverter(serializer);
         }
 
         /// <summary>
@@ -187,7 +179,7 @@ return result";
                 if (this.redisConfiguration == null)
                 {
                     // throws an exception if not found for the name
-                    this.redisConfiguration = RedisConfigurations.GetConfiguration(this.Configuration.HandleName);
+                    this.redisConfiguration = RedisConfigurations.GetConfiguration(this.Configuration.ConfigurationKey);
                 }
 
                 return this.redisConfiguration;
@@ -496,7 +488,7 @@ return result";
         }
 
         private T Retry<T>(Func<T> retryme) =>
-            RetryHelper.Retry(retryme, this.Manager.Configuration.RetryTimeout, this.Manager.Configuration.MaxRetries, this.Logger);
+            RetryHelper.Retry(retryme, this.managerConfiguration.RetryTimeout, this.managerConfiguration.MaxRetries, this.Logger);
 
         private void Retry(Action retryme)
             => this.Retry<bool>(

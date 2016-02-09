@@ -9,60 +9,16 @@ namespace CacheManager.Core
     /// <summary>
     /// The basic cache manager configuration class.
     /// </summary>
-    public sealed class CacheManagerConfiguration
+    public class CacheManagerConfiguration
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="CacheManagerConfiguration"/> class.
         /// </summary>
         public CacheManagerConfiguration()
         {
-            this.LoggerFactory = new NullLoggerFactory();
-#if !PORTABLE && !DOTNET5_2
-            // default to binary serialization if available
-            this.CacheSerializer = new BinaryCacheSerializer();
-#endif
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="CacheManagerConfiguration"/> class.
-        /// </summary>
-        /// <param name="maxRetries">The maximum retries.</param>
-        /// <param name="retryTimeout">The retry timeout.</param>
-        /// <param name="mode">The cache update mode.</param>
-        /// <param name="backPlateConfigurationKey">The name of the cache back plate's configuration.</param>
-        /// <param name="backPlateType">The type of the cache back plate implementation.</param>
-        /// <param name="serializer">The serializer to be used to serialize the cache item.</param>
-        /// <param name="loggerFactory">The logger factory.</param>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "We use it for configuration only.")]
-        public CacheManagerConfiguration(
-            CacheUpdateMode mode = CacheUpdateMode.None,
-            int maxRetries = 50,
-            int retryTimeout = 100,
-            Type backPlateType = null,
-            string backPlateConfigurationKey = null,
-            ICacheSerializer serializer = null,
-            ILoggerFactory loggerFactory = null)
-            : this()
-        {
-            this.CacheUpdateMode = mode;
-            this.MaxRetries = maxRetries;
-            this.RetryTimeout = retryTimeout;
-            this.BackPlateType = backPlateType;
-            this.BackPlateConfigurationKey = backPlateConfigurationKey;
-#if !PORTABLE && !DOTNET5_2
-            // default to binary serialization if available
-            this.CacheSerializer = serializer ?? new BinaryCacheSerializer();
-#else
-            this.CacheSerializer = serializer;
-#endif
-            this.LoggerFactory = loggerFactory ?? new NullLoggerFactory();
-        }
-
-        /// <summary>
-        /// Gets the serializer which should be used to serialize the cache item's value.
-        /// </summary>
-        /// <value>The serializer.</value>
-        public ICacheSerializer CacheSerializer { get; private set; }
+        public string Name { get; set; } = Guid.NewGuid().ToString();
 
         /// <summary>
         /// Gets or sets the <see cref="CacheUpdateMode"/> for the cache manager instance.
@@ -90,17 +46,11 @@ namespace CacheManager.Core
         public int RetryTimeout { get; set; } = 100;
 
         /// <summary>
-        /// Gets the configuration key the back plate might use.
+        /// Gets or sets the configuration key the back plate might use.
         /// </summary>
         /// <value>The key of the back plate configuration.</value>
-        public string BackPlateConfigurationKey { get; private set; }
-
-        /// <summary>
-        /// Gets the type of the back plate.
-        /// </summary>
-        /// <value>The type of the back plate.</value>
-        public Type BackPlateType { get; private set; }
-
+        public string BackPlateConfigurationKey { get; set; }
+        
         /// <summary>
         /// Gets or sets the back plate channel name.
         /// </summary>
@@ -113,40 +63,34 @@ namespace CacheManager.Core
         /// <value>
         /// <c>true</c> if this instance has cache back plate; otherwise, <c>false</c>.
         /// </value>
-        public bool HasBackPlate => this.BackPlateType != null;
+        ////public bool HasBackPlate => this.BackPlateType != null;
 
         /// <summary>
-        /// Gets the logger factory.
+        /// Gets or sets the factory method for a cache back plate.
+        /// </summary>
+        /// <value>The back plate activator.</value>
+        public Type BackPlateType { get; set; }
+
+        public object[] BackPlateTypeArguments { get; set; }
+
+        /// <summary>
+        /// Gets or sets the factory method for a cache serializer.
+        /// </summary>
+        /// <value>The serializer activator.</value>
+        public Type SerializerType { get; set; }
+
+        public object[] SerializerTypeArguments { get; set; }
+
+        /// <summary>
+        /// Gets or sets the factory method for a logger factory.
         /// </summary>
         /// <value>
-        /// The logger factory.
+        /// The logger factory activator.
         /// </value>
-        public ILoggerFactory LoggerFactory { get; private set; }
+        public Type LoggerFactoryType { get; set; }
 
-        internal IList<CacheHandleConfiguration> CacheHandleConfigurations { get; } = new List<CacheHandleConfiguration>();
+        public object[] LoggerFactoryTypeArguments { get; set; }
 
-        internal void WithBackPlate(Type backPlateType, string backPlateName, string channelName = null)
-        {
-            NotNull(backPlateType, nameof(backPlateType));
-            NotNullOrWhiteSpace(backPlateName, nameof(backPlateName));
-
-            this.BackPlateConfigurationKey = backPlateName;
-            this.BackPlateType = backPlateType;
-            this.BackPlateChannelName = channelName;
-        }
-
-        internal void WithSerializer(ICacheSerializer instance)
-        {
-            NotNull(instance, nameof(instance));
-
-            this.CacheSerializer = instance;
-        }
-
-        internal void WithLoggerFactory(ILoggerFactory loggerFactory)
-        {
-            NotNull(loggerFactory, nameof(loggerFactory));
-
-            this.LoggerFactory = loggerFactory;
-        }
+        public IList<CacheHandleConfiguration> CacheHandleConfigurations { get; } = new List<CacheHandleConfiguration>();
     }
 }

@@ -31,25 +31,25 @@ namespace CacheManager.SystemRuntimeCaching
         /// <summary>
         /// Initializes a new instance of the <see cref="MemoryCacheHandle{TCacheValue}"/> class.
         /// </summary>
-        /// <param name="manager">The manager.</param>
-        /// <param name="configuration">The configuration.</param>
-        public MemoryCacheHandle(ICacheManager<TCacheValue> manager, CacheHandleConfiguration configuration)
-            : base(manager, configuration)
+        /// <param name="managerConfiguration">The manager configuration.</param>
+        /// <param name="configuration">The cache handle configuration.</param>
+        /// <param name="loggerFactory">The logger factory.</param>
+        public MemoryCacheHandle(CacheManagerConfiguration managerConfiguration, CacheHandleConfiguration configuration, ILoggerFactory loggerFactory)
+            : base(managerConfiguration, configuration)
         {
             NotNull(configuration, nameof(configuration));
-            NotNull(manager, nameof(manager));
+            NotNull(loggerFactory, nameof(loggerFactory));
 
-            this.Logger = manager.Configuration.LoggerFactory.CreateLogger(this);
-
+            this.Logger = loggerFactory.CreateLogger(this);
             this.cacheName = configuration.HandleName;
 
             if (this.cacheName.ToUpper(CultureInfo.InvariantCulture).Equals(DefaultName.ToUpper(CultureInfo.InvariantCulture)))
             {
-                this.cache = System.Runtime.Caching.MemoryCache.Default;
+                this.cache = MemoryCache.Default;
             }
             else
             {
-                this.cache = new System.Runtime.Caching.MemoryCache(this.cacheName);
+                this.cache = new MemoryCache(this.cacheName);
             }
 
             this.instanceKey = Guid.NewGuid().ToString();

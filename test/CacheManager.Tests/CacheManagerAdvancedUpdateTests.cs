@@ -273,10 +273,10 @@ namespace CacheManager.Tests
 
     public class MockCacheHandle<TCacheValue> : BaseCacheHandle<TCacheValue>
     {
-        public MockCacheHandle(ICacheManager<TCacheValue> manager, CacheHandleConfiguration configuration)
-            : base(manager, configuration)
+        public MockCacheHandle(CacheManagerConfiguration managerConfiguration, CacheHandleConfiguration configuration, ILoggerFactory loggerFactory)
+            : base(managerConfiguration, configuration)
         {
-            this.Logger = manager.Configuration.LoggerFactory.CreateLogger(this);
+            this.Logger = loggerFactory.CreateLogger(this);
             this.AddCall = () => true;
             this.PutCall = () => { };
             this.RemoveCall = () => { };

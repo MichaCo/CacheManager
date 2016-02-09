@@ -10,27 +10,86 @@ namespace CacheManager.Core.Internal
 {
     internal static class CacheReflectionHelper
     {
-        internal static ICacheSerializer CreateSerializer(Type serializerType, params object[] args)
+        internal static ILoggerFactory CreateLoggerFactory(CacheManagerConfiguration configuration)
         {
-            NotNull(serializerType, nameof(serializerType));
+            NotNull(configuration, nameof(configuration));
 
-#if DOTNET5_2
-            var typeInfo = serializerType.GetTypeInfo();
-            var interfaces = typeInfo.ImplementedInterfaces;
-#else
-            var interfaces = serializerType.GetInterfaces();
-#endif
-            Ensure(
-                interfaces.Any(p => p == typeof(ICacheSerializer)),
-                "Serializer type must implement {0}, but {1} is not.",
-                nameof(ICacheSerializer),
-                nameof(serializerType));
+            if (configuration.LoggerFactoryType == null)
+            {
+                return new NullLoggerFactory();
+            }
 
-            return (ICacheSerializer)Activator.CreateInstance(serializerType, args);
+            CheckImplements<ILoggerFactory>(configuration.LoggerFactoryType);
+
+            var args = new object[] { configuration };
+            if (configuration.LoggerFactoryTypeArguments != null)
+            {
+                args = configuration.LoggerFactoryTypeArguments.Concat(args).ToArray();
+            }
+
+            return (ILoggerFactory)CreateInstance(configuration.LoggerFactoryType, args);
         }
 
-        internal static ICollection<BaseCacheHandle<TCacheValue>> CreateCacheHandles<TCacheValue>(BaseCacheManager<TCacheValue> manager, ILogger logger)
+        internal static ICacheSerializer CreateSerializer(CacheManagerConfiguration configuration, ILoggerFactory loggerFactory)
         {
+            NotNull(configuration, nameof(configuration));
+            NotNull(loggerFactory, nameof(loggerFactory));
+
+#if !DOTNET5_2
+            if (configuration.SerializerType == null)
+            {
+                return new BinaryCacheSerializer();
+            }
+#endif
+            if (configuration.SerializerType != null)
+            {
+                CheckImplements<ICacheSerializer>(configuration.SerializerType);
+
+                var args = new object[] { configuration, loggerFactory };
+                if (configuration.SerializerTypeArguments != null)
+                {
+                    args = configuration.SerializerTypeArguments.Concat(args).ToArray();
+                }
+
+                return (ICacheSerializer)CreateInstance(configuration.SerializerType, args);
+            }
+
+            return null;
+        }
+
+        internal static CacheBackPlate CreateBackPlate(CacheManagerConfiguration configuration, ILoggerFactory loggerFactory)
+        {
+            NotNull(configuration, nameof(configuration));
+            NotNull(loggerFactory, nameof(loggerFactory));
+
+            if (configuration.BackPlateType != null)
+            {
+                if (!configuration.CacheHandleConfigurations.Any(p => p.IsBackPlateSource))
+                {
+                    throw new InvalidOperationException(
+                        "At least one cache handle must be marked as the back plate source if a back plate is defined via configuration.");
+                }
+
+                CheckExtends<CacheBackPlate>(configuration.BackPlateType);
+
+                var args = new object[] { configuration, loggerFactory };
+                if (configuration.BackPlateTypeArguments != null)
+                {
+                    args = configuration.BackPlateTypeArguments.Concat(args).ToArray();
+                }
+
+                return (CacheBackPlate)CreateInstance(configuration.BackPlateType, args);
+            }
+
+            return null;
+        }
+
+        internal static ICollection<BaseCacheHandle<TCacheValue>> CreateCacheHandles<TCacheValue>(BaseCacheManager<TCacheValue> manager, ILoggerFactory loggerFactory, ICacheSerializer serializer)
+        {
+            NotNull(manager, nameof(manager));
+            NotNull(loggerFactory, nameof(loggerFactory));
+
+            var logger = loggerFactory.CreateLogger(nameof(CacheReflectionHelper));
             var managerConfiguration = manager.Configuration;
             var handles = new List<BaseCacheHandle<TCacheValue>>();
 
@@ -57,8 +116,15 @@ namespace CacheManager.Core.Internal
                     instanceType = handleType;
                 }
 
-                var handleInstance = Activator.CreateInstance(instanceType, new object[] { manager, handleConfiguration });
-                var instance = handleInstance as BaseCacheHandle<TCacheValue>;
+                var instance = CreateInstance(
+                    instanceType,
+                    new object[] { loggerFactory, serializer, managerConfiguration, manager, handleConfiguration }) as BaseCacheHandle<TCacheValue>;
+
+                if (instance == null)
+                {
+                    throw new InvalidOperationException("Couldn't initialize handle of type " + instanceType.FullName);
+                }
+
                 handles.Add(instance);
             }
 
@@ -70,37 +136,75 @@ namespace CacheManager.Core.Internal
             return handles;
         }
 
-        internal static CacheBackPlate CreateBackPlate<TCacheValue>(BaseCacheManager<TCacheValue> manager)
+        internal static object CreateInstance(Type instanceType, object[] knownInstances)
         {
-            NotNull(manager, nameof(manager));
+#if NET40
+            IEnumerable<ConstructorInfo> constructors = instanceType.GetConstructors();
+#else
+            IEnumerable<ConstructorInfo> constructors = instanceType.GetTypeInfo().DeclaredConstructors;
+#endif
 
-            if (manager.Configuration == null)
+            constructors = constructors
+                .Where(p => !p.IsStatic && p.IsPublic)
+                .OrderByDescending(p => p.GetParameters().Length)
+                .ToArray();
+
+            if (constructors.Count() == 0)
             {
-                throw new ArgumentException("Manager's configuration must not be null.", nameof(manager));
+                throw new InvalidOperationException(
+                    string.Format(CultureInfo.InvariantCulture, "No public non static constructor found for type {0}.", instanceType.FullName));
             }
 
-            if (manager.Configuration.BackPlateType != null)
+            object[] args = MatchArguments(constructors, knownInstances);
+            try
             {
-                if (!manager.CacheHandles.Any(p => p.Configuration.IsBackPlateSource))
+                return Activator.CreateInstance(instanceType, args);
+            }
+            catch (Exception ex)
+            {
+                if (ex.InnerException != null)
                 {
-                    throw new InvalidOperationException("At least one cache handle must be marked as the back plate source.");
+                    throw new InvalidOperationException(
+                        string.Format(
+                            CultureInfo.InvariantCulture,
+                            "Failed to initialize instance of type {0}.",
+                            instanceType),
+                        ex.InnerException);
                 }
 
-                try
-                {
-                    var backPlate = (CacheBackPlate)Activator.CreateInstance(
-                        manager.Configuration.BackPlateType,
-                        new object[] { manager.Configuration });
+                throw;
+            }
+        }
 
-                    return backPlate;
-                }
-                catch (TargetInvocationException e)
+        private static object[] MatchArguments(IEnumerable<ConstructorInfo> constructors, object[] instances)
+        {
+            foreach (var constructor in constructors)
+            {
+                var args = new List<object>();
+                var parameters = constructor.GetParameters();
+
+                foreach (ParameterInfo param in parameters)
                 {
-                    throw e.InnerException;
+#if NET40
+                    var paramValue = instances.FirstOrDefault(p => param.ParameterType.IsAssignableFrom(p.GetType()));
+#else
+                    var paramValue = instances.FirstOrDefault(p => param.ParameterType.GetTypeInfo().IsAssignableFrom(p.GetType().GetTypeInfo()));
+#endif
+                    if (paramValue == null)
+                    {
+                        break;
+                    }
+
+                    args.Add(paramValue);
+                }
+
+                if (parameters.Length == args.Count)
+                {
+                    return args.ToArray();
                 }
             }
 
-            return null;
+            return new object[] { };
         }
 
         private static IEnumerable<Type> GetGenericBaseTypes(this Type type)
@@ -152,6 +256,49 @@ namespace CacheManager.Core.Internal
                         "Cache handle type [{0}] should not have any generic arguments defined.",
                         handle.ToString()));
             }
+        }
+
+        private static void CheckImplements<TValid>(Type type)
+        {
+#if DOTNET5_2
+            var typeInfo = type.GetTypeInfo();
+            var interfaces = typeInfo.ImplementedInterfaces;
+#else
+            var interfaces = type.GetInterfaces();
+#endif
+            Ensure(
+                interfaces.Any(p => p == typeof(TValid)),
+                "Type must implement {0}, but {1} does not.",
+                typeof(TValid).Name,
+                type.FullName);
+        }
+
+        private static void CheckExtends<TValid>(Type type)
+        {
+#if DOTNET5_2
+            var baseType = type.GetTypeInfo().BaseType;
+#else
+            var baseType = type.BaseType;
+#endif
+
+            while (baseType != typeof(object))
+            {
+                if (baseType == typeof(TValid))
+                {
+                    return;
+                }
+#if DOTNET5_2
+                baseType = type.GetTypeInfo().BaseType;
+#else
+                baseType = type.BaseType;
+#endif
+            }
+
+            throw new InvalidOperationException(
+                string.Format(
+                    "Type {0} does not extend from {1}.",
+                    type.FullName,
+                    typeof(TValid).Name));
         }
     }
 }

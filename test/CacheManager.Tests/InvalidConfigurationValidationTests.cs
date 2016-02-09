@@ -509,7 +509,7 @@ namespace CacheManager.Tests
             string fileName = GetCfgFileName(@"/Configuration/configuration.invalid.serializerType.config");
 
             // act
-            Action act = () => ConfigurationBuilder.LoadConfigurationFile(fileName, "c1");
+            Action act = () => CacheFactory.FromConfiguration<object>(ConfigurationBuilder.LoadConfigurationFile(fileName, "c1"));
 
             // assert
             act.ShouldThrow<InvalidOperationException>()
@@ -528,7 +528,7 @@ namespace CacheManager.Tests
 
             // assert
             act.ShouldThrow<InvalidOperationException>()
-                .WithMessage("*type cannot be loaded*");
+                .WithMessage("*type not found*");
         }
 
         [Fact]

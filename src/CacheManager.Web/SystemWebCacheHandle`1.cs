@@ -24,16 +24,14 @@ namespace CacheManager.Web
         /// <summary>
         /// Initializes a new instance of the <see cref="SystemWebCacheHandle{TCacheValue}"/> class.
         /// </summary>
-        /// <param name="manager">The manager.</param>
-        /// <param name="configuration">The configuration.</param>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors", Justification = "Should be fine.")]
-        public SystemWebCacheHandle(ICacheManager<TCacheValue> manager, CacheHandleConfiguration configuration)
-            : base(manager, configuration)
+        /// <param name="managerConfiguration">The manager configuration.</param>
+        /// <param name="configuration">The cache handle configuration.</param>
+        /// <param name="loggerFactory">The logger factory.</param>
+        public SystemWebCacheHandle(CacheManagerConfiguration managerConfiguration, CacheHandleConfiguration configuration, ILoggerFactory loggerFactory)
+            : base(managerConfiguration, configuration)
         {
-            NotNull(configuration, nameof(configuration));
-            NotNull(manager, nameof(manager));
-
-            this.Logger = manager.Configuration.LoggerFactory.CreateLogger(this);
+            NotNull(loggerFactory, nameof(loggerFactory));
+            this.Logger = loggerFactory.CreateLogger(this);
 
             this.instanceKey = Guid.NewGuid().ToString();
 

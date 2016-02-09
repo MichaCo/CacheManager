@@ -27,18 +27,19 @@ namespace CacheManager.Couchbase
         /// <summary>
         /// Initializes a new instance of the <see cref="BucketCacheHandle{TCacheValue}"/> class.
         /// </summary>
-        /// <param name="manager">The manager.</param>
-        /// <param name="configuration">The configuration.</param>
+        /// <param name="managerConfiguration">The manager configuration.</param>
+        /// <param name="configuration">The cache handle configuration.</param>
+        /// <param name="loggerFactory">The logger factory.</param>
         /// <exception cref="System.InvalidOperationException">
         /// If <c>configuration.HandleName</c> is not valid.
         /// </exception>
-        public BucketCacheHandle(ICacheManager<TCacheValue> manager, CacheHandleConfiguration configuration)
-            : base(manager, configuration)
+        public BucketCacheHandle(CacheManagerConfiguration managerConfiguration, CacheHandleConfiguration configuration, ILoggerFactory loggerFactory)
+            : base(managerConfiguration, configuration)
         {
             NotNull(configuration, nameof(configuration));
-            NotNull(manager, nameof(manager));
+            NotNull(loggerFactory, nameof(loggerFactory));
 
-            this.Logger = manager.Configuration.LoggerFactory.CreateLogger(this);
+            this.Logger = loggerFactory.CreateLogger(this);
 
             // we can configure the bucket name by having "<configKey>:<bucketName>" as handle's
             // name value

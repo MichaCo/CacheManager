@@ -18,26 +18,22 @@ namespace CacheManager.Core.Internal
         /// <summary>
         /// Initializes a new instance of the <see cref="BaseCacheHandle{TCacheValue}"/> class.
         /// </summary>
-        /// <param name="manager">The manager.</param>
+        /// <param name="managerConfiguration">The manager's configuration.</param>
         /// <param name="configuration">The configuration.</param>
         /// <exception cref="System.ArgumentNullException">
-        /// If configuration or manager are null.
+        /// If <paramref name="managerConfiguration"/> or <paramref name="configuration"/> are null.
         /// </exception>
-        /// <exception cref="System.ArgumentException">If configuration name is empty.</exception>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors", Justification = "Configuration must be virtual for some unit tests only. Should never be set by users.")]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Not in this case.")]
-        protected BaseCacheHandle(ICacheManager<TCacheValue> manager, CacheHandleConfiguration configuration)
+        /// <exception cref="System.ArgumentException">If <paramref name="configuration"/> name is empty.</exception>
+        protected BaseCacheHandle(CacheManagerConfiguration managerConfiguration, CacheHandleConfiguration configuration)
         {
             NotNull(configuration, nameof(configuration));
-            NotNull(manager, nameof(manager));
+            NotNull(managerConfiguration, nameof(managerConfiguration));
             NotNullOrWhiteSpace(configuration.HandleName, nameof(configuration.HandleName));
 
             this.Configuration = configuration;
 
-            this.Manager = manager;
-
             this.Stats = new CacheStats<TCacheValue>(
-                manager.Name,
+                managerConfiguration.Name,
                 this.Configuration.HandleName,
                 this.Configuration.EnableStatistics,
                 this.Configuration.EnablePerformanceCounters);
@@ -47,19 +43,13 @@ namespace CacheManager.Core.Internal
         /// Gets the cache handle configuration.
         /// </summary>
         /// <value>The configuration.</value>
-        public virtual CacheHandleConfiguration Configuration { get; }
+        public CacheHandleConfiguration Configuration { get; }
 
         /// <summary>
         /// Gets the number of items the cache handle currently maintains.
         /// </summary>
         /// <value>The count.</value>
         public abstract int Count { get; }
-
-        /// <summary>
-        /// Gets the cache manager the cache handle was added to.
-        /// </summary>
-        /// <value>The manager.</value>
-        public virtual ICacheManager<TCacheValue> Manager { get; }
 
         /// <summary>
         /// Gets the cache stats object.

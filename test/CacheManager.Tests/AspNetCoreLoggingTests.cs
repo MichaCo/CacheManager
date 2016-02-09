@@ -147,8 +147,8 @@ namespace CacheManager.Tests
             var cfg = ConfigurationBuilder.BuildConfiguration(
                 s => s.WithAspNetLogging(f => f.AddConsole()));
 
-            cfg.LoggerFactory.Should().NotBeNull();
-            cfg.LoggerFactory.CreateLogger("something").Should().NotBeNull();
+            cfg.LoggerFactoryType.Should().NotBeNull();
+            cfg.LoggerFactoryType.Should().Be(typeof(AspNetCore.Logging.AspNetLoggerFactory));
         }
 
         [Fact]

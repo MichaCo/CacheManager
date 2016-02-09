@@ -171,10 +171,9 @@ namespace CacheManager.Tests
 
             // assert
             cache.Configuration.CacheUpdateMode.Should().Be(CacheUpdateMode.Up);
-            cache.Configuration.CacheSerializer.Should().NotBeNull();
-            cache.Configuration.LoggerFactory.Should().NotBeNull();
+            cache.Configuration.SerializerType.Should().BeNull();
+            cache.Configuration.LoggerFactoryType.Should().BeNull();
             cache.Configuration.BackPlateType.Should().BeNull();
-            cache.Configuration.HasBackPlate.Should().BeFalse();
             cache.Configuration.RetryTimeout.Should().Be(100);
             cache.Configuration.MaxRetries.Should().Be(50);
             cache.CacheHandles.Count().Should().Be(1);

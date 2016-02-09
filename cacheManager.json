@@ -1,5 +1,5 @@
 {
-  "id": "http://cachemanager.net/cachemanager.json",
+  "id": "http://cachemanager.net/schemas/cachemanager.json",
   "title": "JSON schema for CacheManager configuration files",
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
@@ -14,6 +14,13 @@
       "enum": [ "None", "Absolute", "Sliding" ],
       "description": "The expiration mode for the current configuration element"
     },
+    "expirationTimeout": {
+      "type": "string",
+      "description": "The expiration timeout in milliseconds (only required if expirationMode is not None)",
+      "minLength": 1,
+      "format": "regex",
+      "pattern": "^((?:-?0*\\d+\\.)?(?:0*)(?:2[0-3]|1[0-9]|[0-9]))(?::0*([0-5]?[0-9]))?(?::0*((?:[0-5]?[0-9])(?:\\.\\d{0,7})?))?$"
+    },
     "host": {
       "type": "string",
       "oneOf": [
@@ -23,10 +30,10 @@
       ],
       "description": "The host name or IP address."
     },
-    "expirationTimeout": {
-      "type": "integer",
-      "description": "The expiration timeout in milliseconds (only required if expirationMode is not None)",
-      "minimum": 0
+    "channelName": {
+      "type": "string",
+      "minLength": 1,
+      "description": "If specified, this name will be used for communication channels, if applicable"
     },
     "knownBackPlate": {
       "type": "object",
@@ -39,7 +46,8 @@
           "type": "string",
           "enum": [ "Redis" ],
           "description": "Choose one of the known back-plate types instead of typing the full type name. The corresponding package for the back-plate implementation must be installed."
-        }
+        },
+        "channelName": { "$ref": "#/definitions/channelName" }
       },
       "additionalProperties": false
     },
@@ -53,6 +61,53 @@
         },
         "backPlateConfigurationKey": {
           "$ref": "#/definitions/configurationKey"
+        },
+        "channelName": { "$ref": "#/definitions/channelName" }
+      },
+      "additionalProperties": false
+    },
+    "knownLoggerFactory": {
+      "type": "object",
+      "required": [ "knownLoggerFactoryType" ],
+      "properties": {
+        "knownLoggerFactoryType": {
+          "type": "string",
+          "enum": [ "AspNetCore" ],
+          "description": "Choose one of the known logger factories instead of typing the full type name. The corresponding package for the logger factory must be installed."
+        }
+      },
+      "additionalProperties": false
+    },
+    "unknownLoggerFactory": {
+      "type": "object",
+      "required": [ "loggerFactoryType" ],
+      "properties": {
+        "loggerFactoryType": {
+          "type": "string",
+          "description": "The clr type of a logger factory which should be used by CacheManager to log events."
+        }
+      },
+      "additionalProperties": false
+    },
+    "knownSerializer": {
+      "type": "object",
+      "required": [ "knownSerializerType" ],
+      "properties": {
+        "knownSerializerType": {
+          "type": "string",
+          "enum": [ "Binary", "Json" ],
+          "description": "Define a known serializer type instead of setting 'serializerType'. The respective library has to be installed. The default 'binary' might not be available on all platforms."
+        }
+      },
+      "additionalProperties": false
+    },
+    "unknownSerializer": {
+      "type": "object",
+      "required": [ "serializerType" ],
+      "properties": {
+        "serializerType": {
+          "type": "string",
+          "description": "The clr type of the serializer to be used by distributed cache handles."
         }
       },
       "additionalProperties": false
@@ -153,12 +208,6 @@
           "description": "The update mode (default is Up).",
           "default": "Up"
         },
-        "expirationMode": {
-          "$ref": "#/definitions/expirationMode"
-        },
-        "expirationTimeout": {
-          "$ref": "#/definitions/expirationTimeout"
-        },
         "maxRetries": {
           "type": "integer",
           "minimum": 0,
@@ -181,14 +230,29 @@
             }
           ]
         },
-        "loggerFactoryType": {
-          "type": "string",
-          "description": "The clr type of a logger factory which should be used by CacheManager to log events."
+        "loggerFactory": {
+          "type": "object",
+          "description": "The logger factory configuration.",
+          "oneOf": [
+            {
+              "$ref": "#/definitions/knownLoggerFactory"
+            },
+            {
+              "$ref": "#/definitions/unknownLoggerFactory"
+            }
+          ]
         },
-        "knownLoggerFactory": {
-          "type": "string",
-          "enum": [ "AspNetCore" ],
-          "description": "Choose one of the known logger factories instead of typing the full type name. The corresponding package for the logger factory must be installed."
+        "serializer": {
+          "type": "object",
+          "description": "The logger factory configuration.",
+          "oneOf": [
+            {
+              "$ref": "#/definitions/knownSerializer"
+            },
+            {
+              "$ref": "#/definitions/unknownSerializer"
+            }
+          ]
         },
         "handles": {
           "type": "array",
