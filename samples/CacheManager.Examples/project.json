@@ -11,9 +11,9 @@
   },
 
   "dependencies": {
-    "CacheManager.AspNetCore.Logging": "",
+    "CacheManager.Microsoft.Extensions.Logging": "",
     "CacheManager.Core": "",
-    "Microsoft.Extensions.Logging.Console": "1.0.0-*",
+    "Microsoft.Extensions.Logging.Console": "1.0.0-rc1-*",
     "Unity": "4.0.2"
   },
 

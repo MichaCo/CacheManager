@@ -1,6 +1,6 @@
 ﻿{
   "dependencies": {
-    "CacheManager.AspNetCore.Logging": "",
+    "CacheManager.Microsoft.Extensions.Logging": "",
     "CacheManager.Couchbase": "",
     "CacheManager.MemCached": "",
     "CacheManager.Serialization.Json": "",

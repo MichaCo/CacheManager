@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 using ILogger = CacheManager.Core.Logging.ILogger;
 using LogLevel = CacheManager.Core.Logging.LogLevel;
 
-namespace CacheManager.AspNetCore.Logging
+namespace CacheManager.Logging
 {
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
     public class AspNetLoggerFactory : Core.Logging.ILoggerFactory, IDisposable

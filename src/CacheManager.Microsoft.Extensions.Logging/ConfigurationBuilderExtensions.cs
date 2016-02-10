@@ -1,5 +1,5 @@
 ﻿using System;
-using CacheManager.AspNetCore.Logging;
+using CacheManager.Logging;
 using Microsoft.Extensions.Logging;
 using static CacheManager.Core.Utility.Guard;
 

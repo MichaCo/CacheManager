@@ -6,7 +6,7 @@
   "projectUrl": "http://www.cachemanager.net",
   "licenseUrl": "https://github.com/MichaCo/CacheManager/blob/master/LICENSE",
   "dependencies": {
-    "CacheManager.AspNetCore.Logging": "",
+    "CacheManager.Microsoft.Extensions.Logging": "",
     "CacheManager.Core": "",
     "CacheManager.Serialization.Json": "",
     "Microsoft.Extensions.Logging.Console": "1.0.0-rc1-*",

@@ -4,7 +4,6 @@ using CacheManager.Core;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
 
-
 namespace CacheManager.Config.Tests
 {
     internal class Program

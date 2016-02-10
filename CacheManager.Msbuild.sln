@@ -74,13 +74,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CacheManager.SystemRuntimeC
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CacheManager.Web", "src\CacheManager.Web.Net45\CacheManager.Web.csproj", "{56EE8576-6D0E-469D-A522-35788110DC1C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CacheManager.Examples", "samples\CacheManager.Examples.Net45\CacheManager.Examples.csproj", "{2188F6EE-064E-4268-8D85-77EFB39F0511}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CacheManager.Serialization.Json", "src\CacheManager.Serialization.Json.Net45\CacheManager.Serialization.Json.csproj", "{6EFE6B78-DF24-4FEC-8E45-ECE790F16DFC}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CacheManager.Serialization.Json.Net40", "src\CacheManager.Serialization.Json.Net40\CacheManager.Serialization.Json.Net40.csproj", "{7A27C74A-461A-495B-AECB-254703A9F047}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CacheManager.AspNetCore.Logging", "src\CacheManager.AspNetCore.Logging.Net45\CacheManager.AspNetCore.Logging.csproj", "{5CBA7621-CB34-49F9-B49B-DDEA5B097770}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -148,10 +144,6 @@ Global
 		{56EE8576-6D0E-469D-A522-35788110DC1C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{56EE8576-6D0E-469D-A522-35788110DC1C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{56EE8576-6D0E-469D-A522-35788110DC1C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2188F6EE-064E-4268-8D85-77EFB39F0511}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2188F6EE-064E-4268-8D85-77EFB39F0511}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2188F6EE-064E-4268-8D85-77EFB39F0511}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2188F6EE-064E-4268-8D85-77EFB39F0511}.Release|Any CPU.Build.0 = Release|Any CPU
 		{6EFE6B78-DF24-4FEC-8E45-ECE790F16DFC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{6EFE6B78-DF24-4FEC-8E45-ECE790F16DFC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6EFE6B78-DF24-4FEC-8E45-ECE790F16DFC}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -160,10 +152,6 @@ Global
 		{7A27C74A-461A-495B-AECB-254703A9F047}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7A27C74A-461A-495B-AECB-254703A9F047}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7A27C74A-461A-495B-AECB-254703A9F047}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5CBA7621-CB34-49F9-B49B-DDEA5B097770}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5CBA7621-CB34-49F9-B49B-DDEA5B097770}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5CBA7621-CB34-49F9-B49B-DDEA5B097770}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5CBA7621-CB34-49F9-B49B-DDEA5B097770}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -184,9 +172,7 @@ Global
 		{3930C89D-C16B-4C88-B946-0C22E10CD263} = {8099505D-0783-4352-8BAD-F7F5E7D709FD}
 		{D292FD01-C6F3-4600-ABE7-7BBA2B81BFD5} = {8099505D-0783-4352-8BAD-F7F5E7D709FD}
 		{56EE8576-6D0E-469D-A522-35788110DC1C} = {8099505D-0783-4352-8BAD-F7F5E7D709FD}
-		{2188F6EE-064E-4268-8D85-77EFB39F0511} = {3F174B69-A4CC-4241-839D-6CCA83CADB47}
 		{6EFE6B78-DF24-4FEC-8E45-ECE790F16DFC} = {8099505D-0783-4352-8BAD-F7F5E7D709FD}
 		{7A27C74A-461A-495B-AECB-254703A9F047} = {3CBC4C94-1EE1-44E8-BB56-620B8A7F7777}
-		{5CBA7621-CB34-49F9-B49B-DDEA5B097770} = {8099505D-0783-4352-8BAD-F7F5E7D709FD}
 	EndGlobalSection
 EndGlobal
