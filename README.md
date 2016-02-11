@@ -1,5 +1,5 @@
 # CacheManager
-CacheManager is an open source abstraction layer for caching written in C#. It supports various cache providers and implements many advanced features.
+CacheManager is an open source caching abstraction layer for .NET written in C#. It supports various cache providers and implements many advanced features.
 
 The main goal of the CacheManager package is to make developer's life easier to handle even very complex caching scenarios.  
 With CacheManager it is possible to implement multiple layers of caching, e.g. in-process caching in front of a distributed cache, in just a few lines of code.
