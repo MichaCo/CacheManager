@@ -10,17 +10,25 @@ namespace CacheManager.Config.Tests
     {
         public Program()
         {
+            // Set up configuration sources.
+            var builder = new Microsoft.Extensions.Configuration.ConfigurationBuilder()
+                .AddJsonFile("cache.json");
+            
+            this.Configuration = builder.Build();
         }
+
+        public IConfiguration Configuration { get; }
 
         public void Main(string[] args)
         {
             int iterations = int.MaxValue;
             try
             {
-                var cfgBuilder = new Microsoft.Extensions.Configuration.ConfigurationBuilder();
-                cfgBuilder.AddJsonFile("cache.json");
-                var jsonConfig = cfgBuilder.Build();
-                
+                var jsonConfiguration = this.Configuration.GetCacheConfiguration("cachename");
+
+                var jsonCache = CacheFactory.FromConfiguration<string>(jsonConfiguration);
+                jsonCache.Put("key", "value");
+
                 var cacheConfiguration = Core.ConfigurationBuilder.BuildConfiguration(cfg =>
                 {
                     cfg.WithAspNetLogging(f =>
@@ -109,6 +117,7 @@ namespace CacheManager.Config.Tests
 
             Console.ForegroundColor = ConsoleColor.DarkGreen;
             Console.WriteLine("We are done...");
+            Console.ForegroundColor = ConsoleColor.Gray;
             Console.ReadKey();
         }
     }

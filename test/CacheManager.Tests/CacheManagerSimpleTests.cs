@@ -1290,7 +1290,7 @@ namespace CacheManager.Tests
         {
             using (cache)
             {
-                cache.Configuration.CacheUpdateMode = CacheUpdateMode.Full;
+                cache.Configuration.UpdateMode = CacheUpdateMode.Full;
 
                 // arrange
                 var keys = new List<string>() { Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString() };
@@ -1392,7 +1392,7 @@ namespace CacheManager.Tests
             var cacheCfgText = "Cache: " + cache.Name;
             cacheCfgText += ", Handles: " + string.Join(
                 ",",
-                cache.CacheHandles.Select(p => p.Configuration.HandleName).ToArray());
+                cache.CacheHandles.Select(p => p.Configuration.Name).ToArray());
 
             Debug.WriteLine("Validating for cache: " + cacheCfgText);
             values.Select((value, index) =>

@@ -41,7 +41,7 @@ namespace CacheManager.SystemRuntimeCaching
             NotNull(loggerFactory, nameof(loggerFactory));
 
             this.Logger = loggerFactory.CreateLogger(this);
-            this.cacheName = configuration.HandleName;
+            this.cacheName = configuration.Name;
 
             if (this.cacheName.ToUpper(CultureInfo.InvariantCulture).Equals(DefaultName.ToUpper(CultureInfo.InvariantCulture)))
             {

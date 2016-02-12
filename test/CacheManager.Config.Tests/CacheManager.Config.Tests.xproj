@@ -22,4 +22,9 @@
     <ProduceOutputsOnBuild>False</ProduceOutputsOnBuild>
   </PropertyGroup>
   <Import Project="$(VSToolsPath)\DNX\Microsoft.DNX.targets" Condition="'$(VSToolsPath)' != ''" />
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties cache_1json__JSONSchema="" />
+    </VisualStudio>
+  </ProjectExtensions>
 </Project>

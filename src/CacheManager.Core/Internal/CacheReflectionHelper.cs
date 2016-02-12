@@ -95,7 +95,7 @@ namespace CacheManager.Core.Internal
 
             foreach (var handleConfiguration in managerConfiguration.CacheHandleConfigurations)
             {
-                logger.LogInfo("Creating handle {0} of type {1}.", handleConfiguration.HandleName, handleConfiguration.HandleType);
+                logger.LogInfo("Creating handle {0} of type {1}.", handleConfiguration.Name, handleConfiguration.HandleType);
                 Type handleType = handleConfiguration.HandleType;
                 Type instanceType = null;
 

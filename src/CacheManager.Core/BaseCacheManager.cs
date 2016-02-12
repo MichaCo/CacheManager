@@ -24,6 +24,11 @@ namespace CacheManager.Core
         private readonly BaseCacheHandle<TCacheValue>[] cacheHandles;
         private readonly CacheBackPlate cacheBackPlate;
 
+        public BaseCacheManager(CacheManagerConfiguration configuration)
+            : this(Guid.NewGuid().ToString(), configuration)
+        {
+        }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="BaseCacheManager{TCacheValue}"/> class
         /// using the specified configuration.
@@ -370,7 +375,7 @@ namespace CacheManager.Core
             {
                 if (this.logTrace)
                 {
-                    this.Logger.LogTrace("Clear: clearing handle {0}.", handle.Configuration.HandleName);
+                    this.Logger.LogTrace("Clear: clearing handle {0}.", handle.Configuration.Name);
                 }
 
                 handle.Clear();
@@ -409,7 +414,7 @@ namespace CacheManager.Core
             {
                 if (this.logTrace)
                 {
-                    this.Logger.LogTrace("Clear region: {0} in handle {1}.", region, handle.Configuration.HandleName);
+                    this.Logger.LogTrace("Clear region: {0} in handle {1}.", region, handle.Configuration.Name);
                 }
 
                 handle.ClearRegion(region);
@@ -448,7 +453,7 @@ namespace CacheManager.Core
             {
                 if (this.logTrace)
                 {
-                    this.Logger.LogTrace("Expire: {0} on handle {1}.", key, handle.Configuration.HandleName);
+                    this.Logger.LogTrace("Expire: {0} on handle {1}.", key, handle.Configuration.Name);
                 }
 
                 handle.Expire(key, mode, timeout);
@@ -475,7 +480,7 @@ namespace CacheManager.Core
             {
                 if (this.logTrace)
                 {
-                    this.Logger.LogTrace("Expire: {0} {1} on handle {2}.", key, region, handle.Configuration.HandleName);
+                    this.Logger.LogTrace("Expire: {0} {1} on handle {2}.", key, region, handle.Configuration.Name);
                 }
 
                 handle.Expire(key, region, mode, timeout);
@@ -799,7 +804,7 @@ namespace CacheManager.Core
                             "Add: successfully added {0} {1} to handle {2}",
                             item.Key,
                             item.Region,
-                            handle.Configuration.HandleName);
+                            handle.Configuration.Name);
                     }
                     result = true;
                 }
@@ -818,7 +823,7 @@ namespace CacheManager.Core
                             "Add: {0} {1} to handle {2} FAILED. Evicting items from other handles.",
                             item.Key,
                             item.Region,
-                            handle.Configuration.HandleName);
+                            handle.Configuration.Name);
                     }
 
                     this.EvictFromOtherHandles(item.Key, item.Region, handleIndex);
@@ -870,7 +875,7 @@ namespace CacheManager.Core
                         "Put: {0} {1} to handle {2}.",
                         item.Key,
                         item.Region,
-                        handle.Configuration.HandleName);
+                        handle.Configuration.Name);
                 }
 
                 handle.Put(item);
@@ -967,7 +972,7 @@ namespace CacheManager.Core
                 {
                     if (this.logTrace)
                     {
-                        this.Logger.LogTrace("Get: {0} {1}: item found in handle {2}.", key, region, handle.Configuration.HandleName);
+                        this.Logger.LogTrace("Get: {0} {1}: item found in handle {2}.", key, region, handle.Configuration.Name);
                     }
 
                     // update last accessed, might be used for custom sliding implementations
@@ -983,7 +988,7 @@ namespace CacheManager.Core
                 {
                     if (this.logTrace)
                     {
-                        this.Logger.LogTrace("Get: {0} {1}: item NOT found in handle {2}.", key, region, handle.Configuration.HandleName);
+                        this.Logger.LogTrace("Get: {0} {1}: item NOT found in handle {2}.", key, region, handle.Configuration.Name);
                     }
 
                     handle.Stats.OnMiss(region);
@@ -1046,7 +1051,7 @@ namespace CacheManager.Core
                             "Remove: {0} {1}: removed from handle {2}.",
                             key,
                             region,
-                            handle.Configuration.HandleName);
+                            handle.Configuration.Name);
                     }
                     result = true;
                     handle.Stats.OnRemove(region);
@@ -1107,7 +1112,7 @@ namespace CacheManager.Core
                     "Evict from handle: {0} {1}: on handle {2}.",
                     key,
                     region,
-                    handle.Configuration.HandleName);
+                    handle.Configuration.Name);
             }
 
             bool result;
@@ -1196,10 +1201,10 @@ namespace CacheManager.Core
                     "Add to handles: {0} {1}: with update mode {2}.",
                     item.Key,
                     item.Region,
-                    this.Configuration.CacheUpdateMode);
+                    this.Configuration.UpdateMode);
             }
 
-            switch (this.Configuration.CacheUpdateMode)
+            switch (this.Configuration.UpdateMode)
             {
                 case CacheUpdateMode.None:
                     // do basically nothing
@@ -1507,7 +1512,7 @@ namespace CacheManager.Core
                         "Update: {0} {1}: tried on handle {2}: result: {3}.",
                         key,
                         region,
-                        handle.Configuration.HandleName,
+                        handle.Configuration.Name,
                         result.UpdateState);
                 }
 

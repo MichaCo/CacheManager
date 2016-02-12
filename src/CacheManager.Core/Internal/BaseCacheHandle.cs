@@ -28,13 +28,13 @@ namespace CacheManager.Core.Internal
         {
             NotNull(configuration, nameof(configuration));
             NotNull(managerConfiguration, nameof(managerConfiguration));
-            NotNullOrWhiteSpace(configuration.HandleName, nameof(configuration.HandleName));
+            NotNullOrWhiteSpace(configuration.Name, nameof(configuration.Name));
 
             this.Configuration = configuration;
 
             this.Stats = new CacheStats<TCacheValue>(
                 managerConfiguration.Name,
-                this.Configuration.HandleName,
+                this.Configuration.Name,
                 this.Configuration.EnableStatistics,
                 this.Configuration.EnablePerformanceCounters);
         }

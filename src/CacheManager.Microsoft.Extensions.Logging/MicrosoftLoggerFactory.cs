@@ -8,22 +8,22 @@ using LogLevel = CacheManager.Core.Logging.LogLevel;
 namespace CacheManager.Logging
 {
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
-    public class AspNetLoggerFactory : Core.Logging.ILoggerFactory, IDisposable
+    public class MicrosoftLoggerFactory : Core.Logging.ILoggerFactory, IDisposable
     {
         private readonly ILoggerFactory parentFactory;
 
-        public AspNetLoggerFactory()
+        public MicrosoftLoggerFactory()
         {
             this.parentFactory = new LoggerFactory();
         }
 
-        public AspNetLoggerFactory(ILoggerFactory parentFactory)
+        public MicrosoftLoggerFactory(ILoggerFactory parentFactory)
         {
             Guard.NotNull(parentFactory, nameof(parentFactory));
             this.parentFactory = parentFactory;
         }
 
-        ~AspNetLoggerFactory()
+        ~MicrosoftLoggerFactory()
         {
             // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
             this.Dispose(false);
@@ -31,12 +31,12 @@ namespace CacheManager.Logging
 
         public ILogger CreateLogger(string categoryName)
         {
-            return new AspNetLoggerWrapper(this.parentFactory.CreateLogger(categoryName));
+            return new MicrosoftLoggerProxy(this.parentFactory.CreateLogger(categoryName));
         }
 
         public ILogger CreateLogger<T>(T instance)
         {
-            return new AspNetLoggerWrapper(new Logger<T>(this.parentFactory));
+            return new MicrosoftLoggerProxy(new Logger<T>(this.parentFactory));
         }
 
         public void Dispose()
@@ -54,12 +54,12 @@ namespace CacheManager.Logging
         }
     }
 
-    internal class AspNetLoggerWrapper : ILogger
+    internal class MicrosoftLoggerProxy : ILogger
     {
         private static readonly Func<object, Exception, string> Formatter = MessageFormatter;
         private readonly Microsoft.Extensions.Logging.ILogger logger;
 
-        public AspNetLoggerWrapper(Microsoft.Extensions.Logging.ILogger logger)
+        public MicrosoftLoggerProxy(Microsoft.Extensions.Logging.ILogger logger)
         {
             Guard.NotNull(logger, nameof(logger));
 

@@ -25,15 +25,15 @@ namespace CacheManager.Core
         public string Name { get; set; } = Guid.NewGuid().ToString();
 
         /// <summary>
-        /// Gets or sets the <see cref="CacheUpdateMode"/> for the cache manager instance.
+        /// Gets or sets the <see cref="UpdateMode"/> for the cache manager instance.
         /// <para>
         /// Drives the behavior of the cache manager how it should update the different cache
         /// handles it manages.
         /// </para>
         /// </summary>
         /// <value>The cache update mode.</value>
-        /// <see cref="CacheUpdateMode"/>
-        public CacheUpdateMode CacheUpdateMode { get; set; } = CacheUpdateMode.Up;
+        /// <see cref="UpdateMode"/>
+        public CacheUpdateMode UpdateMode { get; set; } = CacheUpdateMode.Up;
 
         /// <summary>
         /// Gets or sets the limit of the number of retry operations per action.

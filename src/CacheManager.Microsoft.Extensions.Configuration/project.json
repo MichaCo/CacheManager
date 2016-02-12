@@ -30,7 +30,8 @@
   },
   "dependencies": {
     "CacheManager.Core": "",
-    "Microsoft.Extensions.Configuration.Abstractions": "1.0.0-rc1-*"
+    "Microsoft.Extensions.Configuration.Abstractions": "1.0.0-rc1-*",
+    "Microsoft.Extensions.Configuration.Binder": "1.0.0-rc1-*"
   },
   "frameworks": {
     "net451": { },

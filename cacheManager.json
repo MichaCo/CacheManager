@@ -37,12 +37,12 @@
     },
     "knownBackPlate": {
       "type": "object",
-      "required": [ "backPlateConfigurationKey", "knownBackPlateType" ],
+      "required": [ "key", "knownType" ],
       "properties": {
-        "backPlateConfigurationKey": {
+        "key": {
           "$ref": "#/definitions/configurationKey"
         },
-        "knownBackPlateType": {
+        "knownType": {
           "type": "string",
           "enum": [ "Redis" ],
           "description": "Choose one of the known back-plate types instead of typing the full type name. The corresponding package for the back-plate implementation must be installed."
@@ -53,13 +53,13 @@
     },
     "unknownBackPlate": {
       "type": "object",
-      "required": [ "backPlateType" ],
+      "required": [ "type", "key" ],
       "properties": {
-        "backPlateType": {
+        "type": {
           "type": "string",
           "description": "The clr type of a back-plate implementation."
         },
-        "backPlateConfigurationKey": {
+        "key": {
           "$ref": "#/definitions/configurationKey"
         },
         "channelName": { "$ref": "#/definitions/channelName" }
@@ -68,11 +68,11 @@
     },
     "knownLoggerFactory": {
       "type": "object",
-      "required": [ "knownLoggerFactoryType" ],
+      "required": [ "knownType" ],
       "properties": {
-        "knownLoggerFactoryType": {
+        "knownType": {
           "type": "string",
-          "enum": [ "AspNetCore" ],
+          "enum": [ "Microsoft" ],
           "description": "Choose one of the known logger factories instead of typing the full type name. The corresponding package for the logger factory must be installed."
         }
       },
@@ -80,9 +80,9 @@
     },
     "unknownLoggerFactory": {
       "type": "object",
-      "required": [ "loggerFactoryType" ],
+      "required": [ "type" ],
       "properties": {
-        "loggerFactoryType": {
+        "type": {
           "type": "string",
           "description": "The clr type of a logger factory which should be used by CacheManager to log events."
         }
@@ -91,9 +91,9 @@
     },
     "knownSerializer": {
       "type": "object",
-      "required": [ "knownSerializerType" ],
+      "required": [ "knownType" ],
       "properties": {
-        "knownSerializerType": {
+        "knownType": {
           "type": "string",
           "enum": [ "Binary", "Json" ],
           "description": "Define a known serializer type instead of setting 'serializerType'. The respective library has to be installed. The default 'binary' might not be available on all platforms."
@@ -103,9 +103,9 @@
     },
     "unknownSerializer": {
       "type": "object",
-      "required": [ "serializerType" ],
+      "required": [ "type" ],
       "properties": {
-        "serializerType": {
+        "type": {
           "type": "string",
           "description": "The clr type of the serializer to be used by distributed cache handles."
         }
@@ -118,21 +118,21 @@
       "properties": {
         "knownType": {
           "type": "string",
-          "enum": [ "SystemRuntime", "Dictionary" ],
+          "enum": [ "SystemRuntime", "Dictionary", "Web" ],
           "description": "Shortcut to the known cache handle types. This requires the corresponding packages are installed."
         }
       }
     },
     "knownHandleWithConfigurationKey": {
       "type": "object",
-      "required": [ "knownType", "configurationKey" ],
+      "required": [ "knownType", "key" ],
       "properties": {
         "knownType": {
           "type": "string",
           "enum": [ "Redis", "Couchbase", "Memcached" ],
           "description": "Shortcut to the known cache handle types. This requires the corresponding packages are installed."
         },
-        "configurationKey": {
+        "key": {
           "$ref": "#/definitions/configurationKey"
         }
       }
@@ -146,7 +146,7 @@
           "description": "The clr type of the cache handle. Must be an open generic type definition.",
           "minLength": 1
         },
-        "configurationKey": {
+        "key": {
           "$ref": "#/definitions/configurationKey"
         }
       }
@@ -197,6 +197,7 @@
       "default": {
         "handles": [ ]
       },
+      "additionalProperties": false,
       "properties": {
         "name": {
           "type": "string",
@@ -268,9 +269,9 @@
       "description": "A connection string based redis configuration.",
       "additionalProperties": false,
       "type": "object",
-      "required": [ "configurationKey", "connectionString" ],
+      "required": [ "key", "connectionString" ],
       "properties": {
-        "configurationKey": {
+        "key": {
           "$ref": "#/definitions/configurationKey"
         },
         "connectionString": {
@@ -284,16 +285,21 @@
       "description": "A redis configuration.",
       "additionalProperties": false,
       "type": "object",
-      "required": [ "configurationKey", "endpoints" ],
+      "required": [ "key", "endpoints" ],
       "properties": {
-        "configurationKey": {
+        "key": {
           "$ref": "#/definitions/configurationKey"
+        },
+        "password": {
+          "type": "string",
+          "description": "The server password.",
+          "minLength": 1
         },
         "allowAdmin": {
           "type": "boolean",
           "description": "If set to true, enables certain commands which might be time intensive, e.g. FLUSHDB."
         },
-        "ssl": {
+        "isSsl": {
           "type": "boolean",
           "description": "Defines if an ssl connection should be used."
         },
@@ -335,7 +341,7 @@
     }
   },
   "properties": {
-    "managers": {
+    "cacheManagers": {
       "description": "The collection of CacheManager configurations.",
       "type": "array",
       "items": {
@@ -347,7 +353,7 @@
     },
     "redis": {
       "type": "array",
-      "description": "The redis options. Use the 'configurationKey' of each item to reference them by other parts of the configuration.",
+      "description": "The redis options. Use the 'key' of each item to reference them by other parts of the configuration.",
       "items": {
         "anyOf": [
           { "$ref": "#/definitions/redisConfiguration" },
@@ -358,5 +364,5 @@
       "minItems": 1
     }
   },
-  "required": [ "managers" ]
+  "required": [ "cacheManagers" ]
 }

@@ -435,22 +435,22 @@ namespace CacheManager.Tests
 
             // assert
             RedisConfigurations.GetConfiguration("myRedis").Should().NotBeNull();
-            act.Configuration.CacheUpdateMode.Should().Be(CacheUpdateMode.Full);
+            act.Configuration.UpdateMode.Should().Be(CacheUpdateMode.Full);
             act.Configuration.MaxRetries.Should().Be(22);
             act.Configuration.RetryTimeout.Should().Be(2223);
-            act.CacheHandles.ElementAt(0).Configuration.HandleName.Should().Be("h1");
+            act.CacheHandles.ElementAt(0).Configuration.Name.Should().Be("h1");
             act.CacheHandles.ElementAt(0).Configuration.EnablePerformanceCounters.Should().BeTrue();
             act.CacheHandles.ElementAt(0).Configuration.EnableStatistics.Should().BeTrue();
             act.CacheHandles.ElementAt(0).Configuration.ExpirationMode.Should().Be(ExpirationMode.Absolute);
             act.CacheHandles.ElementAt(0).Configuration.ExpirationTimeout.Should().Be(new TimeSpan(12, 0, 0));
 
-            act.CacheHandles.ElementAt(1).Configuration.HandleName.Should().Be("h2");
+            act.CacheHandles.ElementAt(1).Configuration.Name.Should().Be("h2");
             act.CacheHandles.ElementAt(1).Configuration.EnablePerformanceCounters.Should().BeFalse();
             act.CacheHandles.ElementAt(1).Configuration.EnableStatistics.Should().BeFalse();
             act.CacheHandles.ElementAt(1).Configuration.ExpirationMode.Should().Be(ExpirationMode.None);
             act.CacheHandles.ElementAt(1).Configuration.ExpirationTimeout.Should().Be(new TimeSpan(0, 0, 0));
 
-            act.CacheHandles.ElementAt(2).Configuration.HandleName.Should().Be("h3");
+            act.CacheHandles.ElementAt(2).Configuration.Name.Should().Be("h3");
             act.CacheHandles.ElementAt(2).Configuration.EnablePerformanceCounters.Should().BeFalse();
             act.CacheHandles.ElementAt(2).Configuration.EnableStatistics.Should().BeTrue();
             act.CacheHandles.ElementAt(2).Configuration.ExpirationMode.Should().Be(ExpirationMode.Sliding);

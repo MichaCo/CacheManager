@@ -180,7 +180,7 @@ return result";
                 if (this.redisConfiguration == null)
                 {
                     // throws an exception if not found for the name
-                    this.redisConfiguration = RedisConfigurations.GetConfiguration(this.Configuration.ConfigurationKey);
+                    this.redisConfiguration = RedisConfigurations.GetConfiguration(this.Configuration.Key);
                 }
 
                 return this.redisConfiguration;

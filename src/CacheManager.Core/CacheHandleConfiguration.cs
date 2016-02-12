@@ -13,19 +13,19 @@ namespace CacheManager.Core
         /// </summary>
         public CacheHandleConfiguration()
         {
-            this.HandleName = this.ConfigurationKey = Guid.NewGuid().ToString();
+            this.Name = this.Key = Guid.NewGuid().ToString();
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CacheHandleConfiguration"/> class.
         /// </summary>
-        /// <param name="handleName">Name of the handle. This value will also be used for the <see cref="ConfigurationKey"/>.</param>
+        /// <param name="handleName">Name of the handle. This value will also be used for the <see cref="Key"/>.</param>
         /// <exception cref="System.ArgumentNullException">If <paramref name="handleName"/> is null.</exception>
         public CacheHandleConfiguration(string handleName)
         {
             NotNullOrWhiteSpace(handleName, nameof(handleName));
 
-            this.HandleName = this.ConfigurationKey = handleName;
+            this.Name = this.Key = handleName;
         }
 
         /// <summary>
@@ -41,8 +41,8 @@ namespace CacheManager.Core
             NotNullOrWhiteSpace(handleName, nameof(handleName));
             NotNullOrWhiteSpace(configurationKey, nameof(configurationKey));
 
-            this.HandleName = handleName;
-            this.ConfigurationKey = configurationKey;
+            this.Name = handleName;
+            this.Key = configurationKey;
         }
 
         /// <summary>
@@ -77,14 +77,14 @@ namespace CacheManager.Core
         /// Gets or sets the name for the cache handle which is also the identifier of the configuration.
         /// </summary>
         /// <value>The name of the handle.</value>
-        public string HandleName { get; set; }
+        public string Name { get; set; }
 
         /// <summary>
         /// Gets or sets the configuration key.
         /// Some cache handles require to reference another part of the configuration by name.
-        /// If not specified, the <see cref="HandleName"/> will be used instead.
+        /// If not specified, the <see cref="Name"/> will be used instead.
         /// </summary>
-        public string ConfigurationKey { get; set; }
+        public string Key { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether this instance is back plate source.

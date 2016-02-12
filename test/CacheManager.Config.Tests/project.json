@@ -7,6 +7,7 @@
   "licenseUrl": "https://github.com/MichaCo/CacheManager/blob/master/LICENSE",
   "dependencies": {
     "CacheManager.Microsoft.Extensions.Logging": "",
+    "CacheManager.Microsoft.Extensions.Configuration": "",
     "CacheManager.Core": "",
     "CacheManager.Serialization.Json": "",
     "Microsoft.Extensions.Logging.Console": "1.0.0-rc1-*",

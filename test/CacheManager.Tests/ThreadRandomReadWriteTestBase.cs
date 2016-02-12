@@ -26,7 +26,7 @@ namespace CacheManager.Tests
             using (cache)
             {
                 var key = Guid.NewGuid().ToString();
-                var handleInfo = string.Join("\nh: ", cache.CacheHandles.Select(p => p.Configuration.HandleName + ":" + p.GetType().Name));
+                var handleInfo = string.Join("\nh: ", cache.CacheHandles.Select(p => p.Configuration.Name + ":" + p.GetType().Name));
 
                 cache.Remove(key);
                 cache.Add(key, new RaceConditionTestElement() { Counter = 0 });
@@ -66,7 +66,7 @@ namespace CacheManager.Tests
                     }
                     else
                     {
-                        result.Should().NotBeNull(handleInfo + "\ncurrent: " + handle.Configuration.HandleName + ":" + handle.GetType().Name);
+                        result.Should().NotBeNull(handleInfo + "\ncurrent: " + handle.Configuration.Name + ":" + handle.GetType().Name);
                         result.Counter.Should().Be(numThreads * numInnerIterations * iterations, handleInfo + "\ncounter should be exactly the expected value.");
                         countCasModifyCalls.Should().BeGreaterOrEqualTo((int)result.Counter, handleInfo + "\nexpecting no (if synced) or some version collisions.");
                     }

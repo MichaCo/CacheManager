@@ -53,7 +53,7 @@ namespace CacheManager.Memcached
             // Default is "enyim.com/memcached"
             try
             {
-                var sectionName = GetEnyimSectionName(configuration.HandleName);
+                var sectionName = GetEnyimSectionName(configuration.Key);
                 this.Cache = new MemcachedClient(sectionName);
             }
             catch (ConfigurationErrorsException ex)
@@ -299,7 +299,7 @@ namespace CacheManager.Memcached
         /// </exception>
         private IMemcachedClientConfiguration GetSection()
         {
-            string sectionName = GetEnyimSectionName(this.Configuration.HandleName);
+            string sectionName = GetEnyimSectionName(this.Configuration.Name);
             MemcachedClientSection section = (MemcachedClientSection)ConfigurationManager.GetSection(sectionName);
 
             if (section == null)

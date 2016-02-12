@@ -54,6 +54,7 @@ namespace CacheManager.Redis
             lock (configLock)
             {
                 NotNull(configuration, nameof(configuration));
+                NotNullOrWhiteSpace(configuration.Key, nameof(configuration.Key));
 
                 if (!Configurations.ContainsKey(configuration.Key))
                 {

@@ -196,7 +196,7 @@ namespace CacheManager.Core
             // build configuration
             var cfg = new CacheManagerConfiguration()
             {
-                CacheUpdateMode = managerCfg.UpdateMode,
+                UpdateMode = managerCfg.UpdateMode,
                 MaxRetries = maxRetries.HasValue ? maxRetries.Value : 50,
                 RetryTimeout = retryTimeout.HasValue ? retryTimeout.Value : 100
             };
@@ -277,7 +277,7 @@ namespace CacheManager.Core
                         string.Format(
                             CultureInfo.InvariantCulture,
                             "Expiration mode set without a valid timeout specified for handle [{0}]",
-                            handle.HandleName));
+                            handle.Name));
                 }
 
                 cfg.CacheHandleConfigurations.Add(handle);
@@ -636,7 +636,7 @@ namespace CacheManager.Core
         /// <seealso cref="CacheUpdateMode"/>
         public ConfigurationBuilderCachePart WithUpdateMode(CacheUpdateMode updateMode)
         {
-            this.Configuration.CacheUpdateMode = updateMode;
+            this.Configuration.UpdateMode = updateMode;
             return this;
         }
 

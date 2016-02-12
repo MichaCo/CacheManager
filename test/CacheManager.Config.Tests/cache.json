@@ -1,0 +1,83 @@
+﻿{
+  "$schema": "../../cacheManager.json#",
+  "redis": [
+    {
+      "key": "redisConnection",
+      "endpoints": [
+        {
+          "host": "localhost",
+          "port": 6379
+        }
+      ],
+      "allowAdmin": true,
+      "database": 11,
+      "isSsl": true,
+      "password": "password",
+      "sslHost": "sslHost",
+      "connectionTimeout": 123
+    },
+    {
+      "key": "redisConString",
+      "connectionString": "localhost:6379,allowAdmin=true"
+    }
+  ],
+  "cacheManagers": [
+    {
+      "maxRetries": 1000,
+      "name": "cachename",
+      "retryTimeout": 100,
+      "updateMode": "Full",
+      "backPlate": {
+        "key": "redisConString",
+        "knownType": "Redis",
+        "channelName": "test"
+      },
+      "loggerFactory": {
+        "knownType": "Microsoft"
+      },
+      "serializer": {
+        "knownType": "Json"
+      },
+      "handles": [
+        {
+          "knownType": "SystemRuntime",
+          "enablePerformanceCounters": true,
+          "enableStatistics": true,
+          "expirationMode": "Absolute",
+          "expirationTimeout": "0:0:23",
+          "isBackPlateSource": false,
+          "name": "sys cache"
+        },
+        {
+          "knownType": "Redis",
+          "key": "redisConString",
+          "isBackPlateSource": true
+        }
+      ]
+    },
+    {
+
+      "backPlate": {
+        "key": "redisConfigKey",
+        "type": "type"
+      },
+      "handles": [
+        {
+          "enablePerformanceCounters": false,
+          "enableStatistics": false,
+          "expirationMode": "Absolute",
+          "expirationTimeout": "1.0:0:1",
+          "isBackPlateSource": false,
+          "knownType": "SystemRuntime",
+          "name": "first"
+        }
+      ],
+      "loggerFactory": { "knownType": "Microsoft" },
+      "serializer": { "knownType": "Binary" },
+      "maxRetries": 123,
+      "name": "myManager",
+      "retryTimeout": 123,
+      "updateMode": "Up"
+    }
+  ]
+}

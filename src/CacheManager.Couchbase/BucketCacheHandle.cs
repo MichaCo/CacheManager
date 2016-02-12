@@ -43,8 +43,8 @@ namespace CacheManager.Couchbase
 
             // we can configure the bucket name by having "<configKey>:<bucketName>" as handle's
             // name value
-            var nameParts = configuration.HandleName.Split(new[] { ":" }, StringSplitOptions.RemoveEmptyEntries);
-            Ensure(nameParts.Length > 0, "Handle name is not valid {0}", configuration.HandleName);
+            var nameParts = configuration.Key.Split(new[] { ":" }, StringSplitOptions.RemoveEmptyEntries);
+            Ensure(nameParts.Length > 0, "Handle key is not valid {0}", configuration.Key);
 
             this.configurationName = nameParts[0];
 
