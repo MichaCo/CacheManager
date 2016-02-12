@@ -1,13 +1,15 @@
 ﻿{
   "dependencies": {
-    "CacheManager.Microsoft.Extensions.Logging": "",
     "CacheManager.Couchbase": "",
     "CacheManager.Memcached": "",
+    "CacheManager.Microsoft.Extensions.Configuration": "",
+    "CacheManager.Microsoft.Extensions.Logging": "",
     "CacheManager.Serialization.Json": "",
     "CacheManager.StackExchange.Redis": "",
     "CacheManager.SystemRuntimeCaching": "",
     "CacheManager.Web": "",
     "FluentAssertions": "4.1.0",
+    "Microsoft.Extensions.Configuration.Json": "1.0.0-rc1-*",
     "Microsoft.Extensions.Logging": "1.0.0-rc1-*",
     "Microsoft.Extensions.Logging.Console": "1.0.0-rc1-*",
     "Moq": "4.2.1510.2205",
