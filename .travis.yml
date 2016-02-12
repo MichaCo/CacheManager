@@ -11,7 +11,7 @@ addons:
     - libunwind8
     - zlib1g
 mono:
-  - latest
+  - 4.0.5
 os:
   - linux
   - osx
@@ -24,7 +24,9 @@ before_install:
 env:
   - KOREBUILD_TEST_DNXCORE=true
 script:
-  - mv "test/CacheManager.Tests/project.mono.json" "test/CacheManager.Tests/project.json" -f
+  - mv "test/CacheManager.Tests/project.mono.json" "test/CacheManager.Tests/project.json" -v
+  - sudo mv "test/CacheManager.Tests/project.mono.json" "test/CacheManager.Tests/project.json" -v
+  - mv "test/CacheManager.Tests/project.mono.json" "test/CacheManager.Tests/project.json" -f -v
   - chmod a+x ./build.sh
   - ./build.sh --quiet verify
  
