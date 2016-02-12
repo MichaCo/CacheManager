@@ -216,18 +216,19 @@ namespace CacheManager.Tests
         [Fact]
         public void Configuration_CacheHandle_KnownType_Redis()
         {
+            var key = Guid.NewGuid().ToString();
             var data = new Dictionary<string, string>
             {
                 {"cacheManagers:0:name", "name"},
                 {"cacheManagers:0:handles:0:knownType", "Redis"},
-                {"cacheManagers:0:handles:0:key", "key"},
+                {"cacheManagers:0:handles:0:key", key},
             };
 
             var config = GetConfiguration(data).GetCacheConfiguration("name");
             config.Name.Should().Be("name");
             config.CacheHandleConfigurations.Count.Should().Be(1);
             config.CacheHandleConfigurations[0].HandleType.Should().Be(typeof(Redis.RedisCacheHandle<>));
-            config.CacheHandleConfigurations[0].Key.Should().Be("key");
+            config.CacheHandleConfigurations[0].Key.Should().Be(key);
             config.CacheHandleConfigurations[0].Name.Should().NotBeNullOrWhiteSpace();  // name is random in this case
         }
 
@@ -266,18 +267,19 @@ namespace CacheManager.Tests
         [Fact]
         public void Configuration_CacheHandle_KnownType_Couchbase()
         {
+            var key = Guid.NewGuid().ToString();
             var data = new Dictionary<string, string>
             {
                 {"cacheManagers:0:name", "name"},
                 {"cacheManagers:0:handles:0:knownType", "Couchbase"},
-                {"cacheManagers:0:handles:0:key", "key"},
+                {"cacheManagers:0:handles:0:key", key},
             };
 
             var config = GetConfiguration(data).GetCacheConfiguration("name");
             config.Name.Should().Be("name");
             config.CacheHandleConfigurations.Count.Should().Be(1);
             config.CacheHandleConfigurations[0].HandleType.Should().Be(typeof(Couchbase.BucketCacheHandle<>));
-            config.CacheHandleConfigurations[0].Key.Should().Be("key");
+            config.CacheHandleConfigurations[0].Key.Should().Be(key);
             config.CacheHandleConfigurations[0].Name.Should().NotBeNullOrWhiteSpace();  // name is random in this case
         }
 
@@ -316,18 +318,19 @@ namespace CacheManager.Tests
         [Fact]
         public void Configuration_CacheHandle_KnownType_Memcached()
         {
+            var key = Guid.NewGuid().ToString();
             var data = new Dictionary<string, string>
             {
                 {"cacheManagers:0:name", "name"},
                 {"cacheManagers:0:handles:0:knownType", "Memcached"},
-                {"cacheManagers:0:handles:0:key", "key"},
+                {"cacheManagers:0:handles:0:key", key},
             };
 
             var config = GetConfiguration(data).GetCacheConfiguration("name");
             config.Name.Should().Be("name");
             config.CacheHandleConfigurations.Count.Should().Be(1);
             config.CacheHandleConfigurations[0].HandleType.Should().Be(typeof(Memcached.MemcachedCacheHandle<>));
-            config.CacheHandleConfigurations[0].Key.Should().Be("key");
+            config.CacheHandleConfigurations[0].Key.Should().Be(key);
             config.CacheHandleConfigurations[0].Name.Should().NotBeNullOrWhiteSpace();  // name is random in this case
         }
 
@@ -382,6 +385,7 @@ namespace CacheManager.Tests
         [Fact]
         public void Configuration_CacheHandle_AllProperties()
         {
+            var key = Guid.NewGuid().ToString();
             var data = new Dictionary<string, string>
             {
                 {"cacheManagers:0:name", "cacheName"},
@@ -392,7 +396,7 @@ namespace CacheManager.Tests
                 {"cacheManagers:0:handles:0:expirationTimeout", "0:10:0"},
                 {"cacheManagers:0:handles:0:isBackPlateSource", "true"},
                 {"cacheManagers:0:handles:0:name", "handleName"},
-                {"cacheManagers:0:handles:0:key", "key"}
+                {"cacheManagers:0:handles:0:key", key}
             };
 
             var config = GetConfiguration(data).GetCacheConfiguration("cacheName");
@@ -403,7 +407,7 @@ namespace CacheManager.Tests
             config.CacheHandleConfigurations[0].ExpirationTimeout.Should().Be(TimeSpan.FromMinutes(10));
             config.CacheHandleConfigurations[0].IsBackPlateSource.Should().BeTrue();
             config.CacheHandleConfigurations[0].Name.Should().Be("handleName");
-            config.CacheHandleConfigurations[0].Key.Should().Be("key");
+            config.CacheHandleConfigurations[0].Key.Should().Be(key);
         }
 
         [Fact]
@@ -569,45 +573,44 @@ namespace CacheManager.Tests
         [Fact]
         public void Configuration_BackPlate_Redis_Valid()
         {
+            var key = Guid.NewGuid().ToString();
             var data = new Dictionary<string, string>
             {
                 {"cacheManagers:0:name", "name"},
                 {"cacheManagers:0:handles:0:knownType", "Redis"},
-                {"cacheManagers:0:handles:0:key", "key"},
+                {"cacheManagers:0:handles:0:key", key},
                 {"cacheManagers:0:handles:0:isBackPlateSource", "true"},
                 {"cacheManagers:0:backPlate:knownType", "Redis"},
                 {"cacheManagers:0:backPlate:channelName", "channelName"},
-                {"cacheManagers:0:backPlate:key", "key"},
+                {"cacheManagers:0:backPlate:key", key},
                 {"redis:1:connectionString", "127.0.0.1:6379"},
-                {"redis:1:key", "key"}
+                {"redis:1:key", key}
             };
 
             var config = GetConfiguration(data).GetCacheConfiguration("name");
-            var cache = new BaseCacheManager<string>(config);
 
             config.BackPlateChannelName.Should().Be("channelName");
-            config.BackPlateConfigurationKey.Should().Be("key");
+            config.BackPlateConfigurationKey.Should().Be(key);
             config.BackPlateType.Should().Be(typeof(Redis.RedisCacheBackPlate));
             config.HasBackPlate.Should().BeTrue();
-            cache.Put("test", "test");
-            cache.Get("test").Should().Be("test");
         }
 
         [Fact]
         public void Configuration_BackPlate_SomeType_Valid()
         {
+            var key = Guid.NewGuid().ToString();
             var data = new Dictionary<string, string>
             {
                 {"cacheManagers:0:name", "name"},
                 {"cacheManagers:0:handles:0:knownType", "Dictionary"},
                 {"cacheManagers:0:backPlate:type", "System.Object"},
                 {"cacheManagers:0:backPlate:channelName", "channelName"},
-                {"cacheManagers:0:backPlate:key", "key"},
+                {"cacheManagers:0:backPlate:key", key},
             };
 
             var config = GetConfiguration(data).GetCacheConfiguration("name");
             config.BackPlateChannelName.Should().Be("channelName");
-            config.BackPlateConfigurationKey.Should().Be("key");
+            config.BackPlateConfigurationKey.Should().Be(key);
             config.BackPlateType.Should().Be(typeof(object));
             config.HasBackPlate.Should().BeTrue();
         }
