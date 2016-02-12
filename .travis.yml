@@ -4,7 +4,7 @@ dist: trusty
 addons:
   apt:
     sources:
-	- debian-sid
+    - debian-sid
     packages:
     - gettext
     - libcurl4-openssl-dev
