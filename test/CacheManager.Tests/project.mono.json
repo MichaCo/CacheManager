@@ -2,7 +2,7 @@
   "dependencies": {
     "CacheManager.Microsoft.Extensions.Logging": "",
     "CacheManager.Couchbase": "",
-    "CacheManager.MemCached": "",
+    "CacheManager.Memcached": "",
     "CacheManager.Serialization.Json": "",
     "CacheManager.StackExchange.Redis": "",
     "CacheManager.SystemRuntimeCaching": "",
