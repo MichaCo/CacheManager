@@ -1,12 +1,29 @@
 language: csharp
+sudo: required
+addons:
+  apt:
+    packages:
+    - gettext
+    - libcurl4-openssl-dev
+    - libicu-dev
+    - libssl-dev
+    - libunwind8
+    - zlib1g
 mono:
   - alpha
+os:
+  - linux
+  - osx
+osx_image: xcode7.1
 sudo: false
 services:
   - redis-server
 before_install:
-  - redis-cli info
+  - if test "$TRAVIS_OS_NAME" == "osx"; then brew update; brew install icu4c; fi
+env:
+  - KOREBUILD_TEST_DNXCORE=true
 script:
   - mv test/CacheManager.Tests/project.mono.json test/CacheManager.Tests/project.json -f
   - chmod a+x ./build.sh
   - ./build.sh --quiet verify
+ 
