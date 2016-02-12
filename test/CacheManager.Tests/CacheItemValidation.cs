@@ -25,7 +25,7 @@ namespace CacheManager.Tests
 
             // assert
             result.ExpirationMode.Should().Be(ExpirationMode.Absolute);
-            result.ExpirationTimeout.Should().BeCloseTo(TimeSpan.FromMinutes(10));
+            result.ExpirationTimeout.Should().BeCloseTo(TimeSpan.FromMinutes(10), precision: 200);
             result.Value.Should().Be(baseItem.Value);
             result.Region.Should().Be(baseItem.Region);
             result.Key.Should().Be(baseItem.Key);

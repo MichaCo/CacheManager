@@ -1,6 +1,5 @@
 language: csharp
-sudo: required
-dist: trusty
+sudo: false
 addons:
   apt:
     sources:
@@ -18,7 +17,6 @@ os:
   - linux
   - osx
 osx_image: xcode7.1
-sudo: false
 services:
   - redis-server
 before_install:
@@ -27,7 +25,6 @@ env:
   - KOREBUILD_TEST_DNXCORE=true
 script:
   - mv ./test/CacheManager.Tests/project.mono.json ./test/CacheManager.Tests/project.json
-  - mv ./test/CacheManager.Tests/project.mono.json ./test/CacheManager.Tests/project.json -f
   - chmod a+x ./build.sh
   - ./build.sh --quiet verify
  

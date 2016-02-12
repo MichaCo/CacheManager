@@ -55,7 +55,7 @@ namespace CacheManager.Tests
 
                 var item = cache.GetCacheItem(key);
 
-                item.ExpirationTimeout.Should().BeCloseTo(TimeSpan.FromMinutes(10));
+                item.ExpirationTimeout.Should().BeCloseTo(TimeSpan.FromMinutes(10), precision: 200);
                 item.ExpirationMode.Should().Be(ExpirationMode.Absolute);
             }
         }
@@ -76,7 +76,7 @@ namespace CacheManager.Tests
 
                 var item = cache.GetCacheItem(key, region);
 
-                item.ExpirationTimeout.Should().BeCloseTo(TimeSpan.FromMinutes(10));
+                item.ExpirationTimeout.Should().BeCloseTo(TimeSpan.FromMinutes(10), precision: 200);
                 item.ExpirationMode.Should().Be(ExpirationMode.Absolute);
             }
         }
@@ -96,7 +96,7 @@ namespace CacheManager.Tests
 
                 var item = cache.GetCacheItem(key);
 
-                item.ExpirationTimeout.Should().BeCloseTo(TimeSpan.FromMinutes(10));
+                item.ExpirationTimeout.Should().BeCloseTo(TimeSpan.FromMinutes(10), precision: 200);
                 item.ExpirationMode.Should().Be(ExpirationMode.Sliding);
             }
         }
@@ -117,7 +117,7 @@ namespace CacheManager.Tests
 
                 var item = cache.GetCacheItem(key, region);
 
-                item.ExpirationTimeout.Should().BeCloseTo(TimeSpan.FromMinutes(10));
+                item.ExpirationTimeout.Should().BeCloseTo(TimeSpan.FromMinutes(10), precision: 200);
                 item.ExpirationMode.Should().Be(ExpirationMode.Sliding);
             }
         }
@@ -199,9 +199,9 @@ namespace CacheManager.Tests
             var none = item.WithExpiration(ExpirationMode.None, default(TimeSpan));
 
             absolute.ExpirationMode.Should().Be(ExpirationMode.Absolute);
-            absolute.ExpirationTimeout.Should().BeCloseTo(TimeSpan.FromMinutes(10));
+            absolute.ExpirationTimeout.Should().BeCloseTo(TimeSpan.FromMinutes(10), precision: 200);
             sliding.ExpirationMode.Should().Be(ExpirationMode.Sliding);
-            sliding.ExpirationTimeout.Should().BeCloseTo(TimeSpan.FromMinutes(10));
+            sliding.ExpirationTimeout.Should().BeCloseTo(TimeSpan.FromMinutes(10), precision: 200);
             none.ExpirationMode.Should().Be(ExpirationMode.None);
             none.ExpirationTimeout.Should().BeCloseTo(default(TimeSpan));
         }
@@ -214,7 +214,7 @@ namespace CacheManager.Tests
             var absolute = item.WithAbsoluteExpiration(DateTimeOffset.Now.AddMinutes(10));
 
             absolute.ExpirationMode.Should().Be(ExpirationMode.Absolute);
-            absolute.ExpirationTimeout.Should().BeCloseTo(TimeSpan.FromMinutes(10));
+            absolute.ExpirationTimeout.Should().BeCloseTo(TimeSpan.FromMinutes(10), precision: 200);
         }
 
         [Fact]
@@ -225,7 +225,7 @@ namespace CacheManager.Tests
             var absolute = item.WithSlidingExpiration(TimeSpan.FromMinutes(10));
 
             absolute.ExpirationMode.Should().Be(ExpirationMode.Sliding);
-            absolute.ExpirationTimeout.Should().BeCloseTo(TimeSpan.FromMinutes(10));
+            absolute.ExpirationTimeout.Should().BeCloseTo(TimeSpan.FromMinutes(10), precision: 200);
         }
 
         [Fact]
