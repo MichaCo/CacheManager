@@ -3,6 +3,8 @@ sudo: required
 dist: trusty
 addons:
   apt:
+    sources:
+	- debian-sid
     packages:
     - gettext
     - libcurl4-openssl-dev
@@ -11,7 +13,7 @@ addons:
     - libunwind8
     - zlib1g
 mono:
-  - 4.0.5
+  - latest
 os:
   - linux
   - osx
@@ -24,9 +26,8 @@ before_install:
 env:
   - KOREBUILD_TEST_DNXCORE=true
 script:
-  - mv "test/CacheManager.Tests/project.mono.json" "test/CacheManager.Tests/project.json" -v
-  - sudo mv "test/CacheManager.Tests/project.mono.json" "test/CacheManager.Tests/project.json" -v
-  - mv "test/CacheManager.Tests/project.mono.json" "test/CacheManager.Tests/project.json" -f -v
+  - mv ./test/CacheManager.Tests/project.mono.json ./test/CacheManager.Tests/project.json
+  - mv ./test/CacheManager.Tests/project.mono.json ./test/CacheManager.Tests/project.json -f
   - chmod a+x ./build.sh
   - ./build.sh --quiet verify
  
