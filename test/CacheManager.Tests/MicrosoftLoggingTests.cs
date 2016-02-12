@@ -128,7 +128,7 @@ namespace CacheManager.Tests
         public void AspNetCoreLogging_Builder_InvalidFactory()
         {
             Action act = () => ConfigurationBuilder.BuildConfiguration(
-                s => s.WithAspNetLogging((Action<ILoggerFactory>) null));
+                s => s.WithMicrosoftLogging((Action<ILoggerFactory>) null));
 
             act.ShouldThrow<ArgumentNullException>().WithMessage("*factory*");
         }
@@ -137,7 +137,7 @@ namespace CacheManager.Tests
         public void AspNetCoreLogging_Builder_InvalidLoggerFactory()
         {
             Action act = () => ConfigurationBuilder.BuildConfiguration(
-                s => s.WithAspNetLogging((ILoggerFactory)null));
+                s => s.WithMicrosoftLogging((ILoggerFactory)null));
 
             act.ShouldThrow<ArgumentNullException>().WithMessage("*loggerFactory*");
         }
@@ -146,7 +146,7 @@ namespace CacheManager.Tests
         public void AspNetCoreLogging_Builder_ValidFactory()
         {
             var cfg = ConfigurationBuilder.BuildConfiguration(
-                s => s.WithAspNetLogging(f => f.AddConsole()));
+                s => s.WithMicrosoftLogging(f => f.AddConsole()));
 
             cfg.LoggerFactoryType.Should().NotBeNull();
             cfg.LoggerFactoryType.Should().Be(typeof(MicrosoftLoggerFactoryAdapter));

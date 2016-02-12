@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Globalization;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -30,8 +30,56 @@ namespace CacheManager.Core
         private const string TypeRedisConfiguration = "CacheManager.Redis.RedisConfiguration, CacheManager.StackExchange.Redis";
         private const string TypeRedisConfigurations = "CacheManager.Redis.RedisConfigurations, CacheManager.StackExchange.Redis";
 
+        /// <summary>
+        /// Gets the first cacheManager (can be used if only one configuration is specified, so no name is needed...).
+        /// </summary>
+        /// <param name="configuration"></param>
+        /// <returns></returns>
+        public static CacheManagerConfiguration GetCacheConfiguration(this IConfiguration configuration)
+        {
+            if (configuration == null)
+            {
+                throw new ArgumentNullException(nameof(configuration));
+            }
+
+            configuration.LoadRedisConfigurations();
+
+            var managersSection = configuration.GetSection(CacheManagersSection);
+            if (managersSection.GetChildren().Count() == 0)
+            {
+                throw new InvalidOperationException(
+                    $"No '{CacheManagersSection}' section found in the configuration provided.");
+            }
+
+            if (managersSection.GetChildren().Count() > 1)
+            {
+                throw new InvalidOperationException(
+                    $"The '{CacheManagersSection}' section has more than one configuration defined. Please specifiy which one to load by name.");
+            }
+
+            return GetFromConfiguration(managersSection.GetChildren().First());            
+        }
+
+        /// <summary>
+        /// Tries to retrieve a <see cref="CacheManagerConfiguration"/> from the provided <see cref="IConfiguration"/> element.
+        /// The <paramref name="configuration"/> should contain a <code>cacheManagers</code> section.
+        /// See
+        /// </summary>
+        /// <param name="configuration"></param>
+        /// <param name="name"></param>
+        /// <returns></returns>
         public static CacheManagerConfiguration GetCacheConfiguration(this IConfiguration configuration, string name)
         {
+            if (configuration == null)
+            {
+                throw new ArgumentNullException(nameof(configuration));
+            }
+
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                throw new ArgumentNullException(nameof(name));
+            }
+
             configuration.LoadRedisConfigurations();
 
             var managersSection = configuration.GetSection(CacheManagersSection);
@@ -41,6 +89,22 @@ namespace CacheManager.Core
             }
 
             throw new InvalidOperationException($"No '{CacheManagersSection}' section found in the configuration provided.");
+        }
+
+        public static IEnumerable<CacheManagerConfiguration> GetCacheConfigurations(this IConfiguration configuration)
+        {
+            configuration.LoadRedisConfigurations();
+
+            var managersSection = configuration.GetSection(CacheManagersSection);
+            if (managersSection.GetChildren().Count() == 0)
+            {
+                throw new InvalidOperationException($"No '{CacheManagersSection}' section found in the configuration provided.");
+            }
+
+            foreach(var managerConfig in managersSection.GetChildren())
+            {
+                yield return GetFromConfiguration(managerConfig);
+            }
         }
 
         public static void LoadRedisConfigurations(this IConfiguration configuration)

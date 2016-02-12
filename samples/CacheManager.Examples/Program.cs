@@ -28,7 +28,7 @@ namespace CacheManager.Examples
         {
             var cache = CacheFactory.Build<string>(
                 c =>
-                c.WithAspNetLogging(log =>
+                c.WithMicrosoftLogging(log =>
                 {
                     log.AddConsole(LogLevel.Debug);
 

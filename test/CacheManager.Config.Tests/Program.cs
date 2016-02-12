@@ -25,13 +25,14 @@ namespace CacheManager.Config.Tests
             try
             {
                 var jsonConfiguration = this.Configuration.GetCacheConfiguration("cachename");
+                jsonConfiguration.WithMicrosoftLogging(f => f.AddConsole(LogLevel.Debug));
 
                 var jsonCache = CacheFactory.FromConfiguration<string>(jsonConfiguration);
                 jsonCache.Put("key", "value");
 
                 var cacheConfiguration = Core.ConfigurationBuilder.BuildConfiguration(cfg =>
                 {
-                    cfg.WithAspNetLogging(f =>
+                    cfg.WithMicrosoftLogging(f =>
                     {
                         // TODO: remove after logging upgrade to RC2
                         f.MinimumLevel = LogLevel.Debug;

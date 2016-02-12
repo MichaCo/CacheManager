@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using CacheManager.Core;
 #if !DNXCORE50
 using CacheManager.Redis;
@@ -14,6 +15,116 @@ namespace CacheManager.Tests
     [ExcludeFromCodeCoverage]
     public class MicrosoftConfigurationTests
     {
+        [Fact]
+        public void Configuration_CacheManager_ComplexSingleManager()
+        {
+            var key = Guid.NewGuid().ToString();
+            var data = new Dictionary<string, string>
+            {
+                {"cacheManagers:0:name", "myCacheName"},
+                {"cacheManagers:0:maxRetries", "500"},
+                {"cacheManagers:0:retryTimeout", "123"},
+                {"cacheManagers:0:updateMode", "Up"},
+                {"cacheManagers:0:handles:0:knownType", "Dictionary"},
+                {"cacheManagers:0:handles:0:enablePerformanceCounters", "true"},
+                {"cacheManagers:0:handles:0:enableStatistics", "true"},
+                {"cacheManagers:0:handles:0:expirationMode", "Absolute"},
+                {"cacheManagers:0:handles:0:expirationTimeout", "0:10:0"},
+                {"cacheManagers:0:handles:0:isBackPlateSource", "true"},
+                {"cacheManagers:0:handles:0:name", "handleName"},
+                {"cacheManagers:0:handles:0:key", key},
+                {"cacheManagers:0:handles:1:knownType", "Dictionary"},
+                {"cacheManagers:0:handles:1:enablePerformanceCounters", "false"},
+                {"cacheManagers:0:handles:1:enableStatistics", "false"},
+                {"cacheManagers:0:handles:1:expirationMode", "Sliding"},
+                {"cacheManagers:0:handles:1:expirationTimeout", "0:20:0"},
+                {"cacheManagers:0:handles:1:isBackPlateSource", "false"},
+                {"cacheManagers:0:handles:1:name", "handleName2"},
+                {"cacheManagers:0:handles:1:key", key + "2"}
+            };
+
+            var config = GetConfiguration(data).GetCacheConfiguration("myCacheName");
+            config.Name.Should().Be("myCacheName");
+            config.MaxRetries.Should().Be(500);
+            config.RetryTimeout.Should().Be(123);
+            config.UpdateMode.Should().Be(CacheUpdateMode.Up);
+            config.CacheHandleConfigurations.Count.Should().Be(2);
+            config.CacheHandleConfigurations[0].Key.Should().Be(key);
+            config.CacheHandleConfigurations[1].Key.Should().Be(key + "2");
+            config.CacheHandleConfigurations[0].Name.Should().Be("handleName");
+            config.CacheHandleConfigurations[1].Name.Should().Be("handleName2");
+        }
+
+        [Fact]
+        public void Configuration_CacheManager_ComplexManyManager()
+        {
+            var key = Guid.NewGuid().ToString();
+            var data = new Dictionary<string, string>
+            {
+                {"cacheManagers:0:name", "myCacheName1"},
+                {"cacheManagers:0:maxRetries", "100"},
+                {"cacheManagers:0:retryTimeout", "100"},
+                {"cacheManagers:0:updateMode", "None"},
+                {"cacheManagers:0:handles:0:knownType", "Dictionary"},
+                {"cacheManagers:1:name", "myCacheName2"},
+                {"cacheManagers:1:maxRetries", "200"},
+                {"cacheManagers:1:retryTimeout", "200"},
+                {"cacheManagers:1:updateMode", "Up"},
+                {"cacheManagers:1:handles:0:knownType", "Dictionary"},
+                {"cacheManagers:1:handles:1:knownType", "Dictionary"},
+                {"cacheManagers:2:name", "myCacheName3"},
+                {"cacheManagers:2:maxRetries", "300"},
+                {"cacheManagers:2:retryTimeout", "300"},
+                {"cacheManagers:2:updateMode", "Full"},
+                {"cacheManagers:2:handles:0:knownType", "Dictionary"},
+                {"cacheManagers:2:handles:1:knownType", "Dictionary"},
+                {"cacheManagers:2:handles:2:knownType", "Dictionary"},
+            };
+
+            var configs = GetConfiguration(data).GetCacheConfigurations().ToArray();
+            for(var i = 1; i <= configs.Count(); i++)
+            {
+                var config = configs[i - 1];
+                config.Name.Should().Be("myCacheName" +i);
+                config.MaxRetries.Should().Be(i * 100);
+                config.RetryTimeout.Should().Be(i * 100);
+                config.CacheHandleConfigurations.Count.Should().Be(i);
+            }
+        }
+
+        [Fact]
+        public void Configuration_CacheManager_ByNameFromMany()
+        {
+            var key = Guid.NewGuid().ToString();
+            var data = new Dictionary<string, string>
+            {
+                {"cacheManagers:0:name", "myCacheName1"},
+                {"cacheManagers:0:maxRetries", "100"},
+                {"cacheManagers:0:retryTimeout", "100"},
+                {"cacheManagers:0:updateMode", "None"},
+                {"cacheManagers:0:handles:0:knownType", "Dictionary"},
+                {"cacheManagers:1:name", "myCacheName2"},
+                {"cacheManagers:1:maxRetries", "200"},
+                {"cacheManagers:1:retryTimeout", "200"},
+                {"cacheManagers:1:updateMode", "Up"},
+                {"cacheManagers:1:handles:0:knownType", "Dictionary"},
+                {"cacheManagers:1:handles:1:knownType", "Dictionary"},
+                {"cacheManagers:2:name", "myCacheName3"},
+                {"cacheManagers:2:maxRetries", "300"},
+                {"cacheManagers:2:retryTimeout", "300"},
+                {"cacheManagers:2:updateMode", "Full"},
+                {"cacheManagers:2:handles:0:knownType", "Dictionary"},
+                {"cacheManagers:2:handles:1:knownType", "Dictionary"},
+                {"cacheManagers:2:handles:2:knownType", "Dictionary"},
+            };
+
+            var config = GetConfiguration(data).GetCacheConfiguration("myCacheName2");
+            config.Name.Should().Be("myCacheName2");
+            config.MaxRetries.Should().Be(200);
+            config.RetryTimeout.Should().Be(200);
+            config.CacheHandleConfigurations.Count.Should().Be(2);
+        }
+
         [Fact]
         public void Configuration_CacheManager_Empty()
         {
