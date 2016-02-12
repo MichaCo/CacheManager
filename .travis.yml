@@ -1,16 +1,5 @@
 language: csharp
 sudo: false
-addons:
-  apt:
-    sources:
-    - debian-sid
-    packages:
-    - gettext
-    - libcurl4-openssl-dev
-    - libicu-dev
-    - libssl-dev
-    - libunwind8
-    - zlib1g
 mono:
   - latest
 os:
@@ -22,7 +11,7 @@ services:
 before_install:
   - if test "$TRAVIS_OS_NAME" == "osx"; then brew update; brew install icu4c; fi
 env:
-  - KOREBUILD_TEST_DNXCORE=true
+  - KOREBUILD_TEST_DNXCORE=false
 script:
   - mv ./test/CacheManager.Tests/project.mono.json ./test/CacheManager.Tests/project.json
   - chmod a+x ./build.sh
