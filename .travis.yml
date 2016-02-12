@@ -1,5 +1,6 @@
 language: csharp
 sudo: required
+dist: trusty
 addons:
   apt:
     packages:
@@ -23,7 +24,7 @@ before_install:
 env:
   - KOREBUILD_TEST_DNXCORE=true
 script:
-  - mv test/CacheManager.Tests/project.mono.json test/CacheManager.Tests/project.json -f
+  - mv "test/CacheManager.Tests/project.mono.json" "test/CacheManager.Tests/project.json" -f
   - chmod a+x ./build.sh
   - ./build.sh --quiet verify
  
