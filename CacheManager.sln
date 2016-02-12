@@ -58,7 +58,7 @@ Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "CacheManager.Microsoft.Exte
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "CacheManager.Microsoft.Extensions.Logging", "src\CacheManager.Microsoft.Extensions.Logging\CacheManager.Microsoft.Extensions.Logging.xproj", "{97C864BD-D4C7-4DF6-92D0-4D76A89F6706}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "CacheManager.Memcached", "src\CacheManager.Memcached\CacheManager.Memcached.xproj", "{5E5AFEF6-C13E-4D78-87D6-50407002A9B1}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "CacheManager.Memcached", "src\CacheManager.Memcachedtemp\CacheManager.Memcached.xproj", "{5E5AFEF6-C13E-4D78-87D6-50407002A9B1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
