@@ -1,6 +1,6 @@
 ﻿{
   "version": "0.7.4-*",
-  "description": "CacheManager is an open source abstraction layer for caching written in C#. The ASP.NET Core logging provides a bridge to the Microsoft.Extensions.Logging framework.",
+  "description": "CacheManager is an open source caching abstraction layer for .NET written in C#. The ASP.NET Core logging provides a bridge to the Microsoft.Extensions.Logging framework.",
   "authors": [ "MichaConrad" ],
   "tags": [ "Caching", "Cache", "CacheManager", "Distributed Cache", "StackExchange Redis", "Azure AppFabric", "Memcached", "Logging", "ASP.NET" ],
   "copyright": "Copyright © 2015 MichaConrad",
@@ -36,7 +36,7 @@
     "net451": { },
     "dotnet5.4": {
       "dependencies": {
-        "System.Runtime": "4.0.21-*"
+        "System.Runtime": "4.0.21-beta-23516"
       }
     }
   }

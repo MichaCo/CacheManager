@@ -7,6 +7,8 @@ cachePath=$cachedir/nuget.exe
 BUILDCMD_DNX_VERSION=1.0.0-rc1-update1
 DNX_FEED=https://www.nuget.org/api/v2/
 DNX_UNSTABLE_FEED=https://www.myget.org/F/aspnetvnext/api/v2
+export KOREBUILD_TEST_DNXCORE="true"
+export KOREBUILD_TEST_SKIPMONO="false"
 
 url=https://dist.nuget.org/win-x86-commandline/$nugetVersion/nuget.exe
 
@@ -34,5 +36,3 @@ else
 fi
 
 mono packages/Sake/tools/Sake.exe -I packages/KoreBuild/build -f makefile.shade "$@"
-cd samples/CacheManager.Examples
-dnx run

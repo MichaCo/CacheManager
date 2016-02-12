@@ -18,6 +18,7 @@ namespace CacheManager.Tests
 #endif
     public class SerializerTests
     {
+#if !DNXCORE50
         [Theory]
         [InlineData(true)]
         [InlineData(float.MaxValue)]
@@ -84,6 +85,7 @@ namespace CacheManager.Tests
 
             result.ShouldBeEquivalentTo(items);
         }
+#endif
 
         [Theory]
         [InlineData(true)]
@@ -207,7 +209,9 @@ namespace CacheManager.Tests
         }
     }
 
+#if !DNXCORE50
     [Serializable]
+#endif
     public class SerializerPoccoSerializable
     {
         public string StringProperty { get; set; }
@@ -240,7 +244,9 @@ namespace CacheManager.Tests
         }
     }
 
+#if !DNXCORE50
     [Serializable]
+#endif
     public class ChildPocco
     {
         public string StringProperty { get; set; }

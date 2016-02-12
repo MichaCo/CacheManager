@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if !DNXCORE50
+using System;
 using System.Configuration;
 using System.Diagnostics.CodeAnalysis;
 using CacheManager.Core;
@@ -602,3 +603,4 @@ namespace CacheManager.Tests
         }
     }
 }
+#endif

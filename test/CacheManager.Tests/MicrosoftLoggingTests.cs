@@ -22,7 +22,7 @@ namespace CacheManager.Tests
             // TODO: change Debug to Trace in RC2 (yes, in RC1 Verbose is higher than debug, and Verbose got renamed to Trace, later, too!)
             external.AddConsole(LogLevel.Debug);
 
-            var loggerFactory = new MicrosoftLoggerFactory(external);
+            var loggerFactory = new MicrosoftLoggerFactoryAdapter(external);
             var logger = loggerFactory.CreateLogger("cat");
 
             logger.Should().NotBeNull();
@@ -44,7 +44,7 @@ namespace CacheManager.Tests
             // TODO: change Debug to Trace in RC2 (yes, in RC1 Verbose is higher than debug, and Verbose got renamed to Trace, later, too!)
             external.AddConsole(LogLevel.Verbose);
 
-            var loggerFactory = new MicrosoftLoggerFactory(external);
+            var loggerFactory = new MicrosoftLoggerFactoryAdapter(external);
             var logger = loggerFactory.CreateLogger("cat");
 
             logger.Should().NotBeNull();
@@ -61,7 +61,7 @@ namespace CacheManager.Tests
         {
             var external = new LoggerFactory();
             external.AddConsole(LogLevel.Information);
-            var loggerFactory = new MicrosoftLoggerFactory(external);
+            var loggerFactory = new MicrosoftLoggerFactoryAdapter(external);
             var logger = loggerFactory.CreateLogger("cat");
 
             logger.Should().NotBeNull();
@@ -78,7 +78,7 @@ namespace CacheManager.Tests
         {
             var external = new LoggerFactory();
             external.AddConsole(LogLevel.Warning);
-            var loggerFactory = new MicrosoftLoggerFactory(external);
+            var loggerFactory = new MicrosoftLoggerFactoryAdapter(external);
             var logger = loggerFactory.CreateLogger("cat");
 
             logger.Should().NotBeNull();
@@ -95,7 +95,7 @@ namespace CacheManager.Tests
         {
             var external = new LoggerFactory();
             external.AddConsole(LogLevel.Error);
-            var loggerFactory = new MicrosoftLoggerFactory(external);
+            var loggerFactory = new MicrosoftLoggerFactoryAdapter(external);
             var logger = loggerFactory.CreateLogger("cat");
 
             logger.Should().NotBeNull();
@@ -112,7 +112,7 @@ namespace CacheManager.Tests
         {
             var external = new LoggerFactory();
             external.AddConsole(LogLevel.Critical);
-            var loggerFactory = new MicrosoftLoggerFactory(external);
+            var loggerFactory = new MicrosoftLoggerFactoryAdapter(external);
             var logger = loggerFactory.CreateLogger("cat");
 
             logger.Should().NotBeNull();
@@ -149,13 +149,13 @@ namespace CacheManager.Tests
                 s => s.WithAspNetLogging(f => f.AddConsole()));
 
             cfg.LoggerFactoryType.Should().NotBeNull();
-            cfg.LoggerFactoryType.Should().Be(typeof(MicrosoftLoggerFactory));
+            cfg.LoggerFactoryType.Should().Be(typeof(MicrosoftLoggerFactoryAdapter));
         }
 
         [Fact]
         public void AspNetCoreLogging_TypedLogger()
         {
-            var loggerFactory = new MicrosoftLoggerFactory();
+            var loggerFactory = new MicrosoftLoggerFactoryAdapter();
             var logger = (loggerFactory as Core.Logging.ILoggerFactory).CreateLogger(this) as Core.Logging.ILogger;
             logger.Should().NotBeNull();
         }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if !DNXCORE50
+using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
@@ -98,7 +99,7 @@ namespace CacheManager.Tests
         {
             // arrange
             var key = Guid.NewGuid().ToString();
-            var item = new CacheItem<object>(key, "something", ExpirationMode.Sliding, new TimeSpan(0, 0, 0, 0, 50));
+            var item = new CacheItem<object>(key, "something", ExpirationMode.Sliding, TimeSpan.FromMilliseconds(200));
 
             // act
             var act = CacheFactory.Build(_ => _.WithSystemRuntimeDefaultCacheHandle());
@@ -110,24 +111,20 @@ namespace CacheManager.Tests
                 var state = 0;
                 var t = new Thread(new ThreadStart(() =>
                 {
-                    // assert trying to get the item 2 times after 15ms which are 10ms more then the
-                    // TimeSpan of 20ms. So each hit should extend the timeout for 20ms... if not,
-                    // the test will fail.
-                    Thread.Sleep(30);
+                    Thread.Sleep(100);
                     valid = act[key] != null;
 
                     if (valid)
                     {
                         state = 1;
-                        Thread.Sleep(30);
+                        Thread.Sleep(100);
                         valid = act[key] != null;
                     }
-
-                    // then test if it expires in time...
+                    
                     if (valid)
                     {
                         state = 2;
-                        Thread.Sleep(50);
+                        Thread.Sleep(200);
                         valid = act[key] == null;
                     }
                 }));
@@ -139,3 +136,4 @@ namespace CacheManager.Tests
         }
     }
 }
+#endif

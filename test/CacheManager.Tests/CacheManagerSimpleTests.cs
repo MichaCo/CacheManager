@@ -1412,7 +1412,9 @@ namespace CacheManager.Tests
             }).ToList();
         }
 
+#if !DNXCORE50
         [Serializable]
+#endif
         public class ComplexType
         {
             public string Name { get; set; }

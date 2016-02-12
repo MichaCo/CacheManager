@@ -118,7 +118,7 @@
       "properties": {
         "knownType": {
           "type": "string",
-          "enum": [ "SystemRuntime", "Dictionary", "Web" ],
+          "enum": [ "SystemRuntime", "Dictionary", "SystemWeb" ],
           "description": "Shortcut to the known cache handle types. This requires the corresponding packages are installed."
         }
       }

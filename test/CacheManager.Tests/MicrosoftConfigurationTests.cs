@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using CacheManager.Core;
+#if !DNXCORE50
 using CacheManager.Redis;
+#endif
 using FluentAssertions;
 using Microsoft.Extensions.Configuration;
 using Xunit;
@@ -135,7 +137,7 @@ namespace CacheManager.Tests
 
             var config = GetConfiguration(data);
             Action action = () => config.GetCacheConfiguration("name");
-            action.ShouldThrow<InvalidOperationException>().WithMessage("*No type or known type defined*");
+            action.ShouldThrow<InvalidOperationException>().WithMessage("*No 'type' or 'knownType' defined*");
         }
 
         [Fact]
@@ -184,6 +186,7 @@ namespace CacheManager.Tests
             config.CacheHandleConfigurations[0].HandleType.Should().Be(typeof(object));
         }
 
+#if !DNXCORE50
         [Fact]
         public void Configuration_CacheHandle_KnownType_SystemRuntime()
         {
@@ -358,7 +361,7 @@ namespace CacheManager.Tests
             var data = new Dictionary<string, string>
             {
                 {"cacheManagers:0:name", "name"},
-                {"cacheManagers:0:handles:0:knownType", "Web"},
+                {"cacheManagers:0:handles:0:knownType", "SystemWeb"},
             };
 
             var config = GetConfiguration(data).GetCacheConfiguration("name");
@@ -366,7 +369,7 @@ namespace CacheManager.Tests
             config.CacheHandleConfigurations.Count.Should().Be(1);
             config.CacheHandleConfigurations[0].HandleType.Should().Be(typeof(Web.SystemWebCacheHandle<>));
         }
-
+#endif
         [Fact]
         public void Configuration_CacheHandle_KnownType_Dictionary()
         {
@@ -496,7 +499,7 @@ namespace CacheManager.Tests
             };
 
             Action act = () => GetConfiguration(data).GetCacheConfiguration("name");
-            act.ShouldThrow<InvalidOperationException>().WithMessage("*No type or known type*");
+            act.ShouldThrow<InvalidOperationException>().WithMessage("*No 'type' or 'knownType'*");
         }
 
         [Fact]
@@ -539,7 +542,7 @@ namespace CacheManager.Tests
             };
 
             Action act = () => GetConfiguration(data).GetCacheConfiguration("name");
-            act.ShouldThrow<InvalidOperationException>().WithMessage("*No type or known type*");
+            act.ShouldThrow<InvalidOperationException>().WithMessage("*No 'type' or 'knownType'*");
         }
 
         [Fact]
@@ -556,6 +559,7 @@ namespace CacheManager.Tests
             act.ShouldThrow<InvalidOperationException>().WithMessage("*Known back-plate type 'Something' is invalid*");
         }
 
+#if !DNXCORE50
         [Fact]
         public void Configuration_BackPlate_Redis_MissingKey()
         {
@@ -594,6 +598,7 @@ namespace CacheManager.Tests
             config.BackPlateType.Should().Be(typeof(Redis.RedisCacheBackPlate));
             config.HasBackPlate.Should().BeTrue();
         }
+#endif
 
         [Fact]
         public void Configuration_BackPlate_SomeType_Valid()
@@ -627,7 +632,7 @@ namespace CacheManager.Tests
             };
 
             Action act = () => GetConfiguration(data).GetCacheConfiguration("name");
-            act.ShouldThrow<InvalidOperationException>().WithMessage("*type or known type*");
+            act.ShouldThrow<InvalidOperationException>().WithMessage("*No 'type' or 'knownType'*");
         }
 
         [Fact]
@@ -684,7 +689,7 @@ namespace CacheManager.Tests
             };
 
             var config = GetConfiguration(data).GetCacheConfiguration("name");
-            config.LoggerFactoryType.Should().Be(typeof(Logging.MicrosoftLoggerFactory));
+            config.LoggerFactoryType.Should().Be(typeof(Logging.MicrosoftLoggerFactoryAdapter));
         }
 
         [Fact]
@@ -699,7 +704,7 @@ namespace CacheManager.Tests
             };
 
             Action act = () => GetConfiguration(data).GetCacheConfiguration("name");
-            act.ShouldThrow<InvalidOperationException>().WithMessage("*type or known type*");
+            act.ShouldThrow<InvalidOperationException>().WithMessage("*No 'type' or 'knownType'*");
         }
 
         [Fact]
@@ -745,6 +750,7 @@ namespace CacheManager.Tests
             config.SerializerType.Should().Be(typeof(object));
         }
 
+#if !DNXCORE50
         [Fact]
         public void Configuration_Serializer_KnownType_Binary()
         {
@@ -758,6 +764,7 @@ namespace CacheManager.Tests
             var config = GetConfiguration(data).GetCacheConfiguration("name");
             config.SerializerType.Should().Be(typeof(Core.Internal.BinaryCacheSerializer));
         }
+#endif
 
         [Fact]
         public void Configuration_Serializer_Json_Binary()
@@ -773,6 +780,7 @@ namespace CacheManager.Tests
             config.SerializerType.Should().Be(typeof(Serialization.Json.JsonCacheSerializer));
         }
 
+#if !DNXCORE50
         [Fact]
         public void Configuration_Redis_NothingDefined()
         {
@@ -870,7 +878,7 @@ namespace CacheManager.Tests
             Action act = () => GetConfiguration(data).LoadRedisConfigurations();
             act.ShouldThrow<InvalidOperationException>().WithMessage("*Failed to convert 'invalid'*");
         }
-
+        
         [Fact]
         public void Configuration_Redis_Properties()
         {
@@ -921,6 +929,7 @@ namespace CacheManager.Tests
             redisConfig.Key.Should().Be(key);
             redisConfig.ConnectionString.Should().Be("connectionString");
         }
+#endif
 
         private static IConfigurationRoot GetConfiguration(IDictionary<string, string> data)
         {

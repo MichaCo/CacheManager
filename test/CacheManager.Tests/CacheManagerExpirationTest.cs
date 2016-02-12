@@ -163,6 +163,7 @@ namespace CacheManager.Tests
             }
         }
 
+#if !DNXCORE50
         [Fact]
         [Trait("category", "Unreliable")]
         [ReplaceCulture]
@@ -186,6 +187,7 @@ namespace CacheManager.Tests
                 cache.Get(key).Should().BeNull("Should be expired.");
             }
         }
+#endif
 
         [Fact]
         public void CacheItem_WithExpiration()
@@ -237,6 +239,7 @@ namespace CacheManager.Tests
             absolute.ExpirationTimeout.Should().BeCloseTo(default(TimeSpan));
         }
 
+#if !DNXCORE50
         [Fact]
         public void BaseCacheHandle_ExpirationInherits_Issue_1()
         {
@@ -258,5 +261,6 @@ namespace CacheManager.Tests
                 handles[1].GetCacheItem("something").ExpirationTimeout.Should().Be(default(TimeSpan));
             }
         }
+#endif
     }
 }

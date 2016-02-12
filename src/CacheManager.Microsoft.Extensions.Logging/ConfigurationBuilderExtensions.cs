@@ -27,7 +27,7 @@ namespace CacheManager.Core
             NotNull(factory, nameof(factory));
             var externalFactory = new LoggerFactory();
             factory(externalFactory);
-            return part.WithLogging(typeof(MicrosoftLoggerFactory), externalFactory);
+            return part.WithLogging(typeof(MicrosoftLoggerFactoryAdapter), externalFactory);
         }
 
         /// <summary>
@@ -41,7 +41,7 @@ namespace CacheManager.Core
         {
             NotNull(part, nameof(part));
             NotNull(loggerFactory, nameof(loggerFactory));
-            return part.WithLogging(typeof(MicrosoftLoggerFactory), loggerFactory);
+            return part.WithLogging(typeof(MicrosoftLoggerFactoryAdapter), loggerFactory);
         }
     }
 }

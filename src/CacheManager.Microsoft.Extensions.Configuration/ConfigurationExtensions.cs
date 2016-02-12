@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using CacheManager.Core.Internal;
@@ -9,81 +10,103 @@ namespace CacheManager.Core
 {
     public static class ConfigurationExtensions
     {
+        private const string CacheManagersSection = "cacheManagers";
+        private const string RedisSection = "redis";
+        private const string SerializerSection = "serializer";
+        private const string LoggerFactorySection = "loggerFactory";
+        private const string HandlesSection = "handles";
+        private const string ConfigurationKey = "key";
+        private const string ConfigurationName = "name";
+        private const string ConfigurationType = "type";
+        private const string ConfigurationKnownType = "knownType";
+        private const string TypeJsonCacheSerializer = "CacheManager.Serialization.Json.JsonCacheSerializer, CacheManager.Serialization.Json";
+        private const string TypeMicrosoftLoggerFactory = "CacheManager.Logging.MicrosoftLoggerFactoryAdapter, CacheManager.Microsoft.Extensions.Logging";
+        private const string TypeRedisBackPlate = "CacheManager.Redis.RedisCacheBackPlate, CacheManager.StackExchange.Redis";
+        private const string TypeSystemRuntimeHandle = "CacheManager.SystemRuntimeCaching.MemoryCacheHandle`1, CacheManager.SystemRuntimeCaching";
+        private const string TypeSystemWebHandle = "CacheManager.Web.SystemWebCacheHandle`1, CacheManager.Web";
+        private const string TypeRedisHandle = "CacheManager.Redis.RedisCacheHandle`1, CacheManager.StackExchange.Redis";
+        private const string TypeCouchbaseHandle = "CacheManager.Couchbase.BucketCacheHandle`1, CacheManager.Couchbase";
+        private const string TypeMemcachedHandle = "CacheManager.Memcached.MemcachedCacheHandle`1, CacheManager.Memcached";
+        private const string TypeRedisConfiguration = "CacheManager.Redis.RedisConfiguration, CacheManager.StackExchange.Redis";
+        private const string TypeRedisConfigurations = "CacheManager.Redis.RedisConfigurations, CacheManager.StackExchange.Redis";
+
         public static CacheManagerConfiguration GetCacheConfiguration(this IConfiguration configuration, string name)
         {
             configuration.LoadRedisConfigurations();
 
-            var managersSection = configuration.GetSection("cacheManagers");
+            var managersSection = configuration.GetSection(CacheManagersSection);
             if (managersSection.GetChildren().Count() > 0)
             {
-                return GetByNameFromRoot(managersSection, name);
+                return GetByName(managersSection, name);
             }
 
-            throw new InvalidOperationException("No 'cacheManagers' section found in the configuration provided.");
+            throw new InvalidOperationException($"No '{CacheManagersSection}' section found in the configuration provided.");
         }
 
         public static void LoadRedisConfigurations(this IConfiguration configuration)
         {
             // load redis configurations if available
-            if (configuration.GetSection("redis").GetChildren().Count() > 0)
+            if (configuration.GetSection(RedisSection).GetChildren().Count() > 0)
             {
                 try
                 {
-                    var redisConfigurationType = Type.GetType("CacheManager.Redis.RedisConfiguration, CacheManager.StackExchange.Redis", true);
-                    var redisConfigurationsType = Type.GetType("CacheManager.Redis.RedisConfigurations, CacheManager.StackExchange.Redis", true);
+                    var redisConfigurationType = Type.GetType(TypeRedisConfiguration, true);
+                    var redisConfigurationsType = Type.GetType(TypeRedisConfigurations, true);
 
                     var addRedisConfiguration = redisConfigurationsType
                         .GetTypeInfo()
                         .DeclaredMethods
-                        .FirstOrDefault(p => p.Name == "AddConfiguration" && p.GetParameters().Length == 1 && p.GetParameters().First().ParameterType == redisConfigurationType);
+                        .FirstOrDefault(
+                            p => p.Name == "AddConfiguration" &&
+                            p.GetParameters().Length == 1 &&
+                            p.GetParameters().First().ParameterType == redisConfigurationType);
 
                     if (addRedisConfiguration == null)
                     {
                         throw new InvalidOperationException("RedisConfigurations type might have changed or cannot be invoked.");
                     }
 
-                    foreach (var redisConfig in configuration.GetSection("redis").GetChildren())
+                    foreach (var redisConfig in configuration.GetSection(RedisSection).GetChildren())
                     {
-                        if (string.IsNullOrWhiteSpace(redisConfig["key"]))
+                        if (string.IsNullOrWhiteSpace(redisConfig[ConfigurationKey]))
                         {
                             throw new InvalidOperationException(
-                                string.Format(
-                                    CultureInfo.InvariantCulture,
-                                    "Key is required in redis configuration but is not configured in '{0}'.",
-                                    redisConfig.Path));
+                                $"Key is required in redis configuration but is not configured in '{redisConfig.Path}'.");
                         }
 
                         if (string.IsNullOrWhiteSpace(redisConfig["connectionString"]) &&
                             redisConfig.GetSection("endpoints").GetChildren().Count() == 0)
                         {
                             throw new InvalidOperationException(
-                                string.Format(
-                                    CultureInfo.InvariantCulture,
-                                    "Either connection string or endpoints must be configured in '{0}' for a redis connection.",
-                                    redisConfig.Path));
+                                $"Either connection string or endpoints must be configured in '{redisConfig.Path}' for a redis connection.");
                         }
 
                         var redis = redisConfig.Get(redisConfigurationType);
                         addRedisConfiguration.Invoke(null, new object[] { redis });
                     }
                 }
+                catch (FileNotFoundException ex)
+                {
+                    throw new InvalidOperationException(
+                        "Redis types could not be loaded. Make sure that you have the CacheManager.Redis.Stackexchange package installed.",
+                        ex);
+                }
                 catch (TypeLoadException ex)
                 {
-                    throw new InvalidOperationException("Redis types could not be loaded. Make sure that you have installed the CacheManager.Redis.Stackexchange package.", ex);
+                    throw new InvalidOperationException(
+                        "Redis types could not be loaded. Make sure that you have the CacheManager.Redis.Stackexchange package installed.",
+                        ex);
                 }
             }
         }
 
-        private static CacheManagerConfiguration GetByNameFromRoot(IConfiguration configuration, string name)
+        private static CacheManagerConfiguration GetByName(IConfiguration configuration, string name)
         {
-            var section = configuration.GetChildren().FirstOrDefault(p => p["name"] == name);
+            var section = configuration.GetChildren().FirstOrDefault(p => p[ConfigurationName] == name);
             if (section == null)
             {
                 throw new InvalidOperationException(
-                    string.Format(
-                        CultureInfo.InvariantCulture,
-                        "CacheManager configuration for name '{0}' not found.",
-                        name));
+                    $"CacheManager configuration for name '{name}' not found.");
             }
 
             return GetFromConfiguration(section);
@@ -93,15 +116,12 @@ namespace CacheManager.Core
         {
             var managerConfiguration = configuration.Get<CacheManagerConfiguration>();
 
-            var handlesConfiguration = configuration.GetSection("handles");
+            var handlesConfiguration = configuration.GetSection(HandlesSection);
 
             if (handlesConfiguration.GetChildren().Count() == 0)
             {
                 throw new InvalidOperationException(
-                    string.Format(
-                        CultureInfo.InvariantCulture,
-                        "No cache handles defined in '{0}'.",
-                        configuration.Path));
+                    $"No cache handles defined in '{configuration.Path}'.");
             }
 
             foreach (var handleConfiguration in handlesConfiguration.GetChildren())
@@ -119,10 +139,10 @@ namespace CacheManager.Core
 
         private static CacheHandleConfiguration GetHandleFromConfiguration(IConfigurationSection handleConfiguration)
         {
-            var type = handleConfiguration["type"];
-            var knownType = handleConfiguration["knownType"];
-            var key = handleConfiguration["key"] ?? handleConfiguration["name"];    // name fallback for key
-            var name = handleConfiguration["name"];
+            var type = handleConfiguration[ConfigurationType];
+            var knownType = handleConfiguration[ConfigurationKnownType];
+            var key = handleConfiguration[ConfigurationKey] ?? handleConfiguration[ConfigurationName];    // name fallback for key
+            var name = handleConfiguration[ConfigurationName];
 
             var cacheHandleConfiguration = handleConfiguration.Get<CacheHandleConfiguration>();
             cacheHandleConfiguration.Key = key;
@@ -131,10 +151,7 @@ namespace CacheManager.Core
             if (string.IsNullOrEmpty(type) && string.IsNullOrEmpty(knownType))
             {
                 throw new InvalidOperationException(
-                    string.Format(
-                        CultureInfo.InvariantCulture,
-                        "No type or known type defined in cache handle configuration '{0}'.",
-                        handleConfiguration.Path));
+                    $"No '{ConfigurationType}' or '{ConfigurationKnownType}' defined in cache handle configuration '{handleConfiguration.Path}'.");
             }
 
             if (string.IsNullOrWhiteSpace(type))
@@ -147,11 +164,8 @@ namespace CacheManager.Core
                 if (keyRequired && string.IsNullOrWhiteSpace(key) && string.IsNullOrWhiteSpace(name))
                 {
                     throw new InvalidOperationException(
-                        string.Format(
-                            CultureInfo.InvariantCulture,
-                            "Known handle of type '{0}' requires 'key' or 'name' to be defined. Check configuration at '{1}'.",
-                            knownType,
-                            handleConfiguration.Path));
+                        $@"Known handle of type '{knownType}' requires '{ConfigurationKey}' or '{ConfigurationName}' to be defined. 
+                            Check configuration at '{handleConfiguration.Path}'.");
                 }
             }
             else
@@ -165,31 +179,42 @@ namespace CacheManager.Core
         private static Type GetKnownHandleType(string knownTypeName, string path, out bool keyRequired)
         {
             keyRequired = false;
-            switch (knownTypeName.ToLowerInvariant())
+            try
             {
-                case "systemruntime":
-                    return Type.GetType("CacheManager.SystemRuntimeCaching.MemoryCacheHandle`1, CacheManager.SystemRuntimeCaching", true);
-                case "dictionary":
-                    return typeof(DictionaryCacheHandle<>);
-                case "web":
-                    return Type.GetType("CacheManager.Web.SystemWebCacheHandle`1, CacheManager.Web", true);
-                case "redis":
-                    keyRequired = true;
-                    return Type.GetType("CacheManager.Redis.RedisCacheHandle`1, CacheManager.StackExchange.Redis", true);
-                case "couchbase":
-                    keyRequired = true;
-                    return Type.GetType("CacheManager.Couchbase.BucketCacheHandle`1, CacheManager.Couchbase", true);
-                case "memcached":
-                    keyRequired = true;
-                    return Type.GetType("CacheManager.Memcached.MemcachedCacheHandle`1, CacheManager.Memcached", true);
+                switch (knownTypeName.ToLowerInvariant())
+                {
+                    case "systemruntime":
+                        return Type.GetType(TypeSystemRuntimeHandle, true);
+                    case "dictionary":
+                        return typeof(DictionaryCacheHandle<>);
+                    case "systemweb":
+                        return Type.GetType(TypeSystemWebHandle, true);
+                    case "redis":
+                        keyRequired = true;
+                        return Type.GetType(TypeRedisHandle, true);
+                    case "couchbase":
+                        keyRequired = true;
+                        return Type.GetType(TypeCouchbaseHandle, true);
+                    case "memcached":
+                        keyRequired = true;
+                        return Type.GetType(TypeMemcachedHandle, true);
+                }
+            }
+            catch (FileNotFoundException ex)
+            {
+                throw new InvalidOperationException(
+                    $"Type for '{ConfigurationKnownType}' '{knownTypeName}' could not be loaded. Make sure you have installed the corresponding NuGet package.",
+                    ex);
+            }
+            catch (TypeLoadException ex)
+            {
+                throw new InvalidOperationException(
+                    $"Type for '{ConfigurationKnownType}' '{knownTypeName}' could not be loaded. Make sure you have installed the corresponding NuGet package.",
+                    ex);
             }
 
             throw new InvalidOperationException(
-                string.Format(
-                    CultureInfo.InvariantCulture,
-                    "Known handle type '{0}' is invalid. Check configuration at '{1}'.",
-                    knownTypeName,
-                    path));
+                $"Known handle type '{knownTypeName}' is invalid. Check configuration at '{path}'.");
         }
 
         private static void GetBackPlateConfiguration(CacheManagerConfiguration managerConfiguration, IConfigurationSection configuration)
@@ -201,18 +226,15 @@ namespace CacheManager.Core
                 return;
             }
 
-            var type = backPlateSection["type"];
-            var knownType = backPlateSection["knownType"];
-            var key = backPlateSection["key"];
+            var type = backPlateSection[ConfigurationType];
+            var knownType = backPlateSection[ConfigurationKnownType];
+            var key = backPlateSection[ConfigurationKey];
             var channelName = backPlateSection["channelName"];
 
             if (string.IsNullOrEmpty(type) && string.IsNullOrEmpty(knownType))
             {
                 throw new InvalidOperationException(
-                    string.Format(
-                        CultureInfo.InvariantCulture,
-                        "No type or known type defined in back plate configuration {0}.",
-                        backPlateSection.Path));
+                    $"No '{ConfigurationType}' or '{ConfigurationKnownType}' defined in back plate configuration '{backPlateSection.Path}'.");
             }
 
             if (string.IsNullOrWhiteSpace(type))
@@ -222,11 +244,7 @@ namespace CacheManager.Core
                 if (keyRequired && string.IsNullOrWhiteSpace(key))
                 {
                     throw new InvalidOperationException(
-                        string.Format(
-                            CultureInfo.InvariantCulture,
-                            "The key property is required for the {0} back plate, but is not configured in {1}.",
-                            knownType,
-                            backPlateSection.Path));
+                        $"The key property is required for the '{knownType}' back plate, but is not configured in '{backPlateSection.Path}'.");
                 }
             }
             else
@@ -244,20 +262,16 @@ namespace CacheManager.Core
             {
                 case "redis":
                     keyRequired = true;
-                    return Type.GetType("CacheManager.Redis.RedisCacheBackPlate, CacheManager.StackExchange.Redis", true);
+                    return Type.GetType(TypeRedisBackPlate, true);
             }
 
             throw new InvalidOperationException(
-                string.Format(
-                    CultureInfo.InvariantCulture,
-                    "Known back-plate type '{0}' is invalid. Check configuration at {1}.",
-                    knownTypeName,
-                    path));
+                $"Known back-plate type '{knownTypeName}' is invalid. Check configuration at '{path}'.");
         }
 
         private static void GetLoggerFactoryConfiguration(CacheManagerConfiguration managerConfiguration, IConfigurationSection configuration)
         {
-            var loggerFactorySection = configuration.GetSection("loggerFactory");
+            var loggerFactorySection = configuration.GetSection(LoggerFactorySection);
 
             if (loggerFactorySection.GetChildren().Count() == 0)
             {
@@ -265,16 +279,13 @@ namespace CacheManager.Core
                 return;
             }
 
-            var knownType = loggerFactorySection["knownType"];
-            var type = loggerFactorySection["type"];
+            var knownType = loggerFactorySection[ConfigurationKnownType];
+            var type = loggerFactorySection[ConfigurationType];
 
             if (string.IsNullOrWhiteSpace(knownType) && string.IsNullOrWhiteSpace(type))
             {
                 throw new InvalidOperationException(
-                    string.Format(
-                        CultureInfo.InvariantCulture,
-                        "No type or known type defined in logger factory configuration '{0}'.",
-                        loggerFactorySection.Path));
+                    $"No '{ConfigurationType}' or '{ConfigurationKnownType}' defined in logger factory configuration '{loggerFactorySection.Path}'.");
             }
 
             if (string.IsNullOrWhiteSpace(type))
@@ -292,20 +303,16 @@ namespace CacheManager.Core
             switch (knownTypeName.ToLowerInvariant())
             {
                 case "microsoft":
-                    return Type.GetType("CacheManager.Logging.MicrosoftLoggerFactory, CacheManager.Microsoft.Extensions.Logging", true);
+                    return Type.GetType(TypeMicrosoftLoggerFactory, true);
             }
 
             throw new InvalidOperationException(
-                string.Format(
-                    CultureInfo.InvariantCulture,
-                    "Known logger factory type '{0}' is invalid. Check configuration at '{1}'.",
-                    knownTypeName,
-                    path));
+                $"Known logger factory type '{knownTypeName}' is invalid. Check configuration at '{path}'.");
         }
 
         private static void GetSerializerConfiguration(CacheManagerConfiguration managerConfiguration, IConfigurationSection configuration)
         {
-            var serializerSection = configuration.GetSection("serializer");
+            var serializerSection = configuration.GetSection(SerializerSection);
 
             if (serializerSection.GetChildren().Count() == 0)
             {
@@ -313,16 +320,13 @@ namespace CacheManager.Core
                 return;
             }
 
-            var knownType = serializerSection["knownType"];
-            var type = serializerSection["type"];
+            var knownType = serializerSection[ConfigurationKnownType];
+            var type = serializerSection[ConfigurationType];
 
             if (string.IsNullOrWhiteSpace(knownType) && string.IsNullOrWhiteSpace(type))
             {
                 throw new InvalidOperationException(
-                    string.Format(
-                        CultureInfo.InvariantCulture,
-                        "No type or known type defined in serializer configuration '{0}'.",
-                        serializerSection.Path));
+                    $"No '{ConfigurationType}' or '{ConfigurationKnownType}' defined in serializer configuration '{serializerSection.Path}'.");
             }
 
             if (string.IsNullOrWhiteSpace(type))
@@ -340,21 +344,17 @@ namespace CacheManager.Core
             switch (knownTypeName.ToLowerInvariant())
             {
                 case "binary":
-#if DOTNET5_4
+#if DOTNET5_4 || DNXCORE50
                     throw new InvalidOperationException("BinaryCacheSerializer is not available on this platform");
 #else
                     return typeof(BinaryCacheSerializer);
 #endif
                 case "json":
-                    return Type.GetType("CacheManager.Serialization.Json.JsonCacheSerializer, CacheManager.Serialization.Json", true);
+                    return Type.GetType(TypeJsonCacheSerializer, true);
             }
 
             throw new InvalidOperationException(
-                string.Format(
-                    CultureInfo.InvariantCulture,
-                    "Known serializer type '{0}' is invalid. Check configuration at '{1}'.",
-                    knownTypeName,
-                    path));
+                $"Known serializer type '{knownTypeName}' is invalid. Check configuration at '{path}'.");
         }
     }
 }

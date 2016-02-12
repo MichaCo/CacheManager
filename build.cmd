@@ -38,11 +38,3 @@ IF "%SKIP_DNX_INSTALL%"=="" (
 )
 
 packages\Sake\tools\Sake.exe -I packages\KoreBuild\build -f makefile.shade %*
-
-cd samples\CacheManager.Examples
-
-CALL dnx --version
-CALL dnx run
-CALL ..\..\packages\KoreBuild\build\dnvm install %BUILDCMD_DNX_VERSION% -runtime CoreCLR -arch x86 -alias default
-CALL dnx --version
-CALL dnx run

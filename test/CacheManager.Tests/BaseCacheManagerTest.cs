@@ -3,10 +3,22 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using CacheManager.Core;
-#if !NET40
+using Microsoft.Extensions.PlatformAbstractions;
+#if !NET40 && !DNXCORE50
 using Couchbase.Configuration.Client;
 #endif
 using static CacheManager.Core.Utility.Guard;
+
+#if DNXCORE50
+namespace System.Diagnostics.CodeAnalysis
+{
+    [Conditional("DEBUG")]
+    [AttributeUsage(AttributeTargets.All, Inherited = false, AllowMultiple = false)]
+    internal sealed class ExcludeFromCodeCoverageAttribute : Attribute
+    {
+    }
+}
+#endif
 
 namespace CacheManager.Tests
 {
@@ -14,16 +26,9 @@ namespace CacheManager.Tests
     public static class TestManagers
     {
         private const int StartDbCount = 100;
+#if !DNXCORE50
         private static int databaseCount = StartDbCount;
-
-        public static ICacheManager<object> WithOneMemoryCacheHandleSliding
-            => CacheFactory.Build(
-                settings => settings
-                    .WithUpdateMode(CacheUpdateMode.Up)
-                    .WithSystemRuntimeCacheHandle()
-                        .EnableStatistics()
-                        .EnablePerformanceCounters()
-                    .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(1000)));
+#endif
 
         public static ICacheManager<object> WithOneDicCacheHandle
             => CacheFactory.Build(
@@ -32,27 +37,6 @@ namespace CacheManager.Tests
                     .WithDictionaryHandle()
                         .EnableStatistics()
                     .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(1000)));
-
-        public static ICacheManager<object> WithOneMemoryCacheHandle
-            => CacheFactory.Build(settings => settings.WithSystemRuntimeCacheHandle().EnableStatistics());
-
-        public static ICacheManager<object> WithMemoryAndDictionaryHandles
-            => CacheFactory.Build(
-                settings =>
-                {
-                    settings
-                        .WithUpdateMode(CacheUpdateMode.None)
-                        .WithSystemRuntimeCacheHandle()
-                            .EnableStatistics()
-                        .And.WithSystemRuntimeCacheHandle()
-                            .EnableStatistics()
-                            .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1000))
-                        .And.WithDictionaryHandle()
-                            .EnableStatistics()
-                        .And.WithDictionaryHandle()
-                            .EnableStatistics()
-                            .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1000));
-                });
 
         public static ICacheManager<object> WithManyDictionaryHandles
             => CacheFactory.Build(
@@ -82,6 +66,36 @@ namespace CacheManager.Tests
                             .EnableStatistics()
                             .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1000));
                 });
+#if !DNXCORE50
+        public static ICacheManager<object> WithOneMemoryCacheHandleSliding
+            => CacheFactory.Build(
+                settings => settings
+                    .WithUpdateMode(CacheUpdateMode.Up)
+                    .WithSystemRuntimeCacheHandle()
+                        .EnableStatistics()
+                        .EnablePerformanceCounters()
+                    .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(1000)));
+        
+        public static ICacheManager<object> WithOneMemoryCacheHandle
+            => CacheFactory.Build(settings => settings.WithSystemRuntimeCacheHandle().EnableStatistics());
+
+        public static ICacheManager<object> WithMemoryAndDictionaryHandles
+            => CacheFactory.Build(
+                settings =>
+                {
+                    settings
+                        .WithUpdateMode(CacheUpdateMode.None)
+                        .WithSystemRuntimeCacheHandle()
+                            .EnableStatistics()
+                        .And.WithSystemRuntimeCacheHandle()
+                            .EnableStatistics()
+                            .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1000))
+                        .And.WithDictionaryHandle()
+                            .EnableStatistics()
+                        .And.WithDictionaryHandle()
+                            .EnableStatistics()
+                            .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1000));
+                });
 
         public static ICacheManager<object> WithTwoNamedMemoryCaches
             => CacheFactory.Build(
@@ -94,18 +108,7 @@ namespace CacheManager.Tests
                         .And.WithSystemRuntimeCacheHandle("cacheHandleB")
                             .EnableStatistics();
                 });
-
-#if !NET40 && MOCK_HTTPCONTEXT_ENABLED
-        public static ICacheManager<object> WithSystemWebCache
-            => CacheFactory.Build(
-                settings =>
-                {
-                    settings
-                    .WithHandle(typeof(SystemWebCacheHandleWrapper<>))
-                        .EnableStatistics();
-                });
-#endif
-
+        
         public static ICacheManager<object> WithRedisCache
         {
             get
@@ -149,8 +152,20 @@ namespace CacheManager.Tests
                 return cache;
             }
         }
+#endif
+#if !NET40 && MOCK_HTTPCONTEXT_ENABLED && !DNXCORE50
+        public static ICacheManager<object> WithSystemWebCache
+            => CacheFactory.Build(
+                settings =>
+                {
+                    settings
+                    .WithHandle(typeof(SystemWebCacheHandleWrapper<>))
+                        .EnableStatistics();
+                });
+#endif
 
-#if !NET40
+
+#if !NET40 && !DNXCORE50
 
         public static ICacheManager<object> WithCouchbaseMemcached
         {
@@ -192,9 +207,9 @@ namespace CacheManager.Tests
                 return cache;
             }
         }
-
 #endif
 
+#if !DNXCORE50
         public static ICacheManager<object> CreateRedisAndSystemCacheWithBackPlate(int database = 0, bool sharedRedisConfig = true, string channelName = null)
         {
             var redisKey = sharedRedisConfig ? "redisConfig" : Guid.NewGuid().ToString();
@@ -270,10 +285,11 @@ namespace CacheManager.Tests
 
             return cache;
         }
+#endif
 
         private static string NewKey() => Guid.NewGuid().ToString();
     }
-
+    
     [SuppressMessage("Microsoft.Design", "CA1053:StaticHolderTypesShouldNotHaveConstructors", Justification = "Needed for xunit")]
     [ExcludeFromCodeCoverage]
     public class BaseCacheManagerTest
@@ -282,12 +298,14 @@ namespace CacheManager.Tests
         {
             get
             {
+#if !DNXCORE50
                 yield return new object[] { TestManagers.WithOneMemoryCacheHandleSliding };
-                yield return new object[] { TestManagers.WithOneDicCacheHandle };
                 yield return new object[] { TestManagers.WithOneMemoryCacheHandle };
                 yield return new object[] { TestManagers.WithMemoryAndDictionaryHandles };
-                yield return new object[] { TestManagers.WithManyDictionaryHandles };
                 yield return new object[] { TestManagers.WithTwoNamedMemoryCaches };
+#endif
+                yield return new object[] { TestManagers.WithManyDictionaryHandles };
+                yield return new object[] { TestManagers.WithOneDicCacheHandle };
 #if REDISENABLED
                 yield return new object[] { TestManagers.WithRedisCache };
                 yield return new object[] { TestManagers.WithSystemAndRedisCache };
@@ -300,16 +318,13 @@ namespace CacheManager.Tests
             }
         }
 
+#if !DNXCORE50
         public static string GetCfgFileName(string fileName)
         {
             NotNullOrWhiteSpace(fileName, nameof(fileName));
-#if DNX451
             var basePath = Environment.CurrentDirectory;
-#else
-            var basePath = AppDomain.CurrentDomain.BaseDirectory;
-#endif
-
             return basePath + (fileName.StartsWith("/") ? fileName : "/" + fileName);
         }
+#endif
     }
 }

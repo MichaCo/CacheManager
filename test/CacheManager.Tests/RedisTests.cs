@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if !DNXCORE50
+using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -710,3 +711,4 @@ namespace CacheManager.Tests
         public string Something { get; set; }
     }
 }
+#endif
