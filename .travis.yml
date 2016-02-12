@@ -11,7 +11,7 @@ addons:
     - libunwind8
     - zlib1g
 mono:
-  - alpha
+  - latest
 os:
   - linux
   - osx
