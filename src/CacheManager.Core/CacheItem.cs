@@ -1,7 +1,11 @@
 ﻿using System;
+
 #if !PORTABLE && !DOTNET5_2
+
 using System.Runtime.Serialization;
+
 #endif
+
 using static CacheManager.Core.Utility.Guard;
 
 namespace CacheManager.Core
@@ -12,6 +16,7 @@ namespace CacheManager.Core
     /// </summary>
     /// <typeparam name="T">The type of the cache value.</typeparam>
 #if !PORTABLE && !DOTNET5_2
+
     [Serializable]
     public class CacheItem<T> : ISerializable
 #else
@@ -64,7 +69,7 @@ namespace CacheManager.Core
         /// <param name="expiration">The expiration mode.</param>
         /// <param name="timeout">The expiration timeout.</param>
         /// <exception cref="System.ArgumentNullException">If key, value or region are null.</exception>
-        public CacheItem(string key, string region, T value,  ExpirationMode expiration, TimeSpan timeout)
+        public CacheItem(string key, string region, T value, ExpirationMode expiration, TimeSpan timeout)
             : this(key, region, value, expiration, timeout, null)
         {
             NotNullOrWhiteSpace(region, nameof(region));
@@ -78,6 +83,7 @@ namespace CacheManager.Core
         }
 
 #if !PORTABLE && !DOTNET5_2
+
         /// <summary>
         /// Initializes a new instance of the <see cref="CacheItem{T}"/> class.
         /// </summary>
@@ -97,6 +103,7 @@ namespace CacheManager.Core
             this.CreatedUtc = info.GetDateTime(nameof(this.CreatedUtc));
             this.LastAccessedUtc = info.GetDateTime(nameof(this.LastAccessedUtc));
         }
+
 #endif
 
         private CacheItem(string key, string region, T value, ExpirationMode? expiration, TimeSpan? timeout, DateTime? created, DateTime? lastAccessed = null)
@@ -164,6 +171,7 @@ namespace CacheManager.Core
         public Type ValueType { get; }
 
 #if !PORTABLE && !DOTNET5_2
+
         /// <summary>
         /// Populates a <see cref="T:System.Runtime.Serialization.SerializationInfo"/> with the data
         /// needed to serialize the target object.
@@ -189,6 +197,7 @@ namespace CacheManager.Core
             info.AddValue(nameof(this.CreatedUtc), this.CreatedUtc);
             info.AddValue(nameof(this.LastAccessedUtc), this.LastAccessedUtc);
         }
+
 #endif
 
         /// <summary>

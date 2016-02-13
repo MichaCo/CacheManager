@@ -3,10 +3,13 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using CacheManager.Core;
-using Microsoft.Extensions.PlatformAbstractions;
+
 #if !NET40 && !DNXCORE50
+
 using Couchbase.Configuration.Client;
+
 #endif
+
 using static CacheManager.Core.Utility.Guard;
 
 namespace CacheManager.Tests
@@ -55,7 +58,9 @@ namespace CacheManager.Tests
                             .EnableStatistics()
                             .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1000));
                 });
+
 #if !DNXCORE50
+
         public static ICacheManager<object> WithOneMemoryCacheHandleSliding
             => CacheFactory.Build(
                 settings => settings
@@ -64,7 +69,7 @@ namespace CacheManager.Tests
                         .EnableStatistics()
                         .EnablePerformanceCounters()
                     .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(1000)));
-        
+
         public static ICacheManager<object> WithOneMemoryCacheHandle
             => CacheFactory.Build(settings => settings.WithSystemRuntimeCacheHandle().EnableStatistics());
 
@@ -97,7 +102,7 @@ namespace CacheManager.Tests
                         .And.WithSystemRuntimeCacheHandle("cacheHandleB")
                             .EnableStatistics();
                 });
-        
+
         public static ICacheManager<object> WithRedisCache
         {
             get
@@ -141,8 +146,10 @@ namespace CacheManager.Tests
                 return cache;
             }
         }
+
 #endif
 #if !NET40 && MOCK_HTTPCONTEXT_ENABLED && !DNXCORE50
+
         public static ICacheManager<object> WithSystemWebCache
             => CacheFactory.Build(
                 settings =>
@@ -151,8 +158,8 @@ namespace CacheManager.Tests
                     .WithHandle(typeof(SystemWebCacheHandleWrapper<>))
                         .EnableStatistics();
                 });
-#endif
 
+#endif
 
 #if !NET40 && !DNXCORE50
 
@@ -196,9 +203,11 @@ namespace CacheManager.Tests
                 return cache;
             }
         }
+
 #endif
 
 #if !DNXCORE50
+
         public static ICacheManager<object> CreateRedisAndSystemCacheWithBackPlate(int database = 0, bool sharedRedisConfig = true, string channelName = null)
         {
             var redisKey = sharedRedisConfig ? "redisConfig" : Guid.NewGuid().ToString();
@@ -274,11 +283,12 @@ namespace CacheManager.Tests
 
             return cache;
         }
+
 #endif
 
         private static string NewKey() => Guid.NewGuid().ToString();
     }
-    
+
     [SuppressMessage("Microsoft.Design", "CA1053:StaticHolderTypesShouldNotHaveConstructors", Justification = "Needed for xunit")]
     [ExcludeFromCodeCoverage]
     public class BaseCacheManagerTest
@@ -308,12 +318,14 @@ namespace CacheManager.Tests
         }
 
 #if !DNXCORE50
+
         public static string GetCfgFileName(string fileName)
         {
             NotNullOrWhiteSpace(fileName, nameof(fileName));
             var basePath = Environment.CurrentDirectory;
             return basePath + (fileName.StartsWith("/") ? fileName : "/" + fileName);
         }
+
 #endif
     }
 }

@@ -10,22 +10,22 @@ using static CacheManager.Core.Utility.Guard;
 namespace CacheManager.Core
 {
     /// <summary>
-    /// The <see cref="BaseCacheManager{TCacheValue}"/> implements <see cref="ICacheManager{TCacheValue}"/> and is the main class 
+    /// The <see cref="CacheManager{TCacheValue}"/> implements <see cref="ICacheManager{TCacheValue}"/> and is the main class
     /// of this library.
     /// The cache manager delegates all cache operations to the list of <see cref="BaseCacheHandle{T}"/>'s which have been
     /// added. It will keep them in sync according to rules and depending on the configuration.
     /// </summary>
     /// <typeparam name="TCacheValue">The type of the cache value.</typeparam>
-    public sealed class BaseCacheManager<TCacheValue> : BaseCache<TCacheValue>, ICacheManager<TCacheValue>, IDisposable
+    public sealed class CacheManager<TCacheValue> : BaseCache<TCacheValue>, ICacheManager<TCacheValue>, IDisposable
     {
         private readonly bool logTrace = false;
         private readonly BaseCacheHandle<TCacheValue>[] cacheHandles;
         private readonly CacheBackPlate cacheBackPlate;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="BaseCacheManager{TCacheValue}"/> class
+        /// Initializes a new instance of the <see cref="CacheManager{TCacheValue}"/> class
         /// using the specified <paramref name="configuration"/>.
-        /// If the name of the <paramref name="configuration"/> is defined, the cache manager will 
+        /// If the name of the <paramref name="configuration"/> is defined, the cache manager will
         /// use it. Otherwise a random string will be generated.
         /// </summary>
         /// <param name="configuration">
@@ -37,13 +37,13 @@ namespace CacheManager.Core
         /// <see cref="CacheFactory"/>
         /// <see cref="ConfigurationBuilder"/>
         /// <see cref="BaseCacheHandle{TCacheValue}"/>
-        public BaseCacheManager(CacheManagerConfiguration configuration)
+        public CacheManager(CacheManagerConfiguration configuration)
             : this(configuration?.Name ?? Guid.NewGuid().ToString(), configuration)
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="BaseCacheManager{TCacheValue}"/> class
+        /// Initializes a new instance of the <see cref="CacheManager{TCacheValue}"/> class
         /// using the specified <paramref name="name"/> and <paramref name="configuration"/>.
         /// </summary>
         /// <param name="name">The cache name.</param>
@@ -57,7 +57,7 @@ namespace CacheManager.Core
         /// <see cref="ConfigurationBuilder"/>
         /// <see cref="BaseCacheHandle{TCacheValue}"/>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "nope")]
-        public BaseCacheManager(string name, CacheManagerConfiguration configuration)
+        public CacheManager(string name, CacheManagerConfiguration configuration)
         {
             NotNullOrWhiteSpace(name, nameof(name));
             NotNull(configuration, nameof(configuration));

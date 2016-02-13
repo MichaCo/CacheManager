@@ -13,6 +13,9 @@ namespace CacheManager.Redis
     /// </summary>
     public class RedisConfiguration
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RedisConfiguration"/> class.
+        /// </summary>
         public RedisConfiguration()
         {
         }
@@ -84,7 +87,7 @@ namespace CacheManager.Redis
         }
 
         /// <summary>
-        /// Gets the identifier for the redis configuration.
+        /// Gets or sets the identifier for the redis configuration.
         /// <para>
         /// This might have to match with the cache handle's name to make the cache handle use this configuration.
         /// </para>
@@ -95,7 +98,7 @@ namespace CacheManager.Redis
         public string Key { get; set; }
 
         /// <summary>
-        /// Gets the connection string.
+        /// Gets or sets the connection string.
         /// </summary>
         /// <value>
         /// The connection string.
@@ -103,7 +106,7 @@ namespace CacheManager.Redis
         public string ConnectionString { get; set; }
 
         /// <summary>
-        /// Gets the password to be used to connect to the Redis server.
+        /// Gets or sets the password to be used to connect to the Redis server.
         /// </summary>
         /// <value>
         /// The password.
@@ -111,7 +114,7 @@ namespace CacheManager.Redis
         public string Password { get; set; }
 
         /// <summary>
-        /// Gets a value indicating whether to use SSL encryption.
+        /// Gets or sets a value indicating whether to use SSL encryption.
         /// </summary>
         /// <value>
         ///   <c>true</c> if this instance is SSL; otherwise, <c>false</c>.
@@ -119,7 +122,7 @@ namespace CacheManager.Redis
         public bool IsSsl { get; set; }
 
         /// <summary>
-        /// Gets the SSL Host.
+        /// Gets or sets the SSL Host.
         /// If set, it will enforce this particular host on the server's certificate.
         /// </summary>
         /// <value>
@@ -128,7 +131,7 @@ namespace CacheManager.Redis
         public string SslHost { get; set; }
 
         /// <summary>
-        /// Gets the timeout for any connect operations.
+        /// Gets or sets the timeout for any connect operations.
         /// </summary>
         /// <value>
         /// The connection timeout.
@@ -144,7 +147,7 @@ namespace CacheManager.Redis
         public IList<ServerEndPoint> Endpoints { get; } = new List<ServerEndPoint>();
 
         /// <summary>
-        /// Gets a value indicating whether to allow the connection to run certain 'risky' commands, or not.
+        /// Gets or sets a value indicating whether to allow the connection to run certain 'risky' commands, or not.
         /// <para><c>cache.Clear</c> requires this to be set to true because we will flush the Redis database.
         /// </para>
         /// </summary>
@@ -154,7 +157,7 @@ namespace CacheManager.Redis
         public bool AllowAdmin { get; set; }
 
         /// <summary>
-        /// Gets the Redis database index the cache will use.
+        /// Gets or sets the Redis database index the cache will use.
         /// </summary>
         /// <value>
         /// The database.
@@ -167,6 +170,9 @@ namespace CacheManager.Redis
     /// </summary>
     public sealed class ServerEndPoint
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ServerEndPoint"/> class.
+        /// </summary>
         public ServerEndPoint()
         {
         }
@@ -186,13 +192,13 @@ namespace CacheManager.Redis
         }
 
         /// <summary>
-        /// Gets the port.
+        /// Gets or sets the port.
         /// </summary>
         /// <value>The port.</value>
         public int Port { get; set; }
 
         /// <summary>
-        /// Gets the host.
+        /// Gets or sets the host.
         /// </summary>
         /// <value>The host.</value>
         public string Host { get; set; }

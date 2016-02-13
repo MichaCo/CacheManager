@@ -120,7 +120,7 @@ namespace CacheManager.Tests
                         Thread.Sleep(100);
                         valid = act[key] != null;
                     }
-                    
+
                     if (valid)
                     {
                         state = 2;

@@ -86,7 +86,7 @@ namespace CacheManager.Config.Tests
                 {
                     HandleType = typeof(Core.Internal.DictionaryCacheHandle<>)
                 });
-                var cacheB = new BaseCacheManager<string>("name", manualConfig);
+                var cacheB = new CacheManager<string>("name", manualConfig);
 
                 for (int i = 0; i < iterations; i++)
                 {

@@ -35,7 +35,8 @@ namespace CacheManager.Core
         /// Builds a <see cref="CacheManagerConfiguration"/> which can be used to create a new cache
         /// manager instance.
         /// <para>
-        /// Pass the configuration to <see cref="CacheFactory.FromConfiguration"/> to create a valid cache manager.
+        /// Pass the configuration to <see cref="CacheFactory.FromConfiguration{TCacheValue}(CacheManagerConfiguration)"/>
+        /// to create a valid cache manager.
         /// </para>
         /// </summary>
         /// <param name="settings">
@@ -55,7 +56,8 @@ namespace CacheManager.Core
         /// Builds a <see cref="CacheManagerConfiguration"/> which can be used to create a new cache
         /// manager instance.
         /// <para>
-        /// Pass the configuration to <see cref="CacheFactory.FromConfiguration"/> to create a valid cache manager.
+        /// Pass the configuration to <see cref="CacheFactory.FromConfiguration{TCacheValue}(CacheManagerConfiguration)"/>
+        /// to create a valid cache manager.
         /// </para>
         /// </summary>
         /// <param name="name">The name of the cache manager.</param>

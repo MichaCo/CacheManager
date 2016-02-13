@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using CacheManager.Core.Internal;
-using CacheManager.Core.Logging;
-using static CacheManager.Core.Utility.Guard;
 
 namespace CacheManager.Core
 {

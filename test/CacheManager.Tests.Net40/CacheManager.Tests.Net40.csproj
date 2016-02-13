@@ -135,9 +135,6 @@
     <Compile Include="..\CacheManager.Tests\CacheManagerUpdateModeTests.cs">
       <Link>CacheManagerUpdateModeTests.cs</Link>
     </Compile>
-    <Compile Include="..\CacheManager.Tests\CultureReplacer.cs">
-      <Link>CultureReplacer.cs</Link>
-    </Compile>
     <Compile Include="..\CacheManager.Tests\InvalidConfigurationValidationTests.cs">
       <Link>InvalidConfigurationValidationTests.cs</Link>
     </Compile>
@@ -161,6 +158,9 @@
     </Compile>
     <Compile Include="..\CacheManager.Tests\SystemWebCacheHandleWrapper.cs">
       <Link>SystemWebCacheHandleWrapper.cs</Link>
+    </Compile>
+    <Compile Include="..\CacheManager.Tests\TestModel.cs">
+      <Link>TestModel.cs</Link>
     </Compile>
     <Compile Include="..\CacheManager.Tests\ThreadRandomReadWriteTestBase.cs">
       <Link>ThreadRandomReadWriteTestBase.cs</Link>
