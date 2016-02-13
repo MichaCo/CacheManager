@@ -69,7 +69,7 @@ There is also from source generated [html documentation][help] available online.
     * **Memcached** using [Enyim.Memcached](https://github.com/enyim/EnyimMemcached)
     * **Couchbase** using [Couchbase.Net.Client v2](https://github.com/couchbase/couchbase-net-client)
     * **System.Web.Caching** based (included in the Web package)
-* **Serialization** can be configured per cache handle.
+* **Serialization** can now be configured.
 Serialization is only needed in distributed caches. The default implementation uses binary serialization. The *Serialization.Json* packages provides a Newtonsoft.Json based alternative.
 * **Update values with lock or transaction** for distributed caches. 
 The interfaced provides a simple update method which internally ensures you work with the latest version.

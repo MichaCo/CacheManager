@@ -398,8 +398,8 @@ namespace CacheManager.Config.Tests
             cache.Expire("key", "region", TimeSpan.FromDays(1));
             var val = cache.Get("key", "region");
             var item = cache.GetCacheItem("key", "region");
-            cache.Put("key", "region", "put value");
-            cache.RemoveExpiration("key", "region");
+            cache.Put("key", "put value");
+            cache.RemoveExpiration("key");
 
             object update2;
             cache.TryUpdate("key", "region", _ => "update 2 value", out update2);

@@ -28,22 +28,41 @@ namespace CacheManager.Examples
         private static void MostSimpleCacheManager()
         {
             var config = new ConfigurationBuilder()
-                .WithSystemRuntimeDefaultCacheHandle()
+                .WithSystemRuntimeCacheHandle()
                 .Build();
 
-            var cache = new BaseCacheManager<string>(config);            
+            var cache = new BaseCacheManager<string>(config);
+            // or
+            var cache2 = CacheFactory.FromConfiguration<string>(config);
         }
 
         private static void MostSimpleCacheManagerB()
         {
-            var cache = new BaseCacheManager<string>(new CacheManagerConfiguration()
-                .Builder.WithSystemRuntimeDefaultCacheHandle().Build());
+            var cache = new BaseCacheManager<string>(
+                new CacheManagerConfiguration()
+                    .Builder
+                    .WithSystemRuntimeCacheHandle()
+                    .Build());
         }
 
         private static void MostSimpleCacheManagerC()
         {
-            var cache = CacheFactory.Build<string>(p => p.WithSystemRuntimeDefaultCacheHandle());
+            var cache = CacheFactory.Build<string>(
+                p => p.WithSystemRuntimeCacheHandle());
         }
+
+        private static void MostSimpleCacheManagerWithLogging()
+        {
+            var config = new ConfigurationBuilder()
+                .WithMicrosoftLogging(l => l.AddConsole(LogLevel.Information))
+                .WithSystemRuntimeCacheHandle()
+                .Build();
+
+            var cache = new BaseCacheManager<string>(config);
+            // or
+            var cache2 = CacheFactory.FromConfiguration<string>(config);
+        }
+        
 #endif
 
         private static void LoggingSample()

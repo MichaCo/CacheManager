@@ -12,8 +12,10 @@
 
   "dependencies": {
     "CacheManager.Microsoft.Extensions.Logging": "",
+    "CacheManager.Microsoft.Extensions.Configuration": "",
     "CacheManager.Core": "",
     "Microsoft.Extensions.Logging.Console": "1.0.0-rc1-*",
+    "Microsoft.Extensions.Configuration.Json": "1.0.0-rc1-*",
     "Unity": "4.0.2"
   },
 

@@ -41,7 +41,7 @@ namespace CacheManager.Config.Tests
 
                 var jsonCache = new BaseCacheManager<string>(jsonConfiguration);
                 jsonCache.Put("key", "value");
-                
+                                
                 var builder = new Core.ConfigurationBuilder("myCache");
                 builder.WithMicrosoftLogging(f =>
                 {
