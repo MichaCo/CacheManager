@@ -84,7 +84,7 @@ namespace CacheManager.Core.Internal
             return null;
         }
 
-        internal static ICollection<BaseCacheHandle<TCacheValue>> CreateCacheHandles<TCacheValue>(CacheManager<TCacheValue> manager, ILoggerFactory loggerFactory, ICacheSerializer serializer)
+        internal static ICollection<BaseCacheHandle<TCacheValue>> CreateCacheHandles<TCacheValue>(BaseCacheManager<TCacheValue> manager, ILoggerFactory loggerFactory, ICacheSerializer serializer)
         {
             NotNull(manager, nameof(manager));
             NotNull(loggerFactory, nameof(loggerFactory));

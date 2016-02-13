@@ -7,7 +7,7 @@ namespace CacheManager.Backplate.TestNode
 {
     public class Program
     {
-        private static ICacheManager<int> cache = new CacheManager<int>(
+        private static ICacheManager<int> cache = new BaseCacheManager<int>(
             "cache",
             ConfigurationBuilder.BuildConfiguration(c =>
             {

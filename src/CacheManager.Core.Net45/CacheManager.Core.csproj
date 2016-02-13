@@ -57,6 +57,9 @@
     <Compile Include="..\..\common\GlobalAssemblyInfo.cs">
       <Link>Properties\GlobalAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="..\CacheManager.Core\BaseCacheManager.cs">
+      <Link>BaseCacheManager.cs</Link>
+    </Compile>
     <Compile Include="..\CacheManager.Core\CacheFactory.cs">
       <Link>CacheFactory.cs</Link>
     </Compile>
@@ -65,9 +68,6 @@
     </Compile>
     <Compile Include="..\CacheManager.Core\CacheItem.cs">
       <Link>CacheItem.cs</Link>
-    </Compile>
-    <Compile Include="..\CacheManager.Core\CacheManager.cs">
-      <Link>CacheManager.cs</Link>
     </Compile>
     <Compile Include="..\CacheManager.Core\CacheManagerConfiguration.cs">
       <Link>CacheManagerConfiguration.cs</Link>

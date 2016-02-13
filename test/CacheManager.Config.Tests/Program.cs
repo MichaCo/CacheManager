@@ -39,7 +39,7 @@ namespace CacheManager.Config.Tests
                     })
                     .Build();
 
-                var jsonCache = new CacheManager<string>(jsonConfiguration);
+                var jsonCache = new BaseCacheManager<string>(jsonConfiguration);
                 jsonCache.Put("key", "value");
                 
                 var builder = new Core.ConfigurationBuilder("myCache");
@@ -87,7 +87,7 @@ namespace CacheManager.Config.Tests
 
                 Console.WriteLine("Using Redis cache handle");
 #endif
-                var cacheA = new CacheManager<object>(builder.Build());
+                var cacheA = new BaseCacheManager<object>(builder.Build());
                 cacheA.Clear();
 
                 var manualConfig = new CacheManagerConfiguration();
@@ -95,7 +95,7 @@ namespace CacheManager.Config.Tests
                 {
                     HandleType = typeof(Core.Internal.DictionaryCacheHandle<>)
                 });
-                var cacheB = new CacheManager<string>("name", manualConfig);
+                var cacheB = new BaseCacheManager<string>("name", manualConfig);
 
                 for (int i = 0; i < iterations; i++)
                 {

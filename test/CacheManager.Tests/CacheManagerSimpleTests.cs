@@ -47,7 +47,7 @@ namespace CacheManager.Tests
             // arrange
 
             // act
-            Action act = () => new CacheManager<object>(null, new CacheManagerConfiguration());
+            Action act = () => new BaseCacheManager<object>(null, new CacheManagerConfiguration());
 
             // assert
             act.ShouldThrow<ArgumentNullException>()
@@ -61,7 +61,7 @@ namespace CacheManager.Tests
             // arrange
 
             // act
-            Action act = () => new CacheManager<object>("name", null);
+            Action act = () => new BaseCacheManager<object>("name", null);
 
             // assert
             act.ShouldThrow<ArgumentException>()
@@ -72,7 +72,7 @@ namespace CacheManager.Tests
         [ReplaceCulture]
         public void CacheManager_CtorA_NoConfig()
         {
-            Action act = () => new CacheManager<object>(null);
+            Action act = () => new BaseCacheManager<object>(null);
             act.ShouldThrow<ArgumentException>()
                     .WithMessage("*Parameter name: configuration");
         }
@@ -82,7 +82,7 @@ namespace CacheManager.Tests
         public void CacheManager_CtorA_ConfigNoName()
         {
             // name should be set from config and default is a Guid
-            var manager = new CacheManager<object>(ConfigurationBuilder.BuildConfiguration(s => s.WithDictionaryHandle()));
+            var manager = new BaseCacheManager<object>(ConfigurationBuilder.BuildConfiguration(s => s.WithDictionaryHandle()));
             manager.Name.Should().NotBeNullOrWhiteSpace();
         }
 
@@ -91,7 +91,7 @@ namespace CacheManager.Tests
         public void CacheManager_CtorA_ConfigWithName()
         {
             // name should be implicitly set
-            var manager = new CacheManager<object>(
+            var manager = new BaseCacheManager<object>(
                 ConfigurationBuilder.BuildConfiguration("newName", s => s.WithDictionaryHandle()));
 
             manager.Name.Should().Be("newName");
@@ -1101,7 +1101,7 @@ namespace CacheManager.Tests
         {
             // arrange
             // act
-            Action act = () => new CacheManager<string>("name", new CacheManagerConfiguration() { MaxRetries = 1000 });
+            Action act = () => new BaseCacheManager<string>("name", new CacheManagerConfiguration() { MaxRetries = 1000 });
 
             // assert
             act.ShouldThrow<InvalidOperationException>().WithMessage("*no cache handles*");

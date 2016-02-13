@@ -31,12 +31,12 @@ namespace CacheManager.Examples
                 .WithSystemRuntimeDefaultCacheHandle()
                 .Build();
 
-            var cache = new CacheManager<string>(config);            
+            var cache = new BaseCacheManager<string>(config);            
         }
 
         private static void MostSimpleCacheManagerB()
         {
-            var cache = new CacheManager<string>(new CacheManagerConfiguration()
+            var cache = new BaseCacheManager<string>(new CacheManagerConfiguration()
                 .Builder.WithSystemRuntimeDefaultCacheHandle().Build());
         }
 
