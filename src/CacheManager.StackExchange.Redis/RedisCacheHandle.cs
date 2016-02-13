@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Net;
 using CacheManager.Core;
@@ -40,7 +39,7 @@ if redis.call('HSETNX', KEYS[1], '{HashFieldValue}', ARGV[1]) == 1 then
         redis.call('PERSIST', KEYS[1])
     end
     return result
-else 
+else
     return nil
 end";
 
@@ -62,7 +61,7 @@ end";
 
         private static readonly string ScriptGet = $@"
 local result = redis.call('HMGET', KEYS[1], '{HashFieldValue}', '{HashFieldExpirationMode}', '{HashFieldExpirationTimeout}', '{HashFieldCreated}', '{HashFieldType}')
-if (result[2] and result[2] == '1') then 
+if (result[2] and result[2] == '1') then
     if (result[3] and result[3] ~= '' and result[3] ~= '0') then
         redis.call('PEXPIRE', KEYS[1], result[3])
     end

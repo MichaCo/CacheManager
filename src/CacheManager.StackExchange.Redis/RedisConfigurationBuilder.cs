@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using static CacheManager.Core.Utility.Guard;
 
 namespace CacheManager.Redis

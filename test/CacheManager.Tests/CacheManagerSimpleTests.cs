@@ -1094,10 +1094,6 @@ namespace CacheManager.Tests
 
         #endregion indexer
 
-        /// <summary>
-        /// Testing edge case, cache manager configuration without any handles It should at least
-        /// not throw or produce unexpected results.
-        /// </summary>
         #region testing empty handle list
 
         [Fact]

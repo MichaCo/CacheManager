@@ -1,5 +1,4 @@
-﻿using System;
-using CacheManager.Serialization.Json;
+﻿using CacheManager.Serialization.Json;
 using Newtonsoft.Json;
 using static CacheManager.Core.Utility.Guard;
 
