@@ -24,15 +24,10 @@ namespace CacheManager.Config.Tests
             int iterations = int.MaxValue;
             try
             {
-                var jsonConfiguration = this.Configuration.GetCacheConfiguration("cachename");
-                jsonConfiguration.WithMicrosoftLogging(f => f.AddConsole(LogLevel.Debug));
-
-                var jsonCache = CacheFactory.FromConfiguration<string>(jsonConfiguration);
-                jsonCache.Put("key", "value");
-
-                var cacheConfiguration = Core.ConfigurationBuilder.BuildConfiguration(cfg =>
-                {
-                    cfg.WithMicrosoftLogging(f =>
+                var jsonConfiguration = 
+                    this.Configuration.GetCacheConfiguration("cachename")
+                    .Builder
+                    .WithMicrosoftLogging(f =>
                     {
                         // TODO: remove after logging upgrade to RC2
                         f.MinimumLevel = LogLevel.Debug;
@@ -41,44 +36,58 @@ namespace CacheManager.Config.Tests
 
                         // TODO: change to Debug after logging upgrade to RC2
                         f.AddDebug(LogLevel.Verbose);
-                    });
+                    })
+                    .Build();
 
-                    cfg.WithUpdateMode(CacheUpdateMode.Up);
-                    cfg.WithRetryTimeout(500);
-                    cfg.WithMaxRetries(50);
+                var jsonCache = new CacheManager<string>(jsonConfiguration);
+                jsonCache.Put("key", "value");
+                
+                var builder = new Core.ConfigurationBuilder("myCache");
+                builder.WithMicrosoftLogging(f =>
+                {
+                    // TODO: remove after logging upgrade to RC2
+                    f.MinimumLevel = LogLevel.Debug;
 
-#if DNXCORE50
-                    cfg.WithDictionaryHandle("dic")
-                        .DisableStatistics();
+                    f.AddConsole(LogLevel.Information);
 
-                    //Console.WriteLine("Using Dictionary cache handle");
-#else
-                    cfg.WithSystemRuntimeDefaultCacheHandle()
-                        .DisableStatistics();
-
-                    cfg.WithRedisCacheHandle("redis", true)
-                        .DisableStatistics();
-
-                    cfg.WithRedisBackPlate("redis");
-
-                    cfg.WithRedisConfiguration("redis", config =>
-                    {
-                        config
-                            .WithAllowAdmin()
-                            .WithDatabase(0)
-                            .WithConnectionTimeout(1000)
-                            .WithEndpoint("127.0.0.1", 6380)
-                            .WithEndpoint("127.0.0.1", 6379);
-                        //.WithEndpoint("192.168.178.34", 7001);
-                    });
-                    
-                    cfg.WithJsonSerializer();
-
-                    Console.WriteLine("Using Redis cache handle");
-#endif
+                    // TODO: change to Debug after logging upgrade to RC2
+                    f.AddDebug(LogLevel.Verbose);
                 });
 
-                var cacheA = CacheFactory.FromConfiguration<object>("myCache", cacheConfiguration);
+                builder.WithUpdateMode(CacheUpdateMode.Up);
+                builder.WithRetryTimeout(500);
+                builder.WithMaxRetries(50);
+
+#if DNXCORE50
+                builder.WithDictionaryHandle("dic")
+                    .DisableStatistics();
+
+                //Console.WriteLine("Using Dictionary cache handle");
+#else
+                builder.WithSystemRuntimeDefaultCacheHandle()
+                    .DisableStatistics();
+
+                builder.WithRedisCacheHandle("redis", true)
+                    .DisableStatistics();
+
+                builder.WithRedisBackPlate("redis");
+
+                builder.WithRedisConfiguration("redis", config =>
+                {
+                    config
+                        .WithAllowAdmin()
+                        .WithDatabase(0)
+                        .WithConnectionTimeout(1000)
+                        .WithEndpoint("127.0.0.1", 6380)
+                        .WithEndpoint("127.0.0.1", 6379);
+                    //.WithEndpoint("192.168.178.34", 7001);
+                });
+
+                builder.WithJsonSerializer();
+
+                Console.WriteLine("Using Redis cache handle");
+#endif
+                var cacheA = new CacheManager<object>(builder.Build());
                 cacheA.Clear();
 
                 var manualConfig = new CacheManagerConfiguration();

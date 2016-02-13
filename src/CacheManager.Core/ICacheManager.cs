@@ -52,7 +52,7 @@ namespace CacheManager.Core
         /// Gets the configuration.
         /// </summary>
         /// <value>The configuration.</value>
-        CacheManagerConfiguration Configuration { get; }
+        IReadOnlyCacheManagerConfiguration Configuration { get; }
 
         /// <summary>
         /// Gets the cache name.

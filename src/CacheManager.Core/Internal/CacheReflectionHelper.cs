@@ -90,7 +90,7 @@ namespace CacheManager.Core.Internal
             NotNull(loggerFactory, nameof(loggerFactory));
 
             var logger = loggerFactory.CreateLogger(nameof(CacheReflectionHelper));
-            var managerConfiguration = manager.Configuration;
+            var managerConfiguration = manager.Configuration as ICacheManagerConfiguration;
             var handles = new List<BaseCacheHandle<TCacheValue>>();
 
             foreach (var handleConfiguration in managerConfiguration.CacheHandleConfigurations)

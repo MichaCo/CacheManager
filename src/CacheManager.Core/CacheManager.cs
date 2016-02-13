@@ -129,7 +129,7 @@ namespace CacheManager.Core
         /// Gets the configuration.
         /// </summary>
         /// <value>The configuration.</value>
-        public CacheManagerConfiguration Configuration { get; }
+        public IReadOnlyCacheManagerConfiguration Configuration { get; }
 
         /// <summary>
         /// Gets a list of cache handles currently registered within the cache manager.

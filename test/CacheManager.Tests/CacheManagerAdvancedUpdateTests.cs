@@ -73,8 +73,6 @@ namespace CacheManager.Tests
                 putCalls: Enumerable.Repeat<Action>(() => putCalls++, 5).ToArray(),
                 removeCalls: Enumerable.Repeat<Action>(() => removeCalls++, 5).ToArray());
 
-            cache.Configuration.UpdateMode = CacheUpdateMode.Up;
-
             // act
             using (cache)
             {
@@ -112,8 +110,6 @@ namespace CacheManager.Tests
                 putCalls: Enumerable.Repeat<Action>(() => putCalls++, 5).ToArray(),
                 removeCalls: Enumerable.Repeat<Action>(() => removeCalls++, 5).ToArray());
 
-            cache.Configuration.UpdateMode = CacheUpdateMode.Up;
-
             // act
             using (cache)
             {
@@ -150,8 +146,6 @@ namespace CacheManager.Tests
                 },
                 putCalls: Enumerable.Repeat<Action>(() => putCalls++, 5).ToArray(),
                 removeCalls: Enumerable.Repeat<Action>(() => removeCalls++, 5).ToArray());
-
-            cache.Configuration.UpdateMode = CacheUpdateMode.Up;
 
             // act
             using (cache)
@@ -200,8 +194,6 @@ namespace CacheManager.Tests
                     null
                 },
                 addCalls: Enumerable.Repeat<Func<bool>>(() => { addCalls++; return true; }, 5).ToArray());
-
-            cache.Configuration.UpdateMode = CacheUpdateMode.Up;
 
             // act
             using (cache)

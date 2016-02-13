@@ -1315,7 +1315,11 @@ namespace CacheManager.Tests
         {
             using (cache)
             {
-                cache.Configuration.UpdateMode = CacheUpdateMode.Full;
+                if (cache.Configuration.UpdateMode == CacheUpdateMode.None)
+                {
+                    // skip for none because we want to test the update mode
+                    return;
+                }
 
                 // arrange
                 var keys = new List<string>() { Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString() };
@@ -1438,6 +1442,7 @@ namespace CacheManager.Tests
         }
 
 #if !DNXCORE50
+
         [Serializable]
 #endif
         public class ComplexType

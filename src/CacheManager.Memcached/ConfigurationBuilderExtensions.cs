@@ -1,5 +1,4 @@
-﻿using System;
-using CacheManager.Memcached;
+﻿using CacheManager.Memcached;
 using static CacheManager.Core.Utility.Guard;
 
 namespace CacheManager.Core
@@ -15,7 +14,7 @@ namespace CacheManager.Core
         /// <param name="part">The builder part.</param>
         /// <param name="configurationName">The configuration name.</param>
         /// <returns>The part.</returns>
-        /// <exception cref="ArgumentNullException">Thrown if handleName is null.</exception>
+        /// <exception cref="System.ArgumentNullException">Thrown if handleName is null.</exception>
         public static ConfigurationBuilderCacheHandlePart WithMemcachedCacheHandle(this ConfigurationBuilderCachePart part, string configurationName) =>
             WithMemcachedCacheHandle(part, configurationName, false);
 
@@ -29,7 +28,7 @@ namespace CacheManager.Core
         /// <para>This setting will be ignored if no back plate is configured.</para>
         /// </param>
         /// <returns>The part.</returns>
-        /// <exception cref="ArgumentNullException">
+        /// <exception cref="System.ArgumentNullException">
         /// Thrown if handleName or handleType are null.
         /// </exception>
         public static ConfigurationBuilderCacheHandlePart WithMemcachedCacheHandle(this ConfigurationBuilderCachePart part, string configurationName, bool isBackPlateSource)

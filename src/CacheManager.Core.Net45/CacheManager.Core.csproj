@@ -90,6 +90,9 @@
     <Compile Include="..\CacheManager.Core\ICacheManager.cs">
       <Link>ICacheManager.cs</Link>
     </Compile>
+    <Compile Include="..\CacheManager.Core\ICacheManagerConfiguration.cs">
+      <Link>ICacheManagerConfiguration.cs</Link>
+    </Compile>
     <Compile Include="..\CacheManager.Core\Internal\BackPlateMessage.cs">
       <Link>Internal\BackPlateMessage.cs</Link>
     </Compile>

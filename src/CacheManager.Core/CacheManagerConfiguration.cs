@@ -6,7 +6,7 @@ namespace CacheManager.Core
     /// <summary>
     /// The basic cache manager configuration class.
     /// </summary>
-    public class CacheManagerConfiguration
+    public class CacheManagerConfiguration : ICacheManagerConfiguration
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="CacheManagerConfiguration"/> class.
@@ -14,6 +14,13 @@ namespace CacheManager.Core
         public CacheManagerConfiguration()
         {
         }
+
+        /// <summary>
+        /// Gets a <see cref="ConfigurationBuilder"/> for the current <see cref="CacheManagerConfiguration"/> instance
+        /// to manipulate the configuration fluently.
+        /// </summary>
+        /// <returns>The <see cref="ConfigurationBuilder"/>.</returns>
+        public ConfigurationBuilder Builder => new ConfigurationBuilder(this);
 
         /// <summary>
         /// Gets or sets the name of the cache.

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using CacheManager.Core.Internal;
-using CacheManager.Core.Logging;
 
 #if !PORTABLE && !DOTNET5_2
 using System.Configuration;
@@ -25,11 +24,57 @@ namespace CacheManager.Core
     /// </para>
     /// </summary>
     /// <see cref="CacheFactory"/>
-    public static class ConfigurationBuilder
+    public class ConfigurationBuilder : ConfigurationBuilderCachePart
     {
         private const string Hours = "h";
         private const string Minutes = "m";
         private const string Seconds = "s";
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ConfigurationBuilder"/> class
+        /// which provides fluent configuration methods.
+        /// </summary>
+        public ConfigurationBuilder()
+            : base()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ConfigurationBuilder"/> class
+        /// which provides fluent configuration methods.
+        /// </summary>
+        /// <param name="name">The name of the cache manager.</param>
+        public ConfigurationBuilder(string name)
+            : base()
+        {
+            NotNullOrWhiteSpace(name, nameof(name));
+            this.Configuration.Name = name;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ConfigurationBuilder"/> class
+        /// which provides fluent configuration methods.
+        /// Creates a builder which allows to modify the existing <paramref name="configuration"/>.
+        /// </summary>
+        /// <param name="configuration">The configuration the builder should be instantiated for.</param>
+        public ConfigurationBuilder(CacheManagerConfiguration configuration)
+            : base(configuration)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ConfigurationBuilder"/> class
+        /// which provides fluent configuration methods.
+        /// Creates a builder which allows to modify the existing <paramref name="configuration"/>.
+        /// </summary>
+        /// <param name="name">The name of the cache manager.</param>
+        /// <param name="configuration">The configuration the builder should be instantiated for.</param>
+        public ConfigurationBuilder(string name, CacheManagerConfiguration configuration)
+            : base(configuration)
+        {
+            NotNullOrWhiteSpace(name, nameof(name));
+            this.Configuration.Name = name;
+        }
 
         /// <summary>
         /// Builds a <see cref="CacheManagerConfiguration"/> which can be used to create a new cache
@@ -380,6 +425,15 @@ namespace CacheManager.Core
         internal CacheHandleConfiguration Configuration { get; }
 
         /// <summary>
+        /// Hands back the new <see cref="CacheManagerConfiguration"/> instance.
+        /// </summary>
+        /// <returns>The <see cref="CacheManagerConfiguration"/>.</returns>
+        public CacheManagerConfiguration Build()
+        {
+            return this.parent.Build();
+        }
+
+        /// <summary>
         /// Disables performance counters for this cache handle.
         /// </summary>
         /// <returns>The builder part.</returns>
@@ -454,14 +508,17 @@ namespace CacheManager.Core
     /// Used to build a <c>CacheManagerConfiguration</c>.
     /// </summary>
     /// <see cref="CacheManagerConfiguration"/>
-    public sealed class ConfigurationBuilderCachePart
+    public class ConfigurationBuilderCachePart
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ConfigurationBuilderCachePart"/> class.
-        /// </summary>
         internal ConfigurationBuilderCachePart()
         {
             this.Configuration = new CacheManagerConfiguration();
+        }
+
+        internal ConfigurationBuilderCachePart(CacheManagerConfiguration forConfiguration)
+        {
+            NotNull(forConfiguration, nameof(forConfiguration));
+            this.Configuration = forConfiguration;
         }
 
         /// <summary>
@@ -577,7 +634,7 @@ namespace CacheManager.Core
 
             handleCfg.IsBackPlateSource = isBackPlateSource;
 
-            if (this.Configuration.CacheHandleConfigurations.Any(p => p.IsBackPlateSource))
+            if (isBackPlateSource && this.Configuration.CacheHandleConfigurations.Any(p => p.IsBackPlateSource))
             {
                 throw new InvalidOperationException("Only one cache handle can be the back plate's source.");
             }
@@ -681,7 +738,7 @@ namespace CacheManager.Core
         }
 
         /// <summary>
-        /// Enables logging by setting the <see cref="ILoggerFactory"/> for the cache manager instance.
+        /// Enables logging by setting the <see cref="Logging.ILoggerFactory"/> for the cache manager instance.
         /// </summary>
         /// <param name="loggerFactoryType">The type of the logger factory.</param>
         /// <param name="args">Additional arguments the type might need to get initialized.</param>
@@ -693,6 +750,15 @@ namespace CacheManager.Core
             this.Configuration.LoggerFactoryType = loggerFactoryType;
             this.Configuration.LoggerFactoryTypeArguments = args;
             return this;
+        }
+
+        /// <summary>
+        /// Hands back the new <see cref="CacheManagerConfiguration"/> instance.
+        /// </summary>
+        /// <returns>The <see cref="CacheManagerConfiguration"/>.</returns>
+        public CacheManagerConfiguration Build()
+        {
+            return this.Configuration;
         }
     }
 }

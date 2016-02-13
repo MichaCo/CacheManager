@@ -24,6 +24,28 @@ namespace CacheManager.Examples
             LoggingSample();
         }
 
+#if !DNXCORE50
+        private static void MostSimpleCacheManager()
+        {
+            var config = new ConfigurationBuilder()
+                .WithSystemRuntimeDefaultCacheHandle()
+                .Build();
+
+            var cache = new CacheManager<string>(config);            
+        }
+
+        private static void MostSimpleCacheManagerB()
+        {
+            var cache = new CacheManager<string>(new CacheManagerConfiguration()
+                .Builder.WithSystemRuntimeDefaultCacheHandle().Build());
+        }
+
+        private static void MostSimpleCacheManagerC()
+        {
+            var cache = CacheFactory.Build<string>(p => p.WithSystemRuntimeDefaultCacheHandle());
+        }
+#endif
+
         private static void LoggingSample()
         {
             var cache = CacheFactory.Build<string>(

@@ -57,7 +57,7 @@ namespace CacheManager.Core
                     $"The '{CacheManagersSection}' section has more than one configuration defined. Please specifiy which one to load by name.");
             }
 
-            return GetFromConfiguration(managersSection.GetChildren().First());            
+            return GetFromConfiguration(managersSection.GetChildren().First());
         }
 
         /// <summary>
@@ -101,7 +101,7 @@ namespace CacheManager.Core
                 throw new InvalidOperationException($"No '{CacheManagersSection}' section found in the configuration provided.");
             }
 
-            foreach(var managerConfig in managersSection.GetChildren())
+            foreach (var managerConfig in managersSection.GetChildren())
             {
                 yield return GetFromConfiguration(managerConfig);
             }
@@ -228,7 +228,7 @@ namespace CacheManager.Core
                 if (keyRequired && string.IsNullOrWhiteSpace(key) && string.IsNullOrWhiteSpace(name))
                 {
                     throw new InvalidOperationException(
-                        $@"Known handle of type '{knownType}' requires '{ConfigurationKey}' or '{ConfigurationName}' to be defined. 
+                        $@"Known handle of type '{knownType}' requires '{ConfigurationKey}' or '{ConfigurationName}' to be defined.
                             Check configuration at '{handleConfiguration.Path}'.");
                 }
             }
@@ -249,16 +249,21 @@ namespace CacheManager.Core
                 {
                     case "systemruntime":
                         return Type.GetType(TypeSystemRuntimeHandle, true);
+
                     case "dictionary":
                         return typeof(DictionaryCacheHandle<>);
+
                     case "systemweb":
                         return Type.GetType(TypeSystemWebHandle, true);
+
                     case "redis":
                         keyRequired = true;
                         return Type.GetType(TypeRedisHandle, true);
+
                     case "couchbase":
                         keyRequired = true;
                         return Type.GetType(TypeCouchbaseHandle, true);
+
                     case "memcached":
                         keyRequired = true;
                         return Type.GetType(TypeMemcachedHandle, true);

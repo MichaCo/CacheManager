@@ -73,6 +73,7 @@ namespace CacheManager.Core
             bool isBackPlateSource)
         {
             NotNull(part, nameof(part));
+            NotNullOrWhiteSpace(couchbaseConfigurationKey, nameof(couchbaseConfigurationKey));
 
             return part.WithHandle(typeof(BucketCacheHandle<>), couchbaseConfigurationKey, isBackPlateSource);
         }
