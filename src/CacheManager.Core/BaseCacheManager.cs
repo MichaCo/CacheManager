@@ -25,7 +25,7 @@ namespace CacheManager.Core
         private readonly CacheBackPlate cacheBackPlate;
 
         public BaseCacheManager(CacheManagerConfiguration configuration)
-            : this(Guid.NewGuid().ToString(), configuration)
+            : this(configuration?.Name ?? Guid.NewGuid().ToString(), configuration)
         {
         }
 

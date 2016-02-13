@@ -68,6 +68,35 @@ namespace CacheManager.Tests
                     .WithMessage("*Parameter name: configuration");
         }
 
+        [Fact]
+        [ReplaceCulture]
+        public void CacheManager_CtorA_NoConfig()
+        {
+            Action act = () => new BaseCacheManager<object>(null);
+            act.ShouldThrow<ArgumentException>()
+                    .WithMessage("*Parameter name: configuration");
+        }
+
+        [Fact]
+        [ReplaceCulture]
+        public void CacheManager_CtorA_ConfigNoName()
+        {
+            // name should be set from config and default is a Guid
+            var manager = new BaseCacheManager<object>(ConfigurationBuilder.BuildConfiguration(s => s.WithDictionaryHandle()));
+            manager.Name.Should().NotBeNullOrWhiteSpace();
+        }
+
+        [Fact]
+        [ReplaceCulture]
+        public void CacheManager_CtorA_ConfigWithName()
+        {
+            // name should be implicitly set
+            var manager = new BaseCacheManager<object>(
+                ConfigurationBuilder.BuildConfiguration("newName", s => s.WithDictionaryHandle()));
+
+            manager.Name.Should().Be("newName");
+        }
+
         #endregion general
 
         #region put params validation

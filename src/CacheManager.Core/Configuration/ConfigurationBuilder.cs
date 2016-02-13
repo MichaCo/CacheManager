@@ -32,22 +32,45 @@ namespace CacheManager.Core
         private const string Seconds = "s";
 
         /// <summary>
-        /// Builds a <c>CacheManagerConfiguration</c> which can be used to create a new cache
+        /// Builds a <see cref="CacheManagerConfiguration"/> which can be used to create a new cache
         /// manager instance.
         /// <para>
-        /// Pass the configuration to <c>CacheFactory.FromConfiguration</c> to create a valid cache manager.
+        /// Pass the configuration to <see cref="CacheFactory.FromConfiguration"/> to create a valid cache manager.
         /// </para>
         /// </summary>
         /// <param name="settings">
         /// The configuration settings to define the cache handles and other properties.
         /// </param>
-        /// <returns>The <c>CacheManagerConfiguration</c>.</returns>
+        /// <returns>The <see cref="CacheManagerConfiguration"/>.</returns>
         public static CacheManagerConfiguration BuildConfiguration(Action<ConfigurationBuilderCachePart> settings)
         {
             NotNull(settings, nameof(settings));
 
             var part = new ConfigurationBuilderCachePart();
             settings(part);
+            return part.Configuration;
+        }
+
+        /// <summary>
+        /// Builds a <see cref="CacheManagerConfiguration"/> which can be used to create a new cache
+        /// manager instance.
+        /// <para>
+        /// Pass the configuration to <see cref="CacheFactory.FromConfiguration"/> to create a valid cache manager.
+        /// </para>
+        /// </summary>
+        /// <param name="name">The name of the cache manager.</param>
+        /// <param name="settings">
+        /// The configuration settings to define the cache handles and other properties.
+        /// </param>
+        /// <returns>The <see cref="CacheManagerConfiguration"/>.</returns>
+        public static CacheManagerConfiguration BuildConfiguration(string name, Action<ConfigurationBuilderCachePart> settings)
+        {
+            NotNullOrWhiteSpace(name, nameof(name));
+            NotNull(settings, nameof(settings));
+
+            var part = new ConfigurationBuilderCachePart();
+            settings(part);
+            part.Configuration.Name = name;
             return part.Configuration;
         }
 

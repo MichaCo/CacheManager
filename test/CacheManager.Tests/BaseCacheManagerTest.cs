@@ -9,17 +9,6 @@ using Couchbase.Configuration.Client;
 #endif
 using static CacheManager.Core.Utility.Guard;
 
-#if DNXCORE50
-namespace System.Diagnostics.CodeAnalysis
-{
-    [Conditional("DEBUG")]
-    [AttributeUsage(AttributeTargets.All, Inherited = false, AllowMultiple = false)]
-    internal sealed class ExcludeFromCodeCoverageAttribute : Attribute
-    {
-    }
-}
-#endif
-
 namespace CacheManager.Tests
 {
     [ExcludeFromCodeCoverage]
@@ -328,3 +317,14 @@ namespace CacheManager.Tests
 #endif
     }
 }
+
+#if DNXCORE50
+namespace System.Diagnostics.CodeAnalysis
+{
+    [Conditional("DEBUG")]
+    [AttributeUsage(AttributeTargets.All, Inherited = false, AllowMultiple = false)]
+    internal sealed class ExcludeFromCodeCoverageAttribute : Attribute
+    {
+    }
+}
+#endif
