@@ -10,12 +10,10 @@ using static CacheManager.Core.Utility.Guard;
 namespace CacheManager.Core
 {
     /// <summary>
-    /// The BaseCacheManager implements <see cref="ICacheManager{T}"/> and is the main class which
-    /// gets constructed by <see cref="CacheFactory"/>.
-    /// <para>
-    /// The cache manager manages the list of <see cref="BaseCacheHandle{T}"/>'s which have been
-    /// added. It will keep them in sync depending on the configuration.
-    /// </para>
+    /// The <see cref="BaseCacheManager{TCacheValue}"/> implements <see cref="ICacheManager{TCacheValue}"/> and is the main class 
+    /// of this library.
+    /// The cache manager delegates all cache operations to the list of <see cref="BaseCacheHandle{T}"/>'s which have been
+    /// added. It will keep them in sync according to rules and depending on the configuration.
     /// </summary>
     /// <typeparam name="TCacheValue">The type of the cache value.</typeparam>
     public sealed class BaseCacheManager<TCacheValue> : BaseCache<TCacheValue>, ICacheManager<TCacheValue>, IDisposable
@@ -24,6 +22,21 @@ namespace CacheManager.Core
         private readonly BaseCacheHandle<TCacheValue>[] cacheHandles;
         private readonly CacheBackPlate cacheBackPlate;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="BaseCacheManager{TCacheValue}"/> class
+        /// using the specified <paramref name="configuration"/>.
+        /// If the name of the <paramref name="configuration"/> is defined, the cache manager will 
+        /// use it. Otherwise a random string will be generated.
+        /// </summary>
+        /// <param name="configuration">
+        /// The configuration which defines the structure and complexity of the cache manager.
+        /// </param>
+        /// <exception cref="System.ArgumentNullException">
+        /// When <paramref name="configuration"/> is null.
+        /// </exception>
+        /// <see cref="CacheFactory"/>
+        /// <see cref="ConfigurationBuilder"/>
+        /// <see cref="BaseCacheHandle{TCacheValue}"/>
         public BaseCacheManager(CacheManagerConfiguration configuration)
             : this(configuration?.Name ?? Guid.NewGuid().ToString(), configuration)
         {
@@ -31,16 +44,18 @@ namespace CacheManager.Core
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BaseCacheManager{TCacheValue}"/> class
-        /// using the specified configuration.
+        /// using the specified <paramref name="name"/> and <paramref name="configuration"/>.
         /// </summary>
         /// <param name="name">The cache name.</param>
         /// <param name="configuration">
-        /// The configuration which defines the name of the manager and contains information of the
-        /// cache handles this instance should manage.
+        /// The configuration which defines the structure and complexity of the cache manager.
         /// </param>
         /// <exception cref="System.ArgumentNullException">
-        /// When <paramref name="configuration"/> is null.
+        /// When <paramref name="name"/> or <paramref name="configuration"/> is null.
         /// </exception>
+        /// <see cref="CacheFactory"/>
+        /// <see cref="ConfigurationBuilder"/>
+        /// <see cref="BaseCacheHandle{TCacheValue}"/>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "nope")]
         public BaseCacheManager(string name, CacheManagerConfiguration configuration)
         {
