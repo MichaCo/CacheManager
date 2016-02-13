@@ -39,8 +39,8 @@ namespace CacheManager.Tests
             Thread.CurrentThread.CurrentCulture = this.CurrentCulture;
             Thread.CurrentThread.CurrentUICulture = this.CurrentUICulture;
 #else
-            CultureInfo.CurrentCulture = Culture;
-            CultureInfo.CurrentUICulture = UICulture;
+            CultureInfo.CurrentCulture = this.CurrentCulture;
+            CultureInfo.CurrentUICulture = this.CurrentUICulture;
 #endif
         }
 
