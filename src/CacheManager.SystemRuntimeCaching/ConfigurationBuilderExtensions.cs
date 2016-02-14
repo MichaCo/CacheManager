@@ -8,6 +8,8 @@ namespace CacheManager.Core
     /// </summary>
     public static class ConfigurationBuilderExtensions
     {
+        private const string DefaultName = "default";
+
 #pragma warning disable SA1625
         /// <summary>
         /// Adds a <see cref="MemoryCacheHandle{TCacheValue}" /> using a <see cref="System.Runtime.Caching.MemoryCache"/> instance with the given <paramref name="instanceName"/>.
@@ -22,20 +24,12 @@ namespace CacheManager.Core
 
         /// <summary>
         /// Adds a <see cref="MemoryCacheHandle{TCacheValue}" /> using a <see cref="System.Runtime.Caching.MemoryCache"/>.
+        /// The name of the cache instance will be 'default'.
         /// </summary>
         /// <param name="part">The builder part.</param>
         /// <returns>The builder part.</returns>
         public static ConfigurationBuilderCacheHandlePart WithSystemRuntimeCacheHandle(this ConfigurationBuilderCachePart part)
-            => part?.WithHandle(typeof(MemoryCacheHandle<>), Guid.NewGuid().ToString("N"), false);
-
-        /// <summary>
-        /// Adds a <see cref="MemoryCacheHandle{TCacheValue}" /> using the <see cref="System.Runtime.Caching.MemoryCache"/> default instance.
-        /// The deafult cache instance can be configured via <c>app/web.config</c> <c>system.runtime.caching</c> section.
-        /// </summary>
-        /// <param name="part">The builder part.</param>
-        /// <returns>The builder part.</returns>
-        public static ConfigurationBuilderCacheHandlePart WithSystemRuntimeDefaultCacheHandle(this ConfigurationBuilderCachePart part)
-            => part?.WithHandle(typeof(MemoryCacheHandle<>), "default", false);
+            => part?.WithHandle(typeof(MemoryCacheHandle<>), DefaultName, false);
 
         /// <summary>
         /// Adds a <see cref="MemoryCacheHandle{TCacheValue}" /> using a <see cref="System.Runtime.Caching.MemoryCache"/> instance with the given <paramref name="instanceName"/>.

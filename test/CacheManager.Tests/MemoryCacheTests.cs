@@ -27,7 +27,7 @@ namespace CacheManager.Tests
             var item = new CacheItem<object>(key, "something", ExpirationMode.Absolute, new TimeSpan(0, 0, 0, 0, 300));
 
             // act
-            using (var act = CacheFactory.Build(_ => _.WithSystemRuntimeDefaultCacheHandle()))
+            using (var act = CacheFactory.Build(_ => _.WithSystemRuntimeCacheHandle()))
             {
                 // act
                 act.Add(item);
@@ -44,7 +44,7 @@ namespace CacheManager.Tests
         [Trait("category", "NotOnMono")]
         public void SysRuntime_MemoryCache_CreateDefaultCache()
         {
-            using (var act = CacheFactory.Build(_ => _.WithSystemRuntimeDefaultCacheHandle()))
+            using (var act = CacheFactory.Build(_ => _.WithSystemRuntimeCacheHandle()))
             {
                 // arrange
                 var settings = ((MemoryCacheHandle<object>)act.CacheHandles.ElementAt(0)).CacheSettings;
@@ -81,7 +81,7 @@ namespace CacheManager.Tests
             var item = new CacheItem<object>(key, "something", ExpirationMode.Sliding, new TimeSpan(0, 0, 0, 0, 8));
 
             // act
-            using (var act = CacheFactory.Build(_ => _.WithSystemRuntimeDefaultCacheHandle()))
+            using (var act = CacheFactory.Build(_ => _.WithSystemRuntimeCacheHandle()))
             {
                 // act
                 act.Add(item);
@@ -102,7 +102,7 @@ namespace CacheManager.Tests
             var item = new CacheItem<object>(key, "something", ExpirationMode.Sliding, TimeSpan.FromMilliseconds(200));
 
             // act
-            var act = CacheFactory.Build(_ => _.WithSystemRuntimeDefaultCacheHandle());
+            var act = CacheFactory.Build(_ => _.WithSystemRuntimeCacheHandle());
             {
                 // act
                 act.Add(item);

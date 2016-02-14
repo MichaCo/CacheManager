@@ -174,7 +174,7 @@ namespace CacheManager.Tests
             using (var cache = CacheFactory.Build<RaceConditionTestElement>(settings =>
             {
                 settings.WithUpdateMode(CacheUpdateMode.Full)
-                    .WithSystemRuntimeDefaultCacheHandle()
+                    .WithSystemRuntimeCacheHandle()
                         .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMilliseconds(1))
                     .And
                     .WithMemcachedCacheHandle("default")

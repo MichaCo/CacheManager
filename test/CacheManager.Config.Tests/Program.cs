@@ -64,7 +64,7 @@ namespace CacheManager.Config.Tests
 
                 //Console.WriteLine("Using Dictionary cache handle");
 #else
-                builder.WithSystemRuntimeDefaultCacheHandle()
+                builder.WithSystemRuntimeCacheHandle()
                     .DisableStatistics();
 
                 builder.WithRedisCacheHandle("redis", true)
