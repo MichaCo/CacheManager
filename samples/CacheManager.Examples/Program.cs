@@ -53,14 +53,26 @@ namespace CacheManager.Examples
 
         private static void MostSimpleCacheManagerWithLogging()
         {
-            var config = new ConfigurationBuilder()
-                .WithMicrosoftLogging(l => l.AddConsole(LogLevel.Information))
-                .WithSystemRuntimeCacheHandle()
-                .Build();
+var config = new ConfigurationBuilder()
+    .WithMicrosoftLogging(l => l.AddConsole(LogLevel.Information))
+    .WithSystemRuntimeCacheHandle()
+    .Build();
 
-            var cache = new BaseCacheManager<string>(config);
+var cache = new BaseCacheManager<string>(config);
             // or
             var cache2 = CacheFactory.FromConfiguration<string>(config);
+        }
+
+        private static void EditExistingConfiguration()
+        {
+            var config = new ConfigurationBuilder()
+                .WithSystemRuntimeCacheHandle()
+                    .EnableStatistics()
+                .Build();
+
+            config = new ConfigurationBuilder(config)
+                .WithMicrosoftLogging(f => f.AddConsole())
+                .Build();
         }
         
 #endif

@@ -54,30 +54,6 @@
           "isBackPlateSource": true
         }
       ]
-    },
-    {
-
-      "backPlate": {
-        "key": "redisConfigKey",
-        "type": "type"
-      },
-      "handles": [
-        {
-          "enablePerformanceCounters": false,
-          "enableStatistics": false,
-          "expirationMode": "Absolute",
-          "expirationTimeout": "1.0:0:1",
-          "isBackPlateSource": false,
-          "knownType": "SystemRuntime",
-          "name": "first"
-        }
-      ],
-      "loggerFactory": { "knownType": "Microsoft" },
-      "serializer": { "knownType": "Binary" },
-      "maxRetries": 123,
-      "name": "myManager",
-      "retryTimeout": 123,
-      "updateMode": "Up"
     }
   ]
 }

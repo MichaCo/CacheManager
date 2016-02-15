@@ -3,19 +3,19 @@
 ## Standard operations
 First and foremost Cache Manager will provide well known cache methods like Get, Put, Remove and Clear.
 All cache items will have a `string Key` and `T` Value where `T` can be anything, e.g. `int`, `string` or even `object`. The Cache Manager is implemented as a strongly typed cache interface.
-
-    cache.Add("key", "value");
-    var value = cache.Get("key");
-    cache.Remove("key");
-    cache.Clear();
-        
+```cs
+cache.Add("key", "value");
+var value = cache.Get("key");
+cache.Remove("key");
+cache.Clear();
+```   
 ### Regions
 Cache Manager has overloads for all cache methods to support a `string Region` in addition to the `Key` to identify an item within the cache. 
-
-    cache.Add("key", "value", "region");
-    var value = cache.Get("key", "region");
-    cache.Remove("key", "region");
-    
+```cs
+cache.Add("key", "value", "region");
+var value = cache.Get("key", "region");
+cache.Remove("key", "region");
+```
 > **Note** 
 > Each cache handle might implement cache regions differently. Often the implementation will simply concatenate `region + key` to form the cache key. 
 > Also the cache `Key` will only be accessible together with the region specified.
@@ -32,23 +32,23 @@ To configure and add cache handles by code call the `WithHandle` method of the `
 Every cache provider specific Cache Manager package will provide an extension method to add the specific cache handle, e.g. `WithSystemRuntimeCacheHandle`, `WithRedisCacheHandle`...
 
 Example:
-
-    var cache = CacheFactory.Build<string>("myCacheName", settings =>
-    {
-	    settings
-		    .WithSystemRuntimeCacheHandle("handle1");
-    });
-
+```cs
+var cache = CacheFactory.Build<string>("myCacheName", settings =>
+{
+	settings
+		.WithSystemRuntimeCacheHandle("handle1");
+});
+```
 Adding multiple cache handles looks pretty much the same:
-
-    var cache = CacheFactory.Build<string>("myCacheName", settings =>
-    {
-	    settings
-		    .WithSystemRuntimeCacheHandle("handle1")
-            .And
-            .WithRedisCacheHandle("redis");
-    });
-
+```cs
+var cache = CacheFactory.Build<string>("myCacheName", settings =>
+{
+	settings
+	.WithSystemRuntimeCacheHandle("handle1")
+	       .And
+	       .WithRedisCacheHandle("redis");
+});
+```
 > Read the Cache Synchronization article for more information about how to keep multiple cache layers in sync.
 
 ### Cache Item handling
@@ -84,16 +84,17 @@ To control the expiration per cache item, a `CacheItem` object has to be created
 
 > **Hint** 
 > This is really only needed to control the expiration per cache item. To simply get or put an item, use `Get(key)`, `Put(key, value)`...
-
-	var item = new CacheItem<string>("key", "value", ExpirationMode.Absolute, TimeSpan.FromMinutes(10));
-    cache.Add(item);
-
+```cs
+var item = new CacheItem<string>(
+	"key", "value", ExpirationMode.Absolute, TimeSpan.FromMinutes(10));
+cache.Add(item);
+```
 To retrieve a cache item and change the expiration, use the `GetCacheItem` method.
-
-    var item = cache.GetCacheItem("key");
-    item.WithExpiration(ExpirationMode.Sliding, TimeSpan.FromMinutes(15));
-    cache.Put(item);
-
+```cs
+var item = cache.GetCacheItem("key");
+item.WithExpiration(ExpirationMode.Sliding, TimeSpan.FromMinutes(15));
+cache.Put(item);
+```
 > **Note**
 > Currently the Memcached and Couchbase cache handles do not support sliding expiration.
 
@@ -102,9 +103,9 @@ The Cache Manager `ICacheManager` interface defines several events which get tri
 The events will be fired only once per cache operation, not per cache handle!
 
 To subscribe to an event, simply add an event listener like that:
-
-	cache.OnAdd += (sender, args) => ...;
-
+```cs
+cache.OnAdd += (sender, args) => ...;
+```
 Events are available for `Add`, `Clear`, `ClearRegion`, `Get`, `Put`, `Remove` and `Update` operations.
 
 The event arguments passed into the listener depend on the event, for `Add`,`Get`, `Put` and `Remove` the `CacheActionEventArgs` will provide the `Key` and `Region` of the cache operation. `Region` might be empty though.
@@ -117,12 +118,12 @@ There are two models implemented in Cache Manager to get those numbers.
 The statistics and Windows performance counters. Both are stored per cache handle.
 
 Both can be enabled or disabled per cache handle. The configuration can be done via .config file or `ConfigurationBuilder`
-
-	var cache = CacheFactory.Build("cacheName", settings => settings
-        .WithSystemRuntimeCacheHandle("handleName")
-	        .EnableStatistics()
-	        .EnablePerformanceCounters());
-
+```cs
+var cache = CacheFactory.Build("cacheName", settings => settings
+       .WithSystemRuntimeCacheHandle("handleName")
+	       .EnableStatistics()
+	       .EnablePerformanceCounters());
+```
 > **Note**
 > Disabling statistics will also disable performance counters and enabling performance counters will enable statistics.
 > Collecting the numbers and updating performance counters can cause a slight performance decrease, only use it for analysis in production if really needed. 
@@ -143,24 +144,24 @@ Statistics are a collection of numbers identified via `CacheStatsCounterType` en
 Statistics can be retrieved for each handle by calling `handle.GetStatistic(CacheStatsCounterType)`.
 
 *Example:*
-
-    foreach (var handle in cache.CacheHandles)
-    {
-        var stats = handle.Stats;
-        Console.WriteLine(string.Format(
-                "Items: {0}, Hits: {1}, Miss: {2}, Remove: {3}, ClearRegion: {4}, Clear: {5}, Adds: {6}, Puts: {7}, Gets: {8}",
-                    stats.GetStatistic(CacheStatsCounterType.Items),
-                    stats.GetStatistic(CacheStatsCounterType.Hits),
-                    stats.GetStatistic(CacheStatsCounterType.Misses),
-                    stats.GetStatistic(CacheStatsCounterType.RemoveCalls),
-                    stats.GetStatistic(CacheStatsCounterType.ClearRegionCalls),
-                    stats.GetStatistic(CacheStatsCounterType.ClearCalls),
-                    stats.GetStatistic(CacheStatsCounterType.AddCalls),
-                    stats.GetStatistic(CacheStatsCounterType.PutCalls),
-                    stats.GetStatistic(CacheStatsCounterType.GetCalls)
-                ));
-    }
-
+```cs
+foreach (var handle in cache.CacheHandles)
+{
+    var stats = handle.Stats;
+    Console.WriteLine(string.Format(
+            "Items: {0}, Hits: {1}, Miss: {2}, Remove: {3}, ClearRegion: {4}, Clear: {5}, Adds: {6}, Puts: {7}, Gets: {8}",
+                stats.GetStatistic(CacheStatsCounterType.Items),
+                stats.GetStatistic(CacheStatsCounterType.Hits),
+                stats.GetStatistic(CacheStatsCounterType.Misses),
+                stats.GetStatistic(CacheStatsCounterType.RemoveCalls),
+                stats.GetStatistic(CacheStatsCounterType.ClearRegionCalls),
+                stats.GetStatistic(CacheStatsCounterType.ClearCalls),
+                stats.GetStatistic(CacheStatsCounterType.AddCalls),
+                stats.GetStatistic(CacheStatsCounterType.PutCalls),
+                stats.GetStatistic(CacheStatsCounterType.GetCalls)
+            ));
+}
+```
 ### Performance Counters
 
 If performance counters are enabled, Cache Manager will try to create a new `PerformanceCounterCategory` named ".Net CacheManager" with several counters below. 
@@ -183,17 +184,17 @@ The instance name displayed in Performance Monitor is the host name of your appl
 The [CacheManager.Web][cm.web] Nuget package contains an implementation for `System.Web.OutputCache` which uses the cache manager to store the page results, if the `OutputCache` is configured to store it on the server.
 
 Configuration of the `OutputCache` can be done via web.config:
-
-	 <system.web>	    
-	   <caching>
-	     <outputCache defaultProvider="CacheManagerOutputCacheProvider">
-	       <providers>
-	         <add cacheName="websiteCache" name="CacheManagerOutputCacheProvider" type="CacheManager.Web.CacheManagerOutputCacheProvider, CacheManager.Web" />
-	       </providers>
-	     </outputCache>
-	   </caching>
-	 </system.web>
-
+```cs
+<system.web>	    
+  <caching>
+    <outputCache defaultProvider="CacheManagerOutputCacheProvider">
+      <providers>
+        <add cacheName="websiteCache" name="CacheManagerOutputCacheProvider" type="CacheManager.Web.CacheManagerOutputCacheProvider, CacheManager.Web" />
+      </providers>
+    </outputCache>
+  </caching>
+</system.web>
+```
 The `cacheName` attribute within the `add` tag is important. This will let CacheManager know which `cache` configuration to use. The configuration must also be provided via web.config, configuration by code is not supported!
 
 [stackoverflow-config-xsd]: http://stackoverflow.com/questions/742905/enabling-intellisense-for-custom-sections-in-config-files

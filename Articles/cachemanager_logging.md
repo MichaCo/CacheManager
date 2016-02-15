@@ -17,7 +17,7 @@ If the `Trace` `LogLevel` is enabled, you will get trace information on each cac
 
 for the following two calls
 
-``` C#
+``` cs
 cache.Add("key", "value");
 cache.AddOrUpdate("key", "value", _ => "update value", 22);
 ```
@@ -45,7 +45,7 @@ CacheManager.Core.BaseCacheManager<object>: Trace: Add or update: key : successf
 In the example above, you can see how CacheManager works with multiple handles. CacheManager starts with the *lowest* cache handle (in this case Redis), and if the item exists, it will remove it from the other cache handles above to prevent potential conflicts and force an update of the handles on the next `Get`.
 Then, the Update is successful. 
 On the next Get, CacheManager should find the item in the Redis handle and add it to the first layer...
-```c#
+```cs
 var val = cache.Get("key");
 ```
 Trace Log for the `Get` operation:
@@ -90,7 +90,7 @@ To actually use a 3rd party logging framework, CacheManager will implement an ad
 ### Configuration
 The configuration works seamlessly and in the same fashion as everything else in CacheManager. The only thing which has to be defined is the `ILoggerFactory` which should be used by CacheManager to instantiate loggers.
 Therefore, there is a new `WithLogging` configuration method which will take the type of the logger factory.
-```c#
+```cs
 builder.WithLogging(typeof(MyLoggerFactory))
 ```
 If you write your own logger factory, your implementation can use constructor injection to pass through things you might need. The only instance which gets injected by CacheManager during initialization of the logger factory out of the box is the current instance of `CacheManagerConfiguration`. If you other types, use the `args` parameter during `WithLogging` configuration.
@@ -116,7 +116,7 @@ Of course, Microsoft.Extensions.Logging will also work cross platform and will b
 For the Microsoft.Extensions.Logging CacheManager extension, there are new extension methods to configure the `ILoggerFactory` adapter in CacheManager.
 
 To configure it, use `WithMicrosoftLogging`:
-```c#
+```cs
 var builder = new Core.ConfigurationBuilder("myCache");
 builder.WithMicrosoftLogging(f =>
 {
@@ -130,7 +130,7 @@ This means, to use e.g. `Console` logging, you have to install `Microsoft.Extens
 Add the `Microsoft.Extensions.Logging` namespace to your usings, to get the extension methods.
 
 If you use Microsoft.Extensions.Logging.ILoggerFactory already for your own logging and want CacheManager to use the same instance, use the 2nd overload and pass in your own instance.
-```C#
+```cs
 .WithMicrosoftLogging(loggerFactory)
 ```
 > **Hint**: CacheManager currently uses RC1 of the `Microsoft.Extensions.*` packages. The logging in this version uses LogLevel.Debug for actually tracing and LogLevel.Verbose for debug messages... This will change in RC2. For now, configure LogLevel.Debug on the Microsoft ILoggerFactory and also set LoggerFactory.MinLevel to Debug, otherwise you'll not see any trace messages.

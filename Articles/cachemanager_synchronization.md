@@ -30,34 +30,34 @@ A cache back plate can be added to the cache manager during configuration.
 
 ### Configuration
 Example for .config xml configuration:
-
-        <cache 
-	        name="redisWithBackPlate" 
-	        backPlateName="redis1" 
-	        backPlateType="CacheManager.Redis.RedisCacheBackPlate, CacheManager.StackExchange.Redis">
-          <handle name="default" ref="systemCache"/>
-          <handle name="redis1" ref="redis" expirationMode="None" isBackPlateSource="true"/>
-        </cache>
-
+```xml
+<cache 
+ name="redisWithBackPlate" 
+ backPlateName="redis1" 
+ backPlateType="CacheManager.Redis.RedisCacheBackPlate, CacheManager.StackExchange.Redis">
+  <handle name="default" ref="systemCache"/>
+  <handle name="redis1" ref="redis" expirationMode="None" isBackPlateSource="true"/>
+</cache>
+```
 Example for configuration by code:
-
-    var cache = CacheFactory.Build<int>("myCache", settings =>
-    {
-        settings
-            .WithSystemRuntimeCacheHandle("inProcessCache")
-            .And
-            .WithRedisConfiguration("redis", config =>
-            {
-                config.WithAllowAdmin()
-                    .WithDatabase(0)
-                    .WithEndpoint("localhost", 6379);
-            })
-            .WithMaxRetries(1000)
-            .WithRetryTimeout(100)
-            .WithRedisBackPlate("redis")
-            .WithRedisCacheHandle("redis", true);
-    });
-
+```cs
+var cache = CacheFactory.Build<int>("myCache", settings =>
+{
+    settings
+        .WithSystemRuntimeCacheHandle("inProcessCache")
+        .And
+        .WithRedisConfiguration("redis", config =>
+        {
+            config.WithAllowAdmin()
+                .WithDatabase(0)
+                .WithEndpoint("localhost", 6379);
+        })
+        .WithMaxRetries(1000)
+        .WithRetryTimeout(100)
+        .WithRedisBackPlate("redis")
+        .WithRedisCacheHandle("redis", true);
+});
+```
 In both cases configuring a back plate requires **one cache handle** being set as the back plate's source. 
 In case of the xml configuration, it is the `isBackPlateSource` attribute on the cacheHandle tag and by code it is the second parameter on the `WithHandle` method being set to true.
 

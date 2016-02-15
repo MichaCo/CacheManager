@@ -11,27 +11,20 @@ To prevent such scenarios and ensure you don't loose any data, every distributed
 
 ## How to use `Update`
 Cache Manager provides a simple interface to make this whole process very easy to use, the `Update` method.
-
-	cache.Update("key", counter => counter + 1);
-
+```cs
+cache.Update("key", counter => counter + 1);
+```
 The lambda expression provides the old value as input and takes the updated value as output.
 
 Now, if a conflict occurs during the update operation, which can happen if another client updates the same item, Cache Manager will call the lambda again with the new version of the value as input.
 
 Back to our example, Cache Manager would handle that version conflict if you use the `Update` method and increase the counter by one for the first client. The second client would handle the version conflict and increase the counter by one on the second try and the result would be correct.
 
-Per default, Cache Manager will retry update operations as long as needed to successfully update the cache item. You can also limit the number of retries: 
-
-	cache.Update(
-		"key", 
-		obj => "new value", 
-		new UpdateItemConfig(100, VersionConflictHandling.EvictItemFromOtherCaches));
-
-If Cache Manager reaches the limit, the Update will not be successful and you would have to handle that by reacting on the returned value.
-
-In addition you can configure what Cache Manager should do in case a version conflict occurred during the update operation. This will be executed even if the update was not successful (maybe because of the retry limit)
-
-Per default, Cache Manager will remove the cache item from all other handles, because it assumes the other handles don't have the same version of the cache item.
+Per default, Cache Manager will retry update operations 50 times. You can adjust limit of retries via `CacheManagerConfiguration` or by passing in the number of retries to the update method: 
+```cs
+cache.Update("key", obj => "new value", 100);
+```
+If Cache Manager reaches the limit, the Update will not be successful and you would have to handle that by reacting on the returned value. Also, CacheManager will remove the cache item from all other handles, because it could be that the other handles don't have the same version of the cache item.
 
 ## Update method variants
 There are currently three different method which provide the update functionality:
@@ -48,48 +41,51 @@ This method can be used to ensure the cached item is present before updating it.
 Let's look at a simple example using all the `Update` methods:
 
 First create a cache
-
-    var cache = CacheFactory.Build<string>("myCache", s => s.WithSystemRuntimeCacheHandle("handle"));
-    Console.WriteLine("Testing update...");
-
+```cs
+var cache = CacheFactory.Build<string>(
+	"myCache", 
+	s => s.WithSystemRuntimeCacheHandle("handle"));
+	
+Console.WriteLine("Testing update...");
+```
 Inspect what happens if we try to update an item which has not yet been added to the cache:
-
-    string newValue;
-    if (!cache.TryUpdate("test", v => "item has not yet been added", out newValue))
-    {
-        Console.WriteLine("Value not added?: {0}", newValue == null);
-    }
-
+```cs
+string newValue;
+if (!cache.TryUpdate("test", v => "item has not yet been added", out newValue))
+{
+    Console.WriteLine("Value not added?: {0}", newValue == null);
+}
+```
 Now we add it to the cache
-
-    cache.Add("test", "start");
-    Console.WriteLine("Inital value: {0}", cache["test"]);
-
+```cs
+cache.Add("test", "start");
+Console.WriteLine("Inital value: {0}", cache["test"]);
+```
 Let's see what `AddOrUpdate` does, it should run the update in this case:
-
-    cache.AddOrUpdate("test", "adding again?", v => "updating and not adding");
-    Console.WriteLine("After AddOrUpdate: {0}", cache["test"]);
-
+```cs
+cache.AddOrUpdate("test", "adding again?", v => "updating and not adding");
+Console.WriteLine("After AddOrUpdate: {0}", cache["test"]);
+```
 Removing the item, will cause the following `Update` call to return `Null` again
-
-    cache.Remove("test");
-    var removeValue = cache.Update("test", v => "updated?");
-    Console.WriteLine("Value after remove is null?: {0}", removeValue == null);
-
+```cs
+cache.Remove("test");
+var removeValue = cache.Update("test", v => "updated?");
+Console.WriteLine("Value after remove is null?: {0}", removeValue == null);
+```
 ## Example 2
 The second example will increase a counter in a loop:
 
+```cs
+cache.AddOrUpdate("counter", 0, v => v + 1);
 
-    cache.AddOrUpdate("counter", 0, v => v + 1);
+Console.WriteLine("Initial value: {0}", cache.Get("counter"));
 
-    Console.WriteLine("Initial value: {0}", cache.Get("counter"));
+for (int i = 0; i < 12345; i++)
+{
+    cache.Update("counter", v => v + 1);
+}
 
-    for (int i = 0; i < 12345; i++)
-    {
-        cache.Update("counter", v => v + 1);
-    }
-
-    Console.WriteLine("Final value: {0}", cache.Get("counter"));
-
+Console.WriteLine("Final value: {0}", cache.Get("counter"));
+```
 
 [TOC]
