@@ -72,7 +72,7 @@ The full code example:
 
 Hopefully this worked out just fine. Now you should be set to play around with the Cache Manager!
 
-[readme]: http://cachemanager.net/CacheManager
+[readme]: http://cachemanager.net/Documentation/Index/cachemanager_readme
 [features]: http://cachemanager.net/Documentation/Index/cachemanager_architecture
 [sysCache]: https://www.nuget.org/packages/CacheManager.SystemRuntimeCaching/
 [newProject]: https://github.com/MichaCo/CacheManager/raw/master/Articles/media/cachemanager-getting-started/create-console-app.jpg
