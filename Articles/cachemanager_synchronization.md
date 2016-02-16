@@ -1,4 +1,11 @@
+<!--
+{title:"CacheManager - Cache Synchronization",
+abstract: "Running multiple instances of your application, all accessing the same distributed cache, can be tricky. This article explains of how and when to use the cache back-plate feature of CacheManager.",
+lastUpdate:"2016-02-16"
+}
+-->
 #Cache Synchronization
+Running multiple instances of your application, all accessing the same distributed cache, can be tricky. This article explains of how and when to use the cache back-plate feature of CacheManager.
 
 ## Multi-Layer Use Case
 A common scenario would be, that you have a distributed cache, e.g. Redis, and you want to access that layer from multiple clients to share the cached data across those clients, because e.g. the creation of the cached items is expensive, or you want to simply store shared data. 

@@ -1,4 +1,10 @@
-## Cache Manager Logging
+<!--
+{title:"CacheManager - Logging Explained",
+abstract: "In-depth walk through of how logging in CacheManager works and how you can use it, with many code and log output examples.",
+lastUpdate:"2016-02-16"
+}
+-->
+## Logging
 Since version 0.7.2, CacheManager.Core comes with its own logging interface `CacheManager.Core.Logging` which is used internally to log standard cache operations, and to trace what decisions CacheManager is making.
 
 ### Example Log Output

@@ -1,4 +1,10 @@
-# Cache Manager Configuration
+<!--
+{title:"CacheManager - Configuration",
+abstract: "Details and code examples of all the different options, CacheManager provides to configure caching in your application, at development- and at run-time.",
+lastUpdate:"2016-02-16"
+}
+-->
+# Configuration
 A big goal of Cache Manager is to make it easy to work with different cache systems, but at the same time it should be flexible to adopt to different needs.
 Therefore, the configuration is a pretty important part of Cache Manager. 
 

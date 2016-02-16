@@ -1,3 +1,9 @@
+<!--
+{title:"CacheManager - Features and Architecture",
+abstract: "An overview of the primary features and functionality of CacheManager.",
+lastUpdate:"2016-02-16"
+}
+-->
 # Features and Architecture
 
 ## Standard operations

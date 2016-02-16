@@ -1,6 +1,12 @@
-# Getting Started with Cache Manager
+<!--
+{title:"CacheManager - Getting Started Guide and Code Samples",
+abstract: "Quick getting started guide of how to install and use CacheManager in your projects.",
+lastUpdate:"2016-02-16"
+}
+-->
+# Getting Started
 
-## Basics
+## The Basics
 Cache Manager is structured into many different Nuget packages.
 The one which is common but must not be installed stand alone is CacheManager.Core. All other packages will add functionality, cache handles and other features, which are totally optional.
 

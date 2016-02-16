@@ -1,6 +1,13 @@
+<!--
+{title:"Example: Single Page Todo App with Cache Manager",
+abstract: "Creating a single page To-Do web app using an ASP.NET Web API 2 Service which stores the data via Cache Manager.",
+lastUpdate:"2016-02-16"
+}
+-->
+
 # Single Page Todo App with Cache Manager
 
-This is about creating a single page web site using an ASP.NET Web API Service which stores the data via Cache Manager. 
+This is about creating a single page web app using an ASP.NET Web API 2 Service which stores the data via Cache Manager. 
 I will explain the service implementation and usage of Cache Manager, and also discuss how to host the newly created site on Azure and how to configure Azure's Redis cache.
 
 To implement the site, I will use an existing AngularJS based [example][1] from [todomvc.com][2]. 
