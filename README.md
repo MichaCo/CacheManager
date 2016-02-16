@@ -19,12 +19,13 @@ Linux, Mono | [![Build Status](https://travis-ci.org/MichaCo/CacheManager.svg?br
 
 | Package Name | .Net 4.0  | .Net 4.5  | DNX 4.5.1 | Dotnet 5.2 | Dotnet 5.4
 |--------------| :-------: | :-------: | :-------: | :-------:  | :--------:
-| [CacheManager.Microsoft.Extensions.Logging] [Logging.nuget] | - | - | x | - | x
 | [CacheManager.Core] [Core.nuget] | x | x | x | x | x
 | [CacheManager.Serialization.Json] [Json.nuget] | x | x | x | x | x
 | [CacheManager.StackExchange.Redis] [Redis.nuget] | x | x | x | - | -
 | [CacheManager.SystemRuntimeCaching] [SystemRuntimeCaching.nuget]  | x | x | x | - | -
 | [CacheManager.Memcached] [Memcached.nuget]  | x | x | x | - | -
+| [CacheManager.Microsoft.Extensions.Configuration] [Configuration.nuget] | - | - | x | - | x
+| [CacheManager.Microsoft.Extensions.Logging] [Logging.nuget] | - | - | x | - | x
 | [CacheManager.Web] [Web.nuget]  | - | x | x | - | -
 | [CacheManager.Couchbase] [Couchbase.nuget]  | - | x | x | - | -
 
@@ -50,6 +51,8 @@ A more advanced in depth introduction to all features of Cache Manager
 Explanation of why and when to use the update method instead of `Put` 
 * [**Cache Synchronization**][cachesyncarticle]
 Use case for and explanation of the Cache Back Plate feature.
+* [**Logging**][logging]
+The logging abstraction and implementations explained
 
 There is also from source generated [html documentation][help] available online.
 
@@ -62,7 +65,11 @@ There is also from source generated [html documentation][help] available online.
 ## Features in Version: [0.7.x][releases] 
 
 * One common interface for handling different caching technologies: `ICache<T>`
-* Configurable via app/web.config or by code.
+* Configurable by
+	* Code with many different paths and a fluent configuration builder
+	* Microsoft.Extensions.Configuration
+	* App/Web.config
+	* See [configuration docs][configuration]
 * Support for different cache providers
     * **MemoryCache** (System.Runtime.Caching)
     * **Redis** using [StackExchange.Redis](https://github.com/StackExchange/StackExchange.Redis)
@@ -120,10 +127,12 @@ OnGet, OnAdd, OnPut, OnRemove, OnClear, OnClearRegion
 [featuresarticle]: http://cachemanager.net/Documentation/Index/cachemanager_architecture
 [updatearticle]: http://cachemanager.net/Documentation/Index/cachemanager_update
 [cachesyncarticle]: http://cachemanager.net/Documentation/Index/cachemanager_synchronization
+[logging]: http://cachemanager.net/Documentation/Index/cachemanager_logging
 [program.cs]: https://github.com/MichaCo/CacheManager/blob/master/samples/CacheManager.Examples/Program.cs
 [outputcachesample]: https://github.com/MichaCo/CacheManager/tree/master/samples/CacheManager.Samples.Mvc
 [todosample]: http://cachemanager.net/Documentation/Index/cachemanager_backed_todo_web_app
 [Json.nuget]: https://www.nuget.org/packages/CacheManager.Serialization.Json
 [Logging.nuget]: https://www.nuget.org/packages/CacheManager.Microsoft.Extensions.Logging
+[Configuration.nuget]: https://www.nuget.org/packages/CacheManager.Microsoft.Extensions.Configuration
 
 [TOC]
