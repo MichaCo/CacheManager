@@ -23,11 +23,12 @@ namespace CacheManager.Redis
         private readonly string channelName;
         private readonly string identifier;
         private readonly ILogger logger;
-        private StackRedis.ISubscriber redisSubscriper;
         private Timer timer;
         private HashSet<string> messages = new HashSet<string>();
         private object messageLock = new object();
         private int skippedMessages = 0;
+        private bool sending = false;
+        private readonly RedisConnectionManager connection;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RedisCacheBackPlate"/> class.
@@ -44,29 +45,26 @@ namespace CacheManager.Redis
             this.channelName = configuration.BackPlateChannelName ?? "CacheManagerBackPlate";
             this.identifier = Guid.NewGuid().ToString();
 
-            RetryHelper.Retry(
-                () =>
-                {
-                    // throws an exception if not found for the name
-                    var cfg = RedisConfigurations.GetConfiguration(this.ConfigurationKey);
+            var cfg = RedisConfigurations.GetConfiguration(this.ConfigurationKey);
+            this.connection = new RedisConnectionManager(
+                cfg,
+                loggerFactory);
 
-                    var connection = RedisConnectionPool.Connect(cfg);
-
-                    this.redisSubscriper = connection.GetSubscriber();
-                },
-                configuration.RetryTimeout,
-                configuration.MaxRetries,
-                this.logger);
-
-            this.Subscribe();
+            RetryHelper.Retry(() => this.Subscribe(), configuration.RetryTimeout, configuration.MaxRetries, logger);
 
             this.timer = new Timer(
                 (obj) =>
                 {
+                    if (this.sending)
+                    {
+                        return;
+                    }
+
                     lock (this.messageLock)
                     {
                         try
                         {
+                            this.sending = true;
                             if (this.messages != null && this.messages.Count > 0)
                             {
                                 var msgs = string.Join(",", this.messages);
@@ -75,7 +73,15 @@ namespace CacheManager.Redis
                                     this.logger.LogDebug("Back-plate is sending {0} messages ({1} skipped).", this.messages.Count, this.skippedMessages);
                                 }
 
-                                this.Publish(msgs);
+                                RetryHelper.Retry(
+                                    () =>
+                                    {
+                                        this.Publish(msgs);
+                                    },
+                                    configuration.RetryTimeout,
+                                    configuration.MaxRetries,
+                                    this.logger);
+
                                 this.skippedMessages = 0;
                                 this.messages.Clear();
                             }
@@ -83,7 +89,10 @@ namespace CacheManager.Redis
                         catch (Exception ex)
                         {
                             this.logger.LogError(ex, "Error occurred sending back plate messages.");
-                            throw;
+                        }
+                        finally
+                        {
+                            this.sending = false;
                         }
                     }
                 },
@@ -158,7 +167,7 @@ namespace CacheManager.Redis
         {
             if (managed)
             {
-                this.redisSubscriper.Unsubscribe(this.channelName);
+                this.connection.Subscriber.Unsubscribe(this.channelName);
                 this.timer.Dispose();
             }
 
@@ -167,7 +176,7 @@ namespace CacheManager.Redis
 
         private void Publish(string message)
         {
-            this.redisSubscriper.Publish(this.channelName, message, StackRedis.CommandFlags.FireAndForget);
+            this.connection.Subscriber.Publish(this.channelName, message, StackRedis.CommandFlags.FireAndForget);
         }
 
         private void PublishMessage(BackPlateMessage message)
@@ -195,7 +204,7 @@ namespace CacheManager.Redis
 
         private void Subscribe()
         {
-            this.redisSubscriper.Subscribe(
+            this.connection.Subscriber.Subscribe(
                 this.channelName,
                 (channel, msg) =>
                 {

@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Threading;
 using CacheManager.Core;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace CacheManager.Config.Tests
 {
@@ -13,7 +13,7 @@ namespace CacheManager.Config.Tests
             // Set up configuration sources.
             var builder = new Microsoft.Extensions.Configuration.ConfigurationBuilder()
                 .AddJsonFile("cache.json");
-            
+
             this.Configuration = builder.Build();
         }
 
@@ -24,39 +24,21 @@ namespace CacheManager.Config.Tests
             int iterations = int.MaxValue;
             try
             {
-                var jsonConfiguration = 
-                    this.Configuration.GetCacheConfiguration("cachename")
-                    .Builder
-                    .WithMicrosoftLogging(f =>
-                    {
-                        // TODO: remove after logging upgrade to RC2
-                        f.MinimumLevel = LogLevel.Debug;
-
-                        f.AddConsole(LogLevel.Information);
-
-                        // TODO: change to Debug after logging upgrade to RC2
-                        f.AddDebug(LogLevel.Verbose);
-                    })
-                    .Build();
-
-                var jsonCache = new BaseCacheManager<string>(jsonConfiguration);
-                jsonCache.Put("key", "value");
-                                
                 var builder = new Core.ConfigurationBuilder("myCache");
                 builder.WithMicrosoftLogging(f =>
                 {
                     // TODO: remove after logging upgrade to RC2
                     f.MinimumLevel = LogLevel.Debug;
 
-                    f.AddConsole(LogLevel.Information);
+                    f.AddConsole(LogLevel.Error);
 
                     // TODO: change to Debug after logging upgrade to RC2
                     f.AddDebug(LogLevel.Verbose);
                 });
 
                 builder.WithUpdateMode(CacheUpdateMode.Up);
-                builder.WithRetryTimeout(500);
-                builder.WithMaxRetries(50);
+                builder.WithRetryTimeout(1000);
+                builder.WithMaxRetries(10);
 
 #if DNXCORE50
                 builder.WithDictionaryHandle("dic")
@@ -64,7 +46,7 @@ namespace CacheManager.Config.Tests
 
                 //Console.WriteLine("Using Dictionary cache handle");
 #else
-                builder.WithSystemRuntimeCacheHandle()
+                builder.WithDictionaryHandle()
                     .DisableStatistics();
 
                 builder.WithRedisCacheHandle("redis", true)
@@ -77,7 +59,7 @@ namespace CacheManager.Config.Tests
                     config
                         .WithAllowAdmin()
                         .WithDatabase(0)
-                        .WithConnectionTimeout(1000)
+                        .WithConnectionTimeout(5000)
                         .WithEndpoint("127.0.0.1", 6380)
                         .WithEndpoint("127.0.0.1", 6379);
                     //.WithEndpoint("192.168.178.34", 7001);
@@ -120,7 +102,7 @@ namespace CacheManager.Config.Tests
                     Console.WriteLine("---------------------------------------------------------");
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Console.WriteLine(ex);
             }

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using CacheManager.Core.Logging;
 using static CacheManager.Core.Utility.Guard;
 
@@ -26,6 +28,7 @@ namespace CacheManager.Core.Internal
             NotNull(loggerFactory, nameof(loggerFactory));
             this.Logger = loggerFactory.CreateLogger(this);
             this.cache = new ConcurrentDictionary<string, CacheItem<TCacheValue>>();
+            this.StartScanExpiredItems();
         }
 
         /// <summary>
@@ -57,6 +60,8 @@ namespace CacheManager.Core.Internal
                 CacheItem<TCacheValue> val = null;
                 this.cache.TryRemove(item.Key, out val);
             }
+
+            this.StartScanExpiredItems();
         }
 
         /// <summary>
@@ -72,6 +77,8 @@ namespace CacheManager.Core.Internal
             NotNull(item, nameof(item));
 
             var key = GetKey(item.Key, item.Region);
+
+            this.StartScanExpiredItems();
             return this.cache.TryAdd(key, item);
         }
 
@@ -96,13 +103,14 @@ namespace CacheManager.Core.Internal
             CacheItem<TCacheValue> result = null;
             if (this.cache.TryGetValue(fullKey, out result))
             {
-                if (IsExpired(result))
+                if (IsExpired(result, DateTimeOffset.UtcNow))
                 {
                     this.cache.TryRemove(fullKey, out result);
                     return null;
                 }
             }
 
+            this.StartScanExpiredItems();
             return result;
         }
 
@@ -115,8 +123,9 @@ namespace CacheManager.Core.Internal
         protected override void PutInternalPrepared(CacheItem<TCacheValue> item)
         {
             NotNull(item, nameof(item));
-
+            
             this.cache[GetKey(item.Key, item.Region)] = item;
+            this.StartScanExpiredItems();
         }
 
         /// <summary>
@@ -162,9 +171,8 @@ namespace CacheManager.Core.Internal
             return string.Concat(region, ":", key);
         }
 
-        private static bool IsExpired(CacheItem<TCacheValue> item)
+        private static bool IsExpired(CacheItem<TCacheValue> item, DateTimeOffset now)
         {
-            var now = DateTime.UtcNow;
             if (item.ExpirationMode == ExpirationMode.Absolute
                 && item.CreatedUtc.Add(item.ExpirationTimeout) < now)
             {
@@ -177,6 +185,54 @@ namespace CacheManager.Core.Internal
             }
 
             return false;
+        }
+
+        private long lastScan = 0L;
+        private const int ScanInterval = 10000;
+        private bool scanRunning;
+        private object startScanLock = new object();
+        private void StartScanExpiredItems()
+        {
+            var currentTicks = Environment.TickCount;
+            if (!this.scanRunning && this.lastScan + ScanInterval < currentTicks)
+            {
+                lock (startScanLock)
+                {
+                    if (!this.scanRunning && this.lastScan + ScanInterval < currentTicks)
+                    {
+                        this.lastScan = currentTicks;
+#if NET40
+                        Task.Factory.StartNew(state => ScanForExpiredItems((DictionaryCacheHandle<TCacheValue>)state), this,
+                            CancellationToken.None, TaskCreationOptions.None, TaskScheduler.Default);
+#else
+                        Task.Factory.StartNew(state => ScanForExpiredItems((DictionaryCacheHandle<TCacheValue>)state), this,
+                            CancellationToken.None, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default);
+#endif
+                    }
+                }
+            }
+        }
+
+        private static void ScanForExpiredItems(DictionaryCacheHandle<TCacheValue> cache)
+        {
+            cache.scanRunning = true;
+            var removed = 0;
+            var now = DateTimeOffset.UtcNow;
+            foreach (var item in cache.cache.Values)
+            {
+                if (IsExpired(item, now))
+                {
+                    cache.RemoveInternal(item.Key, item.Region);
+                    removed++;
+                }
+            }
+
+            if(removed > 0 && cache.Logger.IsEnabled(LogLevel.Information))
+            {
+                cache.Logger.LogInfo("Removed {0} expired items.", removed);
+            }
+
+            cache.scanRunning = false;
         }
     }
 }

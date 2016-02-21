@@ -1,95 +1,143 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text;
+using CacheManager.Core.Logging;
 using static CacheManager.Core.Utility.Guard;
 using StackRedis = StackExchange.Redis;
 
 namespace CacheManager.Redis
 {
-    internal class RedisConnectionPool
+    internal class LogWriter : StringWriter
+    {
+        private readonly ILogger logger;
+
+        public LogWriter(ILogger logger)
+        {
+            this.logger = logger;
+        }
+
+        public LogWriter(StringBuilder sb) : base(sb)
+        {
+        }
+
+        public LogWriter(IFormatProvider formatProvider) : base(formatProvider)
+        {
+        }
+
+        public LogWriter(StringBuilder sb, IFormatProvider formatProvider) : base(sb, formatProvider)
+        {
+        }
+
+        public override void Write(char value)
+        {
+        }
+
+        public override void Write(string value)
+        {
+            this.logger.LogDebug(value);
+        }
+
+        public override void Write(char[] buffer, int index, int count)
+        {
+            this.logger.LogDebug(new string(buffer, index, count));
+        }
+    }
+
+    internal class RedisConnectionManager
     {
         private static IDictionary<string, StackRedis.ConnectionMultiplexer> connections = new Dictionary<string, StackRedis.ConnectionMultiplexer>();
-
+        private static IDictionary<string, int> connectionRefs = new Dictionary<string, int>();
         private static object connectLock = new object();
 
-        public static void DisposeConnection(string connectionString)
-        {
-            NotNullOrWhiteSpace(connectionString, nameof(connectionString));
+        private readonly ILogger logger;
+        private readonly string connectionString;
+        private readonly RedisConfiguration configuration;
+        private readonly Action<StackRedis.ConnectionType> onRestoreConnection;
 
+        public RedisConnectionManager(RedisConfiguration configuration, ILoggerFactory loggerFactory, Action<StackRedis.ConnectionType> onRestoreConnection = null)
+        {
+            NotNull(configuration, nameof(configuration));
+            NotNull(loggerFactory, nameof(loggerFactory));
+
+            this.connectionString = GetConnectionString(configuration);
+
+            this.configuration = configuration;
+            this.logger = loggerFactory.CreateLogger(this);
+            this.onRestoreConnection = onRestoreConnection;
+        }
+
+        public StackRedis.IDatabase Database => this.Connect().GetDatabase(this.configuration.Database);
+
+        public StackRedis.ISubscriber Subscriber => this.Connect().GetSubscriber();
+
+        public void RemoveConnection()
+        {
             lock (connectLock)
             {
                 StackRedis.ConnectionMultiplexer connection;
-                if (connections.TryGetValue(connectionString, out connection))
+                if (connections.TryGetValue(this.connectionString, out connection))
                 {
-                    // don't dispose the connection, might still be used somewhere
-                    // just remove it from the pool so that new connects create new instances
-                    connections.Remove(connectionString);
+                    this.logger.LogInfo("Removing stale redis connection.");
+                    connections.Remove(this.connectionString);
                 }
             }
         }
 
-        public static void DisposeConnection(RedisConfiguration configuration)
+        public StackRedis.ConnectionMultiplexer Connect()
         {
-            NotNull(configuration, nameof(configuration));
-            DisposeConnection(GetConnectionString(configuration));
-        }
-
-        public static StackRedis.ConnectionMultiplexer Connect(string connectionString)
-        {
-            if (!connections.ContainsKey(connectionString))
+            if (!connections.ContainsKey(this.connectionString))
             {
                 lock (connectLock)
                 {
-                    StackRedis.ConnectionMultiplexer connection;
-                    if (!connections.TryGetValue(connectionString, out connection))
+                    if (!connections.ContainsKey(this.connectionString))
                     {
-                        connection = StackRedis.ConnectionMultiplexer.Connect(connectionString);
-                        ////var builder = new StringBuilder();
-                        ////var log = new StringWriter(builder, CultureInfo.InvariantCulture);
-                        ////connection = StackRedis.ConnectionMultiplexer.Connect(connectionString, log);
-
-                        connection.ConnectionFailed += (sender, args) =>
+                        StackRedis.ConnectionMultiplexer connection;
+                        if (!connections.TryGetValue(this.connectionString, out connection))
                         {
-                        };
+                            this.logger.LogInfo("Connecting to redis: '{0}'", this.connectionString);
+                            connection = StackRedis.ConnectionMultiplexer.Connect(this.connectionString, new LogWriter(this.logger));
 
-                        if (!connection.IsConnected)
-                        {
-                            throw new InvalidOperationException("Connection failed.");
+                            if (!connection.IsConnected)
+                            {
+                                connection.Dispose();
+                                throw new InvalidOperationException("Connection failed.");
+                            }
+                            
+                            connection.ConnectionRestored += (sender, args) =>
+                            {
+                                this.logger.LogInfo(args.Exception, "Connection restored, type: '{0}', failure: '{1}'", args.ConnectionType, args.FailureType);
+                            };
+
+                            var endpoints = connection.GetEndPoints();
+                            if (!endpoints.Select(p => connection.GetServer(p))
+                                .Any(p => !p.IsSlave || p.AllowSlaveWrites))
+                            {
+                                throw new InvalidOperationException("No writeable endpoint found.");
+                            }
+
+                            connection.PreserveAsyncOrder = false;
+                            connections.Add(this.connectionString, connection);
                         }
-
-                        var endpoints = connection.GetEndPoints();
-                        if (!endpoints.Select(p => connection.GetServer(p))
-                            .Any(p => !p.IsSlave || p.AllowSlaveWrites))
-                        {
-                            throw new InvalidOperationException("No writeable endpoint found.");
-                        }
-
-                        connection.PreserveAsyncOrder = false;
-                        connections.Add(connectionString, connection);
                     }
                 }
             }
 
-            return connections[connectionString];
+            return connections[this.connectionString];
         }
 
-        public static StackRedis.ConnectionMultiplexer Connect(RedisConfiguration configuration)
+        private static string GetConnectionString(RedisConfiguration configuration)
         {
-            NotNull(configuration, nameof(configuration));
-            return Connect(GetConnectionString(configuration));
-        }
-
-        public static string GetConnectionString(RedisConfiguration configuration)
-        {
-            string connectionString = configuration.ConnectionString;
+            string conString = configuration.ConnectionString;
 
             if (string.IsNullOrWhiteSpace(configuration.ConnectionString))
             {
                 var options = CreateConfigurationOptions(configuration);
-                connectionString = options.ToString();
+                conString = options.ToString();
             }
 
-            return connectionString;
+            return conString;
         }
 
         private static StackRedis.ConfigurationOptions CreateConfigurationOptions(RedisConfiguration configuration)

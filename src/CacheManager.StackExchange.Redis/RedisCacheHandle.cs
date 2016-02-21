@@ -71,7 +71,7 @@ return result";
         private readonly IDictionary<ScriptType, StackRedis.LoadedLuaScript> shaScripts = new Dictionary<ScriptType, StackRedis.LoadedLuaScript>();
         private readonly CacheManagerConfiguration managerConfiguration;
         private readonly RedisValueConverter valueConverter;
-        private StackRedis.IDatabase database = null;
+        private readonly RedisConnectionManager connection;
         private RedisConfiguration redisConfiguration = null;
 
         // flag if scripts are initially loaded to the server
@@ -96,6 +96,8 @@ return result";
             this.managerConfiguration = managerConfiguration;
             this.Logger = loggerFactory.CreateLogger(this);
             this.valueConverter = new RedisValueConverter(serializer);
+            this.redisConfiguration = RedisConfigurations.GetConfiguration(configuration.Key);
+            this.connection = new RedisConnectionManager(this.redisConfiguration, loggerFactory);
         }
 
         /// <summary>
@@ -110,7 +112,7 @@ return result";
                 var count = 0;
                 foreach (var server in this.Servers.Where(p => !p.IsSlave && p.IsConnected))
                 {
-                    count += (int)server.DatabaseSize(this.RedisConfiguration.Database);
+                    count += (int)server.DatabaseSize(this.redisConfiguration.Database);
                 }
 
                 // aprox size, only size on the master..
@@ -126,12 +128,12 @@ return result";
         {
             get
             {
-                var connection = this.Connection;
+                var connection = this.connection;
 
-                EndPoint[] endpoints = connection.GetEndPoints();
+                EndPoint[] endpoints = connection.Connect().GetEndPoints();
                 foreach (var endpoint in endpoints)
                 {
-                    var server = connection.GetServer(endpoint);
+                    var server = connection.Connect().GetServer(endpoint);
                     yield return server;
                 }
             }
@@ -139,52 +141,6 @@ return result";
 
         /// <inheritdoc />
         protected override ILogger Logger { get; }
-
-        private StackRedis.ConnectionMultiplexer Connection
-        {
-            get
-            {
-                return RedisConnectionPool.Connect(this.RedisConfiguration);
-            }
-        }
-
-        private StackRedis.IDatabase Database
-        {
-            get
-            {
-                if (this.database == null)
-                {
-                    lock (this.lockObject)
-                    {
-                        if (this.database == null)
-                        {
-                            this.Retry(() =>
-                            {
-                                this.database = this.Connection.GetDatabase(this.RedisConfiguration.Database);
-
-                                this.database.Ping();
-                            });
-                        }
-                    }
-                }
-
-                return this.database;
-            }
-        }
-
-        private RedisConfiguration RedisConfiguration
-        {
-            get
-            {
-                if (this.redisConfiguration == null)
-                {
-                    // throws an exception if not found for the name
-                    this.redisConfiguration = RedisConfigurations.GetConfiguration(this.Configuration.Key);
-                }
-
-                return this.redisConfiguration;
-            }
-        }
 
         /// <summary>
         /// Clears this cache, removing all items in the base cache and all regions.
@@ -197,7 +153,7 @@ return result";
                 {
                     if (server.IsConnected)
                     {
-                        server.FlushDatabase(this.RedisConfiguration.Database);
+                        server.FlushDatabase(this.redisConfiguration.Database);
                     }
                 });
             }
@@ -212,7 +168,7 @@ return result";
             this.Retry(() =>
             {
                 // we are storing all keys stored in the region in the hash for key=region
-                var hashKeys = this.Database.HashKeys(region);
+                var hashKeys = this.connection.Database.HashKeys(region);
 
                 if (hashKeys.Length > 0)
                 {
@@ -220,13 +176,13 @@ return result";
                     // 01/32/16 changed to remove one by one because on clusters the keys could belong to multiple slots
                     foreach (var key in hashKeys.Where(p => p.HasValue))
                     {
-                        this.Database.KeyDelete(key.ToString(), StackRedis.CommandFlags.FireAndForget);
+                        this.connection.Database.KeyDelete(key.ToString(), StackRedis.CommandFlags.FireAndForget);
                     }
                     //// TODO: log result <> key length
                 }
 
                 // now delete the region
-                this.Database.KeyDelete(region);
+                this.connection.Database.KeyDelete(region);
             });
         }
 
@@ -315,7 +271,7 @@ return result";
             base.Dispose(disposeManaged);
             if (disposeManaged)
             {
-                RedisConnectionPool.DisposeConnection(this.RedisConfiguration);
+                this.connection.RemoveConnection();
             }
         }
 
@@ -437,11 +393,11 @@ return result";
                 // clean up region
                 if (!string.IsNullOrWhiteSpace(region))
                 {
-                    this.Database.HashDelete(region, fullKey, StackRedis.CommandFlags.FireAndForget);
+                    this.connection.Database.HashDelete(region, fullKey, StackRedis.CommandFlags.FireAndForget);
                 }
 
                 // remove key
-                var result = this.Database.KeyDelete(fullKey);
+                var result = this.connection.Database.KeyDelete(fullKey);
 
                 return result;
             });
@@ -553,7 +509,7 @@ return result";
                     {
                         // now update region lookup if region is set
                         // we cannot do that within the lua because the region could be on another cluster node!
-                        this.Database.HashSet(item.Region, fullKey, "regionKey", when, StackRedis.CommandFlags.FireAndForget);
+                        this.connection.Database.HashSet(item.Region, fullKey, "regionKey", when, StackRedis.CommandFlags.FireAndForget);
                     }
 
                     return true;
@@ -587,7 +543,7 @@ return result";
 
             try
             {
-                return this.Database.ScriptEvaluate(script.Hash, new[] { redisKey }, values, flags);
+                return this.connection.Database.ScriptEvaluate(script.Hash, new[] { redisKey }, values, flags);
             }
             catch (StackRedis.RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.OrdinalIgnoreCase))
             {
