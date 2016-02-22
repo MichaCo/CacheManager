@@ -1,0 +1,27 @@
+﻿{
+  "version": "1.0.0-*",
+  "description": "CacheManager.Backplate.App Console Application",
+  "authors": [ "Micha" ],
+  "tags": [ "" ],
+  "projectUrl": "",
+  "licenseUrl": "",
+
+  "compilationOptions": {
+    "emitEntryPoint": true
+  },
+
+  "dependencies": {
+    "CacheManager.StackExchange.Redis": "",
+    "CacheManager.Microsoft.Extensions.Logging": "",
+    "CacheManager.Microsoft.Extensions.Configuration": "",
+    "Microsoft.Extensions.Configuration.Json": "1.0.0-rc1-final"
+  },
+
+  "commands": {
+    "CacheManager.Backplate.App": "CacheManager.Backplate.App"
+  },
+
+  "frameworks": {
+    "dnx451": { }
+  }
+}

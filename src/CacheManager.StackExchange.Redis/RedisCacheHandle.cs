@@ -538,6 +538,7 @@ return result";
             if (!this.shaScripts.TryGetValue(scriptType, out script))
             {
                 this.Logger.LogCritical("Something is wrong with the Lua scripts. Seem to be not loaded.");
+                this.scriptsLoaded = false;
                 throw new InvalidOperationException("Something is wrong with the Lua scripts. Seem to be not loaded.");
             }
 

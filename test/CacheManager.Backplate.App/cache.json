@@ -1,0 +1,71 @@
+﻿{
+  "$schema": "http://cachemanager.net/schemas/cachemanager.json",
+  "redis": [
+    {
+      "key": "RedisA",
+      "endpoints": [
+        {
+          "host": "127.0.0.1",
+          "port": 6379
+        }
+      ],
+      "connectionTimeout": 5000,
+      "allowAdmin": true,
+      "database": 0
+    },
+    {
+      "key": "RedisB",
+      "endpoints": [
+        {
+          "host": "127.0.0.1",
+          "port": 6379
+        }
+      ],
+      "connectionTimeout": 4000,
+      "allowAdmin": true,
+      "database": 0
+    }
+  ],
+  "cacheManagers": [
+    {
+      "name": "CacheA",
+      "backPlate": {
+        "key": "RedisA",
+        "knownType": "Redis"
+      },
+      "handles": [
+        {
+          "knownType": "Dictionary",
+          "expirationMode": "Absolute",
+          "expirationTimeout": "00:00:10"
+        },
+        {
+          "knownType": "Redis",
+          "name": "RedisA",
+          "key": "RedisA",
+          "isBackPlateSource": true
+        }
+      ]
+    },
+    {
+      "name": "CacheB",
+      "backPlate": {
+        "key": "RedisB",
+        "knownType": "Redis"
+      },
+      "handles": [
+        {
+          "knownType": "Dictionary",
+          "expirationMode": "Absolute",
+          "expirationTimeout": "00:00:10"
+        },
+        {
+          "knownType": "Redis",
+          "name": "RedisB",
+          "key": "RedisB",
+          "isBackPlateSource": true
+        }
+      ]
+    }
+  ]
+}

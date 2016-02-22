@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using CacheManager.Core;
 using CacheManager.Core.Internal;
 using CacheManager.Core.Logging;
@@ -23,7 +24,6 @@ namespace CacheManager.Redis
         private readonly string channelName;
         private readonly string identifier;
         private readonly ILogger logger;
-        private Timer timer;
         private HashSet<string> messages = new HashSet<string>();
         private object messageLock = new object();
         private int skippedMessages = 0;
@@ -51,54 +51,6 @@ namespace CacheManager.Redis
                 loggerFactory);
 
             RetryHelper.Retry(() => this.Subscribe(), configuration.RetryTimeout, configuration.MaxRetries, logger);
-
-            this.timer = new Timer(
-                (obj) =>
-                {
-                    if (this.sending)
-                    {
-                        return;
-                    }
-
-                    lock (this.messageLock)
-                    {
-                        try
-                        {
-                            this.sending = true;
-                            if (this.messages != null && this.messages.Count > 0)
-                            {
-                                var msgs = string.Join(",", this.messages);
-                                if (this.logger.IsEnabled(LogLevel.Debug))
-                                {
-                                    this.logger.LogDebug("Back-plate is sending {0} messages ({1} skipped).", this.messages.Count, this.skippedMessages);
-                                }
-
-                                RetryHelper.Retry(
-                                    () =>
-                                    {
-                                        this.Publish(msgs);
-                                    },
-                                    configuration.RetryTimeout,
-                                    configuration.MaxRetries,
-                                    this.logger);
-
-                                this.skippedMessages = 0;
-                                this.messages.Clear();
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            this.logger.LogError(ex, "Error occurred sending back plate messages.");
-                        }
-                        finally
-                        {
-                            this.sending = false;
-                        }
-                    }
-                },
-                this,
-                TimeSpan.FromMilliseconds(100),
-                TimeSpan.FromMilliseconds(100));
         }
 
         /// <summary>
@@ -168,7 +120,6 @@ namespace CacheManager.Redis
             if (managed)
             {
                 this.connection.Subscriber.Unsubscribe(this.channelName);
-                this.timer.Dispose();
             }
 
             base.Dispose(managed);
@@ -176,7 +127,7 @@ namespace CacheManager.Redis
 
         private void Publish(string message)
         {
-            this.connection.Subscriber.Publish(this.channelName, message, StackRedis.CommandFlags.FireAndForget);
+            this.connection.Subscriber.Publish(this.channelName, message, StackRedis.CommandFlags.HighPriority);
         }
 
         private void PublishMessage(BackPlateMessage message)
@@ -199,7 +150,64 @@ namespace CacheManager.Redis
                         this.logger.LogTrace("Skipped duplicate message: {0}.", msg);
                     }
                 }
+
+                this.SendMessages();
             }
+        }
+
+        private void SendMessages()
+        {
+            if (this.sending || this.messages == null || this.messages.Count == 0)
+            {
+                return;
+            }
+            
+            Task.Factory.StartNew((obj) =>
+            {
+                if (this.sending || this.messages == null || this.messages.Count == 0)
+                {
+                    return;
+                }
+
+                this.sending = true;
+#if !NET40
+                Task.Delay(10).Wait();
+#endif
+                string msgs = string.Empty;
+                lock (this.messageLock)
+                {
+                    if (this.messages != null && this.messages.Count > 0)
+                    {
+                        msgs = string.Join(",", this.messages);
+
+                        if (this.logger.IsEnabled(LogLevel.Debug))
+                        {
+                            this.logger.LogDebug("Back-plate is sending {0} messages ({1} skipped).", this.messages.Count, this.skippedMessages);
+                        }
+
+                        this.skippedMessages = 0;
+                        this.messages.Clear();
+                    }
+
+                    try
+                    {
+                        if (msgs.Length > 0)
+                        {
+                            this.Publish(msgs);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        this.logger.LogError(ex, "Error occurred sending back plate messages.");
+                    }
+
+                    this.sending = false;
+                }
+#if NET40
+            }, this, CancellationToken.None, TaskCreationOptions.None, TaskScheduler.Default).ConfigureAwait(false);
+#else
+            }, this, CancellationToken.None, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default).ConfigureAwait(false);
+#endif
         }
 
         private void Subscribe()
@@ -230,32 +238,32 @@ namespace CacheManager.Redis
                         switch (message.Action)
                         {
                             case BackPlateAction.Clear:
-                                this.OnClear();
+                                this.TriggerCleared();
                                 break;
 
                             case BackPlateAction.ClearRegion:
-                                this.OnClearRegion(message.Region);
+                                this.TriggerClearedRegion(message.Region);
                                 break;
 
                             case BackPlateAction.Changed:
                                 if (string.IsNullOrWhiteSpace(message.Region))
                                 {
-                                    this.OnChange(message.Key);
+                                    this.TriggerChanged(message.Key);
                                 }
                                 else
                                 {
-                                    this.OnChange(message.Key, message.Region);
+                                    this.TriggerChanged(message.Key, message.Region);
                                 }
                                 break;
 
                             case BackPlateAction.Removed:
                                 if (string.IsNullOrWhiteSpace(message.Region))
                                 {
-                                    this.OnRemove(message.Key);
+                                    this.TriggerRemoved(message.Key);
                                 }
                                 else
                                 {
-                                    this.OnRemove(message.Key, message.Region);
+                                    this.TriggerRemoved(message.Key, message.Region);
                                 }
                                 break;
                         }

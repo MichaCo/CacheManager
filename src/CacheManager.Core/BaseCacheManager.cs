@@ -144,6 +144,8 @@ namespace CacheManager.Core
                 new List<BaseCacheHandle<TCacheValue>>(
                     this.cacheHandles));
 
+        public CacheBackPlate BackPlate => this.cacheBackPlate;
+
         /// <summary>
         /// Gets the cache name.
         /// </summary>
@@ -849,6 +851,24 @@ namespace CacheManager.Core
             // trigger only once and not per handle and only if the item was added!
             if (result)
             {
+                // update back plate
+                if (this.cacheBackPlate != null)
+                {
+                    if (this.logTrace)
+                    {
+                        this.Logger.LogTrace("Put: {0} {1}: notifies back-plate [change].", item.Key, item.Region);
+                    }
+
+                    if (string.IsNullOrWhiteSpace(item.Region))
+                    {
+                        this.cacheBackPlate.NotifyChange(item.Key);
+                    }
+                    else
+                    {
+                        this.cacheBackPlate.NotifyChange(item.Key, item.Region);
+                    }
+                }
+
                 this.TriggerOnAdd(item.Key, item.Region);
             }
 
@@ -1375,49 +1395,28 @@ namespace CacheManager.Core
                     return handleList.ToArray();
                 });
 
-                backPlate.SubscribeChanged((key) =>
+                backPlate.Changed += (sender, args) =>
                 {
                     if (this.logTrace)
                     {
-                        this.Logger.LogTrace("Back-plate event: [Changed] of {0}.", key);
+                        this.Logger.LogTrace("Back-plate event: [Changed] of {0} {1}.", args.Key, args.Region);
                     }
 
-                    this.EvictFromHandles(key, null, handles());
-                });
+                    this.EvictFromHandles(args.Key, args.Region, handles());
+                };
 
-                backPlate.SubscribeChanged((key, region) =>
+                backPlate.Removed += (sender, args) =>
                 {
                     if (this.logTrace)
                     {
-                        this.Logger.LogTrace("Back-plate event: [Changed] of {0} {1}.", key, region);
+                        this.Logger.LogTrace("Back-plate event: [Remove] of {0} {1}.", args.Key, args.Region);
                     }
 
-                    this.EvictFromHandles(key, region, handles());
-                });
+                    this.EvictFromHandles(args.Key, args.Region, handles());
+                    this.TriggerOnRemove(args.Key, args.Region);
+                };
 
-                backPlate.SubscribeRemove((key) =>
-                {
-                    if (this.logTrace)
-                    {
-                        this.Logger.LogTrace("Back-plate event: [Remove] of {0}.", key);
-                    }
-
-                    this.EvictFromHandles(key, null, handles());
-                    this.TriggerOnRemove(key, null);
-                });
-
-                backPlate.SubscribeRemove((key, region) =>
-                {
-                    if (this.logTrace)
-                    {
-                        this.Logger.LogTrace("Back-plate event: [Remove] of {0} {1}.", key, region);
-                    }
-
-                    this.EvictFromHandles(key, region, handles());
-                    this.TriggerOnRemove(key, region);
-                });
-
-                backPlate.SubscribeClear(() =>
+                backPlate.Cleared += (sender, args) =>
                 {
                     if (this.logTrace)
                     {
@@ -1426,18 +1425,18 @@ namespace CacheManager.Core
 
                     this.ClearHandles(handles());
                     this.TriggerOnClear();
-                });
+                };
 
-                backPlate.SubscribeClearRegion((region) =>
+                backPlate.ClearedRegion += (sender, args) =>
                 {
                     if (this.logTrace)
                     {
-                        this.Logger.LogTrace("Back-plate event: [Clear Region] region: {0}.", region);
+                        this.Logger.LogTrace("Back-plate event: [Clear Region] region: {0}.", args.Region);
                     }
 
-                    this.ClearRegionHandles(region, handles());
-                    this.TriggerOnClearRegion(region);
-                });
+                    this.ClearRegionHandles(args.Region, handles());
+                    this.TriggerOnClearRegion(args.Region);
+                };
             }
         }
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -76,24 +77,24 @@ namespace CacheManager.Redis
         {
             lock (connectLock)
             {
-                StackRedis.ConnectionMultiplexer connection;
-                if (connections.TryGetValue(this.connectionString, out connection))
-                {
-                    this.logger.LogInfo("Removing stale redis connection.");
-                    connections.Remove(this.connectionString);
-                }
+                ////StackRedis.ConnectionMultiplexer connection;
+                ////if (connections.TryGetValue(this.connectionString, out connection))
+                ////{
+                ////    this.logger.LogInfo("Removing stale redis connection.");
+                ////    connections.Remove(this.connectionString);
+                ////}
             }
         }
 
         public StackRedis.ConnectionMultiplexer Connect()
         {
-            if (!connections.ContainsKey(this.connectionString))
+            StackRedis.ConnectionMultiplexer connection;
+            if (!connections.TryGetValue(this.connectionString, out connection))
             {
                 lock (connectLock)
                 {
-                    if (!connections.ContainsKey(this.connectionString))
+                    if (!connections.TryGetValue(this.connectionString, out connection))
                     {
-                        StackRedis.ConnectionMultiplexer connection;
                         if (!connections.TryGetValue(this.connectionString, out connection))
                         {
                             this.logger.LogInfo("Connecting to redis: '{0}'", this.connectionString);
@@ -124,7 +125,16 @@ namespace CacheManager.Redis
                 }
             }
 
-            return connections[this.connectionString];
+            if(connection == null)
+            {
+                throw new InvalidOperationException(
+                    string.Format(
+                        CultureInfo.InvariantCulture,
+                        "Couldn't esteblish a connection for {0}.", 
+                        this.connectionString));
+            }
+
+            return connection;
         }
 
         private static string GetConnectionString(RedisConfiguration configuration)

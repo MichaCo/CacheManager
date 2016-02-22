@@ -108,151 +108,42 @@ namespace CacheManager.Core.Internal
         /// <param name="region">The region.</param>
         public abstract void NotifyRemove(string key, string region);
 
-        /// <summary>
-        /// Called when another client changed a cache key.
-        /// </summary>
-        /// <param name="key">The key.</param>
-        /// <exception cref="System.ArgumentNullException">If key is null.</exception>
-        public void OnChange(string key)
-        {
-            NotNullOrWhiteSpace(key, nameof(key));
+        public event EventHandler<CacheItemEventArgs> Changed;
 
-            this.onChangeKey(key);
+        public event EventHandler<EventArgs> Cleared;
+
+        public event EventHandler<RegionEventArgs> ClearedRegion;
+        
+        public event EventHandler<CacheItemEventArgs> Removed;
+
+        protected void TriggerChanged(string key)
+        {
+            this.Changed?.Invoke(this, new CacheItemEventArgs(key));
         }
 
-        /// <summary>
-        /// Called when another client changed a cache key.
-        /// </summary>
-        /// <param name="key">The key.</param>
-        /// <param name="region">The region.</param>
-        /// <exception cref="System.ArgumentNullException">If key or region are null.</exception>
-        public void OnChange(string key, string region)
+        protected void TriggerChanged(string key, string region)
         {
-            NotNullOrWhiteSpace(key, nameof(key));
-            NotNullOrWhiteSpace(region, nameof(region));
-
-            this.onChangeKeyRegion(key, region);
+            this.Changed?.Invoke(this, new CacheItemEventArgs(key, region));
         }
 
-        /// <summary>
-        /// Called when another client cleared the cache.
-        /// </summary>
-        public void OnClear() => this.onClear();
-
-        /// <summary>
-        /// Called when another client cleared a region.
-        /// </summary>
-        /// <param name="region">The region.</param>
-        /// <exception cref="System.ArgumentNullException">If region is null.</exception>
-        public void OnClearRegion(string region)
+        protected void TriggerCleared()
         {
-            NotNullOrWhiteSpace(region, nameof(region));
-
-            this.onClearRegion(region);
+            this.Cleared?.Invoke(this, new EventArgs());
         }
 
-        /// <summary>
-        /// Called when another client removed a cache key.
-        /// </summary>
-        /// <param name="key">The key.</param>
-        /// <exception cref="System.ArgumentNullException">If key is null.</exception>
-        public void OnRemove(string key)
+        protected void TriggerClearedRegion(string region)
         {
-            NotNullOrWhiteSpace(key, nameof(key));
-
-            this.onRemoveKey(key);
+            this.ClearedRegion?.Invoke(this, new RegionEventArgs(region));
         }
 
-        /// <summary>
-        /// Called when another client removed a cache key.
-        /// </summary>
-        /// <param name="key">The key.</param>
-        /// <param name="region">The region.</param>
-        /// <exception cref="System.ArgumentNullException">If key or region are null.</exception>
-        public void OnRemove(string key, string region)
+        protected void TriggerRemoved(string key)
         {
-            NotNullOrWhiteSpace(key, nameof(key));
-            NotNullOrWhiteSpace(region, nameof(region));
-
-            this.onRemoveKeyRegion(key, region);
+            this.Removed?.Invoke(this, new CacheItemEventArgs(key));
         }
 
-        /// <summary>
-        /// The cache manager will subscribe to the back plate to get triggered whenever another
-        /// client changed a cache key.
-        /// </summary>
-        /// <param name="change">The change.</param>
-        /// <exception cref="System.ArgumentNullException">Id change is null.</exception>
-        internal void SubscribeChanged(Action<string> change)
+        protected void TriggerRemoved(string key, string region)
         {
-            NotNull(change, nameof(change));
-
-            this.onChangeKey = change;
-        }
-
-        /// <summary>
-        /// The cache manager will subscribe to the back plate to get triggered whenever another
-        /// client changed a cache key.
-        /// </summary>
-        /// <param name="change">The change.</param>
-        /// <exception cref="System.ArgumentNullException">If change is null.</exception>
-        internal void SubscribeChanged(Action<string, string> change)
-        {
-            NotNull(change, nameof(change));
-
-            this.onChangeKeyRegion = change;
-        }
-
-        /// <summary>
-        /// Subscribes the clear.The cache manager will subscribe to the back plate to get triggered
-        /// whenever another client cleared the cache.
-        /// </summary>
-        /// <param name="clear">The clear.</param>
-        /// <exception cref="System.ArgumentNullException">If clear is null.</exception>
-        internal void SubscribeClear(Action clear)
-        {
-            NotNull(clear, nameof(clear));
-
-            this.onClear = clear;
-        }
-
-        /// <summary>
-        /// Subscribes the clear region.The cache manager will subscribe to the back plate to get
-        /// triggered whenever another client cleared a region.
-        /// </summary>
-        /// <param name="clearRegion">The clear region.</param>
-        /// <exception cref="System.ArgumentNullException">If clearRegion is null.</exception>
-        internal void SubscribeClearRegion(Action<string> clearRegion)
-        {
-            NotNull(clearRegion, nameof(clearRegion));
-
-            this.onClearRegion = clearRegion;
-        }
-
-        /// <summary>
-        /// The cache manager will subscribe to the back plate to get triggered whenever another
-        /// client removed a cache item.
-        /// </summary>
-        /// <param name="remove">The remove.</param>
-        /// <exception cref="System.ArgumentNullException">If remove is null.</exception>
-        internal void SubscribeRemove(Action<string> remove)
-        {
-            NotNull(remove, nameof(remove));
-
-            this.onRemoveKey = remove;
-        }
-
-        /// <summary>
-        /// The cache manager will subscribe to the back plate to get triggered whenever another
-        /// client removed a cache item.
-        /// </summary>
-        /// <param name="remove">The remove.</param>
-        /// <exception cref="System.ArgumentNullException">If remove is null.</exception>
-        internal void SubscribeRemove(Action<string, string> remove)
-        {
-            NotNull(remove, nameof(remove));
-
-            this.onRemoveKeyRegion = remove;
+            this.Removed?.Invoke(this, new CacheItemEventArgs(key, region));
         }
 
         /// <summary>
@@ -265,5 +156,36 @@ namespace CacheManager.Core.Internal
         protected virtual void Dispose(bool managed)
         {
         }
+    }
+
+    public class RegionEventArgs : EventArgs
+    {
+        public RegionEventArgs(string region)
+        {
+            NotNull(region, nameof(region));
+            this.Region = region;
+        }
+
+        public string Region { get; }
+    }
+
+    public class CacheItemEventArgs : EventArgs
+    {
+        public CacheItemEventArgs(string key)
+        {
+            NotNull(key, nameof(key));
+            this.Key = key;
+        }
+
+        public CacheItemEventArgs(string key, string region)
+            : this(key)
+        {
+            NotNull(region, nameof(region));
+            this.Region = region;
+        }
+
+        public string Key { get; }
+
+        public string Region { get; }
     }
 }

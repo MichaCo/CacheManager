@@ -62,7 +62,7 @@ namespace CacheManager.Config.Tests
                         .WithConnectionTimeout(5000)
                         .WithEndpoint("127.0.0.1", 6380)
                         .WithEndpoint("127.0.0.1", 6379);
-                    //.WithEndpoint("192.168.178.34", 7001);
+                        //.WithEndpoint("192.168.178.34", 7001);
                 });
 
                 builder.WithJsonSerializer();
@@ -71,13 +71,6 @@ namespace CacheManager.Config.Tests
 #endif
                 var cacheA = new BaseCacheManager<object>(builder.Build());
                 cacheA.Clear();
-
-                var manualConfig = new CacheManagerConfiguration();
-                manualConfig.CacheHandleConfigurations.Add(new CacheHandleConfiguration()
-                {
-                    HandleType = typeof(Core.Internal.DictionaryCacheHandle<>)
-                });
-                var cacheB = new BaseCacheManager<string>("name", manualConfig);
 
                 for (int i = 0; i < iterations; i++)
                 {
