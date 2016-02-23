@@ -10,54 +10,16 @@ using StackRedis = StackExchange.Redis;
 
 namespace CacheManager.Redis
 {
-    internal class LogWriter : StringWriter
-    {
-        private readonly ILogger logger;
-
-        public LogWriter(ILogger logger)
-        {
-            this.logger = logger;
-        }
-
-        public LogWriter(StringBuilder sb) : base(sb)
-        {
-        }
-
-        public LogWriter(IFormatProvider formatProvider) : base(formatProvider)
-        {
-        }
-
-        public LogWriter(StringBuilder sb, IFormatProvider formatProvider) : base(sb, formatProvider)
-        {
-        }
-
-        public override void Write(char value)
-        {
-        }
-
-        public override void Write(string value)
-        {
-            this.logger.LogDebug(value);
-        }
-
-        public override void Write(char[] buffer, int index, int count)
-        {
-            this.logger.LogDebug(new string(buffer, index, count));
-        }
-    }
-
     internal class RedisConnectionManager
     {
         private static IDictionary<string, StackRedis.ConnectionMultiplexer> connections = new Dictionary<string, StackRedis.ConnectionMultiplexer>();
-        private static IDictionary<string, int> connectionRefs = new Dictionary<string, int>();
         private static object connectLock = new object();
 
         private readonly ILogger logger;
         private readonly string connectionString;
         private readonly RedisConfiguration configuration;
-        private readonly Action<StackRedis.ConnectionType> onRestoreConnection;
 
-        public RedisConnectionManager(RedisConfiguration configuration, ILoggerFactory loggerFactory, Action<StackRedis.ConnectionType> onRestoreConnection = null)
+        public RedisConnectionManager(RedisConfiguration configuration, ILoggerFactory loggerFactory)
         {
             NotNull(configuration, nameof(configuration));
             NotNull(loggerFactory, nameof(loggerFactory));
@@ -66,7 +28,35 @@ namespace CacheManager.Redis
 
             this.configuration = configuration;
             this.logger = loggerFactory.CreateLogger(this);
-            this.onRestoreConnection = onRestoreConnection;
+        }
+
+        public StackRedis.RedisFeatures Features
+        {
+            get
+            {
+                var server = this.Servers.FirstOrDefault(p => p.IsConnected);
+
+                if (server == null)
+                {
+                    throw new InvalidOperationException("No servers are connected or configured.");
+                }
+
+                return server.Features;
+                ////return new StackRedis.RedisFeatures(new Version(2, 4));
+            }
+        }
+
+        public IEnumerable<StackRedis.IServer> Servers
+        {
+            get
+            {
+                var endpoints = this.Connect().GetEndPoints();
+                foreach (var endpoint in endpoints)
+                {
+                    var server = this.Connect().GetServer(endpoint);
+                    yield return server;
+                }
+            }
         }
 
         public StackRedis.IDatabase Database => this.Connect().GetDatabase(this.configuration.Database);
@@ -77,15 +67,16 @@ namespace CacheManager.Redis
         {
             lock (connectLock)
             {
-                ////StackRedis.ConnectionMultiplexer connection;
-                ////if (connections.TryGetValue(this.connectionString, out connection))
-                ////{
-                ////    this.logger.LogInfo("Removing stale redis connection.");
-                ////    connections.Remove(this.connectionString);
-                ////}
+                StackRedis.ConnectionMultiplexer connection;
+                if (connections.TryGetValue(this.connectionString, out connection))
+                {
+                    ////this.logger.LogInfo("Removing stale redis connection.");
+                    ////connections.Remove(this.connectionString);
+                }
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "nope")]
         public StackRedis.ConnectionMultiplexer Connect()
         {
             StackRedis.ConnectionMultiplexer connection;
@@ -97,7 +88,7 @@ namespace CacheManager.Redis
                     {
                         if (!connections.TryGetValue(this.connectionString, out connection))
                         {
-                            this.logger.LogInfo("Connecting to redis: '{0}'", this.connectionString);
+                            this.logger.LogInfo("Trying to connect with the following configuration: '{0}'", this.connectionString);
                             connection = StackRedis.ConnectionMultiplexer.Connect(this.connectionString, new LogWriter(this.logger));
 
                             if (!connection.IsConnected)
@@ -105,7 +96,7 @@ namespace CacheManager.Redis
                                 connection.Dispose();
                                 throw new InvalidOperationException("Connection failed.");
                             }
-                            
+
                             connection.ConnectionRestored += (sender, args) =>
                             {
                                 this.logger.LogInfo(args.Exception, "Connection restored, type: '{0}', failure: '{1}'", args.ConnectionType, args.FailureType);
@@ -125,12 +116,12 @@ namespace CacheManager.Redis
                 }
             }
 
-            if(connection == null)
+            if (connection == null)
             {
                 throw new InvalidOperationException(
                     string.Format(
                         CultureInfo.InvariantCulture,
-                        "Couldn't esteblish a connection for {0}.", 
+                        "Couldn't establish a connection for '{0}'.",
                         this.connectionString));
             }
 
@@ -169,6 +160,30 @@ namespace CacheManager.Redis
             }
 
             return configurationOptions;
+        }
+    }
+
+    internal class LogWriter : StringWriter
+    {
+        private readonly ILogger logger;
+
+        public LogWriter(ILogger logger)
+        {
+            this.logger = logger;
+        }
+
+        public override void Write(char value)
+        {
+        }
+
+        public override void Write(string value)
+        {
+            this.logger.LogDebug(value);
+        }
+
+        public override void Write(char[] buffer, int index, int count)
+        {
+            this.logger.LogDebug(new string(buffer, index, count));
         }
     }
 }

@@ -144,6 +144,10 @@ namespace CacheManager.Core
                 new List<BaseCacheHandle<TCacheValue>>(
                     this.cacheHandles));
 
+        /// <summary>
+        /// Gets the configured cache back-plate.
+        /// </summary>
+        /// <value>The back-plate</value>
         public CacheBackPlate BackPlate => this.cacheBackPlate;
 
         /// <summary>

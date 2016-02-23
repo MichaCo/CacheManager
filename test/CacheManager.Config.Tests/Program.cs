@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading;
 using CacheManager.Core;
 using Microsoft.Extensions.Configuration;
@@ -60,6 +61,7 @@ namespace CacheManager.Config.Tests
                         .WithAllowAdmin()
                         .WithDatabase(0)
                         .WithConnectionTimeout(5000)
+                        //.WithEndpoint("ubuntu-local", 7024);
                         .WithEndpoint("127.0.0.1", 6380)
                         .WithEndpoint("127.0.0.1", 6379);
                         //.WithEndpoint("192.168.178.34", 7001);
@@ -71,6 +73,11 @@ namespace CacheManager.Config.Tests
 #endif
                 var cacheA = new BaseCacheManager<object>(builder.Build());
                 cacheA.Clear();
+
+#if !DNXCORE50
+                var redisHandle = cacheA.CacheHandles.Last() as Redis.RedisCacheHandle<object>;
+                var features = redisHandle.Features;
+#endif
 
                 for (int i = 0; i < iterations; i++)
                 {

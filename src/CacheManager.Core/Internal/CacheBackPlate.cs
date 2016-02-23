@@ -18,13 +18,6 @@ namespace CacheManager.Core.Internal
     /// </summary>
     public abstract class CacheBackPlate : IDisposable
     {
-        private Action<string> onChangeKey;
-        private Action<string, string> onChangeKeyRegion;
-        private Action onClear;
-        private Action<string> onClearRegion;
-        private Action<string> onRemoveKey;
-        private Action<string, string> onRemoveKeyRegion;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="CacheBackPlate" /> class.
         /// </summary>
@@ -44,6 +37,27 @@ namespace CacheManager.Core.Internal
         {
             this.Dispose(false);
         }
+
+        /// <summary>
+        /// The event gets fired whenever a change message for a key comes in,
+        /// which means, another client changed a key.
+        /// </summary>
+        public event EventHandler<CacheItemEventArgs> Changed;
+
+        /// <summary>
+        /// The event gets fired whenever a cache clear message comes in.
+        /// </summary>
+        public event EventHandler<EventArgs> Cleared;
+
+        /// <summary>
+        /// The event gets fired whenever a clear region message comes in.
+        /// </summary>
+        public event EventHandler<RegionEventArgs> ClearedRegion;
+
+        /// <summary>
+        /// The event gets fired whenever a removed message for a key comes in.
+        /// </summary>
+        public event EventHandler<CacheItemEventArgs> Removed;
 
         /// <summary>
         /// Gets the cache configuration.
@@ -108,40 +122,57 @@ namespace CacheManager.Core.Internal
         /// <param name="region">The region.</param>
         public abstract void NotifyRemove(string key, string region);
 
-        public event EventHandler<CacheItemEventArgs> Changed;
-
-        public event EventHandler<EventArgs> Cleared;
-
-        public event EventHandler<RegionEventArgs> ClearedRegion;
-        
-        public event EventHandler<CacheItemEventArgs> Removed;
-
-        protected void TriggerChanged(string key)
+        /// <summary>
+        /// Sends a changed message for the given <paramref name="key"/>.
+        /// </summary>
+        /// <param name="key">The key.</param>
+        protected internal void TriggerChanged(string key)
         {
             this.Changed?.Invoke(this, new CacheItemEventArgs(key));
         }
 
-        protected void TriggerChanged(string key, string region)
+        /// <summary>
+        /// Sends a changed message for the given <paramref name="key"/> in <paramref name="region"/>.
+        /// </summary>
+        /// <param name="key">The key.</param>
+        /// <param name="region">The region.</param>
+        protected internal void TriggerChanged(string key, string region)
         {
             this.Changed?.Invoke(this, new CacheItemEventArgs(key, region));
         }
 
-        protected void TriggerCleared()
+        /// <summary>
+        /// Sends a cache cleared message.
+        /// </summary>
+        protected internal void TriggerCleared()
         {
             this.Cleared?.Invoke(this, new EventArgs());
         }
 
-        protected void TriggerClearedRegion(string region)
+        /// <summary>
+        /// Sends a region cleared message for the given <paramref name="region"/>.
+        /// </summary>
+        /// <param name="region">The region.</param>
+        protected internal void TriggerClearedRegion(string region)
         {
             this.ClearedRegion?.Invoke(this, new RegionEventArgs(region));
         }
 
-        protected void TriggerRemoved(string key)
+        /// <summary>
+        /// Sends a removed message for the given <paramref name="key"/>.
+        /// </summary>
+        /// <param name="key">The key</param>
+        protected internal void TriggerRemoved(string key)
         {
             this.Removed?.Invoke(this, new CacheItemEventArgs(key));
         }
 
-        protected void TriggerRemoved(string key, string region)
+        /// <summary>
+        /// Sends a removed message for the given <paramref name="key"/> in <paramref name="region"/>.
+        /// </summary>
+        /// <param name="key">The key.</param>
+        /// <param name="region">The region.</param>
+        protected internal void TriggerRemoved(string key, string region)
         {
             this.Removed?.Invoke(this, new CacheItemEventArgs(key, region));
         }
@@ -158,25 +189,48 @@ namespace CacheManager.Core.Internal
         }
     }
 
+    /// <summary>
+    /// Arguments for the region cleared event
+    /// </summary>
     public class RegionEventArgs : EventArgs
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RegionEventArgs" /> class.
+        /// </summary>
+        /// <param name="region">The region.</param>
         public RegionEventArgs(string region)
         {
             NotNull(region, nameof(region));
             this.Region = region;
         }
 
+        /// <summary>
+        /// Gets the region which got cleared.
+        /// </summary>
+        /// <value>The region.</value>
         public string Region { get; }
     }
 
+    /// <summary>
+    /// Arguments for changed and removed events.
+    /// </summary>
     public class CacheItemEventArgs : EventArgs
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CacheItemEventArgs" /> class.
+        /// </summary>
+        /// <param name="key">The key.</param>
         public CacheItemEventArgs(string key)
         {
             NotNull(key, nameof(key));
             this.Key = key;
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CacheItemEventArgs" /> class.
+        /// </summary>
+        /// <param name="key">The key.</param>
+        /// <param name="region">The region.</param>
         public CacheItemEventArgs(string key, string region)
             : this(key)
         {
@@ -184,8 +238,14 @@ namespace CacheManager.Core.Internal
             this.Region = region;
         }
 
+        /// <summary>
+        /// Gets the key.
+        /// </summary>
         public string Key { get; }
 
+        /// <summary>
+        /// Gets the region.
+        /// </summary>
         public string Region { get; }
     }
 }

@@ -17,6 +17,10 @@ namespace CacheManager.Tests
     [ExcludeFromCodeCoverage]
     public static class TestManagers
     {
+        ////private const string RedisHost = "ubuntu-local";
+        ////private const int RedisPort = 7024; // redis 2.4
+        private const string RedisHost = "127.0.0.1";
+        private const int RedisPort = 6379;
         private const int StartDbCount = 100;
 #if !DNXCORE50
         private static int databaseCount = StartDbCount;
@@ -224,7 +228,7 @@ namespace CacheManager.Tests
                     {
                         config
                             .WithDatabase(database)
-                            .WithEndpoint("127.0.0.1", 6379);
+                            .WithEndpoint(RedisHost, RedisPort);
                     })
                     .WithRedisCacheHandle(redisKey, true)
                     .EnableStatistics();
@@ -252,7 +256,7 @@ namespace CacheManager.Tests
                     {
                         config
                             .WithDatabase(database)
-                            .WithEndpoint("127.0.0.1", 6379);
+                            .WithEndpoint(RedisHost, RedisPort);
                     })
                     ////.WithRedisBackPlate(redisKey)
                     .WithRedisCacheHandle(redisKey, true)
@@ -274,7 +278,7 @@ namespace CacheManager.Tests
                     {
                         config
                             .WithDatabase(database)
-                            .WithEndpoint("127.0.0.1", 6379);
+                            .WithEndpoint(RedisHost, RedisPort);
                     })
                     .WithRedisBackPlate(redisKey)
                     .WithRedisCacheHandle(redisKey, true)

@@ -92,8 +92,8 @@
     <Compile Include="..\CacheManager.StackExchange.Redis\RedisConfigurationSection.cs">
       <Link>RedisConfigurationSection.cs</Link>
     </Compile>
-    <Compile Include="..\CacheManager.StackExchange.Redis\RedisConnectionPool.cs">
-      <Link>RedisConnectionPool.cs</Link>
+    <Compile Include="..\CacheManager.StackExchange.Redis\RedisConnectionManager.cs">
+      <Link>RedisConnectionManager.cs</Link>
     </Compile>
     <Compile Include="..\CacheManager.StackExchange.Redis\RedisValueConverter.cs">
       <Link>RedisValueConverter.cs</Link>

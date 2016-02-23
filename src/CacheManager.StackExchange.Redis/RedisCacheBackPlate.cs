@@ -24,11 +24,11 @@ namespace CacheManager.Redis
         private readonly string channelName;
         private readonly string identifier;
         private readonly ILogger logger;
+        private readonly RedisConnectionManager connection;
         private HashSet<string> messages = new HashSet<string>();
         private object messageLock = new object();
         private int skippedMessages = 0;
         private bool sending = false;
-        private readonly RedisConnectionManager connection;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RedisCacheBackPlate"/> class.
@@ -50,7 +50,7 @@ namespace CacheManager.Redis
                 cfg,
                 loggerFactory);
 
-            RetryHelper.Retry(() => this.Subscribe(), configuration.RetryTimeout, configuration.MaxRetries, logger);
+            RetryHelper.Retry(() => this.Subscribe(), configuration.RetryTimeout, configuration.MaxRetries, this.logger);
         }
 
         /// <summary>
@@ -155,58 +155,70 @@ namespace CacheManager.Redis
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "No other way")]
         private void SendMessages()
         {
             if (this.sending || this.messages == null || this.messages.Count == 0)
             {
                 return;
             }
-            
-            Task.Factory.StartNew((obj) =>
-            {
-                if (this.sending || this.messages == null || this.messages.Count == 0)
-                {
-                    return;
-                }
 
-                this.sending = true;
+            Task.Factory.StartNew(
+                (obj) =>
+                {
+                    if (this.sending || this.messages == null || this.messages.Count == 0)
+                    {
+                        return;
+                    }
+
+                    this.sending = true;
 #if !NET40
-                Task.Delay(10).Wait();
+                    Task.Delay(10).Wait();
 #endif
-                string msgs = string.Empty;
-                lock (this.messageLock)
-                {
-                    if (this.messages != null && this.messages.Count > 0)
+                    string msgs = string.Empty;
+                    lock (this.messageLock)
                     {
-                        msgs = string.Join(",", this.messages);
-
-                        if (this.logger.IsEnabled(LogLevel.Debug))
+                        if (this.messages != null && this.messages.Count > 0)
                         {
-                            this.logger.LogDebug("Back-plate is sending {0} messages ({1} skipped).", this.messages.Count, this.skippedMessages);
+                            msgs = string.Join(",", this.messages);
+
+                            if (this.logger.IsEnabled(LogLevel.Debug))
+                            {
+                                this.logger.LogDebug("Back-plate is sending {0} messages ({1} skipped).", this.messages.Count, this.skippedMessages);
+                            }
+
+                            this.skippedMessages = 0;
+                            this.messages.Clear();
                         }
 
-                        this.skippedMessages = 0;
-                        this.messages.Clear();
-                    }
-
-                    try
-                    {
-                        if (msgs.Length > 0)
+                        try
                         {
-                            this.Publish(msgs);
+                            if (msgs.Length > 0)
+                            {
+                                this.Publish(msgs);
+                            }
                         }
-                    }
-                    catch (Exception ex)
-                    {
-                        this.logger.LogError(ex, "Error occurred sending back plate messages.");
-                    }
+                        catch (Exception ex)
+                        {
+                            this.logger.LogError(ex, "Error occurred sending back plate messages.");
+                        }
 
-                    this.sending = false;
-                }
+                        this.sending = false;
+                    }
 #if NET40
-            }, this, CancellationToken.None, TaskCreationOptions.None, TaskScheduler.Default).ConfigureAwait(false);
+                },
+                this,
+                CancellationToken.None,
+                TaskCreationOptions.None,
+                TaskScheduler.Default)
+                .ConfigureAwait(false);
 #else
-            }, this, CancellationToken.None, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default).ConfigureAwait(false);
+                },
+                this,
+                CancellationToken.None,
+                TaskCreationOptions.DenyChildAttach,
+                TaskScheduler.Default)
+                .ConfigureAwait(false);
 #endif
         }
 
