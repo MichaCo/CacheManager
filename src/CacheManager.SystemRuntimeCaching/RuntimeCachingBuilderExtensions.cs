@@ -6,7 +6,7 @@ namespace CacheManager.Core
     /// <summary>
     /// Extensions for the configuration builder specific to System.Runtime.Caching cache handle.
     /// </summary>
-    public static class ConfigurationBuilderExtensions
+    public static class RuntimeCachingBuilderExtensions
     {
         private const string DefaultName = "default";
 

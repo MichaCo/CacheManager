@@ -8,7 +8,7 @@ namespace CacheManager.Core
     /// <summary>
     /// Extensions for the configuration builder for logging.
     /// </summary>
-    public static class ConfigurationBuilderExtensions
+    public static class MicrosoftLoggingBuilderExtensions
     {
         /// <summary>
         /// Enables logging for the cache manager instance.

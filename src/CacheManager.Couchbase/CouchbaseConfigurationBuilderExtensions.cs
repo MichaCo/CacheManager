@@ -8,7 +8,7 @@ namespace CacheManager.Core
     /// <summary>
     /// Extensions for the configuration builder specific to the Couchbase cache handle.
     /// </summary>
-    public static class ConfigurationBuilderExtensions
+    public static class CouchbaseConfigurationBuilderExtensions
     {
         /// <summary>
         /// Adds a <see cref="ClientConfiguration"/> for the given key.

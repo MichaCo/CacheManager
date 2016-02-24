@@ -90,6 +90,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "partials", "partials", "{5F
 		Documentation\template\partials\navbar.tmpl.partial = Documentation\template\partials\navbar.tmpl.partial
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "apispec", "apispec", "{96C0965D-2375-4780-9DAC-640927D74161}"
+	ProjectSection(SolutionItems) = preProject
+		Documentation\apispec\CacheManager_Core_CacheFactory_Build_System_String_System_Action_CacheManager_Core_ConfigurationBuilderCachePart__.md = Documentation\apispec\CacheManager_Core_CacheFactory_Build_System_String_System_Action_CacheManager_Core_ConfigurationBuilderCachePart__.md
+		Documentation\apispec\CacheManager_Core_JsonConfigurationBuilderExtensions.md = Documentation\apispec\CacheManager_Core_JsonConfigurationBuilderExtensions.md
+		Documentation\apispec\CacheManager_Core_MicrosoftConfigurationExtensions.md = Documentation\apispec\CacheManager_Core_MicrosoftConfigurationExtensions.md
+		Documentation\apispec\CacheManager_Core_MicrosoftLoggingBuilderExtensions.md = Documentation\apispec\CacheManager_Core_MicrosoftLoggingBuilderExtensions.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -348,5 +356,6 @@ Global
 		{75D61766-6604-4FAD-8451-FCF300CCCD48} = {E026FBD6-8112-46A7-BB3C-C8FB901CB93A}
 		{42E99581-4D8D-44E1-848D-1EAB564A3129} = {75D61766-6604-4FAD-8451-FCF300CCCD48}
 		{5FFC2D23-4EA5-4402-B251-C83B453DC423} = {75D61766-6604-4FAD-8451-FCF300CCCD48}
+		{96C0965D-2375-4780-9DAC-640927D74161} = {75D61766-6604-4FAD-8451-FCF300CCCD48}
 	EndGlobalSection
 EndGlobal

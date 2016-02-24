@@ -61,14 +61,14 @@
     <Compile Include="..\CacheManager.Web\CacheManagerOutputCacheProvider.cs">
       <Link>CacheManagerOutputCacheProvider.cs</Link>
     </Compile>
-    <Compile Include="..\CacheManager.Web\ConfigurationBuilderExtensions.cs">
-      <Link>ConfigurationBuilderExtensions.cs</Link>
-    </Compile>
     <Compile Include="..\CacheManager.Web\ContextFactory.cs">
       <Link>ContextFactory.cs</Link>
     </Compile>
     <Compile Include="..\CacheManager.Web\SystemWebCacheHandle`1.cs">
       <Link>SystemWebCacheHandle`1.cs</Link>
+    </Compile>
+    <Compile Include="..\CacheManager.Web\WebConfigurationBuilderExtensions.cs">
+      <Link>WebConfigurationBuilderExtensions.cs</Link>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

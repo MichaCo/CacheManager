@@ -7,7 +7,7 @@ namespace CacheManager.Core
     /// <summary>
     /// Extensions for the configuration builder specific to the redis cache handle.
     /// </summary>
-    public static class ConfigurationBuilderExtensions
+    public static class RedisConfigurationBuilderExtensions
     {
         /// <summary>
         /// Adds a redis configuration with the given <paramref name="configurationKey"/>.

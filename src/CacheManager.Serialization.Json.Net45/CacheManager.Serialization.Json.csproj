@@ -56,14 +56,14 @@
     <Compile Include="..\..\common\GlobalAssemblyInfo.cs">
       <Link>Properties\GlobalAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="..\CacheManager.Serialization.Json\ConfigurationBuilderExtensions.cs">
-      <Link>ConfigurationBuilderExtensions.cs</Link>
-    </Compile>
     <Compile Include="..\CacheManager.Serialization.Json\JsonCacheItem.cs">
       <Link>JsonCacheItem.cs</Link>
     </Compile>
     <Compile Include="..\CacheManager.Serialization.Json\JsonCacheSerializer.cs">
       <Link>JsonCacheSerializer.cs</Link>
+    </Compile>
+    <Compile Include="..\CacheManager.Serialization.Json\JsonConfigurationBuilderExtensions.cs">
+      <Link>JsonConfigurationBuilderExtensions.cs</Link>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

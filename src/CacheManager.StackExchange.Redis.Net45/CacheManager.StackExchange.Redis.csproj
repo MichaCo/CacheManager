@@ -59,9 +59,6 @@
     <Compile Include="..\..\common\GlobalAssemblyInfo.cs">
       <Link>Properties\GlobalAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="..\CacheManager.StackExchange.Redis\ConfigurationBuilderExtensions.cs">
-      <Link>ConfigurationBuilderExtensions.cs</Link>
-    </Compile>
     <Compile Include="..\CacheManager.StackExchange.Redis\RedisCacheBackPlate.cs">
       <Link>RedisCacheBackPlate.cs</Link>
     </Compile>
@@ -73,6 +70,9 @@
     </Compile>
     <Compile Include="..\CacheManager.StackExchange.Redis\RedisConfigurationBuilder.cs">
       <Link>RedisConfigurationBuilder.cs</Link>
+    </Compile>
+    <Compile Include="..\CacheManager.StackExchange.Redis\RedisConfigurationBuilderExtensions.cs">
+      <Link>RedisConfigurationBuilderExtensions.cs</Link>
     </Compile>
     <Compile Include="..\CacheManager.StackExchange.Redis\RedisConfigurations.cs">
       <Link>RedisConfigurations.cs</Link>

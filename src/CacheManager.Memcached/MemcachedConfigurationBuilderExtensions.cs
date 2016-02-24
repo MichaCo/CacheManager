@@ -4,9 +4,9 @@ using static CacheManager.Core.Utility.Guard;
 namespace CacheManager.Core
 {
     /// <summary>
-    /// Extensions for the configuration builder specific to the memcached cache handle.
+    /// Extensions for the configuration builder specific to the Memcached cache handle.
     /// </summary>
-    public static class ConfigurationBuilderExtensions
+    public static class MemcachedConfigurationBuilderExtensions
     {
         /// <summary>
         /// Adds a <see cref="MemcachedCacheHandle{TCacheValue}"/>. The <paramref name="configurationName"/> must match with cache configured via enyim configuration section.

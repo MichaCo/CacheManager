@@ -71,8 +71,8 @@
     <Compile Include="..\CacheManager.Couchbase\BucketCacheHandle.cs">
       <Link>BucketCacheHandle.cs</Link>
     </Compile>
-    <Compile Include="..\CacheManager.Couchbase\ConfigurationBuilderExtensions.cs">
-      <Link>ConfigurationBuilderExtensions.cs</Link>
+    <Compile Include="..\CacheManager.Couchbase\CouchbaseConfigurationBuilderExtensions.cs">
+      <Link>CouchbaseConfigurationBuilderExtensions.cs</Link>
     </Compile>
     <Compile Include="..\CacheManager.Couchbase\CouchbaseConfigurationManager.cs">
       <Link>CouchbaseConfigurationManager.cs</Link>

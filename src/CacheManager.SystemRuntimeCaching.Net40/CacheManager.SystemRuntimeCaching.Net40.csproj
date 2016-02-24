@@ -49,11 +49,11 @@
     <Compile Include="..\..\common\GlobalAssemblyInfo.cs">
       <Link>Properties\GlobalAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="..\CacheManager.SystemRuntimeCaching\ConfigurationBuilderExtensions.cs">
-      <Link>ConfigurationBuilderExtensions.cs</Link>
-    </Compile>
     <Compile Include="..\CacheManager.SystemRuntimeCaching\MemoryCacheHandle`1.cs">
       <Link>MemoryCacheHandle`1.cs</Link>
+    </Compile>
+    <Compile Include="..\CacheManager.SystemRuntimeCaching\RuntimeCachingBuilderExtensions.cs">
+      <Link>RuntimeCachingBuilderExtensions.cs</Link>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

@@ -60,11 +60,11 @@
     <Compile Include="..\..\common\GlobalAssemblyInfo.cs">
       <Link>Properties\GlobalAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="..\CacheManager.MemCached\ConfigurationBuilderExtensions.cs">
-      <Link>ConfigurationBuilderExtensions.cs</Link>
-    </Compile>
     <Compile Include="..\CacheManager.MemCached\MemcachedCacheHandle.cs">
       <Link>MemcachedCacheHandle.cs</Link>
+    </Compile>
+    <Compile Include="..\CacheManager.Memcached\MemcachedConfigurationBuilderExtensions.cs">
+      <Link>MemcachedConfigurationBuilderExtensions.cs</Link>
     </Compile>
     <Compile Include="..\CacheManager.MemCached\StatusCode.cs">
       <Link>StatusCode.cs</Link>

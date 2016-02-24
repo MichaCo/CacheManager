@@ -8,7 +8,10 @@ using Microsoft.Extensions.Configuration;
 
 namespace CacheManager.Core
 {
-    public static class ConfigurationExtensions
+    /// <summary>
+    /// Extensions for the <see cref="IConfiguration"/> to load <see cref="CacheManagerConfiguration"/>s from <see cref="IConfigurationProvider"/>s.
+    /// </summary>
+    public static class MicrosoftConfigurationExtensions
     {
         private const string CacheManagersSection = "cacheManagers";
         private const string RedisSection = "redis";
@@ -31,10 +34,12 @@ namespace CacheManager.Core
         private const string TypeRedisConfigurations = "CacheManager.Redis.RedisConfigurations, CacheManager.StackExchange.Redis";
 
         /// <summary>
-        /// Gets the first cacheManager (can be used if only one configuration is specified, so no name is needed...).
+        /// Gets the first and only one <see cref="CacheManagerConfiguration"/> defined in 
+        /// the <code>cacheManagers</code> section of the provided <paramref name="configuration"/>.
         /// </summary>
-        /// <param name="configuration"></param>
-        /// <returns></returns>
+        /// <param name="configuration">The source configuration.</param>
+        /// <returns>The <see cref="CacheManagerConfiguration"/>.</returns>
+        /// <exception cref="InvalidOperationException">If no cacheManagers section is defined or more than one manager is configured.</exception>
         public static CacheManagerConfiguration GetCacheConfiguration(this IConfiguration configuration)
         {
             if (configuration == null)
@@ -61,13 +66,19 @@ namespace CacheManager.Core
         }
 
         /// <summary>
-        /// Tries to retrieve a <see cref="CacheManagerConfiguration"/> from the provided <see cref="IConfiguration"/> element.
-        /// The <paramref name="configuration"/> should contain a <code>cacheManagers</code> section.
-        /// See
+        /// Retrieve a <see cref="CacheManagerConfiguration"/> defined in 
+        /// the <code>cacheManagers</code> section of the provided <paramref name="configuration"/> by <paramref name="name"/>.
         /// </summary>
-        /// <param name="configuration"></param>
-        /// <param name="name"></param>
-        /// <returns></returns>
+        /// <returns>The <see cref="CacheManagerConfiguration"/>.</returns>
+        /// <param name="configuration">The source configuration.</param>
+        /// <param name="name">The name of the cache.</param>
+        /// <exception cref="ArgumentNullException">
+        /// If either <paramref name="configuration"/> or <paramref name="name"/> is null.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        /// If no <code>cacheManagers</code> section is defined in the <paramref name="configuration"/>,
+        /// or if no configuration was found for the <paramref name="name"/>.
+        /// </exception>
         public static CacheManagerConfiguration GetCacheConfiguration(this IConfiguration configuration, string name)
         {
             if (configuration == null)
@@ -91,6 +102,13 @@ namespace CacheManager.Core
             throw new InvalidOperationException($"No '{CacheManagersSection}' section found in the configuration provided.");
         }
 
+        /// <summary>
+        /// Retrieves all configured <see cref="CacheManagerConfiguration"/>s defined in 
+        /// the <code>cacheManagers</code> section of the provided <paramref name="configuration"/>.
+        /// </summary>
+        /// <param name="configuration">The source configuration.</param>
+        /// <returns>The list of <see cref="CacheManagerConfiguration"/>s.</returns>
+        /// <exception cref="InvalidOperationException">If no <code>cacheManagers</code> section is defined.</exception>
         public static IEnumerable<CacheManagerConfiguration> GetCacheConfigurations(this IConfiguration configuration)
         {
             configuration.LoadRedisConfigurations();
@@ -107,6 +125,16 @@ namespace CacheManager.Core
             }
         }
 
+        /// <summary>
+        /// Loads all available Redis configurations from the the <code>redis</code> section of the provided <paramref name="configuration"/>.
+        /// </summary>
+        /// <remarks>
+        /// This method always gets invoked by <see cref="GetCacheConfiguration(IConfiguration)"/> or the other overloads.
+        /// You do not have to call this explicitly. The method also does not throw an exception if the <code>redis</code> section is 
+        /// not defined.
+        /// </remarks>
+        /// <param name="configuration">The source configuration.</param>
+        /// <exception cref="InvalidOperationException">If the CacheManager.StackExchange.Redis package is not installed.</exception>
         public static void LoadRedisConfigurations(this IConfiguration configuration)
         {
             // load redis configurations if available

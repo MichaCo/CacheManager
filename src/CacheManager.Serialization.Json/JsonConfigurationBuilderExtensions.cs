@@ -5,14 +5,14 @@ using static CacheManager.Core.Utility.Guard;
 namespace CacheManager.Core
 {
     /// <summary>
-    /// Extensions for the configuration builder specific to the redis cache handle.
+    /// Extensions for the configuration builder for the <code>Newtonsoft.Json</code> based <see cref="CacheManager.Core.Internal.ICacheSerializer"/>.
     /// </summary>
-    public static class ConfigurationBuilderExtensions
+    public static class JsonConfigurationBuilderExtensions
     {
         /// <summary>
-        /// Configures the cache manager to use the Newtonsoft.Json based cache serializer.
+        /// Configures the cache manager to use the <code>Newtonsoft.Json</code> based cache serializer.
         /// </summary>
-        /// <param name="part">The part.</param>
+        /// <param name="part">The configuration part.</param>
         /// <returns>The builder instance.</returns>
         public static ConfigurationBuilderCachePart WithJsonSerializer(this ConfigurationBuilderCachePart part)
         {
@@ -22,11 +22,11 @@ namespace CacheManager.Core
         }
 
         /// <summary>
-        /// Configures the cache manager to use the Newtonsoft.Json based cache serializer.
+        /// Configures the cache manager to use the <code>Newtonsoft.Json</code> based cache serializer.
         /// </summary>
-        /// <param name="part">The part.</param>
-        /// <param name="serializationSettings">Settings to be used during serialization.</param>
-        /// <param name="deserializationSettings">Settings to be used during deserialization.</param>
+        /// <param name="part">The configuration part.</param>
+        /// <param name="serializationSettings">The settings to be used during serialization.</param>
+        /// <param name="deserializationSettings">The settings to be used during deserialization.</param>
         /// <returns>The builder instance.</returns>
         public static ConfigurationBuilderCachePart WithJsonSerializer(this ConfigurationBuilderCachePart part, JsonSerializerSettings serializationSettings, JsonSerializerSettings deserializationSettings)
         {
