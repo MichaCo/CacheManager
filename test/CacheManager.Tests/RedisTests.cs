@@ -166,7 +166,7 @@ namespace CacheManager.Tests
                 },
                 (cache) =>
                 {
-                    Thread.Sleep(100);
+                    Thread.Sleep(200);
                     var value = cache.Get(item.Key);
                     value.Should().Be("new value", cache.ToString());
                 },
