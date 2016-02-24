@@ -67,7 +67,6 @@ namespace CacheManager.SystemRuntimeCaching
         /// Gets the number of items the cache handle currently maintains.
         /// </summary>
         /// <value>The count.</value>
-        /// <returns>The count.</returns>
         public override int Count => (int)this.cache.GetCount();
 
         /// <inheritdoc />
