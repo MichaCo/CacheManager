@@ -1,0 +1,58 @@
+{
+  "metadata": [
+    {
+      "src": [
+        {
+          "files": [ "**.cs" ],
+          "exclude": [
+            "**/bin/**",
+            "**/obj/**"
+          ],
+		  "cwd": "../src"
+        }
+      ],
+      "dest": "api"
+    }
+  ],
+  "build": {
+    "content": [
+      {
+        "files": [
+          "api/**.yml"
+        ]
+      },
+      {
+        "files": [
+          "toc.yml",
+          "*.md"
+        ],
+        "exclude": [
+          "**/bin/**",
+          "**/obj/**"
+        ]
+      }
+    ],
+    "resource": [
+      {
+        "files": [
+          "images/**"
+        ],
+        "exclude": [
+          "**/bin/**",
+          "**/obj/**"
+        ]
+      }
+    ],
+    "overwrite": "apispec/*.md",
+    "externalReference": [
+      {
+        "files": "msdn.4.5.2/content/*.rpk"
+      }
+    ],
+    "dest": "../../michaconrad.com/website/Documentation",
+    "template": [
+      "default",
+      "template"
+    ]
+  }
+}

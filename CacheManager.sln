@@ -65,6 +65,31 @@ Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "CacheManager.MSConfiguratio
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "CacheManager.Backplate.App", "test\CacheManager.Backplate.App\CacheManager.Backplate.App.xproj", "{1D0401C7-4BA5-4A36-A405-7EF4C7C2D65D}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentation", "{E026FBD6-8112-46A7-BB3C-C8FB901CB93A}"
+	ProjectSection(SolutionItems) = preProject
+		Documentation\build.cmd = Documentation\build.cmd
+		Documentation\docfx.json = Documentation\docfx.json
+		Documentation\index.md = Documentation\index.md
+		Documentation\toc.yml = Documentation\toc.yml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Template", "Template", "{75D61766-6604-4FAD-8451-FCF300CCCD48}"
+	ProjectSection(SolutionItems) = preProject
+		Documentation\template\ManagedReference.html.primary.tmpl = Documentation\template\ManagedReference.html.primary.tmpl
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "styles", "styles", "{42E99581-4D8D-44E1-848D-1EAB564A3129}"
+	ProjectSection(SolutionItems) = preProject
+		Documentation\template\styles\docfx.css = Documentation\template\styles\docfx.css
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "partials", "partials", "{5FFC2D23-4EA5-4402-B251-C83B453DC423}"
+	ProjectSection(SolutionItems) = preProject
+		Documentation\template\partials\footer.tmpl.partial = Documentation\template\partials\footer.tmpl.partial
+		Documentation\template\partials\head.tmpl.partial = Documentation\template\partials\head.tmpl.partial
+		Documentation\template\partials\navbar.tmpl.partial = Documentation\template\partials\navbar.tmpl.partial
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -320,5 +345,8 @@ Global
 		{5E5AFEF6-C13E-4D78-87D6-50407002A9B1} = {58CC885F-40A7-4C82-990D-3F36AAA088A7}
 		{360D0B25-F9EB-4553-92DC-FB0FD24EF344} = {C013E552-43F5-4496-BE29-DB401C3334BB}
 		{1D0401C7-4BA5-4A36-A405-7EF4C7C2D65D} = {C013E552-43F5-4496-BE29-DB401C3334BB}
+		{75D61766-6604-4FAD-8451-FCF300CCCD48} = {E026FBD6-8112-46A7-BB3C-C8FB901CB93A}
+		{42E99581-4D8D-44E1-848D-1EAB564A3129} = {75D61766-6604-4FAD-8451-FCF300CCCD48}
+		{5FFC2D23-4EA5-4402-B251-C83B453DC423} = {75D61766-6604-4FAD-8451-FCF300CCCD48}
 	EndGlobalSection
 EndGlobal

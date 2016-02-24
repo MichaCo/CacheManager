@@ -7,6 +7,13 @@
 *.sln.docstates
 *.lock.json
 
+/Documentation/_site
+/Documentation/api
+/Documentation/msdn.4.5.2
+/Documentation/packages
+/Documentation/.nuget
+/.nuget/nuget.exe
+
 # Build results
 
 [Dd]ebug/
