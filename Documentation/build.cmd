@@ -20,7 +20,6 @@ IF EXIST msdn.4.5.2 goto build
 .nuget\nuget.exe install msdn.4.5.2 -pre -ExcludeVersion
 .nuget\nuget.exe install docfx -ExcludeVersion -pre -Out packages
 
-
 :build
 call dnu restore packages\docfx\app
 del "*.log"
