@@ -8,7 +8,8 @@
 *.lock.json
 
 /Documentation/_site
-/Documentation/api
+/Documentation/api/*.yml
+/Documentation/api/*.manifest
 /Documentation/msdn.4.5.2
 /Documentation/packages
 /Documentation/.nuget
