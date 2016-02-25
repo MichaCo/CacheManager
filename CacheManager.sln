@@ -76,6 +76,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Template", "Template", "{75D61766-6604-4FAD-8451-FCF300CCCD48}"
 	ProjectSection(SolutionItems) = preProject
 		Documentation\template\ManagedReference.html.primary.tmpl = Documentation\template\ManagedReference.html.primary.tmpl
+		Documentation\template\toc.html.tmpl = Documentation\template\toc.html.tmpl
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "styles", "styles", "{42E99581-4D8D-44E1-848D-1EAB564A3129}"
