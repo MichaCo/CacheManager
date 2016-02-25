@@ -88,6 +88,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "partials", "partials", "{5F
 		Documentation\template\partials\footer.tmpl.partial = Documentation\template\partials\footer.tmpl.partial
 		Documentation\template\partials\head.tmpl.partial = Documentation\template\partials\head.tmpl.partial
 		Documentation\template\partials\navbar.tmpl.partial = Documentation\template\partials\navbar.tmpl.partial
+		Documentation\template\partials\scripts.tmpl.partial = Documentation\template\partials\scripts.tmpl.partial
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "apispec", "apispec", "{96C0965D-2375-4780-9DAC-640927D74161}"
