@@ -67,10 +67,12 @@ var disqus_config = function () {
 	//this.page.identifier = "CacheManagerDocs_@ViewBag.DocumentId";
 };
 (function () {
-	var d = document, s = d.createElement('script');
-	s.src = '//cachemanager.disqus.com/embed.js';
-	s.setAttribute('data-timestamp', +new Date());
-	(d.head || d.body).appendChild(s);
+	$(document).ready(function(){
+		var d = document, s = d.createElement('script');
+		s.src = '//cachemanager.disqus.com/embed.js';
+		s.setAttribute('data-timestamp', +new Date());
+		(d.head || d.body).appendChild(s);
+	});
 })();
 </script>
   </body>
