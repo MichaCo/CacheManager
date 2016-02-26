@@ -14,14 +14,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "common", "common", "{A8DA8B
 		appveyor.yml = appveyor.yml
 		common\CacheManager.ruleset = common\CacheManager.ruleset
 		common\CacheManager.Test.ruleset = common\CacheManager.Test.ruleset
-		CacheManagerCfg.xsd = CacheManagerCfg.xsd
 		COPYRIGHT.txt = COPYRIGHT.txt
-		CREDITS.txt = CREDITS.txt
 		common\GlobalAssemblyInfo.cs = common\GlobalAssemblyInfo.cs
 		LICENSE = LICENSE
 		NuGet.Config = NuGet.Config
 		README.md = README.md
-		RedisCfg.xsd = RedisCfg.xsd
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{B5045693-CB90-44E0-A4B8-9928E3965006}"
@@ -57,8 +54,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Articles", "Articles", "{BF
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CacheManager.Config.Tests.Net45", "test\CacheManager.Config.Tests.Net45\CacheManager.Config.Tests.Net45.csproj", "{A99096DC-8B71-4BE7-8638-03E9E882B4E3}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CacheManager.Backplate.TestNode", "test\CacheManager.Backplate.TestNode\CacheManager.Backplate.TestNode.csproj", "{8696BCF6-2F2F-4566-94BD-7EB80E7791F1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CacheManager.Tests.Net45", "test\CacheManager.Tests.Net45\CacheManager.Tests.Net45.csproj", "{3C353206-AAC8-493A-B831-FDE74C54341D}"
 EndProject
@@ -112,10 +107,6 @@ Global
 		{A99096DC-8B71-4BE7-8638-03E9E882B4E3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A99096DC-8B71-4BE7-8638-03E9E882B4E3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A99096DC-8B71-4BE7-8638-03E9E882B4E3}.Release|Any CPU.Build.0 = Release|Any CPU
-		{8696BCF6-2F2F-4566-94BD-7EB80E7791F1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8696BCF6-2F2F-4566-94BD-7EB80E7791F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8696BCF6-2F2F-4566-94BD-7EB80E7791F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8696BCF6-2F2F-4566-94BD-7EB80E7791F1}.Release|Any CPU.Build.0 = Release|Any CPU
 		{3C353206-AAC8-493A-B831-FDE74C54341D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{3C353206-AAC8-493A-B831-FDE74C54341D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3C353206-AAC8-493A-B831-FDE74C54341D}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -164,7 +155,6 @@ Global
 		{009FAF28-6829-414E-A03F-6A39660B12A6} = {3CBC4C94-1EE1-44E8-BB56-620B8A7F7777}
 		{3CEA3848-8C1A-41DA-B65C-90E57A7447CB} = {3CBC4C94-1EE1-44E8-BB56-620B8A7F7777}
 		{A99096DC-8B71-4BE7-8638-03E9E882B4E3} = {A4153E09-B842-4BBF-B4D1-D05F8792A9A5}
-		{8696BCF6-2F2F-4566-94BD-7EB80E7791F1} = {A4153E09-B842-4BBF-B4D1-D05F8792A9A5}
 		{3C353206-AAC8-493A-B831-FDE74C54341D} = {A4153E09-B842-4BBF-B4D1-D05F8792A9A5}
 		{701DF657-8670-4313-A06B-63D8485B18F9} = {8099505D-0783-4352-8BAD-F7F5E7D709FD}
 		{4F3C4713-183E-4181-8B1A-E4192D964894} = {8099505D-0783-4352-8BAD-F7F5E7D709FD}

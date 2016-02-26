@@ -190,6 +190,58 @@ namespace CacheManager.Tests
 #endif
 
         [Fact]
+        [Trait("category", "Unreliable")]
+        [ReplaceCulture]
+        public void DictionaryHandle_AbsoluteExpires()
+        {
+            using (var cache = CacheFactory.Build(settings =>
+            {
+                settings.WithDictionaryHandle()
+                        .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMilliseconds(50));
+            }))
+            {
+                var key = Guid.NewGuid().ToString();
+                cache.Put(key, "value");
+
+                Thread.Sleep(20);
+
+                cache.Get(key).Should().Be("value");
+
+                Thread.Sleep(40);
+
+                cache.Get(key).Should().BeNull("Should be expired.");
+            }
+        }
+
+        [Fact]
+        [Trait("category", "Unreliable")]
+        [ReplaceCulture]
+        public void DictionaryHandle_SlidingExpires()
+        {
+            using (var cache = CacheFactory.Build(settings =>
+            {
+                settings.WithDictionaryHandle()
+                        .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromMilliseconds(50));
+            }))
+            {
+                var key = Guid.NewGuid().ToString();
+                cache.Put(key, "value");
+
+                Thread.Sleep(30);
+
+                cache.Get(key).Should().Be("value");
+
+                Thread.Sleep(30);
+
+                cache.Get(key).Should().Be("value");
+
+                Thread.Sleep(50);
+
+                cache.Get(key).Should().BeNull("Should be expired.");
+            }
+        }
+
+        [Fact]
         public void CacheItem_WithExpiration()
         {
             var item = new CacheItem<object>("key", "value", ExpirationMode.Absolute, TimeSpan.FromSeconds(1));
