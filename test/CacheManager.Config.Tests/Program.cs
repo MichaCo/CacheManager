@@ -34,7 +34,7 @@ namespace CacheManager.Config.Tests
                     f.AddConsole(LogLevel.Error);
 
                     // TODO: change to Debug after logging upgrade to RC2
-                    f.AddDebug(LogLevel.Verbose);
+                    f.AddDebug(LogLevel.Information);
                 });
 
                 builder.WithUpdateMode(CacheUpdateMode.Up);
@@ -73,11 +73,6 @@ namespace CacheManager.Config.Tests
 #endif
                 var cacheA = new BaseCacheManager<object>(builder.Build());
                 cacheA.Clear();
-
-#if !DNXCORE50
-                var redisHandle = cacheA.CacheHandles.Last() as Redis.RedisCacheHandle<object>;
-                var features = redisHandle.Features;
-#endif
 
                 for (int i = 0; i < iterations; i++)
                 {

@@ -223,6 +223,8 @@ namespace CacheManager.Core.Internal
                     if (!this.scanRunning && this.lastScan + ScanInterval < currentTicks)
                     {
                         this.lastScan = currentTicks;
+
+                        this.Logger.LogInfo("Starting scan for expired items. Next scan in {0}sec.", ScanInterval / 1000);
 #if NET40
                         Task.Factory.StartNew(
                             state => ScanForExpiredItems((DictionaryCacheHandle<TCacheValue>)state), 
