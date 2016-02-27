@@ -114,7 +114,9 @@ OnGet, OnAdd, OnPut, OnRemove, OnClear, OnClearRegion
 
 Benchmarks have been implemented with [BenchmarkDotNet](https://github.com/PerfDotNet/BenchmarkDotNet).
 
-Using the same configuration for all the following benchmarks:
+All CacheManager instances used in the benchmarks have only one cache handle configured, either the Dictionary, System.Runtime or Redis handle.
+
+We are using the same configuration for all benchmarks and running two jobs each, one for x86 and one for x64. Regarding the different platforms, the conclusion is obviously that x64 is always faster than the x86 platform, but x64 consumes slightly more memory of course.
 
 ```ini
 BenchmarkDotNet=v0.9.1.0
@@ -129,8 +131,10 @@ TargetCount=100
 ```
 
 ### Add 
-
 *Adding one item per run*
+
+Redis will be a lot slower in this scenario because CacheManager waits for the response to be able to return the `bool` value if the key has been added or not.
+In general, it is good to see how fast the Dictionary handle is compared to the `System.Runtime` one. One thing you cannot see here is that also the memory footprint of the Dictionary handle is much lower.
 
 Method |  Platform |  Median |    StdDev | Scaled |
 -----------: |:-----------: |-----------: |----------: |-------: |
@@ -153,8 +157,8 @@ Method |  Platform |  Median |    StdDev | Scaled |
       Redis |      X86 | 61.0272 us | 1.4178 us |  24.38 |      
 
 ### Put
-
 *Put 1 item per run*
+Redis is as fast as the other handles in this scenario because CacheManager uses fire and forget for those operations. For Put it doesn't matter to know if the item has been added or updated...
 
 Method |  Platform |  Median |    StdDev | Scaled |
 -----------: |:-----------: |-----------: |----------: |-------: |
@@ -177,8 +181,8 @@ Method |  Platform |  Median |    StdDev | Scaled |
       Redis |      X86 | 3.6385 us | 0.2123 us |   1.48 |
 
 ### Get
-
 *Get 1 item per run*
+With `Get` operations we can clearly see how much faster an in-memory cache is, compared to the distributed variant. That's why it makes so much sense to use CacheManager with a first and secondary cache layer.
 
 Method |  Platform |  Median |    StdDev | Scaled |
 -----------: |:-----------: |-----------: |----------: |-------: |
