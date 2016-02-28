@@ -484,7 +484,7 @@ namespace CacheManager.Tests
 
             // assert
             act.ShouldThrow<InvalidOperationException>()
-                .WithMessage("BackplaneType cannot be null if BackplaneName is specified.");
+                .WithMessage("Backplane type cannot be null if backplane name is specified.");
         }
 
         [Fact]
@@ -499,7 +499,7 @@ namespace CacheManager.Tests
 
             // assert
             act.ShouldThrow<InvalidOperationException>()
-                .WithMessage("BackplaneName cannot be null if BackplaneType is specified.");
+                .WithMessage("Backplane name cannot be null if backplane type is specified.");
         }
 
         [Fact]

@@ -83,8 +83,8 @@
     <Compile Include="..\CacheManager.Core\ICacheManagerConfiguration.cs">
       <Link>ICacheManagerConfiguration.cs</Link>
     </Compile>
-    <Compile Include="..\CacheManager.Core\Internal\BackPlateMessage.cs">
-      <Link>Internal\BackPlateMessage.cs</Link>
+    <Compile Include="..\CacheManager.Core\Internal\BackplaneMessage.cs">
+      <Link>Internal\BackplaneMessage.cs</Link>
     </Compile>
     <Compile Include="..\CacheManager.Core\Internal\BaseCache.cs">
       <Link>Internal\BaseCache.cs</Link>
@@ -95,8 +95,8 @@
     <Compile Include="..\CacheManager.Core\Internal\BinaryCacheSerializer.cs">
       <Link>Internal\BinaryCacheSerializer.cs</Link>
     </Compile>
-    <Compile Include="..\CacheManager.Core\Internal\CacheBackPlate.cs">
-      <Link>Internal\CacheBackPlate.cs</Link>
+    <Compile Include="..\CacheManager.Core\Internal\CacheBackplane.cs">
+      <Link>Internal\CacheBackplane.cs</Link>
     </Compile>
     <Compile Include="..\CacheManager.Core\Internal\CacheEventArgs.cs">
       <Link>Internal\CacheEventArgs.cs</Link>

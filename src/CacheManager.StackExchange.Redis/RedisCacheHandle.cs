@@ -86,7 +86,6 @@ return result";
         /// <param name="configuration">The cache handle configuration.</param>
         /// <param name="loggerFactory">The logger factory.</param>
         /// <param name="serializer">The serializer.</param>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA2204:Literals should be spelled correctly", MessageId = "redis", Justification = "That's the name...")]
         public RedisCacheHandle(CacheManagerConfiguration managerConfiguration, CacheHandleConfiguration configuration, ILoggerFactory loggerFactory, ICacheSerializer serializer)
             : base(managerConfiguration, configuration)
         {
@@ -686,7 +685,6 @@ return result";
             });
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA2204:Literals should be spelled correctly", MessageId = "Lua", Justification = "That's the name")]
         private StackRedis.RedisResult Eval(ScriptType scriptType, StackRedis.RedisKey redisKey, StackRedis.RedisValue[] values = null, StackRedis.CommandFlags flags = StackRedis.CommandFlags.None)
         {
             if (!this.scriptsLoaded)

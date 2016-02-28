@@ -1,0 +1,16 @@
+<Dictionary>
+  <Words>
+    <Recognized>
+      <Word>Redis</Word>
+      <Word>Lua</Word>
+    </Recognized>
+    <DiscreteExceptions>
+      <Term></Term>
+    </DiscreteExceptions>
+  </Words>
+  <Acronyms>
+    <CasingExceptions>
+      <Acronym></Acronym>
+    </CasingExceptions>
+  </Acronyms>
+</Dictionary>

@@ -71,8 +71,8 @@
     <Compile Include="..\..\common\GlobalAssemblyInfo.cs">
       <Link>Properties\GlobalAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="..\CacheManager.StackExchange.Redis\RedisCacheBackPlate.cs">
-      <Link>RedisCacheBackPlate.cs</Link>
+    <Compile Include="..\CacheManager.StackExchange.Redis\RedisCacheBackplane.cs">
+      <Link>RedisCacheBackplane.cs</Link>
     </Compile>
     <Compile Include="..\CacheManager.StackExchange.Redis\RedisCacheHandle.cs">
       <Link>RedisCacheHandle.cs</Link>

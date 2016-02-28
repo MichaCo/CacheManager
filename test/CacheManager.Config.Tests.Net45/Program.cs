@@ -54,7 +54,7 @@ namespace CacheManager.Config.Tests
                 cfg.WithRedisCacheHandle("redis", true)
                     .EnablePerformanceCounters();
 
-                cfg.WithRedisBackPlate("redis");
+                cfg.WithRedisBackplane("redis");
 
                 cfg.WithRedisConfiguration("redis", config =>
                 {

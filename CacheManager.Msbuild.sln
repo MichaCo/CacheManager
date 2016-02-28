@@ -15,6 +15,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "common", "common", "{A8DA8B
 		common\CacheManager.ruleset = common\CacheManager.ruleset
 		common\CacheManager.Test.ruleset = common\CacheManager.Test.ruleset
 		COPYRIGHT.txt = COPYRIGHT.txt
+		common\CustomDictionary.xml = common\CustomDictionary.xml
 		common\GlobalAssemblyInfo.cs = common\GlobalAssemblyInfo.cs
 		LICENSE = LICENSE
 		NuGet.Config = NuGet.Config

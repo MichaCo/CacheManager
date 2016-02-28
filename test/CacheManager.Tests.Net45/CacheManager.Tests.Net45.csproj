@@ -176,12 +176,12 @@
       <Link>Configuration\configuration.ExpireTest.config</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="..\CacheManager.Tests\Configuration\configuration.invalid.backPlateNameNoType.config">
-      <Link>Configuration\configuration.invalid.backPlateNameNoType.config</Link>
+    <None Include="..\CacheManager.Tests\Configuration\configuration.invalid.backplaneNameNoType.config">
+      <Link>Configuration\configuration.invalid.backplaneNameNoType.config</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="..\CacheManager.Tests\Configuration\configuration.invalid.backPlateTypeNoName.config">
-      <Link>Configuration\configuration.invalid.backPlateTypeNoName.config</Link>
+    <None Include="..\CacheManager.Tests\Configuration\configuration.invalid.backplaneTypeNoName.config">
+      <Link>Configuration\configuration.invalid.backplaneTypeNoName.config</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="..\CacheManager.Tests\Configuration\configuration.invalid.emptyHandleDefinition.config">

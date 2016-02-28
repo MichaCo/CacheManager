@@ -272,14 +272,14 @@ namespace CacheManager.Core
             {
                 if (!string.IsNullOrWhiteSpace(managerCfg.BackplaneName))
                 {
-                    throw new InvalidOperationException("BackplaneType cannot be null if BackplaneName is specified.");
+                    throw new InvalidOperationException("Backplane type cannot be null if backplane name is specified.");
                 }
             }
             else
             {
                 if (string.IsNullOrWhiteSpace(managerCfg.BackplaneName))
                 {
-                    throw new InvalidOperationException("BackplaneName cannot be null if BackplaneType is specified.");
+                    throw new InvalidOperationException("Backplane name cannot be null if backplane type is specified.");
                 }
 
                 var backplaneType = Type.GetType(managerCfg.BackplaneType, false);
