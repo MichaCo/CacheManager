@@ -4,13 +4,13 @@ abstract: "In-depth walk through of how logging in CacheManager works and how yo
 lastUpdate:"2016-02-16"
 }
 -->
-## Logging
+# Logging
 Since version 0.7.2, CacheManager.Core comes with its own logging interface `CacheManager.Core.Logging` which is used internally to log standard cache operations, and to trace what decisions CacheManager is making.
 
-### Example Log Output
+## Example Log Output
 The examples below are using the [`Microsoft.Extensions.Logging`](#microsoftextensionslogging) for printing log output to the console.
 
-#### Tracing
+### Tracing
 The first few lines are informational on CacheManager initialization, creating the different handles...
 
 ```nohighlight
@@ -64,7 +64,7 @@ CacheManager.Core.BaseCacheManager<object>: Trace: Add to handles: key : adding 
 ```
 > **Hint**: Keep in mind that logging trace level information will cost a lot of performance. If you have 100s or 1000s or cache operations per second, it would log way too much information to a file, console or debug window. Use `LogLevel.Trace` only during development and to track down issues. For Production, `LogLevel.Information` and up should be more than enough.
 
-#### Warnings and Errors
+### Warnings and Errors
 The next example shows what happens if you use the Redis cache handle and the connection to the Redis server is lost (because I killed the instance).
 ```nohighlight
 CacheManager.Core.BaseCacheManager<object>: Trace: Add: key 
@@ -82,18 +82,18 @@ StackExchange.Redis.RedisConnectionException: No connection is available to serv
    bei StackExchange.Redis.ConnectionMultiplexer.ExecuteSyncImpl[T](Message message, ResultProcessor`1 processor, ServerEndPoint server) in...
 ```
 
-### The Logging Internals
+## The Logging Internals
 There are two interfaces defined in `CacheManager.Core.Logging`  which are commonly known in logging frameworks, the `ILoggerFactory` and the `ILogger`. The factory is responsible for creating logger instances.
 The `ILogger` has been defined in the most simplified way with only one `Log` method.
 All other methods to log for certain log levels, string formatting, etc., will be extension methods.
 
-### Logging Abstraction
+## Logging Abstraction
 Important to note is, that CacheManager doesn't implement those interfaces with its own logger framework to target different logging outputs like console, trace and what not. 
 There are already many of those frameworks available. The intent is just abstraction, in a way that the CacheManager.Core package doesn't have hard dependencies to any of those 3rd party logging frameworks.
 
 To actually use a 3rd party logging framework, CacheManager will implement an adapter for the external logger factory and logger, redirecting the internal `Log` calls to the external library.
 
-### Configuration
+## Configuration
 The configuration works seamlessly and in the same fashion as everything else in CacheManager. The only thing which has to be defined is the `ILoggerFactory` which should be used by CacheManager to instantiate loggers.
 Therefore, there is a new `WithLogging` configuration method which will take the type of the logger factory.
 ```cs
@@ -101,7 +101,7 @@ builder.WithLogging(typeof(MyLoggerFactory))
 ```
 If you write your own logger factory, your implementation can use constructor injection to pass through things you might need. The only instance which gets injected by CacheManager during initialization of the logger factory out of the box is the current instance of `CacheManagerConfiguration`. If you other types, use the `args` parameter during `WithLogging` configuration.
 
-### Microsoft.Extensions.Logging
+## Microsoft.Extensions.Logging
 The first implementation of the logging abstraction, which can be installed via NuGet, uses the new [Microsoft.Extensions.Logging][aspnetLogging] framework. 
 The corresponding package is [`CacheManager.Microsoft.Extensions.Logging`][cmLoggingNuget].
 
@@ -118,7 +118,7 @@ Of course, Microsoft.Extensions.Logging will also work cross platform and will b
 
 > **Note**: Those are the reasons why I picked this framework as the first logging implementation. If there is need to support other frameworks, like CommonLogging or e.g. NLog directly, let me know and post a feature request on GitHub.
 
-#### Configuration
+### Configuration
 For the Microsoft.Extensions.Logging CacheManager extension, there are new extension methods to configure the `ILoggerFactory` adapter in CacheManager.
 
 To configure it, use `WithMicrosoftLogging`:

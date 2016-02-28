@@ -33,6 +33,7 @@
         "key": "RedisA",
         "knownType": "Redis"
       },
+      "serializer": { "knownType": "Json" },
       "handles": [
         {
           "knownType": "Dictionary",

@@ -43,6 +43,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Articles", "Articles", "{E2
 		Articles\cachemanager_configuration.md = Articles\cachemanager_configuration.md
 		Articles\cachemanager_getting_started.md = Articles\cachemanager_getting_started.md
 		Articles\cachemanager_logging.md = Articles\cachemanager_logging.md
+		Articles\cachemanager_serialization.md = Articles\cachemanager_serialization.md
 		Articles\cachemanager_synchronization.md = Articles\cachemanager_synchronization.md
 		Articles\cachemanager_update.md = Articles\cachemanager_update.md
 	EndProjectSection
