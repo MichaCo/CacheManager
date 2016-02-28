@@ -49,6 +49,8 @@ Explains how to configure Cache Manager via code or configuration file
 A more advanced in depth introduction to all features of Cache Manager
 * [**Update Operations**][updatearticle]
 Explanation of why and when to use the update method instead of `Put` 
+* [**Serialization**][serialization]
+Cache value serialization and configuration options explained in detail.
 * [**Cache Synchronization**][cachesyncarticle]
 Use case for and explanation of the Cache Backplane feature.
 * [**Logging**][logging]
@@ -216,13 +218,14 @@ Method |  Platform |  Median |    StdDev | Scaled |
 [Couchbase.nuget]: https://www.nuget.org/packages/CacheManager.Couchbase
 [mcweb]: http://michaconrad.com
 [articles]: https://github.com/MichaCo/CacheManager/tree/master/Articles
-[help]: http://michaco.github.io/Documentation/CacheManager/Help
+[help]: http://cachemanager.net/Documentation/api
 [gettingstarted]: http://cachemanager.net/Documentation/Index/cachemanager_getting_started
 [configuration]: http://cachemanager.net/Documentation/Index/cachemanager_configuration
 [featuresarticle]: http://cachemanager.net/Documentation/Index/cachemanager_architecture
 [updatearticle]: http://cachemanager.net/Documentation/Index/cachemanager_update
 [cachesyncarticle]: http://cachemanager.net/Documentation/Index/cachemanager_synchronization
 [logging]: http://cachemanager.net/Documentation/Index/cachemanager_logging
+[serialization]: http://cachemanager.net/Documentation/Index/cachemanager_serialization
 [program.cs]: https://github.com/MichaCo/CacheManager/blob/master/samples/CacheManager.Examples/Program.cs
 [outputcachesample]: https://github.com/MichaCo/CacheManager/tree/master/samples/CacheManager.Samples.Mvc
 [todosample]: http://cachemanager.net/Documentation/Index/cachemanager_backed_todo_web_app
