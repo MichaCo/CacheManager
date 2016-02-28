@@ -166,7 +166,7 @@ namespace CacheManager.Tests
                 },
                 (cache) =>
                 {
-                    Thread.Sleep(200);
+                    Thread.Sleep(400);
                     var value = cache.Get(item.Key);
                     value.Should().Be("new value", cache.ToString());
                 },
@@ -252,7 +252,7 @@ namespace CacheManager.Tests
                 },
                 (cache) =>
                 {
-                    Thread.Sleep(200);
+                    Thread.Sleep(400);
                     var value = cache.GetCacheItem(item.Key);
                     value.Should().BeNull();
                 },
