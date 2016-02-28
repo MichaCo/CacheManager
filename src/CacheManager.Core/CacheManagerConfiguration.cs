@@ -54,37 +54,37 @@ namespace CacheManager.Core
         public int RetryTimeout { get; set; } = 100;
 
         /// <summary>
-        /// Gets or sets the configuration key the back plate might use.
+        /// Gets or sets the configuration key the backplane might use.
         /// </summary>
-        /// <value>The key of the back plate configuration.</value>
-        public string BackPlateConfigurationKey { get; set; }
+        /// <value>The key of the backplane configuration.</value>
+        public string BackplaneConfigurationKey { get; set; }
 
         /// <summary>
-        /// Gets or sets the back plate channel name.
+        /// Gets or sets the backplane channel name.
         /// </summary>
         /// <value>The channel name.</value>
-        public string BackPlateChannelName { get; set; }
+        public string BackplaneChannelName { get; set; }
 
         /// <summary>
-        /// Gets a value indicating whether this instance has a back plate defined.
+        /// Gets a value indicating whether this instance has a backplane defined.
         /// </summary>
         /// <value>
-        /// <c>true</c> if this instance has cache back plate; otherwise, <c>false</c>.
+        /// <c>true</c> if this instance has cache backplane; otherwise, <c>false</c>.
         /// </value>
-        public bool HasBackPlate => this.BackPlateType != null;
+        public bool HasBackplane => this.BackplaneType != null;
 
         /// <summary>
-        /// Gets or sets the factory method for a cache back plate.
+        /// Gets or sets the factory method for a cache backplane.
         /// </summary>
-        /// <value>The back plate activator.</value>
-        public Type BackPlateType { get; set; }
+        /// <value>The backplane activator.</value>
+        public Type BackplaneType { get; set; }
 
         /// <summary>
-        /// Gets or sets additional arguments which should be used instantiating the back-plate.
+        /// Gets or sets additional arguments which should be used instantiating the backplane.
         /// </summary>
         /// <value>The list of arguments.</value>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1819:PropertiesShouldNotReturnArrays", Justification = "nope")]
-        public object[] BackPlateTypeArguments { get; set; }
+        public object[] BackplaneTypeArguments { get; set; }
 
         /// <summary>
         /// Gets or sets the factory method for a cache serializer.

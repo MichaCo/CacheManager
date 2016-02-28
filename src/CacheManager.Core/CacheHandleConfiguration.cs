@@ -87,16 +87,15 @@ namespace CacheManager.Core
         public string Key { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether this instance is back plate source.
+        /// Gets or sets a value indicating whether this instance is backplane source.
         /// <para>
-        /// Only one cache handle inside one cache manager can be back plate source. Usually this is
-        /// a distributed cache. It might not make any sense to define an in process cache as back
-        /// plate source.
+        /// Only one cache handle inside one cache manager can be backplane source. Usually this is
+        /// a distributed cache. It might not make any sense to define an in process cache as backplane source.
         /// </para>
-        /// <para>If no back plate is configured for the cache, this setting will have no effect.</para>
+        /// <para>If no backplane is configured for the cache, this setting will have no effect.</para>
         /// </summary>
-        /// <value><c>true</c> if this instance should be back plate source; otherwise, <c>false</c>.</value>
-        public bool IsBackPlateSource { get; set; }
+        /// <value><c>true</c> if this instance should be backplane source; otherwise, <c>false</c>.</value>
+        public bool IsBackplaneSource { get; set; }
 
         /// <summary>
         /// Gets or sets the type of the handle.

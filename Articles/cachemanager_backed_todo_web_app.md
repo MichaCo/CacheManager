@@ -251,7 +251,7 @@ The configuration now has two cache handles! A "first level" in-process cache, a
 ## Hosting
 If we now host this site on Azure for example, we can change the configuration slightly and use a connection string instead of hard coded connection parameters.
 
-We can also use the Cache Manager's back plate feature, to keep the configured first level in-process cache in sync.
+We can also use the Cache Manager's backplane feature, to keep the configured first level in-process cache in sync.
 ```cs
 var cacheConfig = ConfigurationBuilder.BuildConfiguration(settings =>
 {
@@ -259,7 +259,7 @@ var cacheConfig = ConfigurationBuilder.BuildConfiguration(settings =>
         .WithSystemRuntimeCacheHandle("inprocess")
             .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMinutes(10))
         .And
-        .WithRedisBackPlate("redis.azure.us")
+        .WithRedisBackplane("redis.azure.us")
         .WithRedisCacheHandle("redis.azure.us", true);
 });
 ```

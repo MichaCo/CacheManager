@@ -12,9 +12,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		appveyor.yml = appveyor.yml
 		build.cmd = build.cmd
 		build.sh = build.sh
+		tools\cacheManager.json = tools\cacheManager.json
+		tools\CacheManagerCfg.xsd = tools\CacheManagerCfg.xsd
 		global.json = global.json
 		NuGet.Config = NuGet.Config
 		README.md = README.md
+		tools\RedisCfg.xsd = tools\RedisCfg.xsd
 	EndProjectSection
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "CacheManager.Core", "src\CacheManager.Core\CacheManager.Core.xproj", "{C9B4E53B-15FC-42AF-9107-0C2E52E8680B}"
@@ -58,8 +61,6 @@ Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "CacheManager.Memcached", "s
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "CacheManager.MSConfiguration.TypeLoad.Tests", "test\CacheManager.MSConfiguration.TypeLoad.Tests\CacheManager.MSConfiguration.TypeLoad.Tests.xproj", "{360D0B25-F9EB-4553-92DC-FB0FD24EF344}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "CacheManager.Backplate.App", "test\CacheManager.Backplate.App\CacheManager.Backplate.App.xproj", "{1D0401C7-4BA5-4A36-A405-7EF4C7C2D65D}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentation", "{E026FBD6-8112-46A7-BB3C-C8FB901CB93A}"
 	ProjectSection(SolutionItems) = preProject
 		Documentation\build.cmd = Documentation\build.cmd
@@ -99,6 +100,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "api", "api", "{F2761882-C68
 	ProjectSection(SolutionItems) = preProject
 		Documentation\api\index.md = Documentation\api\index.md
 	EndProjectSection
+EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "CacheManager.Backplane.App", "test\CacheManager.Backplane.App\CacheManager.Backplane.App.xproj", "{1D0401C7-4BA5-4A36-A405-7EF4C7C2D65D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -354,11 +357,11 @@ Global
 		{97C864BD-D4C7-4DF6-92D0-4D76A89F6706} = {58CC885F-40A7-4C82-990D-3F36AAA088A7}
 		{5E5AFEF6-C13E-4D78-87D6-50407002A9B1} = {58CC885F-40A7-4C82-990D-3F36AAA088A7}
 		{360D0B25-F9EB-4553-92DC-FB0FD24EF344} = {C013E552-43F5-4496-BE29-DB401C3334BB}
-		{1D0401C7-4BA5-4A36-A405-7EF4C7C2D65D} = {C013E552-43F5-4496-BE29-DB401C3334BB}
 		{75D61766-6604-4FAD-8451-FCF300CCCD48} = {E026FBD6-8112-46A7-BB3C-C8FB901CB93A}
 		{42E99581-4D8D-44E1-848D-1EAB564A3129} = {75D61766-6604-4FAD-8451-FCF300CCCD48}
 		{5FFC2D23-4EA5-4402-B251-C83B453DC423} = {75D61766-6604-4FAD-8451-FCF300CCCD48}
 		{96C0965D-2375-4780-9DAC-640927D74161} = {E026FBD6-8112-46A7-BB3C-C8FB901CB93A}
 		{F2761882-C68D-4CC4-A906-3C46EF6A6573} = {E026FBD6-8112-46A7-BB3C-C8FB901CB93A}
+		{1D0401C7-4BA5-4A36-A405-7EF4C7C2D65D} = {C013E552-43F5-4496-BE29-DB401C3334BB}
 	EndGlobalSection
 EndGlobal

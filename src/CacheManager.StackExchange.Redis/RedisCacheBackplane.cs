@@ -12,14 +12,14 @@ using StackRedis = StackExchange.Redis;
 namespace CacheManager.Redis
 {
     /// <summary>
-    /// Implementation of the cache back plate with Redis Pub/Sub feature.
+    /// Implementation of the cache backplane with Redis Pub/Sub feature.
     /// <para>
     /// Pub/Sub is used to send messages to the redis server on any Update, cache Clear, Region
     /// Clear or Remove operation. Every cache manager with the same configuration subscribes to the
     /// same chanel and can react on those messages to keep other cache handles in sync with the 'master'.
     /// </para>
     /// </summary>
-    public sealed class RedisCacheBackPlate : CacheBackPlate
+    public sealed class RedisCacheBackplane : CacheBackplane
     {
         private readonly string channelName;
         private readonly string identifier;
@@ -31,18 +31,18 @@ namespace CacheManager.Redis
         private bool sending = false;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="RedisCacheBackPlate"/> class.
+        /// Initializes a new instance of the <see cref="RedisCacheBackplane"/> class.
         /// </summary>
         /// <param name="configuration">The cache manager configuration.</param>
         /// <param name="loggerFactory">The logger factory</param>
-        public RedisCacheBackPlate(CacheManagerConfiguration configuration, ILoggerFactory loggerFactory)
+        public RedisCacheBackplane(CacheManagerConfiguration configuration, ILoggerFactory loggerFactory)
             : base(configuration)
         {
             NotNull(configuration, nameof(configuration));
             NotNull(loggerFactory, nameof(loggerFactory));
 
             this.logger = loggerFactory.CreateLogger(this);
-            this.channelName = configuration.BackPlateChannelName ?? "CacheManagerBackPlate";
+            this.channelName = configuration.BackplaneChannelName ?? "CacheManagerBackplane";
             this.identifier = Guid.NewGuid().ToString();
 
             var cfg = RedisConfigurations.GetConfiguration(this.ConfigurationKey);
@@ -59,7 +59,7 @@ namespace CacheManager.Redis
         /// <param name="key">The key.</param>
         public override void NotifyChange(string key)
         {
-            this.PublishMessage(BackPlateMessage.ForChanged(this.identifier, key));
+            this.PublishMessage(BackplaneMessage.ForChanged(this.identifier, key));
         }
 
         /// <summary>
@@ -69,7 +69,7 @@ namespace CacheManager.Redis
         /// <param name="region">The region.</param>
         public override void NotifyChange(string key, string region)
         {
-            this.PublishMessage(BackPlateMessage.ForChanged(this.identifier, key, region));
+            this.PublishMessage(BackplaneMessage.ForChanged(this.identifier, key, region));
         }
 
         /// <summary>
@@ -77,7 +77,7 @@ namespace CacheManager.Redis
         /// </summary>
         public override void NotifyClear()
         {
-            this.PublishMessage(BackPlateMessage.ForClear(this.identifier));
+            this.PublishMessage(BackplaneMessage.ForClear(this.identifier));
         }
 
         /// <summary>
@@ -86,7 +86,7 @@ namespace CacheManager.Redis
         /// <param name="region">The region.</param>
         public override void NotifyClearRegion(string region)
         {
-            this.PublishMessage(BackPlateMessage.ForClearRegion(this.identifier, region));
+            this.PublishMessage(BackplaneMessage.ForClearRegion(this.identifier, region));
         }
 
         /// <summary>
@@ -95,7 +95,7 @@ namespace CacheManager.Redis
         /// <param name="key">The key.</param>
         public override void NotifyRemove(string key)
         {
-            this.PublishMessage(BackPlateMessage.ForRemoved(this.identifier, key));
+            this.PublishMessage(BackplaneMessage.ForRemoved(this.identifier, key));
         }
 
         /// <summary>
@@ -105,7 +105,7 @@ namespace CacheManager.Redis
         /// <param name="region">The region.</param>
         public override void NotifyRemove(string key, string region)
         {
-            this.PublishMessage(BackPlateMessage.ForRemoved(this.identifier, key, region));
+            this.PublishMessage(BackplaneMessage.ForRemoved(this.identifier, key, region));
         }
 
         /// <summary>
@@ -130,13 +130,13 @@ namespace CacheManager.Redis
             this.connection.Subscriber.Publish(this.channelName, message, StackRedis.CommandFlags.HighPriority);
         }
 
-        private void PublishMessage(BackPlateMessage message)
+        private void PublishMessage(BackplaneMessage message)
         {
             var msg = message.Serialize();
 
             lock (this.messageLock)
             {
-                if (message.Action == BackPlateAction.Clear)
+                if (message.Action == BackplaneAction.Clear)
                 {
                     Interlocked.Exchange(ref this.skippedMessages, this.messages.Count);
                     this.messages.Clear();
@@ -184,7 +184,7 @@ namespace CacheManager.Redis
 
                             if (this.logger.IsEnabled(LogLevel.Debug))
                             {
-                                this.logger.LogDebug("Back-plate is sending {0} messages ({1} skipped).", this.messages.Count, this.skippedMessages);
+                                this.logger.LogDebug("Backplane is sending {0} messages ({1} skipped).", this.messages.Count, this.skippedMessages);
                             }
 
                             this.skippedMessages = 0;
@@ -200,7 +200,7 @@ namespace CacheManager.Redis
                         }
                         catch (Exception ex)
                         {
-                            this.logger.LogError(ex, "Error occurred sending back plate messages.");
+                            this.logger.LogError(ex, "Error occurred sending backplane messages.");
                         }
 
                         this.sending = false;
@@ -240,24 +240,24 @@ namespace CacheManager.Redis
 
                     if (this.logger.IsEnabled(LogLevel.Information))
                     {
-                        this.logger.LogInfo("Back-plate got notified with {0} new messages.", fullMessage.Length);
+                        this.logger.LogInfo("Backplane got notified with {0} new messages.", fullMessage.Length);
                     }
 
                     foreach (var messageStr in fullMessage)
                     {
-                        var message = BackPlateMessage.Deserialize(messageStr);
+                        var message = BackplaneMessage.Deserialize(messageStr);
 
                         switch (message.Action)
                         {
-                            case BackPlateAction.Clear:
+                            case BackplaneAction.Clear:
                                 this.TriggerCleared();
                                 break;
 
-                            case BackPlateAction.ClearRegion:
+                            case BackplaneAction.ClearRegion:
                                 this.TriggerClearedRegion(message.Region);
                                 break;
 
-                            case BackPlateAction.Changed:
+                            case BackplaneAction.Changed:
                                 if (string.IsNullOrWhiteSpace(message.Region))
                                 {
                                     this.TriggerChanged(message.Key);
@@ -268,7 +268,7 @@ namespace CacheManager.Redis
                                 }
                                 break;
 
-                            case BackPlateAction.Removed:
+                            case BackplaneAction.Removed:
                                 if (string.IsNullOrWhiteSpace(message.Region))
                                 {
                                     this.TriggerRemoved(message.Key);

@@ -474,32 +474,32 @@ namespace CacheManager.Tests
 
         [Fact]
         [ReplaceCulture]
-        public void Cfg_InvalidCfgFile_BackPlateNameButNoType()
+        public void Cfg_InvalidCfgFile_BackplaneNameButNoType()
         {
             // arrange
-            string fileName = GetCfgFileName(@"/Configuration/configuration.invalid.backPlateNameNoType.config");
+            string fileName = GetCfgFileName(@"/Configuration/configuration.invalid.backplaneNameNoType.config");
 
             // act
             Action act = () => ConfigurationBuilder.LoadConfigurationFile(fileName, "c1");
 
             // assert
             act.ShouldThrow<InvalidOperationException>()
-                .WithMessage("BackPlateType cannot be null if BackPlateName is specified.");
+                .WithMessage("BackplaneType cannot be null if BackplaneName is specified.");
         }
 
         [Fact]
         [ReplaceCulture]
-        public void Cfg_InvalidCfgFile_BackPlateTypeButNoName()
+        public void Cfg_InvalidCfgFile_BackplaneTypeButNoName()
         {
             // arrange
-            string fileName = GetCfgFileName(@"/Configuration/configuration.invalid.backPlateTypeNoName.config");
+            string fileName = GetCfgFileName(@"/Configuration/configuration.invalid.backplaneTypeNoName.config");
 
             // act
             Action act = () => ConfigurationBuilder.LoadConfigurationFile(fileName, "c1");
 
             // assert
             act.ShouldThrow<InvalidOperationException>()
-                .WithMessage("BackPlateName cannot be null if BackPlateType is specified.");
+                .WithMessage("BackplaneName cannot be null if BackplaneType is specified.");
         }
 
         [Fact]
@@ -545,14 +545,14 @@ namespace CacheManager.Tests
                 EnableStatistics = true,
                 MaximumRetries = 10012,
                 RetryTimeout = 234,
-                BackPlateName = "backPlate",
-                BackPlateType = typeof(string).AssemblyQualifiedName
+                BackplaneName = "backplane",
+                BackplaneType = typeof(string).AssemblyQualifiedName
             };
 
             // assert
             col.Name.Should().Be("name");
-            col.BackPlateName.Should().Be("backPlate");
-            col.BackPlateType.Should().Be(typeof(string).AssemblyQualifiedName);
+            col.BackplaneName.Should().Be("backplane");
+            col.BackplaneType.Should().Be(typeof(string).AssemblyQualifiedName);
             col.UpdateMode.Should().Be(CacheUpdateMode.Up);
             col.EnablePerformanceCounters.Should().BeTrue();
             col.EnableStatistics.Should().BeTrue();
@@ -567,7 +567,7 @@ namespace CacheManager.Tests
             // arrange act
             var col = new CacheManagerHandle()
             {
-                IsBackPlateSource = true,
+                IsBackplaneSource = true,
                 Name = "name",
                 ExpirationMode = ExpirationMode.Absolute.ToString(),
                 Timeout = "22m",
@@ -579,7 +579,7 @@ namespace CacheManager.Tests
             col.ExpirationMode.Should().Be(ExpirationMode.Absolute.ToString());
             col.Timeout.Should().Be("22m");
             col.RefHandleId.Should().Be("ref");
-            col.IsBackPlateSource.Should().BeTrue();
+            col.IsBackplaneSource.Should().BeTrue();
         }
 
         [Fact]

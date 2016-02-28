@@ -30,7 +30,7 @@ namespace CacheManager.Tests
                 {"cacheManagers:0:handles:0:enableStatistics", "true"},
                 {"cacheManagers:0:handles:0:expirationMode", "Absolute"},
                 {"cacheManagers:0:handles:0:expirationTimeout", "0:10:0"},
-                {"cacheManagers:0:handles:0:isBackPlateSource", "true"},
+                {"cacheManagers:0:handles:0:isBackplaneSource", "true"},
                 {"cacheManagers:0:handles:0:name", "handleName"},
                 {"cacheManagers:0:handles:0:key", key},
                 {"cacheManagers:0:handles:1:knownType", "Dictionary"},
@@ -38,7 +38,7 @@ namespace CacheManager.Tests
                 {"cacheManagers:0:handles:1:enableStatistics", "false"},
                 {"cacheManagers:0:handles:1:expirationMode", "Sliding"},
                 {"cacheManagers:0:handles:1:expirationTimeout", "0:20:0"},
-                {"cacheManagers:0:handles:1:isBackPlateSource", "false"},
+                {"cacheManagers:0:handles:1:isBackplaneSource", "false"},
                 {"cacheManagers:0:handles:1:name", "handleName2"},
                 {"cacheManagers:0:handles:1:key", key + "2"}
             };
@@ -508,7 +508,7 @@ namespace CacheManager.Tests
                 {"cacheManagers:0:handles:0:enableStatistics", "true"},
                 {"cacheManagers:0:handles:0:expirationMode", "Absolute"},
                 {"cacheManagers:0:handles:0:expirationTimeout", "0:10:0"},
-                {"cacheManagers:0:handles:0:isBackPlateSource", "true"},
+                {"cacheManagers:0:handles:0:isBackplaneSource", "true"},
                 {"cacheManagers:0:handles:0:name", "handleName"},
                 {"cacheManagers:0:handles:0:key", key}
             };
@@ -519,20 +519,20 @@ namespace CacheManager.Tests
             config.CacheHandleConfigurations[0].EnableStatistics.Should().BeTrue();
             config.CacheHandleConfigurations[0].ExpirationMode.Should().Be(ExpirationMode.Absolute);
             config.CacheHandleConfigurations[0].ExpirationTimeout.Should().Be(TimeSpan.FromMinutes(10));
-            config.CacheHandleConfigurations[0].IsBackPlateSource.Should().BeTrue();
+            config.CacheHandleConfigurations[0].IsBackplaneSource.Should().BeTrue();
             config.CacheHandleConfigurations[0].Name.Should().Be("handleName");
             config.CacheHandleConfigurations[0].Key.Should().Be(key);
         }
 
         [Fact]
         [ReplaceCulture]
-        public void Configuration_CacheHandle_InvalidBackPlateFlag()
+        public void Configuration_CacheHandle_InvalidBackplaneFlag()
         {
             var data = new Dictionary<string, string>
             {
                 {"cacheManagers:0:name", "cacheName"},
                 {"cacheManagers:0:handles:0:knownType", "Dictionary"},
-                {"cacheManagers:0:handles:0:isBackPlateSource", "invalid"}
+                {"cacheManagers:0:handles:0:isBackplaneSource", "invalid"}
             };
 
             Action act = () => GetConfiguration(data).GetCacheConfiguration("cacheName");
@@ -600,13 +600,13 @@ namespace CacheManager.Tests
         }
 
         [Fact]
-        public void Configuration_BackPlate_InvalidType()
+        public void Configuration_Backplane_InvalidType()
         {
             var data = new Dictionary<string, string>
             {
                 {"cacheManagers:0:name", "name"},
                 {"cacheManagers:0:handles:0:knownType", "Dictionary"},
-                {"cacheManagers:0:backPlate:type", ""},
+                {"cacheManagers:0:backplane:type", ""},
             };
 
             Action act = () => GetConfiguration(data).GetCacheConfiguration("name");
@@ -615,13 +615,13 @@ namespace CacheManager.Tests
 
         [Fact]
         [ReplaceCulture]
-        public void Configuration_BackPlate_InvalidSomeType()
+        public void Configuration_Backplane_InvalidSomeType()
         {
             var data = new Dictionary<string, string>
             {
                 {"cacheManagers:0:name", "name"},
                 {"cacheManagers:0:handles:0:knownType", "Dictionary"},
-                {"cacheManagers:0:backPlate:type", "something"},
+                {"cacheManagers:0:backplane:type", "something"},
             };
 
             Action act = () => GetConfiguration(data).GetCacheConfiguration("name");
@@ -629,27 +629,27 @@ namespace CacheManager.Tests
         }
 
         [Fact]
-        public void Configuration_BackPlate_SomeType()
+        public void Configuration_Backplane_SomeType()
         {
             var data = new Dictionary<string, string>
             {
                 {"cacheManagers:0:name", "name"},
                 {"cacheManagers:0:handles:0:knownType", "Dictionary"},
-                {"cacheManagers:0:backPlate:type", "System.Object"},
+                {"cacheManagers:0:backplane:type", "System.Object"},
             };
 
             var config = GetConfiguration(data).GetCacheConfiguration("name");
-            config.BackPlateType.Should().NotBeNull();
+            config.BackplaneType.Should().NotBeNull();
         }
 
         [Fact]
-        public void Configuration_BackPlate_InvalidKnownType()
+        public void Configuration_Backplane_InvalidKnownType()
         {
             var data = new Dictionary<string, string>
             {
                 {"cacheManagers:0:name", "name"},
                 {"cacheManagers:0:handles:0:knownType", "Dictionary"},
-                {"cacheManagers:0:backPlate:knownType", ""},
+                {"cacheManagers:0:backplane:knownType", ""},
             };
 
             Action act = () => GetConfiguration(data).GetCacheConfiguration("name");
@@ -657,28 +657,28 @@ namespace CacheManager.Tests
         }
 
         [Fact]
-        public void Configuration_BackPlate_InvalidKnownTypeB()
+        public void Configuration_Backplane_InvalidKnownTypeB()
         {
             var data = new Dictionary<string, string>
             {
                 {"cacheManagers:0:name", "name"},
                 {"cacheManagers:0:handles:0:knownType", "Dictionary"},
-                {"cacheManagers:0:backPlate:knownType", "Something"},
+                {"cacheManagers:0:backplane:knownType", "Something"},
             };
 
             Action act = () => GetConfiguration(data).GetCacheConfiguration("name");
-            act.ShouldThrow<InvalidOperationException>().WithMessage("*Known back-plate type 'Something' is invalid*");
+            act.ShouldThrow<InvalidOperationException>().WithMessage("*Known backplane type 'Something' is invalid*");
         }
 
 #if !DNXCORE50
         [Fact]
-        public void Configuration_BackPlate_Redis_MissingKey()
+        public void Configuration_Backplane_Redis_MissingKey()
         {
             var data = new Dictionary<string, string>
             {
                 {"cacheManagers:0:name", "name"},
                 {"cacheManagers:0:handles:0:knownType", "Dictionary"},
-                {"cacheManagers:0:backPlate:knownType", "Redis"},
+                {"cacheManagers:0:backplane:knownType", "Redis"},
             };
 
             Action act = () => GetConfiguration(data).GetCacheConfiguration("name");
@@ -686,7 +686,7 @@ namespace CacheManager.Tests
         }
 
         [Fact]
-        public void Configuration_BackPlate_Redis_Valid()
+        public void Configuration_Backplane_Redis_Valid()
         {
             var key = Guid.NewGuid().ToString();
             var data = new Dictionary<string, string>
@@ -694,41 +694,41 @@ namespace CacheManager.Tests
                 {"cacheManagers:0:name", "name"},
                 {"cacheManagers:0:handles:0:knownType", "Redis"},
                 {"cacheManagers:0:handles:0:key", key},
-                {"cacheManagers:0:handles:0:isBackPlateSource", "true"},
-                {"cacheManagers:0:backPlate:knownType", "Redis"},
-                {"cacheManagers:0:backPlate:channelName", "channelName"},
-                {"cacheManagers:0:backPlate:key", key},
+                {"cacheManagers:0:handles:0:isBackplaneSource", "true"},
+                {"cacheManagers:0:backplane:knownType", "Redis"},
+                {"cacheManagers:0:backplane:channelName", "channelName"},
+                {"cacheManagers:0:backplane:key", key},
                 {"redis:1:connectionString", "127.0.0.1:6379"},
                 {"redis:1:key", key}
             };
 
             var config = GetConfiguration(data).GetCacheConfiguration("name");
 
-            config.BackPlateChannelName.Should().Be("channelName");
-            config.BackPlateConfigurationKey.Should().Be(key);
-            config.BackPlateType.Should().Be(typeof(Redis.RedisCacheBackPlate));
-            config.HasBackPlate.Should().BeTrue();
+            config.BackplaneChannelName.Should().Be("channelName");
+            config.BackplaneConfigurationKey.Should().Be(key);
+            config.BackplaneType.Should().Be(typeof(Redis.RedisCacheBackplane));
+            config.HasBackplane.Should().BeTrue();
         }
 #endif
 
         [Fact]
-        public void Configuration_BackPlate_SomeType_Valid()
+        public void Configuration_Backplane_SomeType_Valid()
         {
             var key = Guid.NewGuid().ToString();
             var data = new Dictionary<string, string>
             {
                 {"cacheManagers:0:name", "name"},
                 {"cacheManagers:0:handles:0:knownType", "Dictionary"},
-                {"cacheManagers:0:backPlate:type", "System.Object"},
-                {"cacheManagers:0:backPlate:channelName", "channelName"},
-                {"cacheManagers:0:backPlate:key", key},
+                {"cacheManagers:0:backplane:type", "System.Object"},
+                {"cacheManagers:0:backplane:channelName", "channelName"},
+                {"cacheManagers:0:backplane:key", key},
             };
 
             var config = GetConfiguration(data).GetCacheConfiguration("name");
-            config.BackPlateChannelName.Should().Be("channelName");
-            config.BackPlateConfigurationKey.Should().Be(key);
-            config.BackPlateType.Should().Be(typeof(object));
-            config.HasBackPlate.Should().BeTrue();
+            config.BackplaneChannelName.Should().Be("channelName");
+            config.BackplaneConfigurationKey.Should().Be(key);
+            config.BackplaneType.Should().Be(typeof(object));
+            config.HasBackplane.Should().BeTrue();
         }
 
         [Fact]

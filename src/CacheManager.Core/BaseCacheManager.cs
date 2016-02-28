@@ -20,7 +20,7 @@ namespace CacheManager.Core
     {
         private readonly bool logTrace = false;
         private readonly BaseCacheHandle<TCacheValue>[] cacheHandles;
-        private readonly CacheBackPlate cacheBackPlate;
+        private readonly CacheBackplane cacheBackplane;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BaseCacheManager{TCacheValue}"/> class
@@ -75,10 +75,10 @@ namespace CacheManager.Core
             {
                 this.cacheHandles = CacheReflectionHelper.CreateCacheHandles(this, loggerFactory, serializer).ToArray();
 
-                this.cacheBackPlate = CacheReflectionHelper.CreateBackPlate(configuration, loggerFactory);
-                if (this.cacheBackPlate != null)
+                this.cacheBackplane = CacheReflectionHelper.CreateBackplane(configuration, loggerFactory);
+                if (this.cacheBackplane != null)
                 {
-                    this.RegisterCacheBackPlate(this.cacheBackPlate);
+                    this.RegisterCacheBackplane(this.cacheBackplane);
                 }
             }
             catch (Exception ex)
@@ -145,10 +145,10 @@ namespace CacheManager.Core
                     this.cacheHandles));
 
         /// <summary>
-        /// Gets the configured cache back-plate.
+        /// Gets the configured cache backplane.
         /// </summary>
-        /// <value>The back-plate</value>
-        public CacheBackPlate BackPlate => this.cacheBackPlate;
+        /// <value>The backplane.</value>
+        public CacheBackplane Backplane => this.cacheBackplane;
 
         /// <summary>
         /// Gets the cache name.
@@ -403,14 +403,14 @@ namespace CacheManager.Core
                 handle.Stats.OnClear();
             }
 
-            if (this.cacheBackPlate != null)
+            if (this.cacheBackplane != null)
             {
                 if (this.logTrace)
                 {
-                    this.Logger.LogTrace("Clear: notifies back plate.");
+                    this.Logger.LogTrace("Clear: notifies backplane.");
                 }
 
-                this.cacheBackPlate.NotifyClear();
+                this.cacheBackplane.NotifyClear();
             }
 
             this.TriggerOnClear();
@@ -442,14 +442,14 @@ namespace CacheManager.Core
                 handle.Stats.OnClearRegion(region);
             }
 
-            if (this.cacheBackPlate != null)
+            if (this.cacheBackplane != null)
             {
                 if (this.logTrace)
                 {
-                    this.Logger.LogTrace("Clear region: {0}: notifies back-plate [clear region].", region);
+                    this.Logger.LogTrace("Clear region: {0}: notifies backplane [clear region].", region);
                 }
 
-                this.cacheBackPlate.NotifyClearRegion(region);
+                this.cacheBackplane.NotifyClearRegion(region);
             }
 
             this.TriggerOnClearRegion(region);
@@ -855,21 +855,21 @@ namespace CacheManager.Core
             // trigger only once and not per handle and only if the item was added!
             if (result)
             {
-                // update back plate
-                if (this.cacheBackPlate != null)
+                // update backplane
+                if (this.cacheBackplane != null)
                 {
                     if (this.logTrace)
                     {
-                        this.Logger.LogTrace("Put: {0} {1}: notifies back-plate [change].", item.Key, item.Region);
+                        this.Logger.LogTrace("Put: {0} {1}: notifies backplane [change].", item.Key, item.Region);
                     }
 
                     if (string.IsNullOrWhiteSpace(item.Region))
                     {
-                        this.cacheBackPlate.NotifyChange(item.Key);
+                        this.cacheBackplane.NotifyChange(item.Key);
                     }
                     else
                     {
-                        this.cacheBackPlate.NotifyChange(item.Key, item.Region);
+                        this.cacheBackplane.NotifyChange(item.Key, item.Region);
                     }
                 }
 
@@ -920,21 +920,21 @@ namespace CacheManager.Core
                 handle.Put(item);
             }
 
-            // update back plate
-            if (this.cacheBackPlate != null)
+            // update backplane
+            if (this.cacheBackplane != null)
             {
                 if (this.logTrace)
                 {
-                    this.Logger.LogTrace("Put: {0} {1}: notifies back-plate [change].", item.Key, item.Region);
+                    this.Logger.LogTrace("Put: {0} {1}: notifies backplane [change].", item.Key, item.Region);
                 }
 
                 if (string.IsNullOrWhiteSpace(item.Region))
                 {
-                    this.cacheBackPlate.NotifyChange(item.Key);
+                    this.cacheBackplane.NotifyChange(item.Key);
                 }
                 else
                 {
-                    this.cacheBackPlate.NotifyChange(item.Key, item.Region);
+                    this.cacheBackplane.NotifyChange(item.Key, item.Region);
                 }
             }
 
@@ -955,9 +955,9 @@ namespace CacheManager.Core
                     handle.Dispose();
                 }
 
-                if (this.cacheBackPlate != null)
+                if (this.cacheBackplane != null)
                 {
-                    this.cacheBackPlate.Dispose();
+                    this.cacheBackplane.Dispose();
                 }
             }
 
@@ -1099,21 +1099,21 @@ namespace CacheManager.Core
 
             if (result)
             {
-                // update back plate
-                if (this.cacheBackPlate != null)
+                // update backplane
+                if (this.cacheBackplane != null)
                 {
                     if (this.logTrace)
                     {
-                        this.Logger.LogTrace("Remove: {0} {1}: notifies back-plate [remove].", key, region);
+                        this.Logger.LogTrace("Remove: {0} {1}: notifies backplane [remove].", key, region);
                     }
 
                     if (string.IsNullOrWhiteSpace(region))
                     {
-                        this.cacheBackPlate.NotifyRemove(key);
+                        this.cacheBackplane.NotifyRemove(key);
                     }
                     else
                     {
-                        this.cacheBackPlate.NotifyRemove(key, region);
+                        this.cacheBackplane.NotifyRemove(key, region);
                     }
                 }
 
@@ -1379,19 +1379,19 @@ namespace CacheManager.Core
             }
         }
 
-        private void RegisterCacheBackPlate(CacheBackPlate backPlate)
+        private void RegisterCacheBackplane(CacheBackplane backplane)
         {
-            NotNull(backPlate, nameof(backPlate));
+            NotNull(backplane, nameof(backplane));
 
             // this should have been checked during activation already, just to be totally sure...
-            if (this.cacheHandles.Any(p => p.Configuration.IsBackPlateSource))
+            if (this.cacheHandles.Any(p => p.Configuration.IsBackplaneSource))
             {
                 var handles = new Func<BaseCacheHandle<TCacheValue>[]>(() =>
                 {
                     var handleList = new List<BaseCacheHandle<TCacheValue>>();
                     foreach (var handle in this.cacheHandles)
                     {
-                        if (!handle.Configuration.IsBackPlateSource)
+                        if (!handle.Configuration.IsBackplaneSource)
                         {
                             handleList.Add(handle);
                         }
@@ -1399,43 +1399,43 @@ namespace CacheManager.Core
                     return handleList.ToArray();
                 });
 
-                backPlate.Changed += (sender, args) =>
+                backplane.Changed += (sender, args) =>
                 {
                     if (this.logTrace)
                     {
-                        this.Logger.LogTrace("Back-plate event: [Changed] of {0} {1}.", args.Key, args.Region);
+                        this.Logger.LogTrace("Backplane event: [Changed] of {0} {1}.", args.Key, args.Region);
                     }
 
                     this.EvictFromHandles(args.Key, args.Region, handles());
                 };
 
-                backPlate.Removed += (sender, args) =>
+                backplane.Removed += (sender, args) =>
                 {
                     if (this.logTrace)
                     {
-                        this.Logger.LogTrace("Back-plate event: [Remove] of {0} {1}.", args.Key, args.Region);
+                        this.Logger.LogTrace("Backplane event: [Remove] of {0} {1}.", args.Key, args.Region);
                     }
 
                     this.EvictFromHandles(args.Key, args.Region, handles());
                     this.TriggerOnRemove(args.Key, args.Region);
                 };
 
-                backPlate.Cleared += (sender, args) =>
+                backplane.Cleared += (sender, args) =>
                 {
                     if (this.logTrace)
                     {
-                        this.Logger.LogTrace("Back-plate event: [Clear].");
+                        this.Logger.LogTrace("Backplane event: [Clear].");
                     }
 
                     this.ClearHandles(handles());
                     this.TriggerOnClear();
                 };
 
-                backPlate.ClearedRegion += (sender, args) =>
+                backplane.ClearedRegion += (sender, args) =>
                 {
                     if (this.logTrace)
                     {
-                        this.Logger.LogTrace("Back-plate event: [Clear Region] region: {0}.", args.Region);
+                        this.Logger.LogTrace("Backplane event: [Clear Region] region: {0}.", args.Region);
                     }
 
                     this.ClearRegionHandles(args.Region, handles());
@@ -1576,21 +1576,21 @@ namespace CacheManager.Core
                 }
             }
 
-            // update back plate
-            if (overallResult == UpdateItemResultState.Success && this.cacheBackPlate != null)
+            // update backplane
+            if (overallResult == UpdateItemResultState.Success && this.cacheBackplane != null)
             {
                 if (this.logTrace)
                 {
-                    this.Logger.LogTrace("Update: {0} {1}: notifies back-plate [change].", key, region);
+                    this.Logger.LogTrace("Update: {0} {1}: notifies backplane [change].", key, region);
                 }
 
                 if (string.IsNullOrWhiteSpace(region))
                 {
-                    this.cacheBackPlate.NotifyChange(key);
+                    this.cacheBackplane.NotifyChange(key);
                 }
                 else
                 {
-                    this.cacheBackPlate.NotifyChange(key, region);
+                    this.cacheBackplane.NotifyChange(key, region);
                 }
             }
 

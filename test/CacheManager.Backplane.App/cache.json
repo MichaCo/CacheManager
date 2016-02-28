@@ -29,7 +29,7 @@
   "cacheManagers": [
     {
       "name": "CacheA",
-      "backPlate": {
+      "backplane": {
         "key": "RedisA",
         "knownType": "Redis"
       },
@@ -43,13 +43,13 @@
           "knownType": "Redis",
           "name": "RedisA",
           "key": "RedisA",
-          "isBackPlateSource": true
+          "isBackplaneSource": true
         }
       ]
     },
     {
       "name": "CacheB",
-      "backPlate": {
+      "backplane": {
         "key": "RedisB",
         "knownType": "Redis"
       },
@@ -63,7 +63,7 @@
           "knownType": "Redis",
           "name": "RedisB",
           "key": "RedisB",
-          "isBackPlateSource": true
+          "isBackplaneSource": true
         }
       ]
     }

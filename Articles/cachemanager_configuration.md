@@ -105,7 +105,7 @@ Here is a complete example:
       "name": "cachename",
       "retryTimeout": 100,
       "updateMode": "Full",
-      "backPlate": {
+      "backplane": {
         "key": "redisConString",
         "knownType": "Redis",
         "channelName": "test"
@@ -123,13 +123,13 @@ Here is a complete example:
           "enableStatistics": true,
           "expirationMode": "Absolute",
           "expirationTimeout": "0:0:23",
-          "isBackPlateSource": false,
+          "isBackplaneSource": false,
           "name": "sys cache"
         },
         {
           "knownType": "Redis",
           "key": "redisConnection",
-          "isBackPlateSource": true
+          "isBackplaneSource": true
         }
       ]
     }

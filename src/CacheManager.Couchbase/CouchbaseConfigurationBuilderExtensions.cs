@@ -59,9 +59,9 @@ namespace CacheManager.Core
         /// The Couchbase configuration identifier will be used as name for the cache handle and to
         /// retrieve the connection configuration.
         /// </param>
-        /// <param name="isBackPlateSource">
-        /// Set this to true if this cache handle should be the source of the back plate.
-        /// <para>This setting will be ignored if no back plate is configured.</para>
+        /// <param name="isBackplaneSource">
+        /// Set this to true if this cache handle should be the source of the backplane.
+        /// <para>This setting will be ignored if no backplane is configured.</para>
         /// </param>
         /// <returns>The part.</returns>
         /// <exception cref="ArgumentNullException">
@@ -70,12 +70,12 @@ namespace CacheManager.Core
         public static ConfigurationBuilderCacheHandlePart WithCouchbaseCacheHandle(
             this ConfigurationBuilderCachePart part,
             string couchbaseConfigurationKey,
-            bool isBackPlateSource)
+            bool isBackplaneSource)
         {
             NotNull(part, nameof(part));
             NotNullOrWhiteSpace(couchbaseConfigurationKey, nameof(couchbaseConfigurationKey));
 
-            return part.WithHandle(typeof(BucketCacheHandle<>), couchbaseConfigurationKey, isBackPlateSource);
+            return part.WithHandle(typeof(BucketCacheHandle<>), couchbaseConfigurationKey, isBackplaneSource);
         }
 
         /// <summary>
@@ -117,21 +117,21 @@ namespace CacheManager.Core
         /// <param name="bucketName">
         /// The name of the Couchbase bucket which should be used by the cache handle.
         /// </param>
-        /// <param name="isBackPlateSource">
-        /// Set this to true if this cache handle should be the source of the back plate.
-        /// <para>This setting will be ignored if no back plate is configured.</para>
+        /// <param name="isBackplaneSource">
+        /// Set this to true if this cache handle should be the source of the backplane.
+        /// <para>This setting will be ignored if no backplane is configured.</para>
         /// </param>
         /// <returns>The part.</returns>
         /// <exception cref="System.ArgumentNullException">If bucketName is null.</exception>
         /// <exception cref="ArgumentNullException">
         /// Thrown if handleName or handleType are null.
         /// </exception>
-        public static ConfigurationBuilderCacheHandlePart WithCouchbaseCacheHandle(this ConfigurationBuilderCachePart part, string couchbaseConfigurationKey, string bucketName, bool isBackPlateSource)
+        public static ConfigurationBuilderCacheHandlePart WithCouchbaseCacheHandle(this ConfigurationBuilderCachePart part, string couchbaseConfigurationKey, string bucketName, bool isBackplaneSource)
         {
             NotNull(part, nameof(part));
             NotNullOrWhiteSpace(bucketName, nameof(bucketName));
 
-            return part.WithHandle(typeof(BucketCacheHandle<>), couchbaseConfigurationKey + ":" + bucketName, isBackPlateSource);
+            return part.WithHandle(typeof(BucketCacheHandle<>), couchbaseConfigurationKey + ":" + bucketName, isBackplaneSource);
         }
     }
 }

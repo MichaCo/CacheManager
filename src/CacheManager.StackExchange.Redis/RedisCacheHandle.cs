@@ -183,8 +183,8 @@ return result";
         }
 
         /// <inheritdoc />
-        public override UpdateItemResult<TCacheValue> Update(string key, Func<TCacheValue, TCacheValue> updateValue, int maxRetries) =>
-            this.Update(key, null, updateValue, maxRetries);
+        public override UpdateItemResult<TCacheValue> Update(string key, Func<TCacheValue, TCacheValue> updateValue, int maxRetries)
+            => this.Update(key, null, updateValue, maxRetries);
 
         /// <inheritdoc />
         public override UpdateItemResult<TCacheValue> Update(string key, string region, Func<TCacheValue, TCacheValue> updateValue, int maxRetries)

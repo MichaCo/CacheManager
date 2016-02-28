@@ -4,36 +4,36 @@ using static CacheManager.Core.Utility.Guard;
 namespace CacheManager.Core.Internal
 {
     /// <summary>
-    /// In CacheManager, a cache back plate is used to keep in process and distributed caches in
+    /// In CacheManager, a cache backplane is used to keep in process and distributed caches in
     /// sync. <br/> If the cache manager runs inside multiple nodes or applications accessing the
     /// same distributed cache, and an in process cache is configured to be in front of the
     /// distributed cache handle. All Get calls will hit the in process cache. <br/> Now when an
     /// item gets removed for example by one client, all other clients still have that cache item
     /// available in the in process cache. <br/> This could lead to errors and unexpected behavior,
-    /// therefore a cache back plate will send a message to all other cache clients to also remove
+    /// therefore a cache backplane will send a message to all other cache clients to also remove
     /// that item.
     /// <para>
     /// The same mechanism will apply to any Update, Put, Remove, Clear or ClearRegion call of the cache.
     /// </para>
     /// </summary>
-    public abstract class CacheBackPlate : IDisposable
+    public abstract class CacheBackplane : IDisposable
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="CacheBackPlate" /> class.
+        /// Initializes a new instance of the <see cref="CacheBackplane" /> class.
         /// </summary>
         /// <param name="configuration">The cache manager configuration.</param>
         /// <exception cref="System.ArgumentNullException">If configuration is null.</exception>
-        protected CacheBackPlate(CacheManagerConfiguration configuration)
+        protected CacheBackplane(CacheManagerConfiguration configuration)
         {
             NotNull(configuration, nameof(configuration));
             this.CacheConfiguration = configuration;
-            this.ConfigurationKey = configuration.BackPlateConfigurationKey;
+            this.ConfigurationKey = configuration.BackplaneConfigurationKey;
         }
 
         /// <summary>
-        /// Finalizes an instance of the <see cref="CacheBackPlate"/> class.
+        /// Finalizes an instance of the <see cref="CacheBackplane"/> class.
         /// </summary>
-        ~CacheBackPlate()
+        ~CacheBackplane()
         {
             this.Dispose(false);
         }

@@ -1,8 +1,0 @@
-{
-  "profiles": {
-    "CacheManager.Backplate.App": {
-      "commandName": "CacheManager.Backplate.App",
-      "sdkVersion": "dnx-clr-win-x64.1.0.0-rc1-update1"
-    }
-  }
-}

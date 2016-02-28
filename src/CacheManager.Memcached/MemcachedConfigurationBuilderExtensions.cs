@@ -23,19 +23,19 @@ namespace CacheManager.Core
         /// </summary>
         /// <param name="part">The builder part.</param>
         /// <param name="configurationName">The configuration name.</param>
-        /// <param name="isBackPlateSource">
-        /// Set this to true if this cache handle should be the source of the back plate.
-        /// <para>This setting will be ignored if no back plate is configured.</para>
+        /// <param name="isBackplaneSource">
+        /// Set this to true if this cache handle should be the source of the backplane.
+        /// <para>This setting will be ignored if no backplane is configured.</para>
         /// </param>
         /// <returns>The part.</returns>
         /// <exception cref="System.ArgumentNullException">
         /// Thrown if handleName or handleType are null.
         /// </exception>
-        public static ConfigurationBuilderCacheHandlePart WithMemcachedCacheHandle(this ConfigurationBuilderCachePart part, string configurationName, bool isBackPlateSource)
+        public static ConfigurationBuilderCacheHandlePart WithMemcachedCacheHandle(this ConfigurationBuilderCachePart part, string configurationName, bool isBackplaneSource)
         {
             NotNull(part, nameof(part));
 
-            return part.WithHandle(typeof(MemcachedCacheHandle<>), configurationName, isBackPlateSource);
+            return part.WithHandle(typeof(MemcachedCacheHandle<>), configurationName, isBackplaneSource);
         }
     }
 }

@@ -131,7 +131,7 @@ namespace CacheManager.Tests
                     databaseCount = StartDbCount;
                 }
 
-                return CreateRedisAndSystemCacheWithBackPlate(databaseCount, false);
+                return CreateRedisAndSystemCacheWithBackplane(databaseCount, false);
             }
         }
 
@@ -212,7 +212,7 @@ namespace CacheManager.Tests
 
 #if !DNXCORE50
 
-        public static ICacheManager<object> CreateRedisAndSystemCacheWithBackPlate(int database = 0, bool sharedRedisConfig = true, string channelName = null)
+        public static ICacheManager<object> CreateRedisAndSystemCacheWithBackplane(int database = 0, bool sharedRedisConfig = true, string channelName = null)
         {
             var redisKey = sharedRedisConfig ? "redisConfig" : Guid.NewGuid().ToString();
             return CacheFactory.Build(settings =>
@@ -235,11 +235,11 @@ namespace CacheManager.Tests
 
                 if (channelName != null)
                 {
-                    settings.WithRedisBackPlate(redisKey, channelName);
+                    settings.WithRedisBackplane(redisKey, channelName);
                 }
                 else
                 {
-                    settings.WithRedisBackPlate(redisKey);
+                    settings.WithRedisBackplane(redisKey);
                 }
             });
         }
@@ -258,7 +258,7 @@ namespace CacheManager.Tests
                             .WithDatabase(database)
                             .WithEndpoint(RedisHost, RedisPort);
                     })
-                    ////.WithRedisBackPlate(redisKey)
+                    ////.WithRedisBackplane(redisKey)
                     .WithRedisCacheHandle(redisKey, true)
                     .EnableStatistics();
             });
@@ -280,7 +280,7 @@ namespace CacheManager.Tests
                             .WithDatabase(database)
                             .WithEndpoint(RedisHost, RedisPort);
                     })
-                    .WithRedisBackPlate(redisKey)
+                    .WithRedisBackplane(redisKey)
                     .WithRedisCacheHandle(redisKey, true)
                     .EnableStatistics();
             });

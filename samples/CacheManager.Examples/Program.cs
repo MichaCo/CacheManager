@@ -132,7 +132,7 @@ var cache = new BaseCacheManager<string>(config);
                     })
                     .WithMaxRetries(1000)
                     .WithRetryTimeout(100)
-                    .WithRedisBackPlate("redis")
+                    .WithRedisBackplane("redis")
                     .WithRedisCacheHandle("redis", true);
             });
 

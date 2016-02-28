@@ -57,28 +57,28 @@ namespace CacheManager.Core.Internal
             return null;
         }
 
-        internal static CacheBackPlate CreateBackPlate(CacheManagerConfiguration configuration, ILoggerFactory loggerFactory)
+        internal static CacheBackplane CreateBackplane(CacheManagerConfiguration configuration, ILoggerFactory loggerFactory)
         {
             NotNull(configuration, nameof(configuration));
             NotNull(loggerFactory, nameof(loggerFactory));
 
-            if (configuration.BackPlateType != null)
+            if (configuration.BackplaneType != null)
             {
-                if (!configuration.CacheHandleConfigurations.Any(p => p.IsBackPlateSource))
+                if (!configuration.CacheHandleConfigurations.Any(p => p.IsBackplaneSource))
                 {
                     throw new InvalidOperationException(
-                        "At least one cache handle must be marked as the back plate source if a back plate is defined via configuration.");
+                        "At least one cache handle must be marked as the backplane source if a backplane is defined via configuration.");
                 }
 
-                CheckExtends<CacheBackPlate>(configuration.BackPlateType);
+                CheckExtends<CacheBackplane>(configuration.BackplaneType);
 
                 var args = new object[] { configuration, loggerFactory };
-                if (configuration.BackPlateTypeArguments != null)
+                if (configuration.BackplaneTypeArguments != null)
                 {
-                    args = configuration.BackPlateTypeArguments.Concat(args).ToArray();
+                    args = configuration.BackplaneTypeArguments.Concat(args).ToArray();
                 }
 
-                return (CacheBackPlate)CreateInstance(configuration.BackPlateType, args);
+                return (CacheBackplane)CreateInstance(configuration.BackplaneType, args);
             }
 
             return null;

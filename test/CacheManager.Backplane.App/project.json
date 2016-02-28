@@ -1,6 +1,6 @@
 ﻿{
   "version": "1.0.0-*",
-  "description": "CacheManager.Backplate.App Console Application",
+  "description": "CacheManager.Backplane.App Console Application",
   "authors": [ "Micha" ],
   "tags": [ "" ],
   "projectUrl": "",
@@ -18,7 +18,7 @@
   },
 
   "commands": {
-    "CacheManager.Backplate.App": "CacheManager.Backplate.App"
+    "CacheManager.Backplane.App": "CacheManager.Backplane.App"
   },
 
   "frameworks": {

@@ -28,37 +28,37 @@ namespace CacheManager.Core
     public interface IReadOnlyCacheManagerConfiguration
     {
         /// <summary>
-        /// Gets the back plate channel name.
+        /// Gets the backplane channel name.
         /// </summary>
         /// <value>The channel name.</value>
-        string BackPlateChannelName { get; }
+        string BackplaneChannelName { get; }
 
         /// <summary>
-        /// Gets the configuration key the back plate might use.
+        /// Gets the configuration key the backplane might use.
         /// </summary>
-        /// <value>The key of the back plate configuration.</value>
-        string BackPlateConfigurationKey { get; }
+        /// <value>The key of the backplane configuration.</value>
+        string BackplaneConfigurationKey { get; }
 
         /// <summary>
-        /// Gets the factory method for a cache back plate.
+        /// Gets the factory method for a cache backplane.
         /// </summary>
-        /// <value>The back plate activator.</value>
-        Type BackPlateType { get; }
+        /// <value>The backplane activator.</value>
+        Type BackplaneType { get; }
 
         /// <summary>
-        /// Gets additional arguments which should be used instantiating the back-plate.
+        /// Gets additional arguments which should be used instantiating the backplane.
         /// </summary>
         /// <value>The list of arguments.</value>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1819:PropertiesShouldNotReturnArrays", Justification = "nope")]
-        object[] BackPlateTypeArguments { get; }
+        object[] BackplaneTypeArguments { get; }
 
         /// <summary>
-        /// Gets a value indicating whether this instance has a back plate defined.
+        /// Gets a value indicating whether this instance has a backplane defined.
         /// </summary>
         /// <value>
-        /// <c>true</c> if this instance has cache back plate; otherwise, <c>false</c>.
+        /// <c>true</c> if this instance has cache backplane; otherwise, <c>false</c>.
         /// </value>
-        bool HasBackPlate { get; }
+        bool HasBackplane { get; }
 
         /// <summary>
         /// Gets the factory method for a logger factory.

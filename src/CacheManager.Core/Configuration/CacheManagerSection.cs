@@ -239,19 +239,19 @@
         }
 
         /// <summary>
-        /// Gets or sets a value indicating whether this instance is back plate source.
+        /// Gets or sets a value indicating whether this instance is backplane source.
         /// </summary>
-        /// <value><c>true</c> if this instance is back plate source; otherwise, <c>false</c>.</value>
-        [ConfigurationProperty("isBackPlateSource", IsRequired = false)]
-        public bool IsBackPlateSource
+        /// <value><c>true</c> if this instance is backplane source; otherwise, <c>false</c>.</value>
+        [ConfigurationProperty("isBackplaneSource", IsRequired = false)]
+        public bool IsBackplaneSource
         {
             get
             {
-                return (bool)this["isBackPlateSource"];
+                return (bool)this["isBackplaneSource"];
             }
             set
             {
-                this["isBackPlateSource"] = value;
+                this["isBackplaneSource"] = value;
             }
         }
 
@@ -318,8 +318,8 @@
     /// </summary>
     public sealed class CacheManagerHandleCollection : ConfigurationElementCollection, IEnumerable<CacheManagerHandle>
     {
-        private const string BackPlateNameKey = "backPlateName";
-        private const string BackPlateTypeKey = "backPlateType";
+        private const string BackplaneNameKey = "backplaneName";
+        private const string BackplaneTypeKey = "backplaneType";
         private const string SerializerTypeKey = "serializerType";
         private const string EnablePerformanceCountersKey = "enablePerformanceCounters";
         private const string EnableStatisticsKey = "enableStatistics";
@@ -337,43 +337,43 @@
         }
 
         /// <summary>
-        /// Gets or sets the name of the back plate.
+        /// Gets or sets the name of the backplane.
         /// </summary>
-        /// <value>The name of the back plate.</value>
-        [ConfigurationProperty(BackPlateNameKey, IsRequired = false)]
-        public string BackPlateName
+        /// <value>The name of the backplane.</value>
+        [ConfigurationProperty(BackplaneNameKey, IsRequired = false)]
+        public string BackplaneName
         {
             get
             {
-                return (string)this[BackPlateNameKey];
+                return (string)this[BackplaneNameKey];
             }
             set
             {
-                this[BackPlateNameKey] = value;
+                this[BackplaneNameKey] = value;
             }
         }
 
         /// <summary>
-        /// Gets or sets the type of the back plate.
+        /// Gets or sets the type of the backplane.
         /// </summary>
-        /// <value>The type of the back plate.</value>
-        [ConfigurationProperty(BackPlateTypeKey, IsRequired = false)]
-        public string BackPlateType
+        /// <value>The type of the backplane.</value>
+        [ConfigurationProperty(BackplaneTypeKey, IsRequired = false)]
+        public string BackplaneType
         {
             get
             {
-                return (string)this[BackPlateTypeKey];
+                return (string)this[BackplaneTypeKey];
             }
             set
             {
-                this[BackPlateTypeKey] = value;
+                this[BackplaneTypeKey] = value;
             }
         }
 
         /// <summary>
-        /// Gets or sets the type of the back plate.
+        /// Gets or sets the type of the serializer.
         /// </summary>
-        /// <value>The type of the back plate.</value>
+        /// <value>The type of the serializer.</value>
         [ConfigurationProperty(SerializerTypeKey, IsRequired = false)]
         public string SerializerType
         {

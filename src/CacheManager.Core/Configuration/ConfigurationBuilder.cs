@@ -217,9 +217,6 @@ namespace CacheManager.Core
             return LoadFromSection(section, configName);
         }
 
-        // todo: refactor -> high complexity
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA2204:Literals should be spelled correctly", MessageId = "BackPlateName", Justification = "no.")]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA2204:Literals should be spelled correctly", MessageId = "BackPlateType", Justification = "no")]
         internal static CacheManagerConfiguration LoadFromSection(CacheManagerSection section, string configName)
         {
             NotNullOrWhiteSpace(configName, nameof(configName));
@@ -271,25 +268,25 @@ namespace CacheManager.Core
                 RetryTimeout = retryTimeout.HasValue ? retryTimeout.Value : 100
             };
 
-            if (string.IsNullOrWhiteSpace(managerCfg.BackPlateType))
+            if (string.IsNullOrWhiteSpace(managerCfg.BackplaneType))
             {
-                if (!string.IsNullOrWhiteSpace(managerCfg.BackPlateName))
+                if (!string.IsNullOrWhiteSpace(managerCfg.BackplaneName))
                 {
-                    throw new InvalidOperationException("BackPlateType cannot be null if BackPlateName is specified.");
+                    throw new InvalidOperationException("BackplaneType cannot be null if BackplaneName is specified.");
                 }
             }
             else
             {
-                if (string.IsNullOrWhiteSpace(managerCfg.BackPlateName))
+                if (string.IsNullOrWhiteSpace(managerCfg.BackplaneName))
                 {
-                    throw new InvalidOperationException("BackPlateName cannot be null if BackPlateType is specified.");
+                    throw new InvalidOperationException("BackplaneName cannot be null if BackplaneType is specified.");
                 }
 
-                var backPlateType = Type.GetType(managerCfg.BackPlateType, false);
-                EnsureNotNull(backPlateType, "Back-plate type not found, {0}.", managerCfg.BackPlateType);
+                var backplaneType = Type.GetType(managerCfg.BackplaneType, false);
+                EnsureNotNull(backplaneType, "Backplane type not found, {0}.", managerCfg.BackplaneType);
 
-                cfg.BackPlateType = backPlateType;
-                cfg.BackPlateConfigurationKey = managerCfg.BackPlateName;
+                cfg.BackplaneType = backplaneType;
+                cfg.BackplaneConfigurationKey = managerCfg.BackplaneName;
             }
 
             // build serializer if set
@@ -319,7 +316,7 @@ namespace CacheManager.Core
                     ExpirationTimeout = handleDef.ExpirationTimeout,
                     EnableStatistics = managerCfg.EnableStatistics,
                     EnablePerformanceCounters = managerCfg.EnablePerformanceCounters,
-                    IsBackPlateSource = handleItem.IsBackPlateSource
+                    IsBackplaneSource = handleItem.IsBackplaneSource
                 };
 
                 // override default timeout if it is defined in this section.
@@ -528,63 +525,63 @@ namespace CacheManager.Core
         internal CacheManagerConfiguration Configuration { get; }
 
         /// <summary>
-        /// Configures the back plate for the cache manager.
+        /// Configures the backplane for the cache manager.
         /// <para>
         /// This is an optional feature. If specified, see the documentation for the
-        /// <paramref name="backPlateType"/>. The <paramref name="configurationKey"/> might be used to
+        /// <paramref name="backplaneType"/>. The <paramref name="configurationKey"/> might be used to
         /// reference another configuration item.
         /// </para>
         /// <para>
-        /// If a back plate is defined, at least one cache handle must be marked as back plate
+        /// If a backplane is defined, at least one cache handle must be marked as backplane
         /// source. The cache manager then will try to synchronize multiple instances of the same configuration.
         /// </para>
         /// </summary>
-        /// <param name="backPlateType">The type of the back plate implementation.</param>
+        /// <param name="backplaneType">The type of the backplane implementation.</param>
         /// <param name="configurationKey">The name.</param>
         /// <param name="args">Additional arguments the type might need to get initialized.</param>
         /// <returns>The builder instance.</returns>
         /// <exception cref="System.ArgumentNullException">If <paramref name="configurationKey"/> is null.</exception>
-        public ConfigurationBuilderCachePart WithBackPlate(Type backPlateType, string configurationKey, params object[] args)
+        public ConfigurationBuilderCachePart WithBackplane(Type backplaneType, string configurationKey, params object[] args)
         {
-            NotNull(backPlateType, nameof(backPlateType));
+            NotNull(backplaneType, nameof(backplaneType));
             NotNullOrWhiteSpace(configurationKey, nameof(configurationKey));
 
-            this.Configuration.BackPlateType = backPlateType;
-            this.Configuration.BackPlateTypeArguments = args;
-            this.Configuration.BackPlateConfigurationKey = configurationKey;
+            this.Configuration.BackplaneType = backplaneType;
+            this.Configuration.BackplaneTypeArguments = args;
+            this.Configuration.BackplaneConfigurationKey = configurationKey;
             return this;
         }
 
         /// <summary>
-        /// Configures the back plate for the cache manager.
+        /// Configures the backplane for the cache manager.
         /// <para>
         /// This is an optional feature. If specified, see the documentation for the
-        /// <paramref name="backPlateType"/>. The <paramref name="configurationKey"/> might be used to
+        /// <paramref name="backplaneType"/>. The <paramref name="configurationKey"/> might be used to
         /// reference another configuration item.
         /// </para>
         /// <para>
-        /// If a back plate is defined, at least one cache handle must be marked as back plate
+        /// If a backplane is defined, at least one cache handle must be marked as backplane
         /// source. The cache manager then will try to synchronize multiple instances of the same configuration.
         /// </para>
         /// </summary>
-        /// <param name="backPlateType">The type of the back plate implementation.</param>
+        /// <param name="backplaneType">The type of the backplane implementation.</param>
         /// <param name="configurationKey">The configuration key.</param>
-        /// <param name="channelName">The back plate channel name.</param>
+        /// <param name="channelName">The backplane channel name.</param>
         /// <param name="args">Additional arguments the type might need to get initialized.</param>
         /// <returns>The builder instance.</returns>
         /// <exception cref="System.ArgumentNullException">
         /// If <paramref name="configurationKey"/> or <paramref name="channelName"/> is null.
         /// </exception>
-        public ConfigurationBuilderCachePart WithBackPlate(Type backPlateType, string configurationKey, string channelName, params object[] args)
+        public ConfigurationBuilderCachePart WithBackplane(Type backplaneType, string configurationKey, string channelName, params object[] args)
         {
-            NotNull(backPlateType, nameof(backPlateType));
+            NotNull(backplaneType, nameof(backplaneType));
             NotNullOrWhiteSpace(configurationKey, nameof(configurationKey));
             NotNullOrWhiteSpace(channelName, nameof(channelName));
 
-            this.Configuration.BackPlateType = backPlateType;
-            this.Configuration.BackPlateTypeArguments = args;
-            this.Configuration.BackPlateChannelName = channelName;
-            this.Configuration.BackPlateConfigurationKey = configurationKey;
+            this.Configuration.BackplaneType = backplaneType;
+            this.Configuration.BackplaneTypeArguments = args;
+            this.Configuration.BackplaneChannelName = channelName;
+            this.Configuration.BackplaneConfigurationKey = configurationKey;
             return this;
         }
 
@@ -610,19 +607,19 @@ namespace CacheManager.Core
         /// </summary>
         /// <param name="cacheHandleBaseType">The cache handle type.</param>
         /// <param name="handleName">The name to be used for the cache handle.</param>
-        /// <param name="isBackPlateSource">
-        /// Set this to true if this cache handle should be the source of the back plate.
-        /// <para>This setting will be ignored if no back plate is configured.</para>
+        /// <param name="isBackplaneSource">
+        /// Set this to true if this cache handle should be the source of the backplane.
+        /// <para>This setting will be ignored if no backplane is configured.</para>
         /// </param>
         /// <returns>The builder part.</returns>
         /// <exception cref="System.ArgumentNullException">If handleName is null.</exception>
         /// <exception cref="System.InvalidOperationException">
-        /// Only one cache handle can be the backplate's source.
+        /// Only one cache handle can be the backplane's source.
         /// </exception>
         /// <exception cref="ArgumentNullException">
         /// Thrown if handleName or cacheHandleBaseType are null.
         /// </exception>
-        public ConfigurationBuilderCacheHandlePart WithHandle(Type cacheHandleBaseType, string handleName, bool isBackPlateSource)
+        public ConfigurationBuilderCacheHandlePart WithHandle(Type cacheHandleBaseType, string handleName, bool isBackplaneSource)
         {
             NotNull(cacheHandleBaseType, nameof(cacheHandleBaseType));
             NotNullOrWhiteSpace(handleName, nameof(handleName));
@@ -632,11 +629,11 @@ namespace CacheManager.Core
                 HandleType = cacheHandleBaseType
             };
 
-            handleCfg.IsBackPlateSource = isBackPlateSource;
+            handleCfg.IsBackplaneSource = isBackplaneSource;
 
-            if (isBackPlateSource && this.Configuration.CacheHandleConfigurations.Any(p => p.IsBackPlateSource))
+            if (isBackplaneSource && this.Configuration.CacheHandleConfigurations.Any(p => p.IsBackplaneSource))
             {
-                throw new InvalidOperationException("Only one cache handle can be the back plate's source.");
+                throw new InvalidOperationException("Only one cache handle can be the backplane's source.");
             }
 
             this.Configuration.CacheHandleConfigurations.Add(handleCfg);

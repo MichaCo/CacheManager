@@ -53,7 +53,7 @@ namespace CacheManager.Config.Tests
                 builder.WithRedisCacheHandle("redis", true)
                     .DisableStatistics();
 
-                builder.WithRedisBackPlate("redis");
+                builder.WithRedisBackplane("redis");
 
                 builder.WithRedisConfiguration("redis", config =>
                 {

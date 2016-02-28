@@ -32,7 +32,6 @@ namespace CacheManager.Core.Internal
             NotNull(loggerFactory, nameof(loggerFactory));
             this.Logger = loggerFactory.CreateLogger(this);
             this.cache = new ConcurrentDictionary<string, CacheItem<TCacheValue>>();
-            this.StartScanExpiredItems();
         }
 
         /// <summary>
@@ -227,10 +226,10 @@ namespace CacheManager.Core.Internal
                         this.Logger.LogInfo("Starting scan for expired items. Next scan in {0}sec.", ScanInterval / 1000);
 #if NET40
                         Task.Factory.StartNew(
-                            state => ScanForExpiredItems((DictionaryCacheHandle<TCacheValue>)state), 
+                            state => ScanForExpiredItems((DictionaryCacheHandle<TCacheValue>)state),
                             this,
-                            CancellationToken.None, 
-                            TaskCreationOptions.None, 
+                            CancellationToken.None,
+                            TaskCreationOptions.None,
                             TaskScheduler.Default);
 #else
                         Task.Factory.StartNew(

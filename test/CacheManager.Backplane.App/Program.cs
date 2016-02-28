@@ -6,7 +6,7 @@ using CacheManager.Core;
 using CacheManager.Core.Internal;
 using Microsoft.Extensions.Configuration;
 
-namespace CacheManager.Backplate.App
+namespace CacheManager.Backplane.App
 {
     public class Program
     {
@@ -114,10 +114,10 @@ namespace CacheManager.Backplate.App
             public TestItem(ICacheManager<string> cache)
             {
                 this.Cache = cache as BaseCacheManager<string>;
-                this.Cache.BackPlate.Changed += BackPlateChanged;
-                this.Cache.BackPlate.Cleared += BackPlateCleared;
-                this.Cache.BackPlate.ClearedRegion += BackPlateClearedRegion;
-                this.Cache.BackPlate.Removed += BackPlateRemoved;
+                this.Cache.Backplane.Changed += BackplaneChanged;
+                this.Cache.Backplane.Cleared += BackplaneCleared;
+                this.Cache.Backplane.ClearedRegion += BackplaneClearedRegion;
+                this.Cache.Backplane.Removed += BackplaneRemoved;
             }
 
             public BaseCacheManager<string> Cache { get; }
@@ -143,23 +143,23 @@ namespace CacheManager.Backplate.App
                 }
             }
 
-            private void BackPlateRemoved(object sender, CacheItemEventArgs e)
+            private void BackplaneRemoved(object sender, CacheItemEventArgs e)
             {
                 //Console.WriteLine($"Removed {e.Key} {e.Region} from {this.Cache.Name}.");
                 //RemovedEvents.Add(e);
             }
 
-            private void BackPlateClearedRegion(object sender, RegionEventArgs e)
+            private void BackplaneClearedRegion(object sender, RegionEventArgs e)
             {
                 //ClearedRegionEvents.Add(e);
             }
 
-            private void BackPlateCleared(object sender, EventArgs e)
+            private void BackplaneCleared(object sender, EventArgs e)
             {
                 //ClearedEvents.Add(true);
             }
 
-            private void BackPlateChanged(object sender, CacheItemEventArgs e)
+            private void BackplaneChanged(object sender, CacheItemEventArgs e)
             {
                 if (this.Cache.Name == "CacheA")
                 {

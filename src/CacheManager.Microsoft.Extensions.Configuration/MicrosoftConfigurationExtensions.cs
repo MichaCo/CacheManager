@@ -24,7 +24,7 @@ namespace CacheManager.Core
         private const string ConfigurationKnownType = "knownType";
         private const string TypeJsonCacheSerializer = "CacheManager.Serialization.Json.JsonCacheSerializer, CacheManager.Serialization.Json";
         private const string TypeMicrosoftLoggerFactory = "CacheManager.Logging.MicrosoftLoggerFactoryAdapter, CacheManager.Microsoft.Extensions.Logging";
-        private const string TypeRedisBackPlate = "CacheManager.Redis.RedisCacheBackPlate, CacheManager.StackExchange.Redis";
+        private const string TypeRedisBackplane = "CacheManager.Redis.RedisCacheBackplane, CacheManager.StackExchange.Redis";
         private const string TypeSystemRuntimeHandle = "CacheManager.SystemRuntimeCaching.MemoryCacheHandle`1, CacheManager.SystemRuntimeCaching";
         private const string TypeSystemWebHandle = "CacheManager.Web.SystemWebCacheHandle`1, CacheManager.Web";
         private const string TypeRedisHandle = "CacheManager.Redis.RedisCacheHandle`1, CacheManager.StackExchange.Redis";
@@ -222,7 +222,7 @@ namespace CacheManager.Core
                 managerConfiguration.CacheHandleConfigurations.Add(cacheHandleConfiguration);
             }
 
-            GetBackPlateConfiguration(managerConfiguration, configuration);
+            GetBackplaneConfiguration(managerConfiguration, configuration);
             GetLoggerFactoryConfiguration(managerConfiguration, configuration);
             GetSerializerConfiguration(managerConfiguration, configuration);
 
@@ -314,56 +314,56 @@ namespace CacheManager.Core
                 $"Known handle type '{knownTypeName}' is invalid. Check configuration at '{path}'.");
         }
 
-        private static void GetBackPlateConfiguration(CacheManagerConfiguration managerConfiguration, IConfigurationSection configuration)
+        private static void GetBackplaneConfiguration(CacheManagerConfiguration managerConfiguration, IConfigurationSection configuration)
         {
-            var backPlateSection = configuration.GetSection("backPlate");
-            if (backPlateSection.GetChildren().Count() == 0)
+            var backplaneSection = configuration.GetSection("backplane");
+            if (backplaneSection.GetChildren().Count() == 0)
             {
-                // no backplate
+                // no backplane
                 return;
             }
 
-            var type = backPlateSection[ConfigurationType];
-            var knownType = backPlateSection[ConfigurationKnownType];
-            var key = backPlateSection[ConfigurationKey];
-            var channelName = backPlateSection["channelName"];
+            var type = backplaneSection[ConfigurationType];
+            var knownType = backplaneSection[ConfigurationKnownType];
+            var key = backplaneSection[ConfigurationKey];
+            var channelName = backplaneSection["channelName"];
 
             if (string.IsNullOrEmpty(type) && string.IsNullOrEmpty(knownType))
             {
                 throw new InvalidOperationException(
-                    $"No '{ConfigurationType}' or '{ConfigurationKnownType}' defined in back plate configuration '{backPlateSection.Path}'.");
+                    $"No '{ConfigurationType}' or '{ConfigurationKnownType}' defined in backplane configuration '{backplaneSection.Path}'.");
             }
 
             if (string.IsNullOrWhiteSpace(type))
             {
                 var keyRequired = false;
-                managerConfiguration.BackPlateType = GetKnownBackPlateType(knownType, backPlateSection.Path, out keyRequired);
+                managerConfiguration.BackplaneType = GetKnownBackplaneType(knownType, backplaneSection.Path, out keyRequired);
                 if (keyRequired && string.IsNullOrWhiteSpace(key))
                 {
                     throw new InvalidOperationException(
-                        $"The key property is required for the '{knownType}' back plate, but is not configured in '{backPlateSection.Path}'.");
+                        $"The key property is required for the '{knownType}' backplane, but is not configured in '{backplaneSection.Path}'.");
                 }
             }
             else
             {
-                managerConfiguration.BackPlateType = Type.GetType(type, true);
+                managerConfiguration.BackplaneType = Type.GetType(type, true);
             }
 
-            managerConfiguration.BackPlateChannelName = channelName;
-            managerConfiguration.BackPlateConfigurationKey = key;
+            managerConfiguration.BackplaneChannelName = channelName;
+            managerConfiguration.BackplaneConfigurationKey = key;
         }
 
-        private static Type GetKnownBackPlateType(string knownTypeName, string path, out bool keyRequired)
+        private static Type GetKnownBackplaneType(string knownTypeName, string path, out bool keyRequired)
         {
             switch (knownTypeName.ToLowerInvariant())
             {
                 case "redis":
                     keyRequired = true;
-                    return Type.GetType(TypeRedisBackPlate, true);
+                    return Type.GetType(TypeRedisBackplane, true);
             }
 
             throw new InvalidOperationException(
-                $"Known back-plate type '{knownTypeName}' is invalid. Check configuration at '{path}'.");
+                $"Known backplane type '{knownTypeName}' is invalid. Check configuration at '{path}'.");
         }
 
         private static void GetLoggerFactoryConfiguration(CacheManagerConfiguration managerConfiguration, IConfigurationSection configuration)

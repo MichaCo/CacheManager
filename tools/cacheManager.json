@@ -35,7 +35,7 @@
       "minLength": 1,
       "description": "If specified, this name will be used for communication channels, if applicable"
     },
-    "knownBackPlate": {
+    "knownBackplane": {
       "type": "object",
       "required": [ "key", "knownType" ],
       "properties": {
@@ -45,19 +45,19 @@
         "knownType": {
           "type": "string",
           "enum": [ "Redis" ],
-          "description": "Choose one of the known back-plate types instead of typing the full type name. The corresponding package for the back-plate implementation must be installed."
+          "description": "Choose one of the known backplane types instead of typing the full type name. The corresponding package for the backplane implementation must be installed."
         },
         "channelName": { "$ref": "#/definitions/channelName" }
       },
       "additionalProperties": false
     },
-    "unknownBackPlate": {
+    "unknownBackplane": {
       "type": "object",
       "required": [ "type", "key" ],
       "properties": {
         "type": {
           "type": "string",
-          "description": "The clr type of a back-plate implementation."
+          "description": "The clr type of a backplane implementation."
         },
         "key": {
           "$ref": "#/definitions/configurationKey"
@@ -176,9 +176,9 @@
         "expirationTimeout": {
           "$ref": "#/definitions/expirationTimeout"
         },
-        "isBackPlateSource": {
+        "isBackplaneSource": {
           "type": "boolean",
-          "description": "Determines if the cache handle is the back-plate's source. (optional; if no back-plate is defined, this can stay empty. If a back-plate is defined, at least one handle must be flagged.)"
+          "description": "Determines if the cache handle is the backplane's source. (optional; if no backplane is defined, this can stay empty. If a backplane is defined, at least one handle must be flagged.)"
         },
         "enablePerformanceCounters": {
           "type": "boolean",
@@ -219,15 +219,15 @@
           "minimum": 0,
           "description": "The time between retries (default is 100)."
         },
-        "backPlate": {
+        "backplane": {
           "type": "object",
-          "description": "The back-plate configuration.",
+          "description": "The backplane configuration.",
           "oneOf": [
             {
-              "$ref": "#/definitions/knownBackPlate"
+              "$ref": "#/definitions/knownBackplane"
             },
             {
-              "$ref": "#/definitions/unknownBackPlate"
+              "$ref": "#/definitions/unknownBackplane"
             }
           ]
         },

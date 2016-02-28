@@ -240,7 +240,7 @@ namespace CacheManager.Tests
 
         [Fact]
         [ReplaceCulture]
-        public void CacheFactory_Build_WithRedisBackPlateNoBackplateSource()
+        public void CacheFactory_Build_WithRedisBackplaneNoBackplaneSource()
         {
             // arrange act
             Action act = () =>
@@ -248,7 +248,7 @@ namespace CacheManager.Tests
                 var cache = CacheFactory.Build<object>(settings =>
                {
                    settings.WithDictionaryHandle();
-                   settings.WithRedisBackPlate("redis");
+                   settings.WithRedisBackplane("redis");
                });
 
                 cache.Add("test", "test");
@@ -262,12 +262,12 @@ namespace CacheManager.Tests
 
         [Fact]
         [ReplaceCulture]
-        public void CacheFactory_Build_WithRedisBackPlateTooManyBackplateSources()
+        public void CacheFactory_Build_WithRedisBackplaneTooManyBackplaneSources()
         {
             // arrange act
             Action act = () => CacheFactory.Build<object>(settings =>
            {
-               settings.WithRedisBackPlate("redis");
+               settings.WithRedisBackplane("redis");
                settings.WithSystemRuntimeCacheHandle("redis", true);
                settings.WithSystemRuntimeCacheHandle("redis", true);
            });
@@ -279,12 +279,12 @@ namespace CacheManager.Tests
 
         [Fact]
         [ReplaceCulture]
-        public void CacheFactory_Build_WithRedisBackPlateNoRedisConfig()
+        public void CacheFactory_Build_WithRedisBackplaneNoRedisConfig()
         {
             // arrange act
             Action act = () => CacheFactory.Build<object>(settings =>
            {
-               settings.WithRedisBackPlate("redis");
+               settings.WithRedisBackplane("redis");
                settings.WithSystemRuntimeCacheHandle("redis", true);
            });
 
@@ -295,12 +295,12 @@ namespace CacheManager.Tests
 
         [Fact]
         [ReplaceCulture]
-        public void CacheFactory_Build_WithRedisBackPlateNoName()
+        public void CacheFactory_Build_WithRedisBackplaneNoName()
         {
             // arrange act
             Action act = () => CacheFactory.Build<object>(settings =>
            {
-               settings.WithRedisBackPlate(string.Empty);
+               settings.WithRedisBackplane(string.Empty);
            });
 
             // assert

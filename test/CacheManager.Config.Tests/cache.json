@@ -27,7 +27,7 @@
       "name": "cachename",
       "retryTimeout": 100,
       "updateMode": "Full",
-      "backPlate": {
+      "backplane": {
         "key": "redisConString",
         "knownType": "Redis",
         "channelName": "test"
@@ -45,13 +45,13 @@
           "enableStatistics": true,
           "expirationMode": "Absolute",
           "expirationTimeout": "0:0:23",
-          "isBackPlateSource": false,
+          "isBackplaneSource": false,
           "name": "sys cache"
         },
         {
           "knownType": "Redis",
           "key": "redisConString",
-          "isBackPlateSource": true
+          "isBackplaneSource": true
         }
       ]
     }

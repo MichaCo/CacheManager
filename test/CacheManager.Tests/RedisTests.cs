@@ -148,7 +148,7 @@ namespace CacheManager.Tests
             RedisConfigurations.LoadConfiguration(fileName, RedisConfigurationSection.DefaultSectionName);
 
             var cfg = ConfigurationBuilder.LoadConfigurationFile(fileName, cacheName);
-            cfg.BackPlateChannelName = channelName;
+            cfg.BackplaneChannelName = channelName;
 
             var cfgCache = CacheFactory.FromConfiguration<object>(cfg);
 
@@ -171,10 +171,10 @@ namespace CacheManager.Tests
                     value.Should().Be("new value", cache.ToString());
                 },
                 1,
-                TestManagers.CreateRedisAndSystemCacheWithBackPlate(69, true, channelName),
+                TestManagers.CreateRedisAndSystemCacheWithBackplane(69, true, channelName),
                 cfgCache,
                 TestManagers.CreateRedisCache(69),
-                TestManagers.CreateRedisAndSystemCacheWithBackPlate(69, true, channelName));
+                TestManagers.CreateRedisAndSystemCacheWithBackplane(69, true, channelName));
         }
 
         ////[Fact(Skip = "needs clear")]
@@ -198,10 +198,10 @@ namespace CacheManager.Tests
                     cache.Get(item.Key).Should().BeNull();
                 },
                 2,
-                TestManagers.CreateRedisAndSystemCacheWithBackPlate(444, true, channelName),
-                TestManagers.CreateRedisAndSystemCacheWithBackPlate(444, true, channelName),
+                TestManagers.CreateRedisAndSystemCacheWithBackplane(444, true, channelName),
+                TestManagers.CreateRedisAndSystemCacheWithBackplane(444, true, channelName),
                 TestManagers.CreateRedisCache(444),
-                TestManagers.CreateRedisAndSystemCacheWithBackPlate(444, true, channelName));
+                TestManagers.CreateRedisAndSystemCacheWithBackplane(444, true, channelName));
         }
 
         [Fact]
@@ -257,10 +257,10 @@ namespace CacheManager.Tests
                     value.Should().BeNull();
                 },
                 1,
-                TestManagers.CreateRedisAndSystemCacheWithBackPlate(6, true, channelName),
-                TestManagers.CreateRedisAndSystemCacheWithBackPlate(6, true, channelName),
+                TestManagers.CreateRedisAndSystemCacheWithBackplane(6, true, channelName),
+                TestManagers.CreateRedisAndSystemCacheWithBackplane(6, true, channelName),
                 TestManagers.CreateRedisCache(6),
-                TestManagers.CreateRedisAndSystemCacheWithBackPlate(6, true, channelName));
+                TestManagers.CreateRedisAndSystemCacheWithBackplane(6, true, channelName));
         }
 
         [Fact]
@@ -405,8 +405,8 @@ namespace CacheManager.Tests
             // arrange
             var item = new CacheItem<object>(Guid.NewGuid().ToString(), "something", ExpirationMode.Sliding, TimeSpan.FromMilliseconds(50));
             var channelName = Guid.NewGuid().ToString();
-            var cacheA = TestManagers.CreateRedisAndSystemCacheWithBackPlate(10, true, channelName);
-            var cacheB = TestManagers.CreateRedisAndSystemCacheWithBackPlate(10, true, channelName);
+            var cacheA = TestManagers.CreateRedisAndSystemCacheWithBackplane(10, true, channelName);
+            var cacheB = TestManagers.CreateRedisAndSystemCacheWithBackplane(10, true, channelName);
 
             // act/assert
             using (cacheA)
@@ -469,7 +469,7 @@ namespace CacheManager.Tests
 
         [Fact]
         [Trait("category", "Redis")]
-        public void Redis_Valid_CfgFile_LoadWithRedisBackPlate()
+        public void Redis_Valid_CfgFile_LoadWithRedisBackplane()
         {
             // arrange
             string fileName = BaseCacheManagerTest.GetCfgFileName(@"/Configuration/configuration.valid.allFeatures.config");
@@ -483,22 +483,22 @@ namespace CacheManager.Tests
             var cache = CacheFactory.FromConfiguration<object>(cfg);
 
             // assert
-            cache.CacheHandles.Any(p => p.Configuration.IsBackPlateSource).Should().BeTrue();
+            cache.CacheHandles.Any(p => p.Configuration.IsBackplaneSource).Should().BeTrue();
         }
 
         [Fact]
         [Trait("category", "Redis")]
-        public void Redis_LoadWithRedisBackPlate_FromAppConfig()
+        public void Redis_LoadWithRedisBackplane_FromAppConfig()
         {
             // RedisConfigurations should load this from default section from app.config
 
             // arrange
-            string cacheName = "redisWithBackPlateAppConfig";
+            string cacheName = "redisWithBackplaneAppConfig";
 
             // act
             var cfg = ConfigurationBuilder.LoadConfiguration(cacheName);
             var cache = CacheFactory.FromConfiguration<object>(cfg);
-            var handle = cache.CacheHandles.First(p => p.Configuration.IsBackPlateSource) as RedisCacheHandle<object>;
+            var handle = cache.CacheHandles.First(p => p.Configuration.IsBackplaneSource) as RedisCacheHandle<object>;
 
             // test running something on the redis handle, Count should be enough to test the connection
             Action count = () => { var x = handle.Count; };
@@ -510,16 +510,16 @@ namespace CacheManager.Tests
 
         [Fact]
         [Trait("category", "Redis")]
-        public void Redis_LoadWithRedisBackPlate_FromAppConfigConnectionStrings()
+        public void Redis_LoadWithRedisBackplane_FromAppConfigConnectionStrings()
         {
             // RedisConfigurations should load this from AppSettings from app.config
             // arrange
-            string cacheName = "redisWithBackPlateAppConfigConnectionStrings";
+            string cacheName = "redisWithBackplaneAppConfigConnectionStrings";
 
             // act
             var cfg = ConfigurationBuilder.LoadConfiguration(cacheName);
             var cache = CacheFactory.FromConfiguration<object>(cfg);
-            var handle = cache.CacheHandles.First(p => p.Configuration.IsBackPlateSource) as RedisCacheHandle<object>;
+            var handle = cache.CacheHandles.First(p => p.Configuration.IsBackplaneSource) as RedisCacheHandle<object>;
 
             // test running something on the redis handle, Count should be enough to test the connection
             Action count = () => { var x = handle.Count; };

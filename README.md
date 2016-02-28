@@ -50,7 +50,7 @@ A more advanced in depth introduction to all features of Cache Manager
 * [**Update Operations**][updatearticle]
 Explanation of why and when to use the update method instead of `Put` 
 * [**Cache Synchronization**][cachesyncarticle]
-Use case for and explanation of the Cache Back Plate feature.
+Use case for and explanation of the Cache Backplane feature.
 * [**Logging**][logging]
 The logging abstraction and implementations explained
 
