@@ -281,12 +281,54 @@ namespace CacheManager.Core
         /// </exception>
         TCacheValue AddOrUpdate(CacheItem<TCacheValue> addItem, Func<TCacheValue, TCacheValue> updateValue, int maxRetries);
 
+        /// <summary>
+        /// Adds an item to the cache if it does not already exist.
+        /// The method returns either the existing item's value or the newly added <paramref name="value"/>.
+        /// </summary>
+        /// <param name="key">The cache key.</param>
+        /// <param name="value">The value wich should be added.</param>
+        /// <returns>Either the added or the existing value.</returns>
+        /// <exception cref="ArgumentException">
+        /// If either <paramref name="key"/> or <paramref name="value"/> is null.
+        /// </exception>
         TCacheValue GetOrAdd(string key, TCacheValue value);
 
+        /// <summary>
+        /// Adds an item to the cache if it does not already exist.
+        /// The method returns either the existing item's value or the newly added <paramref name="value"/>.
+        /// </summary>
+        /// <param name="key">The cache key.</param>
+        /// <param name="region">The cache region.</param>
+        /// <param name="value">The value wich should be added.</param>
+        /// <returns>Either the added or the existing value.</returns>
+        /// <exception cref="ArgumentException">
+        /// If either <paramref name="key"/>, <paramref name="region"/> or <paramref name="value"/> is null.
+        /// </exception>
         TCacheValue GetOrAdd(string key, string region, TCacheValue value);
 
+        /// <summary>
+        /// Adds an item to the cache if it does not already exist.
+        /// The <paramref name="valueFactory"/> will be evaluated only if the item does not exist.
+        /// </summary>
+        /// <param name="key">The cache key.</param>
+        /// <param name="valueFactory">The method which creates the value wich should be added.</param>
+        /// <returns>Either the added or the existing value.</returns>
+        /// <exception cref="ArgumentException">
+        /// If either <paramref name="key"/> or <paramref name="valueFactory"/> is null.
+        /// </exception>
         TCacheValue GetOrAdd(string key, Func<string, TCacheValue> valueFactory);
 
+        /// <summary>
+        /// Adds an item to the cache if it does not already exist.
+        /// The <paramref name="valueFactory"/> will be evaluated only if the item does not exist.
+        /// </summary>
+        /// <param name="key">The cache key.</param>
+        /// <param name="region">The cache region.</param>
+        /// <param name="valueFactory">The method which creates the value wich should be added.</param>
+        /// <returns>Either the added or the existing value.</returns>
+        /// <exception cref="ArgumentException">
+        /// If either <paramref name="key"/> or <paramref name="valueFactory"/> is null.
+        /// </exception>
         TCacheValue GetOrAdd(string key, string region, Func<string, string, TCacheValue> valueFactory);
 
         /// <summary>

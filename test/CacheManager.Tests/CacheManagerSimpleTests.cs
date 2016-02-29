@@ -566,10 +566,10 @@ namespace CacheManager.Tests
             }))
             {
                 // arrange act
-                Action actA = () => cache.GetOrAdd("", "value");
-                Action actB = () => cache.GetOrAdd("", "region", "value");
-                Action actC = () => cache.GetOrAdd("", (k) => "value");
-                Action actD = () => cache.GetOrAdd("", "region", (k, r) => "value");
+                Action actA = () => cache.GetOrAdd(null, "value");
+                Action actB = () => cache.GetOrAdd(null, "region", "value");
+                Action actC = () => cache.GetOrAdd(null, (k) => "value");
+                Action actD = () => cache.GetOrAdd(null, "region", (k, r) => "value");
 
                 // assert
                 actA.ShouldThrow<ArgumentException>()

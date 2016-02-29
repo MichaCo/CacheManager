@@ -508,12 +508,15 @@ namespace CacheManager.Core
             }
         }
 
+        /// <inheritdoc />
         public TCacheValue GetOrAdd(string key, TCacheValue value)
             => this.GetOrAdd(key, (k) => value);
 
+        /// <inheritdoc />
         public TCacheValue GetOrAdd(string key, string region, TCacheValue value)
-            => GetOrAdd(key, region, (k, r) => value);
+            => this.GetOrAdd(key, region, (k, r) => value);
 
+        /// <inheritdoc />
         public TCacheValue GetOrAdd(string key, Func<string, TCacheValue> valueFactory)
         {
             NotNullOrWhiteSpace(key, nameof(key));
@@ -522,6 +525,7 @@ namespace CacheManager.Core
             return this.GetOrAddInternal(key, null, (k, r) => valueFactory(k));
         }
 
+        /// <inheritdoc />
         public TCacheValue GetOrAdd(string key, string region, Func<string, string, TCacheValue> valueFactory)
         {
             NotNullOrWhiteSpace(key, nameof(key));
@@ -529,32 +533,6 @@ namespace CacheManager.Core
             NotNull(valueFactory, nameof(valueFactory));
 
             return this.GetOrAddInternal(key, region, (k, r) => valueFactory(k, r));
-        }
-
-        private TCacheValue GetOrAddInternal(string key, string region, Func<string, string, TCacheValue> valueFactory)
-        {
-            var tries = 0;
-            do
-            {
-                tries++;
-                var item = this.GetCacheItemInternal(key, region);
-                if (item != null)
-                {
-                    return item.Value;
-                }
-
-                var newValue = valueFactory(key, region);
-                item = string.IsNullOrWhiteSpace(region) ? new CacheItem<TCacheValue>(key, newValue) : new CacheItem<TCacheValue>(key, region, newValue);
-                if (this.AddInternal(item))
-                {
-                    return newValue;
-                }
-            } while (tries <= this.Configuration.MaxRetries);
-
-            // should usually never occur, but could if e.g. max retries is 1 and an item gets added between the get and add.
-            // pretty unusual, so keep the max tries at least around 50
-            throw new InvalidOperationException(
-                string.Format("Could not get nor add the item {0} {1}", key, region));
         }
 
         /// <summary>
@@ -1426,6 +1404,33 @@ namespace CacheManager.Core
                     this.EvictFromHandle(key, region, this.cacheHandles[handleIndex]);
                 }
             }
+        }
+
+        private TCacheValue GetOrAddInternal(string key, string region, Func<string, string, TCacheValue> valueFactory)
+        {
+            var tries = 0;
+            do
+            {
+                tries++;
+                var item = this.GetCacheItemInternal(key, region);
+                if (item != null)
+                {
+                    return item.Value;
+                }
+
+                var newValue = valueFactory(key, region);
+                item = string.IsNullOrWhiteSpace(region) ? new CacheItem<TCacheValue>(key, newValue) : new CacheItem<TCacheValue>(key, region, newValue);
+                if (this.AddInternal(item))
+                {
+                    return newValue;
+                }
+            }
+            while (tries <= this.Configuration.MaxRetries);
+
+            // should usually never occur, but could if e.g. max retries is 1 and an item gets added between the get and add.
+            // pretty unusual, so keep the max tries at least around 50
+            throw new InvalidOperationException(
+                string.Format("Could not get nor add the item {0} {1}", key, region));
         }
 
         private void RegisterCacheBackplane(CacheBackplane backplane)

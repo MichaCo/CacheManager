@@ -173,7 +173,8 @@ namespace CacheManager.Tests
                         tries++;
                         Thread.Sleep(100);
                         value = cache.Get(item.Key);
-                    } while (value.ToString() != "new value" && tries < 10);
+                    }
+                    while (value.ToString() != "new value" && tries < 10);
 
                     value.Should().Be("new value", cache.ToString());
                 },
@@ -266,7 +267,8 @@ namespace CacheManager.Tests
                         tries++;
                         Thread.Sleep(100);
                         value = cache.GetCacheItem(item.Key);
-                    } while (value != null && tries < 10);
+                    }
+                    while (value != null && tries < 10);
 
                     value.Should().BeNull();
                 },
