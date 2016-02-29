@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using CacheManager.Core;
 using CacheManager.Core.Internal;
 using FluentAssertions;
@@ -551,6 +553,185 @@ namespace CacheManager.Tests
         }
 
         #endregion add or update call validation
+
+        #region get or add
+
+        [Fact]
+        [ReplaceCulture]
+        public void CacheManager_GetOrAdd_InvalidKey()
+        {
+            using (var cache = CacheFactory.Build(settings =>
+            {
+                settings.WithDictionaryHandle("h1");
+            }))
+            {
+                // arrange act
+                Action actA = () => cache.GetOrAdd("", "value");
+                Action actB = () => cache.GetOrAdd("", "region", "value");
+                Action actC = () => cache.GetOrAdd("", (k) => "value");
+                Action actD = () => cache.GetOrAdd("", "region", (k, r) => "value");
+
+                // assert
+                actA.ShouldThrow<ArgumentException>()
+                    .WithMessage("*key*");
+
+                actB.ShouldThrow<ArgumentException>()
+                    .WithMessage("*key*");
+
+                actC.ShouldThrow<ArgumentException>()
+                    .WithMessage("*key*");
+
+                actD.ShouldThrow<ArgumentException>()
+                    .WithMessage("*key*");
+            }
+        }
+
+        [Fact]
+        [ReplaceCulture]
+        public void CacheManager_GetOrAdd_InvalidRegion()
+        {
+            using (var cache = CacheFactory.Build(settings =>
+            {
+                settings.WithDictionaryHandle("h1");
+            }))
+            {
+                // arrange act
+                Action actA = () => cache.GetOrAdd("key", " ", "value");
+                Action actB = () => cache.GetOrAdd("key", null, (k, r) => "value");
+
+                // assert
+                actA.ShouldThrow<ArgumentException>()
+                    .WithMessage("*region*");
+
+                actB.ShouldThrow<ArgumentException>()
+                    .WithMessage("*region*");
+            }
+        }
+
+        [Fact]
+        [ReplaceCulture]
+        public void CacheManager_GetOrAdd_InvalidFactory()
+        {
+            using (var cache = CacheFactory.Build(settings =>
+            {
+                settings.WithDictionaryHandle("h1");
+            }))
+            {
+                // arrange act
+                Action actA = () => cache.GetOrAdd("key", null);
+                Action actB = () => cache.GetOrAdd("key", "region", null);
+
+                // assert
+                actA.ShouldThrow<ArgumentException>()
+                    .WithMessage("*valueFactory*");
+
+                actB.ShouldThrow<ArgumentException>()
+                    .WithMessage("*valueFactory*");
+            }
+        }
+
+        [Theory]
+        [MemberData("TestCacheManagers")]
+        public void CacheManager_GetOrAdd_SimpleAdd<T>(T cache)
+            where T : ICacheManager<object>
+        {
+            // arrange
+            var key = Guid.NewGuid().ToString();
+            var keyF = Guid.NewGuid().ToString();
+            var val = Guid.NewGuid().ToString();
+
+            using (cache)
+            {
+                // act
+                cache.GetOrAdd(key, val);
+                cache.GetOrAdd(key, "region", val);
+                cache.GetOrAdd(keyF, (k) => val);
+                cache.GetOrAdd(keyF, "region", (k, r) => val);
+
+                // assert
+                cache[key].Should().Be(val);
+                cache[key, "region"].Should().Be(val);
+                cache[keyF].Should().Be(val);
+                cache[keyF, "region"].Should().Be(val);
+            }
+        }
+
+        [Theory]
+        [MemberData("TestCacheManagers")]
+        public void CacheManager_GetOrAdd_SimpleGet<T>(T cache)
+            where T : ICacheManager<object>
+        {
+            // arrange
+            var key = Guid.NewGuid().ToString();
+            var keyF = Guid.NewGuid().ToString();
+            var val = Guid.NewGuid().ToString();
+            Func<string, object> add = (k) => { throw new InvalidOperationException(); };
+            Func<string, string, object> addRegion = (k, r) => { throw new InvalidOperationException(); };
+
+            using (cache)
+            {
+                cache.Add(key, val);
+                cache.Add(key, val, "region");
+                cache.Add(keyF, val);
+                cache.Add(keyF, val, "region");
+
+                // act
+                var result = cache.GetOrAdd(key, val);
+                var resultB = cache.GetOrAdd(key, "region", val);
+                Action act = () => cache.GetOrAdd(keyF, add);
+                Action actB = () => cache.GetOrAdd(keyF, "region", addRegion);
+
+                // assert
+                result.Should().Be(val);
+                resultB.Should().Be(val);
+                act.ShouldNotThrow();
+                actB.ShouldNotThrow();
+            }
+        }
+
+        [Theory]
+        [MemberData("TestCacheManagers")]
+        public void CacheManager_GetOrAdd_ForceRace<T>(T cache)
+            where T : ICacheManager<object>
+        {
+            // arrange
+            var key = Guid.NewGuid().ToString();
+            var val = Guid.NewGuid().ToString();
+            var counter = 0;
+            var results = new List<object>();
+
+            using (cache)
+            {
+                Action action = () =>
+                {
+                    var result = cache.GetOrAdd(key, (k) =>
+                    {
+                        Interlocked.Increment(ref counter);
+
+                        // force collision so that multiple threads try to add... yea thats long, but parallel should be fine
+                        Task.Delay(10).Wait();
+                        return counter;
+                    });
+
+                    lock (results)
+                    {
+                        results.Add(result);
+                    }
+                };
+
+                var actions = Enumerable.Repeat(action, 8);
+
+                Parallel.Invoke(new ParallelOptions() { MaxDegreeOfParallelism = 8 }, actions.ToArray());
+
+                // one of the threads one and added the key
+                var winner = (int)cache[key];
+
+                // all results should be the same because we should add the key only once
+                results.ShouldBeEquivalentTo(Enumerable.Repeat(winner, 8));
+            }
+        }
+
+        #endregion get or add
 
         #region Add validation
 

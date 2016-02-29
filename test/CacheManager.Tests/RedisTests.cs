@@ -134,7 +134,7 @@ namespace CacheManager.Tests
 
         [Fact]
         [Trait("category", "Redis")]
-        ////[Trait("category", "Unreliable")]
+        [Trait("category", "Unreliable")]
         public void Redis_Multiple_PubSub_Change()
         {
             // arrange
@@ -174,7 +174,7 @@ namespace CacheManager.Tests
                         Thread.Sleep(100);
                         value = cache.Get(item.Key);
                     } while (value.ToString() != "new value" && tries < 10);
-                    
+
                     value.Should().Be("new value", cache.ToString());
                 },
                 1,
@@ -241,7 +241,7 @@ namespace CacheManager.Tests
 
         [Fact]
         [Trait("category", "Redis")]
-        ////[Trait("category", "Unreliable")]
+        [Trait("category", "Unreliable")]
         public void Redis_Multiple_PubSub_Remove()
         {
             // arrange

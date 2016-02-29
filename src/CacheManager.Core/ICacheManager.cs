@@ -281,6 +281,14 @@ namespace CacheManager.Core
         /// </exception>
         TCacheValue AddOrUpdate(CacheItem<TCacheValue> addItem, Func<TCacheValue, TCacheValue> updateValue, int maxRetries);
 
+        TCacheValue GetOrAdd(string key, TCacheValue value);
+
+        TCacheValue GetOrAdd(string key, string region, TCacheValue value);
+
+        TCacheValue GetOrAdd(string key, Func<string, TCacheValue> valueFactory);
+
+        TCacheValue GetOrAdd(string key, string region, Func<string, string, TCacheValue> valueFactory);
+
         /// <summary>
         /// Updates an existing key in the cache.
         /// <para>
