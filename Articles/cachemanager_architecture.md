@@ -204,8 +204,8 @@ Configuration of the `OutputCache` can be done via web.config:
 The `cacheName` attribute within the `add` tag is important. This will let CacheManager know which `cache` configuration to use. The configuration must also be provided via web.config, configuration by code is not supported!
 
 [stackoverflow-config-xsd]: http://stackoverflow.com/questions/742905/enabling-intellisense-for-custom-sections-in-config-files
-[server-explorer]: media/cachemanager-architecture/performance-counters.jpg "Performance Counters"
-[perfmon]: media/cachemanager-architecture/performance-counters2.jpg "Perfmon.exe"
+[server-explorer]: https://raw.githubusercontent.com/MichaCo/CacheManager/dev/Articles/media/cachemanager-architecture/performance-counters.jpg "Performance Counters"
+[perfmon]: https://raw.githubusercontent.com/MichaCo/CacheManager/dev/Articles/media/cachemanager-architecture/performance-counters2.jpg "Perfmon.exe"
 [cm.web]:  https://www.nuget.org/packages/CacheManager.Web/
 
 

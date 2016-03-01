@@ -81,8 +81,8 @@ Hopefully this worked out just fine. Now you should be set to play around with t
 [readme]: http://cachemanager.net/Documentation/Index/cachemanager_readme
 [features]: http://cachemanager.net/Documentation/Index/cachemanager_architecture
 [sysCache]: https://www.nuget.org/packages/CacheManager.SystemRuntimeCaching/
-[newProject]: media/cachemanager-getting-started/create-console-app.jpg
-[addnuget]: media/cachemanager-getting-started/add-nuget.jpg
+[newProject]: https://raw.githubusercontent.com/MichaCo/CacheManager/dev/Articles/media/cachemanager-getting-started/create-console-app.jpg
+[addnuget]: https://raw.githubusercontent.com/MichaCo/CacheManager/dev/Articles/media/cachemanager-getting-started/add-nuget.jpg
 
 
 [TOC]
