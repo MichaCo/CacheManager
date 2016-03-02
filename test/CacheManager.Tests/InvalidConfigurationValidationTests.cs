@@ -504,6 +504,37 @@ namespace CacheManager.Tests
 
         [Fact]
         [ReplaceCulture]
+        public void Cfg_InvalidCfgFile_BackplaneInvalidType()
+        {
+            // arrange
+            string fileName = GetCfgFileName(@"/Configuration/configuration.invalid.backplaneTypeNoName.config");
+
+            // act
+            var cfg = ConfigurationBuilder.LoadConfigurationFile(fileName, "invalidType");
+            Action act = () => new BaseCacheManager<string>(cfg);
+
+            // assert
+            act.ShouldThrow<InvalidOperationException>()
+                .WithMessage("*does not extend from CacheBackplane*");
+        }
+
+        [Fact]
+        [ReplaceCulture]
+        public void Cfg_InvalidCfgFile_BackplaneTypeNotFound()
+        {
+            // arrange
+            string fileName = GetCfgFileName(@"/Configuration/configuration.invalid.backplaneTypeNoName.config");
+
+            // act
+            Action act = () => ConfigurationBuilder.LoadConfigurationFile(fileName, "typeNotFound");
+
+            // assert
+            act.ShouldThrow<InvalidOperationException>()
+                .WithMessage("*Backplane type not found*");
+        }
+
+        [Fact]
+        [ReplaceCulture]
         public void Cfg_InvalidCfgFile_SerializerType_A()
         {
             // arrange

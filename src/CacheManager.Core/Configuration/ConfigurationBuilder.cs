@@ -283,7 +283,7 @@ namespace CacheManager.Core
                 }
 
                 var backplaneType = Type.GetType(managerCfg.BackplaneType, false);
-                EnsureNotNull(backplaneType, "Backplane type not found, {0}.", managerCfg.BackplaneType);
+                EnsureNotNull(backplaneType, "Backplane type not found, '{0}'. Make sure to install the corresponding nuget package.", managerCfg.BackplaneType);
 
                 cfg.BackplaneType = backplaneType;
                 cfg.BackplaneConfigurationKey = managerCfg.BackplaneName;
