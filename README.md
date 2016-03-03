@@ -35,7 +35,7 @@ Add the following feed, if you want to play with the not yet released bits:
 
     https://www.myget.org/F/cachemanager/api/v3/index.json
 
-To find which checkin created which build, use this [build history](https://ci.appveyor.com/project/MichaCo/cachemanager/history).
+To find which check-in created which build, use this [build history](https://ci.appveyor.com/project/MichaCo/cachemanager/history).
 
 ## Documentation
  
@@ -89,7 +89,7 @@ And CacheManager handles version conflicts for you.
     * Current concrete implementation is based on the ASP.NET Core logging. Other implementation of CacheManager's ILoggerFactory might follow.
 * **Strongly typed** cache interface.
 * **Multiple layers**
-By having multiple cache handles managed by CacheManager, you can easily implement layered caches. For example an in process cache in front of your distributed cache, to make read access faster.
+By having multiple cache handles managed by CacheManager, you can easily implement layered caches. For example, an in process cache in front of your distributed cache, to make read access faster.
 CacheManager will synchronize those layers for you. 
     * `Put` and `Add` operations will always be executed on all cache handles registered on the manager.
     * On `Get`, there are different configuration options defined by `CacheUpdateMode`, if the item was available in one cache handle:
