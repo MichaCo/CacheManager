@@ -74,6 +74,9 @@ namespace CacheManager.Web
         /// <summary>
         /// Adds a value to the cache.
         /// </summary>
+        /// <remarks>
+        /// Be aware that sliding expiration for this cache works only if the timeout is set to more than 2000ms.
+        /// </remarks>
         /// <param name="item">The <c>CacheItem</c> to be added to the cache.</param>
         /// <returns>
         /// <c>true</c> if the key was not already added to the cache, <c>false</c> otherwise.
@@ -82,13 +85,21 @@ namespace CacheManager.Web
         {
             var key = this.GetItemKey(item);
             var settings = this.GetCacheSettings(item);
+
+            if (settings.SlidingExpire.TotalMilliseconds < 2000)
+            {
+                this.Logger.LogWarn(
+                    "System.Web.Caching.Cache sliding expiration works only with a value larger than 2000ms, "
+                    + $"but you configured '{settings.SlidingExpire.TotalMilliseconds}' for key {item.Key}:{item.Region}.");
+            }
+
             var result = this.Context.Cache.Add(
                 key: key,
                 value: item,
                 dependencies: settings.Dependency,
                 absoluteExpiration: settings.AbsoluteExpire,
                 slidingExpiration: settings.SlidingExpire,
-                priority: CacheItemPriority.NotRemovable,
+                priority: CacheItemPriority.Normal,
                 onRemoveCallback: this.ItemRemoved);
 
             // result will be the existing value if the key is already stored, the new value will not override the key
@@ -118,15 +129,6 @@ namespace CacheManager.Web
                 return null;
             }
 
-            //// precision for System.Web.Caching is pretty good but still in seconds, e.g. sliding of milliseconds doesn't work
-            //// TODO: consider enable custom expiration check
-            ////if (IsExpired(item))
-            ////{
-            ////    // if so remove it
-            ////    this.RemoveInternal(item.Key, item.Region);
-            ////    return null;
-            ////}
-
             return item;
         }
 
@@ -134,18 +136,29 @@ namespace CacheManager.Web
         /// Puts the <paramref name="item"/> into the cache. If the item exists it will get updated
         /// with the new value. If the item doesn't exist, the item will be added to the cache.
         /// </summary>
+        /// <remarks>
+        /// Be aware that sliding expiration for this cache works only if the timeout is set to more than 2000ms.
+        /// </remarks>
         /// <param name="item">The <c>CacheItem</c> to be added to the cache.</param>
         protected override void PutInternalPrepared(CacheItem<TCacheValue> item)
         {
             var key = this.GetItemKey(item);
             var settings = this.GetCacheSettings(item);
+
+            if (settings.SlidingExpire.TotalMilliseconds < 2000)
+            {
+                this.Logger.LogWarn(
+                    "System.Web.Caching.Cache sliding expiration works only with a value larger than 2000ms, "
+                    + $"but you configured '{settings.SlidingExpire.TotalMilliseconds}' for key {item.Key}:{item.Region}.");
+            }
+
             this.Context.Cache.Insert(
                 key: key,
                 value: item,
                 dependencies: settings.Dependency,
                 absoluteExpiration: settings.AbsoluteExpire,
                 slidingExpiration: settings.SlidingExpire,
-                priority: CacheItemPriority.NotRemovable,
+                priority: CacheItemPriority.Normal,
                 onRemoveCallback: this.ItemRemoved);
         }
 
@@ -280,7 +293,6 @@ namespace CacheManager.Web
                 return;
             }
 
-            // TODO: use the value, cast to CacheItem<T> and check region...
             // identify item keys and ignore region or instance key
             if (key.Contains(":"))
             {

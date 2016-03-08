@@ -40,6 +40,84 @@ namespace CacheManager.Tests
             }
         }
 
+        [Trait("category", "Unreliable")]
+        [Theory]
+        [MemberData("TestCacheManagers")]
+        public void CacheManager_Sliding_DoesNotExpire_OnGet<T>(T cache)
+            where T : ICacheManager<object>
+        {
+            using (cache)
+            {
+#if !NET40 && MOCK_HTTPCONTEXT_ENABLED
+                var first = cache.CacheHandles.First();
+                if (cache.CacheHandles.Count() == 1 && first.GetType() == typeof(SystemWebCacheHandleWrapper<object>))
+                {
+                    // system.web caching doesn't support short sliding expiration. must be higher than 2000ms for some strange reason...
+                    return;
+                }
+#endif
+                var start = Environment.TickCount;
+                var key = Guid.NewGuid().ToString();
+                cache.Add(new CacheItem<object>(key, "value", ExpirationMode.Sliding, TimeSpan.FromMilliseconds(100)))
+                    .Should().BeTrue();
+
+                cache.GetCacheItem(key).Should().NotBeNull("After: " + (Environment.TickCount - start) + ": " + cache.ToString());
+
+                start = Environment.TickCount;
+                Thread.Sleep(50);
+                cache[key].Should().NotBeNull("After: " + (Environment.TickCount - start) + ": " + cache.ToString());
+
+                start = Environment.TickCount;
+                Thread.Sleep(50);
+                cache.Get(key).Should().NotBeNull("After: " + (Environment.TickCount - start) + ": " + cache.ToString());
+
+                start = Environment.TickCount;
+                Thread.Sleep(110);
+                cache.GetCacheItem(key).Should().BeNull("After: " + (Environment.TickCount - start) + ": " + cache.ToString());
+            }
+        }
+
+        [Trait("category", "Unreliable")]
+        [Theory]
+        [MemberData("TestCacheManagers")]
+        public void CacheManager_Sliding_DoesNotExpire_OnUpdate<T>(T cache)
+            where T : ICacheManager<object>
+        {
+            // see #50, update doesn't copy custom expire settings per item
+            using (cache)
+            {
+#if !NET40 && MOCK_HTTPCONTEXT_ENABLED
+                var first = cache.CacheHandles.First();
+                if (cache.CacheHandles.Count() == 1 && first.GetType() == typeof(SystemWebCacheHandleWrapper<object>))
+                {
+                    // system.web caching doesn't support short sliding expiration. must be higher than 2000ms for some strange reason...
+                    return;
+                }
+#endif
+                var start = Environment.TickCount;
+                var key = Guid.NewGuid().ToString();
+                cache.Add(new CacheItem<object>(key, "value", ExpirationMode.Sliding, TimeSpan.FromMilliseconds(100)))
+                    .Should().BeTrue();
+
+                cache.AddOrUpdate(key, "value", o => o).Should().NotBeNull("After: " + (Environment.TickCount - start) + ": " + cache.ToString());
+
+                start = Environment.TickCount;
+                Thread.Sleep(50);
+                object val;
+                cache.TryUpdate(key, o => o, out val);
+                val.Should().NotBeNull("After: " + (Environment.TickCount - start) + ": " + cache.ToString());
+
+                start = Environment.TickCount;
+                Thread.Sleep(50);
+                cache.Update(key, o => o).Should().NotBeNull("After: " + (Environment.TickCount - start) + ": " + cache.ToString());
+
+                start = Environment.TickCount;
+                Thread.Sleep(110);
+                cache.TryUpdate(key, o => o, out val);
+                val.Should().BeNull("After: " + (Environment.TickCount - start) + ": " + cache.ToString());
+            }
+        }
+
         [Theory]
         [MemberData("TestCacheManagers")]
         public void CacheManager_Expire_Absolute_ForKey_Validate<T>(T cache)

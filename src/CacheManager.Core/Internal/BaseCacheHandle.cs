@@ -138,7 +138,9 @@ namespace CacheManager.Core.Internal
                 }
 
                 var value = updateValue(original.Value);
-                this.Put(key, value);
+                var newItem = original.WithValue(value);
+                newItem.LastAccessedUtc = DateTime.UtcNow;
+                this.Put(newItem);
                 return UpdateItemResult.ForSuccess<TCacheValue>(value);
             }
         }
@@ -184,7 +186,9 @@ namespace CacheManager.Core.Internal
                 }
 
                 var value = updateValue(original.Value);
-                this.Put(key, value, region);
+                var newItem = original.WithValue(value);
+                newItem.LastAccessedUtc = DateTime.UtcNow;
+                this.Put(newItem);
                 return UpdateItemResult.ForSuccess<TCacheValue>(value);
             }
         }

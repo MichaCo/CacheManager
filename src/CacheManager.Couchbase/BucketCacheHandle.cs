@@ -143,9 +143,6 @@ namespace CacheManager.Couchbase
             var fullkey = GetKey(key, region);
             var result = this.bucket.Get<CacheItem<TCacheValue>>(fullkey);
 
-            //// TODO: implement sliding expiration whenever the guys from couchbase actually
-            ////       implement that feature into that client...
-
             if (result.Success)
             {
                 var cacheItem = result.Value;
@@ -158,6 +155,13 @@ namespace CacheManager.Couchbase
                 {
                     var value = cacheItem.Value as JObject;
                     cacheItem = cacheItem.WithValue((TCacheValue)value.ToObject(cacheItem.ValueType));
+                }
+
+                // TODO: test sliding
+                // extend sliding expiration
+                if (cacheItem.ExpirationMode == ExpirationMode.Sliding)
+                {
+                    this.bucket.Touch(fullkey, cacheItem.ExpirationTimeout);
                 }
 
                 return cacheItem;

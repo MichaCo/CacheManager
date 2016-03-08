@@ -3,6 +3,7 @@
     <Recognized>
       <Word>Redis</Word>
       <Word>Lua</Word>
+      <Word>nuget</Word>
     </Recognized>
     <DiscreteExceptions>
       <Term></Term>

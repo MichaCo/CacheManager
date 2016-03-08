@@ -112,10 +112,10 @@ namespace CacheManager.Memcached
         /// <summary>
         /// Clears the cache region, removing all items from the specified <paramref name="region"/> only.
         /// </summary>
+        /// <remarks>Not supported for memcached.</remarks>
         /// <param name="region">The cache region.</param>
         public override void ClearRegion(string region)
         {
-            // not supported, clearing all instead
             // TODO: find workaround this.Clear();
         }
 

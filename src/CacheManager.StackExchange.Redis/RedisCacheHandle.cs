@@ -173,7 +173,6 @@ return result";
                     {
                         this.connection.Database.KeyDelete(key.ToString(), StackRedis.CommandFlags.FireAndForget);
                     }
-                    //// TODO: log result <> key length
                 }
 
                 // now delete the region
@@ -202,18 +201,6 @@ return result";
                 {
                     tries++;
 
-                    ////// actually slower than using the real value field, maybe suffers if the value is larger
-                    ////var version = this.Database.HashIncrement(fullKey, "version", 1L);
-                    ////var oldValueAndType = this.Database.HashGet(fullKey, new StackRedis.RedisValue[] { HashFieldValue, HashFieldType });
-                    ////var oldValue = oldValueAndType[0];
-                    ////var valueType = oldValueAndType[1];
-                    ////if (oldValue.IsNull || !oldValue.HasValue || valueType.IsNull || !valueType.HasValue)
-                    ////{
-                    ////    return UpdateItemResult.ForItemDidNotExist<TCacheValue>();
-                    ////}
-                    ////var newValue = updateValue(
-                    ////    this.FromRedisValue(oldValue, valueType.ToString()));
-
                     var item = this.GetCacheItemInternal(key, region);
 
                     if (item == null)
@@ -234,7 +221,7 @@ return result";
 
                     if (result != null && !result.IsNull)
                     {
-                        return UpdateItemResult.ForSuccess<TCacheValue>(newValue, tries > 1, tries);
+                        return UpdateItemResult.ForSuccess(newValue, tries > 1, tries);
                     }
 
                     this.Logger.LogDebug("Update of {0} {1} failed with version conflict, retrying {2}/{3}", key, region, tries, maxRetries);

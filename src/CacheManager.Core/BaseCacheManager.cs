@@ -542,7 +542,7 @@ namespace CacheManager.Core
         /// A <see cref="string" /> that represents this instance.
         /// </returns>
         public override string ToString() =>
-            string.Format(CultureInfo.InvariantCulture, "{0} Handles: {1}", this.Name, this.cacheHandles.Length);
+            string.Format(CultureInfo.InvariantCulture, "Name: {0}, Handles: [{1}]", this.Name, string.Join(",", this.cacheHandles.Select(p => p.GetType().Name)));
 
         /// <summary>
         /// Tries to update an existing key in the cache.
@@ -1618,7 +1618,6 @@ namespace CacheManager.Core
                     // loop... otherwise, we had too many retries... this basically indicates an
                     // invalide state of the cache: The item is there, but we couldn't update it and
                     // it most likely has a different version
-                    // TODO: logging
                     this.Logger.LogWarn(
                         "Update: {0} {1}: on handle {2} failed with too many retries! Evicting from other handles...",
                         key,
