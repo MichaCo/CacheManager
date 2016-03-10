@@ -12,13 +12,18 @@ using StackRedis = StackExchange.Redis;
 namespace CacheManager.Redis
 {
     /// <summary>
-    /// Implementation of the cache backplane with Redis Pub/Sub feature.
+    /// Implementation of the cache backplane using a Redis Pub/Sub channel.
     /// <para>
-    /// Pub/Sub is used to send messages to the redis server on any Update, cache Clear, Region
-    /// Clear or Remove operation. Every cache manager with the same configuration subscribes to the
-    /// same chanel and can react on those messages to keep other cache handles in sync with the 'master'.
+    /// Redis Pub/Sub is used to send messages to the redis server on any key change, cache clear, region
+    /// clear or key remove operation. 
+    /// Every cache manager with the same configuration subscribes to the
+    /// same channel and can react on those messages to keep other cache handles in sync with the 'master'.
     /// </para>
     /// </summary>
+    /// <remarks>
+    /// The cache manager must have at least one cache handle configured with <see cref="CacheHandleConfiguration.IsBackplaneSource"/> set to <c>true</c>.
+    /// Usually this is the redis cache handle, if configured. It should be the distributed and bottom most cache handle.
+    /// </remarks>
     public sealed class RedisCacheBackplane : CacheBackplane
     {
         private readonly string channelName;
