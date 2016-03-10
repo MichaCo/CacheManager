@@ -3,9 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using CacheManager.Core;
-#if !DNXCORE50
 using CacheManager.Redis;
-#endif
 using FluentAssertions;
 using Microsoft.Extensions.Configuration;
 using Xunit;
@@ -312,6 +310,7 @@ namespace CacheManager.Tests
             config.CacheHandleConfigurations.Count.Should().Be(1);
             config.CacheHandleConfigurations[0].HandleType.Should().Be(typeof(SystemRuntimeCaching.MemoryCacheHandle<>));
         }
+#endif
 
         [Fact]
         public void Configuration_CacheHandle_KnownType_RedisNoKey()
@@ -364,6 +363,7 @@ namespace CacheManager.Tests
             config.CacheHandleConfigurations[0].Key.Should().Be("name");    // now key gets set to name
         }
 
+#if !DNXCORE50
         [Fact]
         public void Configuration_CacheHandle_KnownType_CouchbaseNoKey()
         {
@@ -481,6 +481,7 @@ namespace CacheManager.Tests
             config.CacheHandleConfigurations[0].HandleType.Should().Be(typeof(Web.SystemWebCacheHandle<>));
         }
 #endif
+
         [Fact]
         public void Configuration_CacheHandle_KnownType_Dictionary()
         {
@@ -669,8 +670,7 @@ namespace CacheManager.Tests
             Action act = () => GetConfiguration(data).GetCacheConfiguration("name");
             act.ShouldThrow<InvalidOperationException>().WithMessage("*Known backplane type 'Something' is invalid*");
         }
-
-#if !DNXCORE50
+        
         [Fact]
         public void Configuration_Backplane_Redis_MissingKey()
         {
@@ -709,7 +709,6 @@ namespace CacheManager.Tests
             config.BackplaneType.Should().Be(typeof(Redis.RedisCacheBackplane));
             config.HasBackplane.Should().BeTrue();
         }
-#endif
 
         [Fact]
         public void Configuration_Backplane_SomeType_Valid()
@@ -890,8 +889,7 @@ namespace CacheManager.Tests
             var config = GetConfiguration(data).GetCacheConfiguration("name");
             config.SerializerType.Should().Be(typeof(Serialization.Json.JsonCacheSerializer));
         }
-
-#if !DNXCORE50
+        
         [Fact]
         public void Configuration_Redis_NothingDefined()
         {
@@ -1040,7 +1038,6 @@ namespace CacheManager.Tests
             redisConfig.Key.Should().Be(key);
             redisConfig.ConnectionString.Should().Be("connectionString");
         }
-#endif
 
         private static IConfigurationRoot GetConfiguration(IDictionary<string, string> data)
         {

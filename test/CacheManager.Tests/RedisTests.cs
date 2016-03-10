@@ -1,5 +1,4 @@
-﻿#if !DNXCORE50
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -28,6 +27,7 @@ namespace CacheManager.Tests
             act.ShouldThrow<InvalidOperationException>().WithMessage("*endpoints*");
         }
 
+#if !DNXCORE50
         [Fact]
         [Trait("category", "NotOnMono")]
         public void Redis_Configurations_LoadStandard()
@@ -69,6 +69,7 @@ namespace CacheManager.Tests
 
             act.ShouldThrow<ArgumentNullException>().WithMessage("*section*");
         }
+#endif
 
         [Fact]
         [Trait("category", "Redis")]
@@ -132,6 +133,7 @@ namespace CacheManager.Tests
             }
         }
 
+#if !DNXCORE50
         [Fact]
         [Trait("category", "Redis")]
         [Trait("category", "Unreliable")]
@@ -179,11 +181,12 @@ namespace CacheManager.Tests
                     value.Should().Be("new value", cache.ToString());
                 },
                 1,
-                TestManagers.CreateRedisAndSystemCacheWithBackplane(69, true, channelName),
+                TestManagers.CreateRedisAndDicCacheWithBackplane(69, true, channelName),
                 cfgCache,
                 TestManagers.CreateRedisCache(69),
-                TestManagers.CreateRedisAndSystemCacheWithBackplane(69, true, channelName));
+                TestManagers.CreateRedisAndDicCacheWithBackplane(69, true, channelName));
         }
+#endif
 
         ////[Fact(Skip = "needs clear")]
         [Trait("category", "Redis")]
@@ -206,10 +209,10 @@ namespace CacheManager.Tests
                     cache.Get(item.Key).Should().BeNull();
                 },
                 2,
-                TestManagers.CreateRedisAndSystemCacheWithBackplane(444, true, channelName),
-                TestManagers.CreateRedisAndSystemCacheWithBackplane(444, true, channelName),
+                TestManagers.CreateRedisAndDicCacheWithBackplane(444, true, channelName),
+                TestManagers.CreateRedisAndDicCacheWithBackplane(444, true, channelName),
                 TestManagers.CreateRedisCache(444),
-                TestManagers.CreateRedisAndSystemCacheWithBackplane(444, true, channelName));
+                TestManagers.CreateRedisAndDicCacheWithBackplane(444, true, channelName));
         }
 
         [Fact]
@@ -273,10 +276,10 @@ namespace CacheManager.Tests
                     value.Should().BeNull();
                 },
                 1,
-                TestManagers.CreateRedisAndSystemCacheWithBackplane(6, true, channelName),
-                TestManagers.CreateRedisAndSystemCacheWithBackplane(6, true, channelName),
+                TestManagers.CreateRedisAndDicCacheWithBackplane(6, true, channelName),
+                TestManagers.CreateRedisAndDicCacheWithBackplane(6, true, channelName),
                 TestManagers.CreateRedisCache(6),
-                TestManagers.CreateRedisAndSystemCacheWithBackplane(6, true, channelName));
+                TestManagers.CreateRedisAndDicCacheWithBackplane(6, true, channelName));
         }
 
         [Fact]
@@ -421,8 +424,8 @@ namespace CacheManager.Tests
             // arrange
             var item = new CacheItem<object>(Guid.NewGuid().ToString(), "something", ExpirationMode.Sliding, TimeSpan.FromMilliseconds(50));
             var channelName = Guid.NewGuid().ToString();
-            var cacheA = TestManagers.CreateRedisAndSystemCacheWithBackplane(10, true, channelName);
-            var cacheB = TestManagers.CreateRedisAndSystemCacheWithBackplane(10, true, channelName);
+            var cacheA = TestManagers.CreateRedisAndDicCacheWithBackplane(10, true, channelName);
+            var cacheB = TestManagers.CreateRedisAndDicCacheWithBackplane(10, true, channelName);
 
             // act/assert
             using (cacheA)
@@ -483,6 +486,7 @@ namespace CacheManager.Tests
             }
         }
 
+#if !DNXCORE50
         [Fact]
         [Trait("category", "Redis")]
         public void Redis_Valid_CfgFile_LoadWithRedisBackplane()
@@ -544,6 +548,7 @@ namespace CacheManager.Tests
             handle.Should().NotBeNull();
             count.ShouldNotThrow();
         }
+#endif
 
         [Fact]
         [Trait("category", "Redis")]
@@ -716,7 +721,9 @@ namespace CacheManager.Tests
         }
     }
 
+#if !DNXCORE50
     [Serializable]
+#endif
     [ExcludeFromCodeCoverage]
     internal class Poco
     {
@@ -727,4 +734,3 @@ namespace CacheManager.Tests
         public string Something { get; set; }
     }
 }
-#endif

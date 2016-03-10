@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿#if !DOTNETCORE
+using System.Collections.Generic;
 using System.Configuration;
 
 namespace CacheManager.Redis
@@ -348,3 +349,4 @@ namespace CacheManager.Redis
         }
     }
 }
+#endif

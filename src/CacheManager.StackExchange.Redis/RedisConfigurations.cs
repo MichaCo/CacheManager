@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+#if !DOTNETCORE
 using System.Configuration;
+#endif
 using System.IO;
 using static CacheManager.Core.Utility.Guard;
 
@@ -30,11 +32,13 @@ namespace CacheManager.Redis
                         {
                             config = new Dictionary<string, RedisConfiguration>();
 
+#if !DOTNETCORE
                             var section = ConfigurationManager.GetSection(RedisConfigurationSection.DefaultSectionName) as RedisConfigurationSection;
                             if (section != null)
                             {
                                 LoadConfiguration(section);
                             }
+#endif
                         }
                     }
                 }
@@ -77,6 +81,9 @@ namespace CacheManager.Redis
 
             if (!Configurations.ContainsKey(configurationName))
             {
+#if DOTNETCORE
+                throw new InvalidOperationException("No configuration added for configuration name " + configurationName);
+#else
                 // check connection strings if there is one matching the name
                 var connectionStringHolder = ConfigurationManager.ConnectionStrings[configurationName];
                 if (connectionStringHolder == null || string.IsNullOrWhiteSpace(connectionStringHolder.ConnectionString))
@@ -86,11 +93,13 @@ namespace CacheManager.Redis
 
                 var configuration = new RedisConfiguration(configurationName, connectionStringHolder.ConnectionString);
                 Configurations.Add(configurationName, configuration);
+#endif
             }
 
             return Configurations[configurationName];
         }
 
+#if !DOTNETCORE
         /// <summary>
         /// Loads the configuration.
         /// </summary>
@@ -182,5 +191,6 @@ namespace CacheManager.Redis
         {
             LoadConfiguration(RedisConfigurationSection.DefaultSectionName);
         }
+#endif
     }
 }

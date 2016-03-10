@@ -22,9 +22,7 @@ namespace CacheManager.Tests
         private const string RedisHost = "127.0.0.1";
         private const int RedisPort = 6379;
         private const int StartDbCount = 100;
-#if !DNXCORE50
         private static int databaseCount = StartDbCount;
-#endif
 
         public static ICacheManager<object> WithOneDicCacheHandle
             => CacheFactory.Build(
@@ -62,6 +60,34 @@ namespace CacheManager.Tests
                             .EnableStatistics()
                             .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1000));
                 });
+
+        public static ICacheManager<object> WithRedisCache
+        {
+            get
+            {
+                Interlocked.Increment(ref databaseCount);
+                if (databaseCount >= 2000)
+                {
+                    databaseCount = StartDbCount;
+                }
+
+                return CreateRedisCache(databaseCount, false);
+            }
+        }
+
+        public static ICacheManager<object> WithSystemAndRedisCache
+        {
+            get
+            {
+                Interlocked.Increment(ref databaseCount);
+                if (databaseCount >= 2000)
+                {
+                    databaseCount = StartDbCount;
+                }
+
+                return CreateRedisAndDicCacheWithBackplane(databaseCount, false);
+            }
+        }
 
 #if !DNXCORE50
 
@@ -106,34 +132,6 @@ namespace CacheManager.Tests
                         .And.WithSystemRuntimeCacheHandle("cacheHandleB")
                             .EnableStatistics();
                 });
-
-        public static ICacheManager<object> WithRedisCache
-        {
-            get
-            {
-                Interlocked.Increment(ref databaseCount);
-                if (databaseCount >= 2000)
-                {
-                    databaseCount = StartDbCount;
-                }
-
-                return CreateRedisCache(databaseCount, false);
-            }
-        }
-
-        public static ICacheManager<object> WithSystemAndRedisCache
-        {
-            get
-            {
-                Interlocked.Increment(ref databaseCount);
-                if (databaseCount >= 2000)
-                {
-                    databaseCount = StartDbCount;
-                }
-
-                return CreateRedisAndSystemCacheWithBackplane(databaseCount, false);
-            }
-        }
 
         public static ICacheManager<object> WithMemcached
         {
@@ -210,16 +208,14 @@ namespace CacheManager.Tests
 
 #endif
 
-#if !DNXCORE50
-
-        public static ICacheManager<object> CreateRedisAndSystemCacheWithBackplane(int database = 0, bool sharedRedisConfig = true, string channelName = null)
+        public static ICacheManager<object> CreateRedisAndDicCacheWithBackplane(int database = 0, bool sharedRedisConfig = true, string channelName = null)
         {
             var redisKey = sharedRedisConfig ? "redisConfig" : Guid.NewGuid().ToString();
             return CacheFactory.Build(settings =>
             {
                 settings
                     .WithUpdateMode(CacheUpdateMode.Up)
-                    .WithSystemRuntimeCacheHandle()
+                    .WithDictionaryHandle()
                         .EnableStatistics();
                 settings
                     .WithMaxRetries(100)
@@ -287,8 +283,6 @@ namespace CacheManager.Tests
 
             return cache;
         }
-
-#endif
 
         private static string NewKey() => Guid.NewGuid().ToString();
     }
