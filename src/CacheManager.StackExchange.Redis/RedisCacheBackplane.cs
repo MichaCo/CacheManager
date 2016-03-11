@@ -15,7 +15,7 @@ namespace CacheManager.Redis
     /// Implementation of the cache backplane using a Redis Pub/Sub channel.
     /// <para>
     /// Redis Pub/Sub is used to send messages to the redis server on any key change, cache clear, region
-    /// clear or key remove operation. 
+    /// clear or key remove operation.
     /// Every cache manager with the same configuration subscribes to the
     /// same channel and can react on those messages to keep other cache handles in sync with the 'master'.
     /// </para>

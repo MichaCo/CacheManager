@@ -235,9 +235,9 @@ namespace CacheManager.Core.Internal
                 var ctorTypes = string.Join(", ", lastCtor.GetParameters().Select(p => p.ParameterType.Name).ToArray());
 
                 throw new InvalidOperationException(
-                    $"Could not find a matching constructor for type '{lastCtor.DeclaringType.Name}'. Trying to match ctor[{ctorTypes}] but missing {lastParamMiss.ParameterType.Name}");
+                    $"Could not find a matching constructor for type '{lastCtor.DeclaringType.Name}'. Trying to match [{ctorTypes}] but missing {lastParamMiss.ParameterType.Name}");
             }
-            
+
             throw new InvalidOperationException(
                 $"Could not find a matching or empty constructor for type '{lastCtor.DeclaringType.Name}'.");
         }
