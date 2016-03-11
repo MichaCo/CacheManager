@@ -92,7 +92,7 @@ namespace CacheManager.Redis
                 }
 
                 var configuration = new RedisConfiguration(configurationName, connectionStringHolder.ConnectionString);
-                Configurations.Add(configurationName, configuration);
+                AddConfiguration(configuration);
 #endif
             }
 
