@@ -290,6 +290,7 @@ namespace CacheManager.Tests
             using (var cache = CacheFactory.Build<RaceConditionTestElement>(settings =>
             {
                 settings.WithUpdateMode(CacheUpdateMode.Full)
+                    .WithJsonSerializer()
                     .WithRedisCacheHandle("default")
                     .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMinutes(20));
                 settings.WithRedisConfiguration("default", config =>
@@ -343,6 +344,7 @@ namespace CacheManager.Tests
             using (var cache = CacheFactory.Build<RaceConditionTestElement>(settings =>
             {
                 settings.WithUpdateMode(CacheUpdateMode.Full)
+                    .WithJsonSerializer()
                     .WithRedisCacheHandle("default")
                     .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMinutes(20));
                 settings.WithRedisConfiguration("default", config =>

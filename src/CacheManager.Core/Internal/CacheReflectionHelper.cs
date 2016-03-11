@@ -116,9 +116,13 @@ namespace CacheManager.Core.Internal
                     instanceType = handleType;
                 }
 
-                var instance = CreateInstance(
-                    instanceType,
-                    new object[] { loggerFactory, serializer, managerConfiguration, manager, handleConfiguration }) as BaseCacheHandle<TCacheValue>;
+                var types = new List<object>(new object[] { loggerFactory, managerConfiguration, manager, handleConfiguration });
+                if (serializer != null)
+                {
+                    types.Add(serializer);
+                }
+
+                var instance = CreateInstance(instanceType, types.ToArray()) as BaseCacheHandle<TCacheValue>;
 
                 if (instance == null)
                 {
@@ -152,10 +156,11 @@ namespace CacheManager.Core.Internal
             if (constructors.Count() == 0)
             {
                 throw new InvalidOperationException(
-                    string.Format(CultureInfo.InvariantCulture, "No public non static constructor found for type {0}.", instanceType.FullName));
+                    string.Format(CultureInfo.InvariantCulture, "No matching public non static constructor found for type {0}.", instanceType.FullName));
             }
 
             object[] args = MatchArguments(constructors, knownInstances);
+
             try
             {
                 return Activator.CreateInstance(instanceType, args);
@@ -172,14 +177,23 @@ namespace CacheManager.Core.Internal
                         ex.InnerException);
                 }
 
-                throw;
+                throw new InvalidOperationException(
+                    string.Format(
+                        CultureInfo.InvariantCulture,
+                        "Failed to initialize instance of type {0}.",
+                        instanceType),
+                    ex);
             }
         }
 
         private static object[] MatchArguments(IEnumerable<ConstructorInfo> constructors, object[] instances)
         {
+            ParameterInfo lastParamMiss = null;
+            ConstructorInfo lastCtor = null;
+
             foreach (var constructor in constructors)
             {
+                lastCtor = constructor;
                 var args = new List<object>();
                 var parameters = constructor.GetParameters();
 
@@ -196,6 +210,7 @@ namespace CacheManager.Core.Internal
 #endif
                     if (paramValue == null)
                     {
+                        lastParamMiss = param;
                         break;
                     }
 
@@ -208,7 +223,23 @@ namespace CacheManager.Core.Internal
                 }
             }
 
-            return new object[] { };
+            if (constructors.Any(p => p.GetParameters().Length == 0))
+            {
+                // no match found, will try empty ctor
+                return new object[] { };
+            }
+
+            // give more detailed error of what failed
+            if (lastCtor != null && lastParamMiss != null)
+            {
+                var ctorTypes = string.Join(", ", lastCtor.GetParameters().Select(p => p.ParameterType.Name).ToArray());
+
+                throw new InvalidOperationException(
+                    $"Could not find a matching constructor for type '{lastCtor.DeclaringType.Name}'. Trying to match ctor[{ctorTypes}] but missing {lastParamMiss.ParameterType.Name}");
+            }
+            
+            throw new InvalidOperationException(
+                $"Could not find a matching or empty constructor for type '{lastCtor.DeclaringType.Name}'.");
         }
 
         private static IEnumerable<Type> GetGenericBaseTypes(this Type type)
