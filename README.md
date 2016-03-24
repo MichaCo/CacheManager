@@ -64,7 +64,7 @@ There is also from source generated [html documentation][help] available online.
 	* [**ASP.NET MVC website**][outputcachesample] showcasing usage of the Cache Manager `OutputCache` provider
 * [**Single Page Todo App with Cache Manager on Azure using Redis**][todosample]
 
-## Features in Version: [0.7.x][releases] 
+## Features in Version: [0.8.x][releases] 
 
 * One common interface for handling different caching technologies: `ICache<T>`
 * Configurable by
