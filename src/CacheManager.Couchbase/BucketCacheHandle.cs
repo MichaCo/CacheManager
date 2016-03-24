@@ -146,14 +146,9 @@ namespace CacheManager.Couchbase
             if (result.Success)
             {
                 var cacheItem = result.Value;
-                if (cacheItem.Value.GetType() == typeof(JValue))
+                if (cacheItem.Value is JToken)
                 {
-                    var value = cacheItem.Value as JValue;
-                    cacheItem = cacheItem.WithValue((TCacheValue)value.ToObject(cacheItem.ValueType));
-                }
-                else if (cacheItem.Value.GetType() == typeof(JObject))
-                {
-                    var value = cacheItem.Value as JObject;
+                    var value = cacheItem.Value as JToken;
                     cacheItem = cacheItem.WithValue((TCacheValue)value.ToObject(cacheItem.ValueType));
                 }
 
