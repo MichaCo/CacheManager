@@ -208,7 +208,6 @@ namespace CacheManager.Tests
             result.ShouldBeEquivalentTo(items);
         }
 
-#if !DNXCORE50
         [Theory]
         [InlineData(true)]
         [InlineData(float.MaxValue)]
@@ -329,7 +328,6 @@ namespace CacheManager.Tests
 
             result.ShouldBeEquivalentTo(items);
         }
-#endif
     }
 
 #if !DNXCORE50

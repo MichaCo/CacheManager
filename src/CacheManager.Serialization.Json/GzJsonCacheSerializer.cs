@@ -1,5 +1,4 @@
-﻿#if !DOTNET5_2
-using System;
+﻿using System;
 using Newtonsoft.Json;
 using System.IO.Compression;
 using System.IO;
@@ -84,4 +83,3 @@ namespace CacheManager.Serialization.Json
         }
     }
 }
-#endif
