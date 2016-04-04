@@ -207,6 +207,129 @@ namespace CacheManager.Tests
 
             result.ShouldBeEquivalentTo(items);
         }
+
+#if !DNXCORE50
+        [Theory]
+        [InlineData(true)]
+        [InlineData(float.MaxValue)]
+        [InlineData(int.MaxValue)]
+        [InlineData(long.MaxValue)]
+        [InlineData("some string")]
+        [ReplaceCulture]
+        public void GzJsonSerializer_Primitives<T>(T value)
+        {
+            // arrange
+            var serializer = new GzJsonCacheSerializer();
+
+            // act
+            var data = serializer.Serialize(value);
+            var result = serializer.Deserialize(data, typeof(T));
+
+            result.Should().Be(value);
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(float.MaxValue)]
+        [InlineData(int.MaxValue)]
+        [InlineData(long.MaxValue)]
+        [InlineData("some string")]
+        [ReplaceCulture]
+        public void GzJsonSerializer_CacheItem_Primitives<T>(T value)
+        {
+            // arrange
+            var serializer = new GzJsonCacheSerializer();
+            var item = new CacheItem<T>("key", value);
+
+            // act
+            var data = serializer.SerializeCacheItem(item);
+            var result = serializer.DeserializeCacheItem<T>(data, typeof(T));
+
+            result.Value.Should().Be(value);
+            result.ValueType.Should().Be(item.ValueType);
+            result.CreatedUtc.Should().Be(item.CreatedUtc);
+            result.ExpirationMode.Should().Be(item.ExpirationMode);
+            result.ExpirationTimeout.Should().Be(item.ExpirationTimeout);
+            result.Key.Should().Be(item.Key);
+            result.LastAccessedUtc.Should().Be(item.LastAccessedUtc);
+            result.Region.Should().Be(item.Region);
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(float.MaxValue)]
+        [InlineData(int.MaxValue)]
+        [InlineData(long.MaxValue)]
+        [InlineData("some string")]
+        [ReplaceCulture]
+        public void GzJsonSerializer_CacheItemOfObject_Primitives<T>(T value)
+        {
+            // arrange
+            var serializer = new GzJsonCacheSerializer();
+            var item = new CacheItem<object>("key", value);
+
+            // act
+            var data = serializer.SerializeCacheItem(item);
+            var result = serializer.DeserializeCacheItem<object>(data, typeof(T));
+
+            result.Value.Should().Be(value);
+            result.ValueType.Should().Be(item.ValueType);
+            result.CreatedUtc.Should().Be(item.CreatedUtc);
+            result.ExpirationMode.Should().Be(item.ExpirationMode);
+            result.ExpirationTimeout.Should().Be(item.ExpirationTimeout);
+            result.Key.Should().Be(item.Key);
+            result.LastAccessedUtc.Should().Be(item.LastAccessedUtc);
+            result.Region.Should().Be(item.Region);
+        }
+
+        [Fact]
+        public void GzJsonSerializer_Pocco()
+        {
+            // arrange
+            var serializer = new GzJsonCacheSerializer();
+            var item = SerializerPoccoSerializable.Create();
+
+            // act
+            var data = serializer.Serialize(item);
+            var result = serializer.Deserialize(data, item.GetType());
+
+            result.ShouldBeEquivalentTo(item);
+        }
+
+        [Fact]
+        public void GzJsonSerializer_CacheItemWithPocco()
+        {
+            // arrange
+            var serializer = new GzJsonCacheSerializer();
+            var pocco = SerializerPoccoSerializable.Create();
+            var item = new CacheItem<SerializerPoccoSerializable>("key", "region", pocco, ExpirationMode.Absolute, TimeSpan.FromDays(1));
+
+            // act
+            var data = serializer.SerializeCacheItem(item);
+            var result = serializer.DeserializeCacheItem<SerializerPoccoSerializable>(data, pocco.GetType());
+
+            result.ShouldBeEquivalentTo(item);
+        }
+
+        [Fact]
+        public void GzJsonSerializer_List()
+        {
+            // arrange
+            var serializer = new GzJsonCacheSerializer();
+            var items = new List<SerializerPoccoSerializable>()
+            {
+                SerializerPoccoSerializable.Create(),
+                SerializerPoccoSerializable.Create(),
+                SerializerPoccoSerializable.Create()
+            };
+
+            // act
+            var data = serializer.Serialize(items);
+            var result = serializer.Deserialize(data, items.GetType());
+
+            result.ShouldBeEquivalentTo(items);
+        }
+#endif
     }
 
 #if !DNXCORE50
