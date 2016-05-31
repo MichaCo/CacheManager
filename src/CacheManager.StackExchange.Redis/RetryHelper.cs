@@ -22,7 +22,7 @@ namespace CacheManager.Redis
                     return retryme();
                 }
 
-                // might occur on lua script excecution on a readonly slave because the master just died.
+                // might occur on lua script execution on a readonly slave because the master just died.
                 // Should recover via fail over
                 catch (StackRedis.RedisServerException ex)
                 {

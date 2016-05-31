@@ -167,7 +167,7 @@ namespace CacheManager.Core
         /// The function to perform the update in case the item does already exist.
         /// </param>
         /// <param name="maxRetries">
-        /// The number of trys which should be performed in case of version conflicts.
+        /// The number of tries which should be performed in case of version conflicts.
         /// If the cache cannot perform an update within the number of <paramref name="maxRetries"/>,
         /// this method will return <c>Null</c>.
         /// </param>
@@ -208,7 +208,7 @@ namespace CacheManager.Core
         /// The function to perform the update in case the item does already exist.
         /// </param>
         /// <param name="maxRetries">
-        /// The number of trys which should be performed in case of version conflicts.
+        /// The number of tries which should be performed in case of version conflicts.
         /// If the cache cannot perform an update within the number of <paramref name="maxRetries"/>,
         /// this method will return <c>Null</c>.
         /// </param>
@@ -269,7 +269,7 @@ namespace CacheManager.Core
         /// <param name="addItem">The item which should be added or updated.</param>
         /// <param name="updateValue">The function to perform the update, if the item does exist.</param>
         /// <param name="maxRetries">
-        /// The number of trys which should be performed in case of version conflicts.
+        /// The number of tries which should be performed in case of version conflicts.
         /// If the cache cannot perform an update within the number of <paramref name="maxRetries"/>,
         /// this method will return <c>Null</c>.
         /// </param>
@@ -286,7 +286,7 @@ namespace CacheManager.Core
         /// The method returns either the existing item's value or the newly added <paramref name="value"/>.
         /// </summary>
         /// <param name="key">The cache key.</param>
-        /// <param name="value">The value wich should be added.</param>
+        /// <param name="value">The value which should be added.</param>
         /// <returns>Either the added or the existing value.</returns>
         /// <exception cref="ArgumentException">
         /// If either <paramref name="key"/> or <paramref name="value"/> is null.
@@ -299,7 +299,7 @@ namespace CacheManager.Core
         /// </summary>
         /// <param name="key">The cache key.</param>
         /// <param name="region">The cache region.</param>
-        /// <param name="value">The value wich should be added.</param>
+        /// <param name="value">The value which should be added.</param>
         /// <returns>Either the added or the existing value.</returns>
         /// <exception cref="ArgumentException">
         /// If either <paramref name="key"/>, <paramref name="region"/> or <paramref name="value"/> is null.
@@ -311,7 +311,7 @@ namespace CacheManager.Core
         /// The <paramref name="valueFactory"/> will be evaluated only if the item does not exist.
         /// </summary>
         /// <param name="key">The cache key.</param>
-        /// <param name="valueFactory">The method which creates the value wich should be added.</param>
+        /// <param name="valueFactory">The method which creates the value which should be added.</param>
         /// <returns>Either the added or the existing value.</returns>
         /// <exception cref="ArgumentException">
         /// If either <paramref name="key"/> or <paramref name="valueFactory"/> is null.
@@ -324,7 +324,7 @@ namespace CacheManager.Core
         /// </summary>
         /// <param name="key">The cache key.</param>
         /// <param name="region">The cache region.</param>
-        /// <param name="valueFactory">The method which creates the value wich should be added.</param>
+        /// <param name="valueFactory">The method which creates the value which should be added.</param>
         /// <returns>Either the added or the existing value.</returns>
         /// <exception cref="ArgumentException">
         /// If either <paramref name="key"/> or <paramref name="valueFactory"/> is null.
@@ -409,7 +409,7 @@ namespace CacheManager.Core
         /// <param name="key">The key to update.</param>
         /// <param name="updateValue">The function to perform the update.</param>
         /// <param name="maxRetries">
-        /// The number of trys which should be performed in case of version conflicts.
+        /// The number of tries which should be performed in case of version conflicts.
         /// If the cache cannot perform an update within the number of <paramref name="maxRetries"/>,
         /// this method will return <c>Null</c>.
         /// </param>
@@ -442,7 +442,7 @@ namespace CacheManager.Core
         /// <param name="region">The region of the key to update.</param>
         /// <param name="updateValue">The function to perform the update.</param>
         /// <param name="maxRetries">
-        /// The number of trys which should be performed in case of version conflicts.
+        /// The number of tries which should be performed in case of version conflicts.
         /// If the cache cannot perform an update within the number of <paramref name="maxRetries"/>,
         /// this method will return <c>Null</c>.
         /// </param>
@@ -528,7 +528,7 @@ namespace CacheManager.Core
         /// <param name="key">The key to update.</param>
         /// <param name="updateValue">The function to perform the update.</param>
         /// <param name="maxRetries">
-        /// The number of trys which should be performed in case of version conflicts.
+        /// The number of tries which should be performed in case of version conflicts.
         /// If the cache cannot perform an update within the number of <paramref name="maxRetries"/>,
         /// this method will return <c>False</c>.
         /// </param>
@@ -562,7 +562,7 @@ namespace CacheManager.Core
         /// <param name="region">The region of the key to update.</param>
         /// <param name="updateValue">The function to perform the update.</param>
         /// <param name="maxRetries">
-        /// The number of trys which should be performed in case of version conflicts.
+        /// The number of tries which should be performed in case of version conflicts.
         /// If the cache cannot perform an update within the number of <paramref name="maxRetries"/>,
         /// this method will return <c>False</c>.
         /// </param>

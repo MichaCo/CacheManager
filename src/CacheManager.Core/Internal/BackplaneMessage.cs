@@ -99,23 +99,23 @@ namespace CacheManager.Core.Internal
 
             var tokens = message.Split(new[] { ":" }, StringSplitOptions.RemoveEmptyEntries);
 
-            var ident = tokens[0];
+            var indent = tokens[0];
             var action = (BackplaneAction)int.Parse(tokens[1], CultureInfo.InvariantCulture);
 
             if (action == Clear)
             {
-                return new BackplaneMessage(ident, Clear);
+                return new BackplaneMessage(indent, Clear);
             }
             else if (action == ClearRegion)
             {
-                return new BackplaneMessage(ident, ClearRegion) { Region = Decode(tokens[2]) };
+                return new BackplaneMessage(indent, ClearRegion) { Region = Decode(tokens[2]) };
             }
             else if (tokens.Length == 3)
             {
-                return new BackplaneMessage(ident, action, Decode(tokens[2]));
+                return new BackplaneMessage(indent, action, Decode(tokens[2]));
             }
 
-            return new BackplaneMessage(ident, action, Decode(tokens[2]), Decode(tokens[3]));
+            return new BackplaneMessage(indent, action, Decode(tokens[2]), Decode(tokens[3]));
         }
 
         /// <summary>

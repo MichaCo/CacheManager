@@ -876,7 +876,7 @@ namespace CacheManager.Tests
 
         [Fact]
         [ReplaceCulture]
-        public void CacheManager_Get_InvalideKey()
+        public void CacheManager_Get_InvalidKey()
         {
             // arrange
             using (var cache = CacheFactory.Build(settings =>
@@ -899,7 +899,7 @@ namespace CacheManager.Tests
 
         [Fact]
         [ReplaceCulture]
-        public void CacheManager_Get_InvalideRegion()
+        public void CacheManager_Get_InvalidRegion()
         {
             // arrange
             using (var cache = CacheFactory.Build(settings =>
@@ -918,7 +918,7 @@ namespace CacheManager.Tests
 
         [Fact]
         [ReplaceCulture]
-        public void CacheManager_GetItem_InvalideKey()
+        public void CacheManager_GetItem_InvalidKey()
         {
             // arrange
             using (var cache = CacheFactory.Build(settings =>
@@ -941,7 +941,7 @@ namespace CacheManager.Tests
 
         [Fact]
         [ReplaceCulture]
-        public void CacheManager_GetItem_InvalideRegion()
+        public void CacheManager_GetItem_InvalidRegion()
         {
             // arrange
             using (var cache = CacheFactory.Build(settings =>
@@ -960,7 +960,7 @@ namespace CacheManager.Tests
 
         [Fact]
         [ReplaceCulture]
-        public void CacheManager_GetT_InvalideKey()
+        public void CacheManager_GetT_InvalidKey()
         {
             // arrange
             using (var cache = CacheFactory.Build(settings =>
@@ -983,7 +983,7 @@ namespace CacheManager.Tests
 
         [Fact]
         [ReplaceCulture]
-        public void CacheManager_GetT_InvalideRegion()
+        public void CacheManager_GetT_InvalidRegion()
         {
             // arrange
             using (var cache = CacheFactory.Build(settings =>
@@ -1076,7 +1076,7 @@ namespace CacheManager.Tests
 
         [Fact]
         [ReplaceCulture]
-        public void CacheManager_Remove_InvalideKey()
+        public void CacheManager_Remove_InvalidKey()
         {
             // arrange
             using (var cache = CacheFactory.Build(settings =>
@@ -1099,7 +1099,7 @@ namespace CacheManager.Tests
 
         [Fact]
         [ReplaceCulture]
-        public void CacheManager_Remove_InvalideRegion()
+        public void CacheManager_Remove_InvalidRegion()
         {
             // arrange
             using (var cache = CacheFactory.Build(settings =>
@@ -1209,7 +1209,7 @@ namespace CacheManager.Tests
 
         [Fact]
         [ReplaceCulture]
-        public void CacheManager_Index_InvalideKey()
+        public void CacheManager_Index_InvalidKey()
         {
             // arrange
             using (var cache = CacheFactory.Build(settings =>
@@ -1565,7 +1565,7 @@ namespace CacheManager.Tests
 
         private static void PopulateCache<T>(ICacheManager<T> cache, IList<string> keys, IList<T> values, int mode)
         {
-            // let us make this safe per run so cache doesn't get cleared/populated from ultiple tests
+            // let us make this safe per run so cache doesn't get cleared/populated from multiple tests
             lock (runLock)
             {
                 foreach (var key in keys)

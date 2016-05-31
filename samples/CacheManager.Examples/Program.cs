@@ -241,7 +241,7 @@ var cache = new BaseCacheManager<string>(config);
             }
 
             cache.Add("test", "start");
-            Console.WriteLine("Inital value: {0}", cache["test"]);
+            Console.WriteLine("Initial value: {0}", cache["test"]);
 
             cache.AddOrUpdate("test", "adding again?", v => "updating and not adding");
             Console.WriteLine("After AddOrUpdate: {0}", cache["test"]);

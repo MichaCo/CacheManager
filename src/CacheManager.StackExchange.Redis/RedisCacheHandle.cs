@@ -117,7 +117,7 @@ return result";
                     count += (int)server.DatabaseSize(this.redisConfiguration.Database);
                 }
 
-                // aprox size, only size on the master..
+                // approx size, only size on the master..
                 return count;
             }
         }

@@ -50,7 +50,7 @@ namespace CacheManager.Tests
                 r1.Should().Be("something");
                 r2.Should().Be("something");
 
-                // each cachhandle stats should have one addCall increase
+                // each cache handle stats should have one addCall increase
                 addCalls.ShouldAllBeEquivalentTo(Enumerable.Repeat(1, cache.CacheHandles.Count()));
 
                 items.ShouldAllBeEquivalentTo(

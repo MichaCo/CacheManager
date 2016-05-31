@@ -257,7 +257,7 @@ namespace CacheManager.Core
         /// The function to perform the update in case the item does already exist.
         /// </param>
         /// <param name="maxRetries">
-        /// The number of trys which should be performed in case of version conflicts.
+        /// The number of tries which should be performed in case of version conflicts.
         /// If the cache cannot perform an update within the number of <paramref name="maxRetries"/>,
         /// this method will return <c>Null</c>.
         /// </param>
@@ -299,7 +299,7 @@ namespace CacheManager.Core
         /// The function to perform the update in case the item does already exist.
         /// </param>
         /// <param name="maxRetries">
-        /// The number of trys which should be performed in case of version conflicts.
+        /// The number of tries which should be performed in case of version conflicts.
         /// If the cache cannot perform an update within the number of <paramref name="maxRetries"/>,
         /// this method will return <c>Null</c>.
         /// </param>
@@ -362,7 +362,7 @@ namespace CacheManager.Core
         /// <param name="addItem">The item which should be added or updated.</param>
         /// <param name="updateValue">The function to perform the update, if the item does exist.</param>
         /// <param name="maxRetries">
-        /// The number of trys which should be performed in case of version conflicts.
+        /// The number of tries which should be performed in case of version conflicts.
         /// If the cache cannot perform an update within the number of <paramref name="maxRetries"/>,
         /// this method will return <c>Null</c>.
         /// </param>
@@ -622,7 +622,7 @@ namespace CacheManager.Core
         /// <param name="key">The key to update.</param>
         /// <param name="updateValue">The function to perform the update.</param>
         /// <param name="maxRetries">
-        /// The number of trys which should be performed in case of version conflicts.
+        /// The number of tries which should be performed in case of version conflicts.
         /// If the cache cannot perform an update within the number of <paramref name="maxRetries"/>,
         /// this method will return <c>False</c>.
         /// </param>
@@ -663,7 +663,7 @@ namespace CacheManager.Core
         /// <param name="region">The region of the key to update.</param>
         /// <param name="updateValue">The function to perform the update.</param>
         /// <param name="maxRetries">
-        /// The number of trys which should be performed in case of version conflicts.
+        /// The number of tries which should be performed in case of version conflicts.
         /// If the cache cannot perform an update within the number of <paramref name="maxRetries"/>,
         /// this method will return <c>False</c>.
         /// </param>
@@ -766,7 +766,7 @@ namespace CacheManager.Core
         /// <param name="key">The key to update.</param>
         /// <param name="updateValue">The function to perform the update.</param>
         /// <param name="maxRetries">
-        /// The number of trys which should be performed in case of version conflicts.
+        /// The number of tries which should be performed in case of version conflicts.
         /// If the cache cannot perform an update within the number of <paramref name="maxRetries"/>,
         /// this method will return <c>Null</c>.
         /// </param>
@@ -804,7 +804,7 @@ namespace CacheManager.Core
         /// <param name="region">The region of the key to update.</param>
         /// <param name="updateValue">The function to perform the update.</param>
         /// <param name="maxRetries">
-        /// The number of trys which should be performed in case of version conflicts.
+        /// The number of tries which should be performed in case of version conflicts.
         /// If the cache cannot perform an update within the number of <paramref name="maxRetries"/>,
         /// this method will return <c>Null</c>.
         /// </param>
@@ -1614,9 +1614,9 @@ namespace CacheManager.Core
                 }
                 else if (result.UpdateState == UpdateItemResultState.TooManyRetries)
                 {
-                    // only if the item does not exist in the current handle, we procceed the
+                    // only if the item does not exist in the current handle, we proceed the
                     // loop... otherwise, we had too many retries... this basically indicates an
-                    // invalide state of the cache: The item is there, but we couldn't update it and
+                    // invalid state of the cache: The item is there, but we couldn't update it and
                     // it most likely has a different version
                     this.Logger.LogWarn(
                         "Update: {0} {1}: on handle {2} failed with too many retries! Evicting from other handles...",
