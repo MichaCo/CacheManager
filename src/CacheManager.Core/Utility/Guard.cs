@@ -86,7 +86,7 @@ namespace CacheManager.Core.Utility
         }
 
         /// <summary>
-        /// Validates that <paramref name="value"/> is not null, empty or contains whitespaces only
+        /// Validates that <paramref name="value"/> is not null, empty or contains whitespace only
         /// and otherwise throws an exception.
         /// </summary>
         /// <param name="value">The parameter value to validate.</param>
@@ -112,7 +112,7 @@ namespace CacheManager.Core.Utility
         /// Validates that <paramref name="condition"/> is true and otherwise throws an exception.
         /// </summary>
         /// <param name="condition">The condition to validate.</param>
-        /// <param name="message">The message to throw if the configurtion is <c>false</c>.</param>
+        /// <param name="message">The message to throw if the configuration is <c>false</c>.</param>
         /// <param name="args"><c>string.Format</c> will be used to format <paramref name="message"/>
         /// and <c>args</c> to create the exception message.</param>
         /// <returns><c>true</c> if the <paramref name="condition"/> is valid.</returns>

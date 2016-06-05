@@ -5,7 +5,7 @@ namespace CacheManager.Core.Internal
     /// <summary>
     /// Defines the contract for serialization of the cache value and cache items.
     /// The cache item serialization should be separated in case the serialization
-    /// technology does not support immuatble objects; in that case <see cref="CacheItem{T}"/> might not
+    /// technology does not support immutable objects; in that case <see cref="CacheItem{T}"/> might not
     /// be serializable directly and the implementation has to wrap the cache item.
     /// </summary>
     public interface ICacheSerializer
