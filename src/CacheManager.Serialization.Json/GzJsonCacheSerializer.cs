@@ -58,9 +58,12 @@ namespace CacheManager.Serialization.Json
             Guard.NotNull(data, nameof(data));
 
             using (var bytesBuilder = new MemoryStream())
-            using (var gzWriter = new GZipStream(bytesBuilder, CompressionMode.Compress))
             {
-                gzWriter.Write(data, 0, data.Length);
+                using (var gzWriter = new GZipStream(bytesBuilder, CompressionMode.Compress))
+                {
+                    gzWriter.Write(data, 0, data.Length);
+                }
+
                 return bytesBuilder.ToArray();
             }
         }
