@@ -1,4 +1,4 @@
-﻿{
+{
   "version": "0.8.1-*",
   "description": "CacheManager is an open source caching abstraction layer for .NET written in C#. It supports various cache providers and implements many advanced features. The Core library contains a Newtonsoft.Json based serializer implementation which can be used instead of the default binary serializer.",
   "authors": [ "MichaConrad" ],
@@ -33,8 +33,12 @@
     "Newtonsoft.Json": "6.0.8"
   },
   "frameworks": {
-    "dnx451": { },
-    "dotnet5.2": { },
+    "dnx451": {},
+    "dotnet5.2": {
+      "dependencies": {
+        "System.IO.Compression": "4.0.0"
+      }
+    },
     "net40": { },
     "net45": { }
   }
