@@ -247,7 +247,7 @@ namespace CacheManager.Tests
             var cache = CacheFactory.Build(settings =>
             {
                 settings
-                    .WithJsonSerializer()
+                    .WithGzJsonSerializer()
                     .WithMaxRetries(100)
                     .WithRetryTimeout(1000)
                     .WithRedisConfiguration(redisKey, config =>
@@ -270,7 +270,7 @@ namespace CacheManager.Tests
             var cache = CacheFactory.Build<T>(settings =>
             {
                 settings
-                    .WithJsonSerializer()
+                    .WithGzJsonSerializer()
                     .WithMaxRetries(100)
                     .WithRetryTimeout(1000)
                     .WithRedisConfiguration(redisKey, config =>

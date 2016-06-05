@@ -16,7 +16,7 @@ namespace CacheManager.Tests
 #else
     [Trait("Framework", "NET45")]
 #endif
-    public class SerializerTests
+    public class SerializerTests : BaseCacheManagerTest
     {
 #if !DNXCORE50
         [Theory]
@@ -327,6 +327,29 @@ namespace CacheManager.Tests
             var result = serializer.Deserialize(data, items.GetType());
 
             result.ShouldBeEquivalentTo(items);
+        }
+
+        [Theory]
+        [MemberData("TestCacheManagers")]
+        public void JsonSerializer_FullAddGet<T>(T cache)
+            where T : ICacheManager<object>
+        {
+            using (cache)
+            {
+                // arrange
+                var key = Guid.NewGuid().ToString();
+                var pocco = SerializerPoccoSerializable.Create();
+
+                // act
+                Action actSet = () =>
+                {
+                    cache.Add(key, pocco);
+                };
+
+                // assert
+                actSet.ShouldNotThrow();
+                cache.Get<SerializerPoccoSerializable>(key).ShouldBeEquivalentTo(pocco);
+            }
         }
     }
 

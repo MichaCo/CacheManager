@@ -4,14 +4,14 @@
       <Word>Redis</Word>
       <Word>Lua</Word>
       <Word>nuget</Word>
+      <Word>gz</Word>
     </Recognized>
     <DiscreteExceptions>
-      <Term></Term>
     </DiscreteExceptions>
   </Words>
   <Acronyms>
     <CasingExceptions>
-      <Acronym></Acronym>
+      <Acronym>Gz</Acronym>
     </CasingExceptions>
   </Acronyms>
 </Dictionary>

@@ -86,32 +86,29 @@ namespace CacheManager.Redis
                 {
                     if (!connections.TryGetValue(this.connectionString, out connection))
                     {
-                        if (!connections.TryGetValue(this.connectionString, out connection))
+                        this.logger.LogInfo("Trying to connect with the following configuration: '{0}'", this.connectionString);
+                        connection = StackRedis.ConnectionMultiplexer.Connect(this.connectionString, new LogWriter(this.logger));
+
+                        if (!connection.IsConnected)
                         {
-                            this.logger.LogInfo("Trying to connect with the following configuration: '{0}'", this.connectionString);
-                            connection = StackRedis.ConnectionMultiplexer.Connect(this.connectionString, new LogWriter(this.logger));
-
-                            if (!connection.IsConnected)
-                            {
-                                connection.Dispose();
-                                throw new InvalidOperationException("Connection failed.");
-                            }
-
-                            connection.ConnectionRestored += (sender, args) =>
-                            {
-                                this.logger.LogInfo(args.Exception, "Connection restored, type: '{0}', failure: '{1}'", args.ConnectionType, args.FailureType);
-                            };
-
-                            var endpoints = connection.GetEndPoints();
-                            if (!endpoints.Select(p => connection.GetServer(p))
-                                .Any(p => !p.IsSlave || p.AllowSlaveWrites))
-                            {
-                                throw new InvalidOperationException("No writeable endpoint found.");
-                            }
-
-                            connection.PreserveAsyncOrder = false;
-                            connections.Add(this.connectionString, connection);
+                            connection.Dispose();
+                            throw new InvalidOperationException("Connection failed.");
                         }
+
+                        connection.ConnectionRestored += (sender, args) =>
+                        {
+                            this.logger.LogInfo(args.Exception, "Connection restored, type: '{0}', failure: '{1}'", args.ConnectionType, args.FailureType);
+                        };
+
+                        var endpoints = connection.GetEndPoints();
+                        if (!endpoints.Select(p => connection.GetServer(p))
+                            .Any(p => !p.IsSlave || p.AllowSlaveWrites))
+                        {
+                            throw new InvalidOperationException("No writeable endpoint found.");
+                        }
+
+                        connection.PreserveAsyncOrder = false;
+                        connections.Add(this.connectionString, connection);
                     }
                 }
             }

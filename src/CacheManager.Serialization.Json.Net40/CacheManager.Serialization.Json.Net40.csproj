@@ -56,6 +56,9 @@
     <Compile Include="..\..\common\GlobalAssemblyInfo.cs">
       <Link>Properties\GlobalAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="..\CacheManager.Serialization.Json\GzJsonCacheSerializer.cs">
+      <Link>GzJsonCacheSerializer.cs</Link>
+    </Compile>
     <Compile Include="..\CacheManager.Serialization.Json\JsonCacheItem.cs">
       <Link>JsonCacheItem.cs</Link>
     </Compile>
@@ -75,6 +78,11 @@
       <Project>{997bfd2d-1fa6-43a9-ab39-3040ed69397f}</Project>
       <Name>CacheManager.Core.Net40</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <CodeAnalysisDictionary Include="..\..\common\CustomDictionary.xml">
+      <Link>CustomDictionary.xml</Link>
+    </CodeAnalysisDictionary>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

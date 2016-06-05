@@ -1,7 +1,9 @@
 ﻿using System;
-using Newtonsoft.Json;
-using System.IO.Compression;
 using System.IO;
+using System.IO.Compression;
+using CacheManager.Core.Internal;
+using CacheManager.Core.Utility;
+using Newtonsoft.Json;
 
 namespace CacheManager.Serialization.Json
 {
@@ -33,7 +35,7 @@ namespace CacheManager.Serialization.Json
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0", Justification = "Is checked by GetString")]
         public override object Deserialize(byte[] data, Type target)
         {
-            var compressedData = Decompression(data);
+            var compressedData = this.Decompression(data);
 
             return base.Deserialize(compressedData, target);
         }
@@ -43,7 +45,7 @@ namespace CacheManager.Serialization.Json
         {
             var data = base.Serialize<T>(value);
 
-            return Compression(data);
+            return this.Compression(data);
         }
 
         /// <summary>
@@ -53,13 +55,12 @@ namespace CacheManager.Serialization.Json
         /// <returns>The compressed data.</returns>
         protected virtual byte[] Compression(byte[] data)
         {
-            using (var bytesBuilder = new MemoryStream())
-            {
-                using (var gzWriter = new GZipStream(bytesBuilder, CompressionMode.Compress))
-                {
-                    gzWriter.Write(data, 0, data.Length);
-                }
+            Guard.NotNull(data, nameof(data));
 
+            using (var bytesBuilder = new MemoryStream())
+            using (var gzWriter = new GZipStream(bytesBuilder, CompressionMode.Compress))
+            {
+                gzWriter.Write(data, 0, data.Length);
                 return bytesBuilder.ToArray();
             }
         }
@@ -71,13 +72,13 @@ namespace CacheManager.Serialization.Json
         /// <returns>The uncompressed data.</returns>
         protected virtual byte[] Decompression(byte[] compressedData)
         {
+            Guard.NotNull(compressedData, nameof(compressedData));
+
+            using (var inputStream = new MemoryStream(compressedData))
+            using (var gzReader = new GZipStream(inputStream, CompressionMode.Decompress))
             using (var bytesBuilder = new MemoryStream())
             {
-                using (var gzReader = new GZipStream(new MemoryStream(compressedData), CompressionMode.Decompress))
-                {
-                    gzReader.CopyTo(bytesBuilder);
-                }
-
+                gzReader.CopyTo(bytesBuilder);
                 return bytesBuilder.ToArray();
             }
         }
