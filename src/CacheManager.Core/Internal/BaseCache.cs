@@ -609,10 +609,10 @@ namespace CacheManager.Core.Internal
 
 #if NET40
             var info = typeof(TOut);
-            if (info.IsClass)
+            if (info.IsClass || info.IsInterface)
 #else
             var info = typeof(TOut).GetTypeInfo();
-            if (info.IsClass)
+            if (info.IsClass || info.IsInterface)
 #endif
             {
                 return (TOut)value;
