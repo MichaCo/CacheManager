@@ -84,9 +84,6 @@ var cache = new BaseCacheManager<string>(config);
                 c.WithMicrosoftLogging(log =>
                 {
                     log.AddConsole(LogLevel.Debug);
-
-                    // TODO: remove after asp.net core RC2 upgrade.
-                    log.MinimumLevel = LogLevel.Debug;
                 })
                 .WithDictionaryHandle());
 

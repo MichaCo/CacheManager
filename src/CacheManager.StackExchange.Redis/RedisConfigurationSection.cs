@@ -1,4 +1,4 @@
-﻿#if !DOTNETCORE
+﻿#if !NETSTANDARD
 using System.Collections.Generic;
 using System.Configuration;
 

@@ -2,29 +2,17 @@
   "version": "1.0.0-*",
   "description": "CacheManager.MSConfiguration.TypeLoad.Tests Class Library",
   "authors": [ "Micha" ],
-  "tags": [ "" ],
-  "projectUrl": "",
-  "licenseUrl": "",
-
   "dependencies": {
-    "CacheManager.Microsoft.Extensions.Configuration": "",
-    "FluentAssertions": "4.1.0",
+    "CacheManager.Microsoft.Extensions.Configuration": { "target": "project" },
+    "FluentAssertions": "4.6.3",
     "xunit": "2.1.0",
-    "xunit.runner.dnx": "2.1.0-rc1-build204"
+    "dotnet-test-xunit": "1.0.0-rc2-build10025"
   },
+  "testRunner": "xunit",
   "frameworks": {
-    "dnx451": {
+    "net452": {
       "dependencies": {
-      }
-    },
-    "dnxcore50": {
-      "dependencies": {
-        "System.Runtime": "4.0.21-beta-23516",
-        "System.IO": "4.0.11-beta-23516"
       }
     }
-  },
-  "commands": {
-    "test": "xunit.runner.dnx"
   }
 }

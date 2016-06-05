@@ -1,42 +1,49 @@
 ﻿{
-  "version": "0.8.1-*",
-  "description": "CacheManager is an open source caching abstraction layer for .NET written in C#. The ASP.NET Core logging provides a bridge to the Microsoft.Extensions.Logging framework.",
+  "version": "0.9.0-*",
+  "description": "CacheManager extension package to work with Microsoft.Extensions.Logging as logging provider. CacheManager is an open source caching abstraction layer for .NET written in C#. The ASP.NET Core logging provides a bridge to the Microsoft.Extensions.Logging framework.",
+  "packOptions": {
+    "licenseUrl": "https://github.com/MichaCo/CacheManager/blob/master/LICENSE",
+    "projectUrl": "http://www.cachemanager.net",
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/MichaCo/CacheManager"
+    },
+    "summary": "CacheManager extension package to work with Microsoft.Extensions.Logging as logging provider.",
+    "tags": [ "Caching", "Cache", "CacheManager", "Distributed Cache", "StackExchange Redis", "Azure AppFabric", "Memcached" ]
+  },
   "authors": [ "MichaConrad" ],
-  "tags": [ "Caching", "Cache", "CacheManager", "Distributed Cache", "StackExchange Redis", "Azure AppFabric", "Memcached", "Logging", "ASP.NET" ],
-  "copyright": "Copyright © 2015 MichaConrad",
-  "projectUrl": "http://www.cachemanager.net",
-  "licenseUrl": "https://github.com/MichaCo/CacheManager/blob/master/LICENSE",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/MichaCo/CacheManager"
-  },
-  "compilationOptions": {
-    "warningsAsErrors": true,
+  "buildOptions": {
+    "allowUnsafe": false,
     "languageVersion": "csharp6",
-    "allowUnsafe": false
+    "warningsAsErrors": true
   },
+  "copyright": "Copyright (c) 2015 MichaConrad",
   "configurations": {
     "Debug": {
-      "compilationOptions": {
+      "buildOptions": {
         "define": [ "DEBUG" ]
       }
     },
     "Release": {
-      "compilationOptions": {
+      "buildOptions": {
         "define": [ "RELEASE" ],
         "optimize": true
       }
     }
   },
   "dependencies": {
-    "CacheManager.Core": "",
-    "Microsoft.Extensions.Logging": "1.0.0-rc1-*"
+    "CacheManager.Core": { "target": "project" },
+    "Microsoft.Extensions.Logging": "1.0.0-rc2-final"
   },
   "frameworks": {
-    "net451": { },
-    "dotnet5.4": {
+    "net45": {
       "dependencies": {
-        "System.Runtime": "4.0.21-beta-23516"
+        "System.Runtime": "4.0.0"
+      }
+    },
+    "netstandard1.1": {
+      "dependencies": {
+        "System.Runtime": "4.1.0-rc2-24027"
       }
     }
   }

@@ -48,6 +48,7 @@ namespace CacheManager.Tests
                 .WithMessage("*Parameter name: configName*");
         }
 
+#if !NO_APP_CONFIG
         [Fact]
         [ReplaceCulture]
         [Trait("category", "NotOnMono")]
@@ -91,6 +92,7 @@ namespace CacheManager.Tests
             act.ShouldThrow<ArgumentNullException>()
                 .WithMessage("*cacheValueType*");
         }
+#endif
 
         [Fact]
         [ReplaceCulture]
@@ -458,6 +460,7 @@ namespace CacheManager.Tests
             act.CacheHandles.ElementAt(2).Configuration.ExpirationTimeout.Should().Be(new TimeSpan(0, 0, 231));
         }
 
+#if !NO_APP_CONFIG
         [Fact]
         [ReplaceCulture]
         [Trait("category", "NotOnMono")]
@@ -480,18 +483,6 @@ namespace CacheManager.Tests
             cache.Should().NotBeNull();
             cache.CacheHandles.Count().Should().Be(3);
             cache.Name.Should().Be("c1");
-        }
-
-        [Fact]
-        [ReplaceCulture]
-        public void CacheFactory_Build_NonGenericWithType()
-        {
-            var cache = CacheFactory.Build(
-                typeof(string),
-                settings => settings.WithSystemRuntimeCacheHandle()) as ICacheManager<string>;
-
-            cache.Should().NotBeNull();
-            cache.CacheHandles.Count().Should().Be(1);
         }
 
         [Fact]
@@ -525,6 +516,19 @@ namespace CacheManager.Tests
             var cache = CacheFactory.FromConfiguration(
                 typeof(string),
                 ConfigurationBuilder.BuildConfiguration(cfg => cfg.WithSystemRuntimeCacheHandle())) as ICacheManager<string>;
+
+            cache.Should().NotBeNull();
+            cache.CacheHandles.Count().Should().Be(1);
+        }
+#endif
+
+        [Fact]
+        [ReplaceCulture]
+        public void CacheFactory_Build_NonGenericWithType()
+        {
+            var cache = CacheFactory.Build(
+                typeof(string),
+                settings => settings.WithSystemRuntimeCacheHandle()) as ICacheManager<string>;
 
             cache.Should().NotBeNull();
             cache.CacheHandles.Count().Should().Be(1);

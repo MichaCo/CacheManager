@@ -4,7 +4,7 @@ using System.Globalization;
 using System.Linq;
 using CacheManager.Core.Internal;
 
-#if !PORTABLE && !DOTNET5_2
+#if !NETSTANDARD
 using System.Configuration;
 using System.IO;
 using System.Text.RegularExpressions;
@@ -121,7 +121,7 @@ namespace CacheManager.Core
             return part.Configuration;
         }
 
-#if !PORTABLE && !DOTNET5_2
+#if !NETSTANDARD
 
         /// <summary>
         /// Loads a configuration from web.config or app.config.

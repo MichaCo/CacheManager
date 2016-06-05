@@ -173,8 +173,9 @@ namespace CacheManager.Core
                                 $"Either connection string or endpoints must be configured in '{redisConfig.Path}' for a redis connection.");
                         }
 
-                        var redis = redisConfig.Get(redisConfigurationType);
-                        addRedisConfiguration.Invoke(null, new object[] { redis });
+                        var configInstance = Activator.CreateInstance(redisConfigurationType);
+                        redisConfig.Bind(configInstance);
+                        addRedisConfiguration.Invoke(null, new object[] { configInstance });
                     }
                 }
                 catch (FileNotFoundException ex)
@@ -206,7 +207,8 @@ namespace CacheManager.Core
 
         private static CacheManagerConfiguration GetFromConfiguration(IConfigurationSection configuration)
         {
-            var managerConfiguration = configuration.Get<CacheManagerConfiguration>();
+            var managerConfiguration = new CacheManagerConfiguration();
+            configuration.Bind(managerConfiguration);
 
             var handlesConfiguration = configuration.GetSection(HandlesSection);
 
@@ -236,7 +238,8 @@ namespace CacheManager.Core
             var key = handleConfiguration[ConfigurationKey] ?? handleConfiguration[ConfigurationName];    // name fallback for key
             var name = handleConfiguration[ConfigurationName];
 
-            var cacheHandleConfiguration = handleConfiguration.Get<CacheHandleConfiguration>();
+            var cacheHandleConfiguration = new CacheHandleConfiguration();
+            handleConfiguration.Bind(cacheHandleConfiguration);
             cacheHandleConfiguration.Key = key;
             cacheHandleConfiguration.Name = name ?? cacheHandleConfiguration.Name;
 
@@ -441,7 +444,7 @@ namespace CacheManager.Core
             switch (knownTypeName.ToLowerInvariant())
             {
                 case "binary":
-#if DOTNET5_4 || DNXCORE50
+#if NETSTANDARD
                     throw new InvalidOperationException("BinaryCacheSerializer is not available on this platform");
 #else
                     return typeof(BinaryCacheSerializer);

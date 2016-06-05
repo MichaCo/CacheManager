@@ -2,19 +2,19 @@
   "version": "1.0.0-*",
   "description": "CacheManager.Backplane.App Console Application",
   "authors": [ "Micha" ],
-  "tags": [ "" ],
-  "projectUrl": "",
-  "licenseUrl": "",
-
   "compilationOptions": {
-    "emitEntryPoint": true
+    "emitEntryPoint": true,
+    "copyToOutput": [
+      "cache.json"
+    ]
   },
 
   "dependencies": {
-    "CacheManager.StackExchange.Redis": "",
-    "CacheManager.Microsoft.Extensions.Logging": "",
-    "CacheManager.Microsoft.Extensions.Configuration": "",
-    "Microsoft.Extensions.Configuration.Json": "1.0.0-rc1-final"
+    "CacheManager.StackExchange.Redis": { "target": "project" },
+    "CacheManager.Serialization.Json": { "target": "project" },
+    "CacheManager.Microsoft.Extensions.Logging": { "target": "project" },
+    "CacheManager.Microsoft.Extensions.Configuration": { "target": "project" },
+    "Microsoft.Extensions.Configuration.Json": "1.0.0-rc2-final"
   },
 
   "commands": {
@@ -22,6 +22,6 @@
   },
 
   "frameworks": {
-    "dnx451": { }
+    "net452": { }
   }
 }

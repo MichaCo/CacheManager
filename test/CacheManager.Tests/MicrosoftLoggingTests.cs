@@ -16,11 +16,8 @@ namespace CacheManager.Tests
         public void AspNetCoreLogging_MinLogLevel_Trace()
         {
             var external = new LoggerFactory();
-
-            // TODO: remove in RC2
-            external.MinimumLevel = LogLevel.Debug;
-            // TODO: change Debug to Trace in RC2 (yes, in RC1 Verbose is higher than debug, and Verbose got renamed to Trace, later, too!)
-            external.AddConsole(LogLevel.Debug);
+            
+            external.AddConsole(LogLevel.Trace);
 
             var loggerFactory = new MicrosoftLoggerFactoryAdapter(external);
             var logger = loggerFactory.CreateLogger("cat");
@@ -38,11 +35,8 @@ namespace CacheManager.Tests
         public void AspNetCoreLogging_MinLogLevel_Debug()
         {
             var external = new LoggerFactory();
-
-            // TODO: remove in RC2
-            external.MinimumLevel = LogLevel.Debug;
-            // TODO: change Debug to Trace in RC2 (yes, in RC1 Verbose is higher than debug, and Verbose got renamed to Trace, later, too!)
-            external.AddConsole(LogLevel.Verbose);
+            
+            external.AddConsole(LogLevel.Debug);
 
             var loggerFactory = new MicrosoftLoggerFactoryAdapter(external);
             var logger = loggerFactory.CreateLogger("cat");

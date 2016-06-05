@@ -1,41 +1,46 @@
 {
-  "version": "0.8.1-*",
-  "description": "CacheManager is an open source caching abstraction layer for .NET written in C#. It supports various cache providers and implements many advanced features. This package contains the specific cache handle for Redis.",
+  "version": "0.9.0-*",
+  "description": "CacheManager extension package which adds support for Redis as a distributed cache layer. CacheManager is an open source caching abstraction layer for .NET written in C#. It supports various cache providers and implements many advanced features.",
+  "packOptions": {
+    "licenseUrl": "https://github.com/MichaCo/CacheManager/blob/master/LICENSE",
+    "projectUrl": "http://www.cachemanager.net",
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/MichaCo/CacheManager"
+    },
+    "summary": "CacheManager extension package which adds support for Redis as a distributed cache layer.",
+    "tags": [ "Caching", "Cache", "CacheManager", "Distributed Cache", "StackExchange Redis", "Azure AppFabric", "Memcached" ]
+  },
   "authors": [ "MichaConrad" ],
-  "tags": [ "Caching", "Cache", "CacheManager", "Distributed Cache", "StackExchange Redis", "Azure AppFabric", "Memcached" ],
-  "copyright": "Copyright © 2015 MichaConrad",
-  "projectUrl": "http://www.cachemanager.net",
-  "licenseUrl": "https://github.com/MichaCo/CacheManager/blob/master/LICENSE",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/MichaCo/CacheManager"
-  },
-  "compilationOptions": {
-    "warningsAsErrors": true,
+  "buildOptions": {
+    "allowUnsafe": false,
     "languageVersion": "csharp6",
-    "allowUnsafe": false
+    "warningsAsErrors": true
   },
+  "copyright": "Copyright (c) 2015 MichaConrad",
   "configurations": {
     "Debug": {
-      "compilationOptions": {
+      "buildOptions": {
         "define": [ "DEBUG" ]
       }
     },
     "Release": {
-      "compilationOptions": {
+      "buildOptions": {
         "define": [ "RELEASE" ],
         "optimize": true
       }
     }
   },
   "dependencies": {
-    "CacheManager.Core": "",
-    "StackExchange.Redis": "1.1.572-alpha"
+    "CacheManager.Core": { "target": "project" }
   },
   "frameworks": {
     "net40": {
       "frameworkAssemblies": {
         "System.Configuration": ""
+      },
+      "dependencies": {
+        "StackExchange.Redis": "1.1.603"
       }
     },
     "net45": {
@@ -43,10 +48,14 @@
         "System.Configuration": ""
       },
       "dependencies": {
+        "StackExchange.Redis": "1.1.603"
       }
     },
-    "dotnet5.5": {
-      "compilationOptions": { "define": [ "DOTNETCORE" ] }
+    "netstandard1.5": {
+      "buildOptions": { "define": [ "NETSTANDARD" ] },
+      "dependencies": {
+        "StackExchange.Redis": "1.1.604-alpha"
+      }
     }
   }
 }

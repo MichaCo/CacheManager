@@ -28,12 +28,14 @@ namespace CacheManager.Tests
         }
 
 #if !DNXCORE50
+#if !NO_APP_CONFIG
         [Fact]
         [Trait("category", "NotOnMono")]
         public void Redis_Configurations_LoadStandard()
         {
             RedisConfigurations.LoadConfiguration();
         }
+#endif
 
         [Fact]
         [Trait("category", "NotOnMono")]
@@ -508,6 +510,7 @@ namespace CacheManager.Tests
             cache.CacheHandles.Any(p => p.Configuration.IsBackplaneSource).Should().BeTrue();
         }
 
+#if !NO_APP_CONFIG
         [Fact]
         [Trait("category", "Redis")]
         public void Redis_LoadWithRedisBackplane_FromAppConfig()
@@ -550,6 +553,7 @@ namespace CacheManager.Tests
             handle.Should().NotBeNull();
             count.ShouldNotThrow();
         }
+#endif
 #endif
 
         [Fact]

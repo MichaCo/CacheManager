@@ -1,41 +1,47 @@
 {
-  "version": "0.8.1-*",
+  "version": "0.9.0-*",
   "description": "CacheManager is an open source caching abstraction layer for .NET written in C#. It supports various cache providers and implements many advanced features.",
   "authors": [ "MichaConrad" ],
-  "tags": [ "Caching", "Cache", "CacheManager", "Distributed Cache", "StackExchange Redis", "Azure AppFabric", "Memcached" ],
-  "projectUrl": "http://www.cachemanager.net",
-  "licenseUrl": "https://github.com/MichaCo/CacheManager/blob/master/LICENSE",
   "dependencies": {
-    "CacheManager.Microsoft.Extensions.Logging": "",
-    "CacheManager.Microsoft.Extensions.Configuration": "",
-    "CacheManager.Core": "",
-    "CacheManager.Serialization.Json": "",
-    "Microsoft.Extensions.Logging.Console": "1.0.0-rc1-*",
-    "Microsoft.Extensions.Logging.Debug": "1.0.0-rc1-*",
-    "Microsoft.Extensions.Configuration.Json": "1.0.0-rc1-*",
-    "Microsoft.Extensions.Configuration.Binder": "1.0.0-rc1-*",
-    "Newtonsoft.Json": "6.0.8"
+    "CacheManager.Microsoft.Extensions.Logging": { "target": "project" },
+    "CacheManager.Microsoft.Extensions.Configuration": { "target": "project" },
+    "CacheManager.Core": { "target": "project" },
+    "CacheManager.Serialization.Json": { "target": "project" },
+    "CacheManager.StackExchange.Redis": { "target": "project" },
+    "Microsoft.Extensions.Logging.Console": "1.0.0-rc2-final",
+    "Microsoft.Extensions.Logging.Debug": "1.0.0-rc2-final",
+    "Microsoft.Extensions.Configuration.Json": "1.0.0-rc2-final",
+    "Microsoft.Extensions.Configuration.Binder": "1.0.0-rc2-final"
+  },
+  "buildOptions": {
+    "emitEntryPoint": true,
+    "copyToOutput": [
+      "cache.json"
+    ]
   },
   "commands": {
     "run": "CacheManager.Config.Tests"
   },
-  "exclude": "Properties/AssemblyInfo.cs",
+  "runtimes": {
+    "win10-x64": { }
+  },
   "frameworks": {
-    "dnx451": {
+    "net452": {
       "frameworkAssemblies": {
         "System.Configuration": ""
       },
       "dependencies": {
-        "CacheManager.SystemRuntimeCaching": "",
-        "CacheManager.StackExchange.Redis": ""
+        "CacheManager.SystemRuntimeCaching": { "target": "project" }
       }
     },
-    "dnxcore50": {
+    "netcoreapp1.0": {
+      "buildOptions": { "define": [ "NETCORE" ] },
       "dependencies": {
-        "System.Threading.Thread": "4.0.0-beta-23516",
-        "System.Threading.Tasks.Parallel": "4.0.1-beta-23516",
-        "System.Console": "4.0.0-beta-23516",
-        "System.Runtime": "4.0.21-beta-23516"
+        "NETStandard.Library": "1.5.0-rc2-24027",
+        "System.Threading.Thread": "4.0.0-rc2-24027",
+        "System.Threading.Tasks.Parallel": "4.0.1-rc2-24027",
+        "System.Console": "4.0.0-rc2-24027",
+        "System.Runtime": "4.1.0-rc2-24027"
       }
     }
   }

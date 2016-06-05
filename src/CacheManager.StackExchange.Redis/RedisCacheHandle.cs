@@ -122,6 +122,7 @@ return result";
             }
         }
 
+#pragma warning disable CS3003 // Type is not CLS-compliant
         /// <summary>
         /// Gets the servers.
         /// </summary>
@@ -133,6 +134,7 @@ return result";
         /// </summary>
         /// <value>The server features.</value>
         public StackRedis.RedisFeatures Features => this.connection.Features;
+#pragma warning restore CS3003 // Type is not CLS-compliant
 
         /// <inheritdoc />
         protected override ILogger Logger { get; }

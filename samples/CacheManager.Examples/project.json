@@ -2,21 +2,17 @@
   "version": "1.0.0-*",
   "description": "CacheManager.Examples Console Application",
   "authors": [ "MICHA" ],
-  "tags": [ "" ],
-  "projectUrl": "",
-  "licenseUrl": "",
-
   "compilationOptions": {
     "emitEntryPoint": true
   },
 
   "dependencies": {
-    "CacheManager.Core": "",
-    "CacheManager.Microsoft.Extensions.Configuration": "",
-    "CacheManager.Microsoft.Extensions.Logging": "",
-    "CacheManager.Serialization.Json": "",
-    "Microsoft.Extensions.Configuration.Json": "1.0.0-rc1-*",
-    "Microsoft.Extensions.Logging.Console": "1.0.0-rc1-*",
+    "CacheManager.Core": { "target": "project" },
+    "CacheManager.Microsoft.Extensions.Configuration": { "target": "project" },
+    "CacheManager.Microsoft.Extensions.Logging": { "target": "project" },
+    "CacheManager.Serialization.Json": { "target": "project" },
+    "Microsoft.Extensions.Configuration.Json": "1.0.0-rc2-final",
+    "Microsoft.Extensions.Logging.Console": "1.0.0-rc2-final",
     "Unity": "4.0.2"
   },
 
@@ -27,14 +23,8 @@
   "frameworks": {
     "dnx451": {
       "dependencies": {
-        "CacheManager.StackExchange.Redis": "",
-        "CacheManager.SystemRuntimeCaching": ""
-      }
-    },
-    "dnxcore50": {
-      "dependencies": {
-        "System.Reflection": "4.0.10",
-        "System.Reflection.TypeExtensions": "4.0.0"
+        "CacheManager.StackExchange.Redis": { "target": "project" },
+        "CacheManager.SystemRuntimeCaching": { "target": "project" }
       }
     }
   }

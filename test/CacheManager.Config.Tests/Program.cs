@@ -9,44 +9,33 @@ namespace CacheManager.Config.Tests
 {
     internal class Program
     {
-        public Program()
+        public static void Main(string[] args)
         {
-            // Set up configuration sources.
-            var builder = new Microsoft.Extensions.Configuration.ConfigurationBuilder()
+            var configBuilder = new Microsoft.Extensions.Configuration.ConfigurationBuilder()
                 .AddJsonFile("cache.json");
 
-            this.Configuration = builder.Build();
-        }
+            var configuration = configBuilder.Build();
 
-        public IConfiguration Configuration { get; }
-
-        public void Main(string[] args)
-        {
             int iterations = int.MaxValue;
             try
             {
                 var builder = new Core.ConfigurationBuilder("myCache");
                 builder.WithMicrosoftLogging(f =>
                 {
-                    // TODO: remove after logging upgrade to RC2
-                    f.MinimumLevel = LogLevel.Debug;
-
                     f.AddConsole(LogLevel.Error);
-
-                    // TODO: change to Debug after logging upgrade to RC2
-                    f.AddDebug(LogLevel.Information);
+                    f.AddDebug(LogLevel.Debug);
                 });
 
                 builder.WithUpdateMode(CacheUpdateMode.Up);
                 builder.WithRetryTimeout(1000);
                 builder.WithMaxRetries(10);
 
-#if DNXCORE50
-                builder.WithDictionaryHandle("dic")
-                    .DisableStatistics();
+//#if NETCORE
+//                builder.WithDictionaryHandle("dic")
+//                    .DisableStatistics();
 
-                //Console.WriteLine("Using Dictionary cache handle");
-#else
+//                //Console.WriteLine("Using Dictionary cache handle");
+//#else
                 builder.WithDictionaryHandle()
                     .DisableStatistics();
 
@@ -70,7 +59,7 @@ namespace CacheManager.Config.Tests
                 builder.WithJsonSerializer();
 
                 Console.WriteLine("Using Redis cache handle");
-#endif
+//#endif
                 var cacheA = new BaseCacheManager<object>(builder.Build());
                 cacheA.Clear();
 

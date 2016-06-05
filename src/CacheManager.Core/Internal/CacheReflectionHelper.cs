@@ -35,7 +35,7 @@ namespace CacheManager.Core.Internal
             NotNull(configuration, nameof(configuration));
             NotNull(loggerFactory, nameof(loggerFactory));
 
-#if !DOTNET5_2
+#if !NETSTANDARD
             if (configuration.SerializerType == null)
             {
                 return new BinaryCacheSerializer();
@@ -278,7 +278,7 @@ namespace CacheManager.Core.Internal
                         handle.ToString()));
             }
 
-#if PORTABLE || DOTNET5_2
+#if NETSTANDARD
             var handleInfo = handle.GetTypeInfo();
             if (handleInfo.IsGenericType && !handleInfo.IsGenericTypeDefinition)
 #else
@@ -295,7 +295,7 @@ namespace CacheManager.Core.Internal
 
         private static void CheckImplements<TValid>(Type type)
         {
-#if DOTNET5_2
+#if NETSTANDARD
             var typeInfo = type.GetTypeInfo();
             var interfaces = typeInfo.ImplementedInterfaces;
 #else
@@ -310,7 +310,7 @@ namespace CacheManager.Core.Internal
 
         private static void CheckExtends<TValid>(Type type)
         {
-#if DOTNET5_2
+#if NETSTANDARD
             var baseType = type.GetTypeInfo().BaseType;
 #else
             var baseType = type.BaseType;
@@ -322,7 +322,7 @@ namespace CacheManager.Core.Internal
                 {
                     return;
                 }
-#if DOTNET5_2
+#if NETSTANDARD
                 baseType = type.GetTypeInfo().BaseType;
 #else
                 baseType = type.BaseType;

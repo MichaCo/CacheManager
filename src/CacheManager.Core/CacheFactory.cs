@@ -251,7 +251,7 @@ namespace CacheManager.Core
         public static object Build(Type cacheValueType, Action<ConfigurationBuilderCachePart> settings)
             => Build(cacheValueType, Guid.NewGuid().ToString("N"), settings);
 
-#if !PORTABLE && !DOTNET5_2
+#if !NETSTANDARD
 
         /// <summary>
         /// <para>Instantiates a cache manager from app.config or web.config.</para>

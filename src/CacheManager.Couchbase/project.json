@@ -1,45 +1,43 @@
 ﻿{
-  "version": "0.8.1-*",
-  "description": "CacheManager is an open source caching abstraction layer for .NET written in C#. It supports various cache providers and implements many advanced features.",
+  "version": "0.9.0-*",
+  "description": "CacheManager extension package to work with Couchbase as a distributed cache. CacheManager is an open source caching abstraction layer for .NET written in C#. It supports various cache providers and implements many advanced features.",
+  "packOptions": {
+    "licenseUrl": "https://github.com/MichaCo/CacheManager/blob/master/LICENSE",
+    "projectUrl": "http://www.cachemanager.net",
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/MichaCo/CacheManager"
+    },
+    "summary": "CacheManager extension package to work with Couchbase as a distributed cache.",
+    "tags": [ "Caching", "Cache", "CacheManager", "Distributed Cache", "StackExchange Redis", "Azure AppFabric", "Memcached" ]
+  },
   "authors": [ "MichaConrad" ],
-  "tags": [ "Caching", "Cache", "CacheManager", "Distributed Cache", "StackExchange Redis", "Azure AppFabric", "Memcached" ],
-  "copyright": "Copyright © 2015 MichaConrad",
-  "projectUrl": "http://www.cachemanager.net",
-  "licenseUrl": "https://github.com/MichaCo/CacheManager/blob/master/LICENSE",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/MichaCo/CacheManager"
-  },
-  "compilationOptions": {
-    "warningsAsErrors": true,
+  "buildOptions": {
+    "allowUnsafe": false,
     "languageVersion": "csharp6",
-    "allowUnsafe": false
+    "warningsAsErrors": true
   },
+  "copyright": "Copyright (c) 2015 MichaConrad",
   "configurations": {
     "Debug": {
-      "compilationOptions": {
+      "buildOptions": {
         "define": [ "DEBUG" ]
       }
     },
     "Release": {
-      "compilationOptions": {
+      "buildOptions": {
         "define": [ "RELEASE" ],
         "optimize": true
       }
     }
   },
   "dependencies": {
-    "CacheManager.Core": "",
+    "CacheManager.Core": { "target": "project" },
     "CouchbaseNetClient": "2.2.4",
     "Newtonsoft.Json": "6.0.8"
   },
   "frameworks": {
     "net45": {
-      "frameworkAssemblies": {
-        "System.Configuration": ""
-      }
-    },
-    "dnx451": {
       "frameworkAssemblies": {
         "System.Configuration": ""
       }

@@ -63,6 +63,7 @@ namespace CacheManager.Tests
                 .WithMessage("*Parameter name: configName");
         }
 
+#if !NO_APP_CONFIG
         [Fact]
         [ReplaceCulture]
         [Trait("category", "NotOnMono")]
@@ -78,6 +79,7 @@ namespace CacheManager.Tests
             act.ShouldThrow<InvalidOperationException>()
                 .WithMessage("No cache manager configuration found for name*");
         }
+#endif
 
         [Fact]
         [ReplaceCulture]

@@ -40,6 +40,7 @@ namespace CacheManager.Tests
             }
         }
 
+#if !NO_APP_CONFIG
         [Fact]
         [Trait("category", "NotOnMono")]
         public void SysRuntime_MemoryCache_CreateDefaultCache()
@@ -70,7 +71,8 @@ namespace CacheManager.Tests
                 settings["PhysicalMemoryLimitPercentage"].Should().Be("23");
                 settings["PollingInterval"].Should().Be("00:02:00");
             }
-        }
+        }        
+#endif
 
         [Fact]
         [Trait("category", "Unreliable")]

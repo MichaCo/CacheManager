@@ -76,6 +76,7 @@ namespace CacheManager.Tests
             AssertCacheHandleConfig(cache.CacheHandles.ElementAt(3), "h4", ExpirationMode.Absolute, new TimeSpan(0, 20, 0));
         }
 
+#if !NO_APP_CONFIG
         [Fact]
         [Trait("category", "NotOnMono")]
         public void Cfg_Valid_CfgFile_DefaultSysMemCache()
@@ -99,6 +100,7 @@ namespace CacheManager.Tests
             cache.CacheHandles.Count().Should().Be(1);
             AssertCacheHandleConfig(cache.CacheHandles.ElementAt(0), "default", ExpirationMode.Sliding, new TimeSpan(0, 5, 0));
         }
+#endif
 
         [Fact]
         public void Cfg_Valid_CfgFile_EnabledStatsAndPerformanceCounters()

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-#if !DOTNETCORE
+#if !NETSTANDARD
 using System.Configuration;
 #endif
 using System.IO;
@@ -32,7 +32,7 @@ namespace CacheManager.Redis
                         {
                             config = new Dictionary<string, RedisConfiguration>();
 
-#if !DOTNETCORE
+#if !NETSTANDARD
                             var section = ConfigurationManager.GetSection(RedisConfigurationSection.DefaultSectionName) as RedisConfigurationSection;
                             if (section != null)
                             {
@@ -81,7 +81,7 @@ namespace CacheManager.Redis
 
             if (!Configurations.ContainsKey(configurationName))
             {
-#if DOTNETCORE
+#if NETSTANDARD
                 throw new InvalidOperationException("No configuration added for configuration name " + configurationName);
 #else
                 // check connection strings if there is one matching the name
@@ -99,7 +99,7 @@ namespace CacheManager.Redis
             return Configurations[configurationName];
         }
 
-#if !DOTNETCORE
+#if !NETSTANDARD
         /// <summary>
         /// Loads the configuration.
         /// </summary>

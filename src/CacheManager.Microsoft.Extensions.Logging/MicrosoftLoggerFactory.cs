@@ -68,7 +68,7 @@ namespace CacheManager.Logging
 
         public IDisposable BeginScope(object state)
         {
-            return this.logger.BeginScopeImpl(state);
+            return this.logger.BeginScope(state);
         }
 
         public bool IsEnabled(LogLevel logLevel)
@@ -105,15 +105,10 @@ namespace CacheManager.Logging
         {
             switch (level)
             {
-                //// TODO: Change on RC2 update
-                ////case LogLevel.Trace:
-                ////    return Microsoft.Extensions.Logging.LogLevel.Trace;
-                ////case LogLevel.Debug:
-                ////    return Microsoft.Extensions.Logging.LogLevel.Debug;
-                case LogLevel.Trace:
-                    return Microsoft.Extensions.Logging.LogLevel.Debug;
                 case LogLevel.Debug:
-                    return Microsoft.Extensions.Logging.LogLevel.Verbose;
+                    return Microsoft.Extensions.Logging.LogLevel.Debug;
+                case LogLevel.Trace:
+                    return Microsoft.Extensions.Logging.LogLevel.Trace;
                 case LogLevel.Information:
                     return Microsoft.Extensions.Logging.LogLevel.Information;
                 case LogLevel.Warning:
