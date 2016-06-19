@@ -2,7 +2,7 @@
   "version": "1.0.0-*",
   "description": "CacheManager.Examples Console Application",
   "authors": [ "MICHA" ],
-  "compilationOptions": {
+  "buildOptions": {
     "emitEntryPoint": true
   },
 

@@ -2,7 +2,7 @@
   "version": "1.0.0-*",
   "description": "CacheManager.Backplane.App Console Application",
   "authors": [ "Micha" ],
-  "compilationOptions": {
+  "buildOptions": {
     "emitEntryPoint": true,
     "copyToOutput": [
       "cache.json"

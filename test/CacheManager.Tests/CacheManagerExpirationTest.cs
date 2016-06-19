@@ -16,6 +16,25 @@ namespace CacheManager.Tests
 #endif
     public class CacheManagerExpirationTest : BaseCacheManagerTest
     {
+        // Issue #57 - Verifying diggits will be ignored and stored as proper milliseconds value (integer).
+        [Theory]
+        [MemberData("TestCacheManagers")]
+        public void CacheManager_Expire_DoesNotBreak_OnVeryPreciseValue<T>(T cache)
+            where T : ICacheManager<object>
+        {
+            using (cache)
+            {
+                var key = Guid.NewGuid().ToString();
+                var expiration = TimeSpan.FromTicks(315311111111111);
+                Action act = () => cache.Add(new CacheItem<object>(key, "value", ExpirationMode.Sliding, expiration));
+
+                act.ShouldNotThrow();
+                var item = cache.GetCacheItem(key);
+                item.Should().NotBeNull();
+                Math.Ceiling(item.ExpirationTimeout.TotalDays).Should().Be(Math.Ceiling(expiration.TotalDays));
+            }
+        }
+
         // Issue #9 - item still expires
         [Theory]
         [MemberData("TestCacheManagers")]

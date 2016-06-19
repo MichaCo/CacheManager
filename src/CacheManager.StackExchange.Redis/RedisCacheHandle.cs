@@ -568,7 +568,7 @@ return result";
                 value,
                 item.ValueType.AssemblyQualifiedName,
                 (int)item.ExpirationMode,
-                item.ExpirationTimeout.TotalMilliseconds,
+                (long)item.ExpirationTimeout.TotalMilliseconds,
                 item.CreatedUtc.Ticks
             };
 
@@ -637,7 +637,7 @@ return result";
                 {
                     new StackRedis.HashEntry(HashFieldType, item.ValueType.AssemblyQualifiedName),
                     new StackRedis.HashEntry(HashFieldExpirationMode, (int)item.ExpirationMode),
-                    new StackRedis.HashEntry(HashFieldExpirationTimeout, item.ExpirationTimeout.TotalMilliseconds),
+                    new StackRedis.HashEntry(HashFieldExpirationTimeout, (long)item.ExpirationTimeout.TotalMilliseconds),
                     new StackRedis.HashEntry(HashFieldCreated, item.CreatedUtc.Ticks)
                 };
 

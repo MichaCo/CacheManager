@@ -60,6 +60,17 @@ namespace CacheManager.Tests
         }
 
         [Fact]
+        public void CacheItem_WithExpiration_Invalid()
+        {
+            // arrange
+            // act
+            Action act = () => new CacheItem<object>("key", "region", "value", ExpirationMode.Sliding, TimeSpan.FromTicks(long.MaxValue));
+
+            // assert
+            act.ShouldThrow<ArgumentOutOfRangeException>().WithMessage("*365*");
+        }
+
+        [Fact]
         public void CacheItem_WithCreated()
         {
             // arrange

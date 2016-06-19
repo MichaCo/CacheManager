@@ -74,9 +74,6 @@ namespace CacheManager.Backplane.App
                     }
                 }
             }
-
-            Task.Delay(1000).Wait();
-            UpdateConsole();
         }
 
         private static void UpdateStatus(int addA, int addB, int receivedA, int receivedB)
