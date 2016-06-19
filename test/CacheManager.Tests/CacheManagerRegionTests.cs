@@ -104,6 +104,7 @@ namespace CacheManager.Tests
 
                 // act
                 AddRegionData(cache, 20, 17, true, out keys, out regions);
+
                 try
                 {
                     var clearedRegion = regions.ElementAt((int)Math.Ceiling(regions.Count / 2d));
@@ -134,6 +135,27 @@ namespace CacheManager.Tests
                 {
                     throw;
                 }
+            }
+        }
+
+        // Validates #64, Put has a different code path, at least in redis
+        [Theory]
+        [MemberData("TestCacheManagers")]
+        public void CacheManager_Region_Put_ClearRegion<T>(T cache)
+            where T : ICacheManager<object>
+        {
+            using (cache)
+            {
+                var key = Guid.NewGuid().ToString();
+                var region = Guid.NewGuid().ToString();
+
+                cache.Put(key, "put value", region);
+
+                cache.Get<string>(key, region).Should().NotBeNull();
+
+                cache.ClearRegion(region);
+
+                cache.Get(key, region).Should().BeNull();
             }
         }
 
@@ -255,6 +277,7 @@ namespace CacheManager.Tests
                 {
                     var key = sameKey ? sameKeyAllRegions + i : Guid.NewGuid().ToString();
                     var value = "Value in region " + r + ": " + i;
+
                     if (!cache.Add(key, value, region))
                     {
                         throw new InvalidOperationException("Adding key " + key + ":" + value + " didn't work.");

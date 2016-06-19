@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using CacheManager.Core;
 using CacheManager.Core.Internal;
 using CacheManager.Core.Logging;
@@ -587,6 +586,12 @@ return result";
             {
                 if (flags.HasFlag(StackRedis.CommandFlags.FireAndForget))
                 {
+                    if (!string.IsNullOrWhiteSpace(item.Region))
+                    {
+                        // setting region lookup key if region is being used
+                        this.connection.Database.HashSet(item.Region, fullKey, "regionKey", StackRedis.When.Always, StackRedis.CommandFlags.FireAndForget);
+                    }
+
                     // put runs via fire and forget, so we don't get a result back
                     return true;
                 }
@@ -609,9 +614,9 @@ return result";
                     // Added successfully:
                     if (!string.IsNullOrWhiteSpace(item.Region))
                     {
-                        // now update region lookup if region is set
+                        // setting region lookup key if region is being used
                         // we cannot do that within the lua because the region could be on another cluster node!
-                        this.connection.Database.HashSet(item.Region, fullKey, "regionKey", when, StackRedis.CommandFlags.FireAndForget);
+                        this.connection.Database.HashSet(item.Region, fullKey, "regionKey", StackRedis.When.Always, StackRedis.CommandFlags.FireAndForget);
                     }
 
                     return true;
@@ -645,10 +650,10 @@ return result";
 
                 if (setResult)
                 {
-                    // update region lookup
                     if (!string.IsNullOrWhiteSpace(item.Region))
                     {
-                        this.connection.Database.HashSet(item.Region, fullKey, "regionKey", when, StackRedis.CommandFlags.FireAndForget);
+                        // setting region lookup key if region is being used
+                        this.connection.Database.HashSet(item.Region, fullKey, "regionKey", StackRedis.When.Always, StackRedis.CommandFlags.FireAndForget);
                     }
 
                     // set the additional fields in case sliding expiration should be used in this
