@@ -89,6 +89,9 @@ namespace CacheManager.Tests
             }
         }
 
+        public static ICacheManager<object> WithOneMicrosoftMemoryCacheHandle
+          => CacheFactory.Build(settings => settings.WithMicrosoftMemoryCacheHandle().EnableStatistics());
+
 #if !DNXCORE50
 
         public static ICacheManager<object> WithOneMemoryCacheHandleSliding
@@ -304,6 +307,8 @@ namespace CacheManager.Tests
                 yield return new object[] { TestManagers.WithMemoryAndDictionaryHandles };
                 yield return new object[] { TestManagers.WithTwoNamedMemoryCaches };
 #endif
+                yield return new object[] { TestManagers.WithOneMicrosoftMemoryCacheHandle };
+
                 yield return new object[] { TestManagers.WithManyDictionaryHandles };
                 yield return new object[] { TestManagers.WithOneDicCacheHandle };
 #if REDISENABLED
