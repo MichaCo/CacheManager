@@ -4,7 +4,7 @@
     "CacheManager.Microsoft.Extensions.Logging": { "target": "project" },
     "CacheManager.StackExchange.Redis": { "target": "project" },
     "CacheManager.Serialization.Json": { "target": "project" },
-    "FluentAssertions": "4.6.3",
+    "FluentAssertions": "4.12.0",
     "Microsoft.Extensions.Configuration.Json": "1.0.0",
     "Microsoft.Extensions.Logging": "1.0.0",
     "Microsoft.Extensions.Logging.Console": "1.0.0",
@@ -18,6 +18,9 @@
     ]
   },
   "testRunner": "xunit",
+  "runtimes": {
+    "win7-x64": {}
+  },
   "frameworks": {
     "net452": {
       "buildOptions": {
@@ -38,6 +41,12 @@
         "System.Threading.Tasks": "",
         "System.Reflection": "",
         "System.Configuration": ""
+      }
+    },
+    "netcoreapp1.0": {
+      "buildOptions": { "define": [ "REDISENABLED", "DNXCORE50" ] },
+      "dependencies": {
+        "System.Diagnostics.TraceSource": "4.0.0"
       }
     }
     //"dnxcore50": {
