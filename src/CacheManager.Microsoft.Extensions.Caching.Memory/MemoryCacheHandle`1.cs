@@ -2,15 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using CacheManager.Core;
 using CacheManager.Core.Internal;
 using CacheManager.Core.Logging;
 using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Caching;
 using static CacheManager.Core.Utility.Guard;
 
-namespace CacheManager.Core
+namespace CacheManager.MicrosoftCachingMemory
 {
     public class MemoryCacheHandle<TCacheValue> : BaseCacheHandle<TCacheValue>
     {
@@ -30,7 +28,7 @@ namespace CacheManager.Core
         {
             NotNull(configuration, nameof(configuration));
             NotNull(loggerFactory, nameof(loggerFactory));
-            
+
             this.Logger = loggerFactory.CreateLogger(this);
             this.cacheName = configuration.Name;
             this.cache = new MemoryCache(new MemoryCacheOptions());

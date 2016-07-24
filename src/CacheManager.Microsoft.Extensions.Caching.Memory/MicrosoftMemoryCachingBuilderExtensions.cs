@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using CacheManager.Core;
-using Microsoft.Extensions.Caching.Memory;
+using CacheManager.MicrosoftCachingMemory;
 
 namespace CacheManager.Core
 {

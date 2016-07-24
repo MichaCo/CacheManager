@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Memory;
 
-namespace CacheManager.Core
+namespace CacheManager.MicrosoftCachingMemory
 {
     public static class MemoryCacheExtensions
     {
@@ -19,7 +18,7 @@ namespace CacheManager.Core
             object temp;
             if (cache.TryGetValue(parentKey, out temp))
             {
-                var set = (HashSet<object>) temp;
+                var set = (HashSet<object>)temp;
                 set.Add(childKey);
             }
         }
