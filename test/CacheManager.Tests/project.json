@@ -50,17 +50,5 @@
         "System.Diagnostics.TraceSource": "4.0.0"
       }
     }
-    //"dnxcore50": {
-    //  "dependencies": {
-    //    "System.Runtime": "4.0.21-beta-23516",
-    //    "System.IO": "4.0.11-beta-23516",
-    //    "System.Diagnostics.Tools": "4.0.1-beta-23516",
-    //    "System.Threading.Tasks": "4.0.11-beta-23516",
-    //    "System.Threading.Tasks.Parallel": "4.0.1-beta-23516"
-    //  }
-    //}
-  },
-  "commands": {
-    //"test": "xunit.runner.dnx -notrait category=Memcached -notrait category=Unreliable"
   }
 }
