@@ -8,10 +8,10 @@
     "CacheManager.Core": { "target": "project" },
     "CacheManager.Serialization.Json": { "target": "project" },
     "CacheManager.StackExchange.Redis": { "target": "project" },
-    "Microsoft.Extensions.Logging.Console": "1.0.0-rc2-final",
-    "Microsoft.Extensions.Logging.Debug": "1.0.0-rc2-final",
-    "Microsoft.Extensions.Configuration.Json": "1.0.0-rc2-final",
-    "Microsoft.Extensions.Configuration.Binder": "1.0.0-rc2-final"
+    "Microsoft.Extensions.Logging.Console": "1.0.0",
+    "Microsoft.Extensions.Logging.Debug": "1.0.0",
+    "Microsoft.Extensions.Configuration.Json": "1.0.0",
+    "Microsoft.Extensions.Configuration.Binder": "1.0.0"
   },
   "buildOptions": {
     "emitEntryPoint": true,
@@ -23,7 +23,7 @@
     "run": "CacheManager.Config.Tests"
   },
   "runtimes": {
-    "win10-x64": { }
+    "win7-x64": { }
   },
   "frameworks": {
     "net452": {
@@ -37,11 +37,10 @@
     "netcoreapp1.0": {
       "buildOptions": { "define": [ "NETCORE" ] },
       "dependencies": {
-        "NETStandard.Library": "1.5.0-rc2-24027",
-        "System.Threading.Thread": "4.0.0-rc2-24027",
-        "System.Threading.Tasks.Parallel": "4.0.1-rc2-24027",
-        "System.Console": "4.0.0-rc2-24027",
-        "System.Runtime": "4.1.0-rc2-24027"
+        "System.Threading.Thread": "4.0.0",
+        "System.Threading.Tasks.Parallel": "4.0.1",
+        "System.Console": "4.0.0",
+        "System.Runtime": "4.1.0"
       }
     }
   }

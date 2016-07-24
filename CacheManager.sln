@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.24720.0
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{58CC885F-40A7-4C82-990D-3F36AAA088A7}"
 EndProject
@@ -11,6 +11,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		appveyor.vs2013.yml = appveyor.vs2013.yml
 		appveyor.yml = appveyor.yml
 		build.cmd = build.cmd
+		build.ps1 = build.ps1
 		build.sh = build.sh
 		tools\cacheManager.json = tools\cacheManager.json
 		tools\CacheManagerCfg.xsd = tools\CacheManagerCfg.xsd

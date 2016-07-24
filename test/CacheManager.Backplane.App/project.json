@@ -14,7 +14,7 @@
     "CacheManager.Serialization.Json": { "target": "project" },
     "CacheManager.Microsoft.Extensions.Logging": { "target": "project" },
     "CacheManager.Microsoft.Extensions.Configuration": { "target": "project" },
-    "Microsoft.Extensions.Configuration.Json": "1.0.0-rc2-final"
+    "Microsoft.Extensions.Configuration.Json": "1.0.0"
   },
 
   "commands": {

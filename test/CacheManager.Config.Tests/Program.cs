@@ -16,13 +16,17 @@ namespace CacheManager.Config.Tests
 
             var configuration = configBuilder.Build();
 
+            ////var cacheCfgf = configuration.GetCacheConfigurations().First();
+
+            ////var mgr = new BaseCacheManager<string>(cacheCfgf);
+
             int iterations = int.MaxValue;
             try
             {
                 var builder = new Core.ConfigurationBuilder("myCache");
                 builder.WithMicrosoftLogging(f =>
                 {
-                    f.AddConsole(LogLevel.Error);
+                    f.AddConsole(LogLevel.Warning);
                     f.AddDebug(LogLevel.Debug);
                 });
 
@@ -51,7 +55,7 @@ namespace CacheManager.Config.Tests
                         .WithDatabase(0)
                         .WithConnectionTimeout(5000)
                         //.WithEndpoint("ubuntu-local", 7024);
-                        .WithEndpoint("127.0.0.1", 6380)
+                        //.WithEndpoint("127.0.0.1", 6380)
                         .WithEndpoint("127.0.0.1", 6379);
                         //.WithEndpoint("192.168.178.34", 7001);
                 });

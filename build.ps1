@@ -1,5 +1,3 @@
-$env:KOREBUILD_DOTNET_VERSION = "1.0.0-preview1-002702"
-$env:KOREBUILD_SKIP_RUNTIME_INSTALL = "1"
 $ErrorActionPreference = "Stop"
 
 function DownloadWithRetry([string] $url, [string] $downloadLocation, [int] $retries) 
@@ -35,7 +33,7 @@ cd $PSScriptRoot
 $repoFolder = $PSScriptRoot
 $env:REPO_FOLDER = $repoFolder
 
-$koreBuildZip="https://github.com/aspnet/KoreBuild/archive/dev.zip"
+$koreBuildZip="https://github.com/aspnet/KoreBuild/archive/1.0.0.zip"
 if ($env:KOREBUILD_ZIP)
 {
     $koreBuildZip=$env:KOREBUILD_ZIP

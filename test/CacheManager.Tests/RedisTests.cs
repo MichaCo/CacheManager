@@ -136,7 +136,7 @@ namespace CacheManager.Tests
         }
 
 #if !DNXCORE50
-        [Fact]
+        [Fact(Skip = "not working 100% of the time")]
         [Trait("category", "Redis")]
         [Trait("category", "Unreliable")]
         public void Redis_Multiple_PubSub_Change()
@@ -245,7 +245,7 @@ namespace CacheManager.Tests
                 TestManagers.CreateRedisCache(5));
         }
 
-        [Fact]
+        [Fact(Skip = "not working 100% of the time")]
         [Trait("category", "Redis")]
         [Trait("category", "Unreliable")]
         public void Redis_Multiple_PubSub_Remove()
@@ -426,7 +426,7 @@ namespace CacheManager.Tests
         public void Redis_Sliding_DoesExpire_MultiClients()
         {
             // arrange
-            var item = new CacheItem<object>(Guid.NewGuid().ToString(), "something", ExpirationMode.Sliding, TimeSpan.FromMilliseconds(50));
+            var item = new CacheItem<object>(Guid.NewGuid().ToString(), "something", ExpirationMode.Sliding, TimeSpan.FromMilliseconds(100));
             var channelName = Guid.NewGuid().ToString();
             var cacheA = TestManagers.CreateRedisAndDicCacheWithBackplane(10, true, channelName);
             var cacheB = TestManagers.CreateRedisAndDicCacheWithBackplane(10, true, channelName);
@@ -447,12 +447,12 @@ namespace CacheManager.Tests
                 // 450ms added so absolute would be expired on the 2nd go
                 for (int s = 0; s < 3; s++)
                 {
-                    Thread.Sleep(40);
+                    Thread.Sleep(80);
                     cacheA.GetCacheItem(item.Key).Should().NotBeNull();
                     cacheB.GetCacheItem(item.Key).Should().NotBeNull();
                 }
 
-                Thread.Sleep(100);
+                Thread.Sleep(150);
                 cacheA.GetCacheItem(item.Key).Should().BeNull();
                 cacheB.GetCacheItem(item.Key).Should().BeNull();
             }

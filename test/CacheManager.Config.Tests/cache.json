@@ -40,7 +40,7 @@
       },
       "handles": [
         {
-          "knownType": "SystemRuntime",
+          "knownType": "Dictionary",
           "enablePerformanceCounters": true,
           "enableStatistics": true,
           "expirationMode": "Absolute",
