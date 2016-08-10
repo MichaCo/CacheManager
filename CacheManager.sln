@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.25123.0
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{58CC885F-40A7-4C82-990D-3F36AAA088A7}"
 EndProject
@@ -106,6 +106,8 @@ EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "CacheManager.Backplane.App", "test\CacheManager.Backplane.App\CacheManager.Backplane.App.xproj", "{1D0401C7-4BA5-4A36-A405-7EF4C7C2D65D}"
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "CacheManager.Microsoft.Extensions.Caching.Memory", "src\CacheManager.Microsoft.Extensions.Caching.Memory\CacheManager.Microsoft.Extensions.Caching.Memory.xproj", "{48DD6E04-0CFD-4FB4-A178-749B0FBFBA36}"
+EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "CacheManager.Serialization.ProtoBuf", "src\CacheManager.Serialization.ProtoBuf\CacheManager.Serialization.ProtoBuf.xproj", "{85CD8BC7-3E72-422E-AF91-6FDF2133E155}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -359,6 +361,22 @@ Global
 		{48DD6E04-0CFD-4FB4-A178-749B0FBFBA36}.Windows_Debug|Any CPU.Build.0 = Debug|Any CPU
 		{48DD6E04-0CFD-4FB4-A178-749B0FBFBA36}.Windows_Release|Any CPU.ActiveCfg = Release|Any CPU
 		{48DD6E04-0CFD-4FB4-A178-749B0FBFBA36}.Windows_Release|Any CPU.Build.0 = Release|Any CPU
+		{85CD8BC7-3E72-422E-AF91-6FDF2133E155}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{85CD8BC7-3E72-422E-AF91-6FDF2133E155}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{85CD8BC7-3E72-422E-AF91-6FDF2133E155}.Linux_Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{85CD8BC7-3E72-422E-AF91-6FDF2133E155}.Linux_Debug|Any CPU.Build.0 = Debug|Any CPU
+		{85CD8BC7-3E72-422E-AF91-6FDF2133E155}.Linux_Release|Any CPU.ActiveCfg = Release|Any CPU
+		{85CD8BC7-3E72-422E-AF91-6FDF2133E155}.Linux_Release|Any CPU.Build.0 = Release|Any CPU
+		{85CD8BC7-3E72-422E-AF91-6FDF2133E155}.OSX_Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{85CD8BC7-3E72-422E-AF91-6FDF2133E155}.OSX_Debug|Any CPU.Build.0 = Debug|Any CPU
+		{85CD8BC7-3E72-422E-AF91-6FDF2133E155}.OSX_Release|Any CPU.ActiveCfg = Release|Any CPU
+		{85CD8BC7-3E72-422E-AF91-6FDF2133E155}.OSX_Release|Any CPU.Build.0 = Release|Any CPU
+		{85CD8BC7-3E72-422E-AF91-6FDF2133E155}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{85CD8BC7-3E72-422E-AF91-6FDF2133E155}.Release|Any CPU.Build.0 = Release|Any CPU
+		{85CD8BC7-3E72-422E-AF91-6FDF2133E155}.Windows_Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{85CD8BC7-3E72-422E-AF91-6FDF2133E155}.Windows_Debug|Any CPU.Build.0 = Debug|Any CPU
+		{85CD8BC7-3E72-422E-AF91-6FDF2133E155}.Windows_Release|Any CPU.ActiveCfg = Release|Any CPU
+		{85CD8BC7-3E72-422E-AF91-6FDF2133E155}.Windows_Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -384,5 +402,6 @@ Global
 		{F2761882-C68D-4CC4-A906-3C46EF6A6573} = {E026FBD6-8112-46A7-BB3C-C8FB901CB93A}
 		{1D0401C7-4BA5-4A36-A405-7EF4C7C2D65D} = {C013E552-43F5-4496-BE29-DB401C3334BB}
 		{48DD6E04-0CFD-4FB4-A178-749B0FBFBA36} = {58CC885F-40A7-4C82-990D-3F36AAA088A7}
+		{85CD8BC7-3E72-422E-AF91-6FDF2133E155} = {58CC885F-40A7-4C82-990D-3F36AAA088A7}
 	EndGlobalSection
 EndGlobal
