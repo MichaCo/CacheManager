@@ -1,0 +1,49 @@
+{
+  "version": "0.9.0-*",
+  "description": "CacheManager extension package providing SeriLog Logging for distributed caches. CacheManager is an open source caching abstraction layer for .NET written in C#. It supports various cache providers and implements many advanced features, the SeriLog logger can be used in place of the Microsoft Logging Extension",
+  "packOptions": {
+    "licenseUrl": "https://github.com/MichaCo/CacheManager/blob/master/LICENSE",
+    "projectUrl": "http://www.cachemanager.net",
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/MichaCo/CacheManager"
+    },
+    "summary": "CacheManager extension package providing ProtoBuf serialization for distributed caches.",
+    "tags": [ "Caching", "Cache", "CacheManager", "Distributed Cache", "StackExchange Redis", "Azure AppFabric", "Memcached" ]
+  },
+  "authors": [ "Wenisman" ],
+  "buildOptions": {
+    "allowUnsafe": false,
+    "languageVersion": "csharp6",
+    "warningsAsErrors": true
+  },
+  "copyright": "Copyright (c) 2015 MichaConrad",
+  "configurations": {
+    "Debug": {
+      "buildOptions": {
+        "define": [ "DEBUG" ]
+      }
+    },
+    "Release": {
+      "buildOptions": {
+        "define": [ "RELEASE" ],
+        "optimize": true
+      }
+    }
+  },
+
+  "dependencies": {
+    "CacheManager.Core": "0.9.0-*",
+    "Serilog": "2.1.0"
+  },
+
+  "frameworks": {
+    "netstandard1.0": {
+      "imports": "dnxcore50"
+    },
+    "net45": {
+      "dependencies": {
+      }
+    }
+  }
+}

@@ -4,7 +4,9 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using CacheManager.Core;
 using CacheManager.Core.Logging;
+using CacheManager.Logging.SeriLog;
 using FluentAssertions;
+using Serilog.Events;
 using Xunit;
 
 namespace CacheManager.Tests
@@ -431,6 +433,31 @@ namespace CacheManager.Tests
                 s => s.WithLogging(typeof(NullLoggerFactory)));
 
             cfg.LoggerFactoryType.Should().NotBeNull();
+        }
+
+        [Theory]
+        [InlineData(LogLevel.Critical, LogEventLevel.Fatal)]
+        [InlineData(LogLevel.Error, LogEventLevel.Error)]
+        [InlineData(LogLevel.Warning, LogEventLevel.Warning)]
+        [InlineData(LogLevel.Information, LogEventLevel.Information)]
+        [InlineData(LogLevel.Debug, LogEventLevel.Debug)]
+        [InlineData(LogLevel.Trace, LogEventLevel.Verbose)]
+        public void SeriLogger_LogLevel_Convert(LogLevel inputLevel, LogEventLevel outputLevel)
+        {
+            var serilogger = new SeriLogFactory().CreateLogger("serilog_test");
+
+            var testLevel = SeriLogger.Convert(inputLevel);
+            testLevel.Should().Equals(outputLevel);
+        }
+
+        [Fact]
+        public void Logging_CreateSeriLogger()
+        {
+            var cfg = ConfigurationBuilder.BuildConfiguration(
+                s => s.WithLogging(typeof(SeriLogFactory)));
+
+            cfg.LoggerFactoryType.Should().NotBeNull();
+            cfg.LoggerFactoryType.Should().Be(typeof(SeriLogFactory));
         }
     }
 
