@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
+using Microsoft.Extensions.Logging;
 using CacheManager.Core;
 
 #if !NET40 && !DNXCORE50
@@ -346,6 +347,14 @@ namespace CacheManager.Tests
         }
 
 #endif
+    }
+
+    public enum Serializer
+    {
+        Binary,
+        Json,
+        GzJson,
+        Proto
     }
 
     internal static class ConfigurationExtension
