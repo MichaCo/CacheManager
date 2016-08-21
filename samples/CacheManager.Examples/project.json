@@ -13,7 +13,7 @@
     "CacheManager.Serialization.Json": { "target": "project" },
     "Microsoft.Extensions.Configuration.Json": "1.0.0",
     "Microsoft.Extensions.Logging.Console": "1.0.0",
-    "Unity": "4.0.2"
+    "Unity": "4.0.1"
   },
 
   "commands": {
@@ -21,7 +21,7 @@
   },
 
   "frameworks": {
-    "dnx451": {
+    "net452": {
       "dependencies": {
         "CacheManager.StackExchange.Redis": { "target": "project" },
         "CacheManager.SystemRuntimeCaching": { "target": "project" }

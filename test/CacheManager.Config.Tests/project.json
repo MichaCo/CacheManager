@@ -19,12 +19,6 @@
       "cache.json"
     ]
   },
-  "commands": {
-    "run": "CacheManager.Config.Tests"
-  },
-  "runtimes": {
-    "win7-x64": { }
-  },
   "frameworks": {
     "net452": {
       "frameworkAssemblies": {
@@ -37,6 +31,10 @@
     "netcoreapp1.0": {
       "buildOptions": { "define": [ "NETCORE" ] },
       "dependencies": {
+        "Microsoft.NETCore.App": {
+          "version": "1.0.0",
+          "type": "platform"
+        },
         "System.Threading.Thread": "4.0.0",
         "System.Threading.Tasks.Parallel": "4.0.1",
         "System.Console": "4.0.0",
