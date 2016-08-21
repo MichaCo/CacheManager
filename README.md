@@ -31,7 +31,7 @@ Linux, Mono | [![Build Status](https://travis-ci.org/MichaCo/CacheManager.svg?br
 | [CacheManager.Memcached] [Memcached.nuget]  | x | x | -
 | [CacheManager.Couchbase] [Couchbase.nuget]  | - | x | -
 
-*\* "Minimum .NET Platform Standard" version means, that at least the listed version per package must be targeted if you want to use it. See the [documentation](https://github.com/dotnet/corefx/blob/master/Documentation/architecture/net-platform-standard.md) for more details of what .NET platform standard means.*
+\* *"Minimum .NET Platform Standard" version means, that at least the listed version per package must be targeted if you want to use it. See the [documentation](https://github.com/dotnet/corefx/blob/master/Documentation/architecture/net-platform-standard.md) for more details of what .NET platform standard means.*
 
 ### Beta Packages
 Beta versions of the CacheManager packages are getting pushed to https://www.myget.org/gallery/cachemanager on each build. 
