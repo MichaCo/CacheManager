@@ -11,7 +11,7 @@
     "summary": "CacheManager extension package providing ProtoBuf serialization for distributed caches.",
     "tags": [ "Caching", "Cache", "CacheManager", "Distributed Cache", "StackExchange Redis", "Azure AppFabric", "Memcached" ]
   },
-  "authors": [ "Wenisman" ],
+  "authors": [ "Wenisman", "MichaConrad" ],
   "buildOptions": {
     "allowUnsafe": false,
     "languageVersion": "csharp6",

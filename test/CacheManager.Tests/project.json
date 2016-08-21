@@ -23,7 +23,8 @@
   },
   "testRunner": "xunit",
   "runtimes": {
-    "win7-x64": {}
+    "win7-x64": {},
+    "ubuntu.14.04-x64": {}
   },
   "frameworks": {
     "net452": {
