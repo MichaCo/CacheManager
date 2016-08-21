@@ -33,13 +33,11 @@
   },
   "dependencies": {
     "CacheManager.Core": "0.9.0-*",
-    "NETStandard.Library": "1.6.0",
     "protobuf-net": "2.1.0"
   },
 
   "frameworks": {
     "netstandard1.3": {
-      "imports": "dnxcore50"
     },
     "net40": {
       "dependencies": {
