@@ -21,7 +21,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;CODE_ANALYSIS;NET45;REDISENABLED;MOCK_HTTPCONTEXT_ENABLED;</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;CODE_ANALYSIS;CODE_ANALYSIS;NET45;REDISENABLED;MOCK_HTTPCONTEXT_ENABLED;MSBUILD</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRuleSet>..\..\common\CacheManager.Test.ruleset</CodeAnalysisRuleSet>
@@ -31,7 +31,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE;NET45</DefineConstants>
+    <DefineConstants>TRACE;CODE_ANALYSIS;CODE_ANALYSIS;NET45;REDISENABLED;MOCK_HTTPCONTEXT_ENABLED;MSBUILD</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRuleSet>..\..\common\CacheManager.Test.ruleset</CodeAnalysisRuleSet>
@@ -77,6 +77,10 @@
     </Reference>
     <Reference Include="Ploeh.AutoFixture.AutoMoq, Version=3.37.1.0, Culture=neutral, PublicKeyToken=b24654c590009d4f, processorArchitecture=MSIL">
       <HintPath>..\..\packages\AutoFixture.AutoMoq.3.37.1\lib\net40\Ploeh.AutoFixture.AutoMoq.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="protobuf-net, Version=2.1.0.0, Culture=neutral, PublicKeyToken=257b51d87d2e4d67, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\protobuf-net.2.1.0\lib\net45\protobuf-net.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -292,6 +296,10 @@
     <ProjectReference Include="..\..\src\CacheManager.Serialization.Json.Net45\CacheManager.Serialization.Json.csproj">
       <Project>{6efe6b78-df24-4fec-8e45-ece790f16dfc}</Project>
       <Name>CacheManager.Serialization.Json</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\CacheManager.Serialization.ProtoBuf.Net45\CacheManager.Serialization.ProtoBuf.csproj">
+      <Project>{c24de3f3-140d-4cdb-82bf-def81afd3215}</Project>
+      <Name>CacheManager.Serialization.ProtoBuf</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\src\CacheManager.StackExchange.Redis.Net45\CacheManager.StackExchange.Redis.csproj">
       <Project>{3930c89d-c16b-4c88-b946-0c22e10cd263}</Project>

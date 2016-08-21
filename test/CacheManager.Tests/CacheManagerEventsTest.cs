@@ -379,7 +379,7 @@ namespace CacheManager.Tests
                 var data = new EventCallbackData();
                 var key1 = Guid.NewGuid().ToString();
                 var key2 = Guid.NewGuid().ToString();
-                
+
                 cache.OnUpdate += (sender, args) => data.AddCall(args, key1, key2);
                 cache.OnPut += (sender, args) => data.AddCall(args, key1, key2);    // this should not trigger
                 cache.OnAdd += (sender, args) => data.AddCall(args, key1, key2);    // we should have 3times add
