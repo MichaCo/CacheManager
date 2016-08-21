@@ -1,8 +1,7 @@
 {
   "profiles": {
-    "run": {
-      "commandName": "run",
-      "sdkVersion": "dnx-clr-win-x64.1.0.0-rc1-update1"
+    "CacheManager.Config.Tests": {
+      "commandName": "Project"
     }
   }
 }

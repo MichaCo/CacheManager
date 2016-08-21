@@ -2,7 +2,7 @@
 using System.Reflection;
 using CacheManager.Core;
 using Microsoft.Extensions.Logging;
-#if NET45
+#if NET452
 using Microsoft.Practices.Unity;
 #else
 using Unity;

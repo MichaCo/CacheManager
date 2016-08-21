@@ -22,10 +22,6 @@
     ]
   },
   "testRunner": "xunit",
-  "runtimes": {
-    "win7-x64": {},
-    "ubuntu.14.04-x64": {}
-  },
   "frameworks": {
     "net452": {
       "buildOptions": {
@@ -51,6 +47,10 @@
     "netcoreapp1.0": {
       "buildOptions": { "define": [ "REDISENABLED", "DNXCORE50" ] },
       "dependencies": {
+        "Microsoft.NETCore.App": {
+          "version": "1.0.0",
+          "type": "platform"
+        },
         "System.Diagnostics.TraceSource": "4.0.0"
       }
     }
