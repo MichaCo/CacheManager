@@ -1614,12 +1614,26 @@ namespace CacheManager.Core
                 }
                 else if (result.UpdateState == UpdateItemResultState.TooManyRetries)
                 {
-                    // only if the item does not exist in the current handle, we proceed the
-                    // loop... otherwise, we had too many retries... this basically indicates an
+                    // if we had too many retries, this basically indicates an
                     // invalid state of the cache: The item is there, but we couldn't update it and
                     // it most likely has a different version
                     this.Logger.LogWarn(
-                        "Update: {0} {1}: on handle {2} failed with too many retries! Evicting from other handles...",
+                        "Update: {0} {1}: on handle {2} failed with too many retries! Evicting from other handles.",
+                        key,
+                        region,
+                        handleIndex);
+
+                    this.EvictFromOtherHandles(key, region, handleIndex);
+                    break;
+                }
+                else if (result.UpdateState == UpdateItemResultState.ItemDidNotExist &&
+                    (handle.Configuration.IsBackplaneSource || handleIndex == handles.Length - 1))
+                {
+                    // If update fails because item doesn't exist AND the current handle is backplane source or the lowest cache handle level,
+                    // remove the item from other handles (if exists).
+                    // Otherwise, if we do not exit here, calling update on the next handle might succeed and would return a misleading result.
+                    this.Logger.LogWarn(
+                        "Update: {0} {1}: on handle {2} failed because item did not exist.",
                         key,
                         region,
                         handleIndex);

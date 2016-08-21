@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
+using Microsoft.Extensions.Logging;
 using CacheManager.Core;
 
 #if !NET40 && !DNXCORE50
@@ -85,7 +86,7 @@ namespace CacheManager.Tests
                     databaseCount = StartDbCount;
                 }
 
-                return CreateRedisAndDicCacheWithBackplane(databaseCount, false);
+                return CreateRedisAndDicCacheWithBackplane(databaseCount, false, Guid.NewGuid().ToString());
             }
         }
 
@@ -211,7 +212,7 @@ namespace CacheManager.Tests
 
 #endif
 
-        public static ICacheManager<object> CreateRedisAndDicCacheWithBackplane(int database = 0, bool sharedRedisConfig = true, string channelName = null)
+        public static ICacheManager<object> CreateRedisAndDicCacheWithBackplane(int database = 0, bool sharedRedisConfig = true, string channelName = null, Serializer serializer = Serializer.Proto)
         {
             var redisKey = sharedRedisConfig ? "redisConfig" : Guid.NewGuid().ToString();
             return CacheFactory.Build(settings =>
@@ -221,7 +222,7 @@ namespace CacheManager.Tests
                     .WithDictionaryHandle()
                         .EnableStatistics();
                 settings
-                    .WithJsonSerializer()
+                    .TestSerializer(serializer)
                     .WithMaxRetries(100)
                     .WithRetryTimeout(1000)
                     .WithRedisConfiguration(redisKey, config =>
@@ -232,6 +233,8 @@ namespace CacheManager.Tests
                     })
                     .WithRedisCacheHandle(redisKey, true)
                     .EnableStatistics();
+
+                ////settings.WithMicrosoftLogging(lf => lf.AddDebug(LogLevel.Information));
 
                 if (channelName != null)
                 {
@@ -244,13 +247,13 @@ namespace CacheManager.Tests
             });
         }
 
-        public static ICacheManager<object> CreateRedisCache(int database = 0, bool sharedRedisConfig = true)
+        public static ICacheManager<object> CreateRedisCache(int database = 0, bool sharedRedisConfig = true, Serializer serializer = Serializer.GzJson)
         {
             var redisKey = sharedRedisConfig ? "redisConfig" : Guid.NewGuid().ToString();
             var cache = CacheFactory.Build(settings =>
             {
                 settings
-                    .WithGzJsonSerializer()
+                    .TestSerializer(serializer)
                     .WithMaxRetries(100)
                     .WithRetryTimeout(1000)
                     .WithRedisConfiguration(redisKey, config =>
@@ -267,13 +270,13 @@ namespace CacheManager.Tests
             return cache;
         }
 
-        public static ICacheManager<T> CreateRedisCache<T>(int database = 0, bool sharedRedisConfig = true)
+        public static ICacheManager<T> CreateRedisCache<T>(int database = 0, bool sharedRedisConfig = true, Serializer serializer = Serializer.GzJson)
         {
             var redisKey = sharedRedisConfig ? "redisConfig" : Guid.NewGuid().ToString();
             var cache = CacheFactory.Build<T>(settings =>
             {
                 settings
-                    .WithGzJsonSerializer()
+                    .TestSerializer(serializer)
                     .WithMaxRetries(100)
                     .WithRetryTimeout(1000)
                     .WithRedisConfiguration(redisKey, config =>
@@ -333,6 +336,36 @@ namespace CacheManager.Tests
         }
 
 #endif
+    }
+
+    public enum Serializer
+    {
+        Binary,
+        Json,
+        GzJson,
+        Proto
+    }
+
+    internal static class ConfigurationExtension
+    {
+        public static ConfigurationBuilderCachePart TestSerializer(this ConfigurationBuilderCachePart part, Serializer serializer)
+        {
+            switch (serializer)
+            {
+                case Serializer.Binary:
+                    break;
+                case Serializer.GzJson:
+                    part.WithGzJsonSerializer();
+                    break;
+                case Serializer.Json:
+                    part.WithJsonSerializer();
+                    break;
+                case Serializer.Proto:
+                    part.WithProtoBufSerializer();
+                    break;
+            }
+            return part;
+        }
     }
 }
 

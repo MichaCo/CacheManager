@@ -379,8 +379,7 @@ namespace CacheManager.Tests
                 var data = new EventCallbackData();
                 var key1 = Guid.NewGuid().ToString();
                 var key2 = Guid.NewGuid().ToString();
-
-                // all callbacks should be triggered, so result count should be 4
+                
                 cache.OnUpdate += (sender, args) => data.AddCall(args, key1, key2);
                 cache.OnPut += (sender, args) => data.AddCall(args, key1, key2);    // this should not trigger
                 cache.OnAdd += (sender, args) => data.AddCall(args, key1, key2);    // we should have 3times add
@@ -388,13 +387,14 @@ namespace CacheManager.Tests
                 cache.OnRemove += (sender, args) => data.AddCall(args, key1, key2);  // this should not trigger
 
                 // act get without region, should not return anything and should not trigger the event
-                cache.Add(key1, 1, "region");
-                cache.Add(key2, 1, "region2");
-                cache.Add(key1, 1);
+                cache.Add(key1, 1, "region").Should().BeTrue("add key1 to region");
+                cache.Add(key2, 1, "region2").Should().BeTrue("add key2 to region2");
+                cache.Add(key1, 1).Should().BeTrue("add key1");
 
-                cache.Update(key1, "region", o => ((int)o) + 1);
-                cache.Update(key2, "region2", o => ((int)o) + 1);
-                cache.Update(key1, o => ((int)o) + 1);
+                object val;
+                cache.TryUpdate(key1, "region", o => ((int)o) + 1, out val).Should().BeTrue();
+                cache.TryUpdate(key2, "region2", o => ((int)o) + 1, out val).Should().BeTrue();
+                cache.TryUpdate(key1, o => ((int)o) + 1, out val).Should().BeTrue();
 
                 // assert 4x Put calls x 3 event handles = 12 calls
                 data.Calls.Should().Be(6, "we expect 6 hits");

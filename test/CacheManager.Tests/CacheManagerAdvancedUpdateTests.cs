@@ -117,9 +117,9 @@ namespace CacheManager.Tests
                 var updateResult = cache.TryUpdate("key", updateFunc, 1, out value);
 
                 // assert
-                updateCalls.Should().Be(5, "should iterate through all of them");
+                updateCalls.Should().Be(1, "should exit after the first item did not exist");
                 putCalls.Should().Be(0, "no put calls expected");
-                removeCalls.Should().Be(0);
+                removeCalls.Should().Be(4, "item should be removed from others");
                 updateResult.Should().BeFalse();
             }
         }
@@ -154,7 +154,7 @@ namespace CacheManager.Tests
                 var updateResult = cache.TryUpdate("key", updateFunc, 1, out value);
 
                 // assert
-                updateCalls.Should().Be(2, "bottom to top");
+                updateCalls.Should().Be(1, "failed because item did not exist");
                 putCalls.Should().Be(0, "no put calls expected");
                 removeCalls.Should().Be(4, "the key should have been removed from the other 4 handles");
                 updateResult.Should().BeFalse("the update in handle 4 was not successful.");
@@ -180,8 +180,8 @@ namespace CacheManager.Tests
                     UpdateItemResult.ForItemDidNotExist<string>(),
                     UpdateItemResult.ForItemDidNotExist<string>(),
                     UpdateItemResult.ForItemDidNotExist<string>(),
-                    UpdateItemResult.ForSuccess("some value", true, 100),
-                    UpdateItemResult.ForItemDidNotExist<string>()
+                    UpdateItemResult.ForItemDidNotExist<string>(),
+                    UpdateItemResult.ForSuccess("some value", true, 100)
                 },
                 putCalls: Enumerable.Repeat<Action>(() => putCalls++, 5).ToArray(),
                 removeCalls: Enumerable.Repeat<Action>(() => removeCalls++, 5).ToArray(),
@@ -202,10 +202,10 @@ namespace CacheManager.Tests
                 var updateResult = cache.TryUpdate("key", updateFunc, 1, out value);
 
                 // assert
-                updateCalls.Should().Be(2, "second from below did update");
+                updateCalls.Should().Be(1, "first succeeds second fails");
                 putCalls.Should().Be(0, "no puts");
-                addCalls.Should().Be(1, "one below the one updating");
-                removeCalls.Should().Be(3, "3 above");
+                addCalls.Should().Be(0, "no adds");
+                removeCalls.Should().Be(4, "should remove from all others");
                 updateResult.Should().BeTrue("updated successfully.");
             }
         }
