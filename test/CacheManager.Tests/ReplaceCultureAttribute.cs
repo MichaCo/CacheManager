@@ -35,7 +35,7 @@ namespace CacheManager.Tests
             this.originalCulture = CultureInfo.CurrentCulture;
             this.originalUICulture = CultureInfo.CurrentUICulture;
 
-#if DNX451 || NET40 || NET45 || NET452
+#if !DNXCORE50
             Thread.CurrentThread.CurrentCulture = this.CurrentCulture;
             Thread.CurrentThread.CurrentUICulture = this.CurrentUICulture;
 #else

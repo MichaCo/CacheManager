@@ -5,6 +5,7 @@
     "CacheManager.Microsoft.Extensions.Logging": { "target": "project" },
     "CacheManager.StackExchange.Redis": { "target": "project" },
     "CacheManager.Serialization.Json": { "target": "project" },
+    "CacheManager.Serialization.ProtoBuf": { "target": "project" },
     "FluentAssertions": "4.12.0",
     "Microsoft.Extensions.Configuration.Json": "1.0.0",
     "Microsoft.Extensions.Logging": "1.0.0",
