@@ -21,7 +21,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;NET40;REDISENABLED;MOCK_HTTPCONTEXT_ENABLED</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;NET40;REDISENABLED;MOCK_HTTPCONTEXT_ENABLED;MSBUILD</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
@@ -32,7 +32,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE;NET40</DefineConstants>
+    <DefineConstants>TRACE;NET40;REDISENABLED;MOCK_HTTPCONTEXT_ENABLED;MSBUILD</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
@@ -76,6 +76,10 @@
     </Reference>
     <Reference Include="Ploeh.AutoFixture.AutoMoq, Version=3.37.1.0, Culture=neutral, PublicKeyToken=b24654c590009d4f, processorArchitecture=MSIL">
       <HintPath>..\..\packages\AutoFixture.AutoMoq.3.37.1\lib\net40\Ploeh.AutoFixture.AutoMoq.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="protobuf-net, Version=2.1.0.0, Culture=neutral, PublicKeyToken=257b51d87d2e4d67, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\protobuf-net.2.1.0\lib\net45\protobuf-net.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -285,6 +289,10 @@
     <ProjectReference Include="..\..\src\CacheManager.Serialization.Json.Net40\CacheManager.Serialization.Json.Net40.csproj">
       <Project>{7a27c74a-461a-495b-aecb-254703a9f047}</Project>
       <Name>CacheManager.Serialization.Json.Net40</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\CacheManager.Serialization.ProtoBuf.Net40\CacheManager.Serialization.ProtoBuf.Net40.csproj">
+      <Project>{3f16dd5a-9781-4090-9cd3-16c54300b372}</Project>
+      <Name>CacheManager.Serialization.ProtoBuf.Net40</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\src\CacheManager.StackExchange.Redis.Net40\CacheManager.StackExchange.Redis.Net40.csproj">
       <Project>{74adf5ec-cc57-4c92-bcff-14611530f8f7}</Project>

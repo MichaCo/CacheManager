@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
-using Microsoft.Extensions.Logging;
 using CacheManager.Core;
 
 #if !NET40 && !DNXCORE50
@@ -15,6 +14,14 @@ using static CacheManager.Core.Utility.Guard;
 
 namespace CacheManager.Tests
 {
+    public enum Serializer
+    {
+        Binary,
+        Json,
+        GzJson,
+        Proto
+    }
+
     [ExcludeFromCodeCoverage]
     public static class TestManagers
     {
@@ -90,8 +97,10 @@ namespace CacheManager.Tests
             }
         }
 
+#if !MSBUILD
         public static ICacheManager<object> WithOneMicrosoftMemoryCacheHandle
           => CacheFactory.Build(settings => settings.WithMicrosoftMemoryCacheHandle().EnableStatistics());
+#endif
 
 #if !DNXCORE50
 
@@ -310,8 +319,9 @@ namespace CacheManager.Tests
                 yield return new object[] { TestManagers.WithMemoryAndDictionaryHandles };
                 yield return new object[] { TestManagers.WithTwoNamedMemoryCaches };
 #endif
+#if !MSBUILD
                 yield return new object[] { TestManagers.WithOneMicrosoftMemoryCacheHandle };
-
+#endif
                 yield return new object[] { TestManagers.WithManyDictionaryHandles };
                 yield return new object[] { TestManagers.WithOneDicCacheHandle };
 #if REDISENABLED
@@ -336,14 +346,6 @@ namespace CacheManager.Tests
         }
 
 #endif
-    }
-
-    public enum Serializer
-    {
-        Binary,
-        Json,
-        GzJson,
-        Proto
     }
 
     internal static class ConfigurationExtension

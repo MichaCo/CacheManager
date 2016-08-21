@@ -561,7 +561,7 @@ return result";
             var value = this.ToRedisValue(item.Value);
 
             var flags = sync ? StackRedis.CommandFlags.None : StackRedis.CommandFlags.FireAndForget;
-            
+
             // ARGV [1]: value, [2]: type, [3]: expirationMode, [4]: expirationTimeout(millis), [5]: created(ticks)
             var parameters = new StackRedis.RedisValue[]
             {
