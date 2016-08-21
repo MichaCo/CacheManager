@@ -1,6 +1,6 @@
 ﻿using System;
 using System.IO;
-
+using System.Linq;
 using CacheManager.Core;
 using CacheManager.Core.Internal;
 using pb = ProtoBuf;
@@ -10,11 +10,12 @@ namespace CacheManager.Serialization.ProtoBuf
     public class ProtoBufSerializer : ICacheSerializer
     {
         public ProtoBufSerializer()
-        { }
+        {
+        }
 
         public object Deserialize(byte[] data, Type target)
         {
-            var stream = new MemoryStream(data);
+            var stream = new MemoryStream(data.Skip(1).ToArray());            
             return pb.Serializer.Deserialize(target, stream);
         }
 
@@ -38,7 +39,12 @@ namespace CacheManager.Serialization.ProtoBuf
                 pb.Serializer.Serialize(stream, value);
                 output = stream.ToArray();
             }
-            return output;
+
+            // Protobuf returns an empty byte array {} which would be treated as Null value in redis
+            // this is not allowed in cache manager and would cause issues (would look like the item does not exist)
+            // we'll simply add a prefix byte and remove it before deserialization.
+            var prefix = new byte[] { 1 };
+            return prefix.Concat(output).ToArray();
         }
 
         public byte[] SerializeCacheItem<T>(CacheItem<T> value)

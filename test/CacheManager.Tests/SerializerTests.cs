@@ -333,7 +333,7 @@ namespace CacheManager.Tests
 
         [Theory]
         [MemberData("TestCacheManagers")]
-        public void JsonSerializer_FullAddGet<T>(T cache)
+        public void Serializer_FullAddGet<T>(T cache)
             where T : ICacheManager<object>
         {
             using (cache)
@@ -473,6 +473,27 @@ namespace CacheManager.Tests
             var result = serializer.Deserialize(data, items.GetType());
 
             result.ShouldBeEquivalentTo(items);
+        }
+
+        [Fact]
+        public void ProtoBufSerializer_FullAddGet()
+        {
+            using (var cache = TestManagers.CreateRedisCache(serializer: Serializer.Proto))
+            {
+                // arrange
+                var key = Guid.NewGuid().ToString();
+                var pocco = SerializerPoccoSerializable.Create();
+
+                // act
+                Action actSet = () =>
+                {
+                    cache.Add(key, pocco);
+                };
+
+                // assert
+                actSet.ShouldNotThrow();
+                cache.Get<SerializerPoccoSerializable>(key).ShouldBeEquivalentTo(pocco);
+            }
         }
     }
 

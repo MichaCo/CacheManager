@@ -1626,12 +1626,16 @@ namespace CacheManager.Tests
 
         [Serializable]
 #endif
+        [ProtoBuf.ProtoContract]
         public class ComplexType
         {
+            [ProtoBuf.ProtoMember(1)]
             public string Name { get; set; }
 
+            [ProtoBuf.ProtoMember(2)]
             public long SomeId { get; set; }
 
+            [ProtoBuf.ProtoMember(3)]
             public bool SomeBool { get; set; }
 
             public override bool Equals(object obj)

@@ -561,7 +561,7 @@ return result";
             var value = this.ToRedisValue(item.Value);
 
             var flags = sync ? StackRedis.CommandFlags.None : StackRedis.CommandFlags.FireAndForget;
-
+            
             // ARGV [1]: value, [2]: type, [3]: expirationMode, [4]: expirationTimeout(millis), [5]: created(ticks)
             var parameters = new StackRedis.RedisValue[]
             {
@@ -604,6 +604,7 @@ return result";
                 if (result.IsNull && when == StackRedis.When.NotExists)
                 {
                     // add failed because element exists already
+                    this.Logger.LogInfo("DB {0} | Failed to add item {1} because it exists.", this.connection.Database.Database, fullKey);
                     return false;
                 }
 
@@ -622,6 +623,7 @@ return result";
                     return true;
                 }
 
+                this.Logger.LogWarn("DB {0} | Failed to set item {1}: {2}.", this.connection.Database.Database, fullKey, resultValue.ToString());
                 return false;
             }
         }
