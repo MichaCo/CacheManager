@@ -31,6 +31,7 @@
   </Rules>
   <Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.Analyzers">
     <Rule Id="SA1025" Action="None" />
+    <Rule Id="SA1028" Action="None" />
     <Rule Id="SA1107" Action="None" />
     <Rule Id="SA1118" Action="None" />
     <Rule Id="SA1124" Action="None" />

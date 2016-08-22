@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Linq;
 using System.Collections;
+using System.Linq;
 using CacheManager.Core.Internal;
 using static CacheManager.Core.Utility.Guard;
 using StackRedis = StackExchange.Redis;
