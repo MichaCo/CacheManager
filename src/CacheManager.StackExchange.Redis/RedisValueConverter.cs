@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Collections;
 using CacheManager.Core.Internal;
 using static CacheManager.Core.Utility.Guard;
@@ -174,7 +175,16 @@ namespace CacheManager.Redis
                 {
                     if (!this.types.ContainsKey(type))
                     {
-                        this.types.Add(type, Type.GetType(type));
+                        var typeResult = Type.GetType(type, false);
+                        if (typeResult == null)
+                        {
+                            // fixing an issue for corlib types if mixing net core clr and full clr calls 
+                            // (e.g. typeof(string) is different for those two, either System.String, System.Private.CoreLib or System.String, mscorlib)
+                            var typeName = type.Split(',').FirstOrDefault();
+                            typeResult = Type.GetType(typeName, true);
+                        }
+
+                        this.types.Add(type, typeResult);
                     }
                 }
             }
