@@ -26,7 +26,7 @@
   },
   "testRunner": "xunit",
   "frameworks": {
-    "net452": {
+    "net451": {
       "buildOptions": {
         "define": [
           "REDISENABLED",
