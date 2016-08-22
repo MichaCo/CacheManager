@@ -93,3 +93,65 @@ Method |  Platform |  Median |    StdDev | Scaled |
       Redis |      X64 | 57,257.9868 ns | 1,705.0148 ns | 243.68 |
       Redis |      X86 | 61,789.3944 ns | 1,775.6064 ns | 102.97 |
 
+
+### Serializer comparison
+
+For this, I only used the bare serializer without the cache layer overhead (e.g. Redis) which could yield wrong results.
+Each single performance run does 1000 iterations of serializing and deserializing the same object.
+Object structure was the following:
+
+```
+{
+	"L" : 1671986962,
+	"S" : "1625c0a0-86ce-4fd5-9047-cf2fb1d145b2",
+	"SList" : ["98a62a89-f3e9-49d7-93ad-a4295b21c1a1", "47a86f42-64b0-4e6d-9f18-ecb20abff2a3", "7de26dfc-57a5-4f16-b421-8999b73c9afb", "e29a8f8a-feb8-4f3f-9825-78c067215339", "5b2e1923-8a76-4f39-9366-4700c7d0d408", "febea78f-ca5e-49d6-99c9-18738e4fb36f", "7c87b429-e931-4f1a-a59a-433504c87a1c", "bf288ff7-e6c0-4df1-bfcf-677ff31cdf45", "9b7fcd6c-45ee-4584-98b6-b30d32e52f72", "2729610c-d6ce-4960-b83b-b5fd4230cc7e"],
+	"OList" : [{
+			"Id" : 1210151618,
+			"Val" : "6d2871c9-c5f8-44b1-bad9-4eba68683510"
+		}, {
+			"Id" : 1171177179,
+			"Val" : "6b12cd3f-2726-4bf9-a25c-35533de3910c"
+		}, {
+			"Id" : 1676910093,
+			"Val" : "66f52534-92f3-4ef4-b555-48a993a9df7a"
+		}, {
+			"Id" : 977965209,
+			"Val" : "80a20081-a2a5-4dcc-8d07-162f697588b4"
+		}, {
+			"Id" : 2075961031,
+			"Val" : "35f8710a-64e5-481d-9f18-899c65abd675"
+		}, {
+			"Id" : 328057441,
+			"Val" : "d17277e2-ca25-42b1-a4b4-efc00deef358"
+		}, {
+			"Id" : 2046696720,
+			"Val" : "4fa32d5e-f770-4d44-a55b-f6479633839c"
+		}, {
+			"Id" : 422544189,
+			"Val" : "de39c21e-8cb3-4f5c-bf5c-a3d228bc4c25"
+		}, {
+			"Id" : 1887998603,
+			"Val" : "22b00459-7820-46a6-8514-10e901810bbd"
+		}, {
+			"Id" : 852015288,
+			"Val" : "09cc3bd8-da23-42cb-b700-02ec461beb3f"
+		}
+	]
+}
+
+```  
+
+The values are randomly generated the object has one list of strings (Guids) and a list of child objects with an integer and string.
+Pretty simple but large enough to analyze the performance.
+
+**Results:**
+
+             Method | Platform |      Median |    StdDev | Scaled | Scaled-SD |
+------------------- |--------- |------------ |---------- |------- |---------- |
+   BinarySerializer |      X64 |  62.4158 ms | 1.8668 ms |   2.20 |      0.07 |
+     JsonSerializer |      X64 |  28.5521 ms | 0.4633 ms |   1.00 |      0.00 |
+   JsonGzSerializer |      X64 | 102.5552 ms | 4.8584 ms |   3.60 |      0.18 |
+ ProtoBufSerializer |      X64 |  11.1276 ms | 0.1252 ms |   0.39 |      0.01 |
+ 
+ As expected the protobuf serialization outperforms everything else by a huge margin!
+ The compression overhead of the JsonGz serializer seems to be pretty large and may have some potential for optimizations...
