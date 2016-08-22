@@ -46,7 +46,7 @@ namespace CacheManager.Tests
 
         public override void After(MethodInfo methodUnderTest)
         {
-#if DNX451 || NET40 || NET45 || NET452
+#if !DNXCORE50
             Thread.CurrentThread.CurrentCulture = this.originalCulture;
             Thread.CurrentThread.CurrentUICulture = this.originalUICulture;
 #else
