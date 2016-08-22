@@ -9,19 +9,34 @@ namespace CacheManager.Serialization.ProtoBuf
 {
     public class ProtoBufSerializer : ICacheSerializer
     {
+        private static readonly Type cacheItemType = typeof(ProtoBufCacheItem);
+
         public ProtoBufSerializer()
         {
         }
 
         public object Deserialize(byte[] data, Type target)
         {
-            var stream = new MemoryStream(data.Skip(1).ToArray());            
-            return pb.Serializer.Deserialize(target, stream);
+            byte[] destination;
+            if (data.Length == 0)
+            {
+                destination = data;
+            }
+            else
+            {
+                destination = new byte[data.Length - 1];
+                Array.Copy(data, 1, destination, 0, data.Length - 1);
+            }
+
+            using (var stream = new MemoryStream(destination))
+            {
+                return pb.Serializer.Deserialize(target, stream);
+            }
         }
 
         public CacheItem<T> DeserializeCacheItem<T>(byte[] value, Type valueType)
         {
-            var item = (ProtoBufCacheItem)Deserialize(value, typeof(ProtoBufCacheItem));
+            var item = (ProtoBufCacheItem)Deserialize(value, cacheItemType);
             if (item == null)
             {
                 throw new Exception("Unable to deserialize the CacheItem");
