@@ -1,5 +1,5 @@
 {
-  "version": "0.9.0-*",
+  "version": "0.9.1-*",
   "description": "CacheManager extension package providing JSON serialization for distributed caches. CacheManager is an open source caching abstraction layer for .NET written in C#. It supports various cache providers and implements many advanced features. The Core library contains a Newtonsoft.Json based serializer implementation which can be used instead of the default binary serializer.",
   "packOptions": {
     "licenseUrl": "https://github.com/MichaCo/CacheManager/blob/master/LICENSE",
