@@ -133,7 +133,7 @@ namespace CacheManager.Config.Tests
 
             var elapsed = swatch.ElapsedMilliseconds;
             var opsPerSec = Math.Round(ops / swatch.Elapsed.TotalSeconds, 0);
-            Console.WriteLine("\nSimpleAddGetTest completed \tafter: {0:N} ms. \twith {1:N0} Ops/s m:{2}\t f:{3}", elapsed, opsPerSec, misses, fails);
+            Console.WriteLine("\nPutAndMultiGetTest completed \tafter: {0:N} ms. \twith {1:N0} Ops/s \t{2} misses {3} fails", elapsed, opsPerSec, misses, fails);
         }
 
         public static void AddOrUpdateAndMultiGetTest(params ICacheManager<object>[] caches)

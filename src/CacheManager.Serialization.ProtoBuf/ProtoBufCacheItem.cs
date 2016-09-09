@@ -1,12 +1,11 @@
 ﻿using System;
-
 using CacheManager.Core;
 using ProtoBuf;
 
 namespace CacheManager.Serialization.ProtoBuf
 {
     [ProtoContract]
-    public class ProtoBufCacheItem
+    internal class ProtoBufCacheItem
     {
         [ProtoMember(1)]
         public DateTime CreatedUtc { get; set; }

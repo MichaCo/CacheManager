@@ -15,7 +15,8 @@
   "buildOptions": {
     "allowUnsafe": false,
     "languageVersion": "csharp6",
-    "warningsAsErrors": true
+    "warningsAsErrors": true,
+    "xmlDoc": true
   },
   "copyright": "Copyright (c) 2015 MichaConrad",
   "configurations": {

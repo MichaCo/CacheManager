@@ -2,6 +2,9 @@
 
 namespace CacheManager.Core
 {
+    /// <summary>
+    /// Configuration builder extensions for the <c>ProtoBuf</c> based <see cref="CacheManager.Core.Internal.ICacheSerializer"/>.
+    /// </summary>
     public static class ProtoBufConfigurationBuilderExtensions
     {
         /// <summary>
@@ -11,7 +14,7 @@ namespace CacheManager.Core
         /// <returns>The builder instance.</returns>
         public static ConfigurationBuilderCachePart WithProtoBufSerializer(this ConfigurationBuilderCachePart part)
         {
-            Utility.Guard.NotNull<ConfigurationBuilderCachePart>(part, nameof(part));
+            Utility.Guard.NotNull(part, nameof(part));
 
             return part.WithSerializer(typeof(ProtoBufSerializer));
         }

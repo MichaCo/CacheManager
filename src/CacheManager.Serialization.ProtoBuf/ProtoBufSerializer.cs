@@ -7,14 +7,21 @@ using pb = ProtoBuf;
 
 namespace CacheManager.Serialization.ProtoBuf
 {
+    /// <summary>
+    /// Implements the <see cref="ICacheSerializer"/> contract using <c>ProtoBuf</c>.
+    /// </summary>
     public class ProtoBufSerializer : ICacheSerializer
     {
         private static readonly Type cacheItemType = typeof(ProtoBufCacheItem);
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ProtoBufSerializer"/> class.
+        /// </summary>
         public ProtoBufSerializer()
         {
         }
 
+        /// <inheritdoc/>
         public object Deserialize(byte[] data, Type target)
         {
             byte[] destination;
@@ -34,6 +41,7 @@ namespace CacheManager.Serialization.ProtoBuf
             }
         }
 
+        /// <inheritdoc/>
         public CacheItem<T> DeserializeCacheItem<T>(byte[] value, Type valueType)
         {
             var item = (ProtoBufCacheItem)Deserialize(value, cacheItemType);
@@ -46,6 +54,7 @@ namespace CacheManager.Serialization.ProtoBuf
             return item.ToCacheItem<T>(cachedValue);
         }
 
+        /// <inheritdoc/>
         public byte[] Serialize<T>(T value)
         {
             byte[] output = null;
@@ -62,6 +71,7 @@ namespace CacheManager.Serialization.ProtoBuf
             return prefix.Concat(output).ToArray();
         }
 
+        /// <inheritdoc/>
         public byte[] SerializeCacheItem<T>(CacheItem<T> value)
         {
             var cachedValue = Serialize(value.Value);
