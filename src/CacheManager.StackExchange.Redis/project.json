@@ -16,7 +16,8 @@
     "allowUnsafe": false,
     "languageVersion": "csharp6",
     "warningsAsErrors": true,
-    "xmlDoc": true
+    "xmlDoc": true,
+    "keyFile": "../../Tools/key.snk"
   },
   "copyright": "Copyright (c) 2015 MichaConrad",
   "configurations": {
@@ -33,7 +34,8 @@
     }
   },
   "dependencies": {
-    "CacheManager.Core": { "target": "project" }
+    "CacheManager.Core": { "target": "project" },
+    "StackExchange.Redis.StrongName": "1.1.605"
   },
   "frameworks": {
     "net40": {
@@ -41,7 +43,6 @@
         "System.Configuration": ""
       },
       "dependencies": {
-        "StackExchange.Redis": "1.1.603"
       }
     },
     "net45": {
@@ -49,13 +50,11 @@
         "System.Configuration": ""
       },
       "dependencies": {
-        "StackExchange.Redis": "1.1.603"
       }
     },
     "netstandard1.5": {
       "buildOptions": { "define": [ "NETSTANDARD" ] },
       "dependencies": {
-        "StackExchange.Redis": "1.1.604-alpha"
       }
     }
   }
