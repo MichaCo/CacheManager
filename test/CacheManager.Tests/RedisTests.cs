@@ -4,6 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 using CacheManager.Core;
+using CacheManager.Core.Internal;
 using CacheManager.Redis;
 using FluentAssertions;
 using Xunit;
@@ -692,6 +693,49 @@ namespace CacheManager.Tests
             }
         }
 
+        [Theory]
+        [Trait("category", "Redis")]
+        [InlineData(byte.MaxValue)]
+        [InlineData(new byte[] { 0, 1, 2, 3, 4 })]
+        [InlineData("some string")]
+        [InlineData(int.MaxValue)]
+        [InlineData(uint.MaxValue)]
+        [InlineData(short.MaxValue)]
+        [InlineData(ushort.MaxValue)]
+        [InlineData(float.MaxValue)]
+        [InlineData(double.MaxValue)]
+        [InlineData(true)]
+        [InlineData(false)]
+        [InlineData(long.MaxValue)]
+        [InlineData(ulong.MaxValue)]
+        [InlineData((ulong)int.MaxValue)]
+        [InlineData((ulong)long.MaxValue)]
+        [InlineData(char.MinValue)]
+        [InlineData(char.MaxValue)]
+        public void Redis_ValueConverter_ValidateNotUsingSerializerForNative<T>(T value)
+        {
+            var redisKey = Guid.NewGuid().ToString();
+            var cache = CacheFactory.Build<object>(settings =>
+            {
+                settings
+                    .WithSerializer(typeof(FakeTestSerializer))
+                    .WithRedisConfiguration(redisKey, config =>
+                    {
+                        config
+                            .WithDatabase(66)
+                            .WithEndpoint("127.0.0.1", 6379);
+                    })
+                    .WithRedisCacheHandle(redisKey, true);
+            });
+
+            var key = Guid.NewGuid().ToString();
+
+            cache.Add(key, value);
+            var val = cache[key];
+            val.ShouldBeEquivalentTo(value);
+            val.GetType().Should().Be(value.GetType());
+        }
+
         private static void RunMultipleCaches<TCache>(
             Action<TCache, TCache> stepA,
             Action<TCache> stepB,
@@ -738,5 +782,29 @@ namespace CacheManager.Tests
 
         [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "For testing only")]
         public string Something { get; set; }
+    }
+
+    [ExcludeFromCodeCoverage]
+    internal class FakeTestSerializer : ICacheSerializer
+    {
+        public object Deserialize(byte[] data, Type target)
+        {
+            throw new NotImplementedException();
+        }
+
+        public CacheItem<T> DeserializeCacheItem<T>(byte[] value, Type valueType)
+        {
+            throw new NotImplementedException();
+        }
+
+        public byte[] Serialize<T>(T value)
+        {
+            throw new NotImplementedException();
+        }
+
+        public byte[] SerializeCacheItem<T>(CacheItem<T> value)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

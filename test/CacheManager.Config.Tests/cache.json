@@ -39,15 +39,15 @@
         "knownType": "Json"
       },
       "handles": [
-        {
-          "knownType": "Dictionary",
-          "enablePerformanceCounters": true,
-          "enableStatistics": true,
-          "expirationMode": "Absolute",
-          "expirationTimeout": "0:0:23",
-          "isBackplaneSource": false,
-          "name": "sys cache"
-        },
+        //{
+        //  "knownType": "Dictionary",
+        //  "enablePerformanceCounters": true,
+        //  "enableStatistics": true,
+        //  "expirationMode": "Absolute",
+        //  "expirationTimeout": "0:0:23",
+        //  "isBackplaneSource": false,
+        //  "name": "sys cache"
+        //},
         {
           "knownType": "Redis",
           "key": "redisConString",

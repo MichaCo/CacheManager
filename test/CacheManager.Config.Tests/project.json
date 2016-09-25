@@ -1,5 +1,5 @@
 {
-  "version": "0.9.1-*",
+  "version": "0.9.2-*",
   "description": "CacheManager is an open source caching abstraction layer for .NET written in C#. It supports various cache providers and implements many advanced features.",
   "authors": [ "MichaConrad" ],
   "dependencies": {

@@ -1,5 +1,5 @@
 ﻿{
-  "version": "0.9.1-*",
+  "version": "0.9.2-*",
   "description": "CacheManager extension package to work with Microsoft.Extensions.Logging as logging provider. CacheManager is an open source caching abstraction layer for .NET written in C#. The ASP.NET Core logging provides a bridge to the Microsoft.Extensions.Logging framework.",
   "packOptions": {
     "licenseUrl": "https://github.com/MichaCo/CacheManager/blob/master/LICENSE",
@@ -19,7 +19,7 @@
     "xmlDoc": true,
     "keyFile": "../../Tools/key.snk"
   },
-  "copyright": "Copyright (c) 2015 MichaConrad",
+  "copyright": "Copyright (c) 2016 MichaConrad",
   "configurations": {
     "Debug": {
       "buildOptions": {

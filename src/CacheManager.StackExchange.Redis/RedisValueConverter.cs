@@ -7,13 +7,6 @@ using StackRedis = StackExchange.Redis;
 
 namespace CacheManager.Redis
 {
-    //// this looks strange but yes it has a reason. I could use a serializer to get and set values
-    //// from redis but using the "native" supported types from Stackexchange.Redis, instead of using
-    //// a serializer is up to 10x faster... so its more than worth the effort...
-    //// basically I have to cast the values to and from RedisValue which has implicit conversions
-    //// to/from those types defined internally... I cannot simply cast to my TCacheValue, because its
-    //// generic, and not defined as class or struct or anything... so there is basically no other way
-
     internal interface IRedisValueConverter
     {
         StackRedis.RedisValue ToRedisValue<T>(T value);
@@ -31,19 +24,33 @@ namespace CacheManager.Redis
     internal class RedisValueConverter :
         IRedisValueConverter,
         IRedisValueConverter<byte[]>,
+        IRedisValueConverter<byte>,
         IRedisValueConverter<string>,
         IRedisValueConverter<int>,
+        IRedisValueConverter<uint>,
+        IRedisValueConverter<short>,
+        IRedisValueConverter<ushort>,
+        IRedisValueConverter<float>,
         IRedisValueConverter<double>,
         IRedisValueConverter<bool>,
         IRedisValueConverter<long>,
+        IRedisValueConverter<ulong>,
+        IRedisValueConverter<char>,
         IRedisValueConverter<object>
     {
         private static readonly Type ByteArrayType = typeof(byte[]);
+        private static readonly Type ByteType = typeof(byte);
         private static readonly Type StringType = typeof(string);
         private static readonly Type IntType = typeof(int);
+        private static readonly Type UIntType = typeof(uint);
+        private static readonly Type ShortType = typeof(short);
+        private static readonly Type UShortType = typeof(ushort);
+        private static readonly Type SingleType = typeof(float);
         private static readonly Type DoubleType = typeof(double);
         private static readonly Type BoolType = typeof(bool);
         private static readonly Type LongType = typeof(long);
+        private static readonly Type ULongType = typeof(ulong);
+        private static readonly Type CharType = typeof(char);
         private readonly ICacheSerializer serializer;
         private readonly Hashtable types = new Hashtable();
         private readonly object typesLock = new object();
@@ -59,6 +66,10 @@ namespace CacheManager.Redis
 
         byte[] IRedisValueConverter<byte[]>.FromRedisValue(StackRedis.RedisValue value, string valueType) => value;
 
+        StackRedis.RedisValue IRedisValueConverter<byte>.ToRedisValue(byte value) => value;
+
+        byte IRedisValueConverter<byte>.FromRedisValue(StackRedis.RedisValue value, string valueType) => (byte)value;
+
         StackRedis.RedisValue IRedisValueConverter<string>.ToRedisValue(string value) => value;
 
         string IRedisValueConverter<string>.FromRedisValue(StackRedis.RedisValue value, string valueType) => value;
@@ -66,6 +77,22 @@ namespace CacheManager.Redis
         StackRedis.RedisValue IRedisValueConverter<int>.ToRedisValue(int value) => value;
 
         int IRedisValueConverter<int>.FromRedisValue(StackRedis.RedisValue value, string valueType) => (int)value;
+
+        StackRedis.RedisValue IRedisValueConverter<uint>.ToRedisValue(uint value) => value;
+
+        uint IRedisValueConverter<uint>.FromRedisValue(StackRedis.RedisValue value, string valueType) => (uint)value;
+
+        StackRedis.RedisValue IRedisValueConverter<short>.ToRedisValue(short value) => value;
+
+        short IRedisValueConverter<short>.FromRedisValue(StackRedis.RedisValue value, string valueType) => (short)value;
+
+        StackRedis.RedisValue IRedisValueConverter<ushort>.ToRedisValue(ushort value) => value;
+
+        ushort IRedisValueConverter<ushort>.FromRedisValue(StackRedis.RedisValue value, string valueType) => (ushort)value;
+
+        StackRedis.RedisValue IRedisValueConverter<float>.ToRedisValue(float value) => (double)value;
+
+        float IRedisValueConverter<float>.FromRedisValue(StackRedis.RedisValue value, string valueType) => (float)(double)value;
 
         StackRedis.RedisValue IRedisValueConverter<double>.ToRedisValue(double value) => value;
 
@@ -79,6 +106,16 @@ namespace CacheManager.Redis
 
         long IRedisValueConverter<long>.FromRedisValue(StackRedis.RedisValue value, string valueType) => (long)value;
 
+        // ulong can exceed the supported lenght of storing integers (which is signed 64bit integer)
+        // also, even if we do not exceed long.MaxValue, the SA client stores it as double for no aparent reason => cast to long fixes it.
+        StackRedis.RedisValue IRedisValueConverter<ulong>.ToRedisValue(ulong value) => value > long.MaxValue ? (StackRedis.RedisValue)value.ToString() : checked((long)value);
+
+        ulong IRedisValueConverter<ulong>.FromRedisValue(StackRedis.RedisValue value, string valueType) => ulong.Parse(value);
+
+        StackRedis.RedisValue IRedisValueConverter<char>.ToRedisValue(char value) => value;
+
+        char IRedisValueConverter<char>.FromRedisValue(StackRedis.RedisValue value, string valueType) => (char)value;
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0", Scope = "member", Target = "CacheManager.Redis.RedisValueConverter.#CacheManager.Redis.IRedisValueConverter`1<System.Object>.ToRedisValue(System.Object)", Justification = "For performance reasons we don't do checks at this point. Also, its internally used only.")]
         StackRedis.RedisValue IRedisValueConverter<object>.ToRedisValue(object value)
         {
@@ -87,6 +124,11 @@ namespace CacheManager.Redis
             {
                 var converter = (IRedisValueConverter<byte[]>)this;
                 return converter.ToRedisValue((byte[])value);
+            }
+            else if (valueType == ByteType)
+            {
+                var converter = (IRedisValueConverter<byte>)this;
+                return converter.ToRedisValue((byte)value);
             }
             else if (valueType == StringType)
             {
@@ -97,6 +139,26 @@ namespace CacheManager.Redis
             {
                 var converter = (IRedisValueConverter<int>)this;
                 return converter.ToRedisValue((int)value);
+            }
+            else if (valueType == UIntType)
+            {
+                var converter = (IRedisValueConverter<uint>)this;
+                return converter.ToRedisValue((uint)value);
+            }
+            else if (valueType == ShortType)
+            {
+                var converter = (IRedisValueConverter<short>)this;
+                return converter.ToRedisValue((short)value);
+            }
+            else if (valueType == UShortType)
+            {
+                var converter = (IRedisValueConverter<ushort>)this;
+                return converter.ToRedisValue((ushort)value);
+            }
+            else if (valueType == SingleType)
+            {
+                var converter = (IRedisValueConverter<float>)this;
+                return converter.ToRedisValue((float)value);
             }
             else if (valueType == DoubleType)
             {
@@ -113,6 +175,16 @@ namespace CacheManager.Redis
                 var converter = (IRedisValueConverter<long>)this;
                 return converter.ToRedisValue((long)value);
             }
+            else if (valueType == ULongType)
+            {
+                var converter = (IRedisValueConverter<ulong>)this;
+                return converter.ToRedisValue((ulong)value);
+            }
+            else if (valueType == CharType)
+            {
+                var converter = (IRedisValueConverter<char>)this;
+                return converter.ToRedisValue((char)value);
+            }
 
             return this.serializer.Serialize(value);
         }
@@ -126,6 +198,11 @@ namespace CacheManager.Redis
                 var converter = (IRedisValueConverter<byte[]>)this;
                 return converter.FromRedisValue(value, type);
             }
+            else if (valueType == ByteType)
+            {
+                var converter = (IRedisValueConverter<byte>)this;
+                return converter.FromRedisValue(value, type);
+            }
             else if (valueType == StringType)
             {
                 var converter = (IRedisValueConverter<string>)this;
@@ -134,6 +211,26 @@ namespace CacheManager.Redis
             else if (valueType == IntType)
             {
                 var converter = (IRedisValueConverter<int>)this;
+                return converter.FromRedisValue(value, type);
+            }
+            else if (valueType == UIntType)
+            {
+                var converter = (IRedisValueConverter<uint>)this;
+                return converter.FromRedisValue(value, type);
+            }
+            else if (valueType == ShortType)
+            {
+                var converter = (IRedisValueConverter<short>)this;
+                return converter.FromRedisValue(value, type);
+            }
+            else if (valueType == UShortType)
+            {
+                var converter = (IRedisValueConverter<ushort>)this;
+                return converter.FromRedisValue(value, type);
+            }
+            else if (valueType == SingleType)
+            {
+                var converter = (IRedisValueConverter<float>)this;
                 return converter.FromRedisValue(value, type);
             }
             else if (valueType == DoubleType)
@@ -149,6 +246,16 @@ namespace CacheManager.Redis
             else if (valueType == LongType)
             {
                 var converter = (IRedisValueConverter<long>)this;
+                return converter.FromRedisValue(value, type);
+            }
+            else if (valueType == ULongType)
+            {
+                var converter = (IRedisValueConverter<ulong>)this;
+                return converter.FromRedisValue(value, type);
+            }
+            else if (valueType == CharType)
+            {
+                var converter = (IRedisValueConverter<char>)this;
                 return converter.FromRedisValue(value, type);
             }
 
