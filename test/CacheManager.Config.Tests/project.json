@@ -25,7 +25,8 @@
         "System.Configuration": ""
       },
       "dependencies": {
-        "CacheManager.SystemRuntimeCaching": { "target": "project" }
+        "CacheManager.SystemRuntimeCaching": { "target": "project" },
+        "CacheManager.Couchbase": { "target": "project" }
       }
     },
     "netcoreapp1.0": {

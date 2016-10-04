@@ -126,7 +126,8 @@ namespace CacheManager.Core
 
             var part = new ConfigurationBuilderCachePart();
             settings(part);
-            return new BaseCacheManager<TCacheValue>(cacheName, part.Configuration);
+            part.Configuration.Name = cacheName;
+            return new BaseCacheManager<TCacheValue>(part.Configuration);
         }
 
         /// <summary>
@@ -409,7 +410,11 @@ namespace CacheManager.Core
         /// Thrown on certain configuration errors related to the cache handles.
         /// </exception>
         public static ICacheManager<TCacheValue> FromConfiguration<TCacheValue>(string cacheName, CacheManagerConfiguration configuration)
-            => new BaseCacheManager<TCacheValue>(cacheName, configuration);
+        {
+            NotNull(configuration, nameof(configuration));
+            configuration.Name = cacheName;
+            return new BaseCacheManager<TCacheValue>(configuration);
+        }
 
         /// <summary>
         /// <para>Instantiates a cache manager using the given <paramref name="configuration"/>.</para>

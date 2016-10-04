@@ -41,35 +41,7 @@ namespace CacheManager.Tests
             act.ShouldThrow<InvalidOperationException>()
                 .WithMessage("Expiration mode is defined without timeout.");
         }
-
-        [Fact]
-        [ReplaceCulture]
-        public void CacheManager_Ctor_Cfg_WithoutName()
-        {
-            // arrange
-
-            // act
-            Action act = () => new BaseCacheManager<object>(null, new CacheManagerConfiguration());
-
-            // assert
-            act.ShouldThrow<ArgumentNullException>()
-                    .WithMessage("*name*");
-        }
-
-        [Fact]
-        [ReplaceCulture]
-        public void CacheManager_Ctor_Cfg_WithoutSettings()
-        {
-            // arrange
-
-            // act
-            Action act = () => new BaseCacheManager<object>("name", null);
-
-            // assert
-            act.ShouldThrow<ArgumentException>()
-                    .WithMessage("*Parameter name: configuration");
-        }
-
+        
         [Fact]
         [ReplaceCulture]
         public void CacheManager_CtorA_NoConfig()
@@ -1282,7 +1254,7 @@ namespace CacheManager.Tests
         {
             // arrange
             // act
-            Action act = () => new BaseCacheManager<string>("name", new CacheManagerConfiguration() { MaxRetries = 1000 });
+            Action act = () => new BaseCacheManager<string>(new CacheManagerConfiguration() { MaxRetries = 1000 });
 
             // assert
             act.ShouldThrow<InvalidOperationException>().WithMessage("*no cache handles*");

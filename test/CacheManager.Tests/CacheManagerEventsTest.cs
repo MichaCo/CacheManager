@@ -46,7 +46,7 @@ namespace CacheManager.Tests
             Func<CacheActionEventArgs> act = () => new CacheActionEventArgs(key, region);
 
             // assert
-            act().ShouldBeEquivalentTo(new { Region = (string)null, Key = key });
+            act().ShouldBeEquivalentTo(new { Region = (string)null, Key = key, Origin = CacheActionEventArgOrigin.Local });
         }
 
         [Fact]
@@ -85,7 +85,7 @@ namespace CacheManager.Tests
             Func<CacheClearRegionEventArgs> act = () => new CacheClearRegionEventArgs(region);
 
             // assert
-            act().ShouldBeEquivalentTo(new { Region = region });
+            act().ShouldBeEquivalentTo(new { Region = region, Origin = CacheActionEventArgOrigin.Local });
         }
 
         [Theory]
@@ -407,10 +407,6 @@ namespace CacheManager.Tests
                     new string[] { "region", "region2", "region", "region2", },
                     cfg => cfg.WithStrictOrdering(),
                     "we expect 4 region hits");
-
-                data.Results.ShouldAllBeEquivalentTo(
-                    Enumerable.Repeat(UpdateItemResult.ForSuccess<object>(2, false, 1), 3),
-                    "we expect exactly 3 update results with the same results");
             }
         }
 
@@ -523,21 +519,6 @@ namespace CacheManager.Tests
                     {
                         this.Regions.Add(args.Region);
                     }
-                }
-            }
-
-            internal void AddCall(CacheUpdateEventArgs<object> args, params string[] validKeys)
-            {
-                Guard.NotNullOrEmpty(validKeys, nameof(validKeys));
-                if (validKeys.Contains(args.Key))
-                {
-                    this.Calls++;
-                    this.Keys.Add(args.Key);
-                    if (!string.IsNullOrWhiteSpace(args.Region))
-                    {
-                        this.Regions.Add(args.Region);
-                    }
-                    this.Results.Add(args.Result);
                 }
             }
 

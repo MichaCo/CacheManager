@@ -16,7 +16,7 @@
     "allowUnsafe": false,
     "languageVersion": "csharp6",
     "warningsAsErrors": true,
-    "xmlDoc": true,
+    "xmlDoc": true,    
     "keyFile": "../../Tools/key.snk"
   },
   "copyright": "Copyright (c) 2016 MichaConrad",

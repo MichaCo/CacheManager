@@ -62,9 +62,10 @@ namespace CacheManager.Redis
         /// Notifies other cache clients about a changed cache key.
         /// </summary>
         /// <param name="key">The key.</param>
-        public override void NotifyChange(string key)
+        /// <param name="action">The cache action.</param>
+        public override void NotifyChange(string key, CacheItemChangedEventAction action)
         {
-            this.PublishMessage(BackplaneMessage.ForChanged(this.identifier, key));
+            this.PublishMessage(BackplaneMessage.ForChanged(this.identifier, key, action));
         }
 
         /// <summary>
@@ -72,9 +73,10 @@ namespace CacheManager.Redis
         /// </summary>
         /// <param name="key">The key.</param>
         /// <param name="region">The region.</param>
-        public override void NotifyChange(string key, string region)
+        /// <param name="action">The cache action.</param>
+        public override void NotifyChange(string key, string region, CacheItemChangedEventAction action)
         {
-            this.PublishMessage(BackplaneMessage.ForChanged(this.identifier, key, region));
+            this.PublishMessage(BackplaneMessage.ForChanged(this.identifier, key, region, action));
         }
 
         /// <summary>
@@ -265,11 +267,11 @@ namespace CacheManager.Redis
                             case BackplaneAction.Changed:
                                 if (string.IsNullOrWhiteSpace(message.Region))
                                 {
-                                    this.TriggerChanged(message.Key);
+                                    this.TriggerChanged(message.Key, message.ChangeAction);
                                 }
                                 else
                                 {
-                                    this.TriggerChanged(message.Key, message.Region);
+                                    this.TriggerChanged(message.Key, message.Region, message.ChangeAction);
                                 }
                                 break;
 

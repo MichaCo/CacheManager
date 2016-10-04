@@ -17,6 +17,143 @@ namespace CacheManager.Tests
     [ExcludeFromCodeCoverage]
     public class RedisTests
     {
+        static Func<int, Func<bool>, bool> waitForIt = (tries, act) =>
+        {
+            var i = 0;
+            var result = false;
+            while (!result && i < tries)
+            {
+                i++;
+                result = act();
+                if (result) return true;
+                Thread.Sleep(100);
+            }
+
+            return false;
+        };
+
+        [Fact]
+        public void Redis_BackplaneEvents_Add()
+        {
+            var channelName = Guid.NewGuid().ToString();
+            var cacheA = TestManagers.CreateRedisAndDicCacheWithBackplane(101, false, channelName);
+            var cacheB = TestManagers.CreateRedisAndDicCacheWithBackplane(101, false, channelName);
+            var key = Guid.NewGuid().ToString();
+            var eventTriggered = 0;
+            var errors = 0;
+
+            cacheB.OnAdd += (ev, args) =>
+            {
+                try
+                {
+                    args.Key.Should().Be(key);
+                    args.Origin.Should().Be(CacheActionEventArgOrigin.Remote);
+
+                    Interlocked.Increment(ref eventTriggered);
+                }
+                catch
+                {
+                    Interlocked.Increment(ref errors);
+                    throw;
+                }
+            };
+
+            cacheA.Add(key, key);
+
+            waitForIt(10, () => eventTriggered == 1).Should().BeTrue("Event should get triggered through the backplane.");
+            errors.Should().Be(0, "there should be no errors");
+        }
+
+        [Fact]
+        public void Redis_BackplaneEvents_Put()
+        {
+            var channelName = Guid.NewGuid().ToString();
+            var cacheA = TestManagers.CreateRedisAndDicCacheWithBackplane(101, false, channelName);
+            var cacheB = TestManagers.CreateRedisAndDicCacheWithBackplane(101, false, channelName);
+            var key = Guid.NewGuid().ToString();
+            var eventTriggered = 0;
+            var errors = 0;
+
+            cacheB.OnPut += (ev, args) =>
+            {
+                try
+                {
+                    args.Key.Should().Be(key);
+                    args.Origin.Should().Be(CacheActionEventArgOrigin.Remote);
+                    cacheB[key].Should().Be("new val");
+
+                    Interlocked.Increment(ref eventTriggered);
+                }
+                catch
+                {
+                    Interlocked.Increment(ref errors);
+                    throw;
+                }
+            };
+
+            // two calls might actually trigger only once, but the new value should be the last changed one.
+            cacheA.Put(key, key);
+            cacheA.Put(key, "new val");
+
+            waitForIt(10, () => eventTriggered >= 1).Should().BeTrue("Event should get triggered through the backplane.");
+            errors.Should().Be(0, "there should be no errors");
+        }
+
+        [Fact]
+        public void Redis_BackplaneEvents_Update()
+        {
+            var channelName = Guid.NewGuid().ToString();
+            var cacheA = TestManagers.CreateRedisAndDicCacheWithBackplane(101, false, channelName);
+            var cacheB = TestManagers.CreateRedisAndDicCacheWithBackplane(101, false, channelName);
+
+            var key = Guid.NewGuid().ToString();
+            var eventTriggered = 0;
+            var errors = 0;
+
+            cacheB.OnUpdate += (ev, args) =>
+            {
+                try
+                {
+                    args.Key.Should().Be(key);
+                    args.Origin.Should().Be(CacheActionEventArgOrigin.Remote);
+                    cacheB[key].Should().Be("new");
+                    Interlocked.Increment(ref eventTriggered);
+                }
+                catch
+                {
+                    Interlocked.Increment(ref errors);
+                    throw;
+                }
+            };
+
+            cacheA.Add(key, key);
+            cacheA.Update(key, v => "new").Should().Be("new");
+
+            waitForIt(10, () => eventTriggered == 1).Should().BeTrue("Event should get triggered through the backplane.");
+            errors.Should().Be(0, "there should be no errors");
+        }
+        
+        [Fact]
+        public void Redis_BackplaneEvents_Clear()
+        {
+            var channelName = Guid.NewGuid().ToString();
+            var cacheA = TestManagers.CreateRedisAndDicCacheWithBackplane(101, false, channelName);
+            var cacheB = TestManagers.CreateRedisAndDicCacheWithBackplane(101, false, channelName);
+
+            var key = Guid.NewGuid().ToString();
+            var eventTriggered = 0;
+
+            cacheB.OnClear += (ev, args) =>
+            {
+                Interlocked.Increment(ref eventTriggered);
+            };
+
+            cacheA.Add(key, key);
+            cacheA.Clear();
+
+            waitForIt(10, () => eventTriggered == 1).Should().BeTrue("Event should get triggered through the backplane.");
+        }
+
         [Fact]
         public void Redis_Configuration_NoEndpoint()
         {
@@ -556,92 +693,6 @@ namespace CacheManager.Tests
         }
 #endif
 #endif
-
-        [Fact]
-        [Trait("category", "Redis")]
-        public void Redis_ValueConverter_ObjectCacheTypeConversion_Bool()
-        {
-            var cache = TestManagers.CreateRedisCache(12);
-
-            // act/assert
-            using (cache)
-            {
-                var value = true;
-                var key = Guid.NewGuid().ToString();
-                cache.Add(key, value);
-                var result = (bool)cache.Get(key);
-                value.Should().Be(result);
-            }
-        }
-
-        [Fact]
-        [Trait("category", "Redis")]
-        public void Redis_ValueConverter_ObjectCacheTypeConversion_Bytes()
-        {
-            var cache = TestManagers.CreateRedisCache(13);
-
-            // act/assert
-            using (cache)
-            {
-                var value = new byte[] { 0, 1, 2, 3 };
-                var key = Guid.NewGuid().ToString();
-                cache.Add(key, value);
-                var result = cache.Get(key) as byte[];
-                value.Should().BeEquivalentTo(result);
-            }
-        }
-
-        [Fact]
-        [Trait("category", "Redis")]
-        public void Redis_ValueConverter_ObjectCacheTypeConversion_Double()
-        {
-            var cache = TestManagers.CreateRedisCache(14);
-
-            // act/assert
-            using (cache)
-            {
-                var value = 0231.2d;
-                var key = Guid.NewGuid().ToString();
-                cache.Add(key, value);
-                var result = (double)cache.Get(key);
-                value.Should().Be(result);
-            }
-        }
-
-        [Fact]
-        [Trait("category", "Redis")]
-        public void Redis_ValueConverter_ObjectCacheTypeConversion_Int32()
-        {
-            var cache = TestManagers.CreateRedisCache(15);
-
-            // act/assert
-            using (cache)
-            {
-                var key = Guid.NewGuid().ToString();
-                var value = 1234;
-                cache.Add(key, value);
-                var result = (int)cache.Get(key);
-                value.Should().Be(result);
-            }
-        }
-
-        [Fact]
-        [Trait("category", "Redis")]
-        public void Redis_ValueConverter_ObjectCacheTypeConversion_Long()
-        {
-            var cache = TestManagers.CreateRedisCache(16);
-
-            // act/assert
-            using (cache)
-            {
-                var key = Guid.NewGuid().ToString();
-                var value = 123456L;
-                cache.Add(key, value);
-                var result = (long)cache.Get(key);
-                value.Should().Be(result);
-            }
-        }
-
         [Fact]
         [Trait("category", "Redis")]
         public void Redis_ValueConverter_CacheTypeConversion_Poco()
@@ -676,23 +727,6 @@ namespace CacheManager.Tests
             }
         }
 
-        [Fact]
-        [Trait("category", "Redis")]
-        public void Redis_ValueConverter_ObjectCacheTypeConversion_String()
-        {
-            var cache = TestManagers.CreateRedisCache(18);
-
-            // act/assert
-            using (cache)
-            {
-                var key = Guid.NewGuid().ToString();
-                var value = "some string";
-                cache.Add(key, value);
-                var result = cache.Get(key) as string;
-                value.Should().Be(result);
-            }
-        }
-
         [Theory]
         [Trait("category", "Redis")]
         [InlineData(byte.MaxValue)]
@@ -712,7 +746,7 @@ namespace CacheManager.Tests
         [InlineData((ulong)long.MaxValue)]
         [InlineData(char.MinValue)]
         [InlineData(char.MaxValue)]
-        public void Redis_ValueConverter_ValidateNotUsingSerializerForNative<T>(T value)
+        public void Redis_ValueConverter_ValidateValuesTypesNotUsingSerializer<T>(T value)
         {
             var redisKey = Guid.NewGuid().ToString();
             var cache = CacheFactory.Build<object>(settings =>

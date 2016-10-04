@@ -46,7 +46,7 @@ namespace CacheManager.Core
         /// <summary>
         /// Occurs when an item was successfully updated.
         /// </summary>
-        event EventHandler<CacheUpdateEventArgs<TCacheValue>> OnUpdate;
+        event EventHandler<CacheActionEventArgs> OnUpdate;
 
         /// <summary>
         /// Gets the configuration.

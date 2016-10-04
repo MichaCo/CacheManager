@@ -37,6 +37,8 @@ namespace CacheManager.Core.Internal
     /// </summary>
     public sealed class BackplaneMessage
     {
+        private static readonly Type CacheItemChangedEventActionType = typeof(CacheItemChangedEventAction);
+
         private BackplaneMessage(string owner, BackplaneAction action)
         {
             NotNullOrWhiteSpace(owner, nameof(owner));
@@ -59,6 +61,18 @@ namespace CacheManager.Core.Internal
             NotNullOrWhiteSpace(region, nameof(region));
 
             this.Region = region;
+        }
+
+        private BackplaneMessage(string owner, BackplaneAction action, string key, CacheItemChangedEventAction changeAction)
+            : this(owner, action, key)
+        {
+            this.ChangeAction = changeAction;
+        }
+
+        private BackplaneMessage(string owner, BackplaneAction action, string key, string region, CacheItemChangedEventAction changeAction)
+            : this(owner, action, key, region)
+        {
+            this.ChangeAction = changeAction;
         }
 
         /// <summary>
@@ -86,6 +100,11 @@ namespace CacheManager.Core.Internal
         public string Region { get; set; }
 
         /// <summary>
+        /// Gets or sets the cache action.
+        /// </summary>
+        public CacheItemChangedEventAction ChangeAction { get; set; }
+
+        /// <summary>
         /// Deserializes the specified message.
         /// </summary>
         /// <param name="message">The message.</param>
@@ -110,12 +129,38 @@ namespace CacheManager.Core.Internal
             {
                 return new BackplaneMessage(ident, ClearRegion) { Region = Decode(tokens[2]) };
             }
-            else if (tokens.Length == 3)
+
+            if (tokens.Length < 4)
             {
-                return new BackplaneMessage(ident, action, Decode(tokens[2]));
+                throw new InvalidOperationException("Change message does not contain valid data.");
             }
 
-            return new BackplaneMessage(ident, action, Decode(tokens[2]), Decode(tokens[3]));
+            var cacheActionVal = tokens[2];
+            var changeAction = CacheItemChangedEventAction.Invalid;
+            if (cacheActionVal.Equals("Put", StringComparison.OrdinalIgnoreCase))
+            {
+                changeAction = CacheItemChangedEventAction.Put;
+            }
+            if (cacheActionVal.Equals("Add", StringComparison.OrdinalIgnoreCase))
+            {
+                changeAction = CacheItemChangedEventAction.Add;
+            }
+            if (cacheActionVal.Equals("Update", StringComparison.OrdinalIgnoreCase))
+            {
+                changeAction = CacheItemChangedEventAction.Update;
+            }
+
+            if (changeAction == CacheItemChangedEventAction.Invalid)
+            {
+                throw new InvalidOperationException("Received message with invalid change action.");
+            }
+
+            if (tokens.Length == 4)
+            {
+                return new BackplaneMessage(ident, action, Decode(tokens[3]), changeAction);
+            }
+
+            return new BackplaneMessage(ident, action, Decode(tokens[3]), Decode(tokens[4]), changeAction);
         }
 
         /// <summary>
@@ -123,9 +168,10 @@ namespace CacheManager.Core.Internal
         /// </summary>
         /// <param name="owner">The owner.</param>
         /// <param name="key">The key.</param>
+        /// <param name="changeAction">The cache change action.</param>
         /// <returns>The new <see cref="BackplaneMessage"/> instance.</returns>
-        public static BackplaneMessage ForChanged(string owner, string key) =>
-            new BackplaneMessage(owner, Changed, key);
+        public static BackplaneMessage ForChanged(string owner, string key, CacheItemChangedEventAction changeAction) =>
+            new BackplaneMessage(owner, Changed, key, changeAction);
 
         /// <summary>
         /// Creates a new <see cref="BackplaneMessage"/> for the changed action.
@@ -133,9 +179,10 @@ namespace CacheManager.Core.Internal
         /// <param name="owner">The owner.</param>
         /// <param name="key">The key.</param>
         /// <param name="region">The region.</param>
+        /// <param name="changeAction">The cache change action.</param>
         /// <returns>The new <see cref="BackplaneMessage"/> instance.</returns>
-        public static BackplaneMessage ForChanged(string owner, string key, string region) =>
-            new BackplaneMessage(owner, Changed, key, region);
+        public static BackplaneMessage ForChanged(string owner, string key, string region, CacheItemChangedEventAction changeAction) =>
+            new BackplaneMessage(owner, Changed, key, region, changeAction);
 
         /// <summary>
         /// Creates a new <see cref="BackplaneMessage"/> for the clear action.
@@ -198,10 +245,10 @@ namespace CacheManager.Core.Internal
             }
             else if (string.IsNullOrWhiteSpace(this.Region))
             {
-                return this.OwnerIdentity + ":" + action + ":" + Encode(this.Key);
+                return this.OwnerIdentity + ":" + action + ":" + this.ChangeAction + ":" + Encode(this.Key);
             }
 
-            return this.OwnerIdentity + ":" + action + ":" + Encode(this.Key) + ":" + Encode(this.Region);
+            return this.OwnerIdentity + ":" + action + ":" + this.ChangeAction + ":" + Encode(this.Key) + ":" + Encode(this.Region);
         }
 
         private static string Decode(string value)

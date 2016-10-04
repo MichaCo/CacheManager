@@ -16,10 +16,6 @@ namespace CacheManager.Config.Tests
 
             var configuration = configBuilder.Build();
 
-            ////var cacheCfgf = configuration.GetCacheConfigurations().First();
-
-            ////var mgr = new BaseCacheManager<string>(cacheCfgf);
-
             int iterations = int.MaxValue;
             try
             {
@@ -33,13 +29,6 @@ namespace CacheManager.Config.Tests
                 builder.WithUpdateMode(CacheUpdateMode.Up);
                 builder.WithRetryTimeout(1000);
                 builder.WithMaxRetries(10);
-
-//#if NETCORE
-//                builder.WithDictionaryHandle("dic")
-//                    .DisableStatistics();
-
-//                //Console.WriteLine("Using Dictionary cache handle");
-//#else
                 builder.WithDictionaryHandle()
                     .DisableStatistics();
 
@@ -54,16 +43,13 @@ namespace CacheManager.Config.Tests
                         .WithAllowAdmin()
                         .WithDatabase(0)
                         .WithConnectionTimeout(5000)
-                        //.WithEndpoint("ubuntu-local", 7024);
-                        //.WithEndpoint("127.0.0.1", 6380)
                         .WithEndpoint("127.0.0.1", 6379);
-                        //.WithEndpoint("192.168.178.34", 7001);
                 });
 
                 builder.WithJsonSerializer();
 
                 Console.WriteLine("Using Redis cache handle");
-//#endif
+
                 var cacheA = new BaseCacheManager<object>(builder.Build());
                 cacheA.Clear();
 

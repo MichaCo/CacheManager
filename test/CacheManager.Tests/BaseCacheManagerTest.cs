@@ -237,6 +237,7 @@ namespace CacheManager.Tests
                     .WithRedisConfiguration(redisKey, config =>
                     {
                         config
+                            .WithAllowAdmin()
                             .WithDatabase(database)
                             .WithEndpoint(RedisHost, RedisPort);
                     })

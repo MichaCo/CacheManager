@@ -57,7 +57,7 @@ namespace CacheManager.Core
         /// <see cref="ConfigurationBuilder"/>
         /// <see cref="BaseCacheHandle{TCacheValue}"/>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "nope")]
-        public BaseCacheManager(string name, CacheManagerConfiguration configuration)
+        private BaseCacheManager(string name, CacheManagerConfiguration configuration)
         {
             NotNullOrWhiteSpace(name, nameof(name));
             NotNull(configuration, nameof(configuration));
@@ -123,7 +123,7 @@ namespace CacheManager.Core
         /// <summary>
         /// Occurs when an item was successfully updated.
         /// </summary>
-        public event EventHandler<CacheUpdateEventArgs<TCacheValue>> OnUpdate;
+        public event EventHandler<CacheActionEventArgs> OnUpdate;
 
         /// <summary>
         /// Gets the configuration.
@@ -892,11 +892,11 @@ namespace CacheManager.Core
 
                     if (string.IsNullOrWhiteSpace(item.Region))
                     {
-                        this.cacheBackplane.NotifyChange(item.Key);
+                        this.cacheBackplane.NotifyChange(item.Key, CacheItemChangedEventAction.Add);
                     }
                     else
                     {
-                        this.cacheBackplane.NotifyChange(item.Key, item.Region);
+                        this.cacheBackplane.NotifyChange(item.Key, item.Region, CacheItemChangedEventAction.Add);
                     }
                 }
 
@@ -957,11 +957,11 @@ namespace CacheManager.Core
 
                 if (string.IsNullOrWhiteSpace(item.Region))
                 {
-                    this.cacheBackplane.NotifyChange(item.Key);
+                    this.cacheBackplane.NotifyChange(item.Key, CacheItemChangedEventAction.Put);
                 }
                 else
                 {
-                    this.cacheBackplane.NotifyChange(item.Key, item.Region);
+                    this.cacheBackplane.NotifyChange(item.Key, item.Region, CacheItemChangedEventAction.Put);
                 }
             }
 
@@ -1350,7 +1350,7 @@ namespace CacheManager.Core
                 handle.Stats.OnClear();
             }
 
-            this.TriggerOnClear();
+            ////this.TriggerOnClear();
         }
 
         private void ClearRegionHandles(string region, BaseCacheHandle<TCacheValue>[] handles)
@@ -1361,7 +1361,7 @@ namespace CacheManager.Core
                 handle.Stats.OnClearRegion(region);
             }
 
-            this.TriggerOnClearRegion(region);
+            ////this.TriggerOnClearRegion(region);
         }
 
         private void EvictFromOtherHandles(string key, string region, int excludeIndex)
@@ -1461,6 +1461,18 @@ namespace CacheManager.Core
                     }
 
                     this.EvictFromHandles(args.Key, args.Region, handles());
+                    switch (args.Action)
+                    {
+                        case CacheItemChangedEventAction.Add:
+                            this.TriggerOnAdd(args.Key, args.Region, CacheActionEventArgOrigin.Remote);
+                            break;
+                        case CacheItemChangedEventAction.Put:
+                            this.TriggerOnPut(args.Key, args.Region, CacheActionEventArgOrigin.Remote);
+                            break;
+                        case CacheItemChangedEventAction.Update:
+                            this.TriggerOnUpdate(args.Key, args.Region, CacheActionEventArgOrigin.Remote);
+                            break;
+                    }
                 };
 
                 backplane.Removed += (sender, args) =>
@@ -1471,7 +1483,7 @@ namespace CacheManager.Core
                     }
 
                     this.EvictFromHandles(args.Key, args.Region, handles());
-                    this.TriggerOnRemove(args.Key, args.Region);
+                    this.TriggerOnRemove(args.Key, args.Region, CacheActionEventArgOrigin.Remote);
                 };
 
                 backplane.Cleared += (sender, args) =>
@@ -1482,7 +1494,7 @@ namespace CacheManager.Core
                     }
 
                     this.ClearHandles(handles());
-                    this.TriggerOnClear();
+                    this.TriggerOnClear(CacheActionEventArgOrigin.Remote);
                 };
 
                 backplane.ClearedRegion += (sender, args) =>
@@ -1493,45 +1505,45 @@ namespace CacheManager.Core
                     }
 
                     this.ClearRegionHandles(args.Region, handles());
-                    this.TriggerOnClearRegion(args.Region);
+                    this.TriggerOnClearRegion(args.Region, CacheActionEventArgOrigin.Remote);
                 };
             }
         }
 
-        private void TriggerOnAdd(string key, string region)
+        private void TriggerOnAdd(string key, string region, CacheActionEventArgOrigin origin = CacheActionEventArgOrigin.Local)
         {
-            this.OnAdd?.Invoke(this, new CacheActionEventArgs(key, region));
+            this.OnAdd?.Invoke(this, new CacheActionEventArgs(key, region, origin));
         }
 
-        private void TriggerOnClear()
+        private void TriggerOnClear(CacheActionEventArgOrigin origin = CacheActionEventArgOrigin.Local)
         {
-            this.OnClear?.Invoke(this, new CacheClearEventArgs());
+            this.OnClear?.Invoke(this, new CacheClearEventArgs(origin));
         }
 
-        private void TriggerOnClearRegion(string region)
+        private void TriggerOnClearRegion(string region, CacheActionEventArgOrigin origin = CacheActionEventArgOrigin.Local)
         {
-            this.OnClearRegion?.Invoke(this, new CacheClearRegionEventArgs(region));
+            this.OnClearRegion?.Invoke(this, new CacheClearRegionEventArgs(region, origin));
         }
 
-        private void TriggerOnGet(string key, string region)
+        private void TriggerOnGet(string key, string region, CacheActionEventArgOrigin origin = CacheActionEventArgOrigin.Local)
         {
-            this.OnGet?.Invoke(this, new CacheActionEventArgs(key, region));
+            this.OnGet?.Invoke(this, new CacheActionEventArgs(key, region, origin));
         }
 
-        private void TriggerOnPut(string key, string region)
+        private void TriggerOnPut(string key, string region, CacheActionEventArgOrigin origin = CacheActionEventArgOrigin.Local)
         {
-            this.OnPut?.Invoke(this, new CacheActionEventArgs(key, region));
+            this.OnPut?.Invoke(this, new CacheActionEventArgs(key, region, origin));
         }
 
-        private void TriggerOnRemove(string key, string region)
+        private void TriggerOnRemove(string key, string region, CacheActionEventArgOrigin origin = CacheActionEventArgOrigin.Local)
         {
             NotNullOrWhiteSpace(key, nameof(key));
-            this.OnRemove?.Invoke(this, new CacheActionEventArgs(key, region));
+            this.OnRemove?.Invoke(this, new CacheActionEventArgs(key, region, origin));
         }
 
-        private void TriggerOnUpdate(string key, string region, int maxRetries, UpdateItemResult<TCacheValue> result)
+        private void TriggerOnUpdate(string key, string region, CacheActionEventArgOrigin origin = CacheActionEventArgOrigin.Local)
         {
-            this.OnUpdate?.Invoke(this, new CacheUpdateEventArgs<TCacheValue>(key, region, maxRetries, result));
+            this.OnUpdate?.Invoke(this, new CacheActionEventArgs(key, region, origin));
         }
 
         private bool UpdateInternal(
@@ -1553,7 +1565,7 @@ namespace CacheManager.Core
             this.CheckDisposed();
 
             UpdateItemResultState overallResult = UpdateItemResultState.Success;
-            bool overallVersionConflictOccurred = false;
+            ////bool overallVersionConflictOccurred = false;
             int overallTries = 1;
 
             // assign null
@@ -1588,10 +1600,10 @@ namespace CacheManager.Core
                         result.UpdateState);
                 }
 
-                if (result.VersionConflictOccurred)
-                {
-                    overallVersionConflictOccurred = true;
-                }
+                ////if (result.VersionConflictOccurred)
+                ////{
+                ////    overallVersionConflictOccurred = true;
+                ////}
 
                 overallResult = result.UpdateState;
                 overallTries += result.NumberOfTriesNeeded > 1 ? result.NumberOfTriesNeeded - 1 : 0;
@@ -1653,16 +1665,16 @@ namespace CacheManager.Core
 
                 if (string.IsNullOrWhiteSpace(region))
                 {
-                    this.cacheBackplane.NotifyChange(key);
+                    this.cacheBackplane.NotifyChange(key, CacheItemChangedEventAction.Update);
                 }
                 else
                 {
-                    this.cacheBackplane.NotifyChange(key, region);
+                    this.cacheBackplane.NotifyChange(key, region, CacheItemChangedEventAction.Update);
                 }
             }
 
             // trigger update event with the overall results
-            this.TriggerOnUpdate(key, region, maxRetries, new UpdateItemResult<TCacheValue>(value, overallResult, overallVersionConflictOccurred, overallTries));
+            this.TriggerOnUpdate(key, region);
 
             return overallResult == UpdateItemResultState.Success;
         }
