@@ -43,7 +43,9 @@
         {
           "knownType": "Redis",
           "key": "redisConnection",
-          "isBackplaneSource": true
+          "isBackplaneSource": true,
+          "expirationMode": "Sliding",
+          "expirationTimeout": "00:10:00"
         }
       ]
     }

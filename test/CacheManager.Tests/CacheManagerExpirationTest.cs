@@ -16,6 +16,30 @@ namespace CacheManager.Tests
 #endif
     public class CacheManagerExpirationTest : BaseCacheManagerTest
     {
+        // Issue #97 - Unable to reset expiration to 'None'
+        [Fact]
+        public void CacheManager_Expire_UnableToResetToNone()
+        {
+            using (var cache = CacheFactory.Build<string>(
+                s => s
+                    .WithDictionaryHandle()
+                    .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromDays(10))))
+            {
+                var key = Guid.NewGuid().ToString();
+                cache.Add(key, "value");
+
+                cache.Get(key).Should().Be("value");
+                cache.GetCacheItem(key).ExpirationMode.Should().Be(ExpirationMode.Sliding);
+
+                var item = cache.GetCacheItem(key);
+                var newItem = item.WithNoExpiration();
+
+                cache.Put(newItem);
+
+                cache.GetCacheItem(key).ExpirationMode.Should().Be(ExpirationMode.None);
+            }
+        }
+
         // Issue #57 - Verifying diggits will be ignored and stored as proper milliseconds value (integer).
         [Theory]
         [MemberData("TestCacheManagers")]

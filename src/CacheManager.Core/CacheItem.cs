@@ -115,8 +115,8 @@ namespace CacheManager.Core
             this.Region = region;
             this.Value = value;
             this.ValueType = value.GetType();
-            this.ExpirationMode = expiration ?? ExpirationMode.None;
-            this.ExpirationTimeout = this.ExpirationMode == ExpirationMode.None ? TimeSpan.Zero : timeout ?? TimeSpan.Zero;
+            this.ExpirationMode = expiration ?? ExpirationMode.Default;
+            this.ExpirationTimeout = (this.ExpirationMode == ExpirationMode.None || this.ExpirationMode == ExpirationMode.Default) ? TimeSpan.Zero : timeout ?? TimeSpan.Zero;
 
             // validation check for very high expiration time.
             // Otherwise this will lead to all kinds of errors (e.g. adding time to sliding while using a TimeSpan with long.MaxValue ticks)
@@ -262,7 +262,16 @@ namespace CacheManager.Core
         /// <remarks>We do not clone the cache item or value.</remarks>
         /// <returns>The new instance of the cache item.</returns>
         public CacheItem<T> WithNoExpiration() =>
-            new CacheItem<T>(this.Key, this.Region, this.Value, null, null, this.CreatedUtc, this.LastAccessedUtc);
+            new CacheItem<T>(this.Key, this.Region, this.Value, ExpirationMode.None, TimeSpan.Zero, this.CreatedUtc, this.LastAccessedUtc);
+
+        /// <summary>
+        /// Creates a copy of the current cache item with no explicit expiration, instructing the cache to use the default defined in the cache handle configuration.
+        /// This method doesn't change the state of the item in the cache. Use <c>Put</c> or similar methods to update the cache with the returned copy of the item.
+        /// </summary>
+        /// <remarks>We do not clone the cache item or value.</remarks>
+        /// <returns>The new instance of the cache item.</returns>
+        public CacheItem<T> WithDefaultExpiration() =>
+            new CacheItem<T>(this.Key, this.Region, this.Value, ExpirationMode.Default, TimeSpan.Zero, this.CreatedUtc, this.LastAccessedUtc);
 
         /// <summary>
         /// Creates a copy of the current cache item with new value.

@@ -266,23 +266,37 @@ namespace CacheManager.Core.Internal
             // logic should be that the item setting overrules the handle setting if the item
             // doesn't define a mode (value is None) it should use the handle's setting. if the
             // handle also doesn't define a mode (value is None), we use None.
-            var expirationMode = ExpirationMode.None;
+            var expirationMode = ExpirationMode.Default;
             var expirationTimeout = TimeSpan.Zero;
 
-            if (item.ExpirationMode != ExpirationMode.None || this.Configuration.ExpirationMode != ExpirationMode.None)
+            if (item.ExpirationMode != ExpirationMode.Default || this.Configuration.ExpirationMode != ExpirationMode.Default)
             {
-                expirationMode = item.ExpirationMode != ExpirationMode.None ? item.ExpirationMode : this.Configuration.ExpirationMode;
+                expirationMode = item.ExpirationMode != ExpirationMode.Default ? item.ExpirationMode : this.Configuration.ExpirationMode;
 
-                // if a mode is defined, the item or the fallback (handle config) must have a
-                // timeout defined.
-                // ToDo: this check is pretty late, but the user can configure the CacheItem
-                //       explicitly, so we have to catch it at this point.
-                if (item.ExpirationTimeout == TimeSpan.Zero && this.Configuration.ExpirationTimeout == TimeSpan.Zero)
+                if (expirationMode == ExpirationMode.None)
                 {
-                    throw new InvalidOperationException("Expiration mode is defined without timeout.");
+                    expirationTimeout = TimeSpan.Zero;
                 }
+                else
+                {
 
-                expirationTimeout = item.ExpirationTimeout != TimeSpan.Zero ? item.ExpirationTimeout : this.Configuration.ExpirationTimeout;
+                    // if a mode is defined, the item or the fallback (handle config) must have a
+                    // timeout defined.
+                    // ToDo: this check is pretty late, but the user can configure the CacheItem
+                    //       explicitly, so we have to catch it at this point.
+                    if (item.ExpirationTimeout == TimeSpan.Zero && this.Configuration.ExpirationTimeout == TimeSpan.Zero)
+                    {
+                        throw new InvalidOperationException("Expiration mode is defined without timeout.");
+                    }
+
+                    expirationTimeout = item.ExpirationTimeout != TimeSpan.Zero ? item.ExpirationTimeout : this.Configuration.ExpirationTimeout;
+                }
+            }
+
+            if (expirationMode == ExpirationMode.Default)
+            {
+                expirationMode = ExpirationMode.None;
+                expirationTimeout = TimeSpan.Zero;
             }
 
             // Fix issue 2: updating the item exp timeout and mode: Fix issue where expiration got

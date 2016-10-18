@@ -279,7 +279,7 @@ namespace CacheManager.Tests
 
             // assert
             act.Should()
-                .Match<CacheItem<object>>(p => p.ExpirationMode == ExpirationMode.None)
+                .Match<CacheItem<object>>(p => p.ExpirationMode == ExpirationMode.Default)
                 .And.Match<CacheItem<object>>(p => p.ExpirationTimeout == TimeSpan.Zero)
                 .And.Match<CacheItem<object>>(p => p.Key == key)
                 .And.Match<CacheItem<object>>(p => p.Value == value)
@@ -419,7 +419,7 @@ namespace CacheManager.Tests
 
             // assert
             act.Should()
-                .Match<CacheItem<object>>(p => p.ExpirationMode == ExpirationMode.None)
+                .Match<CacheItem<object>>(p => p.ExpirationMode == ExpirationMode.Default)
                 .And.Match<CacheItem<object>>(p => p.ExpirationTimeout == TimeSpan.Zero)
                 .And.Match<CacheItem<object>>(p => p.Key == key)
                 .And.Match<CacheItem<object>>(p => p.Value == value)

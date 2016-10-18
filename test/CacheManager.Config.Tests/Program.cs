@@ -14,7 +14,11 @@ namespace CacheManager.Config.Tests
             var configBuilder = new Microsoft.Extensions.Configuration.ConfigurationBuilder()
                 .AddJsonFile("cache.json");
 
-            var configuration = configBuilder.Build();
+            var configuration = configBuilder.Build().GetCacheConfiguration();
+
+            var cache = new BaseCacheManager<string>(configuration);
+
+            cache.Add("key", "value");
 
             int iterations = int.MaxValue;
             try

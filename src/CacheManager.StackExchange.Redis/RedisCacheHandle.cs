@@ -32,7 +32,7 @@ namespace CacheManager.Redis
         private static readonly string ScriptAdd = $@"
 if redis.call('HSETNX', KEYS[1], '{HashFieldValue}', ARGV[1]) == 1 then
     local result=redis.call('HMSET', KEYS[1], '{HashFieldType}', ARGV[2], '{HashFieldExpirationMode}', ARGV[3], '{HashFieldExpirationTimeout}', ARGV[4], '{HashFieldCreated}', ARGV[5])
-    if ARGV[3] ~= '0' and ARGV[4] ~= '0' then
+    if ARGV[3] > '1' and ARGV[4] ~= '0' then
         redis.call('PEXPIRE', KEYS[1], ARGV[4])
     else
         redis.call('PERSIST', KEYS[1])
@@ -44,7 +44,7 @@ end";
 
         private static readonly string ScriptPut = $@"
 local result=redis.call('HMSET', KEYS[1], '{HashFieldValue}', ARGV[1], '{HashFieldType}', ARGV[2], '{HashFieldExpirationMode}', ARGV[3], '{HashFieldExpirationTimeout}', ARGV[4], '{HashFieldCreated}', ARGV[5])
-if ARGV[3] ~= '0' and ARGV[4] ~= '0' then
+if ARGV[3] > '1' and ARGV[4] ~= '0' then
     redis.call('PEXPIRE', KEYS[1], ARGV[4])
 else
     redis.call('PERSIST', KEYS[1])
@@ -60,7 +60,7 @@ end";
 
         private static readonly string ScriptGet = $@"
 local result = redis.call('HMGET', KEYS[1], '{HashFieldValue}', '{HashFieldExpirationMode}', '{HashFieldExpirationTimeout}', '{HashFieldCreated}', '{HashFieldType}')
-if (result[2] and result[2] == '1') then
+if (result[2] and result[2] == '2') then
     if (result[3] and result[3] ~= '' and result[3] ~= '0') then
         redis.call('PEXPIRE', KEYS[1], result[3])
     end
