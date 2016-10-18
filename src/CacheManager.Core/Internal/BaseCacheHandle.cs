@@ -137,11 +137,18 @@ namespace CacheManager.Core.Internal
                     return UpdateItemResult.ForItemDidNotExist<TCacheValue>();
                 }
 
-                var value = updateValue(original.Value);
-                var newItem = original.WithValue(value);
+                var newValue = updateValue(original.Value);
+
+                // added null check, throw explicit to me more consistent. Otherwise it would throw later eventually
+                if (newValue == null)
+                {
+                    throw new InvalidOperationException("Factory value must not be null.");
+                }
+
+                var newItem = original.WithValue(newValue);
                 newItem.LastAccessedUtc = DateTime.UtcNow;
                 this.Put(newItem);
-                return UpdateItemResult.ForSuccess<TCacheValue>(value);
+                return UpdateItemResult.ForSuccess<TCacheValue>(newValue);
             }
         }
 

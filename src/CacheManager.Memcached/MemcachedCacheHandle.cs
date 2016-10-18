@@ -351,7 +351,15 @@ namespace CacheManager.Memcached
                     return UpdateItemResult.ForItemDidNotExist<TCacheValue>();
                 }
 
-                item = item.WithValue(updateValue(item.Value));
+                var newValue = updateValue(item.Value);
+
+                // added null check, throw explicit to me more consistent. Otherwise it would throw later eventually
+                if (newValue == null)
+                {
+                    throw new InvalidOperationException("Factory value must not be null.");
+                }
+
+                item = item.WithValue(newValue);
 
                 if (item.ExpirationMode == ExpirationMode.Absolute)
                 {

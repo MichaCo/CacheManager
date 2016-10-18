@@ -10,15 +10,7 @@
         }
       ],
       "allowAdmin": true,
-      "database": 11,
-      "isSsl": true,
-      "password": "password",
-      "sslHost": "sslHost",
-      "connectionTimeout": 123
-    },
-    {
-      "key": "redisConString",
-      "connectionString": "localhost:6379,allowAdmin=true"
+      "database": 11
     }
   ],
   "cacheManagers": [
@@ -28,7 +20,7 @@
       "retryTimeout": 100,
       "updateMode": "Full",
       "backplane": {
-        "key": "redisConString",
+        "key": "redisConnection",
         "knownType": "Redis",
         "channelName": "test"
       },
@@ -50,7 +42,7 @@
         //},
         {
           "knownType": "Redis",
-          "key": "redisConString",
+          "key": "redisConnection",
           "isBackplaneSource": true
         }
       ]

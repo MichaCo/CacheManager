@@ -41,7 +41,7 @@ namespace CacheManager.Tests
             act.ShouldThrow<InvalidOperationException>()
                 .WithMessage("Expiration mode is defined without timeout.");
         }
-        
+
         [Fact]
         [ReplaceCulture]
         public void CacheManager_CtorA_NoConfig()
@@ -625,6 +625,42 @@ namespace CacheManager.Tests
                 cache[key, "region"].Should().Be(val);
                 cache[keyF].Should().Be(val);
                 cache[keyF, "region"].Should().Be(val);
+            }
+        }
+
+        [Theory]
+        [MemberData("TestCacheManagers")]
+        public void CacheManager_GetOrAdd_FactoryReturnsNull<T>(T cache)
+            where T : ICacheManager<object>
+        {
+            // arrange
+            var key = Guid.NewGuid().ToString();
+
+            using (cache)
+            {
+                // act
+                Action act = () => cache.GetOrAdd(key, (k) => null);
+
+                // assert
+                act.ShouldThrow<InvalidOperationException>("added");
+            }
+        }
+
+        [Theory]
+        [MemberData("TestCacheManagers")]
+        public void CacheManager_GetOrAdd_AddNull<T>(T cache)
+            where T : ICacheManager<object>
+        {
+            // arrange
+            var key = Guid.NewGuid().ToString();
+
+            using (cache)
+            {
+                // act
+                Action act = () => cache.GetOrAdd(key, (object)null);
+
+                // assert
+                act.ShouldThrow<InvalidOperationException>("added");
             }
         }
 

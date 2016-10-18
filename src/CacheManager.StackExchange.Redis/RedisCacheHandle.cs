@@ -214,6 +214,12 @@ return result";
                     // run update
                     var newValue = updateValue(item.Value);
 
+                    // added null check, throw explicit to me more consistent. Otherwise it would throw within the script exec
+                    if (newValue == null)
+                    {
+                        throw new InvalidOperationException("Factory value must not be null.");
+                    }
+
                     var result = this.Eval(ScriptType.Update, fullKey, new[]
                     {
                         this.ToRedisValue(newValue),
@@ -261,6 +267,12 @@ return result";
 
                     // run update
                     var newValue = updateValue(item.Value);
+                    
+                    // added null check, throw explicit to me more consistent. Otherwise it would throw later
+                    if (newValue == null)
+                    {
+                        throw new InvalidOperationException("Factory value must not be null.");
+                    }
 
                     tran.HashSetAsync(fullKey, HashFieldValue, this.ToRedisValue(newValue));
 

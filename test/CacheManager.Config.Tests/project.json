@@ -29,18 +29,18 @@
         "CacheManager.Couchbase": { "target": "project" }
       }
     },
-    "netcoreapp1.0": {
-      "buildOptions": { "define": [ "NETCORE" ] },
-      "dependencies": {
-        "Microsoft.NETCore.App": {
-          "version": "1.0.0",
-          "type": "platform"
-        },
-        "System.Threading.Thread": "4.0.0",
-        "System.Threading.Tasks.Parallel": "4.0.1",
-        "System.Console": "4.0.0",
-        "System.Runtime": "4.1.0"
-      }
-    }
+    //"netcoreapp1.0": {
+    //  "buildOptions": { "define": [ "NETCORE" ] },
+    //  "dependencies": {
+    //    "Microsoft.NETCore.App": {
+    //      "version": "1.0.0",
+    //      "type": "platform"
+    //    },
+    //    "System.Threading.Thread": "4.0.0",
+    //    "System.Threading.Tasks.Parallel": "4.0.1",
+    //    "System.Console": "4.0.0",
+    //    "System.Runtime": "4.1.0"
+    //  }
+    //}
   }
 }

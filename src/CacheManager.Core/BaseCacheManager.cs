@@ -1419,6 +1419,15 @@ namespace CacheManager.Core
                 }
 
                 var newValue = valueFactory(key, region);
+
+                // Throw explicit to me more consistent. Otherwise it would throw later eventually...
+                if (newValue == null)
+                {
+                    throw new InvalidOperationException("The value which should be added must not be null.");
+                    //// see #99 TBD
+                    ////return newValue;
+                }
+
                 item = string.IsNullOrWhiteSpace(region) ? new CacheItem<TCacheValue>(key, newValue) : new CacheItem<TCacheValue>(key, region, newValue);
                 if (this.AddInternal(item))
                 {

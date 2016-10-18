@@ -15,8 +15,21 @@ namespace CacheManager.Tests
 #else
     [Trait("Framework", "NET45")]
 #endif
-    public class CacheManagerAdvancedUpdateTests
+    public class CacheManagerAdvancedUpdateTests : BaseCacheManagerTest
     {
+        [Theory]
+        [MemberData("TestCacheManagers")]
+        public void Update_ThrowsIf_FactoryReturnsNull(ICacheManager<object> cache)
+        {
+            using (cache)
+            {
+                var key = Guid.NewGuid().ToString();
+                cache.Add(key, "value");
+                Action act = () => cache.Update(key, v => null);
+                act.ShouldThrow<InvalidOperationException>("factory");
+            }
+        }
+
         [Fact]
         [ReplaceCulture]
         public void UpdateItemResult_ForSuccess()
