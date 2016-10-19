@@ -1108,7 +1108,7 @@ namespace CacheManager.Tests
                 return err?.ToString();
             };
 
-            var triggerResult = waitForIt(10, () => eventTriggeredRemote == 1);
+            var triggerResult = waitForIt(20, () => eventTriggeredRemote == 1);
             lastError.Should().BeNull(formatError(lastError));
             triggerResult.Should().BeTrue("Event should get triggered through the backplane.");
             eventTriggeredLocal.Should().Be(1, "Local cache event should be triggered one time");
