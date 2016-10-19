@@ -12,12 +12,13 @@ namespace CacheManager.Core.Internal
     public enum BackplaneAction
     {
         /// <summary>
-        /// The remove action.
+        /// Default value is invalid to ensure we are not getting wrong results.
         /// </summary>
-        Removed,
+        Invalid = 0,
 
         /// <summary>
         /// The changed action.
+        /// <see cref="CacheItemChangedEventAction"/>
         /// </summary>
         Changed,
 
@@ -29,7 +30,38 @@ namespace CacheManager.Core.Internal
         /// <summary>
         /// The clear region action.
         /// </summary>
-        ClearRegion
+        ClearRegion,
+
+        /// <summary>
+        /// If the cache item has been removed.
+        /// </summary>
+        Removed
+    }
+
+    /// <summary>
+    /// The enum defines the actual operation used to change the value in the cache.
+    /// </summary>
+    public enum CacheItemChangedEventAction
+    {
+        /// <summary>
+        /// Default value is invalid to ensure we are not getting wrong results.
+        /// </summary>
+        Invalid = 0,
+
+        /// <summary>
+        /// If Put was used to change the value.
+        /// </summary>
+        Put,
+
+        /// <summary>
+        /// If Add was used to change the value.
+        /// </summary>
+        Add,
+
+        /// <summary>
+        /// If Update was used to change the value.
+        /// </summary>
+        Update
     }
 
     /// <summary>
@@ -105,18 +137,56 @@ namespace CacheManager.Core.Internal
         public CacheItemChangedEventAction ChangeAction { get; set; }
 
         /// <summary>
-        /// Deserializes the specified message.
+        /// Serializes this instance.
+        /// </summary>
+        /// <returns>The string representing this message.</returns>
+        public string Serialize()
+        {
+            var action = (int)this.Action;
+            if (this.Action == Clear)
+            {
+                return this.OwnerIdentity + ":" + action;
+            }
+            else if (this.Action == ClearRegion)
+            {
+                return this.OwnerIdentity + ":" + action + ":" + Encode(this.Region);
+            }
+            else if (this.Action == Removed)
+            {
+                if (string.IsNullOrWhiteSpace(this.Region))
+                {
+                    return this.OwnerIdentity + ":" + action + ":" + ":" + Encode(this.Key);
+                }
+
+                return this.OwnerIdentity + ":" + action + ":" + Encode(this.Key) + ":" + Encode(this.Region);
+            }
+            else if (string.IsNullOrWhiteSpace(this.Region))
+            {
+                return this.OwnerIdentity + ":" + action + ":" + this.ChangeAction + ":" + Encode(this.Key);
+            }
+
+            return this.OwnerIdentity + ":" + action + ":" + this.ChangeAction + ":" + Encode(this.Key) + ":" + Encode(this.Region);
+        }
+
+        /// <summary>
+        /// Deserializes the <paramref name="message"/>.
         /// </summary>
         /// <param name="message">The message.</param>
         /// <returns>
-        /// The <see cref="BackplaneMessage" /> instance.
+        /// The new <see cref="BackplaneMessage" /> instance.
         /// </returns>
-        /// <exception cref="System.ArgumentException">Parameter message cannot be null or empty.</exception>
+        /// <exception cref="System.ArgumentException">If <paramref name="message"/> is null.</exception>
+        /// <exception cref="System.InvalidOperationException">If the message is not valid.</exception>
         public static BackplaneMessage Deserialize(string message)
         {
             NotNullOrWhiteSpace(message, nameof(message));
 
             var tokens = message.Split(new[] { ":" }, StringSplitOptions.RemoveEmptyEntries);
+
+            if (tokens.Length < 2)
+            {
+                throw new InvalidOperationException("Received an invalid message.");
+            }
 
             var ident = tokens[0];
             var action = (BackplaneAction)int.Parse(tokens[1], CultureInfo.InvariantCulture);
@@ -128,6 +198,20 @@ namespace CacheManager.Core.Internal
             else if (action == ClearRegion)
             {
                 return new BackplaneMessage(ident, ClearRegion) { Region = Decode(tokens[2]) };
+            }
+            else if (action == Removed)
+            {
+                if (tokens.Length < 3)
+                {
+                    throw new InvalidOperationException("Remove message does not contain valid data.");
+                }
+
+                if (tokens.Length == 3)
+                {
+                    return new BackplaneMessage(ident, Removed, Decode(tokens[2]));
+                }
+
+                return new BackplaneMessage(ident, Removed, Decode(tokens[2]), Decode(tokens[3]));
             }
 
             if (tokens.Length < 4)
@@ -227,29 +311,6 @@ namespace CacheManager.Core.Internal
         /// <returns>The new <see cref="BackplaneMessage"/> instance.</returns>
         public static BackplaneMessage ForRemoved(string owner, string key, string region) =>
             new BackplaneMessage(owner, Removed, key, region);
-
-        /// <summary>
-        /// Serializes this instance.
-        /// </summary>
-        /// <returns>The string representing this message.</returns>
-        public string Serialize()
-        {
-            var action = (int)this.Action;
-            if (this.Action == Clear)
-            {
-                return this.OwnerIdentity + ":" + action;
-            }
-            else if (this.Action == ClearRegion)
-            {
-                return this.OwnerIdentity + ":" + action + ":" + Encode(this.Region);
-            }
-            else if (string.IsNullOrWhiteSpace(this.Region))
-            {
-                return this.OwnerIdentity + ":" + action + ":" + this.ChangeAction + ":" + Encode(this.Key);
-            }
-
-            return this.OwnerIdentity + ":" + action + ":" + this.ChangeAction + ":" + Encode(this.Key) + ":" + Encode(this.Region);
-        }
 
         private static string Decode(string value)
         {

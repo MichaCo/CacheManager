@@ -8,7 +8,6 @@
       "cache.json"
     ]
   },
-
   "dependencies": {
     "CacheManager.StackExchange.Redis": { "target": "project" },
     "CacheManager.Serialization.Json": { "target": "project" },
@@ -16,12 +15,16 @@
     "CacheManager.Microsoft.Extensions.Configuration": { "target": "project" },
     "Microsoft.Extensions.Configuration.Json": "1.0.0"
   },
-
-  "commands": {
-    "CacheManager.Backplane.App": "CacheManager.Backplane.App"
-  },
-
   "frameworks": {
-    "net451": { }
+    "netcoreapp1.0": {
+      "buildOptions": { "define": [ "NETCORE" ] },
+      "dependencies": {
+        "Microsoft.NETCore.App": {
+          "version": "1.0.0",
+          "type": "platform"
+        },
+        "System.Console": "4.0.0"
+      }
+    }
   }
 }

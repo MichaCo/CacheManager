@@ -279,7 +279,6 @@ namespace CacheManager.Core.Internal
                 }
                 else
                 {
-
                     // if a mode is defined, the item or the fallback (handle config) must have a
                     // timeout defined.
                     // ToDo: this check is pretty late, but the user can configure the CacheItem

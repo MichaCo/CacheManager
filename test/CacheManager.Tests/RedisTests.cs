@@ -8,150 +8,307 @@ using CacheManager.Core.Internal;
 using CacheManager.Redis;
 using FluentAssertions;
 using Xunit;
+using Xunit.Sdk;
 
 namespace CacheManager.Tests
 {
     /// <summary>
-    /// To run the memcached test, run the bat files under /memcached before executing the tests.
+    /// To run the redis tests, make sure a local redis server instance is running. See redis folder under tools.
     /// </summary>
     [ExcludeFromCodeCoverage]
     public class RedisTests
     {
-        static Func<int, Func<bool>, bool> waitForIt = (tries, act) =>
+        private enum CacheEvent
         {
-            var i = 0;
-            var result = false;
-            while (!result && i < tries)
-            {
-                i++;
-                result = act();
-                if (result) return true;
-                Thread.Sleep(100);
-            }
-
-            return false;
-        };
+            OnAdd,
+            OnPut,
+            OnRemove,
+            OnUpdate,
+            OnClear,
+            OnClearRegion
+        }
 
         [Fact]
         public void Redis_BackplaneEvents_Add()
         {
-            var channelName = Guid.NewGuid().ToString();
-            var cacheA = TestManagers.CreateRedisAndDicCacheWithBackplane(101, false, channelName);
-            var cacheB = TestManagers.CreateRedisAndDicCacheWithBackplane(101, false, channelName);
             var key = Guid.NewGuid().ToString();
-            var eventTriggered = 0;
-            var errors = 0;
 
-            cacheB.OnAdd += (ev, args) =>
-            {
-                try
+            TestBackplaneEvent<CacheActionEventArgs>(
+                CacheEvent.OnAdd,
+                (cacheA) =>
+                {
+                    cacheA.Add(key, key);
+                },
+                (cacheA, args) =>
                 {
                     args.Key.Should().Be(key);
-                    args.Origin.Should().Be(CacheActionEventArgOrigin.Remote);
-
-                    Interlocked.Increment(ref eventTriggered);
-                }
-                catch
+                    args.Region.Should().BeNull();
+                    args.Origin.Should().Be(CacheActionEventArgOrigin.Local);
+                    cacheA[key].Should().Be(key);
+                },
+                (cacheB, args) =>
                 {
-                    Interlocked.Increment(ref errors);
-                    throw;
-                }
-            };
+                    args.Key.Should().Be(key);
+                    args.Region.Should().BeNull();
+                    args.Origin.Should().Be(CacheActionEventArgOrigin.Remote);
+                    cacheB[key].Should().Be(key);
+                });
+        }
 
-            cacheA.Add(key, key);
+        [Fact]
+        public void Redis_BackplaneEvents_AddWithRegion()
+        {
+            var key = Guid.NewGuid().ToString();
+            var region = Guid.NewGuid().ToString();
 
-            waitForIt(10, () => eventTriggered == 1).Should().BeTrue("Event should get triggered through the backplane.");
-            errors.Should().Be(0, "there should be no errors");
+            TestBackplaneEvent<CacheActionEventArgs>(
+                CacheEvent.OnAdd,
+                (cacheA) =>
+                {
+                    cacheA.Add(key, key, region);
+                },
+                (cacheA, args) =>
+                {
+                    args.Key.Should().Be(key);
+                    args.Region.Should().Be(region);
+                    args.Origin.Should().Be(CacheActionEventArgOrigin.Local);
+                    cacheA[key, region].Should().Be(key);
+                },
+                (cacheB, args) =>
+                {
+                    args.Key.Should().Be(key);
+                    args.Region.Should().Be(region);
+                    args.Origin.Should().Be(CacheActionEventArgOrigin.Remote);
+                    cacheB[key, region].Should().Be(key);
+                });
         }
 
         [Fact]
         public void Redis_BackplaneEvents_Put()
         {
-            var channelName = Guid.NewGuid().ToString();
-            var cacheA = TestManagers.CreateRedisAndDicCacheWithBackplane(101, false, channelName);
-            var cacheB = TestManagers.CreateRedisAndDicCacheWithBackplane(101, false, channelName);
             var key = Guid.NewGuid().ToString();
-            var eventTriggered = 0;
-            var errors = 0;
 
-            cacheB.OnPut += (ev, args) =>
-            {
-                try
+            TestBackplaneEvent<CacheActionEventArgs>(
+                CacheEvent.OnPut,
+                (cacheA) =>
+                {
+                    cacheA.Add(key, key);
+                    cacheA.Put(key, "new val");
+                },
+                (cacheA, args) =>
                 {
                     args.Key.Should().Be(key);
+                    args.Region.Should().BeNull();
+                    args.Origin.Should().Be(CacheActionEventArgOrigin.Local);
+                    cacheA[key].Should().Be("new val");
+                },
+                (cacheB, args) =>
+                {
+                    args.Key.Should().Be(key);
+                    args.Region.Should().BeNull();
                     args.Origin.Should().Be(CacheActionEventArgOrigin.Remote);
                     cacheB[key].Should().Be("new val");
+                });
+        }
 
-                    Interlocked.Increment(ref eventTriggered);
-                }
-                catch
+        [Fact]
+        public void Redis_BackplaneEvents_PutWithRegion()
+        {
+            var key = Guid.NewGuid().ToString();
+            var region = Guid.NewGuid().ToString();
+
+            TestBackplaneEvent<CacheActionEventArgs>(
+                CacheEvent.OnPut,
+                (cacheA) =>
                 {
-                    Interlocked.Increment(ref errors);
-                    throw;
-                }
-            };
+                    cacheA.Add(key, key, region);
+                    cacheA.Put(key, "new val", region);
+                },
+                (cacheA, args) =>
+                {
+                    args.Key.Should().Be(key);
+                    args.Region.Should().Be(region);
+                    args.Origin.Should().Be(CacheActionEventArgOrigin.Local);
+                    cacheA[key, region].Should().Be("new val");
+                },
+                (cacheB, args) =>
+                {
+                    args.Key.Should().Be(key);
+                    args.Region.Should().Be(region);
+                    args.Origin.Should().Be(CacheActionEventArgOrigin.Remote);
+                    cacheB[key, region].Should().Be("new val");
+                });
+        }
 
-            // two calls might actually trigger only once, but the new value should be the last changed one.
-            cacheA.Put(key, key);
-            cacheA.Put(key, "new val");
+        [Fact]
+        public void Redis_BackplaneEvents_Remove()
+        {
+            var key = Guid.NewGuid().ToString();
 
-            waitForIt(10, () => eventTriggered >= 1).Should().BeTrue("Event should get triggered through the backplane.");
-            errors.Should().Be(0, "there should be no errors");
+            TestBackplaneEvent<CacheActionEventArgs>(
+                CacheEvent.OnRemove,
+                (cacheA) =>
+                {
+                    cacheA.Add(key, key).Should().BeTrue();
+                    cacheA.Remove(key).Should().BeTrue();
+                },
+                (cacheA, args) =>
+                {
+                    args.Key.Should().Be(key);
+                    args.Region.Should().BeNull();
+                    args.Origin.Should().Be(CacheActionEventArgOrigin.Local);
+                    cacheA[key].Should().BeNull();
+                },
+                (cacheB, args) =>
+                {
+                    args.Key.Should().Be(key);
+                    args.Region.Should().BeNull();
+                    args.Origin.Should().Be(CacheActionEventArgOrigin.Remote);
+                    cacheB[key].Should().BeNull();
+                });
+        }
+
+        [Fact]
+        public void Redis_BackplaneEvents_Remove_WithRegion()
+        {
+            var key = Guid.NewGuid().ToString();
+            var region = Guid.NewGuid().ToString();
+
+            TestBackplaneEvent<CacheActionEventArgs>(
+                CacheEvent.OnRemove,
+                (cacheA) =>
+                {
+                    cacheA.Add(key, key).Should().BeTrue();
+                    cacheA.Add(key, key, region).Should().BeTrue();
+                    cacheA.Remove(key, region).Should().BeTrue();
+                },
+                (cacheA, args) =>
+                {
+                    args.Key.Should().Be(key);
+                    args.Region.Should().Be(region);
+                    args.Origin.Should().Be(CacheActionEventArgOrigin.Local);
+                    cacheA[key].Should().NotBeNull();
+                    cacheA[key, region].Should().BeNull();
+                },
+                (cacheB, args) =>
+                {
+                    args.Key.Should().Be(key);
+                    args.Region.Should().Be(region);
+                    args.Origin.Should().Be(CacheActionEventArgOrigin.Remote);
+                    cacheB[key].Should().NotBeNull();
+                    cacheB[key, region].Should().BeNull();
+                });
         }
 
         [Fact]
         public void Redis_BackplaneEvents_Update()
         {
-            var channelName = Guid.NewGuid().ToString();
-            var cacheA = TestManagers.CreateRedisAndDicCacheWithBackplane(101, false, channelName);
-            var cacheB = TestManagers.CreateRedisAndDicCacheWithBackplane(101, false, channelName);
-
             var key = Guid.NewGuid().ToString();
-            var eventTriggered = 0;
-            var errors = 0;
+            var newValue = "new value";
 
-            cacheB.OnUpdate += (ev, args) =>
-            {
-                try
+            TestBackplaneEvent<CacheActionEventArgs>(
+                CacheEvent.OnUpdate,
+                (cacheA) =>
+                {
+                    cacheA.Add(key, key);
+                    cacheA.Update(key, v => newValue).Should().Be(newValue);
+                },
+                (cacheA, args) =>
                 {
                     args.Key.Should().Be(key);
-                    args.Origin.Should().Be(CacheActionEventArgOrigin.Remote);
-                    cacheB[key].Should().Be("new");
-                    Interlocked.Increment(ref eventTriggered);
-                }
-                catch
+                    args.Region.Should().BeNull();
+                    args.Origin.Should().Be(CacheActionEventArgOrigin.Local);
+                    cacheA[key].Should().Be(newValue);
+                },
+                (cacheB, args) =>
                 {
-                    Interlocked.Increment(ref errors);
-                    throw;
-                }
-            };
-
-            cacheA.Add(key, key);
-            cacheA.Update(key, v => "new").Should().Be("new");
-
-            waitForIt(10, () => eventTriggered == 1).Should().BeTrue("Event should get triggered through the backplane.");
-            errors.Should().Be(0, "there should be no errors");
+                    args.Key.Should().Be(key);
+                    args.Region.Should().BeNull();
+                    args.Origin.Should().Be(CacheActionEventArgOrigin.Remote);
+                    cacheB[key].Should().Be(newValue);
+                });
         }
-        
+
+        [Fact]
+        public void Redis_BackplaneEvents_UpdateWithgRegion()
+        {
+            var key = Guid.NewGuid().ToString();
+            var region = Guid.NewGuid().ToString();
+            var newValue = "new value";
+
+            TestBackplaneEvent<CacheActionEventArgs>(
+                CacheEvent.OnUpdate,
+                (cacheA) =>
+                {
+                    cacheA.Add(key, key, region);
+                    cacheA.Update(key, region, v => newValue).Should().Be(newValue);
+                },
+                (cacheA, args) =>
+                {
+                    args.Key.Should().Be(key);
+                    args.Region.Should().Be(region);
+                    args.Origin.Should().Be(CacheActionEventArgOrigin.Local);
+                    cacheA[key, region].Should().Be(newValue);
+                },
+                (cacheB, args) =>
+                {
+                    args.Key.Should().Be(key);
+                    args.Region.Should().Be(region);
+                    args.Origin.Should().Be(CacheActionEventArgOrigin.Remote);
+                    cacheB[key, region].Should().Be(newValue);
+                });
+        }
+
         [Fact]
         public void Redis_BackplaneEvents_Clear()
         {
-            var channelName = Guid.NewGuid().ToString();
-            var cacheA = TestManagers.CreateRedisAndDicCacheWithBackplane(101, false, channelName);
-            var cacheB = TestManagers.CreateRedisAndDicCacheWithBackplane(101, false, channelName);
-
             var key = Guid.NewGuid().ToString();
-            var eventTriggered = 0;
 
-            cacheB.OnClear += (ev, args) =>
-            {
-                Interlocked.Increment(ref eventTriggered);
-            };
+            TestBackplaneEvent<CacheClearEventArgs>(
+                CacheEvent.OnClear,
+                (cacheA) =>
+                {
+                    cacheA.Add(key, key);
+                    cacheA.Clear();
+                },
+                (cacheA, args) =>
+                {
+                    args.Origin.Should().Be(CacheActionEventArgOrigin.Local);
+                    cacheA.Get(key).Should().BeNull();
+                },
+                (cacheB, args) =>
+                {
+                    args.Origin.Should().Be(CacheActionEventArgOrigin.Remote);
+                    cacheB.Get(key).Should().BeNull();
+                });
+        }
 
-            cacheA.Add(key, key);
-            cacheA.Clear();
+        [Fact]
+        public void Redis_BackplaneEvents_ClearRegion()
+        {
+            var key = Guid.NewGuid().ToString();
+            var region = Guid.NewGuid().ToString();
 
-            waitForIt(10, () => eventTriggered == 1).Should().BeTrue("Event should get triggered through the backplane.");
+            TestBackplaneEvent<CacheClearRegionEventArgs>(
+                CacheEvent.OnClearRegion,
+                (cacheA) =>
+                {
+                    cacheA.Add(key, key);
+                    cacheA.Add(key, key, region);
+                    cacheA.ClearRegion(region);
+                },
+                (cacheA, args) =>
+                {
+                    args.Origin.Should().Be(CacheActionEventArgOrigin.Local);
+                    cacheA.Get(key).Should().NotBeNull();
+                    cacheA.Get(key, region).Should().BeNull();
+                },
+                (cacheB, args) =>
+                {
+                    args.Origin.Should().Be(CacheActionEventArgOrigin.Remote);
+                    cacheB.Get(key).Should().NotBeNull();
+                    cacheB.Get(key, region).Should().BeNull();
+                });
         }
 
         [Fact]
@@ -691,6 +848,7 @@ namespace CacheManager.Tests
             handle.Should().NotBeNull();
             count.ShouldNotThrow();
         }
+
 #endif
 #endif
         [Fact]
@@ -802,6 +960,158 @@ namespace CacheManager.Tests
             {
                 cache.Dispose();
             }
+        }
+
+        private static void TestBackplaneEvent<TEventArgs>(
+            CacheEvent cacheEvent, 
+            Action<ICacheManager<object>> arrange, 
+            Action<ICacheManager<object>, TEventArgs> assertLocal, 
+            Action<ICacheManager<object>, TEventArgs> assertRemote)
+            where TEventArgs : EventArgs
+        {
+            var channelName = Guid.NewGuid().ToString();
+            var cacheA = TestManagers.CreateRedisAndDicCacheWithBackplane(1, false, channelName);
+            var cacheB = TestManagers.CreateRedisAndDicCacheWithBackplane(1, false, channelName);
+            var eventTriggeredLocal = 0;
+            var eventTriggeredRemote = 0;
+            Exception lastError = null;
+
+            Action<EventArgs> testLocal = (args) =>
+            {
+                try
+                {
+                    assertLocal(cacheA, (TEventArgs)args);
+
+                    Interlocked.Increment(ref eventTriggeredLocal);
+                }
+                catch (Exception ex)
+                {
+                    lastError = ex;
+                    throw;
+                }
+            };
+
+            Action<EventArgs> testRemote = (args) =>
+            {
+                try
+                {
+                    assertRemote(cacheB, (TEventArgs)args);
+
+                    Interlocked.Increment(ref eventTriggeredRemote);
+                }
+                catch (Exception ex)
+                {
+                    lastError = ex;
+                    throw;
+                }
+            };
+
+            switch (cacheEvent)
+            {
+                case CacheEvent.OnAdd:
+                    cacheA.OnAdd += (ev, args) =>
+                    {
+                        testLocal(args);
+                    };
+
+                    cacheB.OnAdd += (ev, args) =>
+                    {
+                        testRemote(args);
+                    };
+                    break;
+                case CacheEvent.OnClear:
+                    cacheA.OnClear += (ev, args) =>
+                    {
+                        testLocal(args);
+                    };
+
+                    cacheB.OnClear += (ev, args) =>
+                    {
+                        testRemote(args);
+                    };
+                    break;
+                case CacheEvent.OnClearRegion:
+                    cacheA.OnClearRegion += (ev, args) =>
+                    {
+                        testLocal(args);
+                    };
+
+                    cacheB.OnClearRegion += (ev, args) =>
+                    {
+                        testRemote(args);
+                    };
+                    break;
+                case CacheEvent.OnPut:
+                    cacheA.OnPut += (ev, args) =>
+                    {
+                        testLocal(args);
+                    };
+
+                    cacheB.OnPut += (ev, args) =>
+                    {
+                        testRemote(args);
+                    };
+                    break;
+                case CacheEvent.OnRemove:
+                    cacheA.OnRemove += (ev, args) =>
+                    {
+                        testLocal(args);
+                    };
+
+                    cacheB.OnRemove += (ev, args) =>
+                    {
+                        testRemote(args);
+                    };
+                    break;
+                case CacheEvent.OnUpdate:
+                    cacheA.OnUpdate += (ev, args) =>
+                    {
+                        testLocal(args);
+                    };
+
+                    cacheB.OnUpdate += (ev, args) =>
+                    {
+                        testRemote(args);
+                    };
+                    break;
+            }
+
+            arrange(cacheA);
+
+            Func<int, Func<bool>, bool> waitForIt = (tries, act) =>
+            {
+                var i = 0;
+                var result = false;
+                while (!result && i < tries)
+                {
+                    i++;
+                    result = act();
+                    if (result)
+                    {
+                        return true;
+                    }
+
+                    Thread.Sleep(100);
+                }
+
+                return false;
+            };
+
+            Func<Exception, string> formatError = (err) =>
+            {
+                var xunitError = err as XunitException;
+                if (xunitError != null)
+                {
+                    return xunitError.Message;
+                }
+
+                return err?.ToString();
+            };
+
+            var triggerResult = waitForIt(10, () => eventTriggeredRemote == 1);
+            lastError.Should().BeNull(formatError(lastError));
+            triggerResult.Should().BeTrue("Event should get triggered through the backplane.");
+            eventTriggeredLocal.Should().Be(1, "Local cache event should be triggered one time");
         }
     }
 

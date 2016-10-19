@@ -2,7 +2,7 @@
   "$schema": "http://cachemanager.net/schemas/cachemanager.json",
   "redis": [
     {
-      "key": "RedisA",
+      "key": "RedisConfig",
       "endpoints": [
         {
           "host": "127.0.0.1",
@@ -12,25 +12,13 @@
       "connectionTimeout": 5000,
       "allowAdmin": true,
       "database": 0
-    },
-    {
-      "key": "RedisB",
-      "endpoints": [
-        {
-          "host": "127.0.0.1",
-          "port": 6379
-        }
-      ],
-      "connectionTimeout": 4000,
-      "allowAdmin": true,
-      "database": 0
     }
   ],
   "cacheManagers": [
     {
-      "name": "CacheA",
+      "name": "Cache",
       "backplane": {
-        "key": "RedisA",
+        "key": "RedisConfig",
         "knownType": "Redis"
       },
       "serializer": { "knownType": "Json" },
@@ -44,27 +32,7 @@
           "knownType": "Redis",
           "name": "RedisA",
           "key": "RedisA",
-          "isBackplaneSource": true
-        }
-      ]
-    },
-    {
-      "name": "CacheB",
-      "backplane": {
-        "key": "RedisB",
-        "knownType": "Redis"
-      },
-      "handles": [
-        {
-          "knownType": "Dictionary",
-          "expirationMode": "Absolute",
-          "expirationTimeout": "00:00:10"
-        },
-        {
-          "knownType": "Redis",
-          "name": "RedisB",
-          "key": "RedisB",
-          "isBackplaneSource": true
+          "isBackplaneSource": true          
         }
       ]
     }

@@ -12,6 +12,7 @@ namespace CacheManager.Core.Internal
         /// Locally triggered action.
         /// </summary>
         Local,
+
         /// <summary>
         /// Remote, through the backplane triggered action.
         /// </summary>
@@ -104,6 +105,7 @@ namespace CacheManager.Core.Internal
             NotNullOrWhiteSpace(region, nameof(region));
 
             this.Region = region;
+            this.Origin = origin;
         }
 
         /// <summary>
@@ -117,50 +119,4 @@ namespace CacheManager.Core.Internal
         /// </summary>
         public CacheActionEventArgOrigin Origin { get; }
     }
-
-    /////// <summary>
-    /////// Event arguments for cache update actions.
-    /////// </summary>
-    /////// <typeparam name="TCacheValue">The type of the cache value.</typeparam>
-    ////public sealed class CacheUpdateEventArgs<TCacheValue> : EventArgs
-    ////{
-    ////    /// <summary>
-    ////    /// Initializes a new instance of the <see cref="CacheUpdateEventArgs{TCacheValue}" /> class.
-    ////    /// </summary>
-    ////    /// <param name="key">The key.</param>
-    ////    /// <param name="region">The region.</param>
-    ////    /// <param name="maxRetries">The number of retries configured.</param>
-    ////    /// <param name="result">The result.</param>
-    ////    public CacheUpdateEventArgs(string key, string region, int maxRetries, UpdateItemResult<TCacheValue> result)
-    ////    {
-    ////        this.Key = key;
-    ////        this.Region = region;
-    ////        this.Result = result;
-    ////        this.MaxRetries = maxRetries;
-    ////    }
-
-    ////    /// <summary>
-    ////    /// Gets the number of tries which were configured for the update operation.
-    ////    /// </summary>
-    ////    /// <value>The number of tries.</value>
-    ////    public int MaxRetries { get; }
-
-    ////    /// <summary>
-    ////    /// Gets the key.
-    ////    /// </summary>
-    ////    /// <value>The key.</value>
-    ////    public string Key { get; }
-
-    ////    /// <summary>
-    ////    /// Gets the region.
-    ////    /// </summary>
-    ////    /// <value>The region.</value>
-    ////    public string Region { get; }
-
-    ////    /// <summary>
-    ////    /// Gets the result.
-    ////    /// </summary>
-    ////    /// <value>The result.</value>
-    ////    public UpdateItemResult<TCacheValue> Result { get; }
-    ////}
 }

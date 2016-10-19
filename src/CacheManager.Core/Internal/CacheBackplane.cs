@@ -42,22 +42,22 @@ namespace CacheManager.Core.Internal
         /// The event gets fired whenever a change message for a key comes in,
         /// which means, another client changed a key.
         /// </summary>
-        public event EventHandler<CacheItemChangedEventArgs> Changed;
+        internal event EventHandler<CacheItemChangedEventArgs> Changed;
 
         /// <summary>
         /// The event gets fired whenever a cache clear message comes in.
         /// </summary>
-        public event EventHandler<EventArgs> Cleared;
+        internal event EventHandler<EventArgs> Cleared;
 
         /// <summary>
         /// The event gets fired whenever a clear region message comes in.
         /// </summary>
-        public event EventHandler<RegionEventArgs> ClearedRegion;
+        internal event EventHandler<RegionEventArgs> ClearedRegion;
 
         /// <summary>
         /// The event gets fired whenever a removed message for a key comes in.
         /// </summary>
-        public event EventHandler<CacheItemEventArgs> Removed;
+        internal event EventHandler<CacheItemEventArgs> Removed;
 
         /// <summary>
         /// Gets the cache configuration.
@@ -196,7 +196,7 @@ namespace CacheManager.Core.Internal
     /// <summary>
     /// Arguments for the region cleared event
     /// </summary>
-    public class RegionEventArgs : EventArgs
+    internal class RegionEventArgs : EventArgs
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="RegionEventArgs" /> class.
@@ -218,7 +218,7 @@ namespace CacheManager.Core.Internal
     /// <summary>
     /// Base cache events arguments.
     /// </summary>
-    public class CacheItemEventArgs : EventArgs
+    internal class CacheItemEventArgs : EventArgs
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="CacheItemEventArgs" /> class.
@@ -254,32 +254,9 @@ namespace CacheManager.Core.Internal
     }
 
     /// <summary>
-    /// The enum defines the actual operation used to change the value in the cache.
-    /// </summary>
-    public enum CacheItemChangedEventAction
-    {
-        /// <summary>
-        /// Default value is invalid to ensure we are not getting wrong results.
-        /// </summary>
-        Invalid = 0,
-        /// <summary>
-        /// If Put was used to change the value.
-        /// </summary>
-        Put,
-        /// <summary>
-        /// If Add was used to change the value.
-        /// </summary>
-        Add,
-        /// <summary>
-        /// If Update was used to change the value.
-        /// </summary>
-        Update
-    }
-
-    /// <summary>
     /// Arguments for cache change events.
     /// </summary>
-    public class CacheItemChangedEventArgs : CacheItemEventArgs
+    internal class CacheItemChangedEventArgs : CacheItemEventArgs
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="CacheItemChangedEventArgs" /> class.

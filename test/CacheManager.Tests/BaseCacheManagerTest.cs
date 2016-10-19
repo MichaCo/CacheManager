@@ -244,8 +244,6 @@ namespace CacheManager.Tests
                     .WithRedisCacheHandle(redisKey, true)
                     .EnableStatistics();
 
-                ////settings.WithMicrosoftLogging(lf => lf.AddDebug(LogLevel.Information));
-
                 if (channelName != null)
                 {
                     settings.WithRedisBackplane(redisKey, channelName);
