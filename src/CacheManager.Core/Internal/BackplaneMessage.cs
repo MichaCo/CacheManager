@@ -69,8 +69,6 @@ namespace CacheManager.Core.Internal
     /// </summary>
     public sealed class BackplaneMessage
     {
-        private static readonly Type CacheItemChangedEventActionType = typeof(CacheItemChangedEventAction);
-
         private BackplaneMessage(string owner, BackplaneAction action)
         {
             NotNullOrWhiteSpace(owner, nameof(owner));
@@ -135,38 +133,6 @@ namespace CacheManager.Core.Internal
         /// Gets or sets the cache action.
         /// </summary>
         public CacheItemChangedEventAction ChangeAction { get; set; }
-
-        /// <summary>
-        /// Serializes this instance.
-        /// </summary>
-        /// <returns>The string representing this message.</returns>
-        public string Serialize()
-        {
-            var action = (int)this.Action;
-            if (this.Action == Clear)
-            {
-                return this.OwnerIdentity + ":" + action;
-            }
-            else if (this.Action == ClearRegion)
-            {
-                return this.OwnerIdentity + ":" + action + ":" + Encode(this.Region);
-            }
-            else if (this.Action == Removed)
-            {
-                if (string.IsNullOrWhiteSpace(this.Region))
-                {
-                    return this.OwnerIdentity + ":" + action + ":" + ":" + Encode(this.Key);
-                }
-
-                return this.OwnerIdentity + ":" + action + ":" + Encode(this.Key) + ":" + Encode(this.Region);
-            }
-            else if (string.IsNullOrWhiteSpace(this.Region))
-            {
-                return this.OwnerIdentity + ":" + action + ":" + this.ChangeAction + ":" + Encode(this.Key);
-            }
-
-            return this.OwnerIdentity + ":" + action + ":" + this.ChangeAction + ":" + Encode(this.Key) + ":" + Encode(this.Region);
-        }
 
         /// <summary>
         /// Deserializes the <paramref name="message"/>.
@@ -311,6 +277,38 @@ namespace CacheManager.Core.Internal
         /// <returns>The new <see cref="BackplaneMessage"/> instance.</returns>
         public static BackplaneMessage ForRemoved(string owner, string key, string region) =>
             new BackplaneMessage(owner, Removed, key, region);
+
+        /// <summary>
+        /// Serializes this instance.
+        /// </summary>
+        /// <returns>The string representing this message.</returns>
+        public string Serialize()
+        {
+            var action = (int)this.Action;
+            if (this.Action == Clear)
+            {
+                return this.OwnerIdentity + ":" + action;
+            }
+            else if (this.Action == ClearRegion)
+            {
+                return this.OwnerIdentity + ":" + action + ":" + Encode(this.Region);
+            }
+            else if (this.Action == Removed)
+            {
+                if (string.IsNullOrWhiteSpace(this.Region))
+                {
+                    return this.OwnerIdentity + ":" + action + ":" + ":" + Encode(this.Key);
+                }
+
+                return this.OwnerIdentity + ":" + action + ":" + Encode(this.Key) + ":" + Encode(this.Region);
+            }
+            else if (string.IsNullOrWhiteSpace(this.Region))
+            {
+                return this.OwnerIdentity + ":" + action + ":" + this.ChangeAction + ":" + Encode(this.Key);
+            }
+
+            return this.OwnerIdentity + ":" + action + ":" + this.ChangeAction + ":" + Encode(this.Key) + ":" + Encode(this.Region);
+        }
 
         private static string Decode(string value)
         {

@@ -12,6 +12,7 @@
     <Rule Id="CA1303" Action="None" />
     <Rule Id="CA1305" Action="None" />
     <Rule Id="CA1307" Action="None" />
+    <Rule Id="CA1502" Action="None" />
     <Rule Id="CA1506" Action="None" />
     <Rule Id="CA1702" Action="None" />
     <Rule Id="CA1704" Action="None" />

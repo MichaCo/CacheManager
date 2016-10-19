@@ -1162,6 +1162,28 @@ namespace CacheManager.Core
             return false;
         }
 
+        private static void ClearHandles(BaseCacheHandle<TCacheValue>[] handles)
+        {
+            foreach (var handle in handles)
+            {
+                handle.Clear();
+                handle.Stats.OnClear();
+            }
+
+            ////this.TriggerOnClear();
+        }
+
+        private static void ClearRegionHandles(string region, BaseCacheHandle<TCacheValue>[] handles)
+        {
+            foreach (var handle in handles)
+            {
+                handle.ClearRegion(region);
+                handle.Stats.OnClearRegion(region);
+            }
+
+            ////this.TriggerOnClearRegion(region);
+        }
+
         private void EvictFromHandles(string key, string region, BaseCacheHandle<TCacheValue>[] handles)
         {
             foreach (var handle in handles)
@@ -1342,28 +1364,6 @@ namespace CacheManager.Core
             }
         }
 
-        private void ClearHandles(BaseCacheHandle<TCacheValue>[] handles)
-        {
-            foreach (var handle in handles)
-            {
-                handle.Clear();
-                handle.Stats.OnClear();
-            }
-
-            ////this.TriggerOnClear();
-        }
-
-        private void ClearRegionHandles(string region, BaseCacheHandle<TCacheValue>[] handles)
-        {
-            foreach (var handle in handles)
-            {
-                handle.ClearRegion(region);
-                handle.Stats.OnClearRegion(region);
-            }
-
-            ////this.TriggerOnClearRegion(region);
-        }
-
         private void EvictFromOtherHandles(string key, string region, int excludeIndex)
         {
             if (excludeIndex < 0 || excludeIndex >= this.cacheHandles.Length)
@@ -1502,7 +1502,7 @@ namespace CacheManager.Core
                         this.Logger.LogTrace("Backplane event: [Clear].");
                     }
 
-                    this.ClearHandles(handles());
+                    ClearHandles(handles());
                     this.TriggerOnClear(CacheActionEventArgOrigin.Remote);
                 };
 
@@ -1513,7 +1513,7 @@ namespace CacheManager.Core
                         this.Logger.LogTrace("Backplane event: [Clear Region] region: {0}.", args.Region);
                     }
 
-                    this.ClearRegionHandles(args.Region, handles());
+                    ClearRegionHandles(args.Region, handles());
                     this.TriggerOnClearRegion(args.Region, CacheActionEventArgOrigin.Remote);
                 };
             }

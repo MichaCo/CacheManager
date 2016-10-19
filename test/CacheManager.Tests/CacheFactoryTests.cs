@@ -48,6 +48,48 @@ namespace CacheManager.Tests
                 .WithMessage("*Parameter name: configName*");
         }
 
+        [Fact]
+        [ReplaceCulture]
+        public void CacheFactory_FromConfig_TestInit_A()
+        {
+            // arrange
+            var config = ConfigurationBuilder.BuildConfiguration(s => s.WithDictionaryHandle());
+
+            // act
+            Action act = () => CacheFactory.FromConfiguration<object>(config);
+
+            // assert
+            act.ShouldNotThrow();
+        }
+
+        [Fact]
+        [ReplaceCulture]
+        public void CacheFactory_FromConfig_TestInit_B()
+        {
+            // arrange
+            var config = ConfigurationBuilder.BuildConfiguration(s => s.WithDictionaryHandle());
+
+            // act
+            var cache = CacheFactory.FromConfiguration<object>("custom name", config);
+
+            // assert
+            cache.Name.Should().Be("custom name");
+        }
+
+        [Fact]
+        [ReplaceCulture]
+        public void CacheFactory_FromConfig_TestInit_C()
+        {
+            // arrange
+            var config = ConfigurationBuilder.BuildConfiguration(s => s.WithDictionaryHandle());
+
+            // act
+            var cache = CacheFactory.FromConfiguration(typeof(object), "custom name", config) as ICacheManager<object>;
+
+            // assert
+            cache.Name.Should().Be("custom name");
+        }
+
 #if !NO_APP_CONFIG
         [Fact]
         [ReplaceCulture]

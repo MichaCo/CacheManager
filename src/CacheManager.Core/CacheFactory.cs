@@ -473,9 +473,12 @@ namespace CacheManager.Core
         public static object FromConfiguration(Type cacheValueType, string cacheName, CacheManagerConfiguration configuration)
         {
             NotNull(cacheValueType, nameof(cacheValueType));
+            NotNull(configuration, nameof(configuration));
+
+            configuration.Name = cacheName;
 
             var type = typeof(BaseCacheManager<>).MakeGenericType(new[] { cacheValueType });
-            return Activator.CreateInstance(type, new object[] { cacheName, configuration });
+            return Activator.CreateInstance(type, new object[] { configuration });
         }
 
         /// <summary>
