@@ -230,6 +230,12 @@ namespace CacheManager.Tests
                 Action actU = () => cache.Update(null, (o) => o, 33);
                 Action actRU = () => cache.Update(null, null, null, 33);
 
+                object val = null;
+                Action actT = () => cache.TryUpdate(null, null, out val);
+                Action actTR = () => cache.TryUpdate(null, "r", null, out val);
+                Action actTU = () => cache.TryUpdate(null, (o) => o, 33, out val);
+                Action actTRU = () => cache.TryUpdate(null, null, null, 33, out val);
+
                 // assert
                 act.ShouldThrow<ArgumentException>()
                     .WithMessage("*Parameter name: key*");
@@ -241,6 +247,18 @@ namespace CacheManager.Tests
                     .WithMessage("*Parameter name: key*");
 
                 actRU.ShouldThrow<ArgumentException>()
+                    .WithMessage("*Parameter name: key*");
+
+                actT.ShouldThrow<ArgumentException>()
+                    .WithMessage("*Parameter name: key*");
+
+                actTR.ShouldThrow<ArgumentException>()
+                    .WithMessage("*Parameter name: key*");
+
+                actTU.ShouldThrow<ArgumentException>()
+                    .WithMessage("*Parameter name: key*");
+
+                actTRU.ShouldThrow<ArgumentException>()
                     .WithMessage("*Parameter name: key*");
             }
         }
@@ -260,6 +278,12 @@ namespace CacheManager.Tests
                 Action actU = () => cache.Update("key", null, 33);
                 Action actRU = () => cache.Update("key", "region", null, 33);
 
+                object val = null;
+                Action actT = () => cache.TryUpdate("key", null, out val);
+                Action actTR = () => cache.TryUpdate("key", "r", null, out val);
+                Action actTU = () => cache.TryUpdate("key", null, 33, out val);
+                Action actTRU = () => cache.TryUpdate("key", "r", null, 33, out val);
+
                 // assert
                 act.ShouldThrow<ArgumentException>()
                     .WithMessage("*Parameter name: updateValue*");
@@ -271,6 +295,18 @@ namespace CacheManager.Tests
                     .WithMessage("*Parameter name: updateValue*");
 
                 actRU.ShouldThrow<ArgumentException>()
+                    .WithMessage("*Parameter name: updateValue*");
+
+                actT.ShouldThrow<ArgumentException>()
+                    .WithMessage("*Parameter name: updateValue*");
+
+                actTR.ShouldThrow<ArgumentException>()
+                    .WithMessage("*Parameter name: updateValue*");
+
+                actTU.ShouldThrow<ArgumentException>()
+                    .WithMessage("*Parameter name: updateValue*");
+
+                actTRU.ShouldThrow<ArgumentException>()
                     .WithMessage("*Parameter name: updateValue*");
             }
         }
@@ -288,11 +324,21 @@ namespace CacheManager.Tests
                 Action actR = () => cache.Update("key", null, a => a);
                 Action actRU = () => cache.Update("key", null, a => a, 33);
 
+                object val = null;
+                Action actTR = () => cache.TryUpdate("key", null, null, out val);
+                Action actTRU = () => cache.TryUpdate("key", null, null, 33, out val);
+
                 // assert
                 actR.ShouldThrow<ArgumentException>()
                     .WithMessage("*Parameter name: region*");
 
                 actRU.ShouldThrow<ArgumentException>()
+                    .WithMessage("*Parameter name: region*");
+
+                actTR.ShouldThrow<ArgumentException>()
+                    .WithMessage("*Parameter name: region*");
+
+                actTRU.ShouldThrow<ArgumentException>()
                     .WithMessage("*Parameter name: region*");
             }
         }
@@ -307,14 +353,24 @@ namespace CacheManager.Tests
             }))
             {
                 // arrange act
-                Action act = () => cache.Update("key", a => a, -1);
-                Action actR = () => cache.Update("key", "region", a => a, -1);
+                Action act = () => cache.Update("key", a => a, 0);
+                Action actR = () => cache.Update("key", "region", a => a, 0);
+
+                object val = null;
+                Action actTU = () => cache.TryUpdate("key", a => a, 0, out val);
+                Action actTRU = () => cache.TryUpdate("key", "region", a => a, 0, out val);
 
                 // assert
                 act.ShouldThrow<InvalidOperationException>()
                     .WithMessage("*retries must be greater than*");
 
                 actR.ShouldThrow<InvalidOperationException>()
+                    .WithMessage("*retries must be greater than*");
+
+                actTU.ShouldThrow<InvalidOperationException>()
+                    .WithMessage("*retries must be greater than*");
+
+                actTRU.ShouldThrow<InvalidOperationException>()
                     .WithMessage("*retries must be greater than*");
             }
         }
@@ -331,13 +387,56 @@ namespace CacheManager.Tests
 
                 // act
                 Action act = () => cache.Update(key, item => item);
+                Action actR = () => cache.Update(key, "region", item => item);
 
                 object value;
                 Func<bool> act2 = () => cache.TryUpdate(key, item => item, out value);
+                Func<bool> act2R = () => cache.TryUpdate(key, "region", item => item, out value);
 
                 // assert
                 act.ShouldThrow<InvalidOperationException>("*failed*");
+                actR.ShouldThrow<InvalidOperationException>("*failed*");
                 act2().Should().BeFalse("Item has not been added to the cache");
+                act2R().Should().BeFalse("Item has not been added to the cache");
+            }
+        }
+
+        [Theory]
+        [MemberData("TestCacheManagers")]
+        public void CacheManager_Update_ValueFactoryReturnsNull<T>(T cache)
+            where T : ICacheManager<object>
+        {
+            using (cache)
+            {
+                // arrange
+                var key = Guid.NewGuid().ToString();
+                var region = Guid.NewGuid().ToString();
+
+                cache.Add(key, "value");
+                cache.Add(key, "value", region);
+
+                // act
+                Action act = () => cache.Update(key, (v) => null);
+                Action actR = () => cache.Update(key, region, (v) => null);
+                Action actU = () => cache.Update(key, (v) => null, 33);
+                Action actRU = () => cache.Update(key, region, (v) => null, 33);
+
+                object val = null;
+                Func<bool> actT = () => cache.TryUpdate(key, (v) => null, out val);
+                Func<bool> actTR = () => cache.TryUpdate(key, region, (v) => null, out val);
+                Func<bool> actTU = () => cache.TryUpdate(key, (v) => null, 33, out val);
+                Func<bool> actTRU = () => cache.TryUpdate(key, region, (v) => null, 33, out val);
+
+                // assert
+                act.ShouldThrow<InvalidOperationException>().WithMessage("*value factory returned null*");
+                actR.ShouldThrow<InvalidOperationException>().WithMessage("*value factory returned null*");
+                actU.ShouldThrow<InvalidOperationException>().WithMessage("*value factory returned null*");
+                actRU.ShouldThrow<InvalidOperationException>().WithMessage("*value factory returned null*");
+
+                actT().Should().BeFalse();
+                actTR().Should().BeFalse();
+                actTU().Should().BeFalse();
+                actTRU().Should().BeFalse();
             }
         }
 
@@ -351,18 +450,25 @@ namespace CacheManager.Tests
                 // arrange
                 var key = Guid.NewGuid().ToString();
                 cache.Add(key, "something");
+                cache.Add(key, "something", "region");
 
                 // act
                 Func<object> act = () => cache.Update(key, item => item + " more");
+                Func<object> actR = () => cache.Update(key, "region", item => item + " more");
 
                 object value = string.Empty;
-                Func<bool> act1 = () => cache.TryUpdate(key, item => item + " awesome", out value);
+                object value2 = string.Empty;
+                Func<bool> actT = () => cache.TryUpdate(key, item => item + " awesome", out value);
+                Func<bool> actTR = () => cache.TryUpdate(key, "region", item => item + " awesome", out value2);
                 Func<string> act2 = () => cache.Get<string>(key);
 
                 // assert
                 act().Should().Be("something more");
-                act1().Should().BeTrue();
+                actR().Should().Be("something more");
+                actT().Should().BeTrue();
+                actTR().Should().BeTrue();
                 value.Should().Be("something more awesome");
+                value2.Should().Be("something more awesome");
                 act2().Should().Be("something more awesome");
             }
         }

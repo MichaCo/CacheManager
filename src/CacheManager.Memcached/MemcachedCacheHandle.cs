@@ -356,7 +356,7 @@ namespace CacheManager.Memcached
                 // added null check, throw explicit to me more consistent. Otherwise it would throw later eventually
                 if (newValue == null)
                 {
-                    throw new InvalidOperationException("Factory value must not be null.");
+                    return UpdateItemResult.ForFactoryReturnedNull<TCacheValue>();
                 }
 
                 item = item.WithValue(newValue);

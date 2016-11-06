@@ -660,7 +660,7 @@ namespace CacheManager.Core
             NotNull(updateValue, nameof(updateValue));
             Ensure(maxRetries > 0, "Maximum number of retries must be greater than or equal to zero.");
 
-            return this.UpdateInternal(this.cacheHandles, key, updateValue, maxRetries, out value);
+            return this.UpdateInternal(this.cacheHandles, key, updateValue, maxRetries, false, out value);
         }
 
         /// <summary>
@@ -702,7 +702,7 @@ namespace CacheManager.Core
             NotNull(updateValue, nameof(updateValue));
             Ensure(maxRetries > 0, "Maximum number of retries must be greater than or equal to zero.");
 
-            return this.UpdateInternal(this.cacheHandles, key, region, updateValue, maxRetries, out value);
+            return this.UpdateInternal(this.cacheHandles, key, region, updateValue, maxRetries, false, out value);
         }
 
         /// <summary>
@@ -796,13 +796,14 @@ namespace CacheManager.Core
         /// </exception>
         public TCacheValue Update(string key, Func<TCacheValue, TCacheValue> updateValue, int maxRetries)
         {
-            TCacheValue value;
-            if (this.TryUpdate(key, updateValue, maxRetries, out value))
-            {
-                return value;
-            }
+            NotNullOrWhiteSpace(key, nameof(key));
+            NotNull(updateValue, nameof(updateValue));
+            Ensure(maxRetries > 0, "Maximum number of retries must be greater than or equal to zero.");
 
-            throw new InvalidOperationException($"Update failed for key '{key}'. Either the key didn't exist or max retries has been reached.");
+            TCacheValue value = default(TCacheValue);
+            this.UpdateInternal(this.cacheHandles, key, updateValue, maxRetries, true, out value);
+
+            return value;
         }
 
         /// <summary>
@@ -839,13 +840,15 @@ namespace CacheManager.Core
         /// </exception>
         public TCacheValue Update(string key, string region, Func<TCacheValue, TCacheValue> updateValue, int maxRetries)
         {
-            TCacheValue value;
-            if (this.TryUpdate(key, region, updateValue, maxRetries, out value))
-            {
-                return value;
-            }
+            NotNullOrWhiteSpace(key, nameof(key));
+            NotNullOrWhiteSpace(region, nameof(region));
+            NotNull(updateValue, nameof(updateValue));
+            Ensure(maxRetries > 0, "Maximum number of retries must be greater than or equal to zero.");
 
-            throw new InvalidOperationException($"Update failed for key '{region}:{key}'. Either the key in the region didn't exist or max retries has been reached.");
+            TCacheValue value = default(TCacheValue);
+            this.UpdateInternal(this.cacheHandles, key, region, updateValue, maxRetries, true, out value);
+
+            return value;
         }
 
         /// <summary>
@@ -1450,7 +1453,7 @@ namespace CacheManager.Core
                 }
 
                 value = valueFactory(key, region);
-                
+
                 if (value == null)
                 {
                     return false;
@@ -1619,8 +1622,9 @@ namespace CacheManager.Core
             string key,
             Func<TCacheValue, TCacheValue> updateValue,
             int maxRetries,
+            bool throwOnFailure,
             out TCacheValue value) =>
-            this.UpdateInternal(handles, key, null, updateValue, maxRetries, out value);
+            this.UpdateInternal(handles, key, null, updateValue, maxRetries, throwOnFailure, out value);
 
         private bool UpdateInternal(
             BaseCacheHandle<TCacheValue>[] handles,
@@ -1628,13 +1632,10 @@ namespace CacheManager.Core
             string region,
             Func<TCacheValue, TCacheValue> updateValue,
             int maxRetries,
+            bool throwOnFailure,
             out TCacheValue value)
         {
             this.CheckDisposed();
-
-            UpdateItemResultState overallResult = UpdateItemResultState.Success;
-            ////bool overallVersionConflictOccurred = false;
-            int overallTries = 1;
 
             // assign null
             value = default(TCacheValue);
@@ -1649,82 +1650,81 @@ namespace CacheManager.Core
                 this.Logger.LogTrace("Update: {0} {1}.", key, region);
             }
 
-            // lowest level goes first...
-            for (int handleIndex = handles.Length - 1; handleIndex >= 0; handleIndex--)
+            // lowest level
+            // todo: maybe check for only run on the backplate if configured (could potentially be not the last one).
+            var handleIndex = handles.Length - 1;
+            var handle = handles[handleIndex];
+
+            var result = string.IsNullOrWhiteSpace(region) ?
+                handle.Update(key, updateValue, maxRetries) :
+                handle.Update(key, region, updateValue, maxRetries);
+
+            if (this.logTrace)
             {
-                var handle = handles[handleIndex];
+                this.Logger.LogTrace(
+                    "Update: {0} {1}: tried on handle {2}: result: {3}.",
+                    key,
+                    region,
+                    handle.Configuration.Name,
+                    result.UpdateState);
+            }
 
-                UpdateItemResult<TCacheValue> result = string.IsNullOrWhiteSpace(region) ?
-                    handle.Update(key, updateValue, maxRetries) :
-                    handle.Update(key, region, updateValue, maxRetries);
+            if (result.UpdateState == UpdateItemResultState.Success)
+            {
+                // only on success, the returned value will not be null
+                value = result.Value;
+                handle.Stats.OnUpdate(key, region, result);
 
-                if (this.logTrace)
+                // evict others, we don't know if the update on other handles could actually
+                // succeed... There is a risk the update on other handles could create a
+                // different version than we created with the first successful update... we can
+                // safely add the item to handles below us though.
+                this.EvictFromHandlesAbove(key, region, handleIndex);
+
+                var item = string.IsNullOrWhiteSpace(region) ? handle.GetCacheItem(key) : handle.GetCacheItem(key, region);
+                this.AddToHandlesBelow(item, handleIndex);
+                this.TriggerOnUpdate(key, region);
+            }
+            else if (result.UpdateState == UpdateItemResultState.FactoryReturnedNull)
+            {
+                this.Logger.LogWarn($"Update failed on '{region}:{key}' because value factory returned null.");
+
+                if (throwOnFailure)
                 {
-                    this.Logger.LogTrace(
-                        "Update: {0} {1}: tried on handle {2}: result: {3}.",
-                        key,
-                        region,
-                        handle.Configuration.Name,
-                        result.UpdateState);
+                    throw new InvalidOperationException($"Update failed on '{region}:{key}' because value factory returned null.");
                 }
+            }
+            else if (result.UpdateState == UpdateItemResultState.TooManyRetries)
+            {
+                // if we had too many retries, this basically indicates an
+                // invalid state of the cache: The item is there, but we couldn't update it and
+                // it most likely has a different version
+                this.Logger.LogWarn($"Update failed on '{region}:{key}' because of too many retries.");
 
-                ////if (result.VersionConflictOccurred)
-                ////{
-                ////    overallVersionConflictOccurred = true;
-                ////}
+                this.EvictFromOtherHandles(key, region, handleIndex);
 
-                overallResult = result.UpdateState;
-                overallTries += result.NumberOfTriesNeeded > 1 ? result.NumberOfTriesNeeded - 1 : 0;
-
-                if (result.UpdateState == UpdateItemResultState.Success)
+                if (throwOnFailure)
                 {
-                    // only on success, the returned value will not be null
-                    value = result.Value;
-                    handle.Stats.OnUpdate(key, region, result);
-
-                    // evict others, we don't know if the update on other handles could actually
-                    // succeed... There is a risk the update on other handles could create a
-                    // different version than we created with the first successful update... we can
-                    // safely add the item to handles below us though.
-                    this.EvictFromHandlesAbove(key, region, handleIndex);
-
-                    var item = string.IsNullOrWhiteSpace(region) ? handle.GetCacheItem(key) : handle.GetCacheItem(key, region);
-                    this.AddToHandlesBelow(item, handleIndex);
-                    break;
+                    throw new InvalidOperationException($"Update failed on '{region}:{key}' because of too many retries.");
                 }
-                else if (result.UpdateState == UpdateItemResultState.TooManyRetries)
-                {
-                    // if we had too many retries, this basically indicates an
-                    // invalid state of the cache: The item is there, but we couldn't update it and
-                    // it most likely has a different version
-                    this.Logger.LogWarn(
-                        "Update: {0} {1}: on handle {2} failed with too many retries! Evicting from other handles.",
-                        key,
-                        region,
-                        handleIndex);
+            }
+            else if (result.UpdateState == UpdateItemResultState.ItemDidNotExist)
+            {
+                // If update fails because item doesn't exist AND the current handle is backplane source or the lowest cache handle level,
+                // remove the item from other handles (if exists).
+                // Otherwise, if we do not exit here, calling update on the next handle might succeed and would return a misleading result.
+                this.Logger.LogWarn($"Update failed on '{region}:{key}' because the region/key did not exist.");
 
-                    this.EvictFromOtherHandles(key, region, handleIndex);
-                    break;
-                }
-                else if (result.UpdateState == UpdateItemResultState.ItemDidNotExist &&
-                    (handle.Configuration.IsBackplaneSource || handleIndex == handles.Length - 1))
-                {
-                    // If update fails because item doesn't exist AND the current handle is backplane source or the lowest cache handle level,
-                    // remove the item from other handles (if exists).
-                    // Otherwise, if we do not exit here, calling update on the next handle might succeed and would return a misleading result.
-                    this.Logger.LogWarn(
-                        "Update: {0} {1}: on handle {2} failed because item did not exist.",
-                        key,
-                        region,
-                        handleIndex);
+                this.EvictFromOtherHandles(key, region, handleIndex);
 
-                    this.EvictFromOtherHandles(key, region, handleIndex);
-                    break;
+                if (throwOnFailure)
+                {
+                    throw new InvalidOperationException($"Update failed on '{region}:{key}' because the region/key did not exist.");
                 }
             }
 
             // update backplane
-            if (overallResult == UpdateItemResultState.Success && this.cacheBackplane != null)
+            if (result.UpdateState == UpdateItemResultState.Success && this.cacheBackplane != null)
             {
                 if (this.logTrace)
                 {
@@ -1741,10 +1741,7 @@ namespace CacheManager.Core
                 }
             }
 
-            // trigger update event with the overall results
-            this.TriggerOnUpdate(key, region);
-
-            return overallResult == UpdateItemResultState.Success;
+            return result.UpdateState == UpdateItemResultState.Success;
         }
     }
 }

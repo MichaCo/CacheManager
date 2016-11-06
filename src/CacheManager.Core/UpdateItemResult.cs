@@ -21,7 +21,12 @@ namespace CacheManager.Core
         /// The state represents a failed attempt. The cache item did not exist, so no update could
         /// be made.
         /// </summary>
-        ItemDidNotExist
+        ItemDidNotExist,
+
+        /// <summary>
+        /// Internal state representing a failure where the factory function returns null instead of a valid value.
+        /// </summary>
+        FactoryReturnedNull,
     }
 
     /// <summary>
@@ -37,6 +42,15 @@ namespace CacheManager.Core
         /// <returns>The item result.</returns>
         public static UpdateItemResult<TCacheValue> ForItemDidNotExist<TCacheValue>() =>
             new UpdateItemResult<TCacheValue>(default(TCacheValue), UpdateItemResultState.ItemDidNotExist, false, 1);
+
+        /// <summary>
+        /// Creates a new instance of the <see cref="UpdateItemResult{TCacheValue}"/> indicating that the 
+        /// cache value factory returned null instead of a valid value.
+        /// </summary>
+        /// <typeparam name="TCacheValue">The type of the cache value.</typeparam>
+        /// <returns>The item result.</returns>
+        public static UpdateItemResult<TCacheValue> ForFactoryReturnedNull<TCacheValue>() =>
+            new UpdateItemResult<TCacheValue>(default(TCacheValue), UpdateItemResultState.FactoryReturnedNull, false, 1);
 
         /// <summary>
         /// Creates a new instance of the <see cref="UpdateItemResult{TCacheValue}"/> class with

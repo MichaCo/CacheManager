@@ -64,6 +64,17 @@ namespace CacheManager.Tests
         }
 
         [Fact]
+        [ReplaceCulture]
+        public void UpdateItemResult_ForFactoryReturnsNull()
+        {
+            // arrange act
+            Func<UpdateItemResult<object>> act = () => UpdateItemResult.ForFactoryReturnedNull<object>();
+
+            // assert
+            act().ShouldBeEquivalentTo(new { Value = default(object), UpdateState = UpdateItemResultState.FactoryReturnedNull, NumberOfTriesNeeded = 1, VersionConflictOccurred = false });
+        }
+
+        [Fact]
         public void CacheManager_Update_Validate_LowestWins()
         {
             // arrange

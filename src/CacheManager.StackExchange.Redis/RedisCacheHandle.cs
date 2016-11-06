@@ -217,7 +217,7 @@ return result";
                     // added null check, throw explicit to me more consistent. Otherwise it would throw within the script exec
                     if (newValue == null)
                     {
-                        throw new InvalidOperationException("Factory value must not be null.");
+                        return UpdateItemResult.ForFactoryReturnedNull<TCacheValue>();
                     }
 
                     var result = this.Eval(ScriptType.Update, fullKey, new[]
@@ -235,7 +235,6 @@ return result";
                 }
                 while (tries <= maxRetries);
 
-                this.Logger.LogWarn("Update of {0} {1} failed with version conflict exiting because of too many retries.", key, region);
                 return UpdateItemResult.ForTooManyRetries<TCacheValue>(tries);
             });
         }
@@ -271,7 +270,7 @@ return result";
                     // added null check, throw explicit to me more consistent. Otherwise it would throw later
                     if (newValue == null)
                     {
-                        throw new InvalidOperationException("Factory value must not be null.");
+                        return UpdateItemResult.ForFactoryReturnedNull<TCacheValue>();
                     }
 
                     tran.HashSetAsync(fullKey, HashFieldValue, this.ToRedisValue(newValue));
@@ -282,6 +281,8 @@ return result";
                     {
                         return UpdateItemResult.ForSuccess<TCacheValue>(newValue, tries > 1, tries);
                     }
+
+                    this.Logger.LogDebug("Update of {0} {1} failed with version conflict, retrying {2}/{3}", key, region, tries, maxRetries);
                 }
                 while (committed == false && tries <= maxRetries);
 
