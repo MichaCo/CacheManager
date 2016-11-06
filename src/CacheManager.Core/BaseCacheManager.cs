@@ -535,6 +535,25 @@ namespace CacheManager.Core
             return this.GetOrAddInternal(key, region, (k, r) => valueFactory(k, r));
         }
 
+        /// <inheritdoc />
+        public bool TryGetOrAdd(string key, Func<string, TCacheValue> valueFactory, out TCacheValue value)
+        {
+            NotNullOrWhiteSpace(key, nameof(key));
+            NotNull(valueFactory, nameof(valueFactory));
+
+            return this.TryGetOrAddInternal(key, null, (k, r) => valueFactory(k), out value);
+        }
+
+        /// <inheritdoc />
+        public bool TryGetOrAdd(string key, string region, Func<string, string, TCacheValue> valueFactory, out TCacheValue value)
+        {
+            NotNullOrWhiteSpace(key, nameof(key));
+            NotNullOrWhiteSpace(region, nameof(region));
+            NotNull(valueFactory, nameof(valueFactory));
+
+            return this.TryGetOrAddInternal(key, region, (k, r) => valueFactory(k, r), out value);
+        }
+
         /// <summary>
         /// Returns a <see cref="string" /> that represents this instance.
         /// </summary>
@@ -746,9 +765,7 @@ namespace CacheManager.Core
 
         /// <summary>
         /// Updates an existing key in the cache.
-        /// <para>
         /// The cache manager will make sure the update will always happen on the most recent version.
-        /// </para>
         /// <para>
         /// If version conflicts occur, if for example multiple cache clients try to write the same
         /// key, and during the update process, someone else changed the value for the key, the
@@ -770,22 +787,27 @@ namespace CacheManager.Core
         /// If the cache cannot perform an update within the number of <paramref name="maxRetries"/>,
         /// this method will return <c>Null</c>.
         /// </param>
-        /// <returns>The updated value, or null, if the update was not successful.</returns>
+        /// <returns>The updated value.</returns>
         /// <exception cref="System.ArgumentNullException">
         /// If <paramref name="key"/> or <paramref name="updateValue"/> is null.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        /// If the key didn't exist prior to the update call or the max retries has been reached.
         /// </exception>
         public TCacheValue Update(string key, Func<TCacheValue, TCacheValue> updateValue, int maxRetries)
         {
             TCacheValue value;
-            this.TryUpdate(key, updateValue, maxRetries, out value);
-            return value;
+            if (this.TryUpdate(key, updateValue, maxRetries, out value))
+            {
+                return value;
+            }
+
+            throw new InvalidOperationException($"Update failed for key '{key}'. Either the key didn't exist or max retries has been reached.");
         }
 
         /// <summary>
         /// Updates an existing key in the cache.
-        /// <para>
         /// The cache manager will make sure the update will always happen on the most recent version.
-        /// </para>
         /// <para>
         /// If version conflicts occur, if for example multiple cache clients try to write the same
         /// key, and during the update process, someone else changed the value for the key, the
@@ -808,15 +830,22 @@ namespace CacheManager.Core
         /// If the cache cannot perform an update within the number of <paramref name="maxRetries"/>,
         /// this method will return <c>Null</c>.
         /// </param>
-        /// <returns>The updated value, or null, if the update was not successful.</returns>
+        /// <returns>The updated value.</returns>
         /// <exception cref="System.ArgumentNullException">
         /// If <paramref name="key"/> or <paramref name="region"/> or <paramref name="updateValue"/> is null.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        /// If the key didn't exist prior to the update call or the max retries has been reached.
         /// </exception>
         public TCacheValue Update(string key, string region, Func<TCacheValue, TCacheValue> updateValue, int maxRetries)
         {
             TCacheValue value;
-            this.TryUpdate(key, region, updateValue, maxRetries, out value);
-            return value;
+            if (this.TryUpdate(key, region, updateValue, maxRetries, out value))
+            {
+                return value;
+            }
+
+            throw new InvalidOperationException($"Update failed for key '{region}:{key}'. Either the key in the region didn't exist or max retries has been reached.");
         }
 
         /// <summary>
@@ -1406,6 +1435,38 @@ namespace CacheManager.Core
             }
         }
 
+        private bool TryGetOrAddInternal(string key, string region, Func<string, string, TCacheValue> valueFactory, out TCacheValue value)
+        {
+            value = default(TCacheValue);
+            var tries = 0;
+            do
+            {
+                tries++;
+                var item = this.GetCacheItemInternal(key, region);
+                if (item != null)
+                {
+                    value = item.Value;
+                    return true;
+                }
+
+                value = valueFactory(key, region);
+                
+                if (value == null)
+                {
+                    return false;
+                }
+
+                item = string.IsNullOrWhiteSpace(region) ? new CacheItem<TCacheValue>(key, value) : new CacheItem<TCacheValue>(key, region, value);
+                if (this.AddInternal(item))
+                {
+                    return true;
+                }
+            }
+            while (tries <= this.Configuration.MaxRetries);
+
+            return false;
+        }
+
         private TCacheValue GetOrAddInternal(string key, string region, Func<string, string, TCacheValue> valueFactory)
         {
             var tries = 0;
@@ -1424,8 +1485,6 @@ namespace CacheManager.Core
                 if (newValue == null)
                 {
                     throw new InvalidOperationException("The value which should be added must not be null.");
-                    //// see #99 TBD
-                    ////return newValue;
                 }
 
                 item = string.IsNullOrWhiteSpace(region) ? new CacheItem<TCacheValue>(key, newValue) : new CacheItem<TCacheValue>(key, region, newValue);

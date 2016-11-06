@@ -330,13 +330,13 @@ namespace CacheManager.Tests
                 var key = Guid.NewGuid().ToString();
 
                 // act
-                Func<object> act = () => cache.Update(key, item => item);
+                Action act = () => cache.Update(key, item => item);
 
                 object value;
                 Func<bool> act2 = () => cache.TryUpdate(key, item => item, out value);
 
                 // assert
-                act().Should().BeNull();
+                act.ShouldThrow<InvalidOperationException>("*failed*");
                 act2().Should().BeFalse("Item has not been added to the cache");
             }
         }
@@ -560,6 +560,29 @@ namespace CacheManager.Tests
 
         [Fact]
         [ReplaceCulture]
+        public void CacheManager_TryGetOrAdd_InvalidKey()
+        {
+            using (var cache = CacheFactory.Build(settings =>
+            {
+                settings.WithDictionaryHandle("h1");
+            }))
+            {
+                // arrange act
+                object val;
+                Action actC = () => cache.TryGetOrAdd(null, (k) => "value", out val);
+                Action actD = () => cache.TryGetOrAdd(null, "region", (k, r) => "value", out val);
+
+                // assert
+                actC.ShouldThrow<ArgumentException>()
+                    .WithMessage("*key*");
+
+                actD.ShouldThrow<ArgumentException>()
+                    .WithMessage("*key*");
+            }
+        }
+
+        [Fact]
+        [ReplaceCulture]
         public void CacheManager_GetOrAdd_InvalidRegion()
         {
             using (var cache = CacheFactory.Build(settings =>
@@ -582,6 +605,25 @@ namespace CacheManager.Tests
 
         [Fact]
         [ReplaceCulture]
+        public void CacheManager_TryGetOrAdd_InvalidRegion()
+        {
+            using (var cache = CacheFactory.Build(settings =>
+            {
+                settings.WithDictionaryHandle("h1");
+            }))
+            {
+                // arrange act
+                object val;
+                Action actB = () => cache.TryGetOrAdd("key", null, (k, r) => "value", out val);
+
+                // assert
+                actB.ShouldThrow<ArgumentException>()
+                    .WithMessage("*region*");
+            }
+        }
+
+        [Fact]
+        [ReplaceCulture]
         public void CacheManager_GetOrAdd_InvalidFactory()
         {
             using (var cache = CacheFactory.Build(settings =>
@@ -592,6 +634,29 @@ namespace CacheManager.Tests
                 // arrange act
                 Action actA = () => cache.GetOrAdd("key", null);
                 Action actB = () => cache.GetOrAdd("key", "region", null);
+
+                // assert
+                actA.ShouldThrow<ArgumentException>()
+                    .WithMessage("*valueFactory*");
+
+                actB.ShouldThrow<ArgumentException>()
+                    .WithMessage("*valueFactory*");
+            }
+        }
+
+        [Fact]
+        [ReplaceCulture]
+        public void CacheManager_TryGetOrAdd_InvalidFactory()
+        {
+            using (var cache = CacheFactory.Build(settings =>
+            {
+                settings.WithDictionaryHandle("h1");
+            }))
+            {
+                // arrange act
+                object val;
+                Action actA = () => cache.TryGetOrAdd("key", null, out val);
+                Action actB = () => cache.TryGetOrAdd("key", "region", null, out val);
 
                 // assert
                 actA.ShouldThrow<ArgumentException>()
@@ -630,6 +695,33 @@ namespace CacheManager.Tests
 
         [Theory]
         [MemberData("TestCacheManagers")]
+        public void CacheManager_TryGetOrAdd_SimpleAdd<T>(T cache)
+            where T : ICacheManager<object>
+        {
+            // arrange
+            var key = Guid.NewGuid().ToString();
+            var val = Guid.NewGuid().ToString();
+            object valueA = null;
+            object valueB = null;
+
+            using (cache)
+            {
+                // act
+                Func<bool> actA = () => cache.TryGetOrAdd(key, (k) => val, out valueA);
+                Func<bool> actB = () => cache.TryGetOrAdd(key, "region", (k, r) => val, out valueB);
+
+                // assert
+                actA().Should().BeTrue();
+                actB().Should().BeTrue();
+                valueA.Should().Be(val);
+                valueB.Should().Be(val);
+                cache[key].Should().Be(val);
+                cache[key, "region"].Should().Be(val);
+            }
+        }
+
+        [Theory]
+        [MemberData("TestCacheManagers")]
         public void CacheManager_GetOrAdd_FactoryReturnsNull<T>(T cache)
             where T : ICacheManager<object>
         {
@@ -643,6 +735,26 @@ namespace CacheManager.Tests
 
                 // assert
                 act.ShouldThrow<InvalidOperationException>("added");
+            }
+        }
+
+        [Theory]
+        [MemberData("TestCacheManagers")]
+        public void CacheManager_TryGetOrAdd_FactoryReturnsNull<T>(T cache)
+            where T : ICacheManager<object>
+        {
+            // arrange
+            var key = Guid.NewGuid().ToString();
+
+            using (cache)
+            {
+                // act
+                object val = null;
+                Func<bool> act = () => cache.TryGetOrAdd(key, (k) => null, out val);
+
+                // assert
+                act().Should().BeFalse();
+                val.Should().BeNull();
             }
         }
 
@@ -694,6 +806,38 @@ namespace CacheManager.Tests
                 resultB.Should().Be(val);
                 act.ShouldNotThrow();
                 actB.ShouldNotThrow();
+            }
+        }
+
+        [Theory]
+        [MemberData("TestCacheManagers")]
+        public void CacheManager_TryGetOrAdd_SimpleGet<T>(T cache)
+            where T : ICacheManager<object>
+        {
+            // arrange
+            var key = Guid.NewGuid().ToString();
+            var val = Guid.NewGuid().ToString();
+
+            // the factories should not get invoked because the item exists.
+            Func<string, object> add = (k) => { throw new InvalidOperationException(); };
+            Func<string, string, object> addRegion = (k, r) => { throw new InvalidOperationException(); };
+            object resultA = null;
+            object resultB = null;
+
+            using (cache)
+            {
+                cache.Add(key, val);
+                cache.Add(key, val, "region");
+
+                // act
+                Func<bool> actA = () => cache.TryGetOrAdd(key, add, out resultA);
+                Func<bool> actB = () => cache.TryGetOrAdd(key, "region", addRegion, out resultB);
+
+                // assert
+                actA().Should().BeTrue();
+                actB().Should().BeTrue();
+                resultA.Should().Be(val);
+                resultB.Should().Be(val);
             }
         }
 
