@@ -72,8 +72,6 @@ namespace CacheManager.Tests
                     .WithJsonSerializer()
                     .WithDictionaryHandle("h1")
                     .And
-                    .WithMicrosoftMemoryCacheHandle("h2")
-                    .And
                     .WithRedisConfiguration("redis", "127.0.0.1")
                     .WithRedisCacheHandle("redis")
                     .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMinutes(10))
