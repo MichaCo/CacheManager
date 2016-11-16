@@ -69,6 +69,7 @@ namespace CacheManager.Tests
         {
             using (var cache = CacheFactory.Build<string>(
                 s => s
+                    .WithJsonSerializer()
                     .WithDictionaryHandle("h1")
                     .And
                     .WithMicrosoftMemoryCacheHandle("h2")

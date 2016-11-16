@@ -231,8 +231,8 @@ namespace CacheManager.Tests
                     .WithDictionaryHandle()
                         .EnableStatistics();
                 settings
+                    .WithMaxRetries(int.MaxValue)
                     .TestSerializer(serializer)
-                    .WithMaxRetries(100)
                     .WithRetryTimeout(1000)
                     .WithRedisConfiguration(redisKey, config =>
                     {
@@ -261,8 +261,8 @@ namespace CacheManager.Tests
             var cache = CacheFactory.Build(settings =>
             {
                 settings
+                    .WithMaxRetries(int.MaxValue)
                     .TestSerializer(serializer)
-                    .WithMaxRetries(100)
                     .WithRetryTimeout(1000)
                     .WithRedisConfiguration(redisKey, config =>
                     {
@@ -285,7 +285,7 @@ namespace CacheManager.Tests
             {
                 settings
                     .TestSerializer(serializer)
-                    .WithMaxRetries(100)
+                    .WithMaxRetries(int.MaxValue)
                     .WithRetryTimeout(1000)
                     .WithRedisConfiguration(redisKey, config =>
                     {
