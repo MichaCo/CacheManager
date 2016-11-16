@@ -586,7 +586,7 @@ namespace CacheManager.Tests
         {
             using (var cache = CacheFactory.Build<RaceConditionTestElement>(settings =>
             {
-                settings.WithMaxRetries(1000);
+                settings.WithMaxRetries(int.MaxValue);
                 settings.WithUpdateMode(CacheUpdateMode.Full)
                     .WithJsonSerializer()
                     .WithRedisCacheHandle("default")
