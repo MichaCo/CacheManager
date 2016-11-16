@@ -326,15 +326,16 @@ namespace CacheManager.Tests
         public void CacheFactory_Build_WithRedisBackplaneNoRedisConfig()
         {
             // arrange act
+            var redisKey = Guid.NewGuid().ToString();
             Action act = () => CacheFactory.Build<object>(settings =>
            {
-               settings.WithRedisBackplane("redis");
-               settings.WithSystemRuntimeCacheHandle("redis", true);
+               settings.WithRedisBackplane(redisKey);
+               settings.WithSystemRuntimeCacheHandle(redisKey, true);
            });
 
             // assert
             act.ShouldThrow<InvalidOperationException>()
-                .WithInnerMessage("*No configuration added for configuration name redis*");
+                .WithInnerMessage("*No configuration added for configuration name*");
         }
 
         [Fact]
