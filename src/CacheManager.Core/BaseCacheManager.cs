@@ -193,7 +193,7 @@ namespace CacheManager.Core
         /// as Get plus Put.
         /// </remarks>
         public TCacheValue AddOrUpdate(string key, TCacheValue addValue, Func<TCacheValue, TCacheValue> updateValue) =>
-            this.AddOrUpdate(key, addValue, updateValue, 50);
+            this.AddOrUpdate(key, addValue, updateValue, this.Configuration.MaxRetries);
 
         /// <summary>
         /// Adds an item to the cache or, if the item already exists, updates the item using the
@@ -231,7 +231,7 @@ namespace CacheManager.Core
         /// as Get plus Put.
         /// </remarks>
         public TCacheValue AddOrUpdate(string key, string region, TCacheValue addValue, Func<TCacheValue, TCacheValue> updateValue) =>
-            this.AddOrUpdate(key, region, addValue, updateValue, 50);
+            this.AddOrUpdate(key, region, addValue, updateValue, this.Configuration.MaxRetries);
 
         /// <summary>
         /// Adds an item to the cache or, if the item already exists, updates the item using the
@@ -341,7 +341,7 @@ namespace CacheManager.Core
         /// If <paramref name="addItem"/> or <paramref name="updateValue"/> are null.
         /// </exception>
         public TCacheValue AddOrUpdate(CacheItem<TCacheValue> addItem, Func<TCacheValue, TCacheValue> updateValue) =>
-            this.AddOrUpdate(addItem, updateValue, 50);
+            this.AddOrUpdate(addItem, updateValue, this.Configuration.MaxRetries);
 
         /// <summary>
         /// Adds an item to the cache or, if the item already exists, updates the item using the
@@ -590,7 +590,7 @@ namespace CacheManager.Core
         /// as Get plus Put.
         /// </remarks>
         public bool TryUpdate(string key, Func<TCacheValue, TCacheValue> updateValue, out TCacheValue value) =>
-            this.TryUpdate(key, updateValue, 50, out value);
+            this.TryUpdate(key, updateValue, this.Configuration.MaxRetries, out value);
 
         /// <summary>
         /// Tries to update an existing key in the cache.
@@ -621,7 +621,7 @@ namespace CacheManager.Core
         /// as Get plus Put.
         /// </remarks>
         public bool TryUpdate(string key, string region, Func<TCacheValue, TCacheValue> updateValue, out TCacheValue value) =>
-            this.TryUpdate(key, region, updateValue, 50, out value);
+            this.TryUpdate(key, region, updateValue, this.Configuration.MaxRetries, out value);
 
         /// <summary>
         /// Tries to update an existing key in the cache.
@@ -731,7 +731,7 @@ namespace CacheManager.Core
         /// If <paramref name="key"/> or <paramref name="updateValue"/> is null.
         /// </exception>
         public TCacheValue Update(string key, Func<TCacheValue, TCacheValue> updateValue) =>
-            this.Update(key, updateValue, 50);
+            this.Update(key, updateValue, this.Configuration.MaxRetries);
 
         /// <summary>
         /// Updates an existing key in the cache.
@@ -761,7 +761,7 @@ namespace CacheManager.Core
         /// is null.
         /// </exception>
         public TCacheValue Update(string key, string region, Func<TCacheValue, TCacheValue> updateValue) =>
-            this.Update(key, region, updateValue, 50);
+            this.Update(key, region, updateValue, this.Configuration.MaxRetries);
 
         /// <summary>
         /// Updates an existing key in the cache.
