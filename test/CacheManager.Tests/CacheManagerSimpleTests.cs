@@ -599,7 +599,7 @@ namespace CacheManager.Tests
                 object value = "value";
 
                 // act
-                Func<object> act = () => cache.AddOrUpdate(key, value, item => value);
+                Func<object> act = () => cache.AddOrUpdate(key, value, item => "not this value");
 
                 // assert
                 act().Should().Be(value);
@@ -621,7 +621,11 @@ namespace CacheManager.Tests
                 cache.Add(key, "something");
 
                 // act
-                Func<object> act = () => cache.AddOrUpdate(key, "does exist", item => item + " more");
+                Func<object> act = () => cache.AddOrUpdate(key, "does exist", item =>
+                {
+                    item.Should().Be("something");
+                    return item + " more";
+                });
                 Func<string> act2 = () => cache.Get<string>(key);
 
                 // assert

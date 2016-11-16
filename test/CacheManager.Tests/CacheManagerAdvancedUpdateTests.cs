@@ -35,10 +35,11 @@ namespace CacheManager.Tests
         public void UpdateItemResult_ForSuccess()
         {
             // arrange act
-            Func<UpdateItemResult<object>> act = () => UpdateItemResult.ForSuccess<object>("value", true, 1001);
+            var item = new CacheItem<object>("key", new object());
+            Func<UpdateItemResult<object>> act = () => UpdateItemResult.ForSuccess<object>(item, true, 1001);
 
             // assert
-            act().ShouldBeEquivalentTo(new { Value = "value", UpdateState = UpdateItemResultState.Success, NumberOfTriesNeeded = 1001, VersionConflictOccurred = true });
+            act().ShouldBeEquivalentTo(new { Value = item, UpdateState = UpdateItemResultState.Success, NumberOfTriesNeeded = 1001, VersionConflictOccurred = true });
         }
 
         [Fact]
@@ -92,7 +93,7 @@ namespace CacheManager.Tests
                     null,
                     null,
                     null,
-                    UpdateItemResult.ForSuccess<string>(string.Empty, true, 100)
+                    UpdateItemResult.ForSuccess<string>(new CacheItem<string>("key", string.Empty), true, 100)
                 },
                 putCalls: Enumerable.Repeat<Action>(() => putCalls++, 5).ToArray(),
                 removeCalls: Enumerable.Repeat<Action>(() => removeCalls++, 5).ToArray());
@@ -162,9 +163,9 @@ namespace CacheManager.Tests
                 updateCalls: Enumerable.Repeat<Action>(() => updateCalls++, 5).ToArray(),
                 updateCallResults: new UpdateItemResult<string>[]
                 {
-                    UpdateItemResult.ForSuccess<string>(string.Empty, true, 100),
-                    UpdateItemResult.ForSuccess<string>(string.Empty, true, 100),
-                    UpdateItemResult.ForSuccess<string>(string.Empty, true, 100),
+                    UpdateItemResult.ForSuccess<string>(new CacheItem<string>("key", string.Empty), true, 100),
+                    UpdateItemResult.ForSuccess<string>(new CacheItem<string>("key", string.Empty), true, 100),
+                    UpdateItemResult.ForSuccess<string>(new CacheItem<string>("key", string.Empty), true, 100),
                     UpdateItemResult.ForTooManyRetries<string>(1000),
                     UpdateItemResult.ForItemDidNotExist<string>(),
                 },
@@ -205,7 +206,7 @@ namespace CacheManager.Tests
                     UpdateItemResult.ForItemDidNotExist<string>(),
                     UpdateItemResult.ForItemDidNotExist<string>(),
                     UpdateItemResult.ForItemDidNotExist<string>(),
-                    UpdateItemResult.ForSuccess("some value", true, 100)
+                    UpdateItemResult.ForSuccess(new CacheItem<string>("key", "some value"), true, 100)
                 },
                 putCalls: Enumerable.Repeat<Action>(() => putCalls++, 5).ToArray(),
                 removeCalls: Enumerable.Repeat<Action>(() => removeCalls++, 5).ToArray(),

@@ -51,9 +51,14 @@ else
 end
 return result";
 
+        // script should also update expire now. If sliding, update the sliding window
         private static readonly string ScriptUpdate = $@"
 if redis.call('HGET', KEYS[1], '{HashFieldValue}') == ARGV[2] then
-    return redis.call('HSET', KEYS[1], '{HashFieldValue}', ARGV[1])
+    local result=redis.call('HSET', KEYS[1], '{HashFieldValue}', ARGV[1])
+    if ARGV[3] == '2' and ARGV[4] ~= '0' then
+        redis.call('PEXPIRE', KEYS[1], ARGV[4])
+    end
+    return result;
 else
     return nil
 end";
@@ -76,6 +81,7 @@ return result";
 
         // flag if scripts are initially loaded to the server
         private bool scriptsLoaded = false;
+
         private object lockObject = new object();
 
         /// <summary>
@@ -122,6 +128,7 @@ return result";
         }
 
 #pragma warning disable CS3003 // Type is not CLS-compliant
+
         /// <summary>
         /// Gets the servers.
         /// </summary>
@@ -133,6 +140,7 @@ return result";
         /// </summary>
         /// <value>The server features.</value>
         public StackRedis.RedisFeatures Features => this.connection.Features;
+
 #pragma warning restore CS3003 // Type is not CLS-compliant
 
         /// <inheritdoc />
@@ -220,15 +228,22 @@ return result";
                         return UpdateItemResult.ForFactoryReturnedNull<TCacheValue>();
                     }
 
+                    // resetting TTL on update, too
                     var result = this.Eval(ScriptType.Update, fullKey, new[]
                     {
                         this.ToRedisValue(newValue),
-                        oldValue
+                        oldValue,
+                        (int)item.ExpirationMode,
+                        (long)item.ExpirationTimeout.TotalMilliseconds,
                     });
 
                     if (result != null && !result.IsNull)
                     {
-                        return UpdateItemResult.ForSuccess(newValue, tries > 1, tries);
+                        // optimizing not retrieving the item again after update (could have changed already, too)
+                        var newItem = item.WithValue(newValue);
+                        newItem.LastAccessedUtc = DateTime.UtcNow;
+
+                        return UpdateItemResult.ForSuccess(newItem, tries > 1, tries);
                     }
 
                     this.Logger.LogDebug("Update of {0} {1} failed with version conflict, retrying {2}/{3}", key, region, tries, maxRetries);
@@ -266,7 +281,7 @@ return result";
 
                     // run update
                     var newValue = updateValue(item.Value);
-                    
+
                     // added null check, throw explicit to me more consistent. Otherwise it would throw later
                     if (newValue == null)
                     {
@@ -279,7 +294,15 @@ return result";
 
                     if (committed)
                     {
-                        return UpdateItemResult.ForSuccess<TCacheValue>(newValue, tries > 1, tries);
+                        var newItem = item.WithValue(newValue);
+                        newItem.LastAccessedUtc = DateTime.UtcNow;
+
+                        if (newItem.ExpirationMode == ExpirationMode.Sliding && newItem.ExpirationTimeout != TimeSpan.Zero)
+                        {
+                            this.connection.Database.KeyExpire(fullKey, newItem.ExpirationTimeout, StackRedis.CommandFlags.FireAndForget);
+                        }
+
+                        return UpdateItemResult.ForSuccess(newItem, tries > 1, tries);
                     }
 
                     this.Logger.LogDebug("Update of {0} {1} failed with version conflict, retrying {2}/{3}", key, region, tries, maxRetries);
@@ -289,6 +312,7 @@ return result";
                 return UpdateItemResult.ForTooManyRetries<TCacheValue>(tries);
             });
         }
+
 #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 
         /// <summary>
@@ -456,6 +480,7 @@ return result";
                 return cacheItem;
             });
         }
+
 #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 #pragma warning restore CSE0003
 
@@ -511,6 +536,7 @@ return result";
                 return result;
             });
         }
+
 #pragma warning restore CSE0003
 
         private static string GetKey(string key, string region = null)
@@ -679,14 +705,14 @@ return result";
                         this.connection.Database.HashSet(fullKey, metaValues, flags);
                     }
 
-                    if (item.ExpirationMode != ExpirationMode.None)
+                    if (item.ExpirationMode != ExpirationMode.None && item.ExpirationMode != ExpirationMode.Default)
                     {
                         this.connection.Database.KeyExpire(fullKey, item.ExpirationTimeout, StackRedis.CommandFlags.FireAndForget);
                     }
                     else
                     {
                         // bugfix #9
-                        this.connection.Database.KeyExpire(fullKey, default(TimeSpan?), StackRedis.CommandFlags.FireAndForget);
+                        this.connection.Database.KeyPersist(fullKey, StackRedis.CommandFlags.FireAndForget);
                     }
                 }
 

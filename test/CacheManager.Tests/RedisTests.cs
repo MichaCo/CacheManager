@@ -586,6 +586,7 @@ namespace CacheManager.Tests
         {
             using (var cache = CacheFactory.Build<RaceConditionTestElement>(settings =>
             {
+                settings.WithMaxRetries(1000);
                 settings.WithUpdateMode(CacheUpdateMode.Full)
                     .WithJsonSerializer()
                     .WithRedisCacheHandle("default")
@@ -855,7 +856,7 @@ namespace CacheManager.Tests
         [Trait("category", "Redis")]
         public void Redis_ValueConverter_CacheTypeConversion_Poco()
         {
-            var cache = TestManagers.CreateRedisCache<Poco>(17);
+            var cache = TestManagers.CreateRedisCache<Poco>(17, false, Serializer.Json);
 
             // act/assert
             using (cache)
@@ -870,18 +871,24 @@ namespace CacheManager.Tests
 
         [Fact]
         [Trait("category", "Redis")]
-        public void Redis_ValueConverter_ObjectCacheTypeConversion_Poco()
+        public void Redis_ValueConverter_Poco_Update()
         {
-            var cache = TestManagers.CreateRedisCache(17);
+            var cache = TestManagers.CreateRedisCache(17, false, Serializer.Json);
 
             // act/assert
             using (cache)
             {
                 var key = Guid.NewGuid().ToString();
+                var region = Guid.NewGuid().ToString();
                 var value = new Poco() { Id = 23, Something = "§asdad" };
-                cache.Add(key, value);
-                var result = (Poco)cache.Get(key);
-                value.ShouldBeEquivalentTo(result);
+                cache.Add(key, value, region);
+
+                var newValue = new Poco() { Id = 24, Something = "%!else$&" };
+                object resultValue = null;
+                Func<bool> act = () => cache.TryUpdate(key, region, (o) => newValue, out resultValue);
+
+                act().Should().BeTrue();
+                newValue.ShouldBeEquivalentTo(resultValue);
             }
         }
 
@@ -963,9 +970,9 @@ namespace CacheManager.Tests
         }
 
         private static void TestBackplaneEvent<TEventArgs>(
-            CacheEvent cacheEvent, 
-            Action<ICacheManager<object>> arrange, 
-            Action<ICacheManager<object>, TEventArgs> assertLocal, 
+            CacheEvent cacheEvent,
+            Action<ICacheManager<object>> arrange,
+            Action<ICacheManager<object>, TEventArgs> assertLocal,
             Action<ICacheManager<object>, TEventArgs> assertRemote)
             where TEventArgs : EventArgs
         {

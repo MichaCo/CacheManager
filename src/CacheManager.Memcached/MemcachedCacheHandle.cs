@@ -360,6 +360,7 @@ namespace CacheManager.Memcached
                 }
 
                 item = item.WithValue(newValue);
+                item.LastAccessedUtc = DateTime.UtcNow;
 
                 if (item.ExpirationMode == ExpirationMode.Absolute)
                 {
@@ -377,7 +378,7 @@ namespace CacheManager.Memcached
 
                 if (result.Success)
                 {
-                    return UpdateItemResult.ForSuccess<TCacheValue>(item.Value, tries > 1, tries);
+                    return UpdateItemResult.ForSuccess(item, tries > 1, tries);
                 }
             }
             while (!result.Success && result.StatusCode.HasValue && result.StatusCode.Value == 2 && tries <= maxRetries);

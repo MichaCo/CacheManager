@@ -1672,7 +1672,7 @@ namespace CacheManager.Core
             if (result.UpdateState == UpdateItemResultState.Success)
             {
                 // only on success, the returned value will not be null
-                value = result.Value;
+                value = result.Value.Value;
                 handle.Stats.OnUpdate(key, region, result);
 
                 // evict others, we don't know if the update on other handles could actually
@@ -1681,8 +1681,9 @@ namespace CacheManager.Core
                 // safely add the item to handles below us though.
                 this.EvictFromHandlesAbove(key, region, handleIndex);
 
-                var item = string.IsNullOrWhiteSpace(region) ? handle.GetCacheItem(key) : handle.GetCacheItem(key, region);
-                this.AddToHandlesBelow(item, handleIndex);
+                // optimizing - not getting the item again from cache. We already have it
+                // var item = string.IsNullOrWhiteSpace(region) ? handle.GetCacheItem(key) : handle.GetCacheItem(key, region);
+                this.AddToHandlesBelow(result.Value, handleIndex);
                 this.TriggerOnUpdate(key, region);
             }
             else if (result.UpdateState == UpdateItemResultState.FactoryReturnedNull)

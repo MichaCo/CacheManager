@@ -41,7 +41,7 @@ namespace CacheManager.Core
         /// <typeparam name="TCacheValue">The type of the cache value.</typeparam>
         /// <returns>The item result.</returns>
         public static UpdateItemResult<TCacheValue> ForItemDidNotExist<TCacheValue>() =>
-            new UpdateItemResult<TCacheValue>(default(TCacheValue), UpdateItemResultState.ItemDidNotExist, false, 1);
+            new UpdateItemResult<TCacheValue>(null, UpdateItemResultState.ItemDidNotExist, false, 1);
 
         /// <summary>
         /// Creates a new instance of the <see cref="UpdateItemResult{TCacheValue}"/> indicating that the 
@@ -50,7 +50,7 @@ namespace CacheManager.Core
         /// <typeparam name="TCacheValue">The type of the cache value.</typeparam>
         /// <returns>The item result.</returns>
         public static UpdateItemResult<TCacheValue> ForFactoryReturnedNull<TCacheValue>() =>
-            new UpdateItemResult<TCacheValue>(default(TCacheValue), UpdateItemResultState.FactoryReturnedNull, false, 1);
+            new UpdateItemResult<TCacheValue>(null, UpdateItemResultState.FactoryReturnedNull, false, 1);
 
         /// <summary>
         /// Creates a new instance of the <see cref="UpdateItemResult{TCacheValue}"/> class with
@@ -61,7 +61,7 @@ namespace CacheManager.Core
         /// <param name="conflictOccurred">Set to <c>true</c> if a conflict occurred.</param>
         /// <param name="triesNeeded">The tries needed.</param>
         /// <returns>The item result.</returns>
-        public static UpdateItemResult<TCacheValue> ForSuccess<TCacheValue>(TCacheValue value, bool conflictOccurred = false, int triesNeeded = 1) =>
+        public static UpdateItemResult<TCacheValue> ForSuccess<TCacheValue>(CacheItem<TCacheValue> value, bool conflictOccurred = false, int triesNeeded = 1) =>
             new UpdateItemResult<TCacheValue>(value, UpdateItemResultState.Success, conflictOccurred, triesNeeded);
 
         /// <summary>
@@ -72,7 +72,7 @@ namespace CacheManager.Core
         /// <param name="triesNeeded">The tries needed.</param>
         /// <returns>The item result.</returns>
         public static UpdateItemResult<TCacheValue> ForTooManyRetries<TCacheValue>(int triesNeeded) =>
-            new UpdateItemResult<TCacheValue>(default(TCacheValue), UpdateItemResultState.TooManyRetries, true, triesNeeded);
+            new UpdateItemResult<TCacheValue>(null, UpdateItemResultState.TooManyRetries, true, triesNeeded);
     }
 
     /// <summary>
@@ -82,7 +82,7 @@ namespace CacheManager.Core
     /// <typeparam name="TCacheValue">The type of the cache value.</typeparam>
     public class UpdateItemResult<TCacheValue>
     {
-        internal UpdateItemResult(TCacheValue value, UpdateItemResultState state, bool conflictOccurred, int triesNeeded)
+        internal UpdateItemResult(CacheItem<TCacheValue> value, UpdateItemResultState state, bool conflictOccurred, int triesNeeded)
         {
             if (triesNeeded == 0)
             {
@@ -111,7 +111,7 @@ namespace CacheManager.Core
         /// Gets the updated value.
         /// </summary>
         /// <value>The updated value.</value>
-        public TCacheValue Value { get; }
+        public CacheItem<TCacheValue> Value { get; }
 
         /// <summary>
         /// Gets a value indicating whether a version conflict occurred during an update operation.

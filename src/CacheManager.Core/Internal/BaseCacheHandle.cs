@@ -147,7 +147,7 @@ namespace CacheManager.Core.Internal
                 var newItem = original.WithValue(newValue);
                 newItem.LastAccessedUtc = DateTime.UtcNow;
                 this.Put(newItem);
-                return UpdateItemResult.ForSuccess<TCacheValue>(newValue);
+                return UpdateItemResult.ForSuccess(newItem);
             }
         }
 
@@ -201,7 +201,7 @@ namespace CacheManager.Core.Internal
 
                 newItem.LastAccessedUtc = DateTime.UtcNow;
                 this.Put(newItem);
-                return UpdateItemResult.ForSuccess<TCacheValue>(newValue);
+                return UpdateItemResult.ForSuccess(newItem);
             }
         }
 

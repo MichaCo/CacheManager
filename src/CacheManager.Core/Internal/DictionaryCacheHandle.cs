@@ -106,7 +106,7 @@ namespace CacheManager.Core.Internal
             CacheItem<TCacheValue> result = null;
             if (this.cache.TryGetValue(fullKey, out result))
             {
-                if (IsExpired(result, DateTimeOffset.UtcNow))
+                if (IsExpired(result, DateTime.UtcNow))
                 {
                     this.cache.TryRemove(fullKey, out result);
                     return null;
@@ -178,7 +178,7 @@ namespace CacheManager.Core.Internal
         {
             cache.scanRunning = true;
             var removed = 0;
-            var now = DateTimeOffset.UtcNow;
+            var now = DateTime.UtcNow;
             foreach (var item in cache.cache.Values)
             {
                 if (IsExpired(item, now))
@@ -196,7 +196,7 @@ namespace CacheManager.Core.Internal
             cache.scanRunning = false;
         }
 
-        private static bool IsExpired(CacheItem<TCacheValue> item, DateTimeOffset now)
+        private static bool IsExpired(CacheItem<TCacheValue> item, DateTime now)
         {
             if (item.ExpirationMode == ExpirationMode.Absolute
                 && item.CreatedUtc.Add(item.ExpirationTimeout) < now)
