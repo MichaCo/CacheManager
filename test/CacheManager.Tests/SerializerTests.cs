@@ -4,9 +4,11 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using CacheManager.Core;
 using CacheManager.Core.Internal;
+using CacheManager.Core.Logging;
 using CacheManager.Serialization.Json;
 using CacheManager.Serialization.ProtoBuf;
 using FluentAssertions;
+using Newtonsoft.Json;
 using ProtoBuf;
 using Xunit;
 
@@ -87,7 +89,38 @@ namespace CacheManager.Tests
 
             result.ShouldBeEquivalentTo(items);
         }
+
 #endif
+        [Fact]
+        public void JsonSerializer_RespectJsonSerializerSettings()
+        {
+            var serializationSettings = new JsonSerializerSettings()
+            {
+                DateFormatHandling = DateFormatHandling.MicrosoftDateFormat,
+                FloatFormatHandling = FloatFormatHandling.String
+            };
+
+            var deserializationSettings = new JsonSerializerSettings()
+            {
+                DateFormatHandling = DateFormatHandling.IsoDateFormat,
+                FloatFormatHandling = FloatFormatHandling.Symbol
+            };
+
+            var cache = CacheFactory.Build<string>(
+                p => p
+                    .WithJsonSerializer(serializationSettings, deserializationSettings)
+                    .WithHandle(typeof(SerializerTestCacheHandle)));
+
+            var handle = cache.CacheHandles.ElementAt(0) as SerializerTestCacheHandle;
+            var serializer = handle.Serializer as JsonCacheSerializer;
+
+            serializer.SerializationSettings.DateFormatHandling.Should().Be(DateFormatHandling.MicrosoftDateFormat);
+            serializer.SerializationSettings.FloatFormatHandling.Should().Be(FloatFormatHandling.String);
+            serializer.DeserializationSettings.DateFormatHandling.Should().Be(DateFormatHandling.IsoDateFormat);
+            serializer.DeserializationSettings.FloatFormatHandling.Should().Be(FloatFormatHandling.Symbol);
+
+            cache.Configuration.SerializerTypeArguments.Length.Should().Be(2);
+        }
 
         [Theory]
         [InlineData(true)]
@@ -208,6 +241,38 @@ namespace CacheManager.Tests
             var result = serializer.Deserialize(data, items.GetType());
 
             result.ShouldBeEquivalentTo(items);
+        }
+
+        /* ######### gz json ######### */
+        [Fact]
+        public void GzJsonSerializer_RespectJsonSerializerSettings()
+        {
+            var serializationSettings = new JsonSerializerSettings()
+            {
+                DateFormatHandling = DateFormatHandling.MicrosoftDateFormat,
+                FloatFormatHandling = FloatFormatHandling.String
+            };
+
+            var deserializationSettings = new JsonSerializerSettings()
+            {
+                DateFormatHandling = DateFormatHandling.IsoDateFormat,
+                FloatFormatHandling = FloatFormatHandling.Symbol
+            };
+
+            var cache = CacheFactory.Build<string>(
+                p => p
+                    .WithGzJsonSerializer(serializationSettings, deserializationSettings)
+                    .WithHandle(typeof(SerializerTestCacheHandle)));
+
+            var handle = cache.CacheHandles.ElementAt(0) as SerializerTestCacheHandle;
+            var serializer = handle.Serializer as JsonCacheSerializer;
+
+            serializer.SerializationSettings.DateFormatHandling.Should().Be(DateFormatHandling.MicrosoftDateFormat);
+            serializer.SerializationSettings.FloatFormatHandling.Should().Be(FloatFormatHandling.String);
+            serializer.DeserializationSettings.DateFormatHandling.Should().Be(DateFormatHandling.IsoDateFormat);
+            serializer.DeserializationSettings.FloatFormatHandling.Should().Be(FloatFormatHandling.Symbol);
+
+            cache.Configuration.SerializerTypeArguments.Length.Should().Be(2);
         }
 
         [Theory]
@@ -495,67 +560,136 @@ namespace CacheManager.Tests
                 cache.Get<SerializerPoccoSerializable>(key).ShouldBeEquivalentTo(pocco);
             }
         }
-    }
+
+        private static class DataGenerator
+        {
+            private static Random random = new Random();
+
+            public static string GetString() => Guid.NewGuid().ToString();
+
+            public static int GetInt() => random.Next();
+
+            public static string[] GetStrings() => Enumerable.Repeat(0, 100).Select(p => GetString()).ToArray();
+        }
+
+        private class SerializerTestCacheHandle : BaseCacheHandle<string>
+        {
+            public SerializerTestCacheHandle(CacheManagerConfiguration managerConfiguration, CacheHandleConfiguration configuration, ICacheSerializer serializer)
+                : base(managerConfiguration, configuration)
+            {
+                this.Serializer = serializer;
+            }
+
+            public ICacheSerializer Serializer { get; set; }
+
+            public override int Count
+            {
+                get
+                {
+                    throw new NotImplementedException();
+                }
+            }
+
+            protected override ILogger Logger
+            {
+                get
+                {
+                    throw new NotImplementedException();
+                }
+            }
+
+            public override void Clear()
+            {
+                throw new NotImplementedException();
+            }
+
+            public override void ClearRegion(string region)
+            {
+                throw new NotImplementedException();
+            }
+
+            protected override bool AddInternalPrepared(CacheItem<string> item)
+            {
+                throw new NotImplementedException();
+            }
+
+            protected override CacheItem<string> GetCacheItemInternal(string key)
+            {
+                throw new NotImplementedException();
+            }
+
+            protected override CacheItem<string> GetCacheItemInternal(string key, string region)
+            {
+                throw new NotImplementedException();
+            }
+
+            protected override void PutInternalPrepared(CacheItem<string> item)
+            {
+                throw new NotImplementedException();
+            }
+
+            protected override bool RemoveInternal(string key)
+            {
+                throw new NotImplementedException();
+            }
+
+            protected override bool RemoveInternal(string key, string region)
+            {
+                throw new NotImplementedException();
+            }
+        }
 
 #if !DNXCORE50
-    [Serializable]
+
+        [Serializable]
 #endif
-    [ProtoContract]
-    public class SerializerPoccoSerializable
-    {
-        [ProtoMember(1)]
-        public string StringProperty { get; set; }
-
-        [ProtoMember(2)]
-        public int IntProperty { get; set; }
-
-        [ProtoMember(3)]
-        public string[] StringArrayProperty { get; set; }
-
-        [ProtoMember(4)]
-        public IList<string> StringListProperty { get; set; }
-
-        [ProtoMember(5)]
-        public IDictionary<string, ChildPocco> ChildDictionaryProperty { get; set; }
-
-        public static SerializerPoccoSerializable Create()
+        [ProtoContract]
+        private class SerializerPoccoSerializable
         {
-            var rnd = new Random();
-            return new SerializerPoccoSerializable()
+            [ProtoMember(1)]
+            public string StringProperty { get; set; }
+
+            [ProtoMember(2)]
+            public int IntProperty { get; set; }
+
+            [ProtoMember(3)]
+            public string[] StringArrayProperty { get; set; }
+
+            [ProtoMember(4)]
+            public IList<string> StringListProperty { get; set; }
+
+            [ProtoMember(5)]
+            public IDictionary<string, ChildPocco> ChildDictionaryProperty { get; set; }
+
+            public static SerializerPoccoSerializable Create()
             {
-                StringProperty = DataGenerator.GetString(),
-                IntProperty = DataGenerator.GetInt(),
-                StringArrayProperty = DataGenerator.GetStrings(),
-                StringListProperty = new List<string>(DataGenerator.GetStrings()),
-                ChildDictionaryProperty = new Dictionary<string, ChildPocco>()
+                var rnd = new Random();
+                return new SerializerPoccoSerializable()
+                {
+                    StringProperty = DataGenerator.GetString(),
+                    IntProperty = DataGenerator.GetInt(),
+                    StringArrayProperty = DataGenerator.GetStrings(),
+                    StringListProperty = new List<string>(DataGenerator.GetStrings()),
+                    ChildDictionaryProperty = new Dictionary<string, ChildPocco>()
                 {
                     { DataGenerator.GetString(), new ChildPocco() { StringProperty = DataGenerator.GetString() } },
                     { DataGenerator.GetString(), new ChildPocco() { StringProperty = DataGenerator.GetString() } },
                     { DataGenerator.GetString(), new ChildPocco() { StringProperty = DataGenerator.GetString() } },
                     { DataGenerator.GetString(), new ChildPocco() { StringProperty = DataGenerator.GetString() } },
                 }
-            };
+                };
+            }
         }
-    }
 
 #if !DNXCORE50
-    [Serializable]
+
+        [Serializable]
 #endif
-    [ProtoContract]
-    public class ChildPocco
-    {
-        [ProtoMember(1)]
-        public string StringProperty { get; set; }
-    }
-
-    internal class DataGenerator
-    {
-        private static Random random = new Random();
-
-        public static string GetString() => Guid.NewGuid().ToString();
-
-        public static int GetInt() => random.Next();
-
-        public static string[] GetStrings() => Enumerable.Repeat(0, 100).Select(p => GetString()).ToArray();
+        [ProtoContract]
+        private class ChildPocco
+        {
+            [ProtoMember(1)]
+            public string StringProperty { get; set; }
+        }
     }
 }

@@ -196,15 +196,16 @@ namespace CacheManager.Core.Internal
                 lastCtor = constructor;
                 var args = new List<object>();
                 var parameters = constructor.GetParameters();
-
+                var instancesCopy = new List<object>(instances);
+                
                 foreach (ParameterInfo param in parameters)
                 {
 #if NET40
-                    var paramValue = instances
+                    var paramValue = instancesCopy
                         .Where(p => p != null)
                         .FirstOrDefault(p => param.ParameterType.IsAssignableFrom(p.GetType()));
 #else
-                    var paramValue = instances
+                    var paramValue = instancesCopy
                         .Where(p => p != null)
                         .FirstOrDefault(p => param.ParameterType.GetTypeInfo().IsAssignableFrom(p.GetType().GetTypeInfo()));
 #endif
@@ -214,6 +215,8 @@ namespace CacheManager.Core.Internal
                         break;
                     }
 
+                    // fixing #112 by not looking at the same instance again which was already added to the args
+                    instancesCopy.Remove(paramValue);
                     args.Add(paramValue);
                 }
 

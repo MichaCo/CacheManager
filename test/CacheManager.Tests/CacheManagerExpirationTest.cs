@@ -16,29 +16,6 @@ namespace CacheManager.Tests
 #endif
     public class CacheManagerExpirationTest : BaseCacheManagerTest
     {
-        private static void ValidateExistsInAllHandles<T>(ICacheManager<T> cache, string key)
-        {
-            foreach (var handle in cache.CacheHandles)
-            {
-                var item = handle.GetCacheItem(key);
-                if (item == null)
-                {
-                    throw new Exception($"'{key}' Doesn't exist in handle {handle.Configuration.Name}.");
-                }
-            }
-        }
-
-        private static void ValidateExistsInAllHandles<T>(ICacheManager<T> cache, string key, string region)
-        {
-            foreach (var handle in cache.CacheHandles)
-            {
-                if (cache.GetCacheItem(key, region) == null)
-                {
-                    throw new Exception($"'{key}:{region}' doesn't exist in handle {handle.Configuration.Name}.");
-                }
-            }
-        }
-
         // Issue #97 - Unable to reset expiration to 'None'
         [Fact]
         public void CacheManager_Expire_UnableToResetToNone()
@@ -74,8 +51,7 @@ namespace CacheManager.Tests
                     .And
                     .WithRedisConfiguration("redis", "127.0.0.1")
                     .WithRedisCacheHandle("redis")
-                    .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMinutes(10))
-                    ))
+                    .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMinutes(10))))
             {
                 var key = Guid.NewGuid().ToString();
                 var item = new CacheItem<string>(key, "value");
@@ -97,8 +73,7 @@ namespace CacheManager.Tests
                     .WithDictionaryHandle("h1")
                     .And
                     .WithDictionaryHandle("h2")
-                    .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMinutes(10))
-                    ))
+                    .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMinutes(10))))
             {
                 var key = Guid.NewGuid().ToString();
                 var item = new CacheItem<string>(key, "value");
@@ -107,8 +82,8 @@ namespace CacheManager.Tests
 
                 // sets the item on other cache handles
                 var result = cache.Get(key);
-                                
-                for(var i = 0; i < cache.CacheHandles.Count()-1; i++)
+
+                for (var i = 0; i < cache.CacheHandles.Count() - 1; i++)
                 {
                     var handleItem = cache.CacheHandles.ElementAt(i).GetCacheItem(key);
                     handleItem.ExpirationMode.Should().NotBe(ExpirationMode.Absolute);
@@ -480,6 +455,7 @@ namespace CacheManager.Tests
                 cache.Get(key).Should().BeNull("Should be expired.");
             }
         }
+
 #endif
 
         [Fact]
@@ -606,6 +582,30 @@ namespace CacheManager.Tests
                 handles[1].GetCacheItem("something").ExpirationTimeout.Should().Be(default(TimeSpan));
             }
         }
+
 #endif
+
+        private static void ValidateExistsInAllHandles<T>(ICacheManager<T> cache, string key)
+        {
+            foreach (var handle in cache.CacheHandles)
+            {
+                var item = handle.GetCacheItem(key);
+                if (item == null)
+                {
+                    throw new InvalidOperationException($"'{key}' Doesn't exist in handle {handle.Configuration.Name}.");
+                }
+            }
+        }
+
+        private static void ValidateExistsInAllHandles<T>(ICacheManager<T> cache, string key, string region)
+        {
+            foreach (var handle in cache.CacheHandles)
+            {
+                if (cache.GetCacheItem(key, region) == null)
+                {
+                    throw new InvalidOperationException($"'{key}:{region}' doesn't exist in handle {handle.Configuration.Name}.");
+                }
+            }
+        }
     }
 }

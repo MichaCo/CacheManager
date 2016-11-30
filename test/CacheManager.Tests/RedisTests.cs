@@ -330,6 +330,7 @@ namespace CacheManager.Tests
         {
             RedisConfigurations.LoadConfiguration();
         }
+
 #endif
 
         [Fact]
@@ -367,6 +368,7 @@ namespace CacheManager.Tests
 
             act.ShouldThrow<ArgumentNullException>().WithMessage("*section*");
         }
+
 #endif
 
         [Fact]
@@ -484,6 +486,7 @@ namespace CacheManager.Tests
                 TestManagers.CreateRedisCache(69),
                 TestManagers.CreateRedisAndDicCacheWithBackplane(69, true, channelName));
         }
+
 #endif
 
         ////[Fact(Skip = "needs clear")]
@@ -614,12 +617,15 @@ namespace CacheManager.Tests
                     {
                         for (int i = 0; i < numInnerIterations; i++)
                         {
-                            cache.Update(key, (value) =>
-                            {
-                                value.Counter++;
-                                Interlocked.Increment(ref countCasModifyCalls);
-                                return value;
-                            }, int.MaxValue);
+                            cache.Update(
+                                key, 
+                                (value) =>
+                                {
+                                    value.Counter++;
+                                    Interlocked.Increment(ref countCasModifyCalls);
+                                    return value;
+                                }, 
+                                int.MaxValue);
                         }
                     },
                     numThreads,
@@ -831,10 +837,11 @@ namespace CacheManager.Tests
             // assert
             cache.CacheHandles.Any(p => p.Configuration.IsBackplaneSource).Should().BeTrue();
 
-            // database is the only option apart from key and connection string which must be set, database will not be set through connection string 
+            // database is the only option apart from key and connection string which must be set, database will not be set through connection string
             // to define which database should actually be used...
             redisConfig.Database.Should().Be(131);
         }
+
 #if !NO_APP_CONFIG
         [Fact]
         [Trait("category", "Redis")]
@@ -1055,6 +1062,7 @@ namespace CacheManager.Tests
                         testRemote(args);
                     };
                     break;
+
                 case CacheEvent.OnClear:
                     cacheA.OnClear += (ev, args) =>
                     {
@@ -1066,6 +1074,7 @@ namespace CacheManager.Tests
                         testRemote(args);
                     };
                     break;
+
                 case CacheEvent.OnClearRegion:
                     cacheA.OnClearRegion += (ev, args) =>
                     {
@@ -1077,6 +1086,7 @@ namespace CacheManager.Tests
                         testRemote(args);
                     };
                     break;
+
                 case CacheEvent.OnPut:
                     cacheA.OnPut += (ev, args) =>
                     {
@@ -1088,6 +1098,7 @@ namespace CacheManager.Tests
                         testRemote(args);
                     };
                     break;
+
                 case CacheEvent.OnRemove:
                     cacheA.OnRemove += (ev, args) =>
                     {
@@ -1099,6 +1110,7 @@ namespace CacheManager.Tests
                         testRemote(args);
                     };
                     break;
+
                 case CacheEvent.OnUpdate:
                     cacheA.OnUpdate += (ev, args) =>
                     {
@@ -1152,6 +1164,7 @@ namespace CacheManager.Tests
     }
 
 #if !DNXCORE50
+
     [Serializable]
 #endif
     [ExcludeFromCodeCoverage]
