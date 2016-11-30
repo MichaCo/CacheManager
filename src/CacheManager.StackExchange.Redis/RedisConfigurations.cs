@@ -91,7 +91,8 @@ namespace CacheManager.Redis
                     throw new InvalidOperationException("No configuration added for configuration name " + configurationName);
                 }
 
-                var configuration = new RedisConfiguration(configurationName, connectionStringHolder.ConnectionString);
+                // defaulting to database 0, no way to set it via connection strings atm.
+                var configuration = new RedisConfiguration(configurationName, connectionStringHolder.ConnectionString, 0);
                 AddConfiguration(configuration);
 #endif
             }
@@ -166,7 +167,8 @@ namespace CacheManager.Redis
                     AddConfiguration(
                         new RedisConfiguration(
                             key: redisOption.Id,
-                            connectionString: redisOption.ConnectionString));
+                            connectionString: redisOption.ConnectionString,
+                            database: redisOption.Database));    // fixes #114
                 }
             }
         }

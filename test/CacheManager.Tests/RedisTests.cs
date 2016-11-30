@@ -340,7 +340,8 @@ namespace CacheManager.Tests
 
             RedisConfigurations.LoadConfiguration(fileName, RedisConfigurationSection.DefaultSectionName);
             var cfg = RedisConfigurations.GetConfiguration("redisConnectionString");
-            cfg.ConnectionString.Should().Be("127.0.0.1:6379,allowAdmin=true,ssl=true");
+            cfg.ConnectionString.Should().Be("127.0.0.1:6379,allowAdmin=true,ssl=false");
+            cfg.Database.Should().Be(131);
         }
 
         [Fact]
@@ -793,10 +794,11 @@ namespace CacheManager.Tests
         {
             // arrange
             string fileName = BaseCacheManagerTest.GetCfgFileName(@"/Configuration/configuration.valid.allFeatures.config");
-            string cacheName = "redisConfig";
+            string cacheName = "redisConfigFromConfig";
 
             // have to load the configuration manually because the file is not avialbale to the default ConfigurtaionManager
             RedisConfigurations.LoadConfiguration(fileName, RedisConfigurationSection.DefaultSectionName);
+            var redisConfig = RedisConfigurations.GetConfiguration("redisFromCfgConfigurationId");
 
             // act
             var cfg = ConfigurationBuilder.LoadConfigurationFile(fileName, cacheName);
@@ -804,8 +806,35 @@ namespace CacheManager.Tests
 
             // assert
             cache.CacheHandles.Any(p => p.Configuration.IsBackplaneSource).Should().BeTrue();
+
+            redisConfig.Database.Should().Be(113);
+            redisConfig.ConnectionTimeout.Should().Be(11);
+            redisConfig.AllowAdmin.Should().BeTrue();
         }
 
+        [Fact]
+        [Trait("category", "Redis")]
+        public void Redis_Valid_CfgFile_LoadWithConnectionString()
+        {
+            // arrange
+            string fileName = BaseCacheManagerTest.GetCfgFileName(@"/Configuration/configuration.valid.allFeatures.config");
+            string cacheName = "redisConfigFromConnectionString";
+
+            // have to load the configuration manually because the file is not avialbale to the default ConfigurtaionManager
+            RedisConfigurations.LoadConfiguration(fileName, RedisConfigurationSection.DefaultSectionName);
+            var redisConfig = RedisConfigurations.GetConfiguration("redisConnectionString");
+
+            // act
+            var cfg = ConfigurationBuilder.LoadConfigurationFile(fileName, cacheName);
+            var cache = CacheFactory.FromConfiguration<object>(cfg);
+
+            // assert
+            cache.CacheHandles.Any(p => p.Configuration.IsBackplaneSource).Should().BeTrue();
+
+            // database is the only option apart from key and connection string which must be set, database will not be set through connection string 
+            // to define which database should actually be used...
+            redisConfig.Database.Should().Be(131);
+        }
 #if !NO_APP_CONFIG
         [Fact]
         [Trait("category", "Redis")]

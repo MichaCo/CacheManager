@@ -225,7 +225,7 @@ namespace CacheManager.SystemRuntimeCaching
                 var instanceItem = new CacheItem<string>(this.instanceKey, this.instanceKey);
                 CacheItemPolicy policy = new CacheItemPolicy()
                 {
-                    Priority = CacheItemPriority.Default,
+                    Priority = CacheItemPriority.NotRemovable,
                     RemovedCallback = new CacheEntryRemovedCallback(this.InstanceTokenRemoved),
                     AbsoluteExpiration = System.Runtime.Caching.ObjectCache.InfiniteAbsoluteExpiration,
                     SlidingExpiration = System.Runtime.Caching.ObjectCache.NoSlidingExpiration,
@@ -243,7 +243,7 @@ namespace CacheManager.SystemRuntimeCaching
             // removed whenever the instance gets cleared.
             CacheItemPolicy policy = new CacheItemPolicy()
             {
-                Priority = CacheItemPriority.Default,
+                Priority = CacheItemPriority.NotRemovable,
                 AbsoluteExpiration = System.Runtime.Caching.ObjectCache.InfiniteAbsoluteExpiration,
                 SlidingExpiration = System.Runtime.Caching.ObjectCache.NoSlidingExpiration,
                 ChangeMonitors = { this.cache.CreateCacheEntryChangeMonitor(new[] { this.instanceKey }) },

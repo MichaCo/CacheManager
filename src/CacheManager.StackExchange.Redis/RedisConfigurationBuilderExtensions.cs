@@ -37,17 +37,18 @@ namespace CacheManager.Core
         /// The configuration key which can be used to refernce this configuration by a redis cache handle or backplane.
         /// </param>
         /// <param name="connectionString">The redis connection string.</param>
+        /// <param name="database">The redis database to be used.</param>
         /// <returns>The configuration builder.</returns>
         /// <exception cref="System.ArgumentNullException">
         /// If <paramref name="configurationKey"/> or <paramref name="connectionString"/> are null.
         /// </exception>
-        public static ConfigurationBuilderCachePart WithRedisConfiguration(this ConfigurationBuilderCachePart part, string configurationKey, string connectionString)
+        public static ConfigurationBuilderCachePart WithRedisConfiguration(this ConfigurationBuilderCachePart part, string configurationKey, string connectionString, int database = 0)
         {
             NotNullOrWhiteSpace(configurationKey, nameof(configurationKey));
 
             NotNullOrWhiteSpace(connectionString, nameof(connectionString));
 
-            RedisConfigurations.AddConfiguration(new RedisConfiguration(configurationKey, connectionString));
+            RedisConfigurations.AddConfiguration(new RedisConfiguration(configurationKey, connectionString, database));
             return part;
         }
 

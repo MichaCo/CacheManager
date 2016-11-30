@@ -134,7 +134,7 @@ namespace CacheManager.Redis
                 var options = CreateConfigurationOptions(configuration);
                 conString = options.ToString();
             }
-
+            
             return conString;
         }
 

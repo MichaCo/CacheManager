@@ -78,12 +78,15 @@ namespace CacheManager.Redis
         /// <param name="connectionString">
         /// Instead of specifying all the properties, this can also be done via one connection string.
         /// </param>
+        /// <param name="database">The redis database to use.</param>
         public RedisConfiguration(
             string key,
-            string connectionString)
+            string connectionString,
+            int database)
         {
             this.Key = key;
             this.ConnectionString = connectionString;
+            this.Database = database;
         }
 
         /// <summary>
