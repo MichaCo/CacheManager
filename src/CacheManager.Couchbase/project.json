@@ -35,7 +35,7 @@
   },
   "dependencies": {
     "CacheManager.Core": { "target": "project" },
-    "CouchbaseNetClient": "2.3.4"
+    "CouchbaseNetClient": "2.3.8"
   },
   "frameworks": {
     "net45": {
@@ -43,7 +43,7 @@
         "System.Configuration": ""
       },
       "dependencies": {
-        "Newtonsoft.Json": "9.0.1"
+        "Newtonsoft.Json": "8.0.3"
       }
     }
   }

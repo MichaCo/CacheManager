@@ -35,7 +35,7 @@
   },
   "dependencies": {
     "CacheManager.Core": { "target": "project" },
-    "StackExchange.Redis.StrongName": "1.1.605"
+    "StackExchange.Redis.StrongName": "1.1.608"
   },
   "frameworks": {
     "net40": {
