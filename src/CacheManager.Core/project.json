@@ -1,5 +1,5 @@
 ﻿{
-  "version": "0.9.2-*",
+  "version": "0.9.3-*",
   "description": "CacheManager is an open source caching abstraction layer for .NET written in C#. It supports various cache providers and implements many advanced features. The Core library contains all base interfaces and tools. You should install at least one other CacheManager package to get cache handle implementations.",
   "packOptions": {
     "licenseUrl": "https://github.com/MichaCo/CacheManager/blob/master/LICENSE",

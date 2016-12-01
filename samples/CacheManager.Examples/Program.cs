@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Reflection;
 using CacheManager.Core;
 using Microsoft.Extensions.Logging;
 #if NET451
@@ -53,12 +52,12 @@ namespace CacheManager.Examples
 
         private static void MostSimpleCacheManagerWithLogging()
         {
-var config = new ConfigurationBuilder()
-    .WithMicrosoftLogging(l => l.AddConsole(LogLevel.Information))
-    .WithSystemRuntimeCacheHandle()
-    .Build();
+            var config = new ConfigurationBuilder()
+                .WithMicrosoftLogging(l => l.AddConsole(LogLevel.Information))
+                .WithSystemRuntimeCacheHandle()
+                .Build();
 
-var cache = new BaseCacheManager<string>(config);
+            var cache = new BaseCacheManager<string>(config);
             // or
             var cache2 = CacheFactory.FromConfiguration<string>(config);
         }
@@ -74,7 +73,7 @@ var cache = new BaseCacheManager<string>(config);
                 .WithMicrosoftLogging(f => f.AddConsole())
                 .Build();
         }
-        
+
 #endif
 
         private static void LoggingSample()
@@ -99,6 +98,7 @@ var cache = new BaseCacheManager<string>(config);
             var cache = CacheFactory.FromConfiguration<object>("myCache");
             cache.Add("key", "value");
         }
+
 #endif
 
         private static void EventsExample()
@@ -139,6 +139,7 @@ var cache = new BaseCacheManager<string>(config);
 
             var result = cache.Get("test");
         }
+
 #endif
 
         private static void SimpleCustomBuildConfigurationUsingConfigBuilder()
@@ -244,8 +245,21 @@ var cache = new BaseCacheManager<string>(config);
             Console.WriteLine("After AddOrUpdate: {0}", cache["test"]);
 
             cache.Remove("test");
-            var removeValue = cache.Update("test", v => "updated?");
-            Console.WriteLine("Value after remove is null?: {0}", removeValue == null);
+            try
+            {
+                var removeValue = cache.Update("test", v => "updated?");
+            }
+            catch
+            {
+                Console.WriteLine("Error as expected because item didn't exist.");
+            }
+
+            // use try update to not deal with exceptions
+            string removedValue;
+            if (!cache.TryUpdate("test", v => v, out removedValue))
+            {
+                Console.WriteLine("Value after remove is null?: {0}", removedValue == null);
+            }
         }
 
         private static void UpdateCounterTest()

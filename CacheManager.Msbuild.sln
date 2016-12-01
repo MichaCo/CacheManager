@@ -9,7 +9,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{A4153E09-B
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "common", "common", "{A8DA8B90-61EA-43AB-AD71-22C248780401}"
 	ProjectSection(SolutionItems) = preProject
-		.travis.yml = .travis.yml
+		_disable_.travis.yml = _disable_.travis.yml
 		appveyor.vs2013.yml = appveyor.vs2013.yml
 		appveyor.yml = appveyor.yml
 		common\CacheManager.ruleset = common\CacheManager.ruleset

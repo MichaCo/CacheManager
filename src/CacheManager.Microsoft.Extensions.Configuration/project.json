@@ -1,5 +1,5 @@
 ﻿{
-  "version": "0.9.2-*",
+  "version": "0.9.3-*",
   "description": "CacheManager extension package to use Microsoft.Extensions.Configuration to configure the CacheManager instance. CacheManager is an open source caching abstraction layer for .NET written in C#. This is the ASP.NET Core configuration integration package.",
   "packOptions": {
     "licenseUrl": "https://github.com/MichaCo/CacheManager/blob/master/LICENSE",
