@@ -184,6 +184,7 @@ namespace CacheManager.Core.Internal
                 if (IsExpired(item, now))
                 {
                     cache.RemoveInternal(item.Key, item.Region);
+
                     // fix stats
                     cache.Stats.OnRemove(item.Region);
                     removed++;

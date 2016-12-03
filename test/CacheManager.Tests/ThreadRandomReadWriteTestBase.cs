@@ -74,7 +74,7 @@ namespace CacheManager.Tests
             }
         }
 
-        [Theory]
+        [Theory(Skip = "has no real value")]
         [MemberData("TestCacheManagers")]
         public void Thread_RandomAccess(ICacheManager<object> cache)
         {
@@ -146,11 +146,11 @@ namespace CacheManager.Tests
                     }
                     catch (Exception ex)
                     {
-                        Trace.TraceError("{1} Error: {0}", ex.Message, tId);
+                        Debug.WriteLine("{1} Error: {0}", ex.Message, tId);
                         throw;
                     }
 
-                    Trace.TraceInformation("Hits: {0}, Misses: {1}", hits, misses);
+                    Debug.WriteLine("Hits: {0}, Misses: {1}", hits, misses);
                 };
 
                 ThreadTestHelper.Run(test, 2, 1);
