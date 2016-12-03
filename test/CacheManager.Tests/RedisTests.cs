@@ -434,7 +434,7 @@ namespace CacheManager.Tests
         }
 
 #if !DNXCORE50
-        [Fact(Skip = "not working 100% of the time")]
+        [Fact]
         [Trait("category", "Redis")]
         [Trait("category", "Unreliable")]
         public void Redis_Multiple_PubSub_Change()
@@ -445,11 +445,11 @@ namespace CacheManager.Tests
 
             // redis config name must be same for all cache handles, configured via file and via code
             // otherwise the pub sub channel name is different
-            string cacheName = "redisConfig";
+            string cacheName = "redisConfigFromConfig";
 
             RedisConfigurations.LoadConfiguration(fileName, RedisConfigurationSection.DefaultSectionName);
 
-            var cfg = ConfigurationBuilder.LoadConfigurationFile(fileName, cacheName);
+            var cfg = (CacheManagerConfiguration)ConfigurationBuilder.LoadConfigurationFile(fileName, cacheName);
             cfg.BackplaneChannelName = channelName;
 
             var cfgCache = CacheFactory.FromConfiguration<object>(cfg);
@@ -461,6 +461,7 @@ namespace CacheManager.Tests
                 (cacheA, cacheB) =>
                 {
                     cacheA.Put(item);
+                    cacheA.Get(item.Key).Should().Be("something");
                     Thread.Sleep(10);
                     var value = cacheB.Get(item.Key);
                     value.Should().Be(item.Value, cacheB.ToString());
@@ -481,10 +482,10 @@ namespace CacheManager.Tests
                     value.Should().Be("new value", cache.ToString());
                 },
                 1,
-                TestManagers.CreateRedisAndDicCacheWithBackplane(69, true, channelName),
+                TestManagers.CreateRedisAndDicCacheWithBackplane(113, true, channelName, Serializer.Json),
                 cfgCache,
-                TestManagers.CreateRedisCache(69),
-                TestManagers.CreateRedisAndDicCacheWithBackplane(69, true, channelName));
+                TestManagers.CreateRedisCache(113, false, Serializer.Json),
+                TestManagers.CreateRedisAndDicCacheWithBackplane(113, true, channelName, Serializer.Json));
         }
 
 #endif
@@ -518,7 +519,6 @@ namespace CacheManager.Tests
 
         [Fact]
         [Trait("category", "Redis")]
-        ////[Trait("category", "Unreliable")]
         public void Redis_Multiple_PubSub_ClearRegion()
         {
             // arrange
@@ -544,7 +544,7 @@ namespace CacheManager.Tests
                 TestManagers.CreateRedisCache(5));
         }
 
-        [Fact(Skip = "not working 100% of the time")]
+        [Fact]
         [Trait("category", "Redis")]
         [Trait("category", "Unreliable")]
         public void Redis_Multiple_PubSub_Remove()
@@ -814,7 +814,7 @@ namespace CacheManager.Tests
             cache.CacheHandles.Any(p => p.Configuration.IsBackplaneSource).Should().BeTrue();
 
             redisConfig.Database.Should().Be(113);
-            redisConfig.ConnectionTimeout.Should().Be(11);
+            redisConfig.ConnectionTimeout.Should().Be(1200);
             redisConfig.AllowAdmin.Should().BeTrue();
         }
 

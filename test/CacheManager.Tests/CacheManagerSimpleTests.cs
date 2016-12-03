@@ -951,7 +951,7 @@ namespace CacheManager.Tests
             }
         }
 
-        [Theory(Skip = "not always working")]
+        [Theory]
         [MemberData("TestCacheManagers")]
         public void CacheManager_GetOrAdd_ForceRace<T>(T cache)
             where T : ICacheManager<object>

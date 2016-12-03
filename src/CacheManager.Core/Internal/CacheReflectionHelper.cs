@@ -10,7 +10,7 @@ namespace CacheManager.Core.Internal
 {
     internal static class CacheReflectionHelper
     {
-        internal static ILoggerFactory CreateLoggerFactory(CacheManagerConfiguration configuration)
+        internal static ILoggerFactory CreateLoggerFactory(ICacheManagerConfiguration configuration)
         {
             NotNull(configuration, nameof(configuration));
 
@@ -30,7 +30,7 @@ namespace CacheManager.Core.Internal
             return (ILoggerFactory)CreateInstance(configuration.LoggerFactoryType, args);
         }
 
-        internal static ICacheSerializer CreateSerializer(CacheManagerConfiguration configuration, ILoggerFactory loggerFactory)
+        internal static ICacheSerializer CreateSerializer(ICacheManagerConfiguration configuration, ILoggerFactory loggerFactory)
         {
             NotNull(configuration, nameof(configuration));
             NotNull(loggerFactory, nameof(loggerFactory));
@@ -57,7 +57,7 @@ namespace CacheManager.Core.Internal
             return null;
         }
 
-        internal static CacheBackplane CreateBackplane(CacheManagerConfiguration configuration, ILoggerFactory loggerFactory)
+        internal static CacheBackplane CreateBackplane(ICacheManagerConfiguration configuration, ILoggerFactory loggerFactory)
         {
             NotNull(configuration, nameof(configuration));
             NotNull(loggerFactory, nameof(loggerFactory));

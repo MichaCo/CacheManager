@@ -6,7 +6,7 @@ namespace CacheManager.Core
     /// <summary>
     /// The basic cache manager configuration class.
     /// </summary>
-    public class CacheManagerConfiguration : ICacheManagerConfiguration
+    public sealed class CacheManagerConfiguration : ICacheManagerConfiguration
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="CacheManagerConfiguration"/> class.

@@ -28,7 +28,7 @@ namespace CacheManager.Web
         /// <param name="configuration">The cache handle configuration.</param>
         /// <param name="loggerFactory">The logger factory.</param>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors", Justification = "For unit testing only, will never cause issues.")]
-        public SystemWebCacheHandle(CacheManagerConfiguration managerConfiguration, CacheHandleConfiguration configuration, ILoggerFactory loggerFactory)
+        public SystemWebCacheHandle(ICacheManagerConfiguration managerConfiguration, CacheHandleConfiguration configuration, ILoggerFactory loggerFactory)
             : base(managerConfiguration, configuration)
         {
             NotNull(loggerFactory, nameof(loggerFactory));

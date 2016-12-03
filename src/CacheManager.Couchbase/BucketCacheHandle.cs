@@ -32,7 +32,7 @@ namespace CacheManager.Couchbase
         /// <exception cref="System.InvalidOperationException">
         /// If <c>configuration.HandleName</c> is not valid.
         /// </exception>
-        public BucketCacheHandle(CacheManagerConfiguration managerConfiguration, CacheHandleConfiguration configuration, ILoggerFactory loggerFactory)
+        public BucketCacheHandle(ICacheManagerConfiguration managerConfiguration, CacheHandleConfiguration configuration, ILoggerFactory loggerFactory)
             : base(managerConfiguration, configuration)
         {
             NotNull(configuration, nameof(configuration));

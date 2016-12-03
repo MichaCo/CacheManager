@@ -37,7 +37,7 @@ namespace CacheManager.Core
         /// <see cref="CacheFactory"/>
         /// <see cref="ConfigurationBuilder"/>
         /// <see cref="BaseCacheHandle{TCacheValue}"/>
-        public BaseCacheManager(CacheManagerConfiguration configuration)
+        public BaseCacheManager(ICacheManagerConfiguration configuration)
             : this(configuration?.Name ?? Guid.NewGuid().ToString(), configuration)
         {
         }
@@ -57,7 +57,7 @@ namespace CacheManager.Core
         /// <see cref="ConfigurationBuilder"/>
         /// <see cref="BaseCacheHandle{TCacheValue}"/>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "nope")]
-        private BaseCacheManager(string name, CacheManagerConfiguration configuration)
+        private BaseCacheManager(string name, ICacheManagerConfiguration configuration)
         {
             NotNullOrWhiteSpace(name, nameof(name));
             NotNull(configuration, nameof(configuration));
@@ -158,7 +158,7 @@ namespace CacheManager.Core
 
         /// <inheritdoc />
         protected override ILogger Logger { get; }
-
+        
         /// <summary>
         /// Adds an item to the cache or, if the item already exists, updates the item using the
         /// <paramref name="updateValue"/> function.

@@ -36,7 +36,8 @@
   "dependencies": {
     "CacheManager.Core": { "target": "project" },
     "Microsoft.Extensions.Configuration.Abstractions": "1.0.0",
-    "Microsoft.Extensions.Configuration.Binder": "1.0.0"
+    "Microsoft.Extensions.Configuration.Binder": "1.0.0",
+    "Microsoft.Extensions.DependencyInjection.Abstractions": "1.0.0"
   },
   "frameworks": {
     "net45": {},

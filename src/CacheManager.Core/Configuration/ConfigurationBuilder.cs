@@ -57,8 +57,8 @@ namespace CacheManager.Core
         /// Creates a builder which allows to modify the existing <paramref name="configuration"/>.
         /// </summary>
         /// <param name="configuration">The configuration the builder should be instantiated for.</param>
-        public ConfigurationBuilder(CacheManagerConfiguration configuration)
-            : base(configuration)
+        public ConfigurationBuilder(ICacheManagerConfiguration configuration)
+            : base((CacheManagerConfiguration)configuration)
         {
         }
 
@@ -69,8 +69,8 @@ namespace CacheManager.Core
         /// </summary>
         /// <param name="name">The name of the cache manager.</param>
         /// <param name="configuration">The configuration the builder should be instantiated for.</param>
-        public ConfigurationBuilder(string name, CacheManagerConfiguration configuration)
-            : base(configuration)
+        public ConfigurationBuilder(string name, ICacheManagerConfiguration configuration)
+            : base((CacheManagerConfiguration)configuration)
         {
             NotNullOrWhiteSpace(name, nameof(name));
             this.Configuration.Name = name;
@@ -80,15 +80,15 @@ namespace CacheManager.Core
         /// Builds a <see cref="CacheManagerConfiguration"/> which can be used to create a new cache
         /// manager instance.
         /// <para>
-        /// Pass the configuration to <see cref="CacheFactory.FromConfiguration{TCacheValue}(CacheManagerConfiguration)"/>
+        /// Pass the configuration to <see cref="CacheFactory.FromConfiguration{TCacheValue}(ICacheManagerConfiguration)"/>
         /// to create a valid cache manager.
         /// </para>
         /// </summary>
         /// <param name="settings">
         /// The configuration settings to define the cache handles and other properties.
         /// </param>
-        /// <returns>The <see cref="CacheManagerConfiguration"/>.</returns>
-        public static CacheManagerConfiguration BuildConfiguration(Action<ConfigurationBuilderCachePart> settings)
+        /// <returns>The <see cref="ICacheManagerConfiguration"/>.</returns>
+        public static ICacheManagerConfiguration BuildConfiguration(Action<ConfigurationBuilderCachePart> settings)
         {
             NotNull(settings, nameof(settings));
 
@@ -101,7 +101,7 @@ namespace CacheManager.Core
         /// Builds a <see cref="CacheManagerConfiguration"/> which can be used to create a new cache
         /// manager instance.
         /// <para>
-        /// Pass the configuration to <see cref="CacheFactory.FromConfiguration{TCacheValue}(CacheManagerConfiguration)"/>
+        /// Pass the configuration to <see cref="CacheFactory.FromConfiguration{TCacheValue}(ICacheManagerConfiguration)"/>
         /// to create a valid cache manager.
         /// </para>
         /// </summary>
@@ -109,8 +109,8 @@ namespace CacheManager.Core
         /// <param name="settings">
         /// The configuration settings to define the cache handles and other properties.
         /// </param>
-        /// <returns>The <see cref="CacheManagerConfiguration"/>.</returns>
-        public static CacheManagerConfiguration BuildConfiguration(string name, Action<ConfigurationBuilderCachePart> settings)
+        /// <returns>The <see cref="ICacheManagerConfiguration"/>.</returns>
+        public static ICacheManagerConfiguration BuildConfiguration(string name, Action<ConfigurationBuilderCachePart> settings)
         {
             NotNullOrWhiteSpace(name, nameof(name));
             NotNull(settings, nameof(settings));
@@ -132,8 +132,8 @@ namespace CacheManager.Core
         /// </summary>
         /// <param name="configName">The name of the cache element within the config file.</param>
         /// <returns>The <c>CacheManagerConfiguration</c></returns>
-        /// <see cref="CacheManagerConfiguration"/>
-        public static CacheManagerConfiguration LoadConfiguration(string configName) =>
+        /// <see cref="ICacheManagerConfiguration"/>
+        public static ICacheManagerConfiguration LoadConfiguration(string configName) =>
             LoadConfiguration(CacheManagerSection.DefaultSectionName, configName);
 
         /// <summary>
@@ -146,8 +146,8 @@ namespace CacheManager.Core
         /// <param name="sectionName">The name of the section.</param>
         /// <param name="configName">The name of the cache element within the config file.</param>
         /// <returns>The <c>CacheManagerConfiguration</c></returns>
-        /// <see cref="CacheManagerConfiguration"/>
-        public static CacheManagerConfiguration LoadConfiguration(string sectionName, string configName)
+        /// <see cref="ICacheManagerConfiguration"/>
+        public static ICacheManagerConfiguration LoadConfiguration(string sectionName, string configName)
         {
             NotNullOrWhiteSpace(sectionName, nameof(sectionName));
             NotNullOrWhiteSpace(configName, nameof(configName));
@@ -174,8 +174,8 @@ namespace CacheManager.Core
         /// <exception cref="InvalidOperationException">
         /// If the file specified by <paramref name="configFileName"/> does not exist.
         /// </exception>
-        /// <see cref="CacheManagerConfiguration"/>
-        public static CacheManagerConfiguration LoadConfigurationFile(string configFileName, string configName) =>
+        /// <see cref="ICacheManagerConfiguration"/>
+        public static ICacheManagerConfiguration LoadConfigurationFile(string configFileName, string configName) =>
             LoadConfigurationFile(configFileName, CacheManagerSection.DefaultSectionName, configName);
 
         /// <summary>
@@ -195,8 +195,8 @@ namespace CacheManager.Core
         /// <exception cref="InvalidOperationException">
         /// If the file specified by <paramref name="configFileName"/> does not exist.
         /// </exception>
-        /// <see cref="CacheManagerConfiguration"/>
-        public static CacheManagerConfiguration LoadConfigurationFile(string configFileName, string sectionName, string configName)
+        /// <see cref="ICacheManagerConfiguration"/>
+        public static ICacheManagerConfiguration LoadConfigurationFile(string configFileName, string sectionName, string configName)
         {
             NotNullOrWhiteSpace(configFileName, nameof(configFileName));
             NotNullOrWhiteSpace(sectionName, nameof(sectionName));
@@ -425,7 +425,7 @@ namespace CacheManager.Core
         /// Hands back the new <see cref="CacheManagerConfiguration"/> instance.
         /// </summary>
         /// <returns>The <see cref="CacheManagerConfiguration"/>.</returns>
-        public CacheManagerConfiguration Build()
+        public ICacheManagerConfiguration Build()
         {
             return this.parent.Build();
         }
@@ -752,8 +752,8 @@ namespace CacheManager.Core
         /// <summary>
         /// Hands back the new <see cref="CacheManagerConfiguration"/> instance.
         /// </summary>
-        /// <returns>The <see cref="CacheManagerConfiguration"/>.</returns>
-        public CacheManagerConfiguration Build()
+        /// <returns>The <see cref="ICacheManagerConfiguration"/>.</returns>
+        public ICacheManagerConfiguration Build()
         {
             return this.Configuration;
         }

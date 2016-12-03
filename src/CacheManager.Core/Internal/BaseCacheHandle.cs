@@ -24,7 +24,7 @@ namespace CacheManager.Core.Internal
         /// If <paramref name="managerConfiguration"/> or <paramref name="configuration"/> are null.
         /// </exception>
         /// <exception cref="System.ArgumentException">If <paramref name="configuration"/> name is empty.</exception>
-        protected BaseCacheHandle(CacheManagerConfiguration managerConfiguration, CacheHandleConfiguration configuration)
+        protected BaseCacheHandle(ICacheManagerConfiguration managerConfiguration, CacheHandleConfiguration configuration)
         {
             NotNull(configuration, nameof(configuration));
             NotNull(managerConfiguration, nameof(managerConfiguration));

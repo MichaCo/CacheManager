@@ -409,11 +409,12 @@ namespace CacheManager.Core
         /// <exception cref="System.InvalidOperationException">
         /// Thrown on certain configuration errors related to the cache handles.
         /// </exception>
-        public static ICacheManager<TCacheValue> FromConfiguration<TCacheValue>(string cacheName, CacheManagerConfiguration configuration)
+        public static ICacheManager<TCacheValue> FromConfiguration<TCacheValue>(string cacheName, ICacheManagerConfiguration configuration)
         {
             NotNull(configuration, nameof(configuration));
-            configuration.Name = cacheName;
-            return new BaseCacheManager<TCacheValue>(configuration);
+            var cfg = (CacheManagerConfiguration)configuration;
+            cfg.Name = cacheName;
+            return new BaseCacheManager<TCacheValue>(cfg);
         }
 
         /// <summary>
@@ -449,7 +450,7 @@ namespace CacheManager.Core
         /// <exception cref="System.InvalidOperationException">
         /// Thrown on certain configuration errors related to the cache handles.
         /// </exception>
-        public static ICacheManager<TCacheValue> FromConfiguration<TCacheValue>(CacheManagerConfiguration configuration)
+        public static ICacheManager<TCacheValue> FromConfiguration<TCacheValue>(ICacheManagerConfiguration configuration)
             => FromConfiguration<TCacheValue>(Guid.NewGuid().ToString("N"), configuration);
 
         /// <summary>
@@ -470,15 +471,16 @@ namespace CacheManager.Core
         /// <exception cref="System.InvalidOperationException">
         /// Thrown on certain configuration errors related to the cache handles.
         /// </exception>
-        public static object FromConfiguration(Type cacheValueType, string cacheName, CacheManagerConfiguration configuration)
+        public static object FromConfiguration(Type cacheValueType, string cacheName, ICacheManagerConfiguration configuration)
         {
             NotNull(cacheValueType, nameof(cacheValueType));
             NotNull(configuration, nameof(configuration));
 
-            configuration.Name = cacheName;
+            var cfg = (CacheManagerConfiguration)configuration;
+            cfg.Name = cacheName;
 
             var type = typeof(BaseCacheManager<>).MakeGenericType(new[] { cacheValueType });
-            return Activator.CreateInstance(type, new object[] { configuration });
+            return Activator.CreateInstance(type, new object[] { cfg });
         }
 
         /// <summary>
@@ -498,7 +500,7 @@ namespace CacheManager.Core
         /// <exception cref="System.InvalidOperationException">
         /// Thrown on certain configuration errors related to the cache handles.
         /// </exception>
-        public static object FromConfiguration(Type cacheValueType, CacheManagerConfiguration configuration)
+        public static object FromConfiguration(Type cacheValueType, ICacheManagerConfiguration configuration)
             => FromConfiguration(cacheValueType, Guid.NewGuid().ToString("N"), configuration);
     }
 }

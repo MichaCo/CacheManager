@@ -26,7 +26,7 @@ namespace CacheManager.Core.Internal
         /// <param name="managerConfiguration">The manager configuration.</param>
         /// <param name="configuration">The cache handle configuration.</param>
         /// <param name="loggerFactory">The logger factory.</param>
-        public DictionaryCacheHandle(CacheManagerConfiguration managerConfiguration, CacheHandleConfiguration configuration, ILoggerFactory loggerFactory)
+        public DictionaryCacheHandle(ICacheManagerConfiguration managerConfiguration, CacheHandleConfiguration configuration, ILoggerFactory loggerFactory)
             : base(managerConfiguration, configuration)
         {
             NotNull(loggerFactory, nameof(loggerFactory));
@@ -184,6 +184,8 @@ namespace CacheManager.Core.Internal
                 if (IsExpired(item, now))
                 {
                     cache.RemoveInternal(item.Key, item.Region);
+                    // fix stats
+                    cache.Stats.OnRemove(item.Region);
                     removed++;
                 }
             }

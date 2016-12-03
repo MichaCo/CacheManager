@@ -223,7 +223,7 @@ namespace CacheManager.Tests
 
         public static ICacheManager<object> CreateRedisAndDicCacheWithBackplane(int database = 0, bool sharedRedisConfig = true, string channelName = null, Serializer serializer = Serializer.Proto)
         {
-            var redisKey = sharedRedisConfig ? "redisConfig" : Guid.NewGuid().ToString();
+            var redisKey = sharedRedisConfig ? "redisConfig" + database : Guid.NewGuid().ToString();
             return CacheFactory.Build(settings =>
             {
                 settings
@@ -257,7 +257,7 @@ namespace CacheManager.Tests
 
         public static ICacheManager<object> CreateRedisCache(int database = 0, bool sharedRedisConfig = true, Serializer serializer = Serializer.GzJson)
         {
-            var redisKey = sharedRedisConfig ? "redisConfig" : Guid.NewGuid().ToString();
+            var redisKey = sharedRedisConfig ? "redisConfig" + database : Guid.NewGuid().ToString();
             var cache = CacheFactory.Build(settings =>
             {
                 settings
@@ -280,7 +280,7 @@ namespace CacheManager.Tests
 
         public static ICacheManager<T> CreateRedisCache<T>(int database = 0, bool sharedRedisConfig = true, Serializer serializer = Serializer.GzJson)
         {
-            var redisKey = sharedRedisConfig ? "redisConfig" : Guid.NewGuid().ToString();
+            var redisKey = sharedRedisConfig ? "redisConfig" + database : Guid.NewGuid().ToString();
             var cache = CacheFactory.Build<T>(settings =>
             {
                 settings

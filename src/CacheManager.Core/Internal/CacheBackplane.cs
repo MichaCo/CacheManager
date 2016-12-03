@@ -23,7 +23,7 @@ namespace CacheManager.Core.Internal
         /// </summary>
         /// <param name="configuration">The cache manager configuration.</param>
         /// <exception cref="System.ArgumentNullException">If configuration is null.</exception>
-        protected CacheBackplane(CacheManagerConfiguration configuration)
+        protected CacheBackplane(ICacheManagerConfiguration configuration)
         {
             NotNull(configuration, nameof(configuration));
             this.CacheConfiguration = configuration;
@@ -65,7 +65,7 @@ namespace CacheManager.Core.Internal
         /// <value>
         /// The cache configuration.
         /// </value>
-        public CacheManagerConfiguration CacheConfiguration { get; }
+        public ICacheManagerConfiguration CacheConfiguration { get; }
 
         /// <summary>
         /// Gets the name of the configuration to be used.

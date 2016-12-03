@@ -40,7 +40,7 @@ namespace CacheManager.Redis
         /// </summary>
         /// <param name="configuration">The cache manager configuration.</param>
         /// <param name="loggerFactory">The logger factory</param>
-        public RedisCacheBackplane(CacheManagerConfiguration configuration, ILoggerFactory loggerFactory)
+        public RedisCacheBackplane(ICacheManagerConfiguration configuration, ILoggerFactory loggerFactory)
             : base(configuration)
         {
             NotNull(configuration, nameof(configuration));
