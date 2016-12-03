@@ -73,7 +73,7 @@ end
 return result";
 
         private readonly IDictionary<ScriptType, StackRedis.LoadedLuaScript> shaScripts = new Dictionary<ScriptType, StackRedis.LoadedLuaScript>();
-        private readonly CacheManagerConfiguration managerConfiguration;
+        private readonly ICacheManagerConfiguration managerConfiguration;
         private readonly RedisValueConverter valueConverter;
         private readonly RedisConnectionManager connection;
         private readonly bool isLuaAllowed = true;
@@ -91,7 +91,7 @@ return result";
         /// <param name="configuration">The cache handle configuration.</param>
         /// <param name="loggerFactory">The logger factory.</param>
         /// <param name="serializer">The serializer.</param>
-        public RedisCacheHandle(CacheManagerConfiguration managerConfiguration, CacheHandleConfiguration configuration, ILoggerFactory loggerFactory, ICacheSerializer serializer)
+        public RedisCacheHandle(ICacheManagerConfiguration managerConfiguration, CacheHandleConfiguration configuration, ILoggerFactory loggerFactory, ICacheSerializer serializer)
             : base(managerConfiguration, configuration)
         {
             NotNull(loggerFactory, nameof(loggerFactory));
@@ -398,8 +398,15 @@ return result";
                 // checking if the expiration mode is set on the hash
                 if (expirationModeItem.HasValue && timeoutItem.HasValue)
                 {
-                    expirationMode = (ExpirationMode)(int)expirationModeItem;
-                    expirationTimeout = TimeSpan.FromMilliseconds((long)timeoutItem);
+                    if (!timeoutItem.IsNullOrEmpty && !expirationModeItem.IsNullOrEmpty)
+                    {
+                        expirationMode = (ExpirationMode)(int)expirationModeItem;
+                        expirationTimeout = TimeSpan.FromMilliseconds((long)timeoutItem);
+                    }
+                    else
+                    {
+                        this.Logger.LogWarn("Expiration mode and timeout are set but are not valid '{0}', '{1}'.", expirationModeItem, timeoutItem);
+                    }
                 }
 
                 var value = this.FromRedisValue(item, (string)valueTypeItem);
@@ -456,8 +463,16 @@ return result";
                 // checking if the expiration mode is set on the hash
                 if (expirationModeItem.HasValue && timeoutItem.HasValue)
                 {
-                    expirationMode = (ExpirationMode)(int)expirationModeItem;
-                    expirationTimeout = TimeSpan.FromMilliseconds((long)timeoutItem);
+                    // adding sanity check for empty string results. Could happen in rare cases like #74
+                    if (!timeoutItem.IsNullOrEmpty && !expirationModeItem.IsNullOrEmpty)
+                    {
+                        expirationMode = (ExpirationMode)(int)expirationModeItem;
+                        expirationTimeout = TimeSpan.FromMilliseconds((long)timeoutItem);
+                    }
+                    else
+                    {
+                        this.Logger.LogWarn("Expiration mode and timeout are set but are not valid '{0}', '{1}'.", expirationModeItem, timeoutItem);
+                    }
                 }
 
                 var value = this.FromRedisValue(item, (string)valueTypeItem);

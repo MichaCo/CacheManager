@@ -38,8 +38,8 @@ namespace CacheManager.Tests
             // act
             Action act = () => cache.Add(new CacheItem<object>(key, "something", ExpirationMode.Absolute, default(TimeSpan)));
 
-            act.ShouldThrow<InvalidOperationException>()
-                .WithMessage("Expiration mode is defined without timeout.");
+            act.ShouldThrow<ArgumentOutOfRangeException>()
+                .WithMessage("Expiration timeout must be greater than zero*");
         }
 
         [Fact]

@@ -91,6 +91,23 @@ namespace CacheManager.Tests
             }
         }
 
+        // #74
+        [Theory]
+        [MemberData("TestCacheManagers")]
+        public void CacheManager_Expire_DoesNotAcceptExpirationInThePast<T>(T cache)
+            where T : ICacheManager<object>
+        {
+            using (cache)
+            {
+                var key = Guid.NewGuid().ToString();
+                var expiration = TimeSpan.FromMilliseconds(-1);
+                Action act = () => cache.Add(new CacheItem<object>(key, "value", ExpirationMode.Sliding, expiration));
+
+                act.ShouldThrow<ArgumentOutOfRangeException>()
+                    .WithMessage("Expiration timeout must be greater than zero*");
+            }
+        }
+
         // Issue #57 - Verifying diggits will be ignored and stored as proper milliseconds value (integer).
         [Theory]
         [MemberData("TestCacheManagers")]

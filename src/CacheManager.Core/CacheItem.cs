@@ -122,7 +122,11 @@ namespace CacheManager.Core
             // Otherwise this will lead to all kinds of errors (e.g. adding time to sliding while using a TimeSpan with long.MaxValue ticks)
             if (this.ExpirationTimeout.TotalDays > 365)
             {
-                throw new ArgumentOutOfRangeException("timeout", "Expiration timeout must be between 00:00:00 and 365:00:00:00.");
+                throw new ArgumentOutOfRangeException(nameof(timeout), "Expiration timeout must be between 00:00:00 and 365:00:00:00.");
+            }
+            if (this.ExpirationMode != ExpirationMode.Default && this.ExpirationMode != ExpirationMode.None && this.ExpirationTimeout <= TimeSpan.Zero)
+            {
+                throw new ArgumentOutOfRangeException(nameof(timeout), "Expiration timeout must be greater than zero if expiration mode is defined.");
             }
 
             this.CreatedUtc = created ?? DateTime.UtcNow;
