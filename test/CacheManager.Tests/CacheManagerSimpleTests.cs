@@ -1884,7 +1884,7 @@ namespace CacheManager.Tests
             }).ToList();
         }
 
-#if !DNXCORE50
+#if !NETCOREAPP
 
         [Serializable]
 #endif

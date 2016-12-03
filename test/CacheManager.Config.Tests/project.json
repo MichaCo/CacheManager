@@ -30,7 +30,7 @@
       }
     },
     "netcoreapp1.0": {
-      "buildOptions": { "define": [ "NETCORE" ] },
+      "buildOptions": { "define": [ "NETCOREAPP" ] },
       "dependencies": {
         "Microsoft.NETCore.App": {
           "version": "1.0.0",

@@ -7,6 +7,7 @@ using CacheManager.Core.Internal;
 #if !NETSTANDARD
 using System.Configuration;
 using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text.RegularExpressions;
 using CacheManager.Core.Configuration;
 #endif
@@ -733,6 +734,32 @@ namespace CacheManager.Core
             this.Configuration.SerializerTypeArguments = args;
             return this;
         }
+
+#if !NETSTANDARD
+        /// <summary>
+        /// Configures a <see cref="BinaryCacheSerializer"/> to be used for serialization and deserialization.
+        /// </summary>
+        /// <returns>The builder part.</returns>
+        public ConfigurationBuilderCachePart WithBinarySerializer()
+        {
+            this.Configuration.SerializerType = typeof(BinaryCacheSerializer);
+            return this;
+        }
+
+        /// <summary>
+        /// Configures a <see cref="BinaryCacheSerializer"/> to be used for serialization and deserialization.
+        /// </summary>
+        /// <param name="serializationFormatter">The <see cref="BinaryFormatter"/> for serialization.</param>
+        /// <param name="deserializationFormatter">The <see cref="BinaryFormatter"/> for deserialization.</param>
+        /// <returns>The builder part.</returns>
+        public ConfigurationBuilderCachePart WithBinarySerializer(BinaryFormatter serializationFormatter, BinaryFormatter deserializationFormatter)
+        {
+            this.Configuration.SerializerType = typeof(BinaryCacheSerializer);
+            this.Configuration.SerializerTypeArguments = new object[] { serializationFormatter, deserializationFormatter };
+            return this;
+        }
+
+#endif
 
         /// <summary>
         /// Enables logging by setting the <see cref="Logging.ILoggerFactory"/> for the cache manager instance.

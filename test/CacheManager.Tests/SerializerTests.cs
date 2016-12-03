@@ -11,6 +11,10 @@ using FluentAssertions;
 using Newtonsoft.Json;
 using ProtoBuf;
 using Xunit;
+#if !NETCOREAPP
+using System.Runtime.Serialization.Formatters;
+using System.Runtime.Serialization.Formatters.Binary;
+#endif
 
 namespace CacheManager.Tests
 {
@@ -22,7 +26,42 @@ namespace CacheManager.Tests
 #endif
     public class SerializerTests : BaseCacheManagerTest
     {
-#if !DNXCORE50
+#if !NETCOREAPP
+        [Fact]
+        public void JsonSerializer_RespectBinarySerializerSettings()
+        {
+            var serializationSettings = new BinaryFormatter()
+            {
+                AssemblyFormat = FormatterAssemblyStyle.Simple,
+                FilterLevel = TypeFilterLevel.Low,
+                TypeFormat = FormatterTypeStyle.TypesWhenNeeded
+            };
+
+            var deserializationSettings = new BinaryFormatter()
+            {
+                AssemblyFormat = FormatterAssemblyStyle.Full,
+                FilterLevel = TypeFilterLevel.Full,
+                TypeFormat = FormatterTypeStyle.TypesAlways
+            };
+
+            var cache = CacheFactory.Build<string>(
+                p => p
+                    .WithBinarySerializer(serializationSettings, deserializationSettings)
+                    .WithHandle(typeof(SerializerTestCacheHandle)));
+
+            var handle = cache.CacheHandles.ElementAt(0) as SerializerTestCacheHandle;
+            var serializer = handle.Serializer as BinaryCacheSerializer;
+
+            serializer.SerializationFormatter.AssemblyFormat.Should().Be(FormatterAssemblyStyle.Simple);
+            serializer.SerializationFormatter.FilterLevel.Should().Be(TypeFilterLevel.Low);
+            serializer.SerializationFormatter.TypeFormat.Should().Be(FormatterTypeStyle.TypesWhenNeeded);
+            serializer.DeserializationFormatter.AssemblyFormat.Should().Be(FormatterAssemblyStyle.Full);
+            serializer.DeserializationFormatter.FilterLevel.Should().Be(TypeFilterLevel.Full);
+            serializer.DeserializationFormatter.TypeFormat.Should().Be(FormatterTypeStyle.TypesAlways);
+
+            cache.Configuration.SerializerTypeArguments.Length.Should().Be(2);
+        }
+
         [Theory]
         [InlineData(true)]
         [InlineData(float.MaxValue)]
@@ -639,7 +678,7 @@ namespace CacheManager.Tests
             }
         }
 
-#if !DNXCORE50
+#if !NETCOREAPP
 
         [Serializable]
 #endif
@@ -681,7 +720,7 @@ namespace CacheManager.Tests
             }
         }
 
-#if !DNXCORE50
+#if !NETCOREAPP
 
         [Serializable]
 #endif

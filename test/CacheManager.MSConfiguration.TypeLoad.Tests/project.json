@@ -4,14 +4,26 @@
   "authors": [ "Micha" ],
   "dependencies": {
     "CacheManager.Microsoft.Extensions.Configuration": { "target": "project" },
-    "FluentAssertions": "4.6.3",
-    "xunit": "2.2.0-beta2-build3300",
+    "FluentAssertions": "4.17.0",
+    "xunit": "2.2.0-beta4-build3444",
     "dotnet-test-xunit": "2.2.0-preview2-build1029"
+  },
+  "buildOptions": {
+    "copyToOutput": "xunit.runner.json"
   },
   "testRunner": "xunit",
   "frameworks": {
     "net451": {
       "dependencies": {
+      }
+    },
+    "netcoreapp1.0": {
+      "buildOptions": { "define": [ "NETCOREAPP" ] },
+      "dependencies": {
+        "Microsoft.NETCore.App": {
+          "version": "1.0.0",
+          "type": "platform"
+        }
       }
     }
   }

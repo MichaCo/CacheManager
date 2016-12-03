@@ -295,7 +295,7 @@ namespace CacheManager.Tests
             config.CacheHandleConfigurations[0].HandleType.Should().Be(typeof(object));
         }
 
-#if !DNXCORE50
+#if !NETCOREAPP
         [Fact]
         public void Configuration_CacheHandle_KnownType_SystemRuntime()
         {
@@ -363,7 +363,7 @@ namespace CacheManager.Tests
             config.CacheHandleConfigurations[0].Key.Should().Be("name");    // now key gets set to name
         }
 
-#if !DNXCORE50
+#if !NETCOREAPP
         [Fact]
         public void Configuration_CacheHandle_KnownType_CouchbaseNoKey()
         {
@@ -860,7 +860,7 @@ namespace CacheManager.Tests
             config.SerializerType.Should().Be(typeof(object));
         }
 
-#if !DNXCORE50
+#if !NETCOREAPP
         [Fact]
         public void Configuration_Serializer_KnownType_Binary()
         {

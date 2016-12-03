@@ -448,7 +448,7 @@ namespace CacheManager.Tests
             }
         }
 
-#if !DNXCORE50
+#if !NETCOREAPP
         [Fact]
         [Trait("category", "Unreliable")]
         [ReplaceCulture]
@@ -577,7 +577,7 @@ namespace CacheManager.Tests
             absolute.ExpirationTimeout.Should().BeCloseTo(default(TimeSpan));
         }
 
-#if !DNXCORE50
+#if !NETCOREAPP
         [Fact]
         public void BaseCacheHandle_ExpirationInherits_Issue_1()
         {

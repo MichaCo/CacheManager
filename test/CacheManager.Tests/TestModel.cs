@@ -4,7 +4,7 @@ using ProtoBuf;
 
 namespace CacheManager.Tests
 {
-#if !DNXCORE50
+#if !NETCOREAPP
     [Serializable]
 #endif
     [ExcludeFromCodeCoverage]

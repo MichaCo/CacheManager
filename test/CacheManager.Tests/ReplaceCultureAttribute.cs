@@ -35,7 +35,7 @@ namespace CacheManager.Tests
             this.originalCulture = CultureInfo.CurrentCulture;
             this.originalUICulture = CultureInfo.CurrentUICulture;
 
-#if !DNXCORE50
+#if !NETCOREAPP
             Thread.CurrentThread.CurrentCulture = this.CurrentCulture;
             Thread.CurrentThread.CurrentUICulture = this.CurrentUICulture;
 #else
@@ -46,7 +46,7 @@ namespace CacheManager.Tests
 
         public override void After(MethodInfo methodUnderTest)
         {
-#if !DNXCORE50
+#if !NETCOREAPP
             Thread.CurrentThread.CurrentCulture = this.originalCulture;
             Thread.CurrentThread.CurrentUICulture = this.originalUICulture;
 #else

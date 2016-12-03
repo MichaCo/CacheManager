@@ -97,7 +97,7 @@ namespace CacheManager.MSConfiguration.TypeLoad.Tests
             action.ShouldThrow<InvalidOperationException>().WithMessage("*'SystemWeb' could not be loaded*");
         }
 
-#if DNXCORE50
+#if NETCOREAPP
         [Fact]
         public void Configuration_Serializer_BinaryInvalidOnCore()
         {

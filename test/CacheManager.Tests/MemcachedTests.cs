@@ -1,4 +1,4 @@
-﻿#if !DNXCORE50
+﻿#if !NETCOREAPP
 using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;

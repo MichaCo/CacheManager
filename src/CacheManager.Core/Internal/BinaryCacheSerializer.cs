@@ -1,7 +1,9 @@
 ﻿#if !NETSTANDARD
 using System;
 using System.IO;
+using System.Runtime.Serialization.Formatters;
 using System.Runtime.Serialization.Formatters.Binary;
+using CacheManager.Core.Utility;
 
 namespace CacheManager.Core.Internal
 {
@@ -13,6 +15,45 @@ namespace CacheManager.Core.Internal
     /// </summary>
     public class BinaryCacheSerializer : ICacheSerializer
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="BinaryCacheSerializer"/> class.
+        /// </summary>
+        /// <param name="serializationFormatter">The formatter to use to do the serialization.</param>
+        /// <param name="deserializationFormatter">The formatter to use to do the deserialization.</param>
+        public BinaryCacheSerializer(BinaryFormatter serializationFormatter, BinaryFormatter deserializationFormatter)
+        {
+            Guard.NotNull(serializationFormatter, nameof(serializationFormatter));
+            Guard.NotNull(deserializationFormatter, nameof(deserializationFormatter));
+
+            this.SerializationFormatter = serializationFormatter;
+            this.DeserializationFormatter = deserializationFormatter;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="BinaryCacheSerializer"/> class.
+        /// </summary>
+        public BinaryCacheSerializer()
+        {
+            this.DeserializationFormatter = this.SerializationFormatter = new BinaryFormatter()
+            {
+                AssemblyFormat = FormatterAssemblyStyle.Simple
+            };
+        }
+
+        /// <summary>
+        /// Gets the formatter which should be used during deserialization.
+        /// If nothing is specified the default <see cref="BinaryFormatter"/> will be used.
+        /// </summary>
+        /// <value>The deserialization formatter.</value>
+        public BinaryFormatter DeserializationFormatter { get; }
+
+        /// <summary>
+        /// Gets the formatter which should be used during serialization.
+        /// If nothing is specified the default <see cref="BinaryFormatter"/> will be used.
+        /// </summary>
+        /// <value>The serialization formatter.</value>
+        public BinaryFormatter SerializationFormatter { get; }
+
         /// <inheritdoc/>
         public object Deserialize(byte[] data, Type target)
         {
@@ -21,10 +62,9 @@ namespace CacheManager.Core.Internal
                 return null;
             }
 
-            BinaryFormatter binaryFormatter = new BinaryFormatter();
             using (MemoryStream memoryStream = new MemoryStream(data))
             {
-                return binaryFormatter.Deserialize(memoryStream);
+                return this.DeserializationFormatter.Deserialize(memoryStream);
             }
         }
 
@@ -40,10 +80,9 @@ namespace CacheManager.Core.Internal
                 return null;
             }
 
-            BinaryFormatter binaryFormatter = new BinaryFormatter();
             using (MemoryStream memoryStream = new MemoryStream())
             {
-                binaryFormatter.Serialize(memoryStream, value);
+                this.SerializationFormatter.Serialize(memoryStream, value);
                 byte[] objectDataAsStream = memoryStream.ToArray();
                 return objectDataAsStream;
             }

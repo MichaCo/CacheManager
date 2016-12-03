@@ -4,7 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using CacheManager.Core;
 
-#if !NET40 && !DNXCORE50
+#if !NET40 && !NETCOREAPP
 
 using Couchbase.Configuration.Client;
 
@@ -102,7 +102,7 @@ namespace CacheManager.Tests
           => CacheFactory.Build(settings => settings.WithMicrosoftMemoryCacheHandle().EnableStatistics());
 #endif
 
-#if !DNXCORE50
+#if !NETCOREAPP
 
         public static ICacheManager<object> WithOneMemoryCacheHandleSliding
             => CacheFactory.Build(
@@ -163,7 +163,7 @@ namespace CacheManager.Tests
         }
 
 #endif
-#if !NET40 && MOCK_HTTPCONTEXT_ENABLED && !DNXCORE50
+#if !NET40 && MOCK_HTTPCONTEXT_ENABLED && !NETCOREAPP
 
         public static ICacheManager<object> WithSystemWebCache
             => CacheFactory.Build(
@@ -176,7 +176,7 @@ namespace CacheManager.Tests
 
 #endif
 
-#if !NET40 && !DNXCORE50
+#if !NET40 && !NETCOREAPP
 
         public static ICacheManager<object> WithCouchbaseMemcached
         {
@@ -312,7 +312,7 @@ namespace CacheManager.Tests
         {
             get
             {
-#if !DNXCORE50
+#if !NETCOREAPP
                 yield return new object[] { TestManagers.WithOneMemoryCacheHandleSliding };
                 yield return new object[] { TestManagers.WithOneMemoryCacheHandle };
                 yield return new object[] { TestManagers.WithMemoryAndDictionaryHandles };
@@ -335,7 +335,7 @@ namespace CacheManager.Tests
             }
         }
 
-#if !DNXCORE50
+#if !NETCOREAPP
 
         public static string GetCfgFileName(string fileName)
         {
@@ -370,7 +370,7 @@ namespace CacheManager.Tests
     }
 }
 
-#if DNXCORE50
+#if NETCOREAPP
 namespace System.Diagnostics.CodeAnalysis
 {
     [Conditional("DEBUG")]

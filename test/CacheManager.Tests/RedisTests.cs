@@ -322,7 +322,7 @@ namespace CacheManager.Tests
             act.ShouldThrow<InvalidOperationException>().WithMessage("*endpoints*");
         }
 
-#if !DNXCORE50
+#if !NETCOREAPP
 #if !NO_APP_CONFIG
         [Fact]
         [Trait("category", "NotOnMono")]
@@ -433,7 +433,7 @@ namespace CacheManager.Tests
             }
         }
 
-#if !DNXCORE50
+#if !NETCOREAPP
         [Fact]
         [Trait("category", "Redis")]
         [Trait("category", "Unreliable")]
@@ -793,7 +793,7 @@ namespace CacheManager.Tests
             }
         }
 
-#if !DNXCORE50
+#if !NETCOREAPP
         [Fact]
         [Trait("category", "Redis")]
         public void Redis_Valid_CfgFile_LoadWithRedisBackplane()
@@ -1163,7 +1163,7 @@ namespace CacheManager.Tests
         }
     }
 
-#if !DNXCORE50
+#if !NETCOREAPP
 
     [Serializable]
 #endif
