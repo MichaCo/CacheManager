@@ -572,7 +572,7 @@ namespace CacheManager.Tests
                         Thread.Sleep(100);
                         value = cache.GetCacheItem(item.Key);
                     }
-                    while (value != null && tries < 10);
+                    while (value != null && tries < 50);
 
                     value.Should().BeNull();
                 },

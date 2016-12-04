@@ -951,7 +951,7 @@ namespace CacheManager.Tests
             }
         }
 
-        [Theory]
+        [Theory(Skip = "unclear")]
         [MemberData("TestCacheManagers")]
         public void CacheManager_GetOrAdd_ForceRace<T>(T cache)
             where T : ICacheManager<object>
@@ -985,7 +985,7 @@ namespace CacheManager.Tests
 
                 Parallel.Invoke(new ParallelOptions() { MaxDegreeOfParallelism = 8 }, actions.ToArray());
 
-                // one of the threads one and added the key
+                // one of the threads won and added the key
                 var winner = (int)cache[key];
 
                 // all results should be the same because we should add the key only once
