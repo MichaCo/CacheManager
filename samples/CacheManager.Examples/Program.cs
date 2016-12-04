@@ -23,7 +23,7 @@ namespace CacheManager.Examples
             LoggingSample();
         }
 
-#if !DNXCORE50
+#if !NETCOREAPP
         private static void MostSimpleCacheManager()
         {
             var config = new ConfigurationBuilder()
@@ -92,7 +92,7 @@ namespace CacheManager.Examples
             var val = cache.Get("myKey", "someregion");
         }
 
-#if !DNXCORE50
+#if !NETCOREAPP
         private static void AppConfigLoadInstalledCacheCfg()
         {
             var cache = CacheFactory.FromConfiguration<object>("myCache");
@@ -113,7 +113,7 @@ namespace CacheManager.Examples
             cache.Remove("key");
         }
 
-#if !DNXCORE50
+#if !NETCOREAPP
         private static void RedisSample()
         {
             var cache = CacheFactory.Build<int>(settings =>
