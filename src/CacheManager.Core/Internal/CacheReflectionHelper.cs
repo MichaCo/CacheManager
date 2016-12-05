@@ -84,7 +84,10 @@ namespace CacheManager.Core.Internal
             return null;
         }
 
-        internal static ICollection<BaseCacheHandle<TCacheValue>> CreateCacheHandles<TCacheValue>(BaseCacheManager<TCacheValue> manager, ILoggerFactory loggerFactory, ICacheSerializer serializer)
+        internal static ICollection<BaseCacheHandle<TCacheValue>> CreateCacheHandles<TCacheValue>(
+            BaseCacheManager<TCacheValue> manager,
+            ILoggerFactory loggerFactory,
+            ICacheSerializer serializer)
         {
             NotNull(manager, nameof(manager));
             NotNull(loggerFactory, nameof(loggerFactory));
@@ -117,6 +120,11 @@ namespace CacheManager.Core.Internal
                 }
 
                 var types = new List<object>(new object[] { loggerFactory, managerConfiguration, manager, handleConfiguration });
+                if (handleConfiguration.ConfigurationTypes.Length > 0)
+                {
+                    types.AddRange(handleConfiguration.ConfigurationTypes);
+                }
+
                 if (serializer != null)
                 {
                     types.Add(serializer);
@@ -197,7 +205,7 @@ namespace CacheManager.Core.Internal
                 var args = new List<object>();
                 var parameters = constructor.GetParameters();
                 var instancesCopy = new List<object>(instances);
-                
+
                 foreach (ParameterInfo param in parameters)
                 {
 #if NET40

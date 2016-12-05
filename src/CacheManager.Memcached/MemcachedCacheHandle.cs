@@ -25,6 +25,17 @@ namespace CacheManager.Memcached
         private static readonly string DefaultEnyimSectionName = "enyim.com/memcached";
         private static readonly string DefaultSectionName = "default";
 
+        private MemcachedCacheHandle(CacheHandleConfiguration configuration, ICacheManagerConfiguration managerConfiguration, ILoggerFactory loggerFactory)
+            : base(managerConfiguration, configuration)
+        {
+            NotNull(configuration, nameof(configuration));
+            NotNull(loggerFactory, nameof(loggerFactory));
+
+            Ensure(typeof(TCacheValue).IsSerializable, "The cache value type must be serializable but {0} is not.", typeof(TCacheValue).ToString());
+
+            this.Logger = loggerFactory.CreateLogger(this);
+        }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="MemcachedCacheHandle{TCacheValue}"/> class.
         /// </summary>
@@ -40,26 +51,45 @@ namespace CacheManager.Memcached
         /// </exception>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Cache gets disposed correctly when the owner gets disposed.")]
         public MemcachedCacheHandle(ICacheManagerConfiguration managerConfiguration, CacheHandleConfiguration configuration, ILoggerFactory loggerFactory)
-            : base(managerConfiguration, configuration)
+            : this(configuration, managerConfiguration, loggerFactory)
         {
-            NotNull(configuration, nameof(configuration));
-            NotNull(loggerFactory, nameof(loggerFactory));
-
-            Ensure(typeof(TCacheValue).IsSerializable, "The cache value type must be serializable but {0} is not.", typeof(TCacheValue).ToString());
-
-            this.Logger = loggerFactory.CreateLogger(this);
-
-            // initialize memcached client with section name which must be equal to handle name...
-            // Default is "enyim.com/memcached"
             try
             {
-                var sectionName = GetEnyimSectionName(configuration.Key);
+                var sectionName = GetEnyimSectionName(configuration.Key);                
                 this.Cache = new MemcachedClient(sectionName);
             }
             catch (ConfigurationErrorsException ex)
             {
                 throw new InvalidOperationException("Failed to initialize " + this.GetType().Name + ". " + ex.BareMessage, ex);
             }
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MemcachedCacheHandle{TCacheValue}"/> class.
+        /// </summary>
+        /// <param name="managerConfiguration">The manager configuration.</param>
+        /// <param name="configuration">The cache handle configuration.</param>
+        /// <param name="loggerFactory">The logger factory.</param>
+        /// <param name="client">The <see cref="MemcachedClient"/> to use.</param>
+        public MemcachedCacheHandle(ICacheManagerConfiguration managerConfiguration, CacheHandleConfiguration configuration, ILoggerFactory loggerFactory, MemcachedClient client)
+            : this(configuration, managerConfiguration, loggerFactory)
+        {
+            NotNull(client, nameof(client));
+            this.Cache = client;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MemcachedCacheHandle{TCacheValue}"/> class.
+        /// </summary>
+        /// <param name="managerConfiguration">The manager configuration.</param>
+        /// <param name="configuration">The cache handle configuration.</param>
+        /// <param name="loggerFactory">The logger factory.</param>
+        /// <param name="clientConfiguration">The <see cref="MemcachedClientConfiguration"/> to use to create the <see cref="MemcachedClient"/>.</param>
+        public MemcachedCacheHandle(ICacheManagerConfiguration managerConfiguration, CacheHandleConfiguration configuration, ILoggerFactory loggerFactory, MemcachedClientConfiguration clientConfiguration)
+            : this(configuration, managerConfiguration, loggerFactory)
+        {
+            NotNull(clientConfiguration, nameof(clientConfiguration));
+            this.Cache = new MemcachedClient(clientConfiguration);
         }
 
         /// <summary>
@@ -126,6 +156,13 @@ namespace CacheManager.Memcached
         /// <inheritdoc />
         public override UpdateItemResult<TCacheValue> Update(string key, string region, Func<TCacheValue, TCacheValue> updateValue, int maxRetries) =>
             this.Set(key, region, updateValue, maxRetries);
+
+        /// <inheritdoc />
+        public override bool Exists(string key)
+        {
+            var result = this.Cache.ExecuteAppend(key, new ArraySegment<byte>());
+            return result.StatusCode.HasValue && result.StatusCode.Value != (int)StatusCode.KeyNotFound;
+        }
 
         /// <summary>
         /// Adds a value to the cache.

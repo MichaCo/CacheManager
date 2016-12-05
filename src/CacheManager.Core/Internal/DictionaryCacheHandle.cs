@@ -85,6 +85,12 @@ namespace CacheManager.Core.Internal
             return this.cache.TryAdd(key, item);
         }
 
+        /// <inheritdoc />
+        public override bool Exists(string key)
+        {
+            return this.cache.ContainsKey(key);
+        }
+
         /// <summary>
         /// Gets a <c>CacheItem</c> for the specified key.
         /// </summary>

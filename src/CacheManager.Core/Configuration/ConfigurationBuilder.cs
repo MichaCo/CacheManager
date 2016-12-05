@@ -612,6 +612,7 @@ namespace CacheManager.Core
         /// Set this to true if this cache handle should be the source of the backplane.
         /// <para>This setting will be ignored if no backplane is configured.</para>
         /// </param>
+        /// <param name="configurationTypes">Internally used only.</param>
         /// <returns>The builder part.</returns>
         /// <exception cref="System.ArgumentNullException">If handleName is null.</exception>
         /// <exception cref="System.InvalidOperationException">
@@ -620,14 +621,15 @@ namespace CacheManager.Core
         /// <exception cref="ArgumentNullException">
         /// Thrown if handleName or cacheHandleBaseType are null.
         /// </exception>
-        public ConfigurationBuilderCacheHandlePart WithHandle(Type cacheHandleBaseType, string handleName, bool isBackplaneSource)
+        public ConfigurationBuilderCacheHandlePart WithHandle(Type cacheHandleBaseType, string handleName, bool isBackplaneSource, params object[] configurationTypes)
         {
             NotNull(cacheHandleBaseType, nameof(cacheHandleBaseType));
             NotNullOrWhiteSpace(handleName, nameof(handleName));
 
             var handleCfg = new CacheHandleConfiguration(handleName)
             {
-                HandleType = cacheHandleBaseType
+                HandleType = cacheHandleBaseType,
+                ConfigurationTypes = configurationTypes
             };
 
             handleCfg.IsBackplaneSource = isBackplaneSource;

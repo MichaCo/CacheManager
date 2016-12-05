@@ -6,7 +6,7 @@ namespace CacheManager.Core
     /// <summary>
     /// Defines all settings the cache handle should respect.
     /// </summary>
-    public class CacheHandleConfiguration
+    public sealed class CacheHandleConfiguration
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="CacheHandleConfiguration"/> class.
@@ -102,5 +102,7 @@ namespace CacheManager.Core
         /// </summary>
         /// <value>The type of the handle.</value>
         public Type HandleType { get; set; }
+
+        internal object[] ConfigurationTypes { get; set; }
     }
 }

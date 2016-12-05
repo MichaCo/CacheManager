@@ -188,6 +188,14 @@ return result";
                 this.connection.Database.KeyDelete(region);
             });
         }
+        
+        /// <inheritdoc />
+        public override bool Exists(string key)
+        {
+            var fullKey = GetKey(key);
+
+            return this.Retry(() => this.connection.Database.KeyExists(fullKey));
+        }
 
         /// <inheritdoc />
         public override UpdateItemResult<TCacheValue> Update(string key, Func<TCacheValue, TCacheValue> updateValue, int maxRetries)

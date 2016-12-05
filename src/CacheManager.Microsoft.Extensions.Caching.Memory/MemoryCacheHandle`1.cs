@@ -62,6 +62,12 @@ namespace CacheManager.MicrosoftCachingMemory
             this.cache.RemoveChilds(regionTokenKey);
             this.cache.Remove(regionTokenKey);
         }
+        
+        /// <inheritdoc />
+        public override bool Exists(string key)
+        {
+            return this.cache.Contains(GetItemKey(key));
+        }
 
         /// <inheritdoc/>
         protected override CacheItem<TCacheValue> GetCacheItemInternal(string key)

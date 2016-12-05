@@ -110,6 +110,13 @@ namespace CacheManager.Couchbase
             return this.bucket.Insert(fullKey, item).Success;
         }
 
+        /// <inheritdoc />
+        public override bool Exists(string key)
+        {
+            var fullKey = GetKey(key);
+            return this.bucket.Exists(fullKey);
+        }
+
         /// <summary>
         /// Performs application-defined tasks associated with freeing, releasing, or resetting
         /// unmanaged resources.

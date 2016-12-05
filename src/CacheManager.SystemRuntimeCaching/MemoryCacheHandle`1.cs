@@ -88,6 +88,13 @@ namespace CacheManager.SystemRuntimeCaching
         public override void ClearRegion(string region) =>
             this.cache.Remove(this.GetRegionTokenKey(region));
 
+
+        /// <inheritdoc />
+        public override bool Exists(string key)
+        {
+            return this.cache.Contains(this.GetItemKey(key));
+        }
+
         /// <summary>
         /// Adds a value to the cache.
         /// </summary>

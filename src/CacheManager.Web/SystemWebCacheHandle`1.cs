@@ -71,6 +71,13 @@ namespace CacheManager.Web
         public override void ClearRegion(string region) =>
             this.Context.Cache.Remove(this.GetRegionTokenKey(region));
 
+
+        /// <inheritdoc />
+        public override bool Exists(string key)
+        {
+            return this.Get(key) != null;
+        }
+
         /// <summary>
         /// Adds a value to the cache.
         /// </summary>

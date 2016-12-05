@@ -355,5 +355,10 @@ namespace CacheManager.Tests
             this.RemoveCall();
             return true;
         }
+
+        public override bool Exists(string key)
+        {
+            return false;
+        }
     }
 }

@@ -376,7 +376,7 @@ namespace CacheManager.Core
         {
             NotNull(addItem, nameof(addItem));
             NotNull(updateValue, nameof(updateValue));
-            Ensure(maxRetries > 0, "Maximum number of retries must be greater than or equal to zero.");
+            Ensure(maxRetries >= 0, "Maximum number of retries must be greater than or equal to zero.");
 
             return this.AddOrUpdateInternal(addItem, updateValue, maxRetries);
         }
@@ -506,6 +506,25 @@ namespace CacheManager.Core
 
                 handle.Expire(key, region, mode, timeout);
             }
+        }
+
+        /// <inheritdoc />
+        public override bool Exists(string key)
+        {
+            foreach (var handle in this.cacheHandles)
+            {
+                if (this.logTrace)
+                {
+                    this.Logger.LogTrace("Check Exists: {0} on handle {2}.", key, handle.Configuration.Name);
+                }
+
+                if (handle.Exists(key))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /// <inheritdoc />
@@ -658,7 +677,7 @@ namespace CacheManager.Core
         {
             NotNullOrWhiteSpace(key, nameof(key));
             NotNull(updateValue, nameof(updateValue));
-            Ensure(maxRetries > 0, "Maximum number of retries must be greater than or equal to zero.");
+            Ensure(maxRetries >= 0, "Maximum number of retries must be greater than or equal to zero.");
 
             return this.UpdateInternal(this.cacheHandles, key, updateValue, maxRetries, false, out value);
         }
@@ -700,7 +719,7 @@ namespace CacheManager.Core
             NotNullOrWhiteSpace(key, nameof(key));
             NotNullOrWhiteSpace(region, nameof(region));
             NotNull(updateValue, nameof(updateValue));
-            Ensure(maxRetries > 0, "Maximum number of retries must be greater than or equal to zero.");
+            Ensure(maxRetries >= 0, "Maximum number of retries must be greater than or equal to zero.");
 
             return this.UpdateInternal(this.cacheHandles, key, region, updateValue, maxRetries, false, out value);
         }
@@ -798,7 +817,7 @@ namespace CacheManager.Core
         {
             NotNullOrWhiteSpace(key, nameof(key));
             NotNull(updateValue, nameof(updateValue));
-            Ensure(maxRetries > 0, "Maximum number of retries must be greater than or equal to zero.");
+            Ensure(maxRetries >= 0, "Maximum number of retries must be greater than or equal to zero.");
 
             TCacheValue value = default(TCacheValue);
             this.UpdateInternal(this.cacheHandles, key, updateValue, maxRetries, true, out value);
@@ -843,7 +862,7 @@ namespace CacheManager.Core
             NotNullOrWhiteSpace(key, nameof(key));
             NotNullOrWhiteSpace(region, nameof(region));
             NotNull(updateValue, nameof(updateValue));
-            Ensure(maxRetries > 0, "Maximum number of retries must be greater than or equal to zero.");
+            Ensure(maxRetries >= 0, "Maximum number of retries must be greater than or equal to zero.");
 
             TCacheValue value = default(TCacheValue);
             this.UpdateInternal(this.cacheHandles, key, region, updateValue, maxRetries, true, out value);
