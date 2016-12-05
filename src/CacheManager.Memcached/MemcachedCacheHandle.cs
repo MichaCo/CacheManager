@@ -116,7 +116,9 @@ namespace CacheManager.Memcached
         /// <param name="region">The cache region.</param>
         public override void ClearRegion(string region)
         {
-            // TODO: find workaround this.Clear();
+            var regionKey = GetFinalisedKey(region);
+            var unixTimestamp = (int)DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
+            this.Cache.Store(StoreMode.Set, regionKey, unixTimestamp);
         }
 
         /// <inheritdoc />
@@ -168,7 +170,7 @@ namespace CacheManager.Memcached
         /// <returns>The <c>CacheItem</c>.</returns>
         protected override CacheItem<TCacheValue> GetCacheItemInternal(string key, string region)
         {
-            var item = this.Cache.Get(GetKey(key, region));
+            var item = this.Cache.Get(this.GetKey(key, region));
             return item as CacheItem<TCacheValue>;
         }
 
@@ -196,7 +198,7 @@ namespace CacheManager.Memcached
         /// <returns>
         /// <c>true</c> if the key was found and removed from the cache, <c>false</c> otherwise.
         /// </returns>
-        protected override bool RemoveInternal(string key, string region) => this.Cache.Remove(GetKey(key, region));
+        protected override bool RemoveInternal(string key, string region) => this.Cache.Remove(this.GetKey(key, region));
 
         /// <summary>
         /// Stores the item with the specified mode.
@@ -208,7 +210,7 @@ namespace CacheManager.Memcached
         {
             NotNull(item, nameof(item));
 
-            var key = GetKey(item.Key, item.Region);
+            var key = this.GetKey(item.Key, item.Region);
 
             if (item.ExpirationMode == ExpirationMode.Absolute)
             {
@@ -246,23 +248,31 @@ namespace CacheManager.Memcached
             }
         }
 
-        private static string GetKey(string key, string region = null)
+        private string GetKey(string key, string region = null)
         {
             var fullKey = key;
-
             if (!string.IsNullOrWhiteSpace(region))
             {
-                fullKey = string.Concat(region, ":", key);
+              var regionKey = GetFinalisedKey(region);
+              var regionValue = this.Cache.Get(regionKey);
+              if (regionValue == null)
+              {
+                regionValue = (int)DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
+                this.Cache.Store(StoreMode.Set, regionKey, regionValue);
+              }
+                fullKey = string.Concat(region, ":", regionValue, ":", key);
             }
-
-            // Memcached still has a 250 character limit
-            if (fullKey.Length >= 250)
-            {
-                return GetSHA256Key(fullKey);
-            }
-
-            return fullKey;
+            return GetFinalisedKey(fullKey);
         }
+
+      private static string GetFinalisedKey(string key)
+      {
+        if (key.Length > 250)
+        {
+          return GetSHA256Key(key);
+        }
+        return key;
+      }
 
         private static string GetSHA256Key(string key)
         {
@@ -324,7 +334,7 @@ namespace CacheManager.Memcached
 
         private UpdateItemResult<TCacheValue> Set(string key, string region, Func<TCacheValue, TCacheValue> updateValue, int maxRetries)
         {
-            var fullyKey = GetKey(key, region);
+            var fullyKey = this.GetKey(key, region);
             var tries = 0;
             IStoreOperationResult result;
 
