@@ -42,6 +42,7 @@ namespace CacheManager.Memcached
         /// <param name="managerConfiguration">The manager configuration.</param>
         /// <param name="configuration">The cache handle configuration.</param>
         /// <param name="loggerFactory">The logger factory.</param>
+        /// <param name="serializer">The serializer.</param>
         /// <exception cref="System.ArgumentNullException">
         /// If <paramref name="configuration"/> or <paramref name="loggerFactory"/> is null.
         /// </exception>
@@ -50,18 +51,37 @@ namespace CacheManager.Memcached
         /// be initialized.
         /// </exception>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Cache gets disposed correctly when the owner gets disposed.")]
-        public MemcachedCacheHandle(ICacheManagerConfiguration managerConfiguration, CacheHandleConfiguration configuration, ILoggerFactory loggerFactory)
+        public MemcachedCacheHandle(
+            ICacheManagerConfiguration managerConfiguration,
+            CacheHandleConfiguration configuration,
+            ILoggerFactory loggerFactory,
+            ICacheSerializer serializer)
             : this(configuration, managerConfiguration, loggerFactory)
         {
             try
             {
-                var sectionName = GetEnyimSectionName(configuration.Key);                
-                this.Cache = new MemcachedClient(sectionName);
+                var sectionName = GetEnyimSectionName(configuration.Key);
+                var section = GetSection(sectionName);
+
+                this.Cache = new MemcachedClient(
+                    section.CreatePool(),
+                    section.CreateKeyTransformer(),
+                    section.CreateTranscoder() ?? new CacheManagerTanscoder<TCacheValue>(serializer),
+                    section.CreatePerformanceMonitor());
             }
             catch (ConfigurationErrorsException ex)
             {
                 throw new InvalidOperationException("Failed to initialize " + this.GetType().Name + ". " + ex.BareMessage, ex);
             }
+        }
+
+        private static IMemcachedClientConfiguration GetSection(string sectionName)
+        {
+            MemcachedClientSection section = (MemcachedClientSection)ConfigurationManager.GetSection(sectionName);
+            if (section == null)
+                throw new ConfigurationErrorsException("Section " + sectionName + " is not found.");
+
+            return section;
         }
 
         /// <summary>
@@ -84,11 +104,22 @@ namespace CacheManager.Memcached
         /// <param name="managerConfiguration">The manager configuration.</param>
         /// <param name="configuration">The cache handle configuration.</param>
         /// <param name="loggerFactory">The logger factory.</param>
+        /// <param name="serializer">The serializer.</param>
         /// <param name="clientConfiguration">The <see cref="MemcachedClientConfiguration"/> to use to create the <see cref="MemcachedClient"/>.</param>
-        public MemcachedCacheHandle(ICacheManagerConfiguration managerConfiguration, CacheHandleConfiguration configuration, ILoggerFactory loggerFactory, MemcachedClientConfiguration clientConfiguration)
+        public MemcachedCacheHandle(
+            ICacheManagerConfiguration managerConfiguration,
+            CacheHandleConfiguration configuration,
+            ILoggerFactory loggerFactory,
+            ICacheSerializer serializer,
+            MemcachedClientConfiguration clientConfiguration)
             : this(configuration, managerConfiguration, loggerFactory)
         {
             NotNull(clientConfiguration, nameof(clientConfiguration));
+            if (clientConfiguration.Transcoder.GetType() == typeof(DefaultTranscoder))
+            {
+                clientConfiguration.Transcoder = new CacheManagerTanscoder<TCacheValue>(serializer);
+            }
+
             this.Cache = new MemcachedClient(clientConfiguration);
         }
 
@@ -205,8 +236,23 @@ namespace CacheManager.Memcached
         /// <returns>The <c>CacheItem</c>.</returns>
         protected override CacheItem<TCacheValue> GetCacheItemInternal(string key, string region)
         {
-            var item = this.Cache.Get(GetKey(key, region));
-            return item as CacheItem<TCacheValue>;
+            var item = this.Cache.Get(GetKey(key, region)) as CacheItem<TCacheValue>;
+            if (item != null)
+            {
+                if (item.IsExpired)
+                {
+                    return null;
+                }
+                else if (item.ExpirationMode == ExpirationMode.Sliding)
+                {
+                    // the only way I see to update sliding expiration for keys 
+                    // is to store them again with updated TTL... What a b...t
+                    item.LastAccessedUtc = DateTime.UtcNow;
+                    this.Store(StoreMode.Set, item);
+                }
+            }
+
+            return item;
         }
 
         /// <summary>
@@ -238,6 +284,9 @@ namespace CacheManager.Memcached
         /// <summary>
         /// Stores the item with the specified mode.
         /// </summary>
+        /// <remarks>
+        /// Memcached only supports expiration of seconds, meaning anything less than one second will mean zero, which means it expires right after adding it.
+        /// </remarks>
         /// <param name="mode">The mode.</param>
         /// <param name="item">The item.</param>
         /// <returns>The result.</returns>
@@ -247,14 +296,7 @@ namespace CacheManager.Memcached
 
             var key = GetKey(item.Key, item.Region);
 
-            if (item.ExpirationMode == ExpirationMode.Absolute)
-            {
-                // the implementation internally transforms it to UTC, we have to work with local time
-                var timeoutDate = DateTime.Now.Add(item.ExpirationTimeout);
-                var result = this.Cache.ExecuteStore(mode, key, item, timeoutDate);
-                return result;
-            }
-            else if (item.ExpirationMode == ExpirationMode.Sliding)
+            if (item.ExpirationMode == ExpirationMode.Absolute || item.ExpirationMode == ExpirationMode.Sliding)
             {
                 var result = this.Cache.ExecuteStore(mode, key, item, item.ExpirationTimeout);
                 return result;
@@ -383,7 +425,7 @@ namespace CacheManager.Memcached
                 while (ShouldRetry(getStatus) && getTries <= maxRetries);
 
                 // break operation if we cannot retrieve the object (maybe it has expired already).
-                if (getStatus != StatusCode.Success || item == null)
+                if (getStatus != StatusCode.Success || item == null || item.IsExpired)
                 {
                     return UpdateItemResult.ForItemDidNotExist<TCacheValue>();
                 }
@@ -399,12 +441,7 @@ namespace CacheManager.Memcached
                 item = item.WithValue(newValue);
                 item.LastAccessedUtc = DateTime.UtcNow;
 
-                if (item.ExpirationMode == ExpirationMode.Absolute)
-                {
-                    var timeoutDate = item.ExpirationTimeout;
-                    result = this.Cache.ExecuteCas(StoreMode.Set, fullyKey, item, timeoutDate, cas.Cas);
-                }
-                else if (item.ExpirationMode == ExpirationMode.Sliding)
+                if (item.ExpirationMode == ExpirationMode.Absolute || item.ExpirationMode == ExpirationMode.Sliding)
                 {
                     result = this.Cache.ExecuteCas(StoreMode.Set, fullyKey, item, item.ExpirationTimeout, cas.Cas);
                 }
@@ -421,6 +458,33 @@ namespace CacheManager.Memcached
             while (!result.Success && result.StatusCode.HasValue && result.StatusCode.Value == 2 && tries <= maxRetries);
 
             return UpdateItemResult.ForTooManyRetries<TCacheValue>(tries);
+        }
+
+        private class CacheManagerTanscoder<T> : ITranscoder
+        {
+            private readonly ICacheSerializer serializer;
+
+            public CacheManagerTanscoder(ICacheSerializer serializer)
+            {
+                NotNull(serializer, nameof(serializer));
+                this.serializer = serializer;
+            }
+
+            // TODO: can be optimized like the redis implementation, for primitives we don't have to call the serializer...
+            public object Deserialize(CacheItem item)
+            {
+                var data = new byte[item.Data.Count];
+                Array.Copy(item.Data.Array, item.Data.Offset, data, 0, item.Data.Count);
+
+                // TODO actual type in meta data separated?
+                return this.serializer.DeserializeCacheItem<T>(data, typeof(T));
+            }
+
+            public CacheItem Serialize(object value)
+            {
+                var data = this.serializer.SerializeCacheItem(value as CacheItem<T>);
+                return new CacheItem(DefaultTranscoder.TypeCodeToFlag(TypeCode.Object), new ArraySegment<byte>(data));
+            }
         }
     }
 }

@@ -134,6 +134,31 @@ namespace CacheManager.Core
         }
 
         /// <summary>
+        /// Returns a value indicating if the item is logically expired.
+        /// Depending on the cache vendor, the item might still live in the cache although 
+        /// according to the expiration mode and timeout, the item is already expired.
+        /// </summary>
+        public bool IsExpired
+        {
+            get
+            {
+                DateTime now = DateTime.UtcNow;
+                if (this.ExpirationMode == ExpirationMode.Absolute
+                    && this.CreatedUtc.Add(this.ExpirationTimeout) < now)
+                {
+                    return true;
+                }
+                else if (this.ExpirationMode == ExpirationMode.Sliding
+                    && this.LastAccessedUtc.Add(this.ExpirationTimeout) < now)
+                {
+                    return true;
+                }
+
+                return false;
+            }
+        }
+
+        /// <summary>
         /// Gets the creation date of the cache item.
         /// </summary>
         /// <value>The creation date.</value>

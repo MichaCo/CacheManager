@@ -353,12 +353,12 @@ namespace CacheManager.Tests
             }))
             {
                 // arrange act
-                Action act = () => cache.Update("key", a => a, 0);
-                Action actR = () => cache.Update("key", "region", a => a, 0);
+                Action act = () => cache.Update("key", a => a, -1);
+                Action actR = () => cache.Update("key", "region", a => a, -1);
 
                 object val = null;
-                Action actTU = () => cache.TryUpdate("key", a => a, 0, out val);
-                Action actTRU = () => cache.TryUpdate("key", "region", a => a, 0, out val);
+                Action actTU = () => cache.TryUpdate("key", a => a, -1, out val);
+                Action actTRU = () => cache.TryUpdate("key", "region", a => a, -1, out val);
 
                 // assert
                 act.ShouldThrow<InvalidOperationException>()

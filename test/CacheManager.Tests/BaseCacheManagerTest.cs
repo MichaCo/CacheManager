@@ -4,10 +4,8 @@ using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using CacheManager.Core;
 
-#if !NET40 && !NETCOREAPP
-
-using Couchbase.Configuration.Client;
-
+#if MEMCACHEDENABLED
+using Enyim.Caching.Configuration;
 #endif
 
 using static CacheManager.Core.Utility.Guard;
@@ -28,6 +26,7 @@ namespace CacheManager.Tests
         ////private const string RedisHost = "ubuntu-local";
         ////private const int RedisPort = 7024; // redis 2.4
         private const string RedisHost = "127.0.0.1";
+
         private const int RedisPort = 6379;
         private const int StartDbCount = 100;
         private static int databaseCount = StartDbCount;
@@ -98,8 +97,10 @@ namespace CacheManager.Tests
         }
 
 #if !MSBUILD
+
         public static ICacheManager<object> WithOneMicrosoftMemoryCacheHandle
           => CacheFactory.Build(settings => settings.WithMicrosoftMemoryCacheHandle().EnableStatistics());
+
 #endif
 
 #if !NETCOREAPP
@@ -146,14 +147,38 @@ namespace CacheManager.Tests
                             .EnableStatistics();
                 });
 
+#endif
+#if MEMCACHEDENABLED
+
         public static ICacheManager<object> WithMemcached
         {
             get
             {
+                var memConfig = new MemcachedClientConfiguration();
+                memConfig.AddServer("localhost", 11211);
                 var cache = CacheFactory.Build(settings =>
                 {
                     settings.WithUpdateMode(CacheUpdateMode.Full)
-                        .WithMemcachedCacheHandle("enyim.com/memcached")
+                        .WithMemcachedCacheHandle(memConfig)
+                            .EnableStatistics()
+                            .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1000));
+                });
+
+                return cache;
+            }
+        }
+
+        public static ICacheManager<object> WithMemcachedJson
+        {
+            get
+            {
+                var memConfig = new MemcachedClientConfiguration();
+                memConfig.AddServer("localhost", 11211);
+                var cache = CacheFactory.Build(settings =>
+                {
+                    settings.WithUpdateMode(CacheUpdateMode.Full)
+                        .WithJsonSerializer()
+                        .WithMemcachedCacheHandle(memConfig)
                             .EnableStatistics()
                             .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1000));
                 });
@@ -176,7 +201,7 @@ namespace CacheManager.Tests
 
 #endif
 
-#if !NET40 && !NETCOREAPP
+#if COUCHBASEENABLED
 
         public static ICacheManager<object> WithCouchbaseMemcached
         {
@@ -327,8 +352,13 @@ namespace CacheManager.Tests
                 yield return new object[] { TestManagers.WithRedisCache };
                 yield return new object[] { TestManagers.WithSystemAndRedisCache };
 #endif
-                //// yield return new object[] { TestManagers.WithMemcached };
-                //// yield return new object[] { TestManagers.WithCouchbaseMemcached };
+#if MEMCACHEDENABLED
+                yield return new object[] { TestManagers.WithMemcached };
+                yield return new object[] { TestManagers.WithMemcachedJson };
+#endif
+#if COUCHBASEENABLED
+                yield return new object[] { TestManagers.WithCouchbaseMemcached };
+#endif
 #if !NET40 && MOCK_HTTPCONTEXT_ENABLED
                 yield return new object[] { TestManagers.WithSystemWebCache };
 #endif
@@ -355,12 +385,15 @@ namespace CacheManager.Tests
             {
                 case Serializer.Binary:
                     break;
+
                 case Serializer.GzJson:
                     part.WithGzJsonSerializer();
                     break;
+
                 case Serializer.Json:
                     part.WithJsonSerializer();
                     break;
+
                 case Serializer.Proto:
                     part.WithProtoBufSerializer();
                     break;

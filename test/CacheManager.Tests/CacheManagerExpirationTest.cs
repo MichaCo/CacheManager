@@ -137,7 +137,7 @@ namespace CacheManager.Tests
             using (cache)
             {
                 var key = Guid.NewGuid().ToString();
-                cache.Add(new CacheItem<object>(key, "value", ExpirationMode.Absolute, TimeSpan.FromMilliseconds(30)))
+                cache.Add(new CacheItem<object>(key, "value", ExpirationMode.Absolute, TimeSpan.FromMilliseconds(1000)))
                     .Should().BeTrue();
 
                 var item = cache.GetCacheItem(key);
@@ -145,7 +145,7 @@ namespace CacheManager.Tests
 
                 cache.Put(item.WithExpiration(ExpirationMode.None, default(TimeSpan)));
 
-                Thread.Sleep(100);
+                Thread.Sleep(1000);
 
                 cache.Get(key).Should().NotBeNull();
             }
@@ -160,7 +160,7 @@ namespace CacheManager.Tests
             using (cache)
             {
                 var key = Guid.NewGuid().ToString();
-                cache.Add(new CacheItem<object>(key, "value", ExpirationMode.Absolute, TimeSpan.FromMilliseconds(30)))
+                cache.Add(new CacheItem<object>(key, "value", ExpirationMode.Absolute, TimeSpan.FromMilliseconds(1000)))
                     .Should().BeTrue();
 
                 var item = cache.GetCacheItem(key);
