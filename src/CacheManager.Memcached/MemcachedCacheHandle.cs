@@ -75,6 +75,7 @@ namespace CacheManager.Memcached
             }
         }
 
+        // TODO: test the config section ctor now with this
         private static IMemcachedClientConfiguration GetSection(string sectionName)
         {
             MemcachedClientSection section = (MemcachedClientSection)ConfigurationManager.GetSection(sectionName);

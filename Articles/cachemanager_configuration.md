@@ -175,7 +175,7 @@ The Cache Manager configuration section has two main parts, the `managers`  coll
 
 And the `cacheHandles` collection which lists the available (installed) cache handle types. Those will be used by referencing the `id` to form a cache in the `managers` collection.
 ```xml
-<cacheManager xmlns="http://tempuri.org/CacheManagerCfg.xsd">
+<cacheManager xmlns="http://cachemanager.net/schemas/CacheManagerCfg.xsd">
   <managers>
     <cache name="cacheName" updateMode="Up" enableStatistics="false" enablePerformanceCounters="false">
       <handle name="handleName" ref="systemRuntimeHandle" expirationMode="Absolute" timeout="50s"/>

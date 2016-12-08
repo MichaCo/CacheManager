@@ -1,11 +1,11 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <xs:schema id="CacheManagerCfg"
-    targetNamespace="http://tempuri.org/RedisCfg.xsd"
+    targetNamespace="http://cachemanager.net/schemas/RedisCfg.xsd"
     elementFormDefault="qualified"
-    xmlns="http://tempuri.org/RedisCfg.xsd"
-    xmlns:mstns="http://tempuri.org/RedisCfg.xsd"
+    xmlns="http://cachemanager.net/schemas/RedisCfg.xsd"
+    xmlns:mstns="http://cachemanager.net/schemas/RedisCfg.xsd"
     xmlns:xs="http://www.w3.org/2001/XMLSchema"
->  
+>
   <xs:element name="endpoint">
     <xs:complexType>
       <xs:attribute name="host" use="required" type="xs:string" />
