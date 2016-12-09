@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using CacheManager.Core;
@@ -13,6 +14,8 @@ namespace CacheManager.Serialization.ProtoBuf
     public class ProtoBufSerializer : ICacheSerializer
     {
         private static readonly Type cacheItemType = typeof(ProtoBufCacheItem);
+        private readonly Dictionary<string, Type> types = new Dictionary<string, Type>();
+        private readonly object typesLock = new object();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ProtoBufSerializer"/> class.
@@ -42,7 +45,7 @@ namespace CacheManager.Serialization.ProtoBuf
         }
 
         /// <inheritdoc/>
-        public CacheItem<T> DeserializeCacheItem<T>(byte[] value, Type valueType)
+        public CacheItem<T> DeserializeCacheItem<T>(byte[] value, Type valueType = null)
         {
             var item = (ProtoBufCacheItem)Deserialize(value, cacheItemType);
             if (item == null)
@@ -50,7 +53,7 @@ namespace CacheManager.Serialization.ProtoBuf
                 throw new Exception("Unable to deserialize the CacheItem");
             }
 
-            var cachedValue = Deserialize(item.Value, valueType);
+            var cachedValue = Deserialize(item.Value, valueType ?? this.GetType(item.ValueType));
             return item.ToCacheItem<T>(cachedValue);
         }
 
@@ -78,6 +81,31 @@ namespace CacheManager.Serialization.ProtoBuf
             var pbCacheItem = ProtoBufCacheItem.FromCacheItem(value, cachedValue);
 
             return Serialize(pbCacheItem);
+        }
+
+        private Type GetType(string type)
+        {
+            if (!this.types.ContainsKey(type))
+            {
+                lock (this.typesLock)
+                {
+                    if (!this.types.ContainsKey(type))
+                    {
+                        var typeResult = Type.GetType(type, false);
+                        if (typeResult == null)
+                        {
+                            // fixing an issue for corlib types if mixing net core clr and full clr calls
+                            // (e.g. typeof(string) is different for those two, either System.String, System.Private.CoreLib or System.String, mscorlib)
+                            var typeName = type.Split(',').FirstOrDefault();
+                            typeResult = Type.GetType(typeName, true);
+                        }
+
+                        this.types.Add(type, typeResult);
+                    }
+                }
+            }
+
+            return (Type)this.types[type];
         }
     }
 }

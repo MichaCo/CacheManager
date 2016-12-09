@@ -1631,7 +1631,7 @@ namespace CacheManager.Tests
                 Action act = () => cache.Get<string>("someint");
 
                 // assert
-                act.ShouldThrow<InvalidCastException>();
+                act.ShouldThrow<Exception>();
             }
         }
 

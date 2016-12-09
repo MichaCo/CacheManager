@@ -68,7 +68,7 @@ namespace CacheManager.Tests
                             .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1000));
                 });
 
-        public static ICacheManager<object> WithRedisCache
+        public static ICacheManager<object> WithRedisCacheBinary
         {
             get
             {
@@ -78,7 +78,49 @@ namespace CacheManager.Tests
                     databaseCount = StartDbCount;
                 }
 
-                return CreateRedisCache(databaseCount, false);
+                return CreateRedisCache(databaseCount, false, Serializer.Binary);
+            }
+        }
+
+        public static ICacheManager<object> WithRedisCacheJson
+        {
+            get
+            {
+                Interlocked.Increment(ref databaseCount);
+                if (databaseCount >= 2000)
+                {
+                    databaseCount = StartDbCount;
+                }
+
+                return CreateRedisCache(databaseCount, false, Serializer.Json);
+            }
+        }
+
+        public static ICacheManager<object> WithRedisCacheGzJson
+        {
+            get
+            {
+                Interlocked.Increment(ref databaseCount);
+                if (databaseCount >= 2000)
+                {
+                    databaseCount = StartDbCount;
+                }
+
+                return CreateRedisCache(databaseCount, false, Serializer.GzJson);
+            }
+        }
+
+        public static ICacheManager<object> WithRedisCacheProto
+        {
+            get
+            {
+                Interlocked.Increment(ref databaseCount);
+                if (databaseCount >= 2000)
+                {
+                    databaseCount = StartDbCount;
+                }
+
+                return CreateRedisCache(databaseCount, false, Serializer.Proto);
             }
         }
 
@@ -146,46 +188,6 @@ namespace CacheManager.Tests
                         .And.WithSystemRuntimeCacheHandle("cacheHandleB")
                             .EnableStatistics();
                 });
-
-#endif
-#if MEMCACHEDENABLED
-
-        public static ICacheManager<object> WithMemcached
-        {
-            get
-            {
-                var memConfig = new MemcachedClientConfiguration();
-                memConfig.AddServer("localhost", 11211);
-                var cache = CacheFactory.Build(settings =>
-                {
-                    settings.WithUpdateMode(CacheUpdateMode.Full)
-                        .WithMemcachedCacheHandle(memConfig)
-                            .EnableStatistics()
-                            .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1000));
-                });
-
-                return cache;
-            }
-        }
-
-        public static ICacheManager<object> WithMemcachedJson
-        {
-            get
-            {
-                var memConfig = new MemcachedClientConfiguration();
-                memConfig.AddServer("localhost", 11211);
-                var cache = CacheFactory.Build(settings =>
-                {
-                    settings.WithUpdateMode(CacheUpdateMode.Full)
-                        .WithJsonSerializer()
-                        .WithMemcachedCacheHandle(memConfig)
-                            .EnableStatistics()
-                            .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1000));
-                });
-
-                return cache;
-            }
-        }
 
 #endif
 #if !NET40 && MOCK_HTTPCONTEXT_ENABLED && !NETCOREAPP
@@ -326,6 +328,56 @@ namespace CacheManager.Tests
             return cache;
         }
 
+#if MEMCACHEDENABLED
+
+        public static ICacheManager<object> WithMemcachedBinary
+        {
+            get
+            {
+                return CreateMemcachedCache<object>(Serializer.Binary);
+            }
+        }
+
+        public static ICacheManager<object> WithMemcachedJson
+        {
+            get
+            {
+                return CreateMemcachedCache<object>(Serializer.Json);
+            }
+        }
+
+        public static ICacheManager<object> WithMemcachedGzJson
+        {
+            get
+            {
+                return CreateMemcachedCache<object>(Serializer.GzJson);
+            }
+        }
+
+        public static ICacheManager<object> WithMemcachedProto
+        {
+            get
+            {
+                return CreateMemcachedCache<object>(Serializer.Proto);
+            }
+        }
+
+        public static ICacheManager<T> CreateMemcachedCache<T>(Serializer serializer = Serializer.Json)
+        {
+            var memConfig = new MemcachedClientConfiguration();
+            memConfig.AddServer("localhost", 11211);
+            return CacheFactory.Build<T>(settings =>
+            {
+                settings.WithUpdateMode(CacheUpdateMode.Full)
+                    .TestSerializer(serializer)
+                    .WithMemcachedCacheHandle(memConfig)
+                        .EnableStatistics()
+                        .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1000));
+            });
+        }
+
+#endif
+
         private static string NewKey() => Guid.NewGuid().ToString();
     }
 
@@ -349,12 +401,21 @@ namespace CacheManager.Tests
                 yield return new object[] { TestManagers.WithManyDictionaryHandles };
                 yield return new object[] { TestManagers.WithOneDicCacheHandle };
 #if REDISENABLED
-                yield return new object[] { TestManagers.WithRedisCache };
+#if !NETCOREAPP
+                yield return new object[] { TestManagers.WithRedisCacheBinary };
+#endif
+                yield return new object[] { TestManagers.WithRedisCacheJson };
+                yield return new object[] { TestManagers.WithRedisCacheGzJson };
+                yield return new object[] { TestManagers.WithRedisCacheProto };
                 yield return new object[] { TestManagers.WithSystemAndRedisCache };
 #endif
 #if MEMCACHEDENABLED
-                yield return new object[] { TestManagers.WithMemcached };
+#if !NETCOREAPP
+                yield return new object[] { TestManagers.WithMemcachedBinary };
+#endif
                 yield return new object[] { TestManagers.WithMemcachedJson };
+                yield return new object[] { TestManagers.WithMemcachedGzJson };
+                yield return new object[] { TestManagers.WithMemcachedProto };
 #endif
 #if COUCHBASEENABLED
                 yield return new object[] { TestManagers.WithCouchbaseMemcached };

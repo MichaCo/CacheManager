@@ -246,7 +246,7 @@ namespace CacheManager.Memcached
                 }
                 else if (item.ExpirationMode == ExpirationMode.Sliding)
                 {
-                    // the only way I see to update sliding expiration for keys 
+                    // the only way I see to update sliding expiration for keys
                     // is to store them again with updated TTL... What a b...t
                     item.LastAccessedUtc = DateTime.UtcNow;
                     this.Store(StoreMode.Set, item);
@@ -478,7 +478,7 @@ namespace CacheManager.Memcached
                 Array.Copy(item.Data.Array, item.Data.Offset, data, 0, item.Data.Count);
 
                 // TODO actual type in meta data separated?
-                return this.serializer.DeserializeCacheItem<T>(data, typeof(T));
+                return this.serializer.DeserializeCacheItem<T>(data);
             }
 
             public CacheItem Serialize(object value)

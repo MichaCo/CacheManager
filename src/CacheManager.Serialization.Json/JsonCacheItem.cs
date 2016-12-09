@@ -30,6 +30,9 @@ namespace CacheManager.Core
         [JsonProperty("value")]
         public byte[] Value { get; set; }
 
+        [JsonProperty("ValueType")]
+        public string ValueType { get; set; }
+
         public static JsonCacheItem FromCacheItem<TCacheValue>(CacheItem<TCacheValue> item, byte[] value)
             => new JsonCacheItem()
             {
@@ -39,7 +42,8 @@ namespace CacheManager.Core
                 Key = item.Key,
                 LastAccessedUtc = item.LastAccessedUtc,
                 Region = item.Region,
-                Value = value
+                Value = value,
+                ValueType = item.Value.GetType().AssemblyQualifiedName
             };
 
         public CacheItem<T> ToCacheItem<T>(object value)

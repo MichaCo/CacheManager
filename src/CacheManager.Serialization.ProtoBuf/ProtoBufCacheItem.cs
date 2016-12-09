@@ -28,6 +28,9 @@ namespace CacheManager.Serialization.ProtoBuf
         [ProtoMember(7)]
         public byte[] Value { get; set; }
 
+        [ProtoMember(8)]
+        public string ValueType { get; set; }
+
         public static ProtoBufCacheItem FromCacheItem<TValue>(CacheItem<TValue> item, byte[] value)
         {
             return new ProtoBufCacheItem
@@ -38,7 +41,8 @@ namespace CacheManager.Serialization.ProtoBuf
                 ExpirationTimeout = item.ExpirationTimeout,
                 Key = item.Key,
                 Region = item.Region,
-                Value = value
+                Value = value,
+                ValueType = item.ValueType.AssemblyQualifiedName
             };
         }
 
