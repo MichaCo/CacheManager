@@ -303,23 +303,23 @@ namespace CacheManager.Tests
 #endif
                 var start = Environment.TickCount;
                 var key = Guid.NewGuid().ToString();
-                cache.Add(new CacheItem<object>(key, "value", ExpirationMode.Sliding, TimeSpan.FromMilliseconds(100)))
+                cache.Add(new CacheItem<object>(key, "value", ExpirationMode.Sliding, TimeSpan.FromMilliseconds(200)))
                     .Should().BeTrue();
 
                 cache.AddOrUpdate(key, "value", o => o).Should().NotBeNull("After: " + (Environment.TickCount - start) + ": " + cache.ToString());
 
                 start = Environment.TickCount;
-                Thread.Sleep(50);
+                Thread.Sleep(100);
                 object val;
                 cache.TryUpdate(key, o => o, out val);
                 val.Should().NotBeNull("After: " + (Environment.TickCount - start) + ": " + cache.ToString());
 
                 start = Environment.TickCount;
-                Thread.Sleep(50);
+                Thread.Sleep(100);
                 cache.Update(key, o => o).Should().NotBeNull("After: " + (Environment.TickCount - start) + ": " + cache.ToString());
 
                 start = Environment.TickCount;
-                Thread.Sleep(110);
+                Thread.Sleep(210);
                 cache.TryUpdate(key, o => o, out val);
                 val.Should().BeNull("After: " + (Environment.TickCount - start) + ": " + cache.ToString());
             }

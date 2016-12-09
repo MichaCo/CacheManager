@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Configuration;
 using System.Globalization;
+using System.Linq;
 using System.Net;
 using System.Security.Cryptography;
 using System.Text;
@@ -22,19 +23,51 @@ namespace CacheManager.Memcached
     /// <typeparam name="TCacheValue">The type of the cache value.</typeparam>
     public class MemcachedCacheHandle<TCacheValue> : BaseCacheHandle<TCacheValue>
     {
+        private static readonly TimeSpan MaximumTimeout = TimeSpan.FromDays(30);
         private static readonly string DefaultEnyimSectionName = "enyim.com/memcached";
         private static readonly string DefaultSectionName = "default";
 
-        private MemcachedCacheHandle(CacheHandleConfiguration configuration, ICacheManagerConfiguration managerConfiguration, ILoggerFactory loggerFactory)
-            : base(managerConfiguration, configuration)
+        /// <summary>
+        /// Gets the number of items the cache handle currently maintains.
+        /// </summary>
+        /// <value>The count.</value>
+        public override int Count => int.Parse(this.Cache.Stats().GetRaw("curr_items").First().Value);
+
+        /// <summary>
+        /// Gets the get memcached client configuration.
+        /// </summary>
+        /// <value>The get memcached client configuration.</value>
+        public IMemcachedClientConfiguration GetMemcachedClientConfiguration => this.GetSection();
+
+        /// <summary>
+        /// Gets the total number of items per server.
+        /// </summary>
+        /// <value>The total number of items per server.</value>
+        public IEnumerable<long> ServerItemCount
         {
-            NotNull(configuration, nameof(configuration));
-            NotNull(loggerFactory, nameof(loggerFactory));
-
-            Ensure(typeof(TCacheValue).IsSerializable, "The cache value type must be serializable but {0} is not.", typeof(TCacheValue).ToString());
-
-            this.Logger = loggerFactory.CreateLogger(this);
+            get
+            {
+                foreach (var count in this.Cache.Stats().GetRaw("total_items"))
+                {
+                    yield return long.Parse(count.Value, CultureInfo.InvariantCulture);
+                }
+            }
         }
+
+        /// <summary>
+        /// Gets the servers.
+        /// </summary>
+        /// <value>The servers.</value>
+        public IList<IPEndPoint> Servers => this.GetServers();
+
+        /// <summary>
+        /// Gets or sets the cache.
+        /// </summary>
+        /// <value>The cache.</value>
+        protected MemcachedClient Cache { get; set; }
+
+        /// <inheritdoc />
+        protected override ILogger Logger { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MemcachedCacheHandle{TCacheValue}"/> class.
@@ -73,16 +106,6 @@ namespace CacheManager.Memcached
             {
                 throw new InvalidOperationException("Failed to initialize " + this.GetType().Name + ". " + ex.BareMessage, ex);
             }
-        }
-
-        // TODO: test the config section ctor now with this
-        private static IMemcachedClientConfiguration GetSection(string sectionName)
-        {
-            MemcachedClientSection section = (MemcachedClientSection)ConfigurationManager.GetSection(sectionName);
-            if (section == null)
-                throw new ConfigurationErrorsException("Section " + sectionName + " is not found.");
-
-            return section;
         }
 
         /// <summary>
@@ -124,47 +147,19 @@ namespace CacheManager.Memcached
             this.Cache = new MemcachedClient(clientConfiguration);
         }
 
-        /// <summary>
-        /// Gets the number of items the cache handle currently maintains.
-        /// </summary>
-        /// <value>The count.</value>
-        public override int Count => (int)this.Stats.GetStatistic(CacheStatsCounterType.Items);
-
-        /// <summary>
-        /// Gets the get memcached client configuration.
-        /// </summary>
-        /// <value>The get memcached client configuration.</value>
-        public IMemcachedClientConfiguration GetMemcachedClientConfiguration => this.GetSection();
-
-        /// <summary>
-        /// Gets the total number of items per server.
-        /// </summary>
-        /// <value>The total number of items per server.</value>
-        public IEnumerable<long> ServerItemCount
+        private MemcachedCacheHandle(
+            CacheHandleConfiguration configuration,
+            ICacheManagerConfiguration managerConfiguration,
+            ILoggerFactory loggerFactory)
+            : base(managerConfiguration, configuration)
         {
-            get
-            {
-                foreach (var count in this.Cache.Stats().GetRaw("total_items"))
-                {
-                    yield return long.Parse(count.Value, CultureInfo.InvariantCulture);
-                }
-            }
+            NotNull(configuration, nameof(configuration));
+            NotNull(loggerFactory, nameof(loggerFactory));
+
+            Ensure(typeof(TCacheValue).IsSerializable, "The cache value type must be serializable but {0} is not.", typeof(TCacheValue).ToString());
+
+            this.Logger = loggerFactory.CreateLogger(this);
         }
-
-        /// <summary>
-        /// Gets the servers.
-        /// </summary>
-        /// <value>The servers.</value>
-        public IList<IPEndPoint> Servers => this.GetServers();
-
-        /// <summary>
-        /// Gets or sets the cache.
-        /// </summary>
-        /// <value>The cache.</value>
-        protected MemcachedClient Cache { get; set; }
-
-        /// <inheritdoc />
-        protected override ILogger Logger { get; }
 
         /// <summary>
         /// Clears this cache, removing all items in the base cache and all regions.
@@ -182,19 +177,19 @@ namespace CacheManager.Memcached
         }
 
         /// <inheritdoc />
+        public override bool Exists(string key)
+        {
+            var result = this.Cache.ExecuteAppend(key, new ArraySegment<byte>());
+            return result.StatusCode.HasValue && result.StatusCode.Value != (int)StatusCode.KeyNotFound;
+        }
+
+        /// <inheritdoc />
         public override UpdateItemResult<TCacheValue> Update(string key, Func<TCacheValue, TCacheValue> updateValue, int maxRetries) =>
             this.Update(key, null, updateValue, maxRetries);
 
         /// <inheritdoc />
         public override UpdateItemResult<TCacheValue> Update(string key, string region, Func<TCacheValue, TCacheValue> updateValue, int maxRetries) =>
             this.Set(key, region, updateValue, maxRetries);
-
-        /// <inheritdoc />
-        public override bool Exists(string key)
-        {
-            var result = this.Cache.ExecuteAppend(key, new ArraySegment<byte>());
-            return result.StatusCode.HasValue && result.StatusCode.Value != (int)StatusCode.KeyNotFound;
-        }
 
         /// <summary>
         /// Adds a value to the cache.
@@ -299,6 +294,11 @@ namespace CacheManager.Memcached
 
             if (item.ExpirationMode == ExpirationMode.Absolute || item.ExpirationMode == ExpirationMode.Sliding)
             {
+                if (item.ExpirationTimeout > MaximumTimeout)
+                {
+                    throw new InvalidOperationException($"Timeout must not exceed {MaximumTimeout.TotalDays} days.");
+                }
+
                 var result = this.Cache.ExecuteStore(mode, key, item, item.ExpirationTimeout);
                 return result;
             }
@@ -342,6 +342,16 @@ namespace CacheManager.Memcached
             }
 
             return fullKey;
+        }
+
+        // TODO: test the config section ctor now with this
+        private static IMemcachedClientConfiguration GetSection(string sectionName)
+        {
+            MemcachedClientSection section = (MemcachedClientSection)ConfigurationManager.GetSection(sectionName);
+            if (section == null)
+                throw new ConfigurationErrorsException("Section " + sectionName + " is not found.");
+
+            return section;
         }
 
         private static string GetSHA256Key(string key)
@@ -444,6 +454,11 @@ namespace CacheManager.Memcached
 
                 if (item.ExpirationMode == ExpirationMode.Absolute || item.ExpirationMode == ExpirationMode.Sliding)
                 {
+                    if (item.ExpirationTimeout > MaximumTimeout)
+                    {
+                        throw new InvalidOperationException($"Timeout must not exceed {MaximumTimeout.TotalDays} days.");
+                    }
+
                     result = this.Cache.ExecuteCas(StoreMode.Set, fullyKey, item, item.ExpirationTimeout, cas.Cas);
                 }
                 else

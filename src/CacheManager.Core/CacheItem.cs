@@ -134,7 +134,7 @@ namespace CacheManager.Core
         }
 
         /// <summary>
-        /// Returns a value indicating if the item is logically expired.
+        /// Gets a value indicating whether the item is logically expired or not.
         /// Depending on the cache vendor, the item might still live in the cache although 
         /// according to the expiration mode and timeout, the item is already expired.
         /// </summary>

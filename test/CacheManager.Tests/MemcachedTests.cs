@@ -357,6 +357,26 @@ namespace CacheManager.Tests
                 act().Should().BeFalse("Item has not been added to the cache");
             }
         }
+
+        [Fact]
+        [Trait("category", "Memcached")]
+        public void Memcached_TimeoutNotBeGreaterThan30Days()
+        {
+            // arrange
+            using (var cache = CacheFactory.Build<object>(settings =>
+            {
+                settings.WithUpdateMode(CacheUpdateMode.Up)
+                    .WithMemcachedCacheHandle(Configuration)
+                    .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromDays(40));
+            }))
+            {
+                // act
+                Action act = () => cache.Add(Guid.NewGuid().ToString(), "test");
+
+                // assert
+                act.ShouldThrow<InvalidOperationException>("*30 days*");
+            }
+        }
     }
 }
 #endif
