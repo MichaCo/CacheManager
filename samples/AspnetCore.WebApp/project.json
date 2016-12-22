@@ -21,6 +21,7 @@
     "CacheManager.Microsoft.Extensions.Configuration": { "target": "project" },
     "CacheManager.Microsoft.Extensions.Logging": { "target": "project" },
     "CacheManager.StackExchange.Redis": { "target": "project" },
+    "CacheManager.Serialization.Json": { "target": "project" },
     "Microsoft.AspNetCore.Diagnostics": "1.1.0"
   },
   "configurations": {

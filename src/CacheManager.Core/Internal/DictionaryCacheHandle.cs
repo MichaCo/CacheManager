@@ -15,10 +15,19 @@ namespace CacheManager.Core.Internal
     public class DictionaryCacheHandle<TCacheValue> : BaseCacheHandle<TCacheValue>
     {
         private const int ScanInterval = 10000;
+        private ConcurrentDictionary<string, CacheItem<TCacheValue>> cache;
         private long lastScan = 0L;
         private bool scanRunning;
         private object startScanLock = new object();
-        private ConcurrentDictionary<string, CacheItem<TCacheValue>> cache;
+
+        /// <summary>
+        /// Gets the count.
+        /// </summary>
+        /// <value>The count.</value>
+        public override int Count => this.cache.Count;
+
+        /// <inheritdoc />
+        protected override ILogger Logger { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DictionaryCacheHandle{TCacheValue}"/> class.
@@ -33,15 +42,6 @@ namespace CacheManager.Core.Internal
             this.Logger = loggerFactory.CreateLogger(this);
             this.cache = new ConcurrentDictionary<string, CacheItem<TCacheValue>>();
         }
-
-        /// <summary>
-        /// Gets the count.
-        /// </summary>
-        /// <value>The count.</value>
-        public override int Count => this.cache.Count;
-
-        /// <inheritdoc />
-        protected override ILogger Logger { get; }
 
         /// <summary>
         /// Clears this cache, removing all items in the base cache and all regions.
@@ -67,6 +67,12 @@ namespace CacheManager.Core.Internal
             this.StartScanExpiredItems();
         }
 
+        /// <inheritdoc />
+        public override bool Exists(string key)
+        {
+            return this.cache.ContainsKey(key);
+        }
+
         /// <summary>
         /// Adds a value to the cache.
         /// </summary>
@@ -83,12 +89,6 @@ namespace CacheManager.Core.Internal
 
             this.StartScanExpiredItems();
             return this.cache.TryAdd(key, item);
-        }
-
-        /// <inheritdoc />
-        public override bool Exists(string key)
-        {
-            return this.cache.ContainsKey(key);
         }
 
         /// <summary>
@@ -180,6 +180,22 @@ namespace CacheManager.Core.Internal
             return string.Concat(region, ":", key);
         }
 
+        private static bool IsExpired(CacheItem<TCacheValue> item, DateTime now)
+        {
+            if (item.ExpirationMode == ExpirationMode.Absolute
+                && item.CreatedUtc.Add(item.ExpirationTimeout) < now)
+            {
+                return true;
+            }
+            else if (item.ExpirationMode == ExpirationMode.Sliding
+                && item.LastAccessedUtc.Add(item.ExpirationTimeout) < now)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
         private static void ScanForExpiredItems(DictionaryCacheHandle<TCacheValue> cache)
         {
             cache.scanRunning = true;
@@ -203,22 +219,6 @@ namespace CacheManager.Core.Internal
             }
 
             cache.scanRunning = false;
-        }
-
-        private static bool IsExpired(CacheItem<TCacheValue> item, DateTime now)
-        {
-            if (item.ExpirationMode == ExpirationMode.Absolute
-                && item.CreatedUtc.Add(item.ExpirationTimeout) < now)
-            {
-                return true;
-            }
-            else if (item.ExpirationMode == ExpirationMode.Sliding
-                && item.LastAccessedUtc.Add(item.ExpirationTimeout) < now)
-            {
-                return true;
-            }
-
-            return false;
         }
 
         private void StartScanExpiredItems()
