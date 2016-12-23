@@ -100,6 +100,18 @@ namespace CacheManager.Core.Internal
             {
                 logger.LogInfo("Creating handle {0} of type {1}.", handleConfiguration.Name, handleConfiguration.HandleType);
                 Type handleType = handleConfiguration.HandleType;
+                bool requiresSerializer = false;
+#if !NETSTANDARD
+                requiresSerializer = handleType.GetCustomAttributes(typeof(RequiresSerializerAttribute), false).Any();
+#else
+                requiresSerializer = handleType.GetTypeInfo().CustomAttributes.Any(p => p.AttributeType == typeof(RequiresSerializerAttribute));
+#endif
+
+                if (requiresSerializer && serializer == null)
+                {
+                    throw new InvalidOperationException($"Cache handle {handleType.FullName} requires serialization of cached values but no serializer has been configured.");
+                }
+
                 Type instanceType = null;
 
                 ValidateCacheHandleGenericTypeArguments(handleType);

@@ -29,6 +29,20 @@ namespace CacheManager.Tests
         }
 
         [Fact]
+        public void Redis_WithoutSerializer_ShouldThrow()
+        {
+            var cfg = ConfigurationBuilder.BuildConfiguration(
+                settings =>
+                    settings
+                        .WithRedisConfiguration("redis-key", "localhost")
+                        .WithRedisCacheHandle("redis-key")
+                    );
+
+            Action act = () => new BaseCacheManager<string>(cfg);
+            act.ShouldThrow<InvalidOperationException>().WithMessage("*requires serialization*");
+        }
+
+        [Fact]
         public void Redis_BackplaneEvents_Add()
         {
             var key = Guid.NewGuid().ToString();
@@ -590,9 +604,10 @@ namespace CacheManager.Tests
             var cfg = ConfigurationBuilder.BuildConfiguration(settings =>
             {
                 settings
+                    .WithRedisBackplane("redis.config")
                     .WithLogging(typeof(TestLoggerFactory), testLogger)
                     .WithJsonSerializer()
-                    .WithRedisCacheHandle("redis.config")
+                    .WithRedisCacheHandle("redis.config", true)
                     .And
                     .WithRedisConfiguration("redis.config", config =>
                     {
@@ -785,7 +800,7 @@ namespace CacheManager.Tests
                     cacheB.GetCacheItem(item.Key).Should().NotBeNull();
                 }
 
-                Thread.Sleep(150);
+                Thread.Sleep(250);
                 cacheA.GetCacheItem(item.Key).Should().BeNull();
                 cacheB.GetCacheItem(item.Key).Should().BeNull();
             }

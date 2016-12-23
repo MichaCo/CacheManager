@@ -84,7 +84,7 @@ namespace CacheManager.Core
             catch (Exception ex)
             {
                 this.Logger.LogError(ex, "Error occurred while creating the cache manager.");
-                throw;
+                throw ex.InnerException ?? ex;
             }
         }
 

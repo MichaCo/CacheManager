@@ -21,6 +21,7 @@ namespace CacheManager.Memcached
     /// Cache handle implementation based on the Enyim memcached client.
     /// </summary>
     /// <typeparam name="TCacheValue">The type of the cache value.</typeparam>
+    [RequiresSerializer]
     public class MemcachedCacheHandle<TCacheValue> : BaseCacheHandle<TCacheValue>
     {
         private static readonly TimeSpan MaximumTimeout = TimeSpan.FromDays(30);
@@ -155,8 +156,8 @@ namespace CacheManager.Memcached
         {
             NotNull(configuration, nameof(configuration));
             NotNull(loggerFactory, nameof(loggerFactory));
-
-            Ensure(typeof(TCacheValue).IsSerializable, "The cache value type must be serializable but {0} is not.", typeof(TCacheValue).ToString());
+                        
+            //Ensure(typeof(TCacheValue).IsSerializable, "The cache value type must be serializable but {0} is not.", typeof(TCacheValue).ToString());
 
             this.Logger = loggerFactory.CreateLogger(this);
         }

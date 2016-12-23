@@ -335,7 +335,7 @@ namespace CacheManager.Tests
 
             // assert
             act.ShouldThrow<InvalidOperationException>()
-                .WithInnerMessage("*No configuration added for configuration name*");
+                .WithMessage("*No configuration added for configuration name*");
         }
 
         [Fact]

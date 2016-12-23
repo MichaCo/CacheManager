@@ -2,6 +2,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using CacheManager.Core;
 using FluentAssertions;
 using Xunit;
@@ -250,7 +251,7 @@ namespace CacheManager.Tests
         [Trait("category", "Unreliable")]
         [Theory]
         [MemberData("TestCacheManagers")]
-        public void CacheManager_Sliding_DoesNotExpire_OnGet<T>(T cache)
+        public async Task CacheManager_Sliding_DoesNotExpire_OnGet<T>(T cache)
             where T : ICacheManager<object>
         {
             using (cache)
@@ -271,15 +272,21 @@ namespace CacheManager.Tests
                 cache.GetCacheItem(key).Should().NotBeNull("After: " + (Environment.TickCount - start) + ": " + cache.ToString());
 
                 start = Environment.TickCount;
-                Thread.Sleep(100);
-                cache[key].Should().NotBeNull("After: " + (Environment.TickCount - start) + ": " + cache.ToString());
+                await Task.Delay(100);
+                if (Environment.TickCount - start <= 200)
+                {
+                    cache[key].Should().NotBeNull("After: " + (Environment.TickCount - start) + ": " + cache.ToString());
+                }
 
                 start = Environment.TickCount;
-                Thread.Sleep(100);
-                cache.Get(key).Should().NotBeNull("After: " + (Environment.TickCount - start) + ": " + cache.ToString());
+                await Task.Delay(100);
+                if (Environment.TickCount - start <= 200)
+                {
+                    cache[key].Should().NotBeNull("After: " + (Environment.TickCount - start) + ": " + cache.ToString());
+                }
 
                 start = Environment.TickCount;
-                Thread.Sleep(210);
+                await Task.Delay(250);
                 cache.GetCacheItem(key).Should().BeNull("After: " + (Environment.TickCount - start) + ": " + cache.ToString());
             }
         }
@@ -287,7 +294,7 @@ namespace CacheManager.Tests
         [Trait("category", "Unreliable")]
         [Theory]
         [MemberData("TestCacheManagers")]
-        public void CacheManager_Sliding_DoesNotExpire_OnUpdate<T>(T cache)
+        public async Task CacheManager_Sliding_DoesNotExpire_OnUpdate<T>(T cache)
             where T : ICacheManager<object>
         {
             // see #50, update doesn't copy custom expire settings per item
@@ -309,17 +316,24 @@ namespace CacheManager.Tests
                 cache.AddOrUpdate(key, "value", o => o).Should().NotBeNull("After: " + (Environment.TickCount - start) + ": " + cache.ToString());
 
                 start = Environment.TickCount;
-                Thread.Sleep(100);
+                await Task.Delay(100);
+                if (Environment.TickCount - start <= 200)
+                {
+                    object value;
+                    cache.TryUpdate(key, o => o, out value);
+                    value.Should().NotBeNull("After: " + (Environment.TickCount - start) + ": " + cache.ToString());
+                }
+
+                start = Environment.TickCount;
+                if (Environment.TickCount - start <= 200)
+                {
+                    await Task.Delay(100);
+                    cache.Update(key, o => o).Should().NotBeNull("After: " + (Environment.TickCount - start) + ": " + cache.ToString());
+                }
+
+                start = Environment.TickCount;
                 object val;
-                cache.TryUpdate(key, o => o, out val);
-                val.Should().NotBeNull("After: " + (Environment.TickCount - start) + ": " + cache.ToString());
-
-                start = Environment.TickCount;
-                Thread.Sleep(100);
-                cache.Update(key, o => o).Should().NotBeNull("After: " + (Environment.TickCount - start) + ": " + cache.ToString());
-
-                start = Environment.TickCount;
-                Thread.Sleep(210);
+                await Task.Delay(210);
                 cache.TryUpdate(key, o => o, out val);
                 val.Should().BeNull("After: " + (Environment.TickCount - start) + ": " + cache.ToString());
             }

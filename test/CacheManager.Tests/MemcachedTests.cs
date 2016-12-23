@@ -55,28 +55,7 @@ namespace CacheManager.Tests
                 }
             }
         }
-
-        [Fact]
-#if NET40
-        [Trait("Framework", "NET40")]
-#else
-        [Trait("Framework", "NET45")]
-#endif
-        public void Memcached_Ctor()
-        {
-            // arrange act
-            Action act = () => CacheFactory.Build<IAmNotSerializable>(settings =>
-            {
-                settings.WithUpdateMode(CacheUpdateMode.Full)
-                    .WithMemcachedCacheHandle(Configuration)
-                    .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1));
-            });
-
-            // assert
-            act.ShouldThrow<InvalidOperationException>()
-                .WithInnerMessage("The cache value type must be serializable*");
-        }
-
+        
         [Fact]
         [Trait("category", "Memcached")]
         public void Memcached_KeySizeLimit()

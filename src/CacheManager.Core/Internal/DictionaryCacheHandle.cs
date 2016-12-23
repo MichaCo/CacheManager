@@ -21,15 +21,6 @@ namespace CacheManager.Core.Internal
         private object startScanLock = new object();
 
         /// <summary>
-        /// Gets the count.
-        /// </summary>
-        /// <value>The count.</value>
-        public override int Count => this.cache.Count;
-
-        /// <inheritdoc />
-        protected override ILogger Logger { get; }
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="DictionaryCacheHandle{TCacheValue}"/> class.
         /// </summary>
         /// <param name="managerConfiguration">The manager configuration.</param>
@@ -42,6 +33,15 @@ namespace CacheManager.Core.Internal
             this.Logger = loggerFactory.CreateLogger(this);
             this.cache = new ConcurrentDictionary<string, CacheItem<TCacheValue>>();
         }
+
+        /// <summary>
+        /// Gets the count.
+        /// </summary>
+        /// <value>The count.</value>
+        public override int Count => this.cache.Count;
+
+        /// <inheritdoc />
+        protected override ILogger Logger { get; }
 
         /// <summary>
         /// Clears this cache, removing all items in the base cache and all regions.

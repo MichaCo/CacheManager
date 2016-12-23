@@ -28,7 +28,7 @@ namespace CacheManager.Tests
     {
 #if !NETCOREAPP
         [Fact]
-        public void JsonSerializer_RespectBinarySerializerSettings()
+        public void BinarySerializer_RespectBinarySerializerSettings()
         {
             var serializationSettings = new BinaryFormatter()
             {

@@ -21,6 +21,7 @@ namespace CacheManager.Redis
     /// Cache handle implementation for Redis.
     /// </summary>
     /// <typeparam name="TCacheValue">The type of the cache value.</typeparam>
+    [RequiresSerializer]
     public class RedisCacheHandle<TCacheValue> : BaseCacheHandle<TCacheValue>
     {
         private const string HashFieldCreated = "created";
@@ -76,11 +77,11 @@ return result";
         private readonly ICacheManagerConfiguration managerConfiguration;
         private readonly RedisValueConverter valueConverter;
         private readonly RedisConnectionManager connection;
+        private readonly bool isLuaAllowed;
         private RedisConfiguration redisConfiguration = null;
 
         // flag if scripts are initially loaded to the server
         private bool scriptsLoaded = false;
-        private bool? isLuaAllowed;
         private object lockObject = new object();
 
         /// <summary>
@@ -103,19 +104,7 @@ return result";
             this.valueConverter = new RedisValueConverter(serializer);
             this.redisConfiguration = RedisConfigurations.GetConfiguration(configuration.Key);
             this.connection = new RedisConnectionManager(this.redisConfiguration, loggerFactory);
-        }
-
-        private bool IsLuaAllowed
-        {
-            get
-            {
-                if (this.isLuaAllowed == null)
-                {
-                    this.isLuaAllowed = connection.Features.Scripting;
-                }
-
-                return this.isLuaAllowed.Value;
-            }
+            this.isLuaAllowed = connection.Features.Scripting;
         }
 
         /// <summary>
@@ -215,7 +204,7 @@ return result";
         /// <inheritdoc />
         public override UpdateItemResult<TCacheValue> Update(string key, string region, Func<TCacheValue, TCacheValue> updateValue, int maxRetries)
         {
-            if (!this.IsLuaAllowed)
+            if (!this.isLuaAllowed)
             {
                 return this.UpdateNoScript(key, region, updateValue, maxRetries);
             }
@@ -380,7 +369,7 @@ return result";
         /// <returns>The <c>CacheItem</c>.</returns>
         protected override CacheItem<TCacheValue> GetCacheItemInternal(string key, string region)
         {
-            if (!this.IsLuaAllowed)
+            if (!this.isLuaAllowed)
             {
                 return this.GetCacheItemInternalNoScript(key, region);
             }
@@ -625,7 +614,7 @@ return result";
 
         private bool Set(CacheItem<TCacheValue> item, StackRedis.When when, bool sync = false)
         {
-            if (!this.IsLuaAllowed)
+            if (!this.isLuaAllowed)
             {
                 return this.SetNoScript(item, when, sync);
             }
