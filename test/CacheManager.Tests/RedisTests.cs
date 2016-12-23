@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using CacheManager.Core;
 using CacheManager.Core.Internal;
 using CacheManager.Redis;
@@ -772,7 +773,7 @@ namespace CacheManager.Tests
         [Fact]
         [Trait("category", "Redis")]
         [Trait("category", "Unreliable")]
-        public void Redis_Sliding_DoesExpire_MultiClients()
+        public async Task Redis_Sliding_DoesExpire_MultiClients()
         {
             // arrange
             var item = new CacheItem<object>(Guid.NewGuid().ToString(), "something", ExpirationMode.Sliding, TimeSpan.FromMilliseconds(100));
@@ -792,16 +793,15 @@ namespace CacheManager.Tests
                 // assert
                 result.Should().BeTrue();
                 item.Value.Should().Be(valueB);
-
-                // 450ms added so absolute would be expired on the 2nd go
+                
                 for (int s = 0; s < 3; s++)
                 {
-                    Thread.Sleep(80);
+                    await Task.Delay(50);                    
                     cacheA.GetCacheItem(item.Key).Should().NotBeNull();
                     cacheB.GetCacheItem(item.Key).Should().NotBeNull();
                 }
 
-                Thread.Sleep(250);
+                await Task.Delay(250);
                 cacheA.GetCacheItem(item.Key).Should().BeNull();
                 cacheB.GetCacheItem(item.Key).Should().BeNull();
             }

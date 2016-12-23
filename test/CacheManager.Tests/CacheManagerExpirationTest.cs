@@ -325,9 +325,9 @@ namespace CacheManager.Tests
                 }
 
                 start = Environment.TickCount;
+                await Task.Delay(100);
                 if (Environment.TickCount - start <= 200)
                 {
-                    await Task.Delay(100);
                     cache.Update(key, o => o).Should().NotBeNull("After: " + (Environment.TickCount - start) + ": " + cache.ToString());
                 }
 
