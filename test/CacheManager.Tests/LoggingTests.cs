@@ -445,12 +445,12 @@ namespace CacheManager.Tests
 
         public ILogger CreateLogger(string categoryName)
         {
-            return useLogger;
+            return this.useLogger;
         }
 
         public ILogger CreateLogger<T>(T instance)
         {
-            return useLogger;
+            return this.useLogger;
         }
     }
 

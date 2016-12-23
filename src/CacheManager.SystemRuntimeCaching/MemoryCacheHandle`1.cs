@@ -88,7 +88,6 @@ namespace CacheManager.SystemRuntimeCaching
         public override void ClearRegion(string region) =>
             this.cache.Remove(this.GetRegionTokenKey(region));
 
-
         /// <inheritdoc />
         public override bool Exists(string key)
         {

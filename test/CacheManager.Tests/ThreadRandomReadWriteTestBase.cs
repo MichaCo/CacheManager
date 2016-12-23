@@ -41,17 +41,20 @@ namespace CacheManager.Tests
                     {
                         for (int i = 0; i < numInnerIterations; i++)
                         {
-                            cache.Update(key, (value) =>
-                            {
-                                var val = value as RaceConditionTestElement;
-                                if (val == null)
+                            cache.Update(
+                                key, 
+                                (value) =>
                                 {
-                                    throw new Exception("WTF invalid object result");
-                                }
-                                val.Counter++;
-                                Interlocked.Increment(ref countCasModifyCalls);
-                                return value;
-                            }, 200);
+                                    var val = value as RaceConditionTestElement;
+                                    if (val == null)
+                                    {
+                                        throw new InvalidOperationException("WTF invalid object result");
+                                    }
+                                    val.Counter++;
+                                    Interlocked.Increment(ref countCasModifyCalls);
+                                    return value;
+                                }, 
+                                200);
                         }
                     },
                     numThreads,

@@ -24,9 +24,100 @@ namespace CacheManager.Memcached
     [RequiresSerializer]
     public class MemcachedCacheHandle<TCacheValue> : BaseCacheHandle<TCacheValue>
     {
-        private static readonly TimeSpan MaximumTimeout = TimeSpan.FromDays(30);
         private static readonly string DefaultEnyimSectionName = "enyim.com/memcached";
         private static readonly string DefaultSectionName = "default";
+        private static readonly TimeSpan MaximumTimeout = TimeSpan.FromDays(30);
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MemcachedCacheHandle{TCacheValue}"/> class.
+        /// </summary>
+        /// <param name="managerConfiguration">The manager configuration.</param>
+        /// <param name="configuration">The cache handle configuration.</param>
+        /// <param name="loggerFactory">The logger factory.</param>
+        /// <param name="serializer">The serializer.</param>
+        /// <exception cref="System.ArgumentNullException">
+        /// If <paramref name="configuration"/> or <paramref name="loggerFactory"/> is null.
+        /// </exception>
+        /// <exception cref="System.InvalidOperationException">
+        /// The cache value type is not serializable or if the enyim configuration section could not
+        /// be initialized.
+        /// </exception>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Cache gets disposed correctly when the owner gets disposed.")]
+        public MemcachedCacheHandle(
+            ICacheManagerConfiguration managerConfiguration,
+            CacheHandleConfiguration configuration,
+            ILoggerFactory loggerFactory,
+            ICacheSerializer serializer)
+            : this(configuration, managerConfiguration, loggerFactory)
+        {
+            try
+            {
+                NotNull(configuration, nameof(configuration));
+                var sectionName = GetEnyimSectionName(configuration.Key);
+                var section = GetSection(sectionName);
+
+                this.Cache = new MemcachedClient(
+                    section.CreatePool(),
+                    section.CreateKeyTransformer(),
+                    section.CreateTranscoder() ?? new CacheManagerTanscoder<TCacheValue>(serializer),
+                    section.CreatePerformanceMonitor());
+            }
+            catch (ConfigurationErrorsException ex)
+            {
+                throw new InvalidOperationException("Failed to initialize " + this.GetType().Name + ". " + ex.BareMessage, ex);
+            }
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MemcachedCacheHandle{TCacheValue}"/> class.
+        /// </summary>
+        /// <param name="managerConfiguration">The manager configuration.</param>
+        /// <param name="configuration">The cache handle configuration.</param>
+        /// <param name="loggerFactory">The logger factory.</param>
+        /// <param name="client">The <see cref="MemcachedClient"/> to use.</param>
+        public MemcachedCacheHandle(ICacheManagerConfiguration managerConfiguration, CacheHandleConfiguration configuration, ILoggerFactory loggerFactory, MemcachedClient client)
+            : this(configuration, managerConfiguration, loggerFactory)
+        {
+            NotNull(client, nameof(client));
+            this.Cache = client;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MemcachedCacheHandle{TCacheValue}"/> class.
+        /// </summary>
+        /// <param name="managerConfiguration">The manager configuration.</param>
+        /// <param name="configuration">The cache handle configuration.</param>
+        /// <param name="loggerFactory">The logger factory.</param>
+        /// <param name="serializer">The serializer.</param>
+        /// <param name="clientConfiguration">The <see cref="MemcachedClientConfiguration"/> to use to create the <see cref="MemcachedClient"/>.</param>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Cache gets disposed correctly when the owner gets disposed.")]
+        public MemcachedCacheHandle(
+            ICacheManagerConfiguration managerConfiguration,
+            CacheHandleConfiguration configuration,
+            ILoggerFactory loggerFactory,
+            ICacheSerializer serializer,
+            MemcachedClientConfiguration clientConfiguration)
+            : this(configuration, managerConfiguration, loggerFactory)
+        {
+            NotNull(clientConfiguration, nameof(clientConfiguration));
+            if (clientConfiguration.Transcoder.GetType() == typeof(DefaultTranscoder))
+            {
+                clientConfiguration.Transcoder = new CacheManagerTanscoder<TCacheValue>(serializer);
+            }
+
+            this.Cache = new MemcachedClient(clientConfiguration);
+        }
+
+        private MemcachedCacheHandle(
+                    CacheHandleConfiguration configuration,
+                    ICacheManagerConfiguration managerConfiguration,
+                    ILoggerFactory loggerFactory)
+                    : base(managerConfiguration, configuration)
+        {
+            NotNull(configuration, nameof(configuration));
+            NotNull(loggerFactory, nameof(loggerFactory));
+            this.Logger = loggerFactory.CreateLogger(this);
+        }
 
         /// <summary>
         /// Gets the number of items the cache handle currently maintains.
@@ -71,98 +162,6 @@ namespace CacheManager.Memcached
         protected override ILogger Logger { get; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="MemcachedCacheHandle{TCacheValue}"/> class.
-        /// </summary>
-        /// <param name="managerConfiguration">The manager configuration.</param>
-        /// <param name="configuration">The cache handle configuration.</param>
-        /// <param name="loggerFactory">The logger factory.</param>
-        /// <param name="serializer">The serializer.</param>
-        /// <exception cref="System.ArgumentNullException">
-        /// If <paramref name="configuration"/> or <paramref name="loggerFactory"/> is null.
-        /// </exception>
-        /// <exception cref="System.InvalidOperationException">
-        /// The cache value type is not serializable or if the enyim configuration section could not
-        /// be initialized.
-        /// </exception>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Cache gets disposed correctly when the owner gets disposed.")]
-        public MemcachedCacheHandle(
-            ICacheManagerConfiguration managerConfiguration,
-            CacheHandleConfiguration configuration,
-            ILoggerFactory loggerFactory,
-            ICacheSerializer serializer)
-            : this(configuration, managerConfiguration, loggerFactory)
-        {
-            try
-            {
-                var sectionName = GetEnyimSectionName(configuration.Key);
-                var section = GetSection(sectionName);
-
-                this.Cache = new MemcachedClient(
-                    section.CreatePool(),
-                    section.CreateKeyTransformer(),
-                    section.CreateTranscoder() ?? new CacheManagerTanscoder<TCacheValue>(serializer),
-                    section.CreatePerformanceMonitor());
-            }
-            catch (ConfigurationErrorsException ex)
-            {
-                throw new InvalidOperationException("Failed to initialize " + this.GetType().Name + ". " + ex.BareMessage, ex);
-            }
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MemcachedCacheHandle{TCacheValue}"/> class.
-        /// </summary>
-        /// <param name="managerConfiguration">The manager configuration.</param>
-        /// <param name="configuration">The cache handle configuration.</param>
-        /// <param name="loggerFactory">The logger factory.</param>
-        /// <param name="client">The <see cref="MemcachedClient"/> to use.</param>
-        public MemcachedCacheHandle(ICacheManagerConfiguration managerConfiguration, CacheHandleConfiguration configuration, ILoggerFactory loggerFactory, MemcachedClient client)
-            : this(configuration, managerConfiguration, loggerFactory)
-        {
-            NotNull(client, nameof(client));
-            this.Cache = client;
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MemcachedCacheHandle{TCacheValue}"/> class.
-        /// </summary>
-        /// <param name="managerConfiguration">The manager configuration.</param>
-        /// <param name="configuration">The cache handle configuration.</param>
-        /// <param name="loggerFactory">The logger factory.</param>
-        /// <param name="serializer">The serializer.</param>
-        /// <param name="clientConfiguration">The <see cref="MemcachedClientConfiguration"/> to use to create the <see cref="MemcachedClient"/>.</param>
-        public MemcachedCacheHandle(
-            ICacheManagerConfiguration managerConfiguration,
-            CacheHandleConfiguration configuration,
-            ILoggerFactory loggerFactory,
-            ICacheSerializer serializer,
-            MemcachedClientConfiguration clientConfiguration)
-            : this(configuration, managerConfiguration, loggerFactory)
-        {
-            NotNull(clientConfiguration, nameof(clientConfiguration));
-            if (clientConfiguration.Transcoder.GetType() == typeof(DefaultTranscoder))
-            {
-                clientConfiguration.Transcoder = new CacheManagerTanscoder<TCacheValue>(serializer);
-            }
-
-            this.Cache = new MemcachedClient(clientConfiguration);
-        }
-
-        private MemcachedCacheHandle(
-            CacheHandleConfiguration configuration,
-            ICacheManagerConfiguration managerConfiguration,
-            ILoggerFactory loggerFactory)
-            : base(managerConfiguration, configuration)
-        {
-            NotNull(configuration, nameof(configuration));
-            NotNull(loggerFactory, nameof(loggerFactory));
-                        
-            //Ensure(typeof(TCacheValue).IsSerializable, "The cache value type must be serializable but {0} is not.", typeof(TCacheValue).ToString());
-
-            this.Logger = loggerFactory.CreateLogger(this);
-        }
-
-        /// <summary>
         /// Clears this cache, removing all items in the base cache and all regions.
         /// </summary>
         public override void Clear() => this.Cache.FlushAll();
@@ -180,7 +179,7 @@ namespace CacheManager.Memcached
         /// <inheritdoc />
         public override bool Exists(string key)
         {
-            var result = this.Cache.ExecuteAppend(key, new ArraySegment<byte>());
+            var result = this.Cache.ExecuteAppend(key, default(ArraySegment<byte>));
             return result.StatusCode.HasValue && result.StatusCode.Value != (int)StatusCode.KeyNotFound;
         }
 
@@ -350,7 +349,9 @@ namespace CacheManager.Memcached
         {
             MemcachedClientSection section = (MemcachedClientSection)ConfigurationManager.GetSection(sectionName);
             if (section == null)
+            {
                 throw new ConfigurationErrorsException("Section " + sectionName + " is not found.");
+            }
 
             return section;
         }

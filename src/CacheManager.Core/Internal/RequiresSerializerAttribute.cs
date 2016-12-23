@@ -7,7 +7,7 @@ namespace CacheManager.Core.Internal
     /// Can be used to decorate cache handles which require serialization
     /// </summary>
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
-    public class RequiresSerializerAttribute : Attribute
+    public sealed class RequiresSerializerAttribute : Attribute
     {
     }
 }

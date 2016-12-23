@@ -647,6 +647,11 @@ namespace CacheManager.Tests
                 throw new NotImplementedException();
             }
 
+            public override bool Exists(string key)
+            {
+                throw new NotImplementedException();
+            }
+
             protected override bool AddInternalPrepared(CacheItem<string> item)
             {
                 throw new NotImplementedException();
@@ -673,11 +678,6 @@ namespace CacheManager.Tests
             }
 
             protected override bool RemoveInternal(string key, string region)
-            {
-                throw new NotImplementedException();
-            }
-
-            public override bool Exists(string key)
             {
                 throw new NotImplementedException();
             }

@@ -131,7 +131,11 @@ namespace CacheManager.Redis
 
         private static string RemoveCredentials(string value)
         {
-            if (string.IsNullOrWhiteSpace(value)) return value;
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return value;
+            }
+
             return Regex.Replace(value, @"password\s*=\s*[^,]*", "password=****", RegexOptions.IgnoreCase);
         }
 
@@ -168,29 +172,30 @@ namespace CacheManager.Redis
 
             return configurationOptions;
         }
-    }
 
-    internal class LogWriter : StringWriter
-    {
-        private readonly ILogger logger;
-
-        public LogWriter(ILogger logger)
+        private class LogWriter : StringWriter
         {
-            this.logger = logger;
-        }
+            private readonly ILogger logger;
 
-        public override void Write(char value)
-        {
-        }
+            public LogWriter(ILogger logger)
+            {
+                this.logger = logger;
+            }
 
-        public override void Write(string value)
-        {
-            this.logger.LogDebug(value);
-        }
+            public override void Write(char value)
+            {
+            }
 
-        public override void Write(char[] buffer, int index, int count)
-        {
-            this.logger.LogDebug(new string(buffer, index, count));
+            public override void Write(string value)
+            {
+                this.logger.LogDebug(value);
+            }
+
+            public override void Write(char[] buffer, int index, int count)
+            {
+                var logValue = new string(buffer, index, count);
+                this.logger.LogDebug(RemoveCredentials(logValue));
+            }
         }
     }
 }

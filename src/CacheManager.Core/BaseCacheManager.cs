@@ -50,12 +50,13 @@ namespace CacheManager.Core
         /// <param name="configuration">
         /// The configuration which defines the structure and complexity of the cache manager.
         /// </param>
-        /// <exception cref="System.ArgumentNullException">
+        /// <exception cref="ArgumentNullException">
         /// When <paramref name="name"/> or <paramref name="configuration"/> is null.
         /// </exception>
         /// <see cref="CacheFactory"/>
         /// <see cref="ConfigurationBuilder"/>
         /// <see cref="BaseCacheHandle{TCacheValue}"/>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2200:RethrowToPreserveStackDetails", Justification = "fine for now")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "nope")]
         private BaseCacheManager(string name, ICacheManagerConfiguration configuration)
         {

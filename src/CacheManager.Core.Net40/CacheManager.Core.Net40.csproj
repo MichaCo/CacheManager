@@ -125,6 +125,9 @@
     <Compile Include="..\CacheManager.Core\Internal\ICacheValueSerializer.cs">
       <Link>Internal\ICacheValueSerializer.cs</Link>
     </Compile>
+    <Compile Include="..\CacheManager.Core\Internal\RequiresSerializerAttribute.cs">
+      <Link>Internal\RequiresSerializerAttribute.cs</Link>
+    </Compile>
     <Compile Include="..\cachemanager.core\logging\ILogger.cs">
       <Link>Logging\ILogger.cs</Link>
     </Compile>

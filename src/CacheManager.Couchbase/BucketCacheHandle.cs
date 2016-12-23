@@ -90,6 +90,13 @@ namespace CacheManager.Couchbase
             throw new NotImplementedException();
         }
 
+        /// <inheritdoc />
+        public override bool Exists(string key)
+        {
+            var fullKey = GetKey(key);
+            return this.bucket.Exists(fullKey);
+        }
+
         /// <summary>
         /// Adds a value to the cache.
         /// </summary>
@@ -108,13 +115,6 @@ namespace CacheManager.Couchbase
             }
 
             return this.bucket.Insert(fullKey, item).Success;
-        }
-
-        /// <inheritdoc />
-        public override bool Exists(string key)
-        {
-            var fullKey = GetKey(key);
-            return this.bucket.Exists(fullKey);
         }
 
         /// <summary>

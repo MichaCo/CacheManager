@@ -336,6 +336,11 @@ namespace CacheManager.Tests
             return this.UpdateValue;
         }
 
+        public override bool Exists(string key)
+        {
+            return false;
+        }
+
         protected override bool AddInternalPrepared(CacheItem<TCacheValue> item) => this.AddCall();
 
         protected override CacheItem<TCacheValue> GetCacheItemInternal(string key) => this.GetCallValue;
@@ -354,11 +359,6 @@ namespace CacheManager.Tests
         {
             this.RemoveCall();
             return true;
-        }
-
-        public override bool Exists(string key)
-        {
-            return false;
         }
     }
 }

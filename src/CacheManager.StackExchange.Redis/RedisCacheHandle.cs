@@ -104,7 +104,7 @@ return result";
             this.valueConverter = new RedisValueConverter(serializer);
             this.redisConfiguration = RedisConfigurations.GetConfiguration(configuration.Key);
             this.connection = new RedisConnectionManager(this.redisConfiguration, loggerFactory);
-            this.isLuaAllowed = connection.Features.Scripting;
+            this.isLuaAllowed = this.connection.Features.Scripting;
         }
 
         /// <summary>

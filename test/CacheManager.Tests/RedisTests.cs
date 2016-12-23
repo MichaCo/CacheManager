@@ -28,6 +28,7 @@ namespace CacheManager.Tests
             OnClearRegion
         }
 
+#if NETCOREAPP
         [Fact]
         public void Redis_WithoutSerializer_ShouldThrow()
         {
@@ -35,12 +36,12 @@ namespace CacheManager.Tests
                 settings =>
                     settings
                         .WithRedisConfiguration("redis-key", "localhost")
-                        .WithRedisCacheHandle("redis-key")
-                    );
+                        .WithRedisCacheHandle("redis-key")) as CacheManagerConfiguration;
 
             Action act = () => new BaseCacheManager<string>(cfg);
             act.ShouldThrow<InvalidOperationException>().WithMessage("*requires serialization*");
         }
+#endif
 
         [Fact]
         public void Redis_BackplaneEvents_Add()
@@ -622,7 +623,7 @@ namespace CacheManager.Tests
             });
 
             Action act = () => new BaseCacheManager<string>(cfg).Put("key", "value");
-            
+
             act.ShouldThrow<InvalidOperationException>().WithMessage("*password=***");
 
             testLogger.LogMessages.Any(p => p.Message.ToString().Contains("mysupersecret")).Should().BeFalse();

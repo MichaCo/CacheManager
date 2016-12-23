@@ -11,9 +11,6 @@ namespace CacheManager.Core
     /// </summary>
     public static class MemcachedConfigurationBuilderExtensions
     {
-        //private static readonly string DefaultEnyimSectionName = "enyim.com/memcached";
-        //private static readonly string DefaultSectionName = "default";
-
         /// <summary>
         /// Adds a <see cref="MemcachedCacheHandle{TCacheValue}"/>. The <paramref name="configurationName"/> must match with cache configured via enyim configuration section.
         /// </summary>
