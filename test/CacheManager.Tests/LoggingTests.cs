@@ -434,6 +434,26 @@ namespace CacheManager.Tests
         }
     }
 
+    public class TestLoggerFactory : ILoggerFactory
+    {
+        private readonly TestLogger useLogger;
+
+        public TestLoggerFactory(TestLogger useLogger)
+        {
+            this.useLogger = useLogger;
+        }
+
+        public ILogger CreateLogger(string categoryName)
+        {
+            return useLogger;
+        }
+
+        public ILogger CreateLogger<T>(T instance)
+        {
+            return useLogger;
+        }
+    }
+
     public class TestLogger : ILogger
     {
         public TestLogger()

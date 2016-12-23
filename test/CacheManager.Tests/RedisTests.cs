@@ -584,6 +584,36 @@ namespace CacheManager.Tests
         }
 
         [Fact]
+        public void Redis_Verify_NoCredentialsLoggedOrThrown()
+        {
+            var testLogger = new TestLogger();
+            var cfg = ConfigurationBuilder.BuildConfiguration(settings =>
+            {
+                settings
+                    .WithLogging(typeof(TestLoggerFactory), testLogger)
+                    .WithJsonSerializer()
+                    .WithRedisCacheHandle("redis.config")
+                    .And
+                    .WithRedisConfiguration("redis.config", config =>
+                    {
+                        config
+                            .WithConnectionTimeout(10)
+                            .WithAllowAdmin()
+                            .WithDatabase(7)
+                            .WithEndpoint("doesnotexist", 6379)
+                            .WithPassword("mysupersecret")
+                            .WithSsl();
+                    });
+            });
+
+            Action act = () => new BaseCacheManager<string>(cfg).Put("key", "value");
+            
+            act.ShouldThrow<InvalidOperationException>().WithMessage("*password=***");
+
+            testLogger.LogMessages.Any(p => p.Message.ToString().Contains("mysupersecret")).Should().BeFalse();
+        }
+
+        [Fact]
         [Trait("category", "Redis")]
         [Trait("category", "Unreliable")]
         public void Redis_NoRaceCondition_WithUpdate()
@@ -618,13 +648,13 @@ namespace CacheManager.Tests
                         for (int i = 0; i < numInnerIterations; i++)
                         {
                             cache.Update(
-                                key, 
+                                key,
                                 (value) =>
                                 {
                                     value.Counter++;
                                     Interlocked.Increment(ref countCasModifyCalls);
                                     return value;
-                                }, 
+                                },
                                 int.MaxValue);
                         }
                     },

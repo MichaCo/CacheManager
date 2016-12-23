@@ -117,7 +117,7 @@ namespace CacheManager.Tests
             using (cache)
             {
                 var key = Guid.NewGuid().ToString();
-                var expiration = TimeSpan.FromTicks(315311111111111);
+                var expiration = TimeSpan.FromTicks(TimeSpan.FromDays(20).Ticks);
                 Action act = () => cache.Add(new CacheItem<object>(key, "value", ExpirationMode.Sliding, expiration));
 
                 act.ShouldNotThrow();

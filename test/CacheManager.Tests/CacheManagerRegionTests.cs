@@ -90,7 +90,7 @@ namespace CacheManager.Tests
                 }
             }
         }
-
+        
         [Theory]
         [MemberData("TestCacheManagers")]
         public void CacheManager_Region_ClearRegion<T>(T cache)

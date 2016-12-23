@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Text;
+using System.Text.RegularExpressions;
 using CacheManager.Core.Logging;
 using static CacheManager.Core.Utility.Guard;
 using StackRedis = StackExchange.Redis;
@@ -86,13 +86,17 @@ namespace CacheManager.Redis
                 {
                     if (!connections.TryGetValue(this.connectionString, out connection))
                     {
-                        this.logger.LogInfo("Trying to connect with the following configuration: '{0}'", this.connectionString);
+                        if (this.logger.IsEnabled(LogLevel.Information))
+                        {
+                            this.logger.LogInfo("Trying to connect with the following configuration: '{0}'", RemoveCredentials(this.connectionString));
+                        }
+
                         connection = StackRedis.ConnectionMultiplexer.Connect(this.connectionString, new LogWriter(this.logger));
 
                         if (!connection.IsConnected)
                         {
                             connection.Dispose();
-                            throw new InvalidOperationException("Connection failed.");
+                            throw new InvalidOperationException($"Connection to '{RemoveCredentials(this.connectionString)}' failed.");
                         }
 
                         connection.ConnectionRestored += (sender, args) =>
@@ -119,10 +123,16 @@ namespace CacheManager.Redis
                     string.Format(
                         CultureInfo.InvariantCulture,
                         "Couldn't establish a connection for '{0}'.",
-                        this.connectionString));
+                        RemoveCredentials(this.connectionString)));
             }
 
             return connection;
+        }
+
+        private static string RemoveCredentials(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value)) return value;
+            return Regex.Replace(value, @"password\s*=\s*[^,]*", "password=****", RegexOptions.IgnoreCase);
         }
 
         private static string GetConnectionString(RedisConfiguration configuration)
@@ -134,7 +144,7 @@ namespace CacheManager.Redis
                 var options = CreateConfigurationOptions(configuration);
                 conString = options.ToString();
             }
-            
+
             return conString;
         }
 
