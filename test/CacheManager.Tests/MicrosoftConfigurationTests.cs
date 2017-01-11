@@ -497,6 +497,22 @@ namespace CacheManager.Tests
             config.CacheHandleConfigurations[0].HandleType.Should().Be(typeof(Core.Internal.DictionaryCacheHandle<>));
         }
 
+
+        [Fact]
+        public void Configuration_CacheHandle_KnownType_MsMemory()
+        {
+            var data = new Dictionary<string, string>
+            {
+                {"cacheManagers:0:name", "name"},
+                {"cacheManagers:0:handles:0:knownType", "MsMemory"},
+            };
+
+            var config = GetConfiguration(data).GetCacheConfiguration("name");
+            config.Name.Should().Be("name");
+            config.CacheHandleConfigurations.Count.Should().Be(1);
+            config.CacheHandleConfigurations[0].HandleType.Should().Be(typeof(CacheManager.MicrosoftCachingMemory.MemoryCacheHandle<>));
+        }
+
         [Fact]
         public void Configuration_CacheHandle_AllProperties()
         {

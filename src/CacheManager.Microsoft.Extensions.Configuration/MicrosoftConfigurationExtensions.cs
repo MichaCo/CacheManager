@@ -30,11 +30,12 @@ namespace Microsoft.Extensions.Configuration
         private const string TypeRedisHandle = "CacheManager.Redis.RedisCacheHandle`1, CacheManager.StackExchange.Redis";
         private const string TypeCouchbaseHandle = "CacheManager.Couchbase.BucketCacheHandle`1, CacheManager.Couchbase";
         private const string TypeMemcachedHandle = "CacheManager.Memcached.MemcachedCacheHandle`1, CacheManager.Memcached";
+        private const string TypeMsExtensionMemoryCacheHandle = "CacheManager.MicrosoftCachingMemory.MemoryCacheHandle`1, CacheManager.Microsoft.Extensions.Caching.Memory";
         private const string TypeRedisConfiguration = "CacheManager.Redis.RedisConfiguration, CacheManager.StackExchange.Redis";
         private const string TypeRedisConfigurations = "CacheManager.Redis.RedisConfigurations, CacheManager.StackExchange.Redis";
 
         /// <summary>
-        /// Gets the first and only <see cref="CacheManagerConfiguration"/> defined in 
+        /// Gets the first and only <see cref="CacheManagerConfiguration"/> defined in
         /// the <code>cacheManagers</code> section of the provided <paramref name="configuration"/>.
         /// </summary>
         /// <param name="configuration">The source configuration.</param>
@@ -46,7 +47,7 @@ namespace Microsoft.Extensions.Configuration
             {
                 throw new ArgumentNullException(nameof(configuration));
             }
-            
+
             configuration.LoadRedisConfigurations();
 
             var managersSection = configuration.GetSection(CacheManagersSection);
@@ -66,7 +67,7 @@ namespace Microsoft.Extensions.Configuration
         }
 
         /// <summary>
-        /// Retrieve a <see cref="CacheManagerConfiguration"/> defined in 
+        /// Retrieve a <see cref="CacheManagerConfiguration"/> defined in
         /// the <code>cacheManagers</code> section of the provided <paramref name="configuration"/> by <paramref name="name"/>.
         /// </summary>
         /// <returns>The <see cref="ICacheManagerConfiguration"/>.</returns>
@@ -103,7 +104,7 @@ namespace Microsoft.Extensions.Configuration
         }
 
         /// <summary>
-        /// Retrieves all configured <see cref="CacheManagerConfiguration"/>s defined in 
+        /// Retrieves all configured <see cref="CacheManagerConfiguration"/>s defined in
         /// the <code>cacheManagers</code> section of the provided <paramref name="configuration"/>.
         /// </summary>
         /// <param name="configuration">The source configuration.</param>
@@ -130,7 +131,7 @@ namespace Microsoft.Extensions.Configuration
         /// </summary>
         /// <remarks>
         /// This method always gets invoked by <see cref="GetCacheConfiguration(IConfiguration)"/> or the other overloads.
-        /// You do not have to call this explicitly. The method also does not throw an exception if the <code>redis</code> section is 
+        /// You do not have to call this explicitly. The method also does not throw an exception if the <code>redis</code> section is
         /// not defined.
         /// </remarks>
         /// <param name="configuration">The source configuration.</param>
@@ -286,6 +287,9 @@ namespace Microsoft.Extensions.Configuration
 
                     case "systemweb":
                         return Type.GetType(TypeSystemWebHandle, true);
+
+                    case "msmemory":
+                        return Type.GetType(TypeMsExtensionMemoryCacheHandle, true);
 
                     case "redis":
                         keyRequired = true;
