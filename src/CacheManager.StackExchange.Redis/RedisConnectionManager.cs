@@ -80,7 +80,10 @@ namespace CacheManager.Redis
         {
             lock (connectLock)
             {
-                connections.Add(connectionString, connection);
+                if (!connections.ContainsKey(connectionString))
+                {
+                    connections.Add(connectionString, connection);
+                }
             }
         }
 

@@ -29,10 +29,11 @@ namespace CacheManager.Redis
         private const string HashFieldExpirationTimeout = "timeout";
         private const string HashFieldType = "type";
         private const string HashFieldValue = "value";
+        private const string HashFieldVersion = "version";
 
         private static readonly string ScriptAdd = $@"
 if redis.call('HSETNX', KEYS[1], '{HashFieldValue}', ARGV[1]) == 1 then
-    local result=redis.call('HMSET', KEYS[1], '{HashFieldType}', ARGV[2], '{HashFieldExpirationMode}', ARGV[3], '{HashFieldExpirationTimeout}', ARGV[4], '{HashFieldCreated}', ARGV[5])
+    local result=redis.call('HMSET', KEYS[1], '{HashFieldType}', ARGV[2], '{HashFieldExpirationMode}', ARGV[3], '{HashFieldExpirationTimeout}', ARGV[4], '{HashFieldCreated}', ARGV[5], '{HashFieldVersion}', 1)
     if ARGV[3] > '1' and ARGV[4] ~= '0' then
         redis.call('PEXPIRE', KEYS[1], ARGV[4])
     else
@@ -45,6 +46,7 @@ end";
 
         private static readonly string ScriptPut = $@"
 local result=redis.call('HMSET', KEYS[1], '{HashFieldValue}', ARGV[1], '{HashFieldType}', ARGV[2], '{HashFieldExpirationMode}', ARGV[3], '{HashFieldExpirationTimeout}', ARGV[4], '{HashFieldCreated}', ARGV[5])
+redis.call('HINCRBY', KEYS[1], '{HashFieldVersion}', 1)
 if ARGV[3] > '1' and ARGV[4] ~= '0' then
     redis.call('PEXPIRE', KEYS[1], ARGV[4])
 else
@@ -54,8 +56,9 @@ return result";
 
         // script should also update expire now. If sliding, update the sliding window
         private static readonly string ScriptUpdate = $@"
-if redis.call('HGET', KEYS[1], '{HashFieldValue}') == ARGV[2] then
+if redis.call('HGET', KEYS[1], '{HashFieldVersion}') == ARGV[2] then
     local result=redis.call('HSET', KEYS[1], '{HashFieldValue}', ARGV[1])
+    redis.call('HINCRBY', KEYS[1], '{HashFieldVersion}', 1)
     if ARGV[3] == '2' and ARGV[4] ~= '0' then
         redis.call('PEXPIRE', KEYS[1], ARGV[4])
     end
@@ -65,7 +68,7 @@ else
 end";
 
         private static readonly string ScriptGet = $@"
-local result = redis.call('HMGET', KEYS[1], '{HashFieldValue}', '{HashFieldExpirationMode}', '{HashFieldExpirationTimeout}', '{HashFieldCreated}', '{HashFieldType}')
+local result = redis.call('HMGET', KEYS[1], '{HashFieldValue}', '{HashFieldExpirationMode}', '{HashFieldExpirationTimeout}', '{HashFieldCreated}', '{HashFieldType}', '{HashFieldVersion}')
 if (result[2] and result[2] == '2') then
     if (result[3] and result[3] ~= '' and result[3] ~= '0') then
         redis.call('PEXPIRE', KEYS[1], result[3])
@@ -227,7 +230,8 @@ return result";
                 {
                     tries++;
 
-                    var item = this.GetCacheItemInternal(key, region);
+                    int version;
+                    var item = this.GetCacheItemAndVersion(key, region, out version);
 
                     if (item == null)
                     {
@@ -249,7 +253,7 @@ return result";
                     var result = this.Eval(ScriptType.Update, fullKey, new[]
                     {
                         this.ToRedisValue(newValue),
-                        oldValue,
+                        version,
                         (int)item.ExpirationMode,
                         (long)item.ExpirationTimeout.TotalMilliseconds,
                     });
@@ -380,67 +384,72 @@ return result";
         /// <returns>The <c>CacheItem</c>.</returns>
         protected override CacheItem<TCacheValue> GetCacheItemInternal(string key, string region)
         {
+            int version;
+            return GetCacheItemAndVersion(key, region, out version);
+        }
+
+        private CacheItem<TCacheValue> GetCacheItemAndVersion(string key, string region, out int version)
+        {
+            version = -1;
             if (!this.isLuaAllowed)
             {
                 return this.GetCacheItemInternalNoScript(key, region);
             }
+            
+            var fullKey = GetKey(key, region);
 
-            return this.Retry(() =>
+            var result = this.Retry(() => this.Eval(ScriptType.Get, fullKey));
+            if (result == null || result.IsNull)
             {
-                var fullKey = GetKey(key, region);
+                // something went wrong. HMGET should return at least a null result for each requested field
+                throw new InvalidOperationException("Error retrieving " + fullKey);
+            }
 
-                var result = this.Eval(ScriptType.Get, fullKey);
-                if (result == null || result.IsNull)
+            var values = (StackRedis.RedisValue[])result;
+
+            // the first item stores the value
+            var item = values[0];
+            var expirationModeItem = values[1];
+            var timeoutItem = values[2];
+            var createdItem = values[3];
+            var valueTypeItem = values[4];
+            version = (int)values[5];
+
+            if (!item.HasValue || !valueTypeItem.HasValue /* partially removed? */
+                || item.IsNullOrEmpty || item.IsNull)
+            {
+                return null;
+            }
+
+            var expirationMode = ExpirationMode.None;
+            var expirationTimeout = default(TimeSpan);
+
+            // checking if the expiration mode is set on the hash
+            if (expirationModeItem.HasValue && timeoutItem.HasValue)
+            {
+                if (!timeoutItem.IsNullOrEmpty && !expirationModeItem.IsNullOrEmpty)
                 {
-                    // something went wrong. HMGET should return at least a null result for each requested field
-                    throw new InvalidOperationException("Error retrieving " + fullKey);
+                    expirationMode = (ExpirationMode)(int)expirationModeItem;
+                    expirationTimeout = TimeSpan.FromMilliseconds((long)timeoutItem);
                 }
-
-                var values = (StackRedis.RedisValue[])result;
-
-                // the first item stores the value
-                var item = values[0];
-                var expirationModeItem = values[1];
-                var timeoutItem = values[2];
-                var createdItem = values[3];
-                var valueTypeItem = values[4];
-
-                if (!item.HasValue || !valueTypeItem.HasValue /* partially removed? */
-                    || item.IsNullOrEmpty || item.IsNull)
+                else
                 {
-                    return null;
+                    this.Logger.LogWarn("Expiration mode and timeout are set but are not valid '{0}', '{1}'.", expirationModeItem, timeoutItem);
                 }
+            }
 
-                var expirationMode = ExpirationMode.None;
-                var expirationTimeout = default(TimeSpan);
+            var value = this.FromRedisValue(item, (string)valueTypeItem);
 
-                // checking if the expiration mode is set on the hash
-                if (expirationModeItem.HasValue && timeoutItem.HasValue)
-                {
-                    if (!timeoutItem.IsNullOrEmpty && !expirationModeItem.IsNullOrEmpty)
-                    {
-                        expirationMode = (ExpirationMode)(int)expirationModeItem;
-                        expirationTimeout = TimeSpan.FromMilliseconds((long)timeoutItem);
-                    }
-                    else
-                    {
-                        this.Logger.LogWarn("Expiration mode and timeout are set but are not valid '{0}', '{1}'.", expirationModeItem, timeoutItem);
-                    }
-                }
+            var cacheItem = string.IsNullOrWhiteSpace(region) ?
+                    new CacheItem<TCacheValue>(key, value, expirationMode, expirationTimeout) :
+                    new CacheItem<TCacheValue>(key, region, value, expirationMode, expirationTimeout);
 
-                var value = this.FromRedisValue(item, (string)valueTypeItem);
+            if (createdItem.HasValue)
+            {
+                cacheItem = cacheItem.WithCreated(new DateTime((long)createdItem));
+            }
 
-                var cacheItem = string.IsNullOrWhiteSpace(region) ?
-                        new CacheItem<TCacheValue>(key, value, expirationMode, expirationTimeout) :
-                        new CacheItem<TCacheValue>(key, region, value, expirationMode, expirationTimeout);
-
-                if (createdItem.HasValue)
-                {
-                    cacheItem = cacheItem.WithCreated(new DateTime((long)createdItem));
-                }
-
-                return cacheItem;
-            });
+            return cacheItem;
         }
 
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member

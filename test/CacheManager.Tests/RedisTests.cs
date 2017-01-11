@@ -72,6 +72,41 @@ namespace CacheManager.Tests
                 });
         }
 
+
+        [Fact]
+        [Trait("category", "Redis")]
+        public void Redis_ValidateVersion_AddPutGetUpdate()
+        {
+            var multi = ConnectionMultiplexer.Connect("localhost");
+            var cache = CacheFactory.Build<Poco>(
+                s => s
+                    .WithRedisConfiguration("redis", multi)
+                    .WithJsonSerializer()
+                    .WithRedisCacheHandle("redis"));
+
+            // act/assert
+            using (cache)
+            {
+                var key = Guid.NewGuid().ToString();                
+                var value = new Poco() { Id = 23, Something = "§asdad" };
+                cache.Add(key, value);
+
+                var version = (int)multi.GetDatabase(0).HashGet(key, "version");
+                version.Should().Be(1);
+
+                cache.Put(key, value);
+
+                version = (int)multi.GetDatabase(0).HashGet(key, "version");
+                version.Should().Be(2);
+
+                cache.Update(key, r => { r.Something = "new text"; return r; });
+
+                version = (int)multi.GetDatabase(0).HashGet(key, "version");
+                version.Should().Be(3);
+                cache.Get(key).Something.Should().Be("new text");
+            }
+        }
+
         [Fact]
         public void Redis_UseExistingConnection()
         {
@@ -789,7 +824,7 @@ namespace CacheManager.Tests
             }
         }
 
-        [Fact]
+        [Fact(Skip = "not consistent")]
         [Trait("category", "Redis")]
         [Trait("category", "Unreliable")]
         public async Task Redis_Sliding_DoesExpire_MultiClients()
