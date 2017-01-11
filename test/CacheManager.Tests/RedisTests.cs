@@ -8,6 +8,7 @@ using CacheManager.Core;
 using CacheManager.Core.Internal;
 using CacheManager.Redis;
 using FluentAssertions;
+using StackExchange.Redis;
 using Xunit;
 using Xunit.Sdk;
 
@@ -69,6 +70,22 @@ namespace CacheManager.Tests
                     args.Origin.Should().Be(CacheActionEventArgOrigin.Remote);
                     cacheB[key].Should().Be(key);
                 });
+        }
+
+        [Fact]
+        public void Redis_UseExistingConnection()
+        {
+            var multiplexer = ConnectionMultiplexer.Connect("localhost:6379");
+
+            var cfg = ConfigurationBuilder.BuildConfiguration(
+                s => s
+                    .WithRedisConfiguration("redisKey", multiplexer)
+                    .WithRedisCacheHandle("redisKey"));
+
+            using (var cache = new BaseCacheManager<long>(cfg))
+            {
+                cache.Add("somevalue", 12345);
+            }
         }
 
         [Fact]
@@ -450,6 +467,7 @@ namespace CacheManager.Tests
         }
 
 #if !NETCOREAPP
+
         [Fact]
         [Trait("category", "Redis")]
         [Trait("category", "Unreliable")]
@@ -793,10 +811,10 @@ namespace CacheManager.Tests
                 // assert
                 result.Should().BeTrue();
                 item.Value.Should().Be(valueB);
-                
+
                 for (int s = 0; s < 3; s++)
                 {
-                    await Task.Delay(50);                    
+                    await Task.Delay(50);
                     cacheA.GetCacheItem(item.Key).Should().NotBeNull();
                     cacheB.GetCacheItem(item.Key).Should().NotBeNull();
                 }
@@ -840,6 +858,7 @@ namespace CacheManager.Tests
         }
 
 #if !NETCOREAPP
+
         [Fact]
         [Trait("category", "Redis")]
         public void Redis_Valid_CfgFile_LoadWithRedisBackplane()
@@ -934,6 +953,7 @@ namespace CacheManager.Tests
 
 #endif
 #endif
+
         [Fact]
         [Trait("category", "Redis")]
         public void Redis_ValueConverter_CacheTypeConversion_Poco()

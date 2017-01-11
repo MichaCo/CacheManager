@@ -1,5 +1,6 @@
 ﻿using System;
 using CacheManager.Redis;
+using StackExchange.Redis;
 using static CacheManager.Core.Utility.Guard;
 
 namespace CacheManager.Core
@@ -49,6 +50,34 @@ namespace CacheManager.Core
             NotNullOrWhiteSpace(connectionString, nameof(connectionString));
 
             RedisConfigurations.AddConfiguration(new RedisConfiguration(configurationKey, connectionString, database));
+            return part;
+        }
+
+        /// <summary>
+        /// Adds an existing <see cref="IConnectionMultiplexer"/> to the cache manager configuration which can be referenced by redis cache handle and/or backplane.
+        /// </summary>
+        /// <param name="part">The builder instance.</param>
+        /// <param name="configurationKey">
+        /// The configuration key which can be used to refernce this configuration by a redis cache handle or backplane.
+        /// </param>
+        /// <param name="redisClient">The connection multiplexer instance.</param>
+        /// <param name="database">The redis database to use for caching.</param>
+        /// <returns>The configuration builder.</returns>
+        /// <exception cref="System.ArgumentNullException">
+        /// If <paramref name="configurationKey"/> or <paramref name="redisClient"/> are null.
+        /// </exception>
+        [CLSCompliant(false)]
+        public static ConfigurationBuilderCachePart WithRedisConfiguration(this ConfigurationBuilderCachePart part, string configurationKey, IConnectionMultiplexer redisClient, int database = 0)
+        {
+            NotNullOrWhiteSpace(configurationKey, nameof(configurationKey));
+
+            NotNull(redisClient, nameof(redisClient));
+
+            var connectionString = redisClient.Configuration;
+            part.WithRedisConfiguration(configurationKey, connectionString, database);
+
+            RedisConnectionManager.AddConnection(connectionString, redisClient);
+            
             return part;
         }
 

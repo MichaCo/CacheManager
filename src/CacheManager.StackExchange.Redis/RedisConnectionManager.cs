@@ -12,7 +12,7 @@ namespace CacheManager.Redis
 {
     internal class RedisConnectionManager
     {
-        private static IDictionary<string, StackRedis.ConnectionMultiplexer> connections = new Dictionary<string, StackRedis.ConnectionMultiplexer>();
+        private static IDictionary<string, StackRedis.IConnectionMultiplexer> connections = new Dictionary<string, StackRedis.IConnectionMultiplexer>();
         private static object connectLock = new object();
 
         private readonly ILogger logger;
@@ -67,7 +67,7 @@ namespace CacheManager.Redis
         {
             lock (connectLock)
             {
-                StackRedis.ConnectionMultiplexer connection;
+                StackRedis.IConnectionMultiplexer connection;
                 if (connections.TryGetValue(this.connectionString, out connection))
                 {
                     ////this.logger.LogInfo("Removing stale redis connection.");
@@ -76,10 +76,18 @@ namespace CacheManager.Redis
             }
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "nope")]
-        public StackRedis.ConnectionMultiplexer Connect()
+        public static void AddConnection(string connectionString, StackRedis.IConnectionMultiplexer connection)
         {
-            StackRedis.ConnectionMultiplexer connection;
+            lock (connectLock)
+            {
+                connections.Add(connectionString, connection);
+            }
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "nope")]
+        public StackRedis.IConnectionMultiplexer Connect()
+        {
+            StackRedis.IConnectionMultiplexer connection;
             if (!connections.TryGetValue(this.connectionString, out connection))
             {
                 lock (connectLock)
