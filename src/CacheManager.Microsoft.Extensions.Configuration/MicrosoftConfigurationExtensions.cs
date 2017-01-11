@@ -23,6 +23,8 @@ namespace Microsoft.Extensions.Configuration
         private const string ConfigurationType = "type";
         private const string ConfigurationKnownType = "knownType";
         private const string TypeJsonCacheSerializer = "CacheManager.Serialization.Json.JsonCacheSerializer, CacheManager.Serialization.Json";
+        private const string TypeGzJsonCacheSerializer = "CacheManager.Serialization.Json.GzJsonCacheSerializer, CacheManager.Serialization.Json";
+        private const string TypeProtobufCacheSerializer = "CacheManager.Serialization.ProtoBuf.ProtoBufSerializer, CacheManager.Serialization.ProtoBuf";
         private const string TypeMicrosoftLoggerFactory = "CacheManager.Logging.MicrosoftLoggerFactoryAdapter, CacheManager.Microsoft.Extensions.Logging";
         private const string TypeRedisBackplane = "CacheManager.Redis.RedisCacheBackplane, CacheManager.StackExchange.Redis";
         private const string TypeSystemRuntimeHandle = "CacheManager.SystemRuntimeCaching.MemoryCacheHandle`1, CacheManager.SystemRuntimeCaching";
@@ -455,6 +457,12 @@ namespace Microsoft.Extensions.Configuration
 #endif
                 case "json":
                     return Type.GetType(TypeJsonCacheSerializer, true);
+
+                case "gzjson":
+                    return Type.GetType(TypeGzJsonCacheSerializer, true);
+
+                case "protobuf":
+                    return Type.GetType(TypeProtobufCacheSerializer, true);
             }
 
             throw new InvalidOperationException(

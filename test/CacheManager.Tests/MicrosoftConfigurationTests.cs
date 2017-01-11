@@ -893,7 +893,7 @@ namespace CacheManager.Tests
 #endif
 
         [Fact]
-        public void Configuration_Serializer_Json_Binary()
+        public void Configuration_Serializer_KnownType_Json()
         {
             var data = new Dictionary<string, string>
             {
@@ -905,7 +905,35 @@ namespace CacheManager.Tests
             var config = GetConfiguration(data).GetCacheConfiguration("name");
             config.SerializerType.Should().Be(typeof(Serialization.Json.JsonCacheSerializer));
         }
-        
+
+        [Fact]
+        public void Configuration_Serializer_KnownType_GzJson()
+        {
+            var data = new Dictionary<string, string>
+            {
+                {"cacheManagers:0:name", "name"},
+                {"cacheManagers:0:handles:0:knownType", "Dictionary"},
+                {"cacheManagers:0:serializer:knownType", "GzJson"}
+            };
+
+            var config = GetConfiguration(data).GetCacheConfiguration("name");
+            config.SerializerType.Should().Be(typeof(Serialization.Json.GzJsonCacheSerializer));
+        }
+
+        [Fact]
+        public void Configuration_Serializer_KnownType_Protobuf()
+        {
+            var data = new Dictionary<string, string>
+            {
+                {"cacheManagers:0:name", "name"},
+                {"cacheManagers:0:handles:0:knownType", "Dictionary"},
+                {"cacheManagers:0:serializer:knownType", "Protobuf"}
+            };
+
+            var config = GetConfiguration(data).GetCacheConfiguration("name");
+            config.SerializerType.Should().Be(typeof(Serialization.ProtoBuf.ProtoBufSerializer));
+        }
+
         [Fact]
         public void Configuration_Redis_NothingDefined()
         {
