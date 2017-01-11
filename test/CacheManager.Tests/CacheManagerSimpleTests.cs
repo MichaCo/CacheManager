@@ -73,6 +73,102 @@ namespace CacheManager.Tests
 
         #endregion general
 
+        #region exists
+
+        [Theory]
+        [ReplaceCulture]
+        [MemberData("TestCacheManagers")]
+        public void CacheManager_Exists_InvalidKey(ICacheManager<object> cache)
+        {
+            using (cache)
+            {
+                // arrange act
+                Action act = () => cache.Exists(null);
+                Action actB = () => cache.Exists(null, "region");
+                Action actR = () => cache.Exists("key", null);
+
+                // assert
+                act.ShouldThrow<ArgumentException>(cache.Configuration.ToString())
+                    .WithMessage("*Parameter name: key", cache.Configuration.ToString());
+
+                actB.ShouldThrow<ArgumentException>(cache.ToString())
+                    .WithMessage("*Parameter name: key", cache.Configuration.ToString());
+
+                actR.ShouldThrow<ArgumentException>(cache.ToString())
+                    .WithMessage("*Parameter name: region", cache.Configuration.ToString());
+            }
+        }
+
+        [Theory]
+        [MemberData("TestCacheManagers")]
+        public void CacheManager_Exists_KeyDoesExist(ICacheManager<object> cache)
+        {
+            using (cache)
+            {
+                // arrange
+                var key = Guid.NewGuid().ToString();
+
+                // act
+                cache.Add(key, key);
+
+                // assert
+                cache.Exists(key).Should().BeTrue(cache.Configuration.ToString());
+                cache.Get(key).Should().Be(key, cache.Configuration.ToString());
+            }
+        }
+
+        [Theory]
+        [MemberData("TestCacheManagers")]
+        public void CacheManager_Exists_KeyRegionDoesExist(ICacheManager<object> cache)
+        {
+            using (cache)
+            {
+                // arrange
+                var key = Guid.NewGuid().ToString();
+                var region = Guid.NewGuid().ToString();
+
+                // act
+                cache.Add(key, "value", region);
+
+                // assert
+                cache.Exists(key, region).Should().BeTrue(cache.Configuration.ToString());
+                cache.Get(key, region).Should().Be("value", cache.Configuration.ToString());
+            }
+        }
+
+        [Theory]
+        [MemberData("TestCacheManagers")]
+        public void CacheManager_Exists_KeyDoesNotExist(ICacheManager<object> cache)
+        {
+            using (cache)
+            {
+                // arrange
+                var key = Guid.NewGuid().ToString();
+
+                // act
+                // assert
+                cache.Exists(key).Should().BeFalse(cache.Configuration.ToString());
+            }
+        }
+
+        [Theory]
+        [MemberData("TestCacheManagers")]
+        public void CacheManager_Exists_KeyRegionDoesNotExist(ICacheManager<object> cache)
+        {
+            using (cache)
+            {
+                // arrange
+                var key = Guid.NewGuid().ToString();
+                var region = Guid.NewGuid().ToString();
+
+                // act                
+                // assert
+                cache.Exists(key, region).Should().BeFalse(cache.Configuration.ToString());
+            }
+        }
+
+        #endregion
+
         #region put params validation
 
         [Fact]

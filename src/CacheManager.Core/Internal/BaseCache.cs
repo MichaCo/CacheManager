@@ -196,6 +196,9 @@ namespace CacheManager.Core.Internal
         /// <inheritdoc />
         public abstract bool Exists(string key);
 
+        /// <inheritdoc />
+        public abstract bool Exists(string key, string region);
+
         /// <summary>
         /// Changes the expiration <paramref name="mode"/> and <paramref name="timeout"/> for the
         /// given <paramref name="key"/>.

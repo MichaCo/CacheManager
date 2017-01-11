@@ -341,6 +341,11 @@ namespace CacheManager.Tests
             return false;
         }
 
+        public override bool Exists(string key, string region)
+        {
+            return false;
+        }
+
         protected override bool AddInternalPrepared(CacheItem<TCacheValue> item) => this.AddCall();
 
         protected override CacheItem<TCacheValue> GetCacheItemInternal(string key) => this.GetCallValue;

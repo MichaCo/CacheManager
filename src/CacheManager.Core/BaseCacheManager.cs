@@ -516,10 +516,29 @@ namespace CacheManager.Core
             {
                 if (this.logTrace)
                 {
-                    this.Logger.LogTrace("Check Exists: {0} on handle {2}.", key, handle.Configuration.Name);
+                    this.Logger.LogTrace("Check Exists: {0} on handle {1}.", key, handle.Configuration.Name);
                 }
 
                 if (handle.Exists(key))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <inheritdoc />
+        public override bool Exists(string key, string region)
+        {
+            foreach (var handle in this.cacheHandles)
+            {
+                if (this.logTrace)
+                {
+                    this.Logger.LogTrace("Check Exists: {0} {1} on handle {2}.", key, region, handle.Configuration.Name);
+                }
+
+                if (handle.Exists(key, region))
                 {
                     return true;
                 }

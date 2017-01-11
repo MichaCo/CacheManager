@@ -69,6 +69,14 @@ namespace CacheManager.MicrosoftCachingMemory
             return this.cache.Contains(GetItemKey(key));
         }
 
+        /// <inheritdoc />
+        public override bool Exists(string key, string region)
+        {
+            NotNullOrWhiteSpace(region, nameof(region));
+
+            return this.cache.Contains(GetItemKey(key, region));
+        }
+
         /// <inheritdoc/>
         protected override CacheItem<TCacheValue> GetCacheItemInternal(string key)
         {

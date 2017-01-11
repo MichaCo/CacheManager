@@ -97,6 +97,15 @@ namespace CacheManager.Couchbase
             return this.bucket.Exists(fullKey);
         }
 
+        /// <inheritdoc />
+        public override bool Exists(string key, string region)
+        {
+            NotNullOrWhiteSpace(region, nameof(region));
+
+            var fullKey = GetKey(key, region);
+            return this.bucket.Exists(fullKey);
+        }
+
         /// <summary>
         /// Adds a value to the cache.
         /// </summary>

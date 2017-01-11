@@ -179,7 +179,16 @@ namespace CacheManager.Memcached
         /// <inheritdoc />
         public override bool Exists(string key)
         {
-            var result = this.Cache.ExecuteAppend(key, default(ArraySegment<byte>));
+            var result = this.Cache.ExecuteAppend(GetKey(key), default(ArraySegment<byte>));
+            return result.StatusCode.HasValue && result.StatusCode.Value != (int)StatusCode.KeyNotFound;
+        }
+        
+        /// <inheritdoc />
+        public override bool Exists(string key, string region)
+        {
+            NotNullOrWhiteSpace(region, nameof(region));
+
+            var result = this.Cache.ExecuteAppend(GetKey(key, region), default(ArraySegment<byte>));
             return result.StatusCode.HasValue && result.StatusCode.Value != (int)StatusCode.KeyNotFound;
         }
 
@@ -328,6 +337,11 @@ namespace CacheManager.Memcached
 
         private static string GetKey(string key, string region = null)
         {
+            if (string.IsNullOrWhiteSpace(key))
+            {
+                throw new ArgumentNullException(nameof(key));
+            }
+
             var fullKey = key;
 
             if (!string.IsNullOrWhiteSpace(region))

@@ -79,6 +79,7 @@ namespace CacheManager.Tests
 
             var cfg = ConfigurationBuilder.BuildConfiguration(
                 s => s
+                    .WithJsonSerializer()
                     .WithRedisConfiguration("redisKey", multiplexer)
                     .WithRedisCacheHandle("redisKey"));
 

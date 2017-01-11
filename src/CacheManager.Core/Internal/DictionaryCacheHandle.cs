@@ -70,7 +70,17 @@ namespace CacheManager.Core.Internal
         /// <inheritdoc />
         public override bool Exists(string key)
         {
+            NotNullOrWhiteSpace(key, nameof(key));
+
             return this.cache.ContainsKey(key);
+        }
+
+        /// <inheritdoc />
+        public override bool Exists(string key, string region)
+        {
+            NotNullOrWhiteSpace(region, nameof(region));
+            var fullKey = GetKey(key, region);
+            return this.cache.ContainsKey(fullKey);
         }
 
         /// <summary>

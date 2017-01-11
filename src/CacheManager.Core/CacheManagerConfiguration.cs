@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace CacheManager.Core
 {
@@ -119,5 +120,11 @@ namespace CacheManager.Core
         /// </summary>
         /// <value>The list of cache handle configurations.</value>
         public IList<CacheHandleConfiguration> CacheHandleConfigurations { get; } = new List<CacheHandleConfiguration>();
+
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            return $"{Name}: {string.Join(", ", CacheHandleConfigurations)}";
+        }
     }
 }

@@ -121,12 +121,21 @@ namespace CacheManager.Core
         void ClearRegion(string region);
 
         /// <summary>
-        /// Returns a value indicating if the <paramref name="key"/> exists in at least one cache layer 
+        /// Returns a value indicating if the <paramref name="key"/> exists in at least one cache layer
         /// configured in CacheManger, without actually retrieving it from the cache.
         /// </summary>
         /// <param name="key">The cache key to check.</param>
         /// <returns><c>True</c> if the <paramref name="key"/> exists, <c>False</c> otherwise.</returns>
         bool Exists(string key);
+
+        /// <summary>
+        /// Returns a value indicating if the <paramref name="key"/> in <paramref name="region"/> exists in at least one cache layer
+        /// configured in CacheManger, without actually retrieving it from the cache (if supported).
+        /// </summary>
+        /// <param name="key">The cache key to check.</param>
+        /// <param name="region">The cache region.</param>
+        /// <returns><c>True</c> if the <paramref name="key"/> exists, <c>False</c> otherwise.</returns>
+        bool Exists(string key, string region);
 
         /// <summary>
         /// Changes the expiration <paramref name="mode"/> and <paramref name="timeout"/> for the

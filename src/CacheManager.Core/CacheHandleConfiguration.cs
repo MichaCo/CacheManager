@@ -103,6 +103,12 @@ namespace CacheManager.Core
         /// <value>The type of the handle.</value>
         public Type HandleType { get; set; }
 
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            return $"{HandleType}";
+        }
+
         internal object[] ConfigurationTypes { get; set; } = new object[0];
     }
 }

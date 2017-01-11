@@ -74,7 +74,15 @@ namespace CacheManager.Web
         /// <inheritdoc />
         public override bool Exists(string key)
         {
-            return this.Get(key) != null;
+            return this.GetCacheItemInternal(key) != null;
+        }
+
+        /// <inheritdoc />
+        public override bool Exists(string key, string region)
+        {
+            NotNullOrWhiteSpace(region, nameof(region));
+
+            return this.GetCacheItemInternal(key, region) != null;
         }
 
         /// <summary>

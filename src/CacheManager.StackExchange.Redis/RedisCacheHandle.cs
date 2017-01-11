@@ -82,6 +82,7 @@ return result";
 
         // flag if scripts are initially loaded to the server
         private bool scriptsLoaded = false;
+
         private object lockObject = new object();
 
         /// <summary>
@@ -188,12 +189,20 @@ return result";
                 this.connection.Database.KeyDelete(region);
             });
         }
-        
+
         /// <inheritdoc />
         public override bool Exists(string key)
         {
             var fullKey = GetKey(key);
+            return this.Retry(() => this.connection.Database.KeyExists(fullKey));
+        }
 
+        /// <inheritdoc />
+        public override bool Exists(string key, string region)
+        {
+            NotNullOrWhiteSpace(region, nameof(region));
+
+            var fullKey = GetKey(key, region);
             return this.Retry(() => this.connection.Database.KeyExists(fullKey));
         }
 
@@ -263,6 +272,7 @@ return result";
         }
 
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
+
         protected UpdateItemResult<TCacheValue> UpdateNoScript(string key, string region, Func<TCacheValue, TCacheValue> updateValue, int maxRetries)
         {
             var committed = false;
@@ -361,6 +371,7 @@ return result";
             => this.GetCacheItemInternal(key, null);
 
 #pragma warning disable CSE0003
+
         /// <summary>
         /// Gets a <c>CacheItem</c> for the specified key.
         /// </summary>
@@ -433,6 +444,7 @@ return result";
         }
 
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
+
         protected CacheItem<TCacheValue> GetCacheItemInternalNoScript(string key, string region)
         {
             return this.Retry(() =>
@@ -533,6 +545,7 @@ return result";
         protected override bool RemoveInternal(string key) => this.RemoveInternal(key, null);
 
 #pragma warning disable CSE0003
+
         /// <summary>
         /// Removes a value from the cache for the specified key.
         /// </summary>
@@ -564,6 +577,11 @@ return result";
 
         private static string GetKey(string key, string region = null)
         {
+            if (string.IsNullOrWhiteSpace(key))
+            {
+                throw new ArgumentNullException(nameof(key));
+            }
+
             var fullKey = key;
 
             if (!string.IsNullOrWhiteSpace(region))

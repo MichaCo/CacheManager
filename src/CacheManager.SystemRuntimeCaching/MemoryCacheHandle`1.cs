@@ -94,6 +94,14 @@ namespace CacheManager.SystemRuntimeCaching
             return this.cache.Contains(this.GetItemKey(key));
         }
 
+        /// <inheritdoc />
+        public override bool Exists(string key, string region)
+        {
+            NotNullOrWhiteSpace(region, nameof(region));
+            var fullKey = GetItemKey(key, region);
+            return this.cache.Contains(fullKey);
+        }
+
         /// <summary>
         /// Adds a value to the cache.
         /// </summary>
