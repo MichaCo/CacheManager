@@ -44,16 +44,6 @@
         "System.Configuration": ""
       }
     },
-    "netcoreapp1.0": {
-      "buildOptions": { "define": [ "REDISENABLED", "NETCOREAPP" ] },
-      "dependencies": {
-        "Microsoft.NETCore.App": {
-          "version": "1.0.0",
-          "type": "platform"
-        },
-        "System.Diagnostics.TraceSource": "4.0.0"
-      }
-    },
     "netcoreapp1.1": {
       "buildOptions": { "define": [ "REDISENABLED", "NETCOREAPP" ] },
       "dependencies": {

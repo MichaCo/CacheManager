@@ -238,8 +238,6 @@ return result";
                         return UpdateItemResult.ForItemDidNotExist<TCacheValue>();
                     }
 
-                    var oldValue = this.ToRedisValue(item.Value);
-
                     // run update
                     var newValue = updateValue(item.Value);
 
@@ -385,7 +383,7 @@ return result";
         protected override CacheItem<TCacheValue> GetCacheItemInternal(string key, string region)
         {
             int version;
-            return GetCacheItemAndVersion(key, region, out version);
+            return this.GetCacheItemAndVersion(key, region, out version);
         }
 
         private CacheItem<TCacheValue> GetCacheItemAndVersion(string key, string region, out int version)

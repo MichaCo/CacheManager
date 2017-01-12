@@ -63,6 +63,17 @@ namespace CacheManager.Redis
 
         public StackRedis.ISubscriber Subscriber => this.Connect().GetSubscriber();
 
+        public static void AddConnection(string connectionString, StackRedis.IConnectionMultiplexer connection)
+        {
+            lock (connectLock)
+            {
+                if (!connections.ContainsKey(connectionString))
+                {
+                    connections.Add(connectionString, connection);
+                }
+            }
+        }
+
         public void RemoveConnection()
         {
             lock (connectLock)
@@ -72,17 +83,6 @@ namespace CacheManager.Redis
                 {
                     ////this.logger.LogInfo("Removing stale redis connection.");
                     ////connections.Remove(this.connectionString);
-                }
-            }
-        }
-
-        public static void AddConnection(string connectionString, StackRedis.IConnectionMultiplexer connection)
-        {
-            lock (connectLock)
-            {
-                if (!connections.ContainsKey(connectionString))
-                {
-                    connections.Add(connectionString, connection);
                 }
             }
         }

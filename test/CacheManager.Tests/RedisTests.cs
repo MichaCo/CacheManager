@@ -72,7 +72,6 @@ namespace CacheManager.Tests
                 });
         }
 
-
         [Fact]
         [Trait("category", "Redis")]
         public void Redis_ValidateVersion_AddPutGetUpdate()
@@ -87,7 +86,7 @@ namespace CacheManager.Tests
             // act/assert
             using (cache)
             {
-                var key = Guid.NewGuid().ToString();                
+                var key = Guid.NewGuid().ToString();
                 var value = new Poco() { Id = 23, Something = "§asdad" };
                 cache.Add(key, value);
 
@@ -393,6 +392,7 @@ namespace CacheManager.Tests
 
 #if !NETCOREAPP
 #if !NO_APP_CONFIG
+
         [Fact]
         [Trait("category", "NotOnMono")]
         public void Redis_Configurations_LoadStandard()
@@ -944,6 +944,7 @@ namespace CacheManager.Tests
         }
 
 #if !NO_APP_CONFIG
+
         [Fact]
         [Trait("category", "Redis")]
         public void Redis_LoadWithRedisBackplane_FromAppConfig()

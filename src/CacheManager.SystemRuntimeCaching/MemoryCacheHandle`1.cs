@@ -98,7 +98,7 @@ namespace CacheManager.SystemRuntimeCaching
         public override bool Exists(string key, string region)
         {
             NotNullOrWhiteSpace(region, nameof(region));
-            var fullKey = GetItemKey(key, region);
+            var fullKey = this.GetItemKey(key, region);
             return this.cache.Contains(fullKey);
         }
 

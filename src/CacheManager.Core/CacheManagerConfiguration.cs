@@ -124,7 +124,7 @@ namespace CacheManager.Core
         /// <inheritdoc />
         public override string ToString()
         {
-            return $"{Name}: {string.Join(", ", CacheHandleConfigurations)}";
+            return $"{this.Name}: {string.Join(", ", this.CacheHandleConfigurations)}";
         }
     }
 }
