@@ -135,7 +135,7 @@ namespace CacheManager.Core
 
         /// <summary>
         /// Gets a value indicating whether the item is logically expired or not.
-        /// Depending on the cache vendor, the item might still live in the cache although 
+        /// Depending on the cache vendor, the item might still live in the cache although
         /// according to the expiration mode and timeout, the item is already expired.
         /// </summary>
         public bool IsExpired
@@ -236,6 +236,14 @@ namespace CacheManager.Core
         }
 
 #endif
+
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            return !string.IsNullOrWhiteSpace(this.Region) ?
+                $"'{this.Region}:{this.Key}', exp:{this.ExpirationMode.ToString()} {this.ExpirationTimeout}, lastAccess:{this.LastAccessedUtc}"
+                : $"'{this.Key}', exp:{this.ExpirationMode.ToString()} {this.ExpirationTimeout}, lastAccess:{this.LastAccessedUtc}";
+        }
 
         /// <summary>
         /// Creates a copy of the current cache item with different expiration options.

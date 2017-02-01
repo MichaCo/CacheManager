@@ -905,7 +905,7 @@ namespace CacheManager.Core
             this.CheckDisposed();
             if (this.logTrace)
             {
-                this.Logger.LogTrace("Add: {0} {1}", item.Key, item.Region);
+                this.Logger.LogTrace("Add [{0}]", item);
             }
 
             var result = false;
@@ -920,9 +920,8 @@ namespace CacheManager.Core
                     if (this.logTrace)
                     {
                         this.Logger.LogTrace(
-                            "Add: successfully added {0} {1} to handle {2}",
-                            item.Key,
-                            item.Region,
+                            "Add: successfully added [{0}] to handle '{1}'",
+                            item,
                             handle.Configuration.Name);
                     }
                     result = true;
@@ -939,9 +938,8 @@ namespace CacheManager.Core
                     if (this.logTrace)
                     {
                         this.Logger.LogTrace(
-                            "Add: {0} {1} to handle {2} FAILED. Evicting items from other handles.",
-                            item.Key,
-                            item.Region,
+                            "Adding [{0}] to handle '{1}' FAILED. Evicting items from other handles.",
+                            item,
                             handle.Configuration.Name);
                     }
 
@@ -956,11 +954,6 @@ namespace CacheManager.Core
                 // update backplane
                 if (this.cacheBackplane != null)
                 {
-                    if (this.logTrace)
-                    {
-                        this.Logger.LogTrace("Put: {0} {1}: notifies backplane [change].", item.Key, item.Region);
-                    }
-
                     if (string.IsNullOrWhiteSpace(item.Region))
                     {
                         this.cacheBackplane.NotifyChange(item.Key, CacheItemChangedEventAction.Add);
@@ -968,6 +961,11 @@ namespace CacheManager.Core
                     else
                     {
                         this.cacheBackplane.NotifyChange(item.Key, item.Region, CacheItemChangedEventAction.Add);
+                    }
+
+                    if (this.logTrace)
+                    {
+                        this.Logger.LogTrace("Notified backplane 'change' because [{0}] was added.", item);
                     }
                 }
 

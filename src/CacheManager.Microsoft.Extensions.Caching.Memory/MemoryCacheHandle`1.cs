@@ -94,7 +94,7 @@ namespace CacheManager.MicrosoftCachingMemory
                 return null;
             }
 
-            if (IsExpired(item))
+            if (item.IsExpired)
             {
                 this.RemoveInternal(item.Key, item.Region);
                 return null;
@@ -102,7 +102,7 @@ namespace CacheManager.MicrosoftCachingMemory
 
             if (item.ExpirationMode == ExpirationMode.Sliding)
             {
-                item = this.GetItemExpiration(item);
+                // item = this.GetItemExpiration(item); // done by basecachehandle already
                 this.cache.Set(fullKey, item, this.GetOptions(item));
             }
 
@@ -203,23 +203,6 @@ namespace CacheManager.MicrosoftCachingMemory
 
             region = region.Replace("@", "!!").Replace(":", "!!");
             return this.instanceKey + "@" + region + ":" + key;
-        }
-
-        private static bool IsExpired(CacheItem<TCacheValue> item)
-        {
-            var now = DateTime.UtcNow;
-            if (item.ExpirationMode == ExpirationMode.Absolute
-                && item.CreatedUtc.Add(item.ExpirationTimeout) < now)
-            {
-                return true;
-            }
-            else if (item.ExpirationMode == ExpirationMode.Sliding
-                && item.LastAccessedUtc.Add(item.ExpirationTimeout) < now)
-            {
-                return true;
-            }
-
-            return false;
         }
 
         private MemoryCacheEntryOptions GetOptions(CacheItem<TCacheValue> item)

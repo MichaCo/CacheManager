@@ -82,9 +82,10 @@ namespace CacheManager.Examples
                 c =>
                 c.WithMicrosoftLogging(log =>
                 {
-                    log.AddConsole(LogLevel.Debug);
+                    log.AddConsole(LogLevel.Trace);
                 })
-                .WithDictionaryHandle());
+                .WithDictionaryHandle()
+                .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(10)));
 
             cache.AddOrUpdate("myKey", "someregion", "value", _ => "new value");
             cache.AddOrUpdate("myKey", "someregion", "value", _ => "new value");

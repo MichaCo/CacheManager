@@ -61,6 +61,7 @@ namespace CacheManager.Tests
                 var result = cache.Get(key);
                 ValidateExistsInAllHandles(cache, key);
 
+                // actually wrong (see next test). Item in dic handle should not inherit absolut default expiration from redis handle
                 cache.GetCacheItem(key).ExpirationMode.Should().Be(ExpirationMode.Absolute);
                 ValidateExistsInAllHandles(cache, key);
             }
@@ -89,6 +90,78 @@ namespace CacheManager.Tests
                     var handleItem = cache.CacheHandles.ElementAt(i).GetCacheItem(key);
                     handleItem.ExpirationMode.Should().NotBe(ExpirationMode.Absolute);
                 }
+            }
+        }
+
+        [Fact]
+        public void CacheManager_Expire_RespectDefaultPerHandle()
+        {
+            using (var cache = CacheFactory.Build<string>(
+                s => s
+                    .WithDictionaryHandle()
+                        .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(10))
+                    .And
+                    .WithDictionaryHandle()
+                        .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMinutes(10))
+                    .And
+                    .WithDictionaryHandle()
+                        .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromDays(10))))
+            {
+                var key = Guid.NewGuid().ToString();
+                cache.Add(key, "value");
+
+                cache.CacheHandles.ElementAt(0).GetCacheItem(key)
+                    .ExpirationMode.Should().Be(ExpirationMode.Absolute);
+                cache.CacheHandles.ElementAt(0).GetCacheItem(key)
+                    .ExpirationTimeout.Should().Be(TimeSpan.FromSeconds(10));
+
+                cache.CacheHandles.ElementAt(1).GetCacheItem(key)
+                    .ExpirationMode.Should().Be(ExpirationMode.Absolute);
+                cache.CacheHandles.ElementAt(1).GetCacheItem(key)
+                    .ExpirationTimeout.Should().Be(TimeSpan.FromMinutes(10));
+
+                cache.CacheHandles.ElementAt(2).GetCacheItem(key)
+                    .ExpirationMode.Should().Be(ExpirationMode.Sliding);
+                cache.CacheHandles.ElementAt(2).GetCacheItem(key)
+                    .ExpirationTimeout.Should().Be(TimeSpan.FromDays(10));
+            }
+        }
+
+
+        [Fact]
+        public void CacheManager_Expire_RespectDefaultPerHandleAfterAutofill()
+        {
+            using (var cache = CacheFactory.Build<string>(
+                s => s
+                    .WithDictionaryHandle()
+                        .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(10))
+                    .And
+                    .WithDictionaryHandle()
+                        .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMinutes(10))
+                    .And
+                    .WithDictionaryHandle()
+                        .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromDays(10))))
+            {
+                var key = Guid.NewGuid().ToString();
+
+                // add into last handle and get it will add the item to all other handles
+                cache.CacheHandles.Last().Add(key, "value");
+                var item = cache.Get(key);
+
+                cache.CacheHandles.ElementAt(0).GetCacheItem(key)
+                    .ExpirationMode.Should().Be(ExpirationMode.Absolute);
+                cache.CacheHandles.ElementAt(0).GetCacheItem(key)
+                    .ExpirationTimeout.Should().Be(TimeSpan.FromSeconds(10));
+
+                cache.CacheHandles.ElementAt(1).GetCacheItem(key)
+                    .ExpirationMode.Should().Be(ExpirationMode.Absolute);
+                cache.CacheHandles.ElementAt(1).GetCacheItem(key)
+                    .ExpirationTimeout.Should().Be(TimeSpan.FromMinutes(10));
+
+                cache.CacheHandles.ElementAt(2).GetCacheItem(key)
+                    .ExpirationMode.Should().Be(ExpirationMode.Sliding);
+                cache.CacheHandles.ElementAt(2).GetCacheItem(key)
+                    .ExpirationTimeout.Should().Be(TimeSpan.FromDays(10));
             }
         }
 
@@ -463,6 +536,7 @@ namespace CacheManager.Tests
         }
 
 #if !NETCOREAPP
+
         [Fact]
         [Trait("category", "Unreliable")]
         [ReplaceCulture]
@@ -592,6 +666,7 @@ namespace CacheManager.Tests
         }
 
 #if !NETCOREAPP
+
         [Fact]
         public void BaseCacheHandle_ExpirationInherits_Issue_1()
         {

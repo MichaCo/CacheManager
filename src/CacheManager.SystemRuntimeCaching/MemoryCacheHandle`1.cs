@@ -148,7 +148,7 @@ namespace CacheManager.SystemRuntimeCaching
             // maybe the item is already expired because MemoryCache implements a default interval
             // of 20 seconds! to check for expired items on each store, we do it on access to also
             // reflect smaller time frames especially for sliding expiration...
-            if (IsExpired(item))
+            if (item.IsExpired)
             {
                 // if so remove it
                 this.RemoveInternal(item.Key, item.Region);
@@ -159,7 +159,7 @@ namespace CacheManager.SystemRuntimeCaching
             {
                 // because we don't use UpdateCallback because of some multithreading issues lets
                 // try to simply reset the item by setting it again.
-                item = this.GetItemExpiration(item);
+                // item = this.GetItemExpiration(item); // done via base cache handle
                 this.cache.Set(fullKey, item, this.GetPolicy(item));
             }
 
@@ -212,23 +212,6 @@ namespace CacheManager.SystemRuntimeCaching
             cacheCfg.Add("PollingInterval", instance.PollingInterval.ToString());
 
             return cacheCfg;
-        }
-
-        private static bool IsExpired(CacheItem<TCacheValue> item)
-        {
-            var now = DateTime.UtcNow;
-            if (item.ExpirationMode == ExpirationMode.Absolute
-                && item.CreatedUtc.Add(item.ExpirationTimeout) < now)
-            {
-                return true;
-            }
-            else if (item.ExpirationMode == ExpirationMode.Sliding
-                && item.LastAccessedUtc.Add(item.ExpirationTimeout) < now)
-            {
-                return true;
-            }
-
-            return false;
         }
 
         private void CreateInstanceToken()
