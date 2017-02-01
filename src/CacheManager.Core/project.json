@@ -15,7 +15,7 @@
   "buildOptions": {
     "allowUnsafe": false,
     "languageVersion": "csharp6",
-    "warningsAsErrors": true,
+    "warningsAsErrors": false,
     "xmlDoc": true,    
     "keyFile": "../../tools/key.snk"
   },

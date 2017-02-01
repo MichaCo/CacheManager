@@ -191,7 +191,7 @@ namespace CacheManager.Tests
             // act
             Func<ICacheManager<string>> act = () => CacheFactory.Build<string>(settings =>
             {
-                settings.WithUpdateMode(CacheUpdateMode.Full)
+                settings
                     .WithDictionaryHandle("h1")
                     .DisableStatistics() // disable it first
                     .EnablePerformanceCounters();   // should enable stats
@@ -209,7 +209,7 @@ namespace CacheManager.Tests
             // act
             Func<ICacheManager<string>> act = () => CacheFactory.Build<string>(settings =>
             {
-                settings.WithUpdateMode(CacheUpdateMode.Full)
+                settings
                     .WithDictionaryHandle("h1")
                     .EnableStatistics();
             });
@@ -226,7 +226,7 @@ namespace CacheManager.Tests
             // act
             Func<ICacheManager<string>> act = () => CacheFactory.Build<string>(settings =>
             {
-                settings.WithUpdateMode(CacheUpdateMode.Full)
+                settings
                     .WithDictionaryHandle("h1");
             });
 
@@ -242,7 +242,7 @@ namespace CacheManager.Tests
             // act
             Action act = () => CacheFactory.Build<string>(settings =>
             {
-                settings.WithUpdateMode(CacheUpdateMode.Full)
+                settings
                     .WithDictionaryHandle("h1")
                         .WithExpiration(ExpirationMode.Absolute, TimeSpan.Zero);
             });
@@ -467,7 +467,7 @@ namespace CacheManager.Tests
                     })
                     .WithMaxRetries(22)
                     .WithRetryTimeout(2223)
-                    .WithUpdateMode(CacheUpdateMode.Full)
+                    .WithUpdateMode(CacheUpdateMode.None)
                     .WithDictionaryHandle("h1")
                         .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromHours(12))
                         .EnablePerformanceCounters()
@@ -481,7 +481,7 @@ namespace CacheManager.Tests
 
             // assert
             RedisConfigurations.GetConfiguration("myRedis").Should().NotBeNull();
-            act.Configuration.UpdateMode.Should().Be(CacheUpdateMode.Full);
+            act.Configuration.UpdateMode.Should().Be(CacheUpdateMode.None);
             act.Configuration.MaxRetries.Should().Be(22);
             act.Configuration.RetryTimeout.Should().Be(2223);
             act.CacheHandles.ElementAt(0).Configuration.Name.Should().Be("h1");

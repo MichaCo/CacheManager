@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using CacheManager.Core;
 using CacheManager.Core.Internal;
-using pb = ProtoBuf;
+using ProtoBuf;
 
 namespace CacheManager.Serialization.ProtoBuf
 {
@@ -40,7 +40,7 @@ namespace CacheManager.Serialization.ProtoBuf
 
             using (var stream = new MemoryStream(destination))
             {
-                return pb.Serializer.Deserialize(target, stream);
+                return Serializer.Deserialize(target, stream);
             }
         }
 
@@ -63,7 +63,7 @@ namespace CacheManager.Serialization.ProtoBuf
             byte[] output = null;
             using (var stream = new MemoryStream())
             {
-                pb.Serializer.Serialize(stream, value);
+                Serializer.Serialize(stream, value);
                 output = stream.ToArray();
             }
 
@@ -105,7 +105,7 @@ namespace CacheManager.Serialization.ProtoBuf
                 }
             }
 
-            return (Type)this.types[type];
+            return this.types[type];
         }
     }
 }

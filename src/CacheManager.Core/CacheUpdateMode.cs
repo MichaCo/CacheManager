@@ -1,4 +1,6 @@
-﻿namespace CacheManager.Core
+﻿using System;
+
+namespace CacheManager.Core
 {
     /// <summary>
     /// Defines the possible update modes of the cache manager.
@@ -20,6 +22,7 @@
         /// <c>Full</c> instructs the cache manager to add the cache item found to all cache
         /// handles, except the one the item was found in.
         /// </summary>
+        [Obsolete("Will be removed in 1.0.0. I don't really see any actual value using this setting and it might actually cause issues.")]
         Full,
 
         /// <summary>

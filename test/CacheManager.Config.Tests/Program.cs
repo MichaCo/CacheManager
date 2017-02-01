@@ -11,16 +11,7 @@ namespace CacheManager.Config.Tests
     {
         public static void Main(string[] args)
         {
-            var configBuilder = new Microsoft.Extensions.Configuration.ConfigurationBuilder()
-                .AddJsonFile("cache.json");
-
-            var configuration = configBuilder.Build().GetCacheConfiguration();
-
-            var cache = new BaseCacheManager<string>(configuration);
-
-            cache.Add("key", "value");
-
-            int iterations = int.MaxValue;
+            int iterations = 10;
             try
             {
                 var builder = new Core.ConfigurationBuilder("myCache");
@@ -29,11 +20,11 @@ namespace CacheManager.Config.Tests
                     f.AddConsole(LogLevel.Warning);
                     f.AddDebug(LogLevel.Debug);
                 });
-
-                builder.WithUpdateMode(CacheUpdateMode.Up);
+                
                 builder.WithRetryTimeout(1000);
                 builder.WithMaxRetries(10);
                 builder.WithDictionaryHandle()
+                    .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(1))
                     .DisableStatistics();
 
                 builder.WithRedisCacheHandle("redis", true)
@@ -51,9 +42,7 @@ namespace CacheManager.Config.Tests
                 });
 
                 builder.WithJsonSerializer();
-
-                Console.WriteLine("Using Redis cache handle");
-
+                
                 var cacheA = new BaseCacheManager<object>(builder.Build());
                 cacheA.Clear();
 

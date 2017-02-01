@@ -233,12 +233,12 @@ namespace CacheManager.Core.Internal
 
         private void StartScanExpiredItems()
         {
-            var currentTicks = Environment.TickCount;
-            if (!this.scanRunning && this.lastScan + ScanInterval < currentTicks)
+            var currentTicks = Environment.TickCount & int.MaxValue;
+            if (!this.scanRunning && (this.lastScan + ScanInterval < currentTicks || this.lastScan > currentTicks))
             {
                 lock (this.startScanLock)
                 {
-                    if (!this.scanRunning && this.lastScan + ScanInterval < currentTicks)
+                    if (!this.scanRunning && (this.lastScan + ScanInterval < currentTicks || this.lastScan > currentTicks))
                     {
                         this.lastScan = currentTicks;
 

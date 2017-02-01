@@ -11,7 +11,7 @@ namespace CacheManager.Config.Tests
 {
     public static class Tests
     {
-        public static void CacheThreadTest(ICacheManager<string> cache, int seed)
+        public static void CacheThreadTest(ICacheManager<string> cache, int seed = 42)
         {
             cache.Clear();
 
@@ -66,10 +66,8 @@ namespace CacheManager.Config.Tests
                             stats.GetStatistic(CacheStatsCounterType.GetCalls)));
             }
 
-            cache.Dispose();
-
             Console.WriteLine(string.Format(
-                "Event - Adds {0} Hits {1} Removes {2}",
+                "Event - Adds {0} Gets {1} Removes {2}",
                 eventAddCount,
                 eventGetCount,
                 eventRemoveCount));

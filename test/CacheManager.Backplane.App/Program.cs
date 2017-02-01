@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using CacheManager.Core;
 using Microsoft.Extensions.Configuration;
 
 namespace CacheManager.Backplane.App
@@ -14,10 +10,9 @@ namespace CacheManager.Backplane.App
             Console.WriteLine(Environment.NewLine);
             try
             {
-                var config = new Microsoft.Extensions.Configuration.ConfigurationBuilder()
+                var config = new ConfigurationBuilder()
                     .AddJsonFile("cache.json")
                     .Build();
-
             }
             catch (Exception ex)
             {
@@ -26,6 +21,6 @@ namespace CacheManager.Backplane.App
 
             Console.WriteLine("done");
             Console.Read();
-        }        
+        }
     }
 }

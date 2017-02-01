@@ -404,7 +404,7 @@ return result";
             }
 
             var values = (StackRedis.RedisValue[])result;
-
+            
             // the first item stores the value
             var item = values[0];
             var expirationModeItem = values[1];

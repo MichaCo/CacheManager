@@ -90,7 +90,7 @@ namespace CacheManager.Tests
                 }
             }
         }
-        
+
         [Theory]
         [MemberData("TestCacheManagers")]
         public void CacheManager_Region_ClearRegion<T>(T cache)
@@ -122,7 +122,7 @@ namespace CacheManager.Tests
                         cache[key].Should().BeNull("the cache should not find the item without region specified");
                         if (region == clearedRegion)
                         {
-                            cache[key, region].Should().BeNull("we cleared the region");
+                            cache[key, region].Should().BeNull("we cleared the region " + cache.ToString());
                             cache["SomeNewItem", region].Should().NotBeNull();
                         }
                         else
@@ -155,7 +155,7 @@ namespace CacheManager.Tests
 
                 cache.ClearRegion(region);
 
-                cache.Get(key, region).Should().BeNull();
+                cache.Get(key, region).Should().BeNull(cache.ToString());
             }
         }
 
