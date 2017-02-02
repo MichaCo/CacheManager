@@ -5,6 +5,8 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 using CacheManager.Core;
+using CacheManager.Memcached;
+using Enyim.Caching;
 using Enyim.Caching.Configuration;
 using FluentAssertions;
 using Xunit;
@@ -22,6 +24,84 @@ namespace CacheManager.Tests
                 memConfig.AddServer("localhost", 11211);
                 return memConfig;
             }
+        }
+
+        [Fact]
+        [Trait("category", "Memcached")]
+        public void Memcached_ExtensionsWork_WithClient()
+        {
+            var client = new MemcachedClient(Configuration);
+            var cache = CacheFactory.Build(
+                settings =>
+                settings.WithMemcachedCacheHandle(client));
+
+            Assert.NotNull(cache);
+            var handle = cache.CacheHandles.OfType<MemcachedCacheHandle<object>>().First();
+            Assert.Equal(client, handle.Cache);
+        }
+
+        [Fact]
+        [Trait("category", "Memcached")]
+        public void Memcached_ExtensionsWork_WithClientNamed()
+        {
+            var client = new MemcachedClient(Configuration);
+            var cache = CacheFactory.Build(
+                settings =>
+                settings.WithMemcachedCacheHandle("memcachedname", client));
+
+            Assert.NotNull(cache);
+            var handle = cache.CacheHandles.OfType<MemcachedCacheHandle<object>>().First();
+            Assert.Equal(client, handle.Cache);
+        }
+
+        [Fact]
+        [Trait("category", "Memcached")]
+        public void Memcached_ExtensionsWork_WithClientNull()
+        {
+            Action act = () => CacheFactory.Build(
+                settings =>
+                settings.WithMemcachedCacheHandle("name", (MemcachedClient)null));
+
+            var ex = Record.Exception(act);
+
+            // doesn't actually throw check on client because it hits the standard ctor without the client because of the Null value.
+            Assert.IsType<InvalidOperationException>(ex);
+        }
+
+        [Fact]
+        [Trait("category", "Memcached")]
+        public void Memcached_ExtensionsWork_WithConfiguration()
+        {
+            var cache = CacheFactory.Build(
+                settings =>
+                settings.WithMemcachedCacheHandle(Configuration));
+
+            Assert.NotNull(cache);
+        }
+
+        [Fact]
+        [Trait("category", "Memcached")]
+        public void Memcached_ExtensionsWork_WithConfigurationNamed()
+        {
+            var cache = CacheFactory.Build(
+                settings =>
+                settings.WithMemcachedCacheHandle("cachename", Configuration));
+
+            Assert.NotNull(cache);
+        }
+
+        [Fact]
+        [Trait("category", "Memcached")]
+        public void Memcached_ExtensionsWork_WithConfigurationNull()
+        {
+            Action act = () => CacheFactory.Build(
+                settings =>
+                settings.WithMemcachedCacheHandle("name", (MemcachedClientConfiguration)null));
+
+            var ex = Record.Exception(act);
+
+            // doesn't actually throw check on client because it hits the standard ctor without the client because of the Null value.
+            Assert.IsType<InvalidOperationException>(ex);
         }
 
         [Fact]
@@ -55,7 +135,7 @@ namespace CacheManager.Tests
                 }
             }
         }
-        
+
         [Fact]
         [Trait("category", "Memcached")]
         public void Memcached_KeySizeLimit()

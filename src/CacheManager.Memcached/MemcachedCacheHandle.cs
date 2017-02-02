@@ -74,10 +74,12 @@ namespace CacheManager.Memcached
         /// <param name="managerConfiguration">The manager configuration.</param>
         /// <param name="configuration">The cache handle configuration.</param>
         /// <param name="loggerFactory">The logger factory.</param>
+        /// <param name="serializer">The serializer.</param>
         /// <param name="client">The <see cref="MemcachedClient"/> to use.</param>
-        public MemcachedCacheHandle(ICacheManagerConfiguration managerConfiguration, CacheHandleConfiguration configuration, ILoggerFactory loggerFactory, MemcachedClient client)
+        public MemcachedCacheHandle(ICacheManagerConfiguration managerConfiguration, CacheHandleConfiguration configuration, ILoggerFactory loggerFactory, ICacheSerializer serializer, MemcachedClient client)
             : this(configuration, managerConfiguration, loggerFactory)
         {
+            // serializer gets ignored, just added to the ctor to satisfy the ctor finder in our custom DI to actually hit this ctor if the client is specified.
             NotNull(client, nameof(client));
             this.Cache = client;
         }
@@ -156,7 +158,7 @@ namespace CacheManager.Memcached
         /// Gets or sets the cache.
         /// </summary>
         /// <value>The cache.</value>
-        protected MemcachedClient Cache { get; set; }
+        public MemcachedClient Cache { get; }
 
         /// <inheritdoc />
         protected override ILogger Logger { get; }
