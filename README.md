@@ -10,10 +10,9 @@ The developer can opt-in to those features only if needed.
 ## Build Status
 
 Build Server | Status
---- | ---
-Windows, KoreBuild | [![Build status](https://ci.appveyor.com/api/projects/status/lbi004cv6idhbr26?svg=true)](https://ci.appveyor.com/project/MichaCo/cachemanager)
-Windows, MSBuild | [![Build status](https://ci.appveyor.com/api/projects/status/0uxi3saj5prdyulg?svg=true)](https://ci.appveyor.com/project/MichaCo/cachemanager-at86a)
-Linux, Mono | [![Build Status](https://travis-ci.org/MichaCo/CacheManager.svg?branch=master)](https://travis-ci.org/MichaCo/CacheManager) 
+--- | :---:
+Windows, MSBuild | [![Build status](https://ci.appveyor.com/api/projects/status/mv4u7eg5vq6ty5s4?svg=true)](https://ci.appveyor.com/project/MichaCo/cachemanager-ak9g3)
+Linux, Mono | -
 
 ## CacheManager Nuget Packages
 
@@ -68,6 +67,9 @@ There is also from source generated [html documentation][help] available online.
 	* [**ASP.NET MVC website**][outputcachesample] showcasing usage of the Cache Manager `OutputCache` provider
 * [**Single Page Todo App with Cache Manager on Azure using Redis**][todosample]
 
+## Benchmarks
+See [benchmarks page](https://github.com/MichaCo/CacheManager/blob/dev/Benchmarks.md)
+
 ## Features in Version: [0.9.x][releases] 
 
 * One common interface for handling different caching technologies: `ICache<T>`
@@ -116,6 +118,7 @@ This can be used to for example group elements and remove all of them at once.
 * **Performance Counters**: To be able to inspect certain numbers with `perfmon`, CacheManager supports performance counters per instance of the manager and per cache handle.
 * **Event System**: CacheManager triggers events for common cache actions:
 OnGet, OnAdd, OnPut, OnRemove, OnClear, OnClearRegion
+   * Events now also get triggered through the backplane (if enabled) when multiple instances are sharing the same cache.
 * **System.Web.OutputCache** implementation to use CacheManager as OutputCache provider which makes the OutputCache extremely flexible, for example by using a distributed cache like Redis across many web servers.
 * **Cache clients synchronization** 
     * Implemented with the Redis pub/sub feature
