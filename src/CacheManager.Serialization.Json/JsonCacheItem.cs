@@ -30,8 +30,11 @@ namespace CacheManager.Core
         [JsonProperty("value")]
         public byte[] Value { get; set; }
 
-        [JsonProperty("ValueType")]
+        [JsonProperty("valueType")]
         public string ValueType { get; set; }
+
+        [JsonProperty("usesDefaultExpiration")]
+        public bool UsesExpirationDefaults { get; set; }
 
         public static JsonCacheItem FromCacheItem<TCacheValue>(CacheItem<TCacheValue> item, byte[] value)
             => new JsonCacheItem()
@@ -43,14 +46,35 @@ namespace CacheManager.Core
                 LastAccessedUtc = item.LastAccessedUtc,
                 Region = item.Region,
                 Value = value,
-                ValueType = item.Value.GetType().AssemblyQualifiedName
+                ValueType = item.Value.GetType().AssemblyQualifiedName,
+                UsesExpirationDefaults = item.UsesExpirationDefaults
             };
 
         public CacheItem<T> ToCacheItem<T>(object value)
         {
             var item = string.IsNullOrWhiteSpace(this.Region) ?
-                new CacheItem<T>(this.Key, (T)value, this.ExpirationMode, this.ExpirationTimeout) :
-                new CacheItem<T>(this.Key, this.Region, (T)value, this.ExpirationMode, this.ExpirationTimeout);
+                new CacheItem<T>(this.Key, (T)value) :
+                new CacheItem<T>(this.Key, this.Region, (T)value);
+
+            if (!this.UsesExpirationDefaults)
+            {
+                if (this.ExpirationMode == ExpirationMode.Sliding)
+                {
+                    item = item.WithSlidingExpiration(this.ExpirationTimeout);
+                }
+                else if (this.ExpirationMode == ExpirationMode.Absolute)
+                {
+                    item = item.WithAbsoluteExpiration(this.ExpirationTimeout);
+                }
+                else if (this.ExpirationMode == ExpirationMode.None)
+                {
+                    item = item.WithNoExpiration();
+                }
+            }
+            else
+            {
+                item = item.WithDefaultExpiration();
+            }
 
             item.LastAccessedUtc = this.LastAccessedUtc;
 

@@ -97,7 +97,7 @@ namespace CacheManager.Tests
             var baseItem = new CacheItem<object>("key", "region", "value", ExpirationMode.Sliding, TimeSpan.FromDays(10));
 
             // act
-            var result = baseItem.WithExpiration(ExpirationMode.None, TimeSpan.FromMinutes(10));
+            var result = baseItem.WithNoExpiration();
 
             // assert
             result.ExpirationMode.Should().Be(ExpirationMode.None);
@@ -116,7 +116,7 @@ namespace CacheManager.Tests
             var baseItem = new CacheItem<object>("key", "region", "value", ExpirationMode.Absolute, TimeSpan.FromDays(10));
 
             // act
-            var result = baseItem.WithExpiration(ExpirationMode.Sliding, TimeSpan.FromMinutes(10));
+            var result = baseItem.WithSlidingExpiration(TimeSpan.FromMinutes(10));
 
             // assert
             result.ExpirationMode.Should().Be(ExpirationMode.Sliding);
@@ -135,7 +135,7 @@ namespace CacheManager.Tests
             var baseItem = new CacheItem<object>("key", "region", "value", ExpirationMode.Sliding, TimeSpan.FromDays(10));
 
             // act
-            var result = baseItem.WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMinutes(10));
+            var result = baseItem.WithAbsoluteExpiration(DateTime.UtcNow.AddMinutes(10));
 
             // assert
             result.ExpirationMode.Should().Be(ExpirationMode.Absolute);

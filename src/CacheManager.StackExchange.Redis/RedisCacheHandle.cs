@@ -30,10 +30,11 @@ namespace CacheManager.Redis
         private const string HashFieldType = "type";
         private const string HashFieldValue = "value";
         private const string HashFieldVersion = "version";
+        private const string HashFieldUsesDefaultExp = "defaultExpiration";
 
         private static readonly string ScriptAdd = $@"
 if redis.call('HSETNX', KEYS[1], '{HashFieldValue}', ARGV[1]) == 1 then
-    local result=redis.call('HMSET', KEYS[1], '{HashFieldType}', ARGV[2], '{HashFieldExpirationMode}', ARGV[3], '{HashFieldExpirationTimeout}', ARGV[4], '{HashFieldCreated}', ARGV[5], '{HashFieldVersion}', 1)
+    local result=redis.call('HMSET', KEYS[1], '{HashFieldType}', ARGV[2], '{HashFieldExpirationMode}', ARGV[3], '{HashFieldExpirationTimeout}', ARGV[4], '{HashFieldCreated}', ARGV[5], '{HashFieldVersion}', 1, '{HashFieldUsesDefaultExp}', ARGV[6])
     if ARGV[3] > '1' and ARGV[4] ~= '0' then
         redis.call('PEXPIRE', KEYS[1], ARGV[4])
     else
@@ -45,7 +46,7 @@ else
 end";
 
         private static readonly string ScriptPut = $@"
-local result=redis.call('HMSET', KEYS[1], '{HashFieldValue}', ARGV[1], '{HashFieldType}', ARGV[2], '{HashFieldExpirationMode}', ARGV[3], '{HashFieldExpirationTimeout}', ARGV[4], '{HashFieldCreated}', ARGV[5])
+local result=redis.call('HMSET', KEYS[1], '{HashFieldValue}', ARGV[1], '{HashFieldType}', ARGV[2], '{HashFieldExpirationMode}', ARGV[3], '{HashFieldExpirationTimeout}', ARGV[4], '{HashFieldCreated}', ARGV[5], '{HashFieldUsesDefaultExp}', ARGV[6])
 redis.call('HINCRBY', KEYS[1], '{HashFieldVersion}', 1)
 if ARGV[3] > '1' and ARGV[4] ~= '0' then
     redis.call('PEXPIRE', KEYS[1], ARGV[4])
@@ -68,7 +69,7 @@ else
 end";
 
         private static readonly string ScriptGet = $@"
-local result = redis.call('HMGET', KEYS[1], '{HashFieldValue}', '{HashFieldExpirationMode}', '{HashFieldExpirationTimeout}', '{HashFieldCreated}', '{HashFieldType}', '{HashFieldVersion}')
+local result = redis.call('HMGET', KEYS[1], '{HashFieldValue}', '{HashFieldExpirationMode}', '{HashFieldExpirationTimeout}', '{HashFieldCreated}', '{HashFieldType}', '{HashFieldVersion}', '{HashFieldUsesDefaultExp}')
 if (result[2] and result[2] == '2') then
     if (result[3] and result[3] ~= '' and result[3] ~= '0') then
         redis.call('PEXPIRE', KEYS[1], result[3])
@@ -80,7 +81,7 @@ return result";
         private readonly ICacheManagerConfiguration managerConfiguration;
         private readonly RedisValueConverter valueConverter;
         private readonly RedisConnectionManager connection;
-        private readonly bool isLuaAllowed;
+        private bool isLuaAllowed;
         private RedisConfiguration redisConfiguration = null;
 
         // flag if scripts are initially loaded to the server
@@ -146,6 +147,22 @@ return result";
         public StackRedis.RedisFeatures Features => this.connection.Features;
 
 #pragma warning restore CS3003 // Type is not CLS-compliant
+
+        /// <summary>
+        /// Gets or sets a flag indicating if we can use the lua implementation instead of manual.
+        /// This flag will be set automatically via feature detection based on the Redis server version and should never be set manually except for testing.
+        /// </summary>
+        public bool UseLua
+        {
+            get
+            {
+                return this.isLuaAllowed;
+            }
+            set
+            {
+                this.isLuaAllowed = value;
+            }
+        }
 
         /// <inheritdoc />
         protected override ILogger Logger { get; }
@@ -393,7 +410,7 @@ return result";
             {
                 return this.GetCacheItemInternalNoScript(key, region);
             }
-            
+
             var fullKey = GetKey(key, region);
 
             var result = this.Retry(() => this.Eval(ScriptType.Get, fullKey));
@@ -404,7 +421,7 @@ return result";
             }
 
             var values = (StackRedis.RedisValue[])result;
-            
+
             // the first item stores the value
             var item = values[0];
             var expirationModeItem = values[1];
@@ -412,6 +429,7 @@ return result";
             var createdItem = values[3];
             var valueTypeItem = values[4];
             version = (int)values[5];
+            var usesDefaultExpiration = values[6].HasValue ? (bool)values[6] : true;
 
             if (!item.HasValue || !valueTypeItem.HasValue /* partially removed? */
                 || item.IsNullOrEmpty || item.IsNull)
@@ -438,7 +456,12 @@ return result";
 
             var value = this.FromRedisValue(item, (string)valueTypeItem);
 
-            var cacheItem = string.IsNullOrWhiteSpace(region) ?
+            var cacheItem =
+                usesDefaultExpiration ?
+                string.IsNullOrWhiteSpace(region) ?
+                    new CacheItem<TCacheValue>(key, value) :
+                    new CacheItem<TCacheValue>(key, region, value) :
+                string.IsNullOrWhiteSpace(region) ?
                     new CacheItem<TCacheValue>(key, value, expirationMode, expirationTimeout) :
                     new CacheItem<TCacheValue>(key, region, value, expirationMode, expirationTimeout);
 
@@ -468,7 +491,8 @@ return result";
                         HashFieldExpirationMode,
                         HashFieldExpirationTimeout,
                         HashFieldCreated,
-                        HashFieldType
+                        HashFieldType,
+                        HashFieldUsesDefaultExp
                     });
 
                 // the first item stores the value
@@ -477,6 +501,7 @@ return result";
                 var timeoutItem = values[2];
                 var createdItem = values[3];
                 var valueTypeItem = values[4];
+                var usesDefaultExpiration = values[5].HasValue ? (bool)values[5] : true;
 
                 if (!item.HasValue || !valueTypeItem.HasValue /* partially removed? */
                     || item.IsNullOrEmpty || item.IsNull)
@@ -504,7 +529,12 @@ return result";
 
                 var value = this.FromRedisValue(item, (string)valueTypeItem);
 
-                var cacheItem = string.IsNullOrWhiteSpace(region) ?
+                var cacheItem =
+                    usesDefaultExpiration ?
+                    string.IsNullOrWhiteSpace(region) ?
+                        new CacheItem<TCacheValue>(key, value) :
+                        new CacheItem<TCacheValue>(key, region, value) :
+                    string.IsNullOrWhiteSpace(region) ?
                         new CacheItem<TCacheValue>(key, value, expirationMode, expirationTimeout) :
                         new CacheItem<TCacheValue>(key, region, value, expirationMode, expirationTimeout);
 
@@ -656,7 +686,8 @@ return result";
                 item.ValueType.AssemblyQualifiedName,
                 (int)item.ExpirationMode,
                 (long)item.ExpirationTimeout.TotalMilliseconds,
-                item.CreatedUtc.Ticks
+                item.CreatedUtc.Ticks,
+                item.UsesExpirationDefaults
             };
 
             StackRedis.RedisResult result;
@@ -727,7 +758,8 @@ return result";
                     new StackRedis.HashEntry(HashFieldType, item.ValueType.AssemblyQualifiedName),
                     new StackRedis.HashEntry(HashFieldExpirationMode, (int)item.ExpirationMode),
                     new StackRedis.HashEntry(HashFieldExpirationTimeout, (long)item.ExpirationTimeout.TotalMilliseconds),
-                    new StackRedis.HashEntry(HashFieldCreated, item.CreatedUtc.Ticks)
+                    new StackRedis.HashEntry(HashFieldCreated, item.CreatedUtc.Ticks),
+                    new StackRedis.HashEntry(HashFieldUsesDefaultExp, item.UsesExpirationDefaults)
                 };
 
                 var flags = sync ? StackRedis.CommandFlags.None : StackRedis.CommandFlags.FireAndForget;

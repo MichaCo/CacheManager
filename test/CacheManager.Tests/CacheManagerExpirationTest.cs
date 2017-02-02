@@ -40,8 +40,7 @@ namespace CacheManager.Tests
                 cache.GetCacheItem(key).ExpirationMode.Should().Be(ExpirationMode.None);
             }
         }
-
-        // Issue where dictionary cache returned wrong IsExpired results because of the use of DateTimeOffset AND DateTime
+        
         [Fact]
         public void CacheManager_Expire_InheritIsExpiredCheck()
         {
@@ -61,13 +60,14 @@ namespace CacheManager.Tests
                 var result = cache.Get(key);
                 ValidateExistsInAllHandles(cache, key);
 
-                // actually wrong (see next test). Item in dic handle should not inherit absolut default expiration from redis handle
-                cache.GetCacheItem(key).ExpirationMode.Should().Be(ExpirationMode.Absolute);
+                // must respect the first handle because the item will be found in the first one and it should respect the expiration configuration
+                // instead of the individual item
+                cache.GetCacheItem(key).ExpirationMode.Should().Be(ExpirationMode.None);
                 ValidateExistsInAllHandles(cache, key);
             }
         }
 
-        [Fact(Skip = "Bug")]
+        [Fact]
         public void CacheManager_Expire_DoesNotInheritExpiration()
         {
             using (var cache = CacheFactory.Build<string>(
@@ -165,6 +165,58 @@ namespace CacheManager.Tests
             }
         }
 
+        [Theory]
+        [MemberData("TestCacheManagers")]
+        public void CacheManager_Expire_ValidateUsesDefaultExpirationFlag<T>(T cache)
+            where T : ICacheManager<object>
+        {
+            using (cache)
+            {
+                var key = Guid.NewGuid().ToString();
+                cache.Add(key, key);
+
+                var item = cache.GetCacheItem(key);
+
+                item.UsesExpirationDefaults.Should().BeTrue(cache.ToString() + " | " + item.ToString());
+            }
+        }
+
+        [Theory]
+        [MemberData("TestCacheManagers")]
+        public void CacheManager_Expire_NotDefaultExpirationFlag_Item<T>(T cache)
+            where T : ICacheManager<object>
+        {
+            using (cache)
+            {
+                var key = Guid.NewGuid().ToString();
+                cache.Add(new CacheItem<object>(key, key, ExpirationMode.Sliding, TimeSpan.FromMinutes(10)));
+
+                var item = cache.GetCacheItem(key);
+
+                item.UsesExpirationDefaults.Should().BeFalse(cache.ToString() + " | " + item.ToString());
+            }
+        }
+
+        [Theory]
+        [MemberData("TestCacheManagers")]
+        public void CacheManager_Expire_NotDefaultExpirationFlag_Expire<T>(T cache)
+            where T : ICacheManager<object>
+        {
+            using (cache)
+            {
+                var key = Guid.NewGuid().ToString();
+                cache.Add(key, key);
+
+                var item = cache.GetCacheItem(key);
+                item.UsesExpirationDefaults.Should().BeTrue(cache.ToString() + " | " + item.ToString());
+
+                cache.Expire(key, TimeSpan.FromSeconds(360));
+                item = cache.GetCacheItem(key);
+
+                item.UsesExpirationDefaults.Should().BeFalse(cache.ToString() + " | " + item.ToString());
+            }
+        }
+
         // #74
         [Theory]
         [MemberData("TestCacheManagers")]
@@ -217,7 +269,7 @@ namespace CacheManager.Tests
                 var item = cache.GetCacheItem(key);
                 item.Should().NotBeNull();
 
-                cache.Put(item.WithExpiration(ExpirationMode.None, default(TimeSpan)));
+                cache.Put(item.WithNoExpiration());
 
                 Thread.Sleep(200);
 
@@ -240,7 +292,7 @@ namespace CacheManager.Tests
                 var item = cache.GetCacheItem(key);
                 item.Should().NotBeNull();
 
-                cache.Put(item.WithExpiration(ExpirationMode.None, default(TimeSpan)));
+                cache.Put(item.WithNoExpiration());
                 cache.Update(key, (o) => o + "something").Should().NotBeNull();
 
                 Thread.Sleep(100);
@@ -264,7 +316,7 @@ namespace CacheManager.Tests
                 var item = cache.GetCacheItem(key);
                 item.Should().NotBeNull();
 
-                cache.Put(item.WithExpiration(ExpirationMode.None, default(TimeSpan)));
+                cache.Put(item.WithNoExpiration());
                 cache.Update(key, (o) => o + "something").Should().NotBeNull();
 
                 Thread.Sleep(100);
@@ -282,7 +334,7 @@ namespace CacheManager.Tests
             using (cache)
             {
                 var key = Guid.NewGuid().ToString();
-                cache.Add(new CacheItem<object>(key, "value", ExpirationMode.Absolute, TimeSpan.FromMilliseconds(30)))
+                cache.Add(new CacheItem<object>(key, "value", ExpirationMode.Absolute, TimeSpan.FromMilliseconds(200)))
                     .Should().BeTrue();
 
                 var item = cache.GetCacheItem(key);
@@ -291,7 +343,7 @@ namespace CacheManager.Tests
                 cache.RemoveExpiration(key);
                 cache.Update(key, (o) => o + "something").Should().NotBeNull();
 
-                Thread.Sleep(100);
+                Thread.Sleep(200);
 
                 cache.Get(key).Should().NotBeNull();
             }
@@ -306,16 +358,16 @@ namespace CacheManager.Tests
             using (cache)
             {
                 var key = Guid.NewGuid().ToString();
-                cache.Add(new CacheItem<object>(key, "value", ExpirationMode.Sliding, TimeSpan.FromMilliseconds(30)))
+                cache.Add(new CacheItem<object>(key, "value", ExpirationMode.Sliding, TimeSpan.FromMilliseconds(200)))
                     .Should().BeTrue();
 
                 var item = cache.GetCacheItem(key);
-                item.Should().NotBeNull();
+                item.Should().NotBeNull(cache.ToString());
 
                 cache.RemoveExpiration(key);
                 cache.Update(key, (o) => o + "something").Should().NotBeNull();
 
-                Thread.Sleep(100);
+                Thread.Sleep(200);
 
                 cache.Get(key).Should().NotBeNull();
             }
@@ -620,9 +672,9 @@ namespace CacheManager.Tests
         {
             var item = new CacheItem<object>("key", "value", ExpirationMode.Absolute, TimeSpan.FromSeconds(1));
 
-            var absolute = item.WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMinutes(10));
-            var sliding = item.WithExpiration(ExpirationMode.Sliding, TimeSpan.FromMinutes(10));
-            var none = item.WithExpiration(ExpirationMode.None, default(TimeSpan));
+            var absolute = item.WithAbsoluteExpiration(TimeSpan.FromMinutes(10));
+            var sliding = item.WithSlidingExpiration(TimeSpan.FromMinutes(10));
+            var none = item.WithNoExpiration();
 
             absolute.ExpirationMode.Should().Be(ExpirationMode.Absolute);
             absolute.ExpirationTimeout.Should().BeCloseTo(TimeSpan.FromMinutes(10), precision: 200);

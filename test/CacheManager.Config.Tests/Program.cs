@@ -24,10 +24,11 @@ namespace CacheManager.Config.Tests
                 builder.WithRetryTimeout(1000);
                 builder.WithMaxRetries(10);
                 builder.WithDictionaryHandle()
-                    .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(1))
+                    .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(20))
                     .DisableStatistics();
 
                 builder.WithRedisCacheHandle("redis", true)
+                    .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(60))
                     .DisableStatistics();
 
                 builder.WithRedisBackplane("redis");

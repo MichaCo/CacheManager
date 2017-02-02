@@ -31,7 +31,7 @@ namespace CacheManager.Tests
         {
             var cache = CacheFactory.Build(settings =>
             {
-                settings.WithUpdateMode(CacheUpdateMode.Full)
+                settings.WithUpdateMode(CacheUpdateMode.Up)
                     .WithMemcachedCacheHandle(Configuration)
                     .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1));
             });
@@ -66,7 +66,7 @@ namespace CacheManager.Tests
             var item = new CacheItem<string>(longKey, "something");
             var cache = CacheFactory.Build<string>(settings =>
             {
-                settings.WithUpdateMode(CacheUpdateMode.Full)
+                settings.WithUpdateMode(CacheUpdateMode.Up)
                     .WithMemcachedCacheHandle(Configuration)
                     .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1));
             });
@@ -94,7 +94,7 @@ namespace CacheManager.Tests
             var item = new CacheItem<string>(longKey, "someRegion", "something");
             var cache = CacheFactory.Build<string>(settings =>
             {
-                settings.WithUpdateMode(CacheUpdateMode.Full)
+                settings.WithUpdateMode(CacheUpdateMode.Up)
                     .WithMemcachedCacheHandle(Configuration)
                     .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMinutes(1));
             });
@@ -119,7 +119,7 @@ namespace CacheManager.Tests
             // arrange
             using (var cache = CacheFactory.Build<RaceConditionTestElement>(settings =>
             {
-                settings.WithUpdateMode(CacheUpdateMode.Full)
+                settings.WithUpdateMode(CacheUpdateMode.Up)
                     .WithMemcachedCacheHandle(Configuration)
                         .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromHours(10));
             }))
@@ -175,7 +175,7 @@ namespace CacheManager.Tests
             // arrange
             using (var cache = CacheFactory.Build<RaceConditionTestElement>(settings =>
             {
-                settings.WithUpdateMode(CacheUpdateMode.Full)
+                settings.WithUpdateMode(CacheUpdateMode.Up)
                     .WithSystemRuntimeCacheHandle()
                         .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMilliseconds(1))
                     .And
@@ -227,7 +227,7 @@ namespace CacheManager.Tests
             // arrange
             using (var cache = CacheFactory.Build<RaceConditionTestElement>(settings =>
             {
-                settings.WithUpdateMode(CacheUpdateMode.Full)
+                settings.WithUpdateMode(CacheUpdateMode.Up)
                     .WithMemcachedCacheHandle(Configuration)
                         .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMinutes(10));
             }))
@@ -279,7 +279,7 @@ namespace CacheManager.Tests
             // arrange
             using (var cache = CacheFactory.Build<RaceConditionTestElement>(settings =>
             {
-                settings.WithUpdateMode(CacheUpdateMode.Full)
+                settings.WithUpdateMode(CacheUpdateMode.Up)
                     .WithMemcachedCacheHandle(Configuration)
                     .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMinutes(20));
             }))
@@ -322,7 +322,7 @@ namespace CacheManager.Tests
             // arrange
             using (var cache = CacheFactory.Build<RaceConditionTestElement>(settings =>
             {
-                settings.WithUpdateMode(CacheUpdateMode.Full)
+                settings.WithUpdateMode(CacheUpdateMode.Up)
                     .WithMemcachedCacheHandle(Configuration)
                     .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMinutes(20));
             }))

@@ -74,7 +74,26 @@ namespace CacheManager.Core.Internal
                 return;
             }
 
-            this.PutInternalPrepared(item.WithExpiration(mode, timeout));
+            if (mode == ExpirationMode.Absolute)
+            {
+                item = item.WithAbsoluteExpiration(timeout);
+            }
+            else if (mode == ExpirationMode.Sliding)
+            {
+                item = item.WithSlidingExpiration(timeout);
+            }
+            else if (mode == ExpirationMode.None)
+            {
+                item = item.WithNoExpiration();
+            }
+            else if (mode == ExpirationMode.Default)
+            {
+                item = item.WithDefaultExpiration();
+            }
+
+            item = GetItemExpiration(item);
+
+            this.PutInternalPrepared(item);
         }
 
         /// <summary>
@@ -95,7 +114,26 @@ namespace CacheManager.Core.Internal
                 return;
             }
 
-            this.PutInternalPrepared(item.WithExpiration(mode, timeout));
+            if (mode == ExpirationMode.Absolute)
+            {
+                item = item.WithAbsoluteExpiration(timeout);
+            }
+            else if (mode == ExpirationMode.Sliding)
+            {
+                item = item.WithSlidingExpiration(timeout);
+            }
+            else if (mode == ExpirationMode.None)
+            {
+                item = item.WithNoExpiration();
+            }
+            else if (mode == ExpirationMode.Default)
+            {
+                item = item.WithDefaultExpiration();
+            }
+
+            item = GetItemExpiration(item);
+
+            this.PutInternalPrepared(item);
         }
 
         /// <summary>
@@ -273,7 +311,7 @@ namespace CacheManager.Core.Internal
             // handle also doesn't define a mode (value is None|Default), we use None.
             var expirationMode = ExpirationMode.Default;
             var expirationTimeout = TimeSpan.Zero;
-            bool useItemExpiration = item.ExpirationMode != ExpirationMode.Default;
+            bool useItemExpiration = item.ExpirationMode != ExpirationMode.Default && !item.UsesExpirationDefaults;
 
             if (useItemExpiration)
             {
@@ -296,9 +334,7 @@ namespace CacheManager.Core.Internal
                 throw new InvalidOperationException("Expiration mode is defined without timeout.");
             }
 
-            // Fix issue 2: updating the item exp timeout and mode: Fix issue where expiration got
-            // applied to all caches because it was stored in the item passed around.
-            return item.WithExpiration(expirationMode, expirationTimeout);
+            return item.WithExpiration(expirationMode, expirationTimeout, !useItemExpiration);
         }
 
         /// <summary>

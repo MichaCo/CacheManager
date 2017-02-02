@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Threading;
 using CacheManager.Core;
+using CacheManager.Redis;
 
 #if MEMCACHEDENABLED
 using Enyim.Caching.Configuration;
@@ -92,7 +94,21 @@ namespace CacheManager.Tests
                     databaseCount = StartDbCount;
                 }
 
-                return CreateRedisCache(databaseCount, false, Serializer.Json);
+                return CreateRedisCache(database: databaseCount, sharedRedisConfig: false, serializer: Serializer.Json);
+            }
+        }
+
+        public static ICacheManager<object> WithRedisCacheJsonNoLua
+        {
+            get
+            {
+                Interlocked.Increment(ref databaseCount);
+                if (databaseCount >= 2000)
+                {
+                    databaseCount = StartDbCount;
+                }
+
+                return CreateRedisCache(database: databaseCount, sharedRedisConfig: false, serializer: Serializer.Json, useLua: false);
             }
         }
 
@@ -124,7 +140,7 @@ namespace CacheManager.Tests
             }
         }
 
-        public static ICacheManager<object> WithSystemAndRedisCache
+        public static ICacheManager<object> WithDicAndRedisCache
         {
             get
             {
@@ -134,7 +150,21 @@ namespace CacheManager.Tests
                     databaseCount = StartDbCount;
                 }
 
-                return CreateRedisAndDicCacheWithBackplane(databaseCount, false, Guid.NewGuid().ToString());
+                return CreateRedisAndDicCacheWithBackplane(database: databaseCount, sharedRedisConfig: false, channelName: Guid.NewGuid().ToString(), useLua: true);
+            }
+        }
+
+        public static ICacheManager<object> WithDicAndRedisCacheNoLua
+        {
+            get
+            {
+                Interlocked.Increment(ref databaseCount);
+                if (databaseCount >= 2000)
+                {
+                    databaseCount = StartDbCount;
+                }
+
+                return CreateRedisAndDicCacheWithBackplane(database: databaseCount, sharedRedisConfig: false, channelName: Guid.NewGuid().ToString(), useLua: false);
             }
         }
 
@@ -248,10 +278,10 @@ namespace CacheManager.Tests
 
 #endif
 
-        public static ICacheManager<object> CreateRedisAndDicCacheWithBackplane(int database = 0, bool sharedRedisConfig = true, string channelName = null, Serializer serializer = Serializer.Proto)
+        public static ICacheManager<object> CreateRedisAndDicCacheWithBackplane(int database = 0, bool sharedRedisConfig = true, string channelName = null, Serializer serializer = Serializer.Proto, bool useLua = true)
         {
             var redisKey = sharedRedisConfig ? "redisConfig" + database : Guid.NewGuid().ToString();
-            return CacheFactory.Build(settings =>
+            var cache = CacheFactory.Build(settings =>
             {
                 settings
                     .WithUpdateMode(CacheUpdateMode.Up)
@@ -280,9 +310,16 @@ namespace CacheManager.Tests
                     settings.WithRedisBackplane(redisKey);
                 }
             });
+
+            foreach (var h in cache.CacheHandles.OfType<RedisCacheHandle<object>>())
+            {
+                h.UseLua = useLua;
+            }
+
+            return cache;
         }
 
-        public static ICacheManager<object> CreateRedisCache(int database = 0, bool sharedRedisConfig = true, Serializer serializer = Serializer.GzJson)
+        public static ICacheManager<object> CreateRedisCache(int database = 0, bool sharedRedisConfig = true, Serializer serializer = Serializer.GzJson, bool useLua = true)
         {
             var redisKey = sharedRedisConfig ? "redisConfig" + database : Guid.NewGuid().ToString();
             var cache = CacheFactory.Build(settings =>
@@ -301,6 +338,11 @@ namespace CacheManager.Tests
                     .WithRedisCacheHandle(redisKey, true)
                     .EnableStatistics();
             });
+
+            foreach (var h in cache.CacheHandles.OfType<RedisCacheHandle<object>>())
+            {
+                h.UseLua = useLua;
+            }
 
             return cache;
         }
@@ -407,7 +449,10 @@ namespace CacheManager.Tests
                 yield return new object[] { TestManagers.WithRedisCacheJson };
                 yield return new object[] { TestManagers.WithRedisCacheGzJson };
                 yield return new object[] { TestManagers.WithRedisCacheProto };
-                yield return new object[] { TestManagers.WithSystemAndRedisCache };
+                yield return new object[] { TestManagers.WithDicAndRedisCache };
+
+                yield return new object[] { TestManagers.WithRedisCacheJsonNoLua };
+                yield return new object[] { TestManagers.WithDicAndRedisCacheNoLua };
 #endif
 #if MEMCACHEDENABLED
 #if !NETCOREAPP

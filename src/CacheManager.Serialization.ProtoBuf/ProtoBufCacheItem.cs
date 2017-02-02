@@ -31,6 +31,9 @@ namespace CacheManager.Serialization.ProtoBuf
         [ProtoMember(8)]
         public string ValueType { get; set; }
 
+        [ProtoMember(9)]
+        public bool UsesExpirationDefaults { get; set; }
+
         public static ProtoBufCacheItem FromCacheItem<TValue>(CacheItem<TValue> item, byte[] value)
         {
             return new ProtoBufCacheItem
@@ -42,18 +45,40 @@ namespace CacheManager.Serialization.ProtoBuf
                 Key = item.Key,
                 Region = item.Region,
                 Value = value,
-                ValueType = item.ValueType.AssemblyQualifiedName
+                ValueType = item.ValueType.AssemblyQualifiedName,
+                UsesExpirationDefaults = item.UsesExpirationDefaults
             };
         }
 
         public CacheItem<T> ToCacheItem<T>(object value)
         {
-            var output = string.IsNullOrEmpty(Region) ?
-                    new CacheItem<T>(Key, (T)value, ExpirationMode, ExpirationTimeout) :
-                    new CacheItem<T>(Key, Region, (T)value, ExpirationMode, ExpirationTimeout);
+            var item = string.IsNullOrWhiteSpace(this.Region) ?
+                new CacheItem<T>(this.Key, (T)value) :
+                new CacheItem<T>(this.Key, this.Region, (T)value);
 
-            output.LastAccessedUtc = LastAccessedUtc;
-            return output.WithCreated(CreatedUtc);
+            if (!this.UsesExpirationDefaults)
+            {
+                if (this.ExpirationMode == ExpirationMode.Sliding)
+                {
+                    item = item.WithSlidingExpiration(this.ExpirationTimeout);
+                }
+                else if (this.ExpirationMode == ExpirationMode.Absolute)
+                {
+                    item = item.WithAbsoluteExpiration(this.ExpirationTimeout);
+                }
+                else if (this.ExpirationMode == ExpirationMode.None)
+                {
+                    item = item.WithNoExpiration();
+                }
+            }
+            else
+            {
+                item = item.WithDefaultExpiration();
+            }
+
+            item.LastAccessedUtc = this.LastAccessedUtc;
+
+            return item.WithCreated(this.CreatedUtc);
         }
     }
 }
