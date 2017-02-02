@@ -226,7 +226,7 @@ namespace CacheManager.Tests
             using (cache)
             {
                 var key = Guid.NewGuid().ToString();
-                var expiration = TimeSpan.FromMilliseconds(-1);
+                var expiration = TimeSpan.FromSeconds(-1);
                 Action act = () => cache.Add(new CacheItem<object>(key, "value", ExpirationMode.Sliding, expiration));
 
                 act.ShouldThrow<ArgumentOutOfRangeException>()
@@ -415,7 +415,7 @@ namespace CacheManager.Tests
                 cache.GetCacheItem(key).Should().BeNull("After: " + (Environment.TickCount - start) + ": " + cache.ToString());
             }
         }
-
+        
         [Trait("category", "Unreliable")]
         [Theory]
         [MemberData("TestCacheManagers")]

@@ -1743,7 +1743,7 @@ namespace CacheManager.Core
 
                 if (throwOnFailure)
                 {
-                    throw new InvalidOperationException($"Update failed on '{region}:{key}' because of too many retries.");
+                    throw new InvalidOperationException($"Update failed on '{region}:{key}' because of too many retries: {result.NumberOfTriesNeeded}.");
                 }
             }
             else if (result.UpdateState == UpdateItemResultState.ItemDidNotExist)

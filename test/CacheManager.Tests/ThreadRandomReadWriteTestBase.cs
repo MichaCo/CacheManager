@@ -54,7 +54,7 @@ namespace CacheManager.Tests
                                     Interlocked.Increment(ref countCasModifyCalls);
                                     return value;
                                 }, 
-                                200);
+                                int.MaxValue);
                         }
                     },
                     numThreads,

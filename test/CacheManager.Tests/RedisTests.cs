@@ -89,16 +89,19 @@ namespace CacheManager.Tests
                 var key = Guid.NewGuid().ToString();
                 var value = new Poco() { Id = 23, Something = "§asdad" };
                 cache.Add(key, value);
+                Thread.Sleep(10);
 
                 var version = (int)multi.GetDatabase(0).HashGet(key, "version");
                 version.Should().Be(1);
 
                 cache.Put(key, value);
+                Thread.Sleep(10);
 
                 version = (int)multi.GetDatabase(0).HashGet(key, "version");
                 version.Should().Be(2);
 
                 cache.Update(key, r => { r.Something = "new text"; return r; });
+                Thread.Sleep(10);
 
                 version = (int)multi.GetDatabase(0).HashGet(key, "version");
                 version.Should().Be(3);
@@ -824,7 +827,7 @@ namespace CacheManager.Tests
             }
         }
 
-        [Fact(Skip = "not consistent")]
+        [Fact]
         [Trait("category", "Redis")]
         [Trait("category", "Unreliable")]
         public async Task Redis_Sliding_DoesExpire_MultiClients()
