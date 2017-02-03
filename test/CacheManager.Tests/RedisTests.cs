@@ -53,6 +53,7 @@ namespace CacheManager.Tests
             var client = ConnectionMultiplexer.Connect("localhost");
             var cache = CacheFactory.Build<string>(
                 s => s
+                    .WithJsonSerializer()
                     .WithRedisConfiguration(configKey, client)
                     .WithRedisCacheHandle(configKey));
 
@@ -72,6 +73,7 @@ namespace CacheManager.Tests
             var client = ConnectionMultiplexer.Connect("localhost");
             var cache = CacheFactory.Build<string>(
                 s => s
+                    .WithJsonSerializer()
                     .WithRedisConfiguration(configKey, client, 23)
                     .WithRedisCacheHandle(configKey));
 
@@ -875,8 +877,8 @@ namespace CacheManager.Tests
             // arrange
             var item = new CacheItem<object>(Guid.NewGuid().ToString(), "something", ExpirationMode.Sliding, TimeSpan.FromMilliseconds(100));
             var channelName = Guid.NewGuid().ToString();
-            var cacheA = TestManagers.CreateRedisAndDicCacheWithBackplane(10, true, channelName);
-            var cacheB = TestManagers.CreateRedisAndDicCacheWithBackplane(10, true, channelName);
+            var cacheA = TestManagers.CreateRedisAndDicCacheWithBackplane(10, false, channelName);
+            var cacheB = TestManagers.CreateRedisAndDicCacheWithBackplane(10, false, channelName);
 
             // act/assert
             using (cacheA)
