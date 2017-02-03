@@ -136,7 +136,7 @@ namespace CacheManager.Core
         /// <returns>The builder instance.</returns>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="redisConfigurationKey"/> is null.</exception>
         public static ConfigurationBuilderCacheHandlePart WithRedisCacheHandle(this ConfigurationBuilderCachePart part, string redisConfigurationKey) =>
-            WithRedisCacheHandle(part, redisConfigurationKey, false);
+            WithRedisCacheHandle(part, redisConfigurationKey, true);
 
         /// <summary>
         /// Adds a <see cref="RedisCacheHandle{TCacheValue}"/>.

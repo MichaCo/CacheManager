@@ -46,6 +46,45 @@ namespace CacheManager.Tests
 #endif
 
         [Fact]
+        [Trait("category", "Redis")]
+        public void Redis_Extensions_WithClient()
+        {
+            var configKey = Guid.NewGuid().ToString();
+            var client = ConnectionMultiplexer.Connect("localhost");
+            var cache = CacheFactory.Build<string>(
+                s => s
+                    .WithRedisConfiguration(configKey, client)
+                    .WithRedisCacheHandle(configKey));
+
+            var handle = cache.CacheHandles.OfType<RedisCacheHandle<string>>().First();
+            var cfg = RedisConfigurations.GetConfiguration(configKey);
+
+            Assert.Equal(handle.Configuration.Name, configKey);
+            Assert.Equal(0, cfg.Database);
+            Assert.Equal("localhost:6379", cfg.ConnectionString);
+        }
+
+        [Fact]
+        [Trait("category", "Redis")]
+        public void Redis_Extensions_WithClientWithDb()
+        {
+            var configKey = Guid.NewGuid().ToString();
+            var client = ConnectionMultiplexer.Connect("localhost");
+            var cache = CacheFactory.Build<string>(
+                s => s
+                    .WithRedisConfiguration(configKey, client, 23)
+                    .WithRedisCacheHandle(configKey));
+
+            var handle = cache.CacheHandles.OfType<RedisCacheHandle<string>>().First();
+            var cfg = RedisConfigurations.GetConfiguration(configKey);
+
+            Assert.Equal(handle.Configuration.Name, configKey);
+            Assert.Equal(23, cfg.Database);
+            Assert.Equal("localhost:6379", cfg.ConnectionString);
+        }
+
+        [Fact]
+        [Trait("category", "Redis")]
         public void Redis_BackplaneEvents_Add()
         {
             var key = Guid.NewGuid().ToString();
@@ -76,12 +115,13 @@ namespace CacheManager.Tests
         [Trait("category", "Redis")]
         public void Redis_ValidateVersion_AddPutGetUpdate()
         {
+            var configKey = Guid.NewGuid().ToString();
             var multi = ConnectionMultiplexer.Connect("localhost");
             var cache = CacheFactory.Build<Poco>(
                 s => s
-                    .WithRedisConfiguration("redis", multi)
+                    .WithRedisConfiguration(configKey, multi)
                     .WithJsonSerializer()
-                    .WithRedisCacheHandle("redis"));
+                    .WithRedisCacheHandle(configKey));
 
             // act/assert
             using (cache)
