@@ -465,6 +465,24 @@ namespace CacheManager.Tests
             config.CacheHandleConfigurations[0].Name.Should().Be("name");
             config.CacheHandleConfigurations[0].Key.Should().Be("name");    // now key gets set to name
         }
+        
+        [Fact]
+        public void Configuration_CacheHandle_Type_MemcachedB()
+        {
+            var data = new Dictionary<string, string>
+            {
+                {"cacheManagers:0:name", "name"},
+                {"cacheManagers:0:handles:0:type", "CacheManager.Memcached.MemcachedCacheHandle`1, CacheManager.Memcached"},
+                {"cacheManagers:0:handles:0:name", "name"},
+            };
+
+            var config = GetConfiguration(data).GetCacheConfiguration("name");
+            config.Name.Should().Be("name");
+            config.CacheHandleConfigurations.Count.Should().Be(1);
+            config.CacheHandleConfigurations[0].HandleType.Should().Be(typeof(Memcached.MemcachedCacheHandle<>));
+            config.CacheHandleConfigurations[0].Name.Should().Be("name");
+            config.CacheHandleConfigurations[0].Key.Should().Be("name");    // now key gets set to name
+        }
 
         [Fact]
         public void Configuration_CacheHandle_KnownType_Web()
@@ -928,6 +946,20 @@ namespace CacheManager.Tests
                 {"cacheManagers:0:name", "name"},
                 {"cacheManagers:0:handles:0:knownType", "Dictionary"},
                 {"cacheManagers:0:serializer:knownType", "Protobuf"}
+            };
+
+            var config = GetConfiguration(data).GetCacheConfiguration("name");
+            config.SerializerType.Should().Be(typeof(Serialization.ProtoBuf.ProtoBufSerializer));
+        }
+
+        [Fact]
+        public void Configuration_Serializer_Type_Protobuf()
+        {
+            var data = new Dictionary<string, string>
+            {
+                {"cacheManagers:0:name", "name"},
+                {"cacheManagers:0:handles:0:knownType", "Dictionary"},
+                {"cacheManagers:0:serializer:type", "CacheManager.Serialization.ProtoBuf.ProtoBufSerializer, CacheManager.Serialization.ProtoBuf"}
             };
 
             var config = GetConfiguration(data).GetCacheConfiguration("name");
