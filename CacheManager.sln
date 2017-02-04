@@ -7,9 +7,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{58CC885F-40A
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{D83D3737-3BD4-4AEE-8C42-CDED9410DB79}"
 	ProjectSection(SolutionItems) = preProject
-		.gitignore = .gitignore
-		.travis.yml = .travis.yml
-		appveyor.vs2013.yml = appveyor.vs2013.yml
 		appveyor.yml = appveyor.yml
 		Benchmarks.md = Benchmarks.md
 		build.cmd = build.cmd
