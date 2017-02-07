@@ -8,7 +8,7 @@ namespace CacheManager.MicrosoftCachingMemory
     /// <summary>
     /// Extensions for the configuration builder specific to Microsoft.Extensions.Caching.Memory cache handle.
     /// </summary>
-    public static class MemoryCacheExtensions
+    internal static class MemoryCacheExtensions
     {
         /// <summary>
         /// Extension method to check if a key exists in the given <paramref name="cache"/> instance.
@@ -32,14 +32,16 @@ namespace CacheManager.MicrosoftCachingMemory
             }
         }
 
-        internal static void RemoveChilds(this MemoryCache cache, object key)
+        internal static void RemoveChilds(this MemoryCache cache, object region)
         {
-            object temp;
-            if (cache.TryGetValue(key, out temp))
+            object keys;
+            if (cache.TryGetValue(region, out keys))
             {
-                var set = (HashSet<object>)temp;
-                foreach (var item in set)
-                    cache.Remove(item);
+                var keySet = (HashSet<object>)keys;
+                foreach (var key in keySet)
+                {
+                    cache.Remove(key);
+                }
             }
         }
     }

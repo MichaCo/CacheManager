@@ -73,7 +73,7 @@ namespace CacheManager.Config.Tests
                 eventRemoveCount));
         }
 
-        public static void PutAndMultiGetTest(params ICacheManager<object>[] caches)
+        public static void PutAndMultiGetTest(params ICacheManager<string>[] caches)
         {
             var swatch = Stopwatch.StartNew();
             var threads = 50;
@@ -114,7 +114,7 @@ namespace CacheManager.Config.Tests
                             }
                         }
 
-                        object value;
+                        string value;
                         Interlocked.Increment(ref ops);
                         Interlocked.Increment(ref ops); // update does a get and then set = 2 ops
                         if (!cache.TryUpdate("key" + rand.Next(0, items - 1), region, v => Guid.NewGuid().ToString(), out value))

@@ -122,9 +122,9 @@ namespace CacheManager.Tests
             var cache = CacheFactory.Build<Poco>(
                 s => s
                     .WithRedisConfiguration(configKey, multi)
-                    .WithJsonSerializer()
+                    .WithBondBinarySerializer()
                     .WithRedisCacheHandle(configKey));
-
+            
             // act/assert
             using (cache)
             {
@@ -794,7 +794,7 @@ namespace CacheManager.Tests
         {
             using (var cache = CacheFactory.Build<RaceConditionTestElement>(settings =>
             {
-                settings.WithUpdateMode(CacheUpdateMode.Full)
+                settings.WithUpdateMode(CacheUpdateMode.Up)
                     .WithJsonSerializer()
                     .WithRedisCacheHandle("default")
                     .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMinutes(20));
@@ -1316,11 +1316,14 @@ namespace CacheManager.Tests
     [Serializable]
 #endif
     [ExcludeFromCodeCoverage]
+    [Bond.Schema]
     internal class Poco
     {
+        [Bond.Id(1)]
         [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "For testing only")]
         public int Id { get; set; }
 
+        [Bond.Id(2)]
         [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "For testing only")]
         public string Something { get; set; }
     }

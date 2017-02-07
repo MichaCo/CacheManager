@@ -184,7 +184,7 @@ namespace CacheManager.Memcached
             var result = this.Cache.ExecuteAppend(GetKey(key), default(ArraySegment<byte>));
             return result.StatusCode.HasValue && result.StatusCode.Value != (int)StatusCode.KeyNotFound;
         }
-        
+
         /// <inheritdoc />
         public override bool Exists(string key, string region)
         {
@@ -503,14 +503,12 @@ namespace CacheManager.Memcached
                 NotNull(serializer, nameof(serializer));
                 this.serializer = serializer;
             }
-
-            // TODO: can be optimized like the redis implementation, for primitives we don't have to call the serializer...
+            
             public object Deserialize(CacheItem item)
             {
                 var data = new byte[item.Data.Count];
-                Array.Copy(item.Data.Array, item.Data.Offset, data, 0, item.Data.Count);
-
-                // TODO actual type in meta data separated?
+                Buffer.BlockCopy(item.Data.Array, item.Data.Offset, data, 0, item.Data.Count);
+                
                 return this.serializer.DeserializeCacheItem<T>(data);
             }
 

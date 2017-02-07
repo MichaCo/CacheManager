@@ -21,6 +21,78 @@ namespace CacheManager.Tests
     public class CacheFactoryTests
     {
         [Fact]
+        public void ConfigurationBuilder_EmptyCtor()
+        {
+            var builder = new ConfigurationBuilder();
+            var cfg = builder.Build();
+
+            cfg.Should().NotBeNull();
+            cfg.Name.Should().NotBeNull();
+        }
+
+        [Fact]
+        public void ConfigurationBuilder_NamedCtorNull()
+        {
+            Action act = () => new ConfigurationBuilder((string)null);
+
+            act.ShouldThrow<ArgumentNullException>().WithMessage("*name*");
+        }
+
+        [Fact]
+        public void ConfigurationBuilder_ForConfigCtorNull()
+        {
+            Action act = () => new ConfigurationBuilder((ICacheManagerConfiguration)null);
+
+            act.ShouldThrow<ArgumentNullException>().WithMessage("*forConfiguration*");
+        }
+
+        [Fact]
+        public void ConfigurationBuilder_NamedForConfigCtorNull()
+        {
+            Action act = () => new ConfigurationBuilder(null, null);
+
+            act.ShouldThrow<ArgumentNullException>().WithMessage("*name*");
+        }
+
+        [Fact]
+        public void ConfigurationBuilder_NamedForConfigCtorNullB()
+        {
+            Action act = () => new ConfigurationBuilder("name", null);
+
+            act.ShouldThrow<ArgumentNullException>().WithMessage("*forConfiguration*");
+        }
+
+        [Fact]
+        public void ConfigurationBuilder_EmptyCtorAdd()
+        {
+            var builder = new ConfigurationBuilder();
+            builder.WithDictionaryHandle();
+            var cfg = builder.Build();
+
+            cfg.CacheHandleConfigurations.Count.Should().Be(1);
+        }
+
+        [Fact]
+        public void ConfigurationBuilder_ForConfiguration()
+        {
+            var builder = new ConfigurationBuilder("name");
+            builder.WithDictionaryHandle().WithExpiration(ExpirationMode.Sliding, TimeSpan.FromMinutes(10));
+            builder.WithJsonSerializer();
+            var cfg = builder.Build();
+
+            var forCfg = new ConfigurationBuilder("newName", cfg);
+            forCfg.WithDictionaryHandle().WithExpiration(ExpirationMode.Absolute, TimeSpan.FromHours(1));
+            forCfg.WithGzJsonSerializer();
+
+            cfg.CacheHandleConfigurations.Count.Should().Be(2);
+            cfg.Name.Should().Be("newName");
+            cfg.CacheHandleConfigurations.First().ExpirationMode.Should().Be(ExpirationMode.Sliding);
+            cfg.CacheHandleConfigurations.First().ExpirationTimeout.Should().Be(TimeSpan.FromMinutes(10));
+            cfg.CacheHandleConfigurations.Last().ExpirationMode.Should().Be(ExpirationMode.Absolute);
+            cfg.CacheHandleConfigurations.Last().ExpirationTimeout.Should().Be(TimeSpan.FromHours(1));
+        }
+
+        [Fact]
         [ReplaceCulture]
         public void CacheFactory_FromConfig_NullCheck_A()
         {
@@ -174,7 +246,7 @@ namespace CacheManager.Tests
             // act
             Func<ICacheManager<string>> act = () => CacheFactory.Build<string>(settings =>
             {
-                settings.WithUpdateMode(CacheUpdateMode.Full)
+                settings.WithUpdateMode(CacheUpdateMode.Up)
                     .WithDictionaryHandle("h1")
                     .DisablePerformanceCounters();
             });

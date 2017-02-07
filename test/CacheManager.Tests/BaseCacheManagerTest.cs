@@ -19,7 +19,8 @@ namespace CacheManager.Tests
         Binary,
         Json,
         GzJson,
-        Proto
+        Proto,
+        BondBinary
     }
 
     [ExcludeFromCodeCoverage]
@@ -81,6 +82,20 @@ namespace CacheManager.Tests
                 }
 
                 return CreateRedisCache(databaseCount, false, Serializer.Binary);
+            }
+        }
+
+        public static ICacheManager<object> WithRedisCacheBondBinary
+        {
+            get
+            {
+                Interlocked.Increment(ref databaseCount);
+                if (databaseCount >= 2000)
+                {
+                    databaseCount = StartDbCount;
+                }
+
+                return CreateRedisCache(databaseCount, false, Serializer.BondBinary);
             }
         }
 
@@ -212,7 +227,7 @@ namespace CacheManager.Tests
                 settings =>
                 {
                     settings
-                        .WithUpdateMode(CacheUpdateMode.Full)
+                        .WithUpdateMode(CacheUpdateMode.Up)
                         .WithSystemRuntimeCacheHandle("cacheHandleA")
                             .EnableStatistics()
                         .And.WithSystemRuntimeCacheHandle("cacheHandleB")
@@ -404,6 +419,14 @@ namespace CacheManager.Tests
             }
         }
 
+        public static ICacheManager<object> WithMemcachedBondBinary
+        {
+            get
+            {
+                return CreateMemcachedCache<object>(Serializer.BondBinary);
+            }
+        }
+
         public static ICacheManager<T> CreateMemcachedCache<T>(Serializer serializer = Serializer.Json)
         {
             var memConfig = new MemcachedClientConfiguration();
@@ -449,6 +472,7 @@ namespace CacheManager.Tests
                 yield return new object[] { TestManagers.WithRedisCacheJson };
                 yield return new object[] { TestManagers.WithRedisCacheGzJson };
                 yield return new object[] { TestManagers.WithRedisCacheProto };
+                yield return new object[] { TestManagers.WithRedisCacheBondBinary };
                 yield return new object[] { TestManagers.WithDicAndRedisCache };
 
                 yield return new object[] { TestManagers.WithRedisCacheJsonNoLua };
@@ -461,6 +485,7 @@ namespace CacheManager.Tests
                 yield return new object[] { TestManagers.WithMemcachedJson };
                 yield return new object[] { TestManagers.WithMemcachedGzJson };
                 yield return new object[] { TestManagers.WithMemcachedProto };
+                yield return new object[] { TestManagers.WithMemcachedBondBinary };
 #endif
 #if COUCHBASEENABLED
                 yield return new object[] { TestManagers.WithCouchbaseMemcached };
@@ -502,6 +527,10 @@ namespace CacheManager.Tests
 
                 case Serializer.Proto:
                     part.WithProtoBufSerializer();
+                    break;
+
+                case Serializer.BondBinary:
+                    part.WithBondBinarySerializer(2048);
                     break;
             }
             return part;

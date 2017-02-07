@@ -58,7 +58,7 @@ namespace CacheManager.Core.Internal
             NotNullOrWhiteSpace(region, nameof(region));
 
             var key = string.Concat(region, ":");
-            foreach (var item in this.cache.Where(p => p.Key.StartsWith(key, StringComparison.Ordinal)))
+            foreach (var item in this.cache.Where(p => p.Key.StartsWith(key, StringComparison.OrdinalIgnoreCase)))
             {
                 CacheItem<TCacheValue> val = null;
                 this.cache.TryRemove(item.Key, out val);
@@ -122,7 +122,7 @@ namespace CacheManager.Core.Internal
             CacheItem<TCacheValue> result = null;
             if (this.cache.TryGetValue(fullKey, out result))
             {
-                if (IsExpired(result, DateTime.UtcNow))
+                if (result.ExpirationMode != ExpirationMode.None && IsExpired(result, DateTime.UtcNow))
                 {
                     this.cache.TryRemove(fullKey, out result);
                     return null;

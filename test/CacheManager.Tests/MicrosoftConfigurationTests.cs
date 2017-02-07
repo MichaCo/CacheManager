@@ -182,7 +182,7 @@ namespace CacheManager.Tests
                 {"cacheManagers:0:name", "name"},
                 {"cacheManagers:0:maxRetries", "42"},
                 {"cacheManagers:0:retryTimeout", "21"},
-                {"cacheManagers:0:updateMode", "Full"},
+                {"cacheManagers:0:updateMode", "Up"},
                 {"cacheManagers:0:handles:0:knownType", "Dictionary"},
             };
 
@@ -190,7 +190,7 @@ namespace CacheManager.Tests
             config.Name.Should().Be("name");
             config.MaxRetries.Should().Be(42);
             config.RetryTimeout.Should().Be(21);
-            config.UpdateMode.Should().Be(CacheUpdateMode.Full);
+            config.UpdateMode.Should().Be(CacheUpdateMode.Up);
         }
 
         [Fact]

@@ -47,6 +47,20 @@ namespace CacheManager.Tests
         }
 
         [Fact]
+        public void CacheItem_WithAbsoluteExpiration_InvalidB()
+        {
+            // arrange
+            var baseItem = new CacheItem<object>("key", "region", "value", ExpirationMode.Sliding, TimeSpan.FromDays(10));
+
+            // act
+            Action act = () => baseItem.WithAbsoluteExpiration(TimeSpan.FromMilliseconds(-10));
+
+            // assert
+            act.ShouldThrow<ArgumentException>().WithMessage("*value must be greater*");
+        }
+
+
+        [Fact]
         public void CacheItem_WithSlidingExpiration_Invalid()
         {
             // arrange
@@ -139,7 +153,7 @@ namespace CacheManager.Tests
 
             // assert
             result.ExpirationMode.Should().Be(ExpirationMode.Absolute);
-            result.ExpirationTimeout.Should().Be(TimeSpan.FromMinutes(10));
+            result.ExpirationTimeout.Should().BeCloseTo(TimeSpan.FromMinutes(10), 100);
             result.Value.Should().Be(baseItem.Value);
             result.Region.Should().Be(baseItem.Region);
             result.Key.Should().Be(baseItem.Key);

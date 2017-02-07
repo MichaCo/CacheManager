@@ -7,6 +7,7 @@
     "CacheManager.Microsoft.Extensions.Configuration": { "target": "project" },
     "CacheManager.Core": { "target": "project" },
     "CacheManager.Serialization.Json": { "target": "project" },
+    "CacheManager.Serialization.Bond": { "target": "project" },
     "CacheManager.StackExchange.Redis": { "target": "project" },
     "Microsoft.Extensions.Logging.Console": "1.0.0",
     "Microsoft.Extensions.Logging.Debug": "1.0.0",
@@ -25,6 +26,7 @@
         "System.Configuration": ""
       },
       "dependencies": {
+        "CacheManager.Memcached": { "target": "project" },
         "CacheManager.SystemRuntimeCaching": { "target": "project" },
         "CacheManager.Couchbase": { "target": "project" }
       }

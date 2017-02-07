@@ -157,6 +157,15 @@ namespace CacheManager.Core.Internal
                 throw new InvalidOperationException("No cache handles defined.");
             }
 
+            // validate backplane is the last handle in the cache manager (only if backplane is configured)
+            if (handles.Any(p => p.Configuration.IsBackplaneSource) && manager.Configuration.BackplaneType != null)
+            {
+                if (!handles.Last().Configuration.IsBackplaneSource)
+                {
+                    throw new InvalidOperationException("The last cache handle should be the backplane source.");
+                }
+            }
+
             return handles;
         }
 

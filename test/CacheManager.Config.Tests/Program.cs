@@ -2,6 +2,10 @@
 using System.Linq;
 using System.Threading;
 using CacheManager.Core;
+#if !NETCOREAPP
+using Enyim.Caching;
+using Enyim.Caching.Configuration;
+#endif
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
@@ -42,9 +46,16 @@ namespace CacheManager.Config.Tests
                         .WithEndpoint("127.0.0.1", 6379);
                 });
 
-                builder.WithJsonSerializer();
-                
-                var cacheA = new BaseCacheManager<object>(builder.Build());
+                //builder.WithGzJsonSerializer();
+                builder.WithBondBinarySerializer();
+
+#if !NETCOREAPP
+                //var memcachedCfg = new MemcachedClientConfiguration();
+                //memcachedCfg.AddServer("localhost", 11211);
+                //builder.WithMemcachedCacheHandle(memcachedCfg);
+#endif
+                 
+                var cacheA = new BaseCacheManager<string>(builder.Build());
                 cacheA.Clear();
 
                 for (int i = 0; i < iterations; i++)

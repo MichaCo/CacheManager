@@ -11,6 +11,7 @@ using FluentAssertions;
 using Newtonsoft.Json;
 using ProtoBuf;
 using Xunit;
+using CacheManager.Serialization.Bond;
 #if !NETCOREAPP
 using System.Runtime.Serialization.Formatters;
 using System.Runtime.Serialization.Formatters.Binary;
@@ -27,6 +28,7 @@ namespace CacheManager.Tests
     public class SerializerTests : BaseCacheManagerTest
     {
 #if !NETCOREAPP
+
         [Fact]
         public void BinarySerializer_RespectBinarySerializerSettings()
         {
@@ -130,6 +132,7 @@ namespace CacheManager.Tests
         }
 
 #endif
+
         [Fact]
         public void JsonSerializer_RespectJsonSerializerSettings()
         {
@@ -222,7 +225,7 @@ namespace CacheManager.Tests
 
             // act
             var data = serializer.SerializeCacheItem(item);
-            var result = serializer.DeserializeCacheItem<object>(data, typeof(T));
+            var result = serializer.DeserializeCacheItem<object>(data);
 
             result.Value.Should().Be(value);
             result.ValueType.Should().Be(item.ValueType);
@@ -283,6 +286,7 @@ namespace CacheManager.Tests
         }
 
         /* ######### gz json ######### */
+
         [Fact]
         public void GzJsonSerializer_RespectJsonSerializerSettings()
         {
@@ -375,7 +379,7 @@ namespace CacheManager.Tests
 
             // act
             var data = serializer.SerializeCacheItem(item);
-            var result = serializer.DeserializeCacheItem<object>(data, typeof(T));
+            var result = serializer.DeserializeCacheItem<object>(data);
 
             result.Value.Should().Be(value);
             result.ValueType.Should().Be(item.ValueType);
@@ -519,7 +523,7 @@ namespace CacheManager.Tests
 
             // act
             var data = serializer.SerializeCacheItem(item);
-            var result = serializer.DeserializeCacheItem<object>(data, typeof(T));
+            var result = serializer.DeserializeCacheItem<object>(data);
 
             result.Value.Should().Be(value);
             result.ValueType.Should().Be(item.ValueType);
@@ -599,6 +603,136 @@ namespace CacheManager.Tests
                 cache.Get<SerializerPoccoSerializable>(key).ShouldBeEquivalentTo(pocco);
             }
         }
+
+        #region Bond binary serializer
+        
+        [Theory]
+        [InlineData(true)]
+        [InlineData(float.MaxValue)]
+        [InlineData(int.MaxValue)]
+        [InlineData(long.MaxValue)]
+        [InlineData("some string")]
+        [ReplaceCulture]
+        public void BondBinarySerializer_CacheItem_Primitives<T>(T value)
+        {
+            // arrange
+            var serializer = new BondBinaryCacheSerializer();
+            var item = new CacheItem<T>("key", value);
+
+            // act
+            var data = serializer.SerializeCacheItem(item);
+            var result = serializer.DeserializeCacheItem<T>(data, typeof(T));
+
+            result.Value.Should().Be(value);
+            result.ValueType.Should().Be(item.ValueType);
+            result.CreatedUtc.Should().Be(item.CreatedUtc);
+            result.ExpirationMode.Should().Be(item.ExpirationMode);
+            result.ExpirationTimeout.Should().Be(item.ExpirationTimeout);
+            result.Key.Should().Be(item.Key);
+            result.LastAccessedUtc.Should().Be(item.LastAccessedUtc);
+            result.Region.Should().Be(item.Region);
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(float.MaxValue)]
+        [InlineData(int.MaxValue)]
+        [InlineData(long.MaxValue)]
+        [InlineData("some string")]
+        [ReplaceCulture]
+        public void BondBinarySerializer_CacheItemOfObject_Primitives<T>(T value)
+        {
+            // arrange
+            var serializer = new BondBinaryCacheSerializer();
+            var item = new CacheItem<object>("key", value);
+
+            // act
+            var data = serializer.SerializeCacheItem(item);
+
+            // not using the type defined, expecting the serializer object to store the actualy value type correctly...
+            var result = serializer.DeserializeCacheItem<object>(data);
+
+            result.Value.Should().Be(value);
+            result.ValueType.Should().Be(item.ValueType);
+            result.CreatedUtc.Should().Be(item.CreatedUtc);
+            result.ExpirationMode.Should().Be(item.ExpirationMode);
+            result.ExpirationTimeout.Should().Be(item.ExpirationTimeout);
+            result.Key.Should().Be(item.Key);
+            result.LastAccessedUtc.Should().Be(item.LastAccessedUtc);
+            result.Region.Should().Be(item.Region);
+        }
+
+        [Fact]
+        public void BondBinarySerializer_Pocco()
+        {
+            // arrange
+            var serializer = new BondBinaryCacheSerializer();
+            var item = SerializerPoccoSerializable.Create();
+
+            // act
+            var data = serializer.Serialize(item);
+            var result = serializer.Deserialize(data, item.GetType());
+
+            result.ShouldBeEquivalentTo(item);
+        }
+
+        [Fact]
+        public void BondBinarySerializer_CacheItemWithPocco()
+        {
+            // arrange
+            var serializer = new BondBinaryCacheSerializer();
+            var pocco = SerializerPoccoSerializable.Create();
+            var item = new CacheItem<SerializerPoccoSerializable>("key", "region", pocco, ExpirationMode.Absolute, TimeSpan.FromDays(1));
+
+            var x = serializer.Serialize(pocco);
+
+            // act
+            var data = serializer.SerializeCacheItem(item);
+            var result = serializer.DeserializeCacheItem<SerializerPoccoSerializable>(data, pocco.GetType());
+
+            result.ShouldBeEquivalentTo(item);
+        }
+
+        [Fact]
+        public void BondBinarySerializer_ObjectCacheItemWithPocco()
+        {
+            // arrange
+            var serializer = new BondBinaryCacheSerializer();
+            var pocco = SerializerPoccoSerializable.Create();
+            var item = new CacheItem<object>("key", "region", pocco, ExpirationMode.Absolute, TimeSpan.FromDays(1));
+
+            var x = serializer.Serialize(pocco);
+
+            // act
+            var data = serializer.SerializeCacheItem(item);
+            var result = serializer.DeserializeCacheItem<object>(data, pocco.GetType());
+
+            result.ShouldBeEquivalentTo(item);
+        }
+
+        [Fact]
+        [Trait("category", "Redis")]
+        public void BondBinarySerializer_FullAddGet()
+        {
+            using (var cache = TestManagers.CreateRedisCache(serializer: Serializer.BondBinary))
+            {
+                // arrange
+                var key = Guid.NewGuid().ToString();
+                var pocco = SerializerPoccoSerializable.Create();
+
+                // act
+                Action actSet = () =>
+                {
+                    cache.Add(key, pocco);
+                };
+
+                // assert
+                actSet.ShouldNotThrow();
+                cache.Get<SerializerPoccoSerializable>(key).ShouldBeEquivalentTo(pocco);
+            }
+        }
+
+        #endregion Bond binary serializer
 
         private static class DataGenerator
         {
@@ -693,22 +827,28 @@ namespace CacheManager.Tests
         [Serializable]
 #endif
         [ProtoContract]
+        [Bond.Schema]
         private class SerializerPoccoSerializable
         {
             [ProtoMember(1)]
+            [Bond.Id(1)]
             public string StringProperty { get; set; }
 
             [ProtoMember(2)]
+            [Bond.Id(2)]
             public int IntProperty { get; set; }
 
             [ProtoMember(3)]
+            [Bond.Id(3)]
             public string[] StringArrayProperty { get; set; }
 
             [ProtoMember(4)]
-            public IList<string> StringListProperty { get; set; }
+            [Bond.Id(4)]
+            public List<string> StringListProperty { get; set; }
 
             [ProtoMember(5)]
-            public IDictionary<string, ChildPocco> ChildDictionaryProperty { get; set; }
+            [Bond.Id(5)]
+            public Dictionary<string, ChildPocco> ChildDictionaryProperty { get; set; }
 
             public static SerializerPoccoSerializable Create()
             {
@@ -720,12 +860,12 @@ namespace CacheManager.Tests
                     StringArrayProperty = DataGenerator.GetStrings(),
                     StringListProperty = new List<string>(DataGenerator.GetStrings()),
                     ChildDictionaryProperty = new Dictionary<string, ChildPocco>()
-                {
-                    { DataGenerator.GetString(), new ChildPocco() { StringProperty = DataGenerator.GetString() } },
-                    { DataGenerator.GetString(), new ChildPocco() { StringProperty = DataGenerator.GetString() } },
-                    { DataGenerator.GetString(), new ChildPocco() { StringProperty = DataGenerator.GetString() } },
-                    { DataGenerator.GetString(), new ChildPocco() { StringProperty = DataGenerator.GetString() } },
-                }
+                    {
+                        { DataGenerator.GetString(), new ChildPocco() { StringProperty = DataGenerator.GetString() } },
+                        { DataGenerator.GetString(), new ChildPocco() { StringProperty = DataGenerator.GetString() } },
+                        { DataGenerator.GetString(), new ChildPocco() { StringProperty = DataGenerator.GetString() } },
+                        { DataGenerator.GetString(), new ChildPocco() { StringProperty = DataGenerator.GetString() } },
+                    }
                 };
             }
         }
@@ -735,9 +875,11 @@ namespace CacheManager.Tests
         [Serializable]
 #endif
         [ProtoContract]
+        [Bond.Schema]
         private class ChildPocco
         {
             [ProtoMember(1)]
+            [Bond.Id(1)]
             public string StringProperty { get; set; }
         }
     }

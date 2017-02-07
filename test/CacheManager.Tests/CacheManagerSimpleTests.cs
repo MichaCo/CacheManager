@@ -1678,12 +1678,11 @@ namespace CacheManager.Tests
             using (cache)
             {
                 // arrange
-                var keys = new List<string>() { Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString() };
+                var keys = new List<string>() { Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString() };
                 var values = new List<object>()
                 {
                     "string", 33293, 0.123f, 0.324d, 123311L, true,
-                    new ComplexType() { Name = "name", SomeBool = false, SomeId = 213 },
-                    new DateTime(2014, 1, 3)
+                    new ComplexType() { Name = "name", SomeBool = false, SomeId = 213 }
                 };
 
                 // act
@@ -1695,7 +1694,6 @@ namespace CacheManager.Tests
                 long someLonging = cache.Get<long>(keys[4]);
                 bool someBooling = cache.Get<bool>(keys[5]);
                 ComplexType obj = cache.Get<ComplexType>(keys[6]);
-                DateTime date = cache.Get<DateTime>(keys[7]);
                 object someObject = cache.Get<object>("nonexistent");
 
                 // assert
@@ -1707,7 +1705,6 @@ namespace CacheManager.Tests
                 someLonging.ShouldBeEquivalentTo(values[4]);
                 someBooling.ShouldBeEquivalentTo(values[5]);
                 obj.ShouldBeEquivalentTo(values[6]);
-                date.ShouldBeEquivalentTo(values[7]);
                 someObject.Should().Be(null);
             }
         }
@@ -1741,7 +1738,7 @@ namespace CacheManager.Tests
             {
                 // arrange
                 var keys = new List<string>() { Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString() };
-                var values = new List<object>() { new DateTime(2014, 1, 1), 234, "test string" };
+                var values = new List<object>() { true, 234, "test string" };
 
                 // act
                 Action actPut = () =>
@@ -1764,7 +1761,7 @@ namespace CacheManager.Tests
             {
                 // arrange
                 var keys = new List<string>() { Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString() };
-                var values = new List<object>() { new DateTime(2014, 1, 1), 234, "test string" };
+                var values = new List<object>() { true, 234, "test string" };
 
                 // act
                 Action actSet = () =>
@@ -1787,7 +1784,7 @@ namespace CacheManager.Tests
             {
                 // arrange
                 var keys = new List<string>() { Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString() };
-                var values = new List<object>() { new DateTime(2014, 1, 1), 234, "test string" };
+                var values = new List<object>() { true, 234, "test string" };
 
                 // act
                 Action actSet = () =>
@@ -1810,7 +1807,7 @@ namespace CacheManager.Tests
             {
                 // arrange
                 var keys = new List<string>() { Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString() };
-                var values = new List<object>() { new DateTime(2014, 1, 1), 234, "test string" };
+                var values = new List<object>() { true, 234, "test string" };
                 var nulls = new List<object>() { null, null, null };
 
                 // act
@@ -1985,15 +1982,19 @@ namespace CacheManager.Tests
         [Serializable]
 #endif
         [ProtoBuf.ProtoContract]
+        [Bond.Schema]
         public class ComplexType
         {
             [ProtoBuf.ProtoMember(1)]
+            [Bond.Id(1)]
             public string Name { get; set; }
 
             [ProtoBuf.ProtoMember(2)]
+            [Bond.Id(2)]
             public long SomeId { get; set; }
 
             [ProtoBuf.ProtoMember(3)]
+            [Bond.Id(3)]
             public bool SomeBool { get; set; }
 
             public override bool Equals(object obj)

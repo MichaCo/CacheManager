@@ -55,23 +55,23 @@ namespace CacheManager.Core
         /// <summary>
         /// Initializes a new instance of the <see cref="ConfigurationBuilder"/> class
         /// which provides fluent configuration methods.
-        /// Creates a builder which allows to modify the existing <paramref name="configuration"/>.
+        /// Creates a builder which allows to modify the existing <paramref name="forConfiguration"/>.
         /// </summary>
-        /// <param name="configuration">The configuration the builder should be instantiated for.</param>
-        public ConfigurationBuilder(ICacheManagerConfiguration configuration)
-            : base((CacheManagerConfiguration)configuration)
+        /// <param name="forConfiguration">The configuration the builder should be instantiated for.</param>
+        public ConfigurationBuilder(ICacheManagerConfiguration forConfiguration)
+            : base((CacheManagerConfiguration)forConfiguration)
         {
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ConfigurationBuilder"/> class
         /// which provides fluent configuration methods.
-        /// Creates a builder which allows to modify the existing <paramref name="configuration"/>.
+        /// Creates a builder which allows to modify the existing <paramref name="forConfiguration"/>.
         /// </summary>
         /// <param name="name">The name of the cache manager.</param>
-        /// <param name="configuration">The configuration the builder should be instantiated for.</param>
-        public ConfigurationBuilder(string name, ICacheManagerConfiguration configuration)
-            : base((CacheManagerConfiguration)configuration)
+        /// <param name="forConfiguration">The configuration the builder should be instantiated for.</param>
+        public ConfigurationBuilder(string name, ICacheManagerConfiguration forConfiguration)
+            : base((CacheManagerConfiguration)forConfiguration)
         {
             NotNullOrWhiteSpace(name, nameof(name));
             this.Configuration.Name = name;
@@ -93,7 +93,7 @@ namespace CacheManager.Core
         {
             NotNull(settings, nameof(settings));
 
-            var part = new ConfigurationBuilderCachePart();
+            var part = new ConfigurationBuilder();
             settings(part);
             return part.Configuration;
         }
@@ -116,7 +116,7 @@ namespace CacheManager.Core
             NotNullOrWhiteSpace(name, nameof(name));
             NotNull(settings, nameof(settings));
 
-            var part = new ConfigurationBuilderCachePart();
+            var part = new ConfigurationBuilder();
             settings(part);
             part.Configuration.Name = name;
             return part.Configuration;

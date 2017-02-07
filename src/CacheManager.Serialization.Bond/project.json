@@ -1,0 +1,62 @@
+﻿{
+  "version": "0.9.4-*",
+  "description": "CacheManager extension package providing Microsoft Bond based serialization for distributed caches. CacheManager is an open source caching abstraction layer for .NET written in C#. It supports various cache providers and implements many advanced features. The Core library contains a Newtonsoft.Json based serializer implementation which can be used instead of the default binary serializer.",
+  "packOptions": {
+    "licenseUrl": "https://github.com/MichaCo/CacheManager/blob/master/LICENSE",
+    "projectUrl": "http://www.cachemanager.net",
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/MichaCo/CacheManager"
+    },
+    "summary": "CacheManager extension package providing Microsoft Bond based serialization for distributed caches.",
+    "tags": [ "Caching", "Cache", "CacheManager", "Serialization", "Bond" ]
+  },
+  "authors": [ "MichaConrad" ],
+  "buildOptions": {
+    "allowUnsafe": false,
+    "languageVersion": "csharp6",
+    "warningsAsErrors": true,
+    "xmlDoc": true,
+    "keyFile": "../../tools/key.snk"
+  },
+  "copyright": "Copyright (c) 2016 MichaConrad",
+  "configurations": {
+    "Debug": {
+      "buildOptions": {
+        "define": [ "DEBUG" ]
+      }
+    },
+    "Release": {
+      "buildOptions": {
+        "define": [ "RELEASE" ],
+        "optimize": true
+      }
+    }
+  },
+  "dependencies": {
+    "CacheManager.Core": { "target": "project" },
+    "Bond.CSharp": "5.1.0"
+  },
+  "frameworks": {
+    "netstandard1.1": {
+      "buildOptions": { "define": [ "NOUNSAFE" ] },
+      "dependencies": {
+      }
+    },
+    "netstandard1.3": {
+      "dependencies": {
+      }
+    },
+    "net40": {
+      "dependencies": {
+      },
+      "frameworkAssemblies": {
+      }
+    },
+    "net45": {
+      "dependencies": {
+      },
+      "frameworkAssemblies": { "System.Runtime": "4.0.0.0" }
+    }
+  }
+}

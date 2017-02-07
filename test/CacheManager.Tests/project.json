@@ -6,6 +6,7 @@
     "CacheManager.StackExchange.Redis": { "target": "project" },
     "CacheManager.Serialization.Json": { "target": "project" },
     "CacheManager.Serialization.ProtoBuf": { "target": "project" },
+    "CacheManager.Serialization.Bond": { "target": "project" },
     "FluentAssertions": "4.17.0",
     "Microsoft.Extensions.Configuration.Json": "1.1.0",
     "Microsoft.Extensions.Logging": "1.1.0",
@@ -19,7 +20,8 @@
       "app.config",
       "Configuration/*.*",
       "xunit.runner.json"
-    ]
+    ],
+    "keyFile": "../../tools/key.snk"
   },
   "testRunner": "xunit",
   "frameworks": {
@@ -27,6 +29,7 @@
       "buildOptions": {
         "define": [
           "REDISENABLED",
+          
           "MOCK_HTTPCONTEXT_ENABLED",
           "NO_APP_CONFIG"
         ]

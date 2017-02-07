@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<meta charset='utf-8' />
+<title>SerializationBenchmark</title>
+
+<style type="text/css">
+	table { border-collapse: collapse; display: block; width: 100%; overflow: auto; }
+	td, th { padding: 6px 13px; border: 1px solid #ddd; }
+	tr { background-color: #fff; border-top: 1px solid #ccc; }
+	tr:nth-child(even) { background: #f8f8f8; }
+</style>
+</head>
+<body>
+<pre><code>
+BenchmarkDotNet=v0.10.1, OS=Microsoft Windows NT 6.2.9200.0
+Processor=Intel(R) Core(TM) i7-6700 CPU 3.40GHz, ProcessorCount=8
+Frequency=3328120 Hz, Resolution=300.4699 ns, Timer=TSC
+  [Host]     : Clr 4.0.30319.42000, 64bit RyuJIT-v4.6.1586.0
+  Job-DZPVZX : Clr 4.0.30319.42000, 64bit RyuJIT-v4.6.1586.0
+</code></pre>
+<pre><code>Platform=X64  LaunchCount=2  TargetCount=15  
+WarmupCount=10  
+</code></pre>
+
+<table>
+<thead><tr><th>        Method</th><th> Mean</th><th>StdDev</th><th>Scaled</th><th>Scaled-StdDev</th><th>Gen 0</th><th>Gen 1</th><th>Allocated</th>
+</tr>
+</thead><tbody><tr><td>BinarySerializer</td><td>105.5278 us</td><td>1.5448 us</td><td>1.92</td><td>   0.04</td><td>8.4635</td><td>-</td><td>58.05 kB</td>
+</tr><tr><td>JsonSerializer</td><td>55.0184 us</td><td>0.9774 us</td><td>1.00</td><td>   0.00</td><td>7.0964</td><td>-</td><td>41.56 kB</td>
+</tr><tr><td>JsonGzSerializer</td><td>228.2791 us</td><td>3.1088 us</td><td>4.15</td><td>   0.09</td><td>68.2292</td><td>5.7292</td><td>329.66 kB</td>
+</tr><tr><td>ProtoBufSerializer</td><td>37.6229 us</td><td>1.0164 us</td><td>0.68</td><td>   0.02</td><td>3.8493</td><td>-</td><td>22.42 kB</td>
+</tr><tr><td>BondBinarySerializer</td><td>7.3235 us</td><td>0.2123 us</td><td>0.13</td><td>   0.00</td><td>0.8321</td><td>-</td><td>5.02 kB</td>
+</tr></tbody></table>
+</body>
+</html>

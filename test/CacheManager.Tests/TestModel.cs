@@ -9,6 +9,7 @@ namespace CacheManager.Tests
 #endif
     [ExcludeFromCodeCoverage]
     [ProtoContract]
+    [Bond.Schema]
     public class RaceConditionTestElement
     {
         public RaceConditionTestElement()
@@ -16,6 +17,7 @@ namespace CacheManager.Tests
         }
 
         [ProtoMember(1)]
+        [Bond.Id(1)]
         public long Counter { get; set; }
     }
 

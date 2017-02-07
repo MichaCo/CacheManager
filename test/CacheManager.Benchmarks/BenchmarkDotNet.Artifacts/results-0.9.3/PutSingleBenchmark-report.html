@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<meta charset='utf-8' />
+<title>PutSingleBenchmark</title>
+
+<style type="text/css">
+	table { border-collapse: collapse; display: block; width: 100%; overflow: auto; }
+	td, th { padding: 6px 13px; border: 1px solid #ddd; }
+	tr { background-color: #fff; border-top: 1px solid #ccc; }
+	tr:nth-child(even) { background: #f8f8f8; }
+</style>
+</head>
+<body>
+<pre><code>
+BenchmarkDotNet=v0.10.1, OS=Microsoft Windows NT 6.2.9200.0
+Processor=Intel(R) Core(TM) i7-6700 CPU 3.40GHz, ProcessorCount=8
+Frequency=3328120 Hz, Resolution=300.4699 ns, Timer=TSC
+  [Host]     : Clr 4.0.30319.42000, 64bit RyuJIT-v4.6.1586.0
+  Job-DZPVZX : Clr 4.0.30319.42000, 64bit RyuJIT-v4.6.1586.0
+</code></pre>
+<pre><code>Platform=X64  LaunchCount=2  TargetCount=15  
+WarmupCount=10  
+</code></pre>
+
+<table>
+<thead><tr><th>Method</th><th>    Mean</th><th> StdErr</th><th> StdDev</th><th>Scaled</th><th>Scaled-StdDev</th><th>Gen 0</th><th>Allocated</th>
+</tr>
+</thead><tbody><tr><td>Dictionary</td><td>243.5642 ns</td><td>0.7127 ns</td><td>3.8380 ns</td><td>1.00</td><td>   0.00</td><td>0.0257</td><td>160 B</td>
+</tr><tr><td>Runtime</td><td>2,462.5431 ns</td><td>15.6490 ns</td><td>85.7133 ns</td><td>10.11</td><td>   0.38</td><td>1.2548</td><td>5.68 kB</td>
+</tr><tr><td>MsMemory</td><td>1,307.1531 ns</td><td>2.8219 ns</td><td>14.6628 ns</td><td>5.37</td><td>   0.10</td><td>0.1915</td><td>1.02 kB</td>
+</tr><tr><td>Redis</td><td>2,138.2635 ns</td><td>12.3456 ns</td><td>64.1494 ns</td><td>8.78</td><td>   0.29</td><td>0.0768</td><td>1.1 kB</td>
+</tr><tr><td>Memcached</td><td>96,120.9035 ns</td><td>1,375.9735 ns</td><td>7,409.8438 ns</td><td>394.74</td><td>  30.51</td><td>0.3255</td><td>13 kB</td>
+</tr></tbody></table>
+</body>
+</html>
