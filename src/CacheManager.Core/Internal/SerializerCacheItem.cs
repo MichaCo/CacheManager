@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using CacheManager.Core.Utility;
 
 namespace CacheManager.Core.Internal
 {
@@ -37,7 +38,7 @@ namespace CacheManager.Core.Internal
         /// Gets or set the expiration timeout in milliseconds.
         /// Can be coverted from and to <see cref="TimeSpan"/>.
         /// </summary>
-        public abstract int ExpirationTimeout { get; set; }
+        public abstract double ExpirationTimeout { get; set; }
 
         /// <inheritdoc/>
         public abstract string Key { get; set; }
@@ -76,41 +77,18 @@ namespace CacheManager.Core.Internal
         /// <param name="value"></param>
         public SerializerCacheItem(ICacheItemProperties properties, object value) : this()
         {
+            Guard.NotNull(properties, nameof(properties));
+            Guard.NotNull(value, nameof(value));
+
             this.CreatedUtc = properties.CreatedUtc.Ticks;
             this.ExpirationMode = properties.ExpirationMode;
-            this.ExpirationTimeout = (int)properties.ExpirationTimeout.TotalMilliseconds;
+            this.ExpirationTimeout = properties.ExpirationTimeout.TotalMilliseconds;
             this.Key = properties.Key;
             this.LastAccessedUtc = properties.LastAccessedUtc.Ticks;
             this.Region = properties.Region;
             this.UsesExpirationDefaults = properties.UsesExpirationDefaults;
             this.ValueType = properties.ValueType.AssemblyQualifiedName;
             this.Value = (T)value;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        /// <typeparam name="TCacheItem"></typeparam>
-        /// <param name="source"></param>
-        /// <param name="factory"></param>
-        /// <param name="openGenericSerializerCacheItemType"></param>
-        /// <returns></returns>
-        public static object CreateFromCacheItem<TCacheItem>(
-            CacheItem<TCacheItem> source,
-            Func<ICacheItemProperties, object, SerializerCacheItem<T>> factory,
-            Type openGenericSerializerCacheItemType)
-        {
-            Type tType = typeof(T);
-
-            if (tType != source.ValueType || tType == TypeCache.ObjectType)
-            {
-                var targetType = openGenericSerializerCacheItemType.MakeGenericType(source.ValueType);
-                return Activator.CreateInstance(targetType, (ICacheItemProperties)source, source.Value);
-            }
-            else
-            {
-                return factory((ICacheItemProperties)source, source.Value);
-            }
         }
 
         /// <inheritdoc/>

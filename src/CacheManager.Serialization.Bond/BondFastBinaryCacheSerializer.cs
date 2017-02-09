@@ -14,7 +14,7 @@ namespace CacheManager.Serialization.Bond
     /// <summary>
     /// Implements the <see cref="ICacheSerializer"/> contract using <c>Microsoft.Bond</c>.
     /// </summary>
-    public class BondFastBinaryCacheSerializer : BondSerializerBase, ICacheSerializer
+    public class BondFastBinaryCacheSerializer : BondSerializerBase
     {
         private readonly FastBinarySerializerCache _cache;
 
@@ -27,7 +27,7 @@ namespace CacheManager.Serialization.Bond
         }
 
         /// <inheritdoc/>
-        protected override byte[] Serialize(object value, Type type)
+        public override byte[] Serialize<T>(T value)
         {
             var serializer = _cache.GetSerializer(value.GetType());
             var buffer = OutputBufferPool.Lease();

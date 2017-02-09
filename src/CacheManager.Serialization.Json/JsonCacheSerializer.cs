@@ -12,7 +12,7 @@ namespace CacheManager.Serialization.Json
     /// <summary>
     /// Implements the <see cref="ICacheSerializer"/> contract using <c>Newtonsoft.Json</c>.
     /// </summary>
-    public class JsonCacheSerializer : ICacheSerializer
+    public class JsonCacheSerializer : CacheSerializer
     {
         private static readonly Type OpenGenericItemType = typeof(JsonCacheItem<>);
         private readonly ObjectPool<StringBuilder> _stringBuilderPool;
@@ -60,11 +60,8 @@ namespace CacheManager.Serialization.Json
         public JsonSerializerSettings SerializationSettings { get; }
 
         /// <inheritdoc/>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0", Justification = "Is checked by GetString")]
-        public virtual object Deserialize(byte[] data, Type target)
+        public override object Deserialize(byte[] data, Type target)
         {
-            //var stringValue = Encoding.UTF8.GetString(data, 0, data.Length);
-            //return JsonConvert.DeserializeObject(stringValue, target, this.DeserializationSettings);
             string value = Encoding.UTF8.GetString(data, 0, data.Length);
             using (var reader = new StringReader(value))
             using (var jsonReader = new JsonTextReader(reader))
@@ -74,16 +71,7 @@ namespace CacheManager.Serialization.Json
         }
 
         /// <inheritdoc/>
-        public CacheItem<T> DeserializeCacheItem<T>(byte[] value, Type valueType = null)
-        {
-            var targetType = OpenGenericItemType.MakeGenericType(valueType);
-            var jsonItem = (ICacheItemConverter)this.Deserialize(value, targetType);
-
-            return jsonItem.ToCacheItem<T>();
-        }
-
-        /// <inheritdoc/>
-        public virtual byte[] Serialize<T>(T value)
+        public override byte[] Serialize<T>(T value)
         {
             var buffer = _stringBuilderPool.Lease();
 
@@ -98,18 +86,15 @@ namespace CacheManager.Serialization.Json
         }
 
         /// <inheritdoc/>
-        public byte[] SerializeCacheItem<T>(CacheItem<T> value)
+        protected override Type GetOpenGeneric()
         {
-            Guard.NotNull(value, nameof(value));
-            var jsonItem = JsonCacheItem<T>.CreateFromCacheItem(
-                value, 
-                (props, val) =>
-                {
-                    return new JsonCacheItem<T>(props, val);
-                }, 
-                typeof(JsonCacheItem<>));
+            return OpenGenericItemType;
+        }
 
-            return this.Serialize(jsonItem);
+        /// <inheritdoc/>
+        protected override object CreateNewItem<TCacheValue>(ICacheItemProperties properties, object value)
+        {
+            return new JsonCacheItem<TCacheValue>(properties, value);
         }
 
         private class StringBuilderPoolPolicy : IObjectPoolPolicy<StringBuilder>

@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Text;
 #if !NOUNSAFE
 using Bond.IO.Unsafe;
@@ -17,8 +15,14 @@ namespace CacheManager.Serialization.Bond
     /// <summary>
     /// Base class for Bond based serializers
     /// </summary>
-    public abstract class BondSerializerBase : ICacheSerializer
+    public abstract class BondSerializerBase : CacheSerializer
     {
+        private static readonly Type OpenItemType = typeof(BondCacheItem<>);
+
+        private BondSerializerBase()
+        {
+        }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="BondSerializerBase"/> class.
         /// </summary>
@@ -29,9 +33,15 @@ namespace CacheManager.Serialization.Bond
         }
 
         /// <inheritdoc/>
-        public byte[] Serialize<T>(T value)
+        protected override Type GetOpenGeneric()
         {
-            return Serialize(value, value.GetType());
+            return OpenItemType;
+        }
+
+        /// <inheritdoc/>
+        protected override object CreateNewItem<TCacheValue>(ICacheItemProperties properties, object value)
+        {
+            return new BondCacheItem<TCacheValue>(properties, value);
         }
 
         /// <summary>
@@ -44,68 +54,6 @@ namespace CacheManager.Serialization.Bond
         /// Gets a pool handling <see cref="StringBuilder"/>s.
         /// </summary>
         protected ObjectPool<StringBuilder> StringBuilderPool { get; }
-
-        /// <summary>
-        /// Serializes stuff
-        /// </summary>
-        /// <param name="value">The object to serialize.</param>
-        /// <param name="type">The actual <c>Type</c> to serialize to.</param>
-        /// <returns>Byte array of serialized data.</returns>
-        protected abstract byte[] Serialize(object value, Type type);
-
-        /// <inheritdoc/>
-        public abstract object Deserialize(byte[] data, Type target);
-
-        /// <inheritdoc/>
-        public byte[] SerializeCacheItem<T>(CacheItem<T> value)
-        {
-            if (typeof(T) == TypeCache.ObjectType)
-            {
-                var valueBytes = this.Serialize(value.Value, value.ValueType);
-                var itemType = BondCacheItem<object>.OpenItemType.MakeGenericType(value.ValueType);
-                var item = Activator.CreateInstance(itemType, value);
-
-                var wrapper = new BondCacheItemWrapper()
-                {
-                    ValueType = value.ValueType.AssemblyQualifiedName,
-                    Data = this.Serialize(item, itemType)
-                };
-
-                return this.Serialize(wrapper);
-            }
-            else
-            {
-                var bondCacheItem = new BondCacheItem<T>(value);
-                return this.Serialize(bondCacheItem);
-            }
-        }
-
-        /// <inheritdoc/>
-        public CacheItem<T> DeserializeCacheItem<T>(byte[] value, Type valueType = null)
-        {
-            if (typeof(T) == TypeCache.ObjectType)
-            {
-                var wrapper = (BondCacheItemWrapper)this.Deserialize(value, typeof(BondCacheItemWrapper));
-                var targetValueType = valueType ?? TypeCache.GetType(wrapper.ValueType);
-                var itemType = BondCacheItem<object>.OpenItemType.MakeGenericType(targetValueType);
-                var obj = Deserialize(wrapper.Data, itemType);
-
-#if NET40
-                var methodInfo = itemType.GetMethod("ToObjectCacheItem");
-#else
-                var methodInfo = itemType.GetTypeInfo().GetDeclaredMethod("ToObjectCacheItem");
-#endif
-
-                var cacheItem = (CacheItem<T>)methodInfo.Invoke(obj, new object[0]);
-                return cacheItem;
-            }
-            else
-            {
-                var bondCacheItem = (BondCacheItem<T>)Deserialize(value, typeof(BondCacheItem<T>));
-
-                return bondCacheItem.ToCacheItem();
-            }
-        }
 
         private class OutputBufferPoolPolicy : IObjectPoolPolicy<OutputBuffer>
         {

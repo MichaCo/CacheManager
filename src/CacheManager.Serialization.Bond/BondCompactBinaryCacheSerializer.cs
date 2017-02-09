@@ -14,20 +14,21 @@ namespace CacheManager.Serialization.Bond
     /// <summary>
     /// Implements the <see cref="ICacheSerializer"/> contract using <c>Microsoft.Bond</c>.
     /// </summary>
-    public class BondCompactBinaryCacheSerializer : BondSerializerBase, ICacheSerializer
+    public class BondCompactBinaryCacheSerializer : BondSerializerBase
     {
         private readonly BinarySerializerCache _cache;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BondCompactBinaryCacheSerializer"/> class.
         /// </summary>
-        public BondCompactBinaryCacheSerializer(int defaultWriteBufferSize = 1024) : base(defaultWriteBufferSize)
+        /// <param name="defaultBufferSize">The default buffer size.</param>
+        public BondCompactBinaryCacheSerializer(int defaultBufferSize = 1024) : base(defaultBufferSize)
         {
             _cache = new BinarySerializerCache();
         }
-
+        
         /// <inheritdoc/>
-        protected override byte[] Serialize(object value, Type type)
+        public override byte[] Serialize<T>(T value)
         {
             var serializer = _cache.GetSerializer(value.GetType());
             var buffer = OutputBufferPool.Lease();
@@ -42,6 +43,7 @@ namespace CacheManager.Serialization.Bond
         }
 
         /// <inheritdoc/>
+
         public override object Deserialize(byte[] data, Type target)
         {
             var deserializer = _cache.GetDeserializer(target);

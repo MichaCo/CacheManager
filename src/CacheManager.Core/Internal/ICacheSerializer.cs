@@ -44,6 +44,6 @@ namespace CacheManager.Core.Internal
         /// <param name="value">The data to deserialize from.</param>
         /// <param name="valueType">The type of the actual serialized cache value.</param>
         /// <returns>The deserialized cache item.</returns>
-        CacheItem<T> DeserializeCacheItem<T>(byte[] value, Type valueType = null);
+        CacheItem<T> DeserializeCacheItem<T>(byte[] value, Type valueType);
     }
 }

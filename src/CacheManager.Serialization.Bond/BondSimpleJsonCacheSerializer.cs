@@ -16,7 +16,7 @@ namespace CacheManager.Serialization.Bond
     /// <summary>
     /// Implements the <see cref="ICacheSerializer"/> contract using <c>Microsoft.Bond</c>.
     /// </summary>
-    public class BondSimpleJsonCacheSerializer : BondSerializerBase, ICacheSerializer
+    public class BondSimpleJsonCacheSerializer : BondSerializerBase
     {
         private readonly SimpleJsonSerializerCache _cache;
 
@@ -29,7 +29,7 @@ namespace CacheManager.Serialization.Bond
         }
 
         /// <inheritdoc/>
-        protected override byte[] Serialize(object value, Type type)
+        public override byte[] Serialize<T>(T value)
         {
             var serializer = _cache.GetSerializer(value.GetType());
             var buffer = StringBuilderPool.Lease();
@@ -44,11 +44,6 @@ namespace CacheManager.Serialization.Bond
                 return bytes;
             }
         }
-
-        //var length = Encoding.UTF8.GetByteCount(chars, 0, charLength);
-        //var bytes = ByteArrayPool.Rent(length);
-        //Encoding.UTF8.GetBytes(chars, 0, charLength, bytes, 0);
-        //Buffer = new ArraySegment<byte>(bytes, 0, length);
 
         /// <inheritdoc/>
         public override object Deserialize(byte[] data, Type target)

@@ -24,6 +24,7 @@ namespace CacheManager.Benchmarks
             var bench = new SerializationBenchmark();
             bench.Setup();
             bench.JsonSerializer();
+            bench.JsonGzSerializer();
             bench.BinarySerializer();
             bench.BondFastBinarySerializer();
             bench.BondBinarySerializer();

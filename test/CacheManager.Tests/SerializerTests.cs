@@ -774,7 +774,7 @@ namespace CacheManager.Tests
             var data = serializer.SerializeCacheItem(item);
 
             // not using the type defined, expecting the serializer object to store the actualy value type correctly...
-            var result = serializer.DeserializeCacheItem<object>(data);
+            var result = serializer.DeserializeCacheItem<object>(data, typeof(T));
 
             result.Value.Should().Be(value);
             result.ValueType.Should().Be(item.ValueType);
@@ -798,6 +798,21 @@ namespace CacheManager.Tests
             var result = serializer.Deserialize(data, item.GetType());
 
             result.ShouldBeEquivalentTo(item);
+        }
+
+        [Fact]
+        public void BondBinarySerializer_DoesNotSupportPrimitives()
+        {
+            // arrange
+            var serializer = new BondCompactBinaryCacheSerializer();
+
+            // act
+            var data = serializer.Serialize("test");
+            Action act = () => serializer.Deserialize(data, typeof(string));
+
+            data.Length.Should().Be(1);
+            data[0].Should().Be(0);
+            act.ShouldThrow<Exception>("Bond does not support primitives.");
         }
 
         [Fact]

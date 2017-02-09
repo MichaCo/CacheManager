@@ -512,7 +512,7 @@ namespace CacheManager.Memcached
 
                 string typeName = Encoding.UTF8.GetString(item.Data.Array, position, typeNameLen);
                 position += typeNameLen;
-                if (item.Data.Array[++position] != 0)
+                if (item.Data.Array[position++] != 0)
                 {
                     throw new InvalidOperationException("Invalid data, stop bit not found in type name encoding.");
                 }

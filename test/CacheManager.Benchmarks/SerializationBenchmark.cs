@@ -74,7 +74,7 @@ namespace CacheManager.Benchmarks
             payload.Enqueue(item);
         }
         
-        //[Benchmark()]
+        [Benchmark()]
         public void BinarySerializer()
         {
             ExecRun((item) =>
@@ -88,7 +88,7 @@ namespace CacheManager.Benchmarks
             });
         }
 
-        //[Benchmark(Baseline = true)]
+        [Benchmark(Baseline = true)]
         public void JsonSerializer()
         {
             ExecRun((item) =>
@@ -102,7 +102,7 @@ namespace CacheManager.Benchmarks
             });
         }
 
-        //[Benchmark]
+        [Benchmark]
         public void JsonGzSerializer()
         {
             ExecRun((item) =>

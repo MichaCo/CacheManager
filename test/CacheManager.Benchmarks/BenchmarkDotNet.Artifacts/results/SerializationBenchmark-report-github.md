@@ -10,10 +10,12 @@ Platform=X64  LaunchCount=2  TargetCount=15
 WarmupCount=10  
 
 ```
-                   Method |        Mean |    StdDev | Scaled | Scaled-StdDev |   Gen 0 | Allocated |
-------------------------- |------------ |---------- |------- |-------------- |-------- |---------- |
-           JsonSerializer | 316.8737 us | 2.9366 us |   1.00 |          0.00 | 26.9531 | 157.65 kB |
-       ProtoBufSerializer | 329.1610 us | 2.8577 us |   1.04 |          0.01 | 37.9557 | 201.92 kB |
-     BondBinarySerializer |  86.3952 us | 1.1801 us |   0.27 |          0.00 | 12.7767 |  65.27 kB |
- BondFastBinarySerializer |  87.5721 us | 2.1179 us |   0.28 |          0.01 | 12.6465 |   65.5 kB |
- BondSimpleJsonSerializer | 240.1620 us | 4.0579 us |   0.76 |          0.01 | 28.1901 | 160.36 kB |
+                   Method |          Mean |     StdDev | Scaled | Scaled-StdDev |   Gen 0 | Allocated |
+------------------------- |-------------- |----------- |------- |-------------- |-------- |---------- |
+         BinarySerializer |   494.3521 us | 21.7862 us |   1.57 |          0.08 | 56.9010 | 327.16 kB |
+           JsonSerializer |   315.5607 us | 10.7359 us |   1.00 |          0.00 | 27.2135 | 157.08 kB |
+         JsonGzSerializer | 1,251.3457 us | 13.1597 us |   3.97 |          0.13 | 43.2292 | 371.17 kB |
+       ProtoBufSerializer |   135.5862 us |  1.5707 us |   0.43 |          0.01 | 30.9245 | 152.68 kB |
+     BondBinarySerializer |    85.9038 us |  0.7079 us |   0.27 |          0.01 | 12.6465 |  65.41 kB |
+ BondFastBinarySerializer |    82.7233 us |  1.7417 us |   0.26 |          0.01 | 13.0208 |   65.7 kB |
+ BondSimpleJsonSerializer |   238.8491 us |  6.8009 us |   0.76 |          0.03 | 28.1901 | 160.55 kB |

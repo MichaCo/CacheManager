@@ -22,7 +22,7 @@ namespace CacheManager.Core
         public override ExpirationMode ExpirationMode { get; set; }
         
         [JsonProperty("expirationTimeout")]
-        public override int ExpirationTimeout { get; set; }
+        public override double ExpirationTimeout { get; set; }
         
         [JsonProperty("key")]
         public override string Key { get; set; }
