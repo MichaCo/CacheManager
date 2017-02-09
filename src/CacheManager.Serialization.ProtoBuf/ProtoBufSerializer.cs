@@ -5,6 +5,7 @@ using System.Linq;
 using CacheManager.Core;
 using CacheManager.Core.Internal;
 using ProtoBuf;
+using static CacheManager.Core.Utility.Guard;
 
 namespace CacheManager.Serialization.ProtoBuf
 {
@@ -14,8 +15,6 @@ namespace CacheManager.Serialization.ProtoBuf
     public class ProtoBufSerializer : ICacheSerializer
     {
         private static readonly Type cacheItemType = typeof(ProtoBufCacheItem);
-        private readonly Dictionary<string, Type> types = new Dictionary<string, Type>();
-        private readonly object typesLock = new object();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ProtoBufSerializer"/> class.
@@ -27,18 +26,13 @@ namespace CacheManager.Serialization.ProtoBuf
         /// <inheritdoc/>
         public object Deserialize(byte[] data, Type target)
         {
-            byte[] destination;
-            if (data.Length == 0)
+            int offset = 0;
+            if (data.Length > 0)
             {
-                destination = data;
-            }
-            else
-            {
-                destination = new byte[data.Length - 1];
-                Array.Copy(data, 1, destination, 0, data.Length - 1);
+                offset = 1;
             }
 
-            using (var stream = new MemoryStream(destination))
+            using (var stream = new MemoryStream(data, offset, data.Length - offset))
             {
                 return Serializer.Deserialize(target, stream);
             }
@@ -47,65 +41,33 @@ namespace CacheManager.Serialization.ProtoBuf
         /// <inheritdoc/>
         public CacheItem<T> DeserializeCacheItem<T>(byte[] value, Type valueType = null)
         {
-            var item = (ProtoBufCacheItem)Deserialize(value, cacheItemType);
-            if (item == null)
-            {
-                throw new Exception("Unable to deserialize the CacheItem");
-            }
+            var targetType = ProtoBufCacheItem.GetGenericJsonCacheItemType(valueType);
+            var item = (ICacheItemConverter)this.Deserialize(value, targetType);
 
-            var cachedValue = Deserialize(item.Value, valueType ?? this.GetType(item.ValueType));
-            return item.ToCacheItem<T>(cachedValue);
+            return item.ToCacheItem<T>();
         }
 
         /// <inheritdoc/>
         public byte[] Serialize<T>(T value)
         {
-            byte[] output = null;
             using (var stream = new MemoryStream())
             {
+                // Protobuf returns an empty byte array {} which would be treated as Null value in redis
+                // this is not allowed in cache manager and would cause issues (would look like the item does not exist)
+                // we'll simply add a prefix byte and remove it before deserialization.
+                stream.WriteByte(0);
                 Serializer.Serialize(stream, value);
-                output = stream.ToArray();
+                return stream.ToArray();
             }
-
-            // Protobuf returns an empty byte array {} which would be treated as Null value in redis
-            // this is not allowed in cache manager and would cause issues (would look like the item does not exist)
-            // we'll simply add a prefix byte and remove it before deserialization.
-            var prefix = new byte[] { 1 };
-            return prefix.Concat(output).ToArray();
         }
 
         /// <inheritdoc/>
         public byte[] SerializeCacheItem<T>(CacheItem<T> value)
         {
-            var cachedValue = Serialize(value.Value);
-            var pbCacheItem = ProtoBufCacheItem.FromCacheItem(value, cachedValue);
+            NotNull(value, nameof(value));
+            var jsonItem = ProtoBufCacheItem.CreateFromCacheItem(value);
 
-            return Serialize(pbCacheItem);
-        }
-
-        private Type GetType(string type)
-        {
-            if (!this.types.ContainsKey(type))
-            {
-                lock (this.typesLock)
-                {
-                    if (!this.types.ContainsKey(type))
-                    {
-                        var typeResult = Type.GetType(type, false);
-                        if (typeResult == null)
-                        {
-                            // fixing an issue for corlib types if mixing net core clr and full clr calls
-                            // (e.g. typeof(string) is different for those two, either System.String, System.Private.CoreLib or System.String, mscorlib)
-                            var typeName = type.Split(',').FirstOrDefault();
-                            typeResult = Type.GetType(typeName, true);
-                        }
-
-                        this.types.Add(type, typeResult);
-                    }
-                }
-            }
-
-            return this.types[type];
+            return this.Serialize(jsonItem);
         }
     }
 }

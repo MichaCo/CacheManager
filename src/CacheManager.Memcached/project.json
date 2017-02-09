@@ -35,7 +35,7 @@
   },
   "dependencies": {
     "CacheManager.Core": { "target": "project" },
-    "EnyimMemcached": "2.13.0"
+    "EnyimMemcached": "2.16.0"
   },
   "frameworks": {
     "net40": {

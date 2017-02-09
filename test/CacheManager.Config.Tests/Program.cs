@@ -47,7 +47,7 @@ namespace CacheManager.Config.Tests
                 });
 
                 //builder.WithGzJsonSerializer();
-                builder.WithBondBinarySerializer();
+                builder.WithBondCompactBinarySerializer();
 
 #if !NETCOREAPP
                 //var memcachedCfg = new MemcachedClientConfiguration();

@@ -18,7 +18,7 @@ namespace CacheManager.Core
 #if !NETSTANDARD
 
     [Serializable]
-    public class CacheItem<T> : ISerializable
+    public class CacheItem<T> : ISerializable, ICacheItemProperties
 #else
     public class CacheItem<T>
 #endif

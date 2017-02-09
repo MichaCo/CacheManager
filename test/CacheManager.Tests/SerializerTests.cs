@@ -113,6 +113,37 @@ namespace CacheManager.Tests
         }
 
         [Fact]
+        public void BinarySerializer_ObjectCacheItemWithPocco()
+        {
+            // arrange
+            var serializer = new BinaryCacheSerializer();
+            var pocco = SerializerPoccoSerializable.Create();
+            var item = new CacheItem<object>("key", "region", pocco, ExpirationMode.Absolute, TimeSpan.FromDays(1));
+
+            // act
+            var data = serializer.SerializeCacheItem(item);
+            var result = serializer.DeserializeCacheItem<object>(data, pocco.GetType());
+
+            result.ShouldBeEquivalentTo(item);
+        }
+
+        [Fact]
+        public void BinarySerializer_CacheItemWithDerivedPocco()
+        {
+            // arrange
+            var serializer = new BinaryCacheSerializer();
+            var pocco = DerivedPocco.CreateDerived();
+            var item = new CacheItem<SerializerPoccoSerializable>("key", "region", pocco, ExpirationMode.Absolute, TimeSpan.FromDays(1));
+
+            // act
+            var data = serializer.SerializeCacheItem(item);
+            var result = serializer.DeserializeCacheItem<SerializerPoccoSerializable>(data, pocco.GetType());
+
+            result.ShouldBeEquivalentTo(item);
+            pocco.ShouldBeEquivalentTo(item.Value);
+        }
+
+        [Fact]
         public void BinarySerializer_List()
         {
             // arrange
@@ -211,10 +242,10 @@ namespace CacheManager.Tests
         }
 
         [Theory]
+        [InlineData(long.MaxValue)]
         [InlineData(true)]
         [InlineData(float.MaxValue)]
         [InlineData(int.MaxValue)]
-        [InlineData(long.MaxValue)]
         [InlineData("some string")]
         [ReplaceCulture]
         public void JsonSerializer_CacheItemOfObject_Primitives<T>(T value)
@@ -225,7 +256,7 @@ namespace CacheManager.Tests
 
             // act
             var data = serializer.SerializeCacheItem(item);
-            var result = serializer.DeserializeCacheItem<object>(data);
+            var result = serializer.DeserializeCacheItem<object>(data, typeof(T));
 
             result.Value.Should().Be(value);
             result.ValueType.Should().Be(item.ValueType);
@@ -264,6 +295,37 @@ namespace CacheManager.Tests
             var result = serializer.DeserializeCacheItem<SerializerPoccoSerializable>(data, pocco.GetType());
 
             result.ShouldBeEquivalentTo(item);
+        }
+
+        [Fact]
+        public void JsonSerializer_ObjectCacheItemWithPocco()
+        {
+            // arrange
+            var serializer = new JsonCacheSerializer();
+            var pocco = SerializerPoccoSerializable.Create();
+            var item = new CacheItem<object>("key", "region", pocco, ExpirationMode.Absolute, TimeSpan.FromDays(1));
+
+            // act
+            var data = serializer.SerializeCacheItem(item);
+            var result = serializer.DeserializeCacheItem<object>(data, pocco.GetType());
+
+            result.ShouldBeEquivalentTo(item);
+        }
+
+        [Fact]
+        public void JsonSerializer_CacheItemWithDerivedPocco()
+        {
+            // arrange
+            var serializer = new JsonCacheSerializer();
+            var pocco = DerivedPocco.CreateDerived();
+            var item = new CacheItem<SerializerPoccoSerializable>("key", "region", pocco, ExpirationMode.Absolute, TimeSpan.FromDays(1));
+
+            // act
+            var data = serializer.SerializeCacheItem(item);
+            var result = serializer.DeserializeCacheItem<SerializerPoccoSerializable>(data, pocco.GetType());
+
+            result.ShouldBeEquivalentTo(item);
+            pocco.ShouldBeEquivalentTo(item.Value);
         }
 
         [Fact]
@@ -379,7 +441,7 @@ namespace CacheManager.Tests
 
             // act
             var data = serializer.SerializeCacheItem(item);
-            var result = serializer.DeserializeCacheItem<object>(data);
+            var result = serializer.DeserializeCacheItem<object>(data, typeof(T));
 
             result.Value.Should().Be(value);
             result.ValueType.Should().Be(item.ValueType);
@@ -418,6 +480,37 @@ namespace CacheManager.Tests
             var result = serializer.DeserializeCacheItem<SerializerPoccoSerializable>(data, pocco.GetType());
 
             result.ShouldBeEquivalentTo(item);
+        }
+
+        [Fact]
+        public void GzJsonSerializer_ObjectCacheItemWithPocco()
+        {
+            // arrange
+            var serializer = new GzJsonCacheSerializer();
+            var pocco = SerializerPoccoSerializable.Create();
+            var item = new CacheItem<object>("key", "region", pocco, ExpirationMode.Absolute, TimeSpan.FromDays(1));
+
+            // act
+            var data = serializer.SerializeCacheItem(item);
+            var result = serializer.DeserializeCacheItem<object>(data, pocco.GetType());
+
+            result.ShouldBeEquivalentTo(item);
+        }
+
+        [Fact]
+        public void GzJsonSerializer_CacheItemWithDerivedPocco()
+        {
+            // arrange
+            var serializer = new GzJsonCacheSerializer();
+            var pocco = DerivedPocco.CreateDerived();
+            var item = new CacheItem<SerializerPoccoSerializable>("key", "region", pocco, ExpirationMode.Absolute, TimeSpan.FromDays(1));
+
+            // act
+            var data = serializer.SerializeCacheItem(item);
+            var result = serializer.DeserializeCacheItem<SerializerPoccoSerializable>(data, pocco.GetType());
+
+            result.ShouldBeEquivalentTo(item);
+            pocco.ShouldBeEquivalentTo(item.Value);
         }
 
         [Fact]
@@ -523,7 +616,7 @@ namespace CacheManager.Tests
 
             // act
             var data = serializer.SerializeCacheItem(item);
-            var result = serializer.DeserializeCacheItem<object>(data);
+            var result = serializer.DeserializeCacheItem<object>(data, typeof(T));
 
             result.Value.Should().Be(value);
             result.ValueType.Should().Be(item.ValueType);
@@ -562,6 +655,37 @@ namespace CacheManager.Tests
             var result = serializer.DeserializeCacheItem<SerializerPoccoSerializable>(data, pocco.GetType());
 
             result.ShouldBeEquivalentTo(item);
+        }
+
+        [Fact]
+        public void ProtoBufSerializer_ObjectCacheItemWithPocco()
+        {
+            // arrange
+            var serializer = new ProtoBufSerializer();
+            var pocco = SerializerPoccoSerializable.Create();
+            var item = new CacheItem<object>("key", "region", pocco, ExpirationMode.Absolute, TimeSpan.FromDays(1));
+
+            // act
+            var data = serializer.SerializeCacheItem(item);
+            var result = serializer.DeserializeCacheItem<object>(data, pocco.GetType());
+
+            result.ShouldBeEquivalentTo(item);
+        }
+
+        [Fact]
+        public void ProtoBufSerializer_CacheItemWithDerivedPocco()
+        {
+            // arrange
+            var serializer = new ProtoBufSerializer();
+            var pocco = DerivedPocco.CreateDerived();
+            var item = new CacheItem<SerializerPoccoSerializable>("key", "region", pocco, ExpirationMode.Absolute, TimeSpan.FromDays(1));
+
+            // act
+            var data = serializer.SerializeCacheItem(item);
+            var result = serializer.DeserializeCacheItem<SerializerPoccoSerializable>(data, pocco.GetType());
+
+            result.ShouldBeEquivalentTo(item);
+            pocco.ShouldBeEquivalentTo(item.Value);
         }
 
         [Fact]
@@ -605,7 +729,7 @@ namespace CacheManager.Tests
         }
 
         #region Bond binary serializer
-        
+
         [Theory]
         [InlineData(true)]
         [InlineData(float.MaxValue)]
@@ -616,7 +740,7 @@ namespace CacheManager.Tests
         public void BondBinarySerializer_CacheItem_Primitives<T>(T value)
         {
             // arrange
-            var serializer = new BondBinaryCacheSerializer();
+            var serializer = new BondCompactBinaryCacheSerializer();
             var item = new CacheItem<T>("key", value);
 
             // act
@@ -643,7 +767,7 @@ namespace CacheManager.Tests
         public void BondBinarySerializer_CacheItemOfObject_Primitives<T>(T value)
         {
             // arrange
-            var serializer = new BondBinaryCacheSerializer();
+            var serializer = new BondCompactBinaryCacheSerializer();
             var item = new CacheItem<object>("key", value);
 
             // act
@@ -666,7 +790,7 @@ namespace CacheManager.Tests
         public void BondBinarySerializer_Pocco()
         {
             // arrange
-            var serializer = new BondBinaryCacheSerializer();
+            var serializer = new BondCompactBinaryCacheSerializer();
             var item = SerializerPoccoSerializable.Create();
 
             // act
@@ -680,7 +804,7 @@ namespace CacheManager.Tests
         public void BondBinarySerializer_CacheItemWithPocco()
         {
             // arrange
-            var serializer = new BondBinaryCacheSerializer();
+            var serializer = new BondCompactBinaryCacheSerializer();
             var pocco = SerializerPoccoSerializable.Create();
             var item = new CacheItem<SerializerPoccoSerializable>("key", "region", pocco, ExpirationMode.Absolute, TimeSpan.FromDays(1));
 
@@ -697,7 +821,7 @@ namespace CacheManager.Tests
         public void BondBinarySerializer_ObjectCacheItemWithPocco()
         {
             // arrange
-            var serializer = new BondBinaryCacheSerializer();
+            var serializer = new BondCompactBinaryCacheSerializer();
             var pocco = SerializerPoccoSerializable.Create();
             var item = new CacheItem<object>("key", "region", pocco, ExpirationMode.Absolute, TimeSpan.FromDays(1));
 
@@ -708,6 +832,22 @@ namespace CacheManager.Tests
             var result = serializer.DeserializeCacheItem<object>(data, pocco.GetType());
 
             result.ShouldBeEquivalentTo(item);
+        }
+
+        [Fact]
+        public void BondBinarySerializer_CacheItemWithDerivedPocco()
+        {
+            // arrange
+            var serializer = new BondCompactBinaryCacheSerializer();
+            var pocco = DerivedPocco.CreateDerived();
+            var item = new CacheItem<SerializerPoccoSerializable>("key", "region", pocco, ExpirationMode.Absolute, TimeSpan.FromDays(1));
+
+            // act
+            var data = serializer.SerializeCacheItem(item);
+            var result = serializer.DeserializeCacheItem<SerializerPoccoSerializable>(data, pocco.GetType());
+
+            result.ShouldBeEquivalentTo(item);
+            pocco.ShouldBeEquivalentTo(item.Value);
         }
 
         [Fact]
@@ -827,6 +967,7 @@ namespace CacheManager.Tests
         [Serializable]
 #endif
         [ProtoContract]
+        [ProtoInclude(20, typeof(DerivedPocco))]
         [Bond.Schema]
         private class SerializerPoccoSerializable
         {
@@ -881,6 +1022,39 @@ namespace CacheManager.Tests
             [ProtoMember(1)]
             [Bond.Id(1)]
             public string StringProperty { get; set; }
+        }
+
+#if !NETCOREAPP
+
+        [Serializable]
+#endif
+        [ProtoContract]
+        [Bond.Schema]
+        private class DerivedPocco : SerializerPoccoSerializable
+        {
+            [ProtoMember(6)]
+            [Bond.Id(6)]
+            public string DerivedStringProperty { get; set; }
+
+            public static DerivedPocco CreateDerived()
+            {
+                var rnd = new Random();
+                return new DerivedPocco()
+                {
+                    StringProperty = DataGenerator.GetString(),
+                    IntProperty = DataGenerator.GetInt(),
+                    StringArrayProperty = DataGenerator.GetStrings(),
+                    StringListProperty = new List<string>(DataGenerator.GetStrings()),
+                    DerivedStringProperty = DataGenerator.GetString(),
+                    ChildDictionaryProperty = new Dictionary<string, ChildPocco>()
+                    {
+                        { DataGenerator.GetString(), new ChildPocco() { StringProperty = DataGenerator.GetString() } },
+                        { DataGenerator.GetString(), new ChildPocco() { StringProperty = DataGenerator.GetString() } },
+                        { DataGenerator.GetString(), new ChildPocco() { StringProperty = DataGenerator.GetString() } },
+                        { DataGenerator.GetString(), new ChildPocco() { StringProperty = DataGenerator.GetString() } },
+                    }
+                };
+            }
         }
     }
 }

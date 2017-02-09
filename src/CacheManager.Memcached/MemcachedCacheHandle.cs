@@ -496,26 +496,57 @@ namespace CacheManager.Memcached
 
         private class CacheManagerTanscoder<T> : ITranscoder
         {
-            private readonly ICacheSerializer serializer;
+            private readonly ICacheSerializer _serializer;
 
             public CacheManagerTanscoder(ICacheSerializer serializer)
             {
                 NotNull(serializer, nameof(serializer));
-                this.serializer = serializer;
+                _serializer = serializer;
             }
-            
+
             public object Deserialize(CacheItem item)
             {
-                var data = new byte[item.Data.Count];
-                Buffer.BlockCopy(item.Data.Array, item.Data.Offset, data, 0, item.Data.Count);
-                
-                return this.serializer.DeserializeCacheItem<T>(data);
+                int position = item.Data.Offset;
+                ushort typeNameLen = BitConverter.ToUInt16(item.Data.Array, position);
+                position += 2;
+
+                string typeName = Encoding.UTF8.GetString(item.Data.Array, position, typeNameLen);
+                position += typeNameLen;
+                if (item.Data.Array[++position] != 0)
+                {
+                    throw new InvalidOperationException("Invalid data, stop bit not found in type name encoding.");
+                }
+
+                var data = new byte[item.Data.Count - position + item.Data.Offset];
+                Buffer.BlockCopy(item.Data.Array, position, data, 0, data.Length);
+                return _serializer.DeserializeCacheItem<T>(data, TypeCache.GetType(typeName));
             }
 
             public CacheItem Serialize(object value)
             {
-                var data = this.serializer.SerializeCacheItem(value as CacheItem<T>);
-                return new CacheItem(DefaultTranscoder.TypeCodeToFlag(TypeCode.Object), new ArraySegment<byte>(data));
+                var cacheItem = value as CacheItem<T>;
+                if (cacheItem == null)
+                {
+                    throw new ArgumentException($"Value is not {nameof(CacheItem<T>)}.", nameof(value));
+                }
+
+                string typeName = cacheItem.Value.GetType().AssemblyQualifiedName;
+                byte[] typeNameBytes = Encoding.UTF8.GetBytes(typeName);
+                byte[] typeBytesLength = BitConverter.GetBytes((ushort)typeNameBytes.Length);
+                var data = _serializer.SerializeCacheItem(cacheItem);
+
+                var result = new byte[typeNameBytes.Length + typeBytesLength.Length + data.Length + 1];
+
+                /* Encoding the actual item value Type into the cached item
+                 *
+                 * | 0 - 1 | 2 - len | len + 1 | ...
+                 * |  len  |TypeName |0 - stop | data
+                 */
+                Buffer.BlockCopy(typeBytesLength, 0, result, 0, typeBytesLength.Length);
+                Buffer.BlockCopy(typeNameBytes, 0, result, typeBytesLength.Length, typeNameBytes.Length);
+                Buffer.BlockCopy(data, 0, result, typeBytesLength.Length + typeNameBytes.Length + 1, data.Length);
+
+                return new CacheItem(DefaultTranscoder.TypeCodeToFlag(TypeCode.Object), new ArraySegment<byte>(result));
             }
         }
     }

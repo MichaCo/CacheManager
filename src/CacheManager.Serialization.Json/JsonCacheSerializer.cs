@@ -1,11 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using CacheManager.Core;
 using CacheManager.Core.Internal;
+using CacheManager.Core.Utility;
 using Newtonsoft.Json;
-using static CacheManager.Core.Utility.Guard;
 
 namespace CacheManager.Serialization.Json
 {
@@ -14,8 +14,10 @@ namespace CacheManager.Serialization.Json
     /// </summary>
     public class JsonCacheSerializer : ICacheSerializer
     {
-        private readonly Dictionary<string, Type> types = new Dictionary<string, Type>();
-        private readonly object typesLock = new object();
+        private static readonly Type OpenGenericItemType = typeof(JsonCacheItem<>);
+        private readonly ObjectPool<StringBuilder> _stringBuilderPool;
+        private readonly JsonSerializer _deserializer;
+        private readonly JsonSerializer _serializer;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="JsonCacheSerializer"/> class.
@@ -33,9 +35,12 @@ namespace CacheManager.Serialization.Json
         /// <param name="deserializationSettings">The settings which should be used during deserialization.</param>
         public JsonCacheSerializer(JsonSerializerSettings serializationSettings, JsonSerializerSettings deserializationSettings)
         {
-            NotNull(serializationSettings, nameof(serializationSettings));
-            NotNull(deserializationSettings, nameof(deserializationSettings));
+            Guard.NotNull(serializationSettings, nameof(serializationSettings));
+            Guard.NotNull(deserializationSettings, nameof(deserializationSettings));
 
+            _serializer = JsonSerializer.Create(serializationSettings);
+            _deserializer = JsonSerializer.Create(deserializationSettings);
+            _stringBuilderPool = new ObjectPool<StringBuilder>(new StringBuilderPoolPolicy(100));
             this.SerializationSettings = serializationSettings;
             this.DeserializationSettings = deserializationSettings;
         }
@@ -58,60 +63,79 @@ namespace CacheManager.Serialization.Json
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0", Justification = "Is checked by GetString")]
         public virtual object Deserialize(byte[] data, Type target)
         {
-            var stringValue = Encoding.UTF8.GetString(data, 0, data.Length);
-            return JsonConvert.DeserializeObject(stringValue, target, this.DeserializationSettings);
+            //var stringValue = Encoding.UTF8.GetString(data, 0, data.Length);
+            //return JsonConvert.DeserializeObject(stringValue, target, this.DeserializationSettings);
+            string value = Encoding.UTF8.GetString(data, 0, data.Length);
+            using (var reader = new StringReader(value))
+            using (var jsonReader = new JsonTextReader(reader))
+            {
+                return _deserializer.Deserialize(jsonReader, target);
+            }
         }
 
         /// <inheritdoc/>
         public CacheItem<T> DeserializeCacheItem<T>(byte[] value, Type valueType = null)
         {
-            var jsonItem = (JsonCacheItem)this.Deserialize(value, typeof(JsonCacheItem));
-            EnsureNotNull(jsonItem, "Could not deserialize cache item");
-            var deserializedValue = this.Deserialize(jsonItem.Value, valueType ?? this.GetType(jsonItem.ValueType));
+            var targetType = OpenGenericItemType.MakeGenericType(valueType);
+            var jsonItem = (ICacheItemConverter)this.Deserialize(value, targetType);
 
-            return jsonItem.ToCacheItem<T>(deserializedValue);
+            return jsonItem.ToCacheItem<T>();
         }
 
         /// <inheritdoc/>
         public virtual byte[] Serialize<T>(T value)
         {
-            var stringValue = JsonConvert.SerializeObject(value, this.SerializationSettings);
-            return Encoding.UTF8.GetBytes(stringValue);
+            var buffer = _stringBuilderPool.Lease();
+
+            using (var stringWriter = new JsonTextWriter(new StringWriter(buffer)))
+            {
+                _serializer.Serialize(stringWriter, value, value.GetType());
+
+                var bytes = Encoding.UTF8.GetBytes(buffer.ToString());
+                _stringBuilderPool.Return(buffer);
+                return bytes;
+            }
         }
 
         /// <inheritdoc/>
         public byte[] SerializeCacheItem<T>(CacheItem<T> value)
         {
-            NotNull(value, nameof(value));
-            var jsonValue = this.Serialize(value.Value);
-            var jsonItem = JsonCacheItem.FromCacheItem(value, jsonValue);
+            Guard.NotNull(value, nameof(value));
+            var jsonItem = JsonCacheItem<T>.CreateFromCacheItem(
+                value, 
+                (props, val) =>
+                {
+                    return new JsonCacheItem<T>(props, val);
+                }, 
+                typeof(JsonCacheItem<>));
 
             return this.Serialize(jsonItem);
         }
 
-        private Type GetType(string type)
+        private class StringBuilderPoolPolicy : IObjectPoolPolicy<StringBuilder>
         {
-            if (!this.types.ContainsKey(type))
-            {
-                lock (this.typesLock)
-                {
-                    if (!this.types.ContainsKey(type))
-                    {
-                        var typeResult = Type.GetType(type, false);
-                        if (typeResult == null)
-                        {
-                            // fixing an issue for corlib types if mixing net core clr and full clr calls
-                            // (e.g. typeof(string) is different for those two, either System.String, System.Private.CoreLib or System.String, mscorlib)
-                            var typeName = type.Split(',').FirstOrDefault();
-                            typeResult = Type.GetType(typeName, true);
-                        }
+            private readonly int _defaultBufferSize;
 
-                        this.types.Add(type, typeResult);
-                    }
-                }
+            public StringBuilderPoolPolicy(int defaultBufferSize)
+            {
+                _defaultBufferSize = defaultBufferSize;
             }
 
-            return (Type)this.types[type];
+            public StringBuilder CreateNew()
+            {
+                return new StringBuilder(_defaultBufferSize);
+            }
+
+            public bool Return(StringBuilder value)
+            {
+                //if (value.Data.Count > _defaultBufferSize * 1000)
+                //{
+                //    return false;
+                //}
+
+                value.Clear();
+                return true;
+            }
         }
     }
 }

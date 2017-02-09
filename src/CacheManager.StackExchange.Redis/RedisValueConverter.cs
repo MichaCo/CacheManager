@@ -52,8 +52,6 @@ namespace CacheManager.Redis
         private static readonly Type ULongType = typeof(ulong);
         private static readonly Type CharType = typeof(char);
         private readonly ICacheSerializer serializer;
-        private readonly Hashtable types = new Hashtable();
-        private readonly object typesLock = new object();
 
         public RedisValueConverter(ICacheSerializer serializer)
         {
@@ -191,7 +189,7 @@ namespace CacheManager.Redis
 
         object IRedisValueConverter<object>.FromRedisValue(StackRedis.RedisValue value, string type)
         {
-            var valueType = this.GetType(type);
+            var valueType = TypeCache.GetType(type);
 
             if (valueType == ByteArrayType)
             {
@@ -268,35 +266,10 @@ namespace CacheManager.Redis
 
         private object Deserialize(StackRedis.RedisValue value, string valueType)
         {
-            var type = this.GetType(valueType);
+            var type = TypeCache.GetType(valueType);
             EnsureNotNull(type, "Type could not be loaded, {0}.", valueType);
 
             return this.serializer.Deserialize(value, type);
-        }
-
-        private Type GetType(string type)
-        {
-            if (!this.types.ContainsKey(type))
-            {
-                lock (this.typesLock)
-                {
-                    if (!this.types.ContainsKey(type))
-                    {
-                        var typeResult = Type.GetType(type, false);
-                        if (typeResult == null)
-                        {
-                            // fixing an issue for corlib types if mixing net core clr and full clr calls 
-                            // (e.g. typeof(string) is different for those two, either System.String, System.Private.CoreLib or System.String, mscorlib)
-                            var typeName = type.Split(',').FirstOrDefault();
-                            typeResult = Type.GetType(typeName, true);
-                        }
-
-                        this.types.Add(type, typeResult);
-                    }
-                }
-            }
-
-            return (Type)this.types[type];
         }
     }
 }

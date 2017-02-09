@@ -70,7 +70,7 @@ namespace CacheManager.Core.Internal
 
         /// <inheritdoc/>
         public CacheItem<T> DeserializeCacheItem<T>(byte[] value, Type valueType)
-            => (CacheItem<T>)this.Deserialize(value, typeof(CacheItem<T>));
+            => (CacheItem<T>)this.Deserialize(value, valueType);
 
         /// <inheritdoc/>
         public byte[] Serialize<T>(T value)

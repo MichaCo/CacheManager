@@ -4,9 +4,56 @@ using ProtoBuf;
 
 namespace CacheManager.Serialization.ProtoBuf
 {
-    [ProtoContract]
-    internal class ProtoBufCacheItem
+    internal static class ProtoBufCacheItem
     {
+        private static readonly Type ProtoBufCacheItemOpernGeneric = typeof(ProtoBufCacheItem<>);
+
+        public static Type GetGenericJsonCacheItemType(Type targetValueType)
+        {
+            return ProtoBufCacheItemOpernGeneric.MakeGenericType(targetValueType);
+        }
+
+        public static object CreateFromCacheItem<T>(CacheItem<T> source)
+        {
+            Type tType = typeof(T);
+
+            if (tType != source.ValueType || tType == typeof(object))
+            {
+                var targetType = GetGenericJsonCacheItemType(source.ValueType);
+                return Activator.CreateInstance(targetType, (ICacheItemProperties)source, source.Value);
+            }
+            else
+            {
+                return new ProtoBufCacheItem<T>((ICacheItemProperties)source, source.Value);
+            }
+        }
+    }
+
+    internal interface ICacheItemConverter
+    {
+        CacheItem<TTarget> ToCacheItem<TTarget>();
+    }
+
+    [ProtoContract]
+    internal class ProtoBufCacheItem<T> : ICacheItemConverter
+    {
+        public ProtoBufCacheItem()
+        {
+        }
+
+        public ProtoBufCacheItem(ICacheItemProperties properties, object value)
+        {
+            this.CreatedUtc = properties.CreatedUtc;
+            this.ExpirationMode = properties.ExpirationMode;
+            this.ExpirationTimeout = properties.ExpirationTimeout;
+            this.Key = properties.Key;
+            this.LastAccessedUtc = properties.LastAccessedUtc;
+            this.Region = properties.Region;
+            this.UsesExpirationDefaults = properties.UsesExpirationDefaults;
+            this.ValueType = properties.ValueType.AssemblyQualifiedName;
+            this.Value = (T)value;
+        }
+
         [ProtoMember(1)]
         public DateTime CreatedUtc { get; set; }
 
@@ -26,7 +73,7 @@ namespace CacheManager.Serialization.ProtoBuf
         public string Region { get; set; }
 
         [ProtoMember(7)]
-        public byte[] Value { get; set; }
+        public T Value { get; set; }
 
         [ProtoMember(8)]
         public string ValueType { get; set; }
@@ -34,27 +81,11 @@ namespace CacheManager.Serialization.ProtoBuf
         [ProtoMember(9)]
         public bool UsesExpirationDefaults { get; set; }
 
-        public static ProtoBufCacheItem FromCacheItem<TValue>(CacheItem<TValue> item, byte[] value)
-        {
-            return new ProtoBufCacheItem
-            {
-                CreatedUtc = item.CreatedUtc,
-                LastAccessedUtc = item.LastAccessedUtc,
-                ExpirationMode = item.ExpirationMode,
-                ExpirationTimeout = item.ExpirationTimeout,
-                Key = item.Key,
-                Region = item.Region,
-                Value = value,
-                ValueType = item.ValueType.AssemblyQualifiedName,
-                UsesExpirationDefaults = item.UsesExpirationDefaults
-            };
-        }
-
-        public CacheItem<T> ToCacheItem<T>(object value)
+        public CacheItem<TTarget> ToCacheItem<TTarget>()
         {
             var item = string.IsNullOrWhiteSpace(this.Region) ?
-                new CacheItem<T>(this.Key, (T)value) :
-                new CacheItem<T>(this.Key, this.Region, (T)value);
+                new CacheItem<TTarget>(this.Key, (TTarget)(object)Value) :
+                new CacheItem<TTarget>(this.Key, this.Region, (TTarget)(object)Value);
 
             if (!this.UsesExpirationDefaults)
             {

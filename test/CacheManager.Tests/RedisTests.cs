@@ -122,7 +122,7 @@ namespace CacheManager.Tests
             var cache = CacheFactory.Build<Poco>(
                 s => s
                     .WithRedisConfiguration(configKey, multi)
-                    .WithBondBinarySerializer()
+                    .WithBondCompactBinarySerializer()
                     .WithRedisCacheHandle(configKey));
             
             // act/assert

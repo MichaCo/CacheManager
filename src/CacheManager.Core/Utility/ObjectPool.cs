@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Threading;
 
-namespace CacheManager.Core.Internal
+namespace CacheManager.Core.Utility
 {
     /// <summary>
     /// Simple policy based pool for objects.

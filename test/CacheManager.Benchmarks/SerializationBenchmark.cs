@@ -23,34 +23,30 @@ namespace CacheManager.Benchmarks
     {
         private int iterations = 1000;
         private Queue<CacheItem<TestPoco>> payload;
-        private BinaryCacheSerializer binary;
-        private JsonCacheSerializer json;
-        private GzJsonCacheSerializer jsonGz;
-        private ProtoBufSerializer proto;
-        private BondBinaryCacheSerializer bondBinary;
+        private BinaryCacheSerializer binary = new BinaryCacheSerializer();
+        private JsonCacheSerializer json = new JsonCacheSerializer();
+        private GzJsonCacheSerializer jsonGz = new GzJsonCacheSerializer();
+        private ProtoBufSerializer proto = new Serialization.ProtoBuf.ProtoBufSerializer();
+        private BondCompactBinaryCacheSerializer bondBinary = new BondCompactBinaryCacheSerializer(18000);
+        private BondFastBinaryCacheSerializer bondFastBinary = new BondFastBinaryCacheSerializer(18000);
+        private BondSimpleJsonCacheSerializer bondSimpleJson = new BondSimpleJsonCacheSerializer();
         private readonly Type pocoType = typeof(TestPoco);
 
         [Setup]
         public void Setup()
         {
-            this.binary = new BinaryCacheSerializer();
-            this.json = new JsonCacheSerializer();
-            this.jsonGz = new GzJsonCacheSerializer();
-            this.proto = new ProtoBufSerializer();
-            this.bondBinary = new BondBinaryCacheSerializer(1024);
-
             var rnd = new Random();
             var items = new List<CacheItem<TestPoco>>();
             for (var iter = 0; iter < iterations; iter++)
             {
                 var list = new List<string>();
-                for (var i = 0; i < 10; i++)
+                for (var i = 0; i < 300; i++)
                 {
                     list.Add(Guid.NewGuid().ToString());
                 }
 
                 var oList = new List<TestSubPoco>();
-                for (var i = 0; i < 10; i++)
+                for (var i = 0; i < 100; i++)
                 {
                     oList.Add(new TestSubPoco()
                     {
@@ -77,150 +73,8 @@ namespace CacheManager.Benchmarks
             action(item);
             payload.Enqueue(item);
         }
-
-        private static JsonSerializer Serializer = Newtonsoft.Json.JsonSerializer.CreateDefault();
-        private static JsonArrayPool CharArrayPool = JsonArrayPool.Instance;
-
-        public class JsonArrayPool : IArrayPool<char>
-        {
-            public static readonly JsonArrayPool Instance = new JsonArrayPool();
-
-            public char[] Rent(int minimumLength)
-            {
-                return ArrayPool<char>.Shared.Rent(minimumLength);
-            }
-
-            public void Return(char[] array)
-            {
-                ArrayPool<char>.Shared.Return(array);
-            }
-        }
-
-        private class JsonTextWriterSerializer
-        {
-            public byte[] Serialize<T>(T value)
-            {
-                var stream = new StringBuilder(256);
-                using (var writer = new StringWriter(stream))
-                using (var jsonWriter = new JsonTextWriter(writer))
-                {
-                    jsonWriter.ArrayPool = CharArrayPool;
-                    Serializer.Serialize(jsonWriter, value);
-                    jsonWriter.Flush();
-                }
-
-                return Encoding.UTF8.GetBytes(stream.ToString());
-            }
-
-            public T Deserialize<T>(byte[] value)
-            {
-                using (var reader = new StreamReader(new MemoryStream(value)))
-                using (var jsonReader = new JsonTextReader(reader))
-                {
-                    jsonReader.ArrayPool = CharArrayPool;
-                    return Serializer.Deserialize<T>(jsonReader);
-                }
-            }
-        }
-
-        public class PooledJsonTextWriterSerializer : IDisposable
-        {
-            private static ArrayPool<byte> ByteArrayPool = ArrayPool<byte>.Create();
-            private static Microsoft.Extensions.ObjectPool.ObjectPool<StringBuilder> BuilderArrayPool = new DefaultObjectPoolProvider().CreateStringBuilderPool(256, 48 * 1024);
-
-            public ArraySegment<byte> Buffer;
-
-            public void Serialize<T>(T value)
-            {
-                var stringBuilder = BuilderArrayPool.Get();
-                using (var jsonWriter = new JsonTextWriter(new StringWriter(stringBuilder)))
-                {
-                    jsonWriter.ArrayPool = CharArrayPool;
-                    Serializer.Serialize(jsonWriter, value);
-                    jsonWriter.Flush();
-                }
-
-                var charLength = stringBuilder.Length;
-                var chars = CharArrayPool.Rent(charLength);
-                stringBuilder.CopyTo(0, chars, 0, charLength);
-                BuilderArrayPool.Return(stringBuilder);
-
-                var length = Encoding.UTF8.GetByteCount(chars, 0, charLength);
-                var bytes = ByteArrayPool.Rent(length);
-                Encoding.UTF8.GetBytes(chars, 0, charLength, bytes, 0);
-                Buffer = new ArraySegment<byte>(bytes, 0, length);
-                CharArrayPool.Return(chars);
-            }
-
-            public T Deserialize<T>()
-            {
-                var stringValue = Encoding.UTF8.GetString(Buffer.Array, Buffer.Offset, Buffer.Count);
-                using (var stream = new StringReader(stringValue))
-                using (var jsonReader = new JsonTextReader(stream))
-                {
-                    jsonReader.ArrayPool = CharArrayPool;
-                    return Serializer.Deserialize<T>(jsonReader);
-                }
-            }
-
-            private bool disposedValue = false; // To detect redundant calls
-
-            protected virtual void Dispose(bool disposing)
-            {
-                if (!disposedValue)
-                {
-                    if (disposing)
-                    {
-                        if (Buffer.Array != null)
-                        {
-                            ByteArrayPool.Return(Buffer.Array);
-                        }
-                    }
-
-                    disposedValue = true;
-                }
-            }
-
-            public void Dispose()
-            {
-                Dispose(true);
-            }
-        }
-
-        private static JsonTextWriterSerializer textWriterSerializer = new JsonTextWriterSerializer();
-
-        //[Benchmark(Baseline = true)]
-        public void JsonTextWriter()
-        {
-            ExecRun((item) =>
-            {
-                var data = textWriterSerializer.Serialize(item);
-                var result = textWriterSerializer.Deserialize<TestPoco>(data);
-                if (result == null)
-                {
-                    throw new Exception();
-                }
-            });
-        }
-
+        
         //[Benchmark()]
-        public void BufferedJsonTextWriter()
-        {
-            ExecRun((item) =>
-            {
-                using (var seri = new PooledJsonTextWriterSerializer())
-                {
-                    seri.Serialize(item);
-                    var result = seri.Deserialize<TestPoco>();
-                    if (result == null)
-                    {
-                        throw new Exception();
-                    }
-                }
-            });
-        }
-
-        [Benchmark()]
         public void BinarySerializer()
         {
             ExecRun((item) =>
@@ -234,7 +88,7 @@ namespace CacheManager.Benchmarks
             });
         }
 
-        [Benchmark(Baseline = true)]
+        //[Benchmark(Baseline = true)]
         public void JsonSerializer()
         {
             ExecRun((item) =>
@@ -248,7 +102,7 @@ namespace CacheManager.Benchmarks
             });
         }
 
-        [Benchmark]
+        //[Benchmark]
         public void JsonGzSerializer()
         {
             ExecRun((item) =>
@@ -283,6 +137,34 @@ namespace CacheManager.Benchmarks
             {
                 var data = bondBinary.SerializeCacheItem(item);
                 var result = bondBinary.DeserializeCacheItem<TestPoco>(data, pocoType);
+                if (result == null)
+                {
+                    throw new Exception();
+                }
+            });
+        }
+
+        [Benchmark]
+        public void BondFastBinarySerializer()
+        {
+            ExecRun((item) =>
+            {
+                var data = bondFastBinary.SerializeCacheItem(item);
+                var result = bondFastBinary.DeserializeCacheItem<TestPoco>(data, pocoType);
+                if (result == null)
+                {
+                    throw new Exception();
+                }
+            });
+        }
+
+        [Benchmark]
+        public void BondSimpleJsonSerializer()
+        {
+            ExecRun((item) =>
+            {
+                var data = bondSimpleJson.SerializeCacheItem(item);
+                var result = bondSimpleJson.DeserializeCacheItem<TestPoco>(data, pocoType);
                 if (result == null)
                 {
                     throw new Exception();

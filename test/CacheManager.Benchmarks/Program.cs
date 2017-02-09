@@ -21,6 +21,13 @@ namespace CacheManager.Benchmarks
     {
         public static void Main(string[] args)
         {
+            var bench = new SerializationBenchmark();
+            bench.Setup();
+            bench.JsonSerializer();
+            bench.BinarySerializer();
+            bench.BondFastBinarySerializer();
+            bench.BondBinarySerializer();
+            bench.BondSimpleJsonSerializer();
             //var bench = new GetSingleBenchmark();
             //bench.Setup();
             //while (true)

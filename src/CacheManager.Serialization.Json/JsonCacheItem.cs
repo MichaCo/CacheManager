@@ -1,84 +1,45 @@
 ﻿using System;
+using CacheManager.Core.Internal;
 using Newtonsoft.Json;
 
 namespace CacheManager.Core
 {
-    /// <summary>
-    /// The json cache item will be used to serialize a <see cref="CacheItem{T}"/>.
-    /// A <see cref="CacheItem{T}"/> cannot be derserialized by Newtonsoft.Json because of the private setters.
-    /// </summary>
-    internal class JsonCacheItem
+    internal class JsonCacheItem<T> : SerializerCacheItem<T>
     {
-        [JsonProperty("createdUtc")]
-        public DateTime CreatedUtc { get; set; }
-
-        [JsonProperty("expirationMode")]
-        public ExpirationMode ExpirationMode { get; set; }
-
-        [JsonProperty("expirationTimeout")]
-        public TimeSpan ExpirationTimeout { get; set; }
-
-        [JsonProperty("key")]
-        public string Key { get; set; }
-
-        [JsonProperty("lastAccessedUtc")]
-        public DateTime LastAccessedUtc { get; set; }
-
-        [JsonProperty("region")]
-        public string Region { get; set; }
-
-        [JsonProperty("value")]
-        public byte[] Value { get; set; }
-
-        [JsonProperty("valueType")]
-        public string ValueType { get; set; }
-
-        [JsonProperty("usesDefaultExpiration")]
-        public bool UsesExpirationDefaults { get; set; }
-
-        public static JsonCacheItem FromCacheItem<TCacheValue>(CacheItem<TCacheValue> item, byte[] value)
-            => new JsonCacheItem()
-            {
-                CreatedUtc = item.CreatedUtc,
-                ExpirationMode = item.ExpirationMode,
-                ExpirationTimeout = item.ExpirationTimeout,
-                Key = item.Key,
-                LastAccessedUtc = item.LastAccessedUtc,
-                Region = item.Region,
-                Value = value,
-                ValueType = item.Value.GetType().AssemblyQualifiedName,
-                UsesExpirationDefaults = item.UsesExpirationDefaults
-            };
-
-        public CacheItem<T> ToCacheItem<T>(object value)
+        [JsonConstructor]
+        public JsonCacheItem()
         {
-            var item = string.IsNullOrWhiteSpace(this.Region) ?
-                new CacheItem<T>(this.Key, (T)value) :
-                new CacheItem<T>(this.Key, this.Region, (T)value);
-
-            if (!this.UsesExpirationDefaults)
-            {
-                if (this.ExpirationMode == ExpirationMode.Sliding)
-                {
-                    item = item.WithSlidingExpiration(this.ExpirationTimeout);
-                }
-                else if (this.ExpirationMode == ExpirationMode.Absolute)
-                {
-                    item = item.WithAbsoluteExpiration(this.ExpirationTimeout);
-                }
-                else if (this.ExpirationMode == ExpirationMode.None)
-                {
-                    item = item.WithNoExpiration();
-                }
-            }
-            else
-            {
-                item = item.WithDefaultExpiration();
-            }
-
-            item.LastAccessedUtc = this.LastAccessedUtc;
-
-            return item.WithCreated(this.CreatedUtc);
         }
+
+        public JsonCacheItem(ICacheItemProperties properties, object value) : base(properties, value)
+        {
+        }
+        
+        [JsonProperty("createdUtc")]
+        public override long CreatedUtc { get; set; }
+        
+        [JsonProperty("expirationMode")]
+        public override ExpirationMode ExpirationMode { get; set; }
+        
+        [JsonProperty("expirationTimeout")]
+        public override int ExpirationTimeout { get; set; }
+        
+        [JsonProperty("key")]
+        public override string Key { get; set; }
+        
+        [JsonProperty("lastAccessedUtc")]
+        public override long LastAccessedUtc { get; set; }
+        
+        [JsonProperty("region")]
+        public override string Region { get; set; }
+        
+        [JsonProperty("usesDefaultExpiration")]
+        public override bool UsesExpirationDefaults { get; set; }
+        
+        [JsonProperty("valueType")]
+        public override string ValueType { get; set; }
+        
+        [JsonProperty("value")]
+        public override T Value { get; set; }
     }
 }

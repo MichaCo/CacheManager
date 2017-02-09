@@ -530,7 +530,7 @@ namespace CacheManager.Tests
                     break;
 
                 case Serializer.BondBinary:
-                    part.WithBondBinarySerializer(2048);
+                    part.WithBondCompactBinarySerializer(2048);
                     break;
             }
             return part;

@@ -24,24 +24,6 @@ namespace CacheManager.Serialization.Bond
         {
         }
 
-        public BondCacheItem(CacheItem<object> from)
-        {
-            if (from == null)
-            {
-                throw new ArgumentNullException(nameof(from));
-            }
-
-            CreatedUtc = from.CreatedUtc.Ticks;
-            ExpirationMode = from.ExpirationMode;
-            ExpirationTimeout = from.ExpirationTimeout.TotalMilliseconds;
-            Key = from.Key;
-            LastAccessedUtc = from.LastAccessedUtc.Ticks;
-            Region = from.Region;
-            ValueType = from.ValueType.AssemblyQualifiedName;
-            UsesExpirationDefaults = from.UsesExpirationDefaults;
-            Value = (T)from.Value;
-        }
-
         public BondCacheItem(CacheItem<T> from)
         {
             if (from == null)
@@ -118,6 +100,7 @@ namespace CacheManager.Serialization.Bond
             return item.WithCreated(new DateTime(this.CreatedUtc));
         }
 
+        // don't remove, referenced via reflection. Needed cuz we cannot cast Item<T> to Item<object>
         public CacheItem<object> ToObjectCacheItem()
         {
             var item = string.IsNullOrWhiteSpace(this.Region) ?

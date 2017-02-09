@@ -56,7 +56,10 @@
     "net45": {
       "dependencies": {
       },
-      "frameworkAssemblies": { "System.Runtime": "4.0.0.0" }
+      "frameworkAssemblies": {
+        "System.Runtime": "",
+        "System.IO": ""
+      }
     }
   }
 }

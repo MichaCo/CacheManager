@@ -148,7 +148,7 @@ namespace CacheManager.Tests
             {
                 settings.WithUpdateMode(CacheUpdateMode.Up)
                     .WithMemcachedCacheHandle(Configuration)
-                    .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1));
+                    .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromHours(1));
             });
 
             // act
