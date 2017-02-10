@@ -57,8 +57,7 @@ namespace CacheManager.Serialization.Json
         /// <returns>The compressed data.</returns>
         protected virtual byte[] Compression(byte[] data)
         {
-            var buffer = new byte[data.Length];
-            using (var bytesBuilder = new MemoryStream(buffer))
+            using (var bytesBuilder = new MemoryStream())
             {
 #if NET40
                 using (var gzWriter = new GZipStream(bytesBuilder, CompressionMode.Compress, true))
