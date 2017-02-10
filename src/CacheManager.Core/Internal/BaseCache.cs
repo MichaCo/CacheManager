@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Globalization;
-using System.Reflection;
 using CacheManager.Core.Logging;
 using static CacheManager.Core.Utility.Guard;
 
@@ -192,7 +191,7 @@ namespace CacheManager.Core.Internal
             this.Dispose(true);
             GC.SuppressFinalize(this);
         }
-        
+
         /// <inheritdoc />
         public abstract bool Exists(string key);
 
@@ -606,26 +605,22 @@ namespace CacheManager.Core.Internal
         /// <typeparam name="TOut">The type.</typeparam>
         /// <param name="value">The value.</param>
         /// <returns>The casted value.</returns>
-        private static TOut GetCasted<TOut>(object value)
+        protected static TOut GetCasted<TOut>(object value)
         {
             if (value == null)
             {
                 return default(TOut);
             }
 
-#if NET40
-            var info = typeof(TOut);
-            if (info.IsClass || info.IsInterface)
-#else
-            var info = typeof(TOut).GetTypeInfo();
-            if (info.IsClass || info.IsInterface)
-#endif
+            try
+            {
+                object changed = Convert.ChangeType(value, typeof(TOut), CultureInfo.InvariantCulture);
+                return changed == null ? (TOut)value : (TOut)changed;
+            }
+            catch
             {
                 return (TOut)value;
             }
-
-            object changed = Convert.ChangeType(value, typeof(TOut), CultureInfo.InvariantCulture);
-            return changed == null ? (TOut)value : (TOut)changed;
         }
     }
 }

@@ -1712,19 +1712,21 @@ namespace CacheManager.Tests
         [Theory]
         [MemberData("TestCacheManagers")]
         [ReplaceCulture]
-        public void CacheManager_CastGet_InvalidTypeThrows<T>(T cache)
+        public void CacheManager_CastGet_ICanHazString<T>(T cache)
             where T : ICacheManager<object>
         {
             using (cache)
             {
-                // arrange
-                cache.Add("someint", 123456);
+                var key = Guid.NewGuid().ToString();
 
+                // arrange
+                cache.Add(key, 123456);
+                
                 // act
-                Action act = () => cache.Get<string>("someint");
+                var val = cache.Get<string>(key);
 
                 // assert
-                act.ShouldThrow<Exception>();
+                val.Should().Be("123456");
             }
         }
 
