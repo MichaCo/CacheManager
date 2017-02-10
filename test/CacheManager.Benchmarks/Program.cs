@@ -21,6 +21,10 @@ namespace CacheManager.Benchmarks
     {
         public static void Main(string[] args)
         {
+            var comp = new GzBenchmark();
+            comp.Setup();
+            comp.ManuelPooled();
+
             var bench = new SerializationBenchmark();
             bench.Setup();
             bench.JsonSerializer();

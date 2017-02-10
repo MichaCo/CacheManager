@@ -7,9 +7,11 @@ Frequency=3328120 Hz, Resolution=300.4699 ns, Timer=TSC
   Job-DZPVZX : Clr 4.0.30319.42000, 64bit RyuJIT-v4.6.1586.0
 
 Platform=X64  LaunchCount=2  TargetCount=15  
-WarmupCount=10  Allocated=300.3 kB  
+WarmupCount=10  
 
 ```
-    Method |      Mean |    StdDev |
----------- |---------- |---------- |
- NaiveImpl | 2.3509 ms | 0.0243 ms |
+       Method |      Mean |    StdDev | Scaled | Scaled-StdDev |   Gen 0 | Allocated |
+------------- |---------- |---------- |------- |-------------- |-------- |---------- |
+        Naive | 1.3792 ms | 0.0211 ms |   1.00 |          0.00 | 29.6875 | 301.06 kB |
+       Manuel | 1.3892 ms | 0.0465 ms |   1.01 |          0.04 |  5.4688 | 191.09 kB |
+ ManuelPooled | 1.3653 ms | 0.0510 ms |   0.99 |          0.04 |       - | 106.26 kB |

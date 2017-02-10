@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using CacheManager.Core.Internal;
 using CacheManager.Core.Utility;
 using Newtonsoft.Json;
@@ -32,9 +33,9 @@ namespace CacheManager.Serialization.Json
         }
 
         /// <inheritdoc/>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0", Justification = "Is checked by GetString")]
         public override object Deserialize(byte[] data, Type target)
         {
+            Guard.NotNull(data, nameof(data));
             var compressedData = this.Decompression(data);
 
             return base.Deserialize(compressedData, target);
@@ -43,6 +44,7 @@ namespace CacheManager.Serialization.Json
         /// <inheritdoc/>
         public override byte[] Serialize<T>(T value)
         {
+            Guard.NotNull(value, nameof(value));
             var data = base.Serialize<T>(value);
 
             return this.Compression(data);
@@ -55,13 +57,17 @@ namespace CacheManager.Serialization.Json
         /// <returns>The compressed data.</returns>
         protected virtual byte[] Compression(byte[] data)
         {
-            Guard.NotNull(data, nameof(data));
-
-            using (var bytesBuilder = new MemoryStream())
+            var buffer = new byte[data.Length];
+            using (var bytesBuilder = new MemoryStream(buffer))
             {
-                using (var gzWriter = new GZipStream(bytesBuilder, CompressionMode.Compress))
+#if NET40
+                using (var gzWriter = new GZipStream(bytesBuilder, CompressionMode.Compress, true))
+#else
+                using (var gzWriter = new GZipStream(bytesBuilder, CompressionLevel.Fastest, true))
+#endif
                 {
                     gzWriter.Write(data, 0, data.Length);
+                    bytesBuilder.Flush();
                 }
 
                 return bytesBuilder.ToArray();
@@ -75,14 +81,18 @@ namespace CacheManager.Serialization.Json
         /// <returns>The uncompressed data.</returns>
         protected virtual byte[] Decompression(byte[] compressedData)
         {
-            Guard.NotNull(compressedData, nameof(compressedData));
-
-            using (var inputStream = new MemoryStream(compressedData))
+            byte[] buffer = new byte[compressedData.Length * 2];
+            using (var inputStream = new MemoryStream(compressedData, 0, compressedData.Length))
             using (var gzReader = new GZipStream(inputStream, CompressionMode.Decompress))
-            using (var bytesBuilder = new MemoryStream())
+            using (var stream = new MemoryStream(compressedData.Length * 2))
             {
-                gzReader.CopyTo(bytesBuilder);
-                return bytesBuilder.ToArray();
+                int readBytes = 0;
+                while ((readBytes = gzReader.Read(buffer, 0, buffer.Length)) > 0)
+                {
+                    stream.Write(buffer, 0, readBytes);
+                }
+
+                return stream.ToArray();
             }
         }
     }
