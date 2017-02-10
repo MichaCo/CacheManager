@@ -20,7 +20,7 @@ namespace CacheManager.Core
     [Serializable]
     public class CacheItem<T> : ISerializable, ICacheItemProperties
 #else
-    public class CacheItem<T>
+    public class CacheItem<T> : ICacheItemProperties
 #endif
     {
         /// <summary>
