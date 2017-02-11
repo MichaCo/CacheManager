@@ -47,6 +47,7 @@ namespace CacheManager.Tests
 
         [Fact]
         [Trait("category", "Redis")]
+        [Trait("category", "Unreliable")]
         public void Redis_Extensions_WithClient()
         {
             var configKey = Guid.NewGuid().ToString();
@@ -71,6 +72,7 @@ namespace CacheManager.Tests
 
         [Fact]
         [Trait("category", "Redis")]
+        [Trait("category", "Unreliable")]
         public void Redis_Extensions_WithClientWithDb()
         {
             var configKey = Guid.NewGuid().ToString();
@@ -165,6 +167,7 @@ namespace CacheManager.Tests
 
         [Fact]
         [Trait("category", "Redis")]
+        [Trait("category", "Unreliable")]
         public void Redis_UseExistingConnection()
         {
             var multiplexer = ConnectionMultiplexer.Connect("localhost:6379");
