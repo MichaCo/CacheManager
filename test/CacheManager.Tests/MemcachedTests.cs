@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using CacheManager.Core;
 using CacheManager.Memcached;
 using Enyim.Caching;
@@ -16,7 +17,7 @@ namespace CacheManager.Tests
     [ExcludeFromCodeCoverage]
     public class MemcachedTests
     {
-        private static MemcachedClientConfiguration Configuration
+        public static MemcachedClientConfiguration Configuration
         {
             get
             {
@@ -106,38 +107,6 @@ namespace CacheManager.Tests
 
         [Fact]
         [Trait("category", "Memcached")]
-        [Trait("category", "Unreliable")]
-        public void Memcached_Absolute_DoesExpire()
-        {
-            var cache = CacheFactory.Build(settings =>
-            {
-                settings.WithUpdateMode(CacheUpdateMode.Up)
-                    .WithMemcachedCacheHandle(Configuration)
-                    .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1));
-            });
-
-            using (cache)
-            {
-                for (int i = 0; i < 3; i++)
-                {
-                    // act
-                    var result = cache.Add("key" + i, "value" + i);
-
-                    // assert
-                    result.Should().BeTrue();
-                    Thread.Sleep(10);
-                    var value = cache.GetCacheItem("key" + i);
-                    value.Should().NotBeNull();
-
-                    Thread.Sleep(2000);
-                    var valueExpired = cache.GetCacheItem("key" + i);
-                    valueExpired.Should().BeNull();
-                }
-            }
-        }
-
-        [Fact]
-        [Trait("category", "Memcached")]
         public void Memcached_KeySizeLimit()
         {
             // arrange
@@ -194,7 +163,7 @@ namespace CacheManager.Tests
 
         [Fact]
         [Trait("category", "Memcached")]
-        public void Memcached_NoRaceCondition_WithCasButTooFiewRetries()
+        public async Task Memcached_NoRaceCondition_WithCasButTooFiewRetries()
         {
             // arrange
             using (var cache = CacheFactory.Build<RaceConditionTestElement>(settings =>
@@ -213,8 +182,8 @@ namespace CacheManager.Tests
                 int retries = 0;
 
                 // act
-                ThreadTestHelper.Run(
-                    () =>
+                await ThreadTestHelper.RunAsync(
+                    async () =>
                     {
                         for (int i = 0; i < numInnerIterations; i++)
                         {
@@ -230,12 +199,13 @@ namespace CacheManager.Tests
                                 retries,
                                 out newValue);
                         }
+
+                        await Task.Delay(10);
                     },
                     numThreads,
                     iterations);
 
                 // assert
-                Thread.Sleep(10);
                 var result = cache.Get("myCounter");
                 result.Should().NotBeNull();
                 Trace.TraceInformation("Counter increased to " + result.Counter + " cas calls needed " + countCasModifyCalls);
@@ -250,12 +220,13 @@ namespace CacheManager.Tests
 
         [Fact]
         [Trait("category", "Memcached")]
-        public void Memcached_NoRaceCondition_WithCasHandling()
+        public async Task Memcached_NoRaceCondition_WithCasHandling()
         {
             // arrange
             using (var cache = CacheFactory.Build<RaceConditionTestElement>(settings =>
             {
                 settings.WithUpdateMode(CacheUpdateMode.Up)
+                    .WithMaxRetries(int.MaxValue)
                     .WithSystemRuntimeCacheHandle()
                         .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMilliseconds(1))
                     .And
@@ -271,8 +242,8 @@ namespace CacheManager.Tests
                 int countCasModifyCalls = 0;
 
                 // act
-                ThreadTestHelper.Run(
-                    () =>
+                await ThreadTestHelper.RunAsync(
+                    async () =>
                     {
                         for (int i = 0; i < numInnerIterations; i++)
                         {
@@ -283,15 +254,15 @@ namespace CacheManager.Tests
                                     value.Counter++;
                                     Interlocked.Increment(ref countCasModifyCalls);
                                     return value;
-                                },
-                                500);
+                                });
                         }
+
+                        await Task.Delay(10);
                     },
                     numThreads,
                     iterations);
 
                 // assert
-                Thread.Sleep(10);
                 var result = cache.Get("myCounter");
                 result.Should().NotBeNull();
                 Trace.WriteLine("Counter increased to " + result.Counter + " cas calls needed " + countCasModifyCalls);
@@ -302,12 +273,13 @@ namespace CacheManager.Tests
 
         [Fact]
         [Trait("category", "Memcached")]
-        public void Memcached_NoRaceCondition_WithCasHandling_WithRegion()
+        public async Task Memcached_NoRaceCondition_WithCasHandling_WithRegion()
         {
             // arrange
             using (var cache = CacheFactory.Build<RaceConditionTestElement>(settings =>
             {
-                settings.WithUpdateMode(CacheUpdateMode.Up)
+                settings
+                    .WithMaxRetries(int.MaxValue)
                     .WithMemcachedCacheHandle(Configuration)
                         .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMinutes(10));
             }))
@@ -322,8 +294,8 @@ namespace CacheManager.Tests
                 int countCasModifyCalls = 0;
 
                 // act
-                ThreadTestHelper.Run(
-                    () =>
+                await ThreadTestHelper.RunAsync(
+                    async () =>
                     {
                         for (int i = 0; i < numInnerIterations; i++)
                         {
@@ -335,15 +307,14 @@ namespace CacheManager.Tests
                                     value.Counter++;
                                     Interlocked.Increment(ref countCasModifyCalls);
                                     return value;
-                                },
-                                500);
+                                });
                         }
+                        await Task.Delay(10);
                     },
                     numThreads,
                     iterations);
 
                 // assert
-                Thread.Sleep(10);
                 var result = cache.Get(key, region);
                 result.Should().NotBeNull();
                 Trace.TraceInformation("Counter increased to " + result.Counter + " cas calls needed " + countCasModifyCalls);
@@ -354,7 +325,7 @@ namespace CacheManager.Tests
 
         [Fact]
         [Trait("category", "Memcached")]
-        public void Memcached_RaceCondition_WithoutCasHandling()
+        public async Task Memcached_RaceCondition_WithoutCasHandling()
         {
             // arrange
             using (var cache = CacheFactory.Build<RaceConditionTestElement>(settings =>
@@ -371,8 +342,8 @@ namespace CacheManager.Tests
                 int numInnerIterations = 10;
 
                 // act
-                ThreadTestHelper.Run(
-                    () =>
+                await ThreadTestHelper.RunAsync(
+                    async () =>
                     {
                         for (int i = 0; i < numInnerIterations; i++)
                         {
@@ -382,12 +353,13 @@ namespace CacheManager.Tests
 
                             cache.Put("myCounter", val);
                         }
+
+                        await Task.Delay(10);
                     },
                     numThreads,
                     iterations);
 
                 // assert
-                Thread.Sleep(10);
                 var result = cache.Get("myCounter");
                 result.Should().NotBeNull();
                 Trace.TraceInformation("Counter increased to " + result.Counter);

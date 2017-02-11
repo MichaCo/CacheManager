@@ -15,10 +15,10 @@ namespace CacheManager.Tests
 #else
     [Trait("Framework", "NET45")]
 #endif
-    public class CacheManagerAdvancedUpdateTests : BaseCacheManagerTest
+    public class CacheManagerAdvancedUpdateTests
     {
         [Theory]
-        [MemberData("TestCacheManagers")]
+        [ClassData(typeof(TestCacheManagers))]
         public void Update_ThrowsIf_FactoryReturnsNull(ICacheManager<object> cache)
         {
             using (cache)

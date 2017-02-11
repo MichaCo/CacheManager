@@ -25,7 +25,7 @@ namespace CacheManager.Tests
 #else
     [Trait("Framework", "NET45")]
 #endif
-    public class SerializerTests : BaseCacheManagerTest
+    public class SerializerTests
     {
 #if !NETCOREAPP
 
@@ -533,7 +533,7 @@ namespace CacheManager.Tests
         }
 
         [Theory]
-        [MemberData("TestCacheManagers")]
+        [ClassData(typeof(TestCacheManagers))]
         public void Serializer_FullAddGet<T>(T cache)
             where T : ICacheManager<object>
         {

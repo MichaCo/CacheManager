@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -10,17 +11,58 @@ using CacheManager.Redis;
 using Enyim.Caching.Configuration;
 #endif
 
-using static CacheManager.Core.Utility.Guard;
-
 namespace CacheManager.Tests
 {
-    public enum Serializer
+    [ExcludeFromCodeCoverage]
+    public class TestCacheManagers : IEnumerable<object[]>
     {
-        Binary,
-        Json,
-        GzJson,
-        Proto,
-        BondBinary
+        public IEnumerator<object[]> GetEnumerator()
+        {
+#if !NETCOREAPP
+            yield return new object[] { TestManagers.WithOneMemoryCacheHandleSliding };
+            yield return new object[] { TestManagers.WithOneMemoryCacheHandle };
+            yield return new object[] { TestManagers.WithMemoryAndDictionaryHandles };
+            yield return new object[] { TestManagers.WithTwoNamedMemoryCaches };
+#endif
+#if !MSBUILD
+            yield return new object[] { TestManagers.WithOneMicrosoftMemoryCacheHandle };
+#endif
+            yield return new object[] { TestManagers.WithManyDictionaryHandles };
+            yield return new object[] { TestManagers.WithOneDicCacheHandle };
+#if REDISENABLED
+#if !NETCOREAPP
+            yield return new object[] { TestManagers.WithRedisCacheBinary };
+#endif
+            yield return new object[] { TestManagers.WithRedisCacheJson };
+            yield return new object[] { TestManagers.WithRedisCacheGzJson };
+            yield return new object[] { TestManagers.WithRedisCacheProto };
+            yield return new object[] { TestManagers.WithRedisCacheBondBinary };
+            yield return new object[] { TestManagers.WithDicAndRedisCache };
+
+            yield return new object[] { TestManagers.WithRedisCacheJsonNoLua };
+            yield return new object[] { TestManagers.WithDicAndRedisCacheNoLua };
+#endif
+#if MEMCACHEDENABLED
+#if !NETCOREAPP
+            yield return new object[] { TestManagers.WithMemcachedBinary };
+#endif
+            yield return new object[] { TestManagers.WithMemcachedJson };
+            yield return new object[] { TestManagers.WithMemcachedGzJson };
+            yield return new object[] { TestManagers.WithMemcachedProto };
+            yield return new object[] { TestManagers.WithMemcachedBondBinary };
+#endif
+#if COUCHBASEENABLED
+            yield return new object[] { TestManagers.WithCouchbaseMemcached };
+#endif
+#if !NET40 && MOCK_HTTPCONTEXT_ENABLED
+            yield return new object[] { TestManagers.WithSystemWebCache };
+#endif
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
     }
 
     [ExcludeFromCodeCoverage]
@@ -37,7 +79,7 @@ namespace CacheManager.Tests
         public static ICacheManager<object> WithOneDicCacheHandle
             => CacheFactory.Build(
                 settings => settings
-                    .WithUpdateMode(CacheUpdateMode.Full)
+                    .WithUpdateMode(CacheUpdateMode.Up)
                     .WithDictionaryHandle()
                         .EnableStatistics()
                     .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(1000)));
@@ -433,7 +475,7 @@ namespace CacheManager.Tests
             memConfig.AddServer("localhost", 11211);
             return CacheFactory.Build<T>(settings =>
             {
-                settings.WithUpdateMode(CacheUpdateMode.Full)
+                settings.WithUpdateMode(CacheUpdateMode.Up)
                     .TestSerializer(serializer)
                     .WithMemcachedCacheHandle(memConfig)
                         .EnableStatistics()
@@ -446,69 +488,16 @@ namespace CacheManager.Tests
         private static string NewKey() => Guid.NewGuid().ToString();
     }
 
-    [SuppressMessage("Microsoft.Design", "CA1053:StaticHolderTypesShouldNotHaveConstructors", Justification = "Needed for xunit")]
-    [ExcludeFromCodeCoverage]
-    public class BaseCacheManagerTest
+    public enum Serializer
     {
-        public static IEnumerable<object[]> TestCacheManagers
-        {
-            get
-            {
-#if !NETCOREAPP
-                yield return new object[] { TestManagers.WithOneMemoryCacheHandleSliding };
-                yield return new object[] { TestManagers.WithOneMemoryCacheHandle };
-                yield return new object[] { TestManagers.WithMemoryAndDictionaryHandles };
-                yield return new object[] { TestManagers.WithTwoNamedMemoryCaches };
-#endif
-#if !MSBUILD
-                yield return new object[] { TestManagers.WithOneMicrosoftMemoryCacheHandle };
-#endif
-                yield return new object[] { TestManagers.WithManyDictionaryHandles };
-                yield return new object[] { TestManagers.WithOneDicCacheHandle };
-#if REDISENABLED
-#if !NETCOREAPP
-                yield return new object[] { TestManagers.WithRedisCacheBinary };
-#endif
-                yield return new object[] { TestManagers.WithRedisCacheJson };
-                yield return new object[] { TestManagers.WithRedisCacheGzJson };
-                yield return new object[] { TestManagers.WithRedisCacheProto };
-                yield return new object[] { TestManagers.WithRedisCacheBondBinary };
-                yield return new object[] { TestManagers.WithDicAndRedisCache };
-
-                yield return new object[] { TestManagers.WithRedisCacheJsonNoLua };
-                yield return new object[] { TestManagers.WithDicAndRedisCacheNoLua };
-#endif
-#if MEMCACHEDENABLED
-#if !NETCOREAPP
-                yield return new object[] { TestManagers.WithMemcachedBinary };
-#endif
-                yield return new object[] { TestManagers.WithMemcachedJson };
-                yield return new object[] { TestManagers.WithMemcachedGzJson };
-                yield return new object[] { TestManagers.WithMemcachedProto };
-                yield return new object[] { TestManagers.WithMemcachedBondBinary };
-#endif
-#if COUCHBASEENABLED
-                yield return new object[] { TestManagers.WithCouchbaseMemcached };
-#endif
-#if !NET40 && MOCK_HTTPCONTEXT_ENABLED
-                yield return new object[] { TestManagers.WithSystemWebCache };
-#endif
-            }
-        }
-
-#if !NETCOREAPP
-
-        public static string GetCfgFileName(string fileName)
-        {
-            NotNullOrWhiteSpace(fileName, nameof(fileName));
-            var basePath = Environment.CurrentDirectory;
-            return basePath + (fileName.StartsWith("/") ? fileName : "/" + fileName);
-        }
-
-#endif
+        Binary,
+        Json,
+        GzJson,
+        Proto,
+        BondBinary
     }
 
-    internal static class ConfigurationExtension
+    public static class ConfigurationExtension
     {
         public static ConfigurationBuilderCachePart TestSerializer(this ConfigurationBuilderCachePart part, Serializer serializer)
         {
@@ -537,14 +526,3 @@ namespace CacheManager.Tests
         }
     }
 }
-
-#if NETCOREAPP
-namespace System.Diagnostics.CodeAnalysis
-{
-    [Conditional("DEBUG")]
-    [AttributeUsage(AttributeTargets.All, Inherited = false, AllowMultiple = false)]
-    internal sealed class ExcludeFromCodeCoverageAttribute : Attribute
-    {
-    }
-}
-#endif

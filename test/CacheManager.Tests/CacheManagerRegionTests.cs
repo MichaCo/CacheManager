@@ -18,10 +18,10 @@ namespace CacheManager.Tests
 #else
     [Trait("Framework", "NET45")]
 #endif
-    public class CacheManagerRegionTests : BaseCacheManagerTest
+    public class CacheManagerRegionTests
     {
         [Theory]
-        [MemberData("TestCacheManagers")]
+        [ClassData(typeof(TestCacheManagers))]
         public void CacheManager_Region_AddItems_UseSameKeys<T>(T cache)
             where T : ICacheManager<object>
         {
@@ -60,7 +60,7 @@ namespace CacheManager.Tests
         }
 
         [Theory]
-        [MemberData("TestCacheManagers")]
+        [ClassData(typeof(TestCacheManagers))]
         public void CacheManager_Region_AddItems_UseDifferentKeys<T>(T cache)
             where T : ICacheManager<object>
         {
@@ -92,13 +92,18 @@ namespace CacheManager.Tests
         }
 
         [Theory]
-        [MemberData("TestCacheManagers")]
+        [ClassData(typeof(TestCacheManagers))]
         public void CacheManager_Region_ClearRegion<T>(T cache)
             where T : ICacheManager<object>
         {
+#if !NETCOREAPP
+            if (cache.CacheHandles.OfType<Memcached.MemcachedCacheHandle<object>>().Any())
+            {
+                return;
+            }
+#endif
             using (cache)
             {
-                // Thread.Sleep(1000); arrange
                 List<Tuple<string, string, string>> keys;
                 List<string> regions;
 
@@ -140,10 +145,16 @@ namespace CacheManager.Tests
 
         // Validates #64, Put has a different code path, at least in redis
         [Theory]
-        [MemberData("TestCacheManagers")]
+        [ClassData(typeof(TestCacheManagers))]
         public void CacheManager_Region_Put_ClearRegion<T>(T cache)
             where T : ICacheManager<object>
         {
+#if !NETCOREAPP
+            if (cache.CacheHandles.OfType<Memcached.MemcachedCacheHandle<object>>().Any())
+            {
+                return;
+            }
+#endif
             using (cache)
             {
                 var key = Guid.NewGuid().ToString();
@@ -160,7 +171,8 @@ namespace CacheManager.Tests
         }
 
         [Theory]
-        [MemberData("TestCacheManagers")]
+        [ClassData(typeof(TestCacheManagers))]
+        [Trait("category", "Unreliable")]
         public void CacheManager_Region_Put_ModifySomeItems<T>(T cache)
             where T : ICacheManager<object>
         {
@@ -212,7 +224,7 @@ namespace CacheManager.Tests
         }
 
         [Theory]
-        [MemberData("TestCacheManagers")]
+        [ClassData(typeof(TestCacheManagers))]
         public void CacheManager_Region_RemoveItem_RandomRemoveSomeItems<T>(T cache)
             where T : ICacheManager<object>
         {

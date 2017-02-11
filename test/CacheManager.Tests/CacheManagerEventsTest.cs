@@ -16,7 +16,7 @@ namespace CacheManager.Tests
 #else
     [Trait("Framework", "NET45")]
 #endif
-    public class CacheManagerEventsTest : BaseCacheManagerTest
+    public class CacheManagerEventsTest
     {
         [Fact]
         [ReplaceCulture]
@@ -89,7 +89,7 @@ namespace CacheManager.Tests
         }
 
         [Theory]
-        [MemberData("TestCacheManagers")]
+        [ClassData(typeof(TestCacheManagers))]
         [ReplaceCulture]
         public void CacheManager_Events_OnGet<T>(T cache)
             where T : ICacheManager<object>
@@ -116,7 +116,7 @@ namespace CacheManager.Tests
         }
 
         [Theory]
-        [MemberData("TestCacheManagers")]
+        [ClassData(typeof(TestCacheManagers))]
         [ReplaceCulture]
         public void CacheManager_Events_OnGetWithRegion<T>(T cache)
             where T : ICacheManager<object>
@@ -144,7 +144,7 @@ namespace CacheManager.Tests
         }
 
         [Theory]
-        [MemberData("TestCacheManagers")]
+        [ClassData(typeof(TestCacheManagers))]
         [ReplaceCulture]
         public void CacheManager_Events_OnGetMiss<T>(T cache)
             where T : ICacheManager<object>
@@ -171,7 +171,7 @@ namespace CacheManager.Tests
         }
 
         [Theory]
-        [MemberData("TestCacheManagers")]
+        [ClassData(typeof(TestCacheManagers))]
         [ReplaceCulture]
         public void CacheManager_Events_OnGetManyHandles<T>(T cache)
             where T : ICacheManager<object>
@@ -208,7 +208,7 @@ namespace CacheManager.Tests
         /// <typeparam name="T">The cache type.</typeparam>
         /// <param name="cache">The cache instance.</param>
         [Theory]
-        [MemberData("TestCacheManagers")]
+        [ClassData(typeof(TestCacheManagers))]
         [Trait("category", "Unreliable")]
         [ReplaceCulture]
         public void CacheManager_Events_OnRemoveMany<T>(T cache)
@@ -262,7 +262,7 @@ namespace CacheManager.Tests
         /// <param name="cache">The cache instance.</param>
         ////[Theory(Skip = "Doesn't work well in parallel")]
         [Theory]
-        [MemberData("TestCacheManagers")]
+        [ClassData(typeof(TestCacheManagers))]
         [ReplaceCulture]
         public void CacheManager_Events_OnAddMany<T>(T cache)
             where T : ICacheManager<object>
@@ -317,7 +317,7 @@ namespace CacheManager.Tests
         /// <typeparam name="T">The cache type.</typeparam>
         /// <param name="cache">The cache instance.</param>
         [Theory]
-        [MemberData("TestCacheManagers")]
+        [ClassData(typeof(TestCacheManagers))]
         [ReplaceCulture]
         public void CacheManager_Events_OnPutMany<T>(T cache)
             where T : ICacheManager<object>
@@ -368,7 +368,7 @@ namespace CacheManager.Tests
         /// <typeparam name="T">The cache type.</typeparam>
         /// <param name="cache">The cache instance.</param>
         [Theory]
-        [MemberData("TestCacheManagers")]
+        [ClassData(typeof(TestCacheManagers))]
         [ReplaceCulture]
         public void CacheManager_Events_OnUpdate<T>(T cache)
             where T : ICacheManager<object>
@@ -417,7 +417,7 @@ namespace CacheManager.Tests
         /// <typeparam name="T">The cache type.</typeparam>
         /// <param name="cache">The cache instance.</param>
         [Theory]
-        [MemberData("TestCacheManagers")]
+        [ClassData(typeof(TestCacheManagers))]
         [Trait("category", "Unreliable")]
         [ReplaceCulture]
         public void CacheManager_Events_OnClearRegion<T>(T cache)

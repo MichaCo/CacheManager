@@ -22,7 +22,7 @@ namespace CacheManager.Tests
 #else
     [Trait("Framework", "NET45")]
 #endif
-    public class CacheManagerSimpleTests : BaseCacheManagerTest
+    public class CacheManagerSimpleTests
     {
         private static object runLock = new object();
 
@@ -77,7 +77,7 @@ namespace CacheManager.Tests
 
         [Theory]
         [ReplaceCulture]
-        [MemberData("TestCacheManagers")]
+        [ClassData(typeof(TestCacheManagers))]
         public void CacheManager_Exists_InvalidKey(ICacheManager<object> cache)
         {
             using (cache)
@@ -100,7 +100,7 @@ namespace CacheManager.Tests
         }
 
         [Theory]
-        [MemberData("TestCacheManagers")]
+        [ClassData(typeof(TestCacheManagers))]
         public void CacheManager_Exists_KeyDoesExist(ICacheManager<object> cache)
         {
             using (cache)
@@ -118,7 +118,7 @@ namespace CacheManager.Tests
         }
 
         [Theory]
-        [MemberData("TestCacheManagers")]
+        [ClassData(typeof(TestCacheManagers))]
         public void CacheManager_Exists_KeyRegionDoesExist(ICacheManager<object> cache)
         {
             using (cache)
@@ -137,7 +137,7 @@ namespace CacheManager.Tests
         }
 
         [Theory]
-        [MemberData("TestCacheManagers")]
+        [ClassData(typeof(TestCacheManagers))]
         public void CacheManager_Exists_KeyDoesNotExist(ICacheManager<object> cache)
         {
             using (cache)
@@ -152,7 +152,7 @@ namespace CacheManager.Tests
         }
 
         [Theory]
-        [MemberData("TestCacheManagers")]
+        [ClassData(typeof(TestCacheManagers))]
         public void CacheManager_Exists_KeyRegionDoesNotExist(ICacheManager<object> cache)
         {
             using (cache)
@@ -161,7 +161,7 @@ namespace CacheManager.Tests
                 var key = Guid.NewGuid().ToString();
                 var region = Guid.NewGuid().ToString();
 
-                // act                
+                // act
                 // assert
                 cache.Exists(key, region).Should().BeFalse(cache.Configuration.ToString());
             }
@@ -472,7 +472,7 @@ namespace CacheManager.Tests
         }
 
         [Theory]
-        [MemberData("TestCacheManagers")]
+        [ClassData(typeof(TestCacheManagers))]
         public void CacheManager_Update_ItemNotAdded<T>(T cache)
             where T : ICacheManager<object>
         {
@@ -498,7 +498,7 @@ namespace CacheManager.Tests
         }
 
         [Theory]
-        [MemberData("TestCacheManagers")]
+        [ClassData(typeof(TestCacheManagers))]
         public void CacheManager_Update_ValueFactoryReturnsNull<T>(T cache)
             where T : ICacheManager<object>
         {
@@ -537,7 +537,7 @@ namespace CacheManager.Tests
         }
 
         [Theory]
-        [MemberData("TestCacheManagers")]
+        [ClassData(typeof(TestCacheManagers))]
         public void CacheManager_Update_Simple<T>(T cache)
             where T : ICacheManager<object>
         {
@@ -684,7 +684,7 @@ namespace CacheManager.Tests
         }
 
         [Theory]
-        [MemberData("TestCacheManagers")]
+        [ClassData(typeof(TestCacheManagers))]
         public void CacheManager_AddOrUpdate_ItemNotAdded<T>(T cache)
             where T : ICacheManager<object>
         {
@@ -706,7 +706,7 @@ namespace CacheManager.Tests
         }
 
         [Theory]
-        [MemberData("TestCacheManagers")]
+        [ClassData(typeof(TestCacheManagers))]
         public void CacheManager_AddOrUpdate_Update_Simple<T>(T cache)
             where T : ICacheManager<object>
         {
@@ -874,7 +874,7 @@ namespace CacheManager.Tests
         }
 
         [Theory]
-        [MemberData("TestCacheManagers")]
+        [ClassData(typeof(TestCacheManagers))]
         public void CacheManager_GetOrAdd_SimpleAdd<T>(T cache)
             where T : ICacheManager<object>
         {
@@ -900,7 +900,7 @@ namespace CacheManager.Tests
         }
 
         [Theory]
-        [MemberData("TestCacheManagers")]
+        [ClassData(typeof(TestCacheManagers))]
         public void CacheManager_TryGetOrAdd_SimpleAdd<T>(T cache)
             where T : ICacheManager<object>
         {
@@ -927,7 +927,7 @@ namespace CacheManager.Tests
         }
 
         [Theory]
-        [MemberData("TestCacheManagers")]
+        [ClassData(typeof(TestCacheManagers))]
         public void CacheManager_GetOrAdd_FactoryReturnsNull<T>(T cache)
             where T : ICacheManager<object>
         {
@@ -945,7 +945,7 @@ namespace CacheManager.Tests
         }
 
         [Theory]
-        [MemberData("TestCacheManagers")]
+        [ClassData(typeof(TestCacheManagers))]
         public void CacheManager_TryGetOrAdd_FactoryReturnsNull<T>(T cache)
             where T : ICacheManager<object>
         {
@@ -965,7 +965,7 @@ namespace CacheManager.Tests
         }
 
         [Theory]
-        [MemberData("TestCacheManagers")]
+        [ClassData(typeof(TestCacheManagers))]
         public void CacheManager_GetOrAdd_AddNull<T>(T cache)
             where T : ICacheManager<object>
         {
@@ -983,7 +983,7 @@ namespace CacheManager.Tests
         }
 
         [Theory]
-        [MemberData("TestCacheManagers")]
+        [ClassData(typeof(TestCacheManagers))]
         public void CacheManager_GetOrAdd_SimpleGet<T>(T cache)
             where T : ICacheManager<object>
         {
@@ -1016,7 +1016,7 @@ namespace CacheManager.Tests
         }
 
         [Theory]
-        [MemberData("TestCacheManagers")]
+        [ClassData(typeof(TestCacheManagers))]
         public void CacheManager_TryGetOrAdd_SimpleGet<T>(T cache)
             where T : ICacheManager<object>
         {
@@ -1047,45 +1047,47 @@ namespace CacheManager.Tests
             }
         }
 
-        [Theory(Skip = "unclear")]
-        [MemberData("TestCacheManagers")]
-        public void CacheManager_GetOrAdd_ForceRace<T>(T cache)
+        [Theory()]
+        [Trait("category", "Unreliable")]
+        [ClassData(typeof(TestCacheManagers))]
+        public async Task CacheManager_GetOrAdd_ForceRace<T>(T cache)
             where T : ICacheManager<object>
         {
             // arrange
             var key = Guid.NewGuid().ToString();
             var val = Guid.NewGuid().ToString();
             var counter = 0;
-            var results = new List<object>();
+            var runs = 10;
 
             using (cache)
             {
-                Action action = () =>
+                Func<object> action = () =>
                 {
-                    var result = cache.GetOrAdd(key, (k) =>
+                    return cache.GetOrAdd(key, (k) =>
                     {
                         Interlocked.Increment(ref counter);
 
                         // force collision so that multiple threads try to add... yea thats long, but parallel should be fine
-                        Task.Delay(10).Wait();
+                        Task.Delay(1).Wait();
                         return counter;
                     });
-
-                    lock (results)
-                    {
-                        results.Add(result);
-                    }
                 };
 
-                var actions = Enumerable.Repeat(action, 8);
+                var tasks = new List<Task<object>>();
+                for (var i = 0; i < runs; i++)
+                {
+                    tasks.Add(Task.Run(action));
+                }
 
-                Parallel.Invoke(new ParallelOptions() { MaxDegreeOfParallelism = 8 }, actions.ToArray());
+                object[] results = await Task.WhenAll(tasks.ToArray());
+
+                await Task.Delay(10);
 
                 // one of the threads won and added the key
                 var winner = (int)cache[key];
 
                 // all results should be the same because we should add the key only once
-                results.ShouldBeEquivalentTo(Enumerable.Repeat(winner, 8));
+                results.ShouldBeEquivalentTo(Enumerable.Repeat(winner, runs), cache.ToString());
             }
         }
 
@@ -1649,7 +1651,7 @@ namespace CacheManager.Tests
         #endregion testing empty handle list
 
         [Theory]
-        [MemberData("TestCacheManagers")]
+        [ClassData(typeof(TestCacheManagers))]
         [ReplaceCulture]
         public void CacheManager_CastGet_Region<T>(T cache)
             where T : ICacheManager<object>
@@ -1670,7 +1672,8 @@ namespace CacheManager.Tests
         }
 
         [Theory]
-        [MemberData("TestCacheManagers")]
+        [ClassData(typeof(TestCacheManagers))]
+        //[ClassData(typeof(TestCacheManagers))]
         [ReplaceCulture]
         public void CacheManager_CastGet<T>(T cache)
             where T : ICacheManager<object>
@@ -1710,7 +1713,7 @@ namespace CacheManager.Tests
         }
 
         [Theory]
-        [MemberData("TestCacheManagers")]
+        [ClassData(typeof(TestCacheManagers))]
         [ReplaceCulture]
         public void CacheManager_CastGet_ICanHazString<T>(T cache)
             where T : ICacheManager<object>
@@ -1721,7 +1724,7 @@ namespace CacheManager.Tests
 
                 // arrange
                 cache.Add(key, 123456);
-                
+
                 // act
                 var val = cache.Get<string>(key);
 
@@ -1731,7 +1734,7 @@ namespace CacheManager.Tests
         }
 
         [Theory]
-        [MemberData("TestCacheManagers")]
+        [ClassData(typeof(TestCacheManagers))]
         [ReplaceCulture]
         public void CacheManager_SimplePut<T>(T cache)
             where T : ICacheManager<object>
@@ -1755,7 +1758,7 @@ namespace CacheManager.Tests
         }
 
         [Theory]
-        [MemberData("TestCacheManagers")]
+        [ClassData(typeof(TestCacheManagers))]
         public void CacheManager_SimpleAdd<T>(T cache)
             where T : ICacheManager<object>
         {
@@ -1778,7 +1781,7 @@ namespace CacheManager.Tests
         }
 
         [Theory]
-        [MemberData("TestCacheManagers")]
+        [ClassData(typeof(TestCacheManagers))]
         public void CacheManager_SimpleIndexPut<T>(T cache)
             where T : ICacheManager<object>
         {
@@ -1801,7 +1804,7 @@ namespace CacheManager.Tests
         }
 
         [Theory]
-        [MemberData("TestCacheManagers")]
+        [ClassData(typeof(TestCacheManagers))]
         public void CacheManager_SimpleRemove<T>(T cache)
             where T : ICacheManager<object>
         {
@@ -1847,7 +1850,7 @@ namespace CacheManager.Tests
         }
 
         [Theory]
-        [MemberData("TestCacheManagers")]
+        [ClassData(typeof(TestCacheManagers))]
         public void CacheManager_SimpleUpdate<T>(T cache)
             where T : ICacheManager<object>
         {
@@ -1889,7 +1892,7 @@ namespace CacheManager.Tests
         }
 
         [Theory]
-        [MemberData("TestCacheManagers")]
+        [ClassData(typeof(TestCacheManagers))]
         public void CacheManager_IsCaseSensitive_Key<T>(T cache)
             where T : ICacheManager<object>
         {
@@ -1905,7 +1908,7 @@ namespace CacheManager.Tests
         }
 
         [Theory]
-        [MemberData("TestCacheManagers")]
+        [ClassData(typeof(TestCacheManagers))]
         public void CacheManager_IsCaseSensitive_Region<T>(T cache)
             where T : ICacheManager<object>
         {

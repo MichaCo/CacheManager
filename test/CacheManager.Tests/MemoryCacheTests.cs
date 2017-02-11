@@ -1,8 +1,6 @@
-﻿#if !NETCOREAPP
-using System;
+﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Threading;
 using CacheManager.Core;
 using CacheManager.MicrosoftCachingMemory;
 using FluentAssertions;
@@ -142,92 +140,9 @@ namespace CacheManager.Tests
             cache.CacheHandles.OfType<MemoryCacheHandle<string>>().First().memoryCacheOptions.ShouldBeEquivalentTo(expectedCacheOptions);
         }
 
-        [Fact]
-        [Trait("category", "Unreliable")]
-        public void MsMemory_Absolute_DoesExpire()
-        {
-            // arrange
-            var key = Guid.NewGuid().ToString();
-            var item = new CacheItem<object>(key, "something", ExpirationMode.Absolute, new TimeSpan(0, 0, 0, 0, 300));
-
-            // act
-            using (var act = CacheFactory.Build(_ => _.WithMicrosoftMemoryCacheHandle()))
-            {
-                // act
-                act.Add(item);
-                act[key].Should().NotBeNull();
-
-                Thread.Sleep(310);
-
-                // assert
-                act[key].Should().BeNull();
-            }
-        }
-
-        [Fact]
-        [Trait("category", "Unreliable")]
-        public void MsMemory_Sliding_DoesExpire()
-        {
-            // arrange
-            var key = Guid.NewGuid().ToString();
-            var item = new CacheItem<object>(key, "something", ExpirationMode.Sliding, new TimeSpan(0, 0, 0, 0, 8));
-
-            // act
-            using (var act = CacheFactory.Build(_ => _.WithMicrosoftMemoryCacheHandle()))
-            {
-                // act
-                act.Add(item);
-
-                Thread.Sleep(15);
-
-                // assert
-                act[key].Should().BeNull();
-            }
-        }
-
-        [Fact]
-        [Trait("category", "Unreliable")]
-        public void MsMemory_Sliding_DoesSlide()
-        {
-            // arrange
-            var key = Guid.NewGuid().ToString();
-            var item = new CacheItem<object>(key, "something", ExpirationMode.Sliding, TimeSpan.FromMilliseconds(200));
-
-            // act
-            var act = CacheFactory.Build(_ => _.WithMicrosoftMemoryCacheHandle());
-            {
-                // act
-                act.Add(item);
-
-                var valid = true;
-                var state = 0;
-                var t = new Thread(new ThreadStart(() =>
-                {
-                    Thread.Sleep(100);
-                    valid = act[key] != null;
-
-                    if (valid)
-                    {
-                        state = 1;
-                        Thread.Sleep(100);
-                        valid = act[key] != null;
-                    }
-
-                    if (valid)
-                    {
-                        state = 2;
-                        Thread.Sleep(200);
-                        valid = act[key] == null;
-                    }
-                }));
-
-                t.Start();
-                t.Join();
-                valid.Should().BeTrue("State: " + state);
-            }
-        }
-
         #endregion MS Memory Cache
+
+#if !NETCOREAPP
 
         #region System Runtime Caching
 
@@ -272,28 +187,6 @@ namespace CacheManager.Tests
             cache.CacheHandles.Count().Should().Be(1);
         }
 
-        [Fact]
-        [Trait("category", "Unreliable")]
-        public void SysRuntime_Absolute_DoesExpire()
-        {
-            // arrange
-            var key = Guid.NewGuid().ToString();
-            var item = new CacheItem<object>(key, "something", ExpirationMode.Absolute, new TimeSpan(0, 0, 0, 0, 300));
-
-            // act
-            using (var act = CacheFactory.Build(_ => _.WithSystemRuntimeCacheHandle()))
-            {
-                // act
-                act.Add(item);
-                act[key].Should().NotBeNull();
-
-                Thread.Sleep(310);
-
-                // assert
-                act[key].Should().BeNull();
-            }
-        }
-
 #if !NO_APP_CONFIG
         [Fact]
         [Trait("category", "NotOnMono")]
@@ -328,70 +221,7 @@ namespace CacheManager.Tests
         }
 #endif
 
-        [Fact]
-        [Trait("category", "Unreliable")]
-        public void SysRuntime_Sliding_DoesExpire()
-        {
-            // arrange
-            var key = Guid.NewGuid().ToString();
-            var item = new CacheItem<object>(key, "something", ExpirationMode.Sliding, new TimeSpan(0, 0, 0, 0, 8));
-
-            // act
-            using (var act = CacheFactory.Build(_ => _.WithSystemRuntimeCacheHandle()))
-            {
-                // act
-                act.Add(item);
-
-                Thread.Sleep(15);
-
-                // assert
-                act[key].Should().BeNull();
-            }
-        }
-
-        [Fact]
-        [Trait("category", "Unreliable")]
-        public void SysRuntime_Sliding_DoesSlide()
-        {
-            // arrange
-            var key = Guid.NewGuid().ToString();
-            var item = new CacheItem<object>(key, "something", ExpirationMode.Sliding, TimeSpan.FromMilliseconds(200));
-
-            // act
-            var act = CacheFactory.Build(_ => _.WithSystemRuntimeCacheHandle());
-            {
-                // act
-                act.Add(item);
-
-                var valid = true;
-                var state = 0;
-                var t = new Thread(new ThreadStart(() =>
-                {
-                    Thread.Sleep(100);
-                    valid = act[key] != null;
-
-                    if (valid)
-                    {
-                        state = 1;
-                        Thread.Sleep(100);
-                        valid = act[key] != null;
-                    }
-
-                    if (valid)
-                    {
-                        state = 2;
-                        Thread.Sleep(200);
-                        valid = act[key] == null;
-                    }
-                }));
-
-                t.Start();
-                t.Join();
-                valid.Should().BeTrue("State: " + state);
-            }
-        }
-
         #endregion
+#endif
     }
 }
-#endif

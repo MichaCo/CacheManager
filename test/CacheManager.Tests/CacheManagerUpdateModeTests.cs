@@ -59,17 +59,7 @@ namespace CacheManager.Tests
 
             return addCalls;
         };
-
-        [Fact]
-        public void CacheManager_UpdateModeTests_All()
-        {
-            // act
-            var result = this.testHandleAddCalls(CacheUpdateMode.Full);
-
-            // assert
-            result.Should().Be(19, " cachemanger should have updated all other 19  handles"); // 19 other handles should be updated.
-        }
-
+        
         [Fact]
         public void CacheManager_UpdateModeTests_Up()
         {

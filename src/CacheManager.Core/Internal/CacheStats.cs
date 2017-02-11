@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using static CacheManager.Core.Utility.Guard;
 
@@ -22,10 +23,9 @@ namespace CacheManager.Core.Internal
     public sealed class CacheStats<TCacheValue> : IDisposable
     {
         private static readonly string NullRegionKey = Guid.NewGuid().ToString();
-        private readonly IDictionary<string, CacheStatsCounter> counters;
+        private readonly ConcurrentDictionary<string, CacheStatsCounter> counters;
         private readonly bool isPerformanceCounterEnabled;
         private readonly bool isStatsEnabled;
-        private readonly object lockObject;
 #if !NETSTANDARD
         private readonly CachePerformanceCounters<TCacheValue> performanceCounters;
 #endif
@@ -50,12 +50,10 @@ namespace CacheManager.Core.Internal
             NotNullOrWhiteSpace(cacheName, nameof(cacheName));
             NotNullOrWhiteSpace(handleName, nameof(handleName));
 
-            this.lockObject = new object();
-
             // if performance counters are enabled, stats must be enabled, too.
             this.isStatsEnabled = enablePerformanceCounters ? true : enabled;
             this.isPerformanceCounterEnabled = enablePerformanceCounters;
-            this.counters = new Dictionary<string, CacheStatsCounter>();
+            this.counters = new ConcurrentDictionary<string, CacheStatsCounter>();
 
 #if !NETSTANDARD
             if (this.isPerformanceCounterEnabled)
@@ -215,16 +213,13 @@ namespace CacheManager.Core.Internal
             }
 
             // clear needs a lock, otherwise we might mess up the overall counts
-            lock (this.lockObject)
+            foreach (var key in this.counters.Keys)
             {
-                foreach (var key in this.counters.Keys)
+                CacheStatsCounter counter = null;
+                if (this.counters.TryGetValue(key, out counter))
                 {
-                    CacheStatsCounter counter = null;
-                    if (this.counters.TryGetValue(key, out counter))
-                    {
-                        counter.Set(CacheStatsCounterType.Items, 0L);
-                        counter.Increment(CacheStatsCounterType.ClearCalls);
-                    }
+                    counter.Set(CacheStatsCounterType.Items, 0L);
+                    counter.Increment(CacheStatsCounterType.ClearCalls);
                 }
             }
         }
@@ -241,7 +236,7 @@ namespace CacheManager.Core.Internal
             }
 
             // clear needs a lock, otherwise we might mess up the overall counts
-            lock (this.lockObject)
+            // lock (this.lockObject)
             {
                 var regionCounter = this.GetCounter(region);
                 var itemCount = regionCounter.Get(CacheStatsCounterType.Items);
@@ -394,18 +389,8 @@ namespace CacheManager.Core.Internal
             CacheStatsCounter counter = null;
             if (!this.counters.TryGetValue(key, out counter))
             {
-                // because of the lazy initialization of region counters, we have to lock at this
-                // point even though the counters dictionary is thread safe the method gets called
-                // so frequently that this is a real performance improvement...
-                lock (this.lockObject)
-                {
-                    // check again after pooling threads on the lock
-                    if (!this.counters.TryGetValue(key, out counter))
-                    {
-                        counter = new CacheStatsCounter();
-                        this.counters.Add(key, counter);
-                    }
-                }
+                counter = new CacheStatsCounter();
+                this.counters.TryAdd(key, counter);
             }
 
             return counter;

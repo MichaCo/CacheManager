@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using CacheManager.Core;
 using CacheManager.Core.Internal;
 using FluentAssertions;
@@ -14,10 +16,10 @@ namespace CacheManager.Tests
 #else
     [Trait("Framework", "NET45")]
 #endif
-    public class CacheManagerStatsTest : BaseCacheManagerTest
+    public class CacheManagerStatsTest
     {
         [Theory]
-        [MemberData("TestCacheManagers")]
+        [ClassData(typeof(TestCacheManagers))]
         [ReplaceCulture]
         public void CacheManager_Stats_AddGet<T>(T cache)
             where T : ICacheManager<object>
@@ -108,7 +110,7 @@ namespace CacheManager.Tests
         }
 
         [Theory]
-        [MemberData("TestCacheManagers")]
+        [ClassData(typeof(TestCacheManagers))]
         [ReplaceCulture]
         public void CacheManager_Stats_Put<T>(T cache)
             where T : ICacheManager<object>
@@ -132,7 +134,7 @@ namespace CacheManager.Tests
         }
 
         [Theory]
-        [MemberData("TestCacheManagers")]
+        [ClassData(typeof(TestCacheManagers))]
         [ReplaceCulture]
         public void CacheManager_Stats_Update<T>(T cache)
             where T : ICacheManager<object>
@@ -159,7 +161,7 @@ namespace CacheManager.Tests
         }
 
         [Theory]
-        [MemberData("TestCacheManagers")]
+        [ClassData(typeof(TestCacheManagers))]
         [ReplaceCulture]
         public void CacheManager_Stats_Remove<T>(T cache)
             where T : ICacheManager<object>
@@ -198,29 +200,35 @@ namespace CacheManager.Tests
         }
 
         [Theory]
-        [MemberData("TestCacheManagers")]
+        [ClassData(typeof(TestCacheManagers))]
         [ReplaceCulture]
-        public void CacheManager_Stats_Threaded<T>(T cache)
+        [Trait("category", "Unreliable")]
+        public async Task CacheManager_Stats_Threaded<T>(T cache)
             where T : ICacheManager<object>
         {
             var puts = cache.CacheHandles.Select(p => p.Stats.GetStatistic(CacheStatsCounterType.PutCalls));
             var adds = cache.CacheHandles.Select(p => p.Stats.GetStatistic(CacheStatsCounterType.AddCalls));
             var threads = 5;
             var iterations = 10;
+            var putCounter = 0;
 
             using (cache)
             {
                 var key = Guid.NewGuid().ToString();
-                ThreadTestHelper.Run(
-                    () =>
+                await ThreadTestHelper.RunAsync(
+                    async () =>
                     {
                         cache.Add(key, "hi");
                         cache.Put(key, "changed");
+                        Interlocked.Increment(ref putCounter);
+                        await Task.Delay(0);
                     },
                     threads,
                     iterations);
             }
 
+            await Task.Delay(20);
+            putCounter.Should().Be(threads * iterations);
             puts.ShouldAllBeEquivalentTo(
                     Enumerable.Repeat(threads * iterations, cache.CacheHandles.Count()));
         }

@@ -126,7 +126,11 @@ namespace CacheManager.Redis
         {
             if (managed)
             {
-                this.connection.Subscriber.Unsubscribe(this.channelName);
+                try
+                {
+                    this.connection.Subscriber.Unsubscribe(this.channelName);
+                }
+                catch { }
             }
 
             base.Dispose(managed);
