@@ -63,6 +63,10 @@ namespace CacheManager.Tests
             Assert.Equal(handle.Configuration.Name, configKey);
             Assert.Equal(0, cfg.Database);
             Assert.Equal("localhost:6379", cfg.ConnectionString);
+
+            // cleanup
+            RedisConnectionManager.RemoveConnection(client.Configuration);
+            client.Dispose();
         }
 
         [Fact]
@@ -83,6 +87,10 @@ namespace CacheManager.Tests
             Assert.Equal(handle.Configuration.Name, configKey);
             Assert.Equal(23, cfg.Database);
             Assert.Equal("localhost:6379", cfg.ConnectionString);
+
+            // cleanup
+            RedisConnectionManager.RemoveConnection(client.Configuration);
+            client.Dispose();
         }
 
         [Fact]
@@ -125,7 +133,11 @@ namespace CacheManager.Tests
                     .WithBondCompactBinarySerializer()
                     .WithRedisCacheHandle(configKey));
 
+            // don't keep it and also dispose it later (seems appveyor doesn't like too many open connections)
+            RedisConnectionManager.RemoveConnection(multi.Configuration);
+
             // act/assert
+            using (multi)
             using (cache)
             {
                 var key = Guid.NewGuid().ToString();
@@ -152,6 +164,7 @@ namespace CacheManager.Tests
         }
 
         [Fact]
+        [Trait("category", "Redis")]
         public void Redis_UseExistingConnection()
         {
             var multiplexer = ConnectionMultiplexer.Connect("localhost:6379");
@@ -162,6 +175,9 @@ namespace CacheManager.Tests
                     .WithRedisConfiguration("redisKey", multiplexer)
                     .WithRedisCacheHandle("redisKey"));
 
+            RedisConnectionManager.RemoveConnection(multiplexer.Configuration);
+
+            using (multiplexer)
             using (var cache = new BaseCacheManager<long>(cfg))
             {
                 cache.Add("somevalue", 12345);

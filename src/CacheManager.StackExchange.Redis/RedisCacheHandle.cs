@@ -377,7 +377,7 @@ return result";
             base.Dispose(disposeManaged);
             if (disposeManaged)
             {
-                this.connection.RemoveConnection();
+                // this.connection.RemoveConnection();
             }
         }
 

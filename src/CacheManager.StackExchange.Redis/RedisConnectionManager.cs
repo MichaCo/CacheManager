@@ -74,15 +74,13 @@ namespace CacheManager.Redis
             }
         }
 
-        public void RemoveConnection()
+        public static void RemoveConnection(string connectionString)
         {
             lock (connectLock)
             {
-                StackRedis.IConnectionMultiplexer connection;
-                if (connections.TryGetValue(this.connectionString, out connection))
+                if (connections.ContainsKey(connectionString))
                 {
-                    ////this.logger.LogInfo("Removing stale redis connection.");
-                    ////connections.Remove(this.connectionString);
+                    connections.Remove(connectionString);
                 }
             }
         }
