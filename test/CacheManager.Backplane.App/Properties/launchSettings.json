@@ -1,8 +1,0 @@
-{
-  "profiles": {
-    "CacheManager.Backplane.App": {
-      "commandName": "CacheManager.Backplane.App",
-      "sdkVersion": "dnx-clr-win-x64.1.0.0-rc1-update1"
-    }
-  }
-}
