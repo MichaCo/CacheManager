@@ -1,0 +1,4 @@
+Method;Job;AnalyzeLaunchVariance;EvaluateOverhead;MaxStdErrRelative;MinInvokeCount;MinIterationTime;RemoveOutliers;Affinity;Jit;Platform;Runtime;AllowVeryLargeObjects;Concurrent;CpuGroups;Force;Server;Clock;EngineFactory;Toolchain;InvocationCount;IterationTime;LaunchCount;RunStrategy;TargetCount;UnrollFactor;WarmupCount;Mean;StdDev;Scaled;Scaled-StdDev;Allocated
+Framework;Default;False;Default;Default;Default;Default;Default;255;RyuJit;X64;Clr;False;True;False;True;False;Default;Default;Default;1;Default;2;Default;15;16;10;22.1431 ns;0.2677 ns;1.00;0.00;0 B
+ManualCalcNaive;Default;False;Default;Default;Default;Default;Default;255;RyuJit;X64;Clr;False;True;False;True;False;Default;Default;Default;1;Default;2;Default;15;16;10;11.4425 ns;0.2960 ns;0.52;0.01;0 B
+ManualCalcOptimized;Default;False;Default;Default;Default;Default;Default;255;RyuJit;X64;Clr;False;True;False;True;False;Default;Default;Default;1;Default;2;Default;15;16;10;7.8302 ns;0.1593 ns;0.35;0.01;0 B

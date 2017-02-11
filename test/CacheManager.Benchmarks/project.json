@@ -6,12 +6,14 @@
   "configurations": {
     "Debug": {
       "buildOptions": {
-        "optimize": false
+        "optimize": false,
+        "allowUnsafe": true
       }
     },
     "Release": {
       "buildOptions": {
-        "optimize": true
+        "optimize": true,
+        "allowUnsafe": true
       }
     }
   },

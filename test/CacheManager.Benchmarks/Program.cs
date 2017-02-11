@@ -21,25 +21,6 @@ namespace CacheManager.Benchmarks
     {
         public static void Main(string[] args)
         {
-            var comp = new GzBenchmark();
-            comp.Setup();
-            comp.ManuelPooled();
-
-            var bench = new SerializationBenchmark();
-            bench.Setup();
-            bench.JsonSerializer();
-            bench.JsonGzSerializer();
-            bench.BinarySerializer();
-            bench.BondFastBinarySerializer();
-            bench.BondBinarySerializer();
-            bench.BondSimpleJsonSerializer();
-            //var bench = new GetSingleBenchmark();
-            //bench.Setup();
-            //while (true)
-            //{
-            //    bench.MsMemory();
-            //}
-
             do
             {
                 BenchmarkSwitcher

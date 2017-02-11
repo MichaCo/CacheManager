@@ -96,12 +96,6 @@ namespace CacheManager.Tests
         public void CacheManager_Region_ClearRegion<T>(T cache)
             where T : ICacheManager<object>
         {
-#if !NETCOREAPP
-            if (cache.CacheHandles.OfType<Memcached.MemcachedCacheHandle<object>>().Any())
-            {
-                return;
-            }
-#endif
             using (cache)
             {
                 List<Tuple<string, string, string>> keys;
@@ -149,12 +143,6 @@ namespace CacheManager.Tests
         public void CacheManager_Region_Put_ClearRegion<T>(T cache)
             where T : ICacheManager<object>
         {
-#if !NETCOREAPP
-            if (cache.CacheHandles.OfType<Memcached.MemcachedCacheHandle<object>>().Any())
-            {
-                return;
-            }
-#endif
             using (cache)
             {
                 var key = Guid.NewGuid().ToString();

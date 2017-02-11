@@ -107,13 +107,14 @@ namespace CacheManager.Tests
             {
                 // arrange
                 var key = Guid.NewGuid().ToString();
+                var value = ComplexType.Create();
 
                 // act
-                cache.Add(key, key);
+                cache.Add(key, value);
 
                 // assert
                 cache.Exists(key).Should().BeTrue(cache.Configuration.ToString());
-                cache.Get(key).Should().Be(key, cache.Configuration.ToString());
+                cache.Get(key).Should().Be(value, cache.Configuration.ToString());
             }
         }
 
@@ -126,13 +127,14 @@ namespace CacheManager.Tests
                 // arrange
                 var key = Guid.NewGuid().ToString();
                 var region = Guid.NewGuid().ToString();
+                var value = ComplexType.Create();
 
                 // act
-                cache.Add(key, "value", region);
+                cache.Add(key, value, region);
 
                 // assert
                 cache.Exists(key, region).Should().BeTrue(cache.Configuration.ToString());
-                cache.Get(key, region).Should().Be("value", cache.Configuration.ToString());
+                cache.Get(key, region).Should().Be(value, cache.Configuration.ToString());
             }
         }
 
@@ -1990,6 +1992,16 @@ namespace CacheManager.Tests
         [Bond.Schema]
         public class ComplexType
         {
+            public static ComplexType Create()
+            {
+                return new ComplexType()
+                {
+                    Name = Guid.NewGuid().ToString(),
+                    SomeId = long.MaxValue,
+                    SomeBool = true
+                };
+            }
+
             [ProtoBuf.ProtoMember(1)]
             [Bond.Id(1)]
             public string Name { get; set; }

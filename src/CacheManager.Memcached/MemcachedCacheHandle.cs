@@ -9,6 +9,7 @@ using System.Text;
 using CacheManager.Core;
 using CacheManager.Core.Internal;
 using CacheManager.Core.Logging;
+using CacheManager.Core.Utility;
 using Enyim.Caching;
 using Enyim.Caching.Configuration;
 using Enyim.Caching.Memcached;
@@ -27,6 +28,7 @@ namespace CacheManager.Memcached
         private static readonly string DefaultEnyimSectionName = "enyim.com/memcached";
         private static readonly string DefaultSectionName = "default";
         private static readonly TimeSpan MaximumTimeout = TimeSpan.FromDays(30);
+        private readonly ICacheManagerConfiguration managerConfiguration;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MemcachedCacheHandle{TCacheValue}"/> class.
@@ -102,6 +104,7 @@ namespace CacheManager.Memcached
             : this(configuration, managerConfiguration, loggerFactory)
         {
             NotNull(clientConfiguration, nameof(clientConfiguration));
+            this.managerConfiguration = managerConfiguration;
             if (clientConfiguration.Transcoder.GetType() == typeof(DefaultTranscoder))
             {
                 clientConfiguration.Transcoder = new CacheManagerTanscoder<TCacheValue>(serializer);
@@ -175,7 +178,12 @@ namespace CacheManager.Memcached
         /// <param name="region">The cache region.</param>
         public override void ClearRegion(string region)
         {
-            // TODO: find workaround this.Clear();
+            var regionPrefix = StoreNewRegionPrefix(region);
+
+            if (this.Logger.IsEnabled(LogLevel.Debug))
+            {
+                this.Logger.LogDebug("Memcached: cleared region {0}, new region key is {1}.", region, regionPrefix);
+            }
         }
 
         /// <inheritdoc />
@@ -320,6 +328,63 @@ namespace CacheManager.Memcached
             }
         }
 
+        private string StoreNewRegionPrefix(string region)
+        {
+            var regionKey = ComputeRegionLookupKey(region);
+            var oldRegionPredix = GetRegionPrefix(region);
+            int tries = 0;
+            bool created = false;
+            while (!created && tries <= this.managerConfiguration.MaxRetries)
+            {
+                var timestamp = Clock.GetUnixTimestampMillis();
+                if (timestamp.ToString() == oldRegionPredix)
+                {
+                    // we are too fast in creating new keys it seems, try again...
+                    continue;
+                }
+
+                tries++;
+
+                if (this.Logger.IsEnabled(LogLevel.Debug))
+                {
+                    this.Logger.LogDebug("Memcached: trying to store new region prefix '{0}', for region key '{1}'.", timestamp, regionKey);
+                }
+
+                created = this.Cache.Store(StoreMode.Set, regionKey, timestamp);
+
+                if (created)
+                {
+                    if (this.Logger.IsEnabled(LogLevel.Debug))
+                    {
+                        this.Logger.LogDebug("Memcached: successfully stored new region prefix '{0}', for region key '{1}'.", timestamp, regionKey);
+                    }
+                    return timestamp.ToString();
+                }
+            }
+
+            Logger.LogError("Memcached: failed to store prefix for region key '{0}' with too many retries after {1} tries.", regionKey, tries);
+
+            throw new InvalidOperationException($"Could not store new cache region prefix after {tries} tries.");
+        }
+
+        private string GetRegionPrefix(string region)
+        {
+            var regionKey = ComputeRegionLookupKey(region);
+
+            object val;
+            if (this.Cache.ExecuteTryGet(regionKey, out val).Success)
+            {
+                return val?.ToString();
+            }
+
+            return null;
+        }
+
+        private static string ComputeRegionLookupKey(string region)
+        {
+            return GetPerhapsHashedKey("__" + region + "_rk__");
+        }
+
         /// <summary>
         /// Gets the name of the enyim section.
         /// </summary>
@@ -337,7 +402,7 @@ namespace CacheManager.Memcached
             }
         }
 
-        private static string GetKey(string key, string region = null)
+        private string GetKey(string key, string region = null)
         {
             if (string.IsNullOrWhiteSpace(key))
             {
@@ -348,16 +413,32 @@ namespace CacheManager.Memcached
 
             if (!string.IsNullOrWhiteSpace(region))
             {
-                fullKey = string.Concat(region, ":", key);
+                var regionKey = this.GetRegionPrefix(region);
+                if (regionKey == null)
+                {
+                    if (this.Logger.IsEnabled(LogLevel.Debug))
+                    {
+                        this.Logger.LogDebug("Memcached: region key for region '{0}' not present, creating a new one...", region);
+                    }
+
+                    regionKey = StoreNewRegionPrefix(region);
+                }
+
+                fullKey = string.Concat(regionKey, ":", key);
             }
 
+            return GetPerhapsHashedKey(fullKey);
+        }
+
+        private static string GetPerhapsHashedKey(string key)
+        {
             // Memcached still has a 250 character limit
-            if (fullKey.Length >= 250)
+            if (key.Length >= 250)
             {
-                return GetSHA256Key(fullKey);
+                return GetSHA256Key(key);
             }
 
-            return fullKey;
+            return key;
         }
 
         // TODO: test the config section ctor now with this
@@ -494,7 +575,7 @@ namespace CacheManager.Memcached
             return UpdateItemResult.ForTooManyRetries<TCacheValue>(tries);
         }
 
-        private class CacheManagerTanscoder<T> : ITranscoder
+        private class CacheManagerTanscoder<T> : DefaultTranscoder
         {
             private readonly ICacheSerializer _serializer;
 
@@ -504,25 +585,25 @@ namespace CacheManager.Memcached
                 _serializer = serializer;
             }
 
-            public object Deserialize(CacheItem item)
+            protected override object DeserializeObject(ArraySegment<byte> value)
             {
-                int position = item.Data.Offset;
-                ushort typeNameLen = BitConverter.ToUInt16(item.Data.Array, position);
+                int position = value.Offset;
+                ushort typeNameLen = BitConverter.ToUInt16(value.Array, position);
                 position += 2;
 
-                string typeName = Encoding.UTF8.GetString(item.Data.Array, position, typeNameLen);
+                string typeName = Encoding.UTF8.GetString(value.Array, position, typeNameLen);
                 position += typeNameLen;
-                if (item.Data.Array[position++] != 0)
+                if (value.Array[position++] != 0)
                 {
                     throw new InvalidOperationException("Invalid data, stop bit not found in type name encoding.");
                 }
 
-                var data = new byte[item.Data.Count - position + item.Data.Offset];
-                Buffer.BlockCopy(item.Data.Array, position, data, 0, data.Length);
+                var data = new byte[value.Count - position + value.Offset];
+                Buffer.BlockCopy(value.Array, position, data, 0, data.Length);
                 return _serializer.DeserializeCacheItem<T>(data, TypeCache.GetType(typeName));
             }
 
-            public CacheItem Serialize(object value)
+            protected override ArraySegment<byte> SerializeObject(object value)
             {
                 var cacheItem = value as CacheItem<T>;
                 if (cacheItem == null)
@@ -546,7 +627,7 @@ namespace CacheManager.Memcached
                 Buffer.BlockCopy(typeNameBytes, 0, result, typeBytesLength.Length, typeNameBytes.Length);
                 Buffer.BlockCopy(data, 0, result, typeBytesLength.Length + typeNameBytes.Length + 1, data.Length);
 
-                return new CacheItem(DefaultTranscoder.TypeCodeToFlag(TypeCode.Object), new ArraySegment<byte>(result));
+                return new ArraySegment<byte>(result);
             }
         }
     }
