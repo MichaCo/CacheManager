@@ -780,7 +780,7 @@ namespace CacheManager.Tests
                 using (cache)
                 {
                     var key = Guid.NewGuid().ToString();
-                    var region = "region";
+                    var region = Guid.NewGuid().ToString();
                     cache.Add(new CacheItem<object>(key, region, "value", ExpirationMode.None, default(TimeSpan)))
                         .Should().BeTrue();
 
@@ -821,7 +821,7 @@ namespace CacheManager.Tests
                 using (cache)
                 {
                     var key = Guid.NewGuid().ToString();
-                    var region = "region";
+                    var region = Guid.NewGuid().ToString();
                     cache.Add(new CacheItem<object>(key, region, "value", ExpirationMode.None, default(TimeSpan)))
                         .Should().BeTrue();
 
@@ -862,7 +862,7 @@ namespace CacheManager.Tests
                 using (cache)
                 {
                     var key = Guid.NewGuid().ToString();
-                    var region = "region";
+                    var region = Guid.NewGuid().ToString();
                     cache.Add(new CacheItem<object>(key, region, "value", ExpirationMode.Absolute, TimeSpan.FromMinutes(30)))
                         .Should().BeTrue();
 
@@ -981,7 +981,7 @@ namespace CacheManager.Tests
             while (true)
             {
                 tries++;
-                if (tries > 10)
+                if (tries > 20)
                 {
                     throw new Exception("Timing issues on testing sliding expiration... stopping.");
                 }
@@ -1040,7 +1040,7 @@ namespace CacheManager.Tests
             while (true)
             {
                 tries++;
-                if (tries > 10)
+                if (tries > 20)
                 {
                     throw new Exception("Timing issues on testing absolute expiration... stopping.");
                 }
@@ -1088,7 +1088,7 @@ namespace CacheManager.Tests
             while (true)
             {
                 tries++;
-                if (tries > 10)
+                if (tries > 20)
                 {
                     throw new Exception("Timing issues on testing absolute expiration... stopping.");
                 }

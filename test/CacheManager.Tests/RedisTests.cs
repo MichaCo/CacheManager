@@ -183,7 +183,7 @@ namespace CacheManager.Tests
             using (multiplexer)
             using (var cache = new BaseCacheManager<long>(cfg))
             {
-                cache.Add("somevalue", 12345);
+                cache.Add(Guid.NewGuid().ToString(), 12345);
             }
         }
 
@@ -781,7 +781,7 @@ namespace CacheManager.Tests
                             val.Counter++;
 
                             cache.Put(key, val);
-                            await Task.Delay(0);
+                            await Task.Delay(1);
                         }
                     },
                     numThreads,

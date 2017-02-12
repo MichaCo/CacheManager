@@ -547,17 +547,18 @@ namespace CacheManager.Tests
             {
                 // arrange
                 var key = Guid.NewGuid().ToString();
+                var region = Guid.NewGuid().ToString();
                 cache.Add(key, "something");
-                cache.Add(key, "something", "region");
+                cache.Add(key, "something", region);
 
                 // act
                 Func<object> act = () => cache.Update(key, item => item + " more");
-                Func<object> actR = () => cache.Update(key, "region", item => item + " more");
+                Func<object> actR = () => cache.Update(key, region, item => item + " more");
 
                 object value = string.Empty;
                 object value2 = string.Empty;
                 Func<bool> actT = () => cache.TryUpdate(key, item => item + " awesome", out value);
-                Func<bool> actTR = () => cache.TryUpdate(key, "region", item => item + " awesome", out value2);
+                Func<bool> actTR = () => cache.TryUpdate(key, region, item => item + " awesome", out value2);
                 Func<string> act2 = () => cache.Get<string>(key);
 
                 // assert
@@ -700,7 +701,7 @@ namespace CacheManager.Tests
                 Func<object> act = () => cache.AddOrUpdate(key, value, item => "not this value");
 
                 // assert
-                act().Should().Be(value);
+                act().Should().Be(value, $"{key} {value} {cache}");
 
                 var addCalls = cache.CacheHandles.Select(h => h.Stats.GetStatistic(CacheStatsCounterType.AddCalls)).Sum();
                 addCalls.Should().Be(cache.CacheHandles.Count(), "Item should be added to each handle");
@@ -883,21 +884,22 @@ namespace CacheManager.Tests
             // arrange
             var key = Guid.NewGuid().ToString();
             var keyF = Guid.NewGuid().ToString();
+            var region = Guid.NewGuid().ToString();
             var val = Guid.NewGuid().ToString();
 
             using (cache)
             {
                 // act
                 cache.GetOrAdd(key, val);
-                cache.GetOrAdd(key, "region", val);
+                cache.GetOrAdd(key, region, val);
                 cache.GetOrAdd(keyF, (k) => val);
-                cache.GetOrAdd(keyF, "region", (k, r) => val);
+                cache.GetOrAdd(keyF, region, (k, r) => val);
 
                 // assert
                 cache[key].Should().Be(val);
-                cache[key, "region"].Should().Be(val);
+                cache[key, region].Should().Be(val);
                 cache[keyF].Should().Be(val);
-                cache[keyF, "region"].Should().Be(val);
+                cache[keyF, region].Should().Be(val);
             }
         }
 
@@ -909,6 +911,7 @@ namespace CacheManager.Tests
             // arrange
             var key = Guid.NewGuid().ToString();
             var val = Guid.NewGuid().ToString();
+            var region = Guid.NewGuid().ToString();
             object valueA = null;
             object valueB = null;
 
@@ -916,7 +919,7 @@ namespace CacheManager.Tests
             {
                 // act
                 Func<bool> actA = () => cache.TryGetOrAdd(key, (k) => val, out valueA);
-                Func<bool> actB = () => cache.TryGetOrAdd(key, "region", (k, r) => val, out valueB);
+                Func<bool> actB = () => cache.TryGetOrAdd(key, region, (k, r) => val, out valueB);
 
                 // assert
                 actA().Should().BeTrue();
@@ -924,7 +927,7 @@ namespace CacheManager.Tests
                 valueA.Should().Be(val);
                 valueB.Should().Be(val);
                 cache[key].Should().Be(val);
-                cache[key, "region"].Should().Be(val);
+                cache[key, region].Should().Be(val);
             }
         }
 
@@ -992,6 +995,7 @@ namespace CacheManager.Tests
             // arrange
             var key = Guid.NewGuid().ToString();
             var keyF = Guid.NewGuid().ToString();
+            var region = Guid.NewGuid().ToString();
             var val = Guid.NewGuid().ToString();
             Func<string, object> add = (k) => { throw new InvalidOperationException(); };
             Func<string, string, object> addRegion = (k, r) => { throw new InvalidOperationException(); };
@@ -999,15 +1003,15 @@ namespace CacheManager.Tests
             using (cache)
             {
                 cache.Add(key, val);
-                cache.Add(key, val, "region");
+                cache.Add(key, val, region);
                 cache.Add(keyF, val);
-                cache.Add(keyF, val, "region");
+                cache.Add(keyF, val, region);
 
                 // act
                 var result = cache.GetOrAdd(key, val);
-                var resultB = cache.GetOrAdd(key, "region", val);
+                var resultB = cache.GetOrAdd(key, region, val);
                 Action act = () => cache.GetOrAdd(keyF, add);
-                Action actB = () => cache.GetOrAdd(keyF, "region", addRegion);
+                Action actB = () => cache.GetOrAdd(keyF, region, addRegion);
 
                 // assert
                 result.Should().Be(val);
@@ -1025,6 +1029,7 @@ namespace CacheManager.Tests
             // arrange
             var key = Guid.NewGuid().ToString();
             var val = Guid.NewGuid().ToString();
+            var region = Guid.NewGuid().ToString();
 
             // the factories should not get invoked because the item exists.
             Func<string, object> add = (k) => { throw new InvalidOperationException(); };
@@ -1035,11 +1040,11 @@ namespace CacheManager.Tests
             using (cache)
             {
                 cache.Add(key, val);
-                cache.Add(key, val, "region");
+                cache.Add(key, val, region);
 
                 // act
                 Func<bool> actA = () => cache.TryGetOrAdd(key, add, out resultA);
-                Func<bool> actB = () => cache.TryGetOrAdd(key, "region", addRegion, out resultB);
+                Func<bool> actB = () => cache.TryGetOrAdd(key, region, addRegion, out resultB);
 
                 // assert
                 actA().Should().BeTrue();
@@ -1662,10 +1667,11 @@ namespace CacheManager.Tests
             {
                 // arrange
                 var key = Guid.NewGuid().ToString();
+                var region = Guid.NewGuid().ToString();
 
                 // act
-                Func<bool> actA = () => cache.Add(key, "some value", "region");
-                Func<string> act = () => cache.Get<string>(key, "region");
+                Func<bool> actA = () => cache.Add(key, "some value", region);
+                Func<string> act = () => cache.Get<string>(key, region);
 
                 // assert
                 actA().Should().BeTrue();
@@ -1675,7 +1681,6 @@ namespace CacheManager.Tests
 
         [Theory]
         [ClassData(typeof(TestCacheManagers))]
-        //[ClassData(typeof(TestCacheManagers))]
         [ReplaceCulture]
         public void CacheManager_CastGet<T>(T cache)
             where T : ICacheManager<object>
@@ -1898,12 +1903,12 @@ namespace CacheManager.Tests
         public void CacheManager_IsCaseSensitive_Key<T>(T cache)
             where T : ICacheManager<object>
         {
+            var key = "A" + Guid.NewGuid().ToString().ToUpper();
             using (cache)
             {
-                cache.Remove("SomeKey");
-                cache.Add("SomeKey", "some value");
+                cache.Add(key, "some value");
 
-                var result = cache.Get("somekeY");
+                var result = cache.Get(key.ToLower());
 
                 result.Should().BeNull();
             }
@@ -1914,12 +1919,13 @@ namespace CacheManager.Tests
         public void CacheManager_IsCaseSensitive_Region<T>(T cache)
             where T : ICacheManager<object>
         {
+            var key = "A" + Guid.NewGuid().ToString().ToUpper();
+            var region = "A" + Guid.NewGuid().ToString().ToUpper();
             using (cache)
             {
-                cache.Remove("SomeKey", "Region");
-                cache.Add("SomeKey", "some value", "Region");
+                cache.Add(key, "some value", region);
 
-                var result = cache.Get("SomeKey", "region");
+                var result = cache.Get(key, region.ToLower());
 
                 result.Should().BeNull();
             }

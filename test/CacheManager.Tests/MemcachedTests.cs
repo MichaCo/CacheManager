@@ -284,8 +284,8 @@ namespace CacheManager.Tests
                         .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMinutes(10));
             }))
             {
-                var region = "region";
-                var key = "myKey";
+                var region = Guid.NewGuid().ToString();
+                var key = Guid.NewGuid().ToString();
                 cache.Remove(key, region);
                 cache.Add(key, new RaceConditionTestElement() { Counter = 0 }, region);
                 int numThreads = 5;
@@ -335,8 +335,9 @@ namespace CacheManager.Tests
                     .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMinutes(20));
             }))
             {
-                cache.Remove("myCounter");
-                cache.Add("myCounter", new RaceConditionTestElement() { Counter = 0 });
+                var key = Guid.NewGuid().ToString();
+                cache.Remove(key);
+                cache.Add(key, new RaceConditionTestElement() { Counter = 0 });
                 int numThreads = 5;
                 int iterations = 10;
                 int numInnerIterations = 10;
@@ -347,11 +348,11 @@ namespace CacheManager.Tests
                     {
                         for (int i = 0; i < numInnerIterations; i++)
                         {
-                            var val = cache.Get("myCounter");
+                            var val = cache.Get(key);
                             val.Should().NotBeNull();
                             val.Counter++;
 
-                            cache.Put("myCounter", val);
+                            cache.Put(key, val);
                         }
 
                         await Task.Delay(10);
@@ -360,7 +361,7 @@ namespace CacheManager.Tests
                     iterations);
 
                 // assert
-                var result = cache.Get("myCounter");
+                var result = cache.Get(key);
                 result.Should().NotBeNull();
                 Trace.TraceInformation("Counter increased to " + result.Counter);
                 result.Counter.Should().NotBe(numThreads * numInnerIterations * iterations);

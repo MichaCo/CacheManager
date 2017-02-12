@@ -722,7 +722,10 @@ return result";
                 if (result.IsNull && when == StackRedis.When.NotExists)
                 {
                     // add failed because element exists already
-                    this.Logger.LogInfo("DB {0} | Failed to add item {1} because it exists.", this.connection.Database.Database, fullKey);
+                    if (this.Logger.IsEnabled(LogLevel.Information))
+                    {
+                        this.Logger.LogInfo("DB {0} | Failed to add item [{1}] because it exists.", this.connection.Database.Database, item.ToString());
+                    }
                     return false;
                 }
 
@@ -741,7 +744,7 @@ return result";
                     return true;
                 }
 
-                this.Logger.LogWarn("DB {0} | Failed to set item {1}: {2}.", this.connection.Database.Database, fullKey, resultValue.ToString());
+                this.Logger.LogWarn("DB {0} | Failed to set item [{1}]: {2}.", this.connection.Database.Database, item.ToString(), resultValue.ToString());
                 return false;
             }
         }

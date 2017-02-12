@@ -44,7 +44,7 @@ namespace CacheManager.Tests
                 var r2 = cache[key1];
 
                 // should increase all handles get + 1 and misses +1
-                cache.Get(key1, "region");
+                cache.Get(key1, Guid.NewGuid().ToString());
 
                 // assert
                 a1.Should().BeTrue();
@@ -69,12 +69,13 @@ namespace CacheManager.Tests
                 // arrange
                 var key1 = Guid.NewGuid().ToString();
                 var key2 = Guid.NewGuid().ToString();
+                var region = Guid.NewGuid().ToString();
                 var clears = cache.CacheHandles.Select(p => p.Stats.GetStatistic(CacheStatsCounterType.ClearCalls));
                 cache.Add(key1, "something");
                 cache.Add(key2, "something");
 
                 // act
-                cache.ClearRegion("region"); // should not trigger
+                cache.ClearRegion(region); // should not trigger
                 cache.Clear();
                 cache.Clear();
 
@@ -93,15 +94,16 @@ namespace CacheManager.Tests
                 // arrange
                 var key1 = Guid.NewGuid().ToString();
                 var key2 = Guid.NewGuid().ToString();
+                var region = Guid.NewGuid().ToString();
                 var clears = cache.CacheHandles.Select(p => p.Stats.GetStatistic(CacheStatsCounterType.ClearRegionCalls));
                 cache.Add(key1, "something");
                 cache.Add(key2, "something");
-                cache.Add(key2, "something", "region");
+                cache.Add(key2, "something", region);
 
                 // act
-                cache.ClearRegion("region");
+                cache.ClearRegion(region);
                 cache.Clear();  // should not trigger
-                cache.ClearRegion("region2");
+                cache.ClearRegion(Guid.NewGuid().ToString());
 
                 // assert all handles should have 2 clearRegion increases.
                 clears.ShouldAllBeEquivalentTo(
@@ -120,12 +122,13 @@ namespace CacheManager.Tests
                 // arrange
                 var key1 = Guid.NewGuid().ToString();
                 var key2 = Guid.NewGuid().ToString();
+                var region = Guid.NewGuid().ToString();
                 var puts = cache.CacheHandles.Select(p => p.Stats.GetStatistic(CacheStatsCounterType.PutCalls));
 
                 // act
                 cache.Put(key1, "something");
                 cache.Put(key2, "something");
-                cache.Put(key2, "something", "region");
+                cache.Put(key2, "something", region);
 
                 // assert all handles should have 2 clearRegion increases.
                 puts.ShouldAllBeEquivalentTo(
@@ -171,21 +174,22 @@ namespace CacheManager.Tests
                 // arrange
                 var key1 = Guid.NewGuid().ToString();
                 var key2 = Guid.NewGuid().ToString();
+                var region = Guid.NewGuid().ToString();
                 var adds = cache.CacheHandles.Select(p => p.Stats.GetStatistic(CacheStatsCounterType.AddCalls));
                 var removes = cache.CacheHandles.Select(p => p.Stats.GetStatistic(CacheStatsCounterType.RemoveCalls));
 
                 // act
                 var r1 = cache.Remove(key2);               // false
-                var r2 = cache.Remove(key2, "region");     // false
+                var r2 = cache.Remove(key2, region);        // false
 
                 var a1 = cache.Add(key1, "something");            // true
                 var a2 = cache.Add(key2, "something");            // true
-                var a3 = cache.Add(key2, "something", "region");  // true
+                var a3 = cache.Add(key2, "something", region);    // true
                 var a4 = cache.Add(key1, "something");            // false
                 var r3 = cache.Remove(key2);                      // true
-                var r4 = cache.Remove(key2, "region");            // true
+                var r4 = cache.Remove(key2, region);              // true
                 var a5 = cache.Add(key2, "something");            // true
-                var a6 = cache.Add(key2, "something", "region");  // true
+                var a6 = cache.Add(key2, "something", region);    // true
 
                 // assert
                 (r1 && r2).Should().BeFalse();

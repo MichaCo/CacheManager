@@ -6,6 +6,8 @@ using System.Linq;
 using System.Net;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using CacheManager.Core;
 using CacheManager.Core.Internal;
 using CacheManager.Core.Logging;
@@ -108,6 +110,8 @@ namespace CacheManager.Memcached
             if (clientConfiguration.Transcoder.GetType() == typeof(DefaultTranscoder))
             {
                 clientConfiguration.Transcoder = new CacheManagerTanscoder<TCacheValue>(serializer);
+                // default is 10, that might be too long as it can take up to 10sec to recover during retries
+                clientConfiguration.SocketPool.DeadTimeout = TimeSpan.FromSeconds(2);
             }
 
             this.Cache = new MemcachedClient(clientConfiguration);
@@ -217,8 +221,25 @@ namespace CacheManager.Memcached
         /// <returns>
         /// <c>true</c> if the key was not already added to the cache, <c>false</c> otherwise.
         /// </returns>
-        protected override bool AddInternalPrepared(CacheItem<TCacheValue> item) =>
-            this.Store(StoreMode.Add, item).Success;
+        protected override bool AddInternalPrepared(CacheItem<TCacheValue> item)
+        {
+            IOperationResult result;
+            bool shouldRetry = false;
+            int tries = 0;
+            do
+            {
+                tries++;
+                result = this.Store(StoreMode.Add, item, out shouldRetry);
+                if (!shouldRetry)
+                {
+                    return result.Success;
+                }
+
+                WaitRetry(tries);
+            } while (shouldRetry && tries < this.managerConfiguration.MaxRetries);
+
+            throw new InvalidOperationException($"Add failed after {tries} tries for [{item.ToString()}]. {result.InnerResult?.Message ?? result.Message}");
+        }
 
         /// <summary>
         /// Performs application-defined tasks associated with freeing, releasing, or resetting
@@ -263,7 +284,8 @@ namespace CacheManager.Memcached
                     // the only way I see to update sliding expiration for keys
                     // is to store them again with updated TTL... What a b...t
                     item.LastAccessedUtc = DateTime.UtcNow;
-                    this.Store(StoreMode.Set, item);
+                    bool shouldRetry;
+                    this.Store(StoreMode.Set, item, out shouldRetry);
                 }
             }
 
@@ -275,7 +297,39 @@ namespace CacheManager.Memcached
         /// with the new value. If the item doesn't exist, the item will be added to the cache.
         /// </summary>
         /// <param name="item">The <c>CacheItem</c> to be added to the cache.</param>
-        protected override void PutInternalPrepared(CacheItem<TCacheValue> item) => this.Store(StoreMode.Set, item);
+        protected override void PutInternalPrepared(CacheItem<TCacheValue> item)
+        {
+            IOperationResult result;
+            bool shouldRetry = false;
+            int tries = 0;
+            do
+            {
+                tries++;
+                result = this.Store(StoreMode.Set, item, out shouldRetry);
+                if (!shouldRetry)
+                {
+                    return;
+                }
+
+                WaitRetry(tries);
+            } while (shouldRetry && tries < this.managerConfiguration.MaxRetries);
+
+            throw new InvalidOperationException($"Put failed after {tries} tries for [{item.ToString()}]. {result.InnerResult?.Message ?? result.Message}");
+        }
+
+        private void WaitRetry(int currentTry)
+        {
+            var delay = this.managerConfiguration.RetryTimeout == 0 ? 10 : this.managerConfiguration.RetryTimeout;
+
+            var adjusted = delay * currentTry;
+            if (adjusted > 10000) adjusted = 10000;
+
+#if !NET40
+            Task.Delay(adjusted).ConfigureAwait(false).GetAwaiter().GetResult();
+#else
+            Thread.Sleep(adjusted);
+#endif
+        }
 
         /// <summary>
         /// Removes a value from the cache for the specified key.
@@ -294,7 +348,29 @@ namespace CacheManager.Memcached
         /// <returns>
         /// <c>true</c> if the key was found and removed from the cache, <c>false</c> otherwise.
         /// </returns>
-        protected override bool RemoveInternal(string key, string region) => this.Cache.Remove(GetKey(key, region));
+        protected override bool RemoveInternal(string key, string region)
+        {
+            var result = this.Cache.ExecuteRemove(GetKey(key, region));
+            if (result.Success)
+            {
+                this.LogOperationResult(LogLevel.Debug, result, "Removed {0} {1}", region, key);
+            }
+            else
+            {
+                int statusCode = result.StatusCode ?? result.InnerResult?.StatusCode ?? -1;
+                if (statusCode == (int)StatusCode.KeyNotFound)
+                {
+                    this.LogOperationResult(LogLevel.Information, result, "Remove Failed, key not found: {0} {1}", region, key);
+                }
+                else
+                {
+                    this.LogOperationResult(LogLevel.Error, result, "Remove Failed for {0} {1}", region, key);
+                    // throw new InvalidOperationException($"Remove failed for {region} {key}; statusCode:{statusCode}, message:{result.InnerResult?.Message ?? result.Message}");
+                }
+            }
+
+            return result.Success;
+        }
 
         /// <summary>
         /// Stores the item with the specified mode.
@@ -304,12 +380,15 @@ namespace CacheManager.Memcached
         /// </remarks>
         /// <param name="mode">The mode.</param>
         /// <param name="item">The item.</param>
+        /// <param name="shouldRetry">Flag indicating if the operation should be retried. Returnd succssess code will be false anyways.</param>
         /// <returns>The result.</returns>
-        protected virtual IStoreOperationResult Store(StoreMode mode, CacheItem<TCacheValue> item)
+        protected virtual IStoreOperationResult Store(StoreMode mode, CacheItem<TCacheValue> item, out bool shouldRetry)
         {
             NotNull(item, nameof(item));
+            shouldRetry = false;
 
             var key = GetKey(item.Key, item.Region);
+            IStoreOperationResult result;
 
             if (item.ExpirationMode == ExpirationMode.Absolute || item.ExpirationMode == ExpirationMode.Sliding)
             {
@@ -318,13 +397,36 @@ namespace CacheManager.Memcached
                     throw new InvalidOperationException($"Timeout must not exceed {MaximumTimeout.TotalDays} days.");
                 }
 
-                var result = this.Cache.ExecuteStore(mode, key, item, item.ExpirationTimeout);
-                return result;
+                result = this.Cache.ExecuteStore(mode, key, item, item.ExpirationTimeout);
             }
             else
             {
-                var result = this.Cache.ExecuteStore(mode, key, item);
-                return result;
+                result = this.Cache.ExecuteStore(mode, key, item);
+            }
+
+            if (mode == StoreMode.Add && result.StatusCode == (int?)StatusCode.KeyExists)
+            {
+                LogOperationResult(LogLevel.Information, result, "Failed to add item [{0}] because it exists.", item);
+            }
+            else if (result.Success)
+            {
+                LogOperationResult(LogLevel.Debug, result, "Stored [{0}]", item);
+            }
+            else
+            {
+                shouldRetry = true;
+                LogOperationResult(LogLevel.Error, result, "Store failed for [{0}]", item);
+            }
+
+            return result;
+        }
+
+        private void LogOperationResult(LogLevel level, IOperationResult result, string message, params object[] args)
+        {
+            if (this.Logger.IsEnabled(level))
+            {
+                var msg = $"{string.Format(message, args)}; Result Success:'{result.Success}' Code:'{result.InnerResult?.StatusCode ?? result.StatusCode}' Message:'{result.InnerResult?.Message ?? result.Message}'.";
+                this.Logger.Log(level, 0, msg, result.Exception);
             }
         }
 
@@ -362,9 +464,9 @@ namespace CacheManager.Memcached
                 }
             }
 
-            Logger.LogError("Memcached: failed to store prefix for region key '{0}' with too many retries after {1} tries.", regionKey, tries);
+            Logger.LogError("Memcached: failed to store prefix for region key '{0}'", regionKey);
 
-            throw new InvalidOperationException($"Could not store new cache region prefix after {tries} tries.");
+            throw new InvalidOperationException($"Could not store new cache region prefix.");
         }
 
         private string GetRegionPrefix(string region)
@@ -569,8 +671,10 @@ namespace CacheManager.Memcached
                 {
                     return UpdateItemResult.ForSuccess(item, tries > 1, tries);
                 }
+
+                WaitRetry(tries);
             }
-            while (!result.Success && result.StatusCode.HasValue && result.StatusCode.Value == 2 && tries <= maxRetries);
+            while (!result.Success && result.StatusCode.HasValue && result.StatusCode.Value == 2 && tries < maxRetries);
 
             return UpdateItemResult.ForTooManyRetries<TCacheValue>(tries);
         }

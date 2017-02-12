@@ -98,13 +98,14 @@ namespace CacheManager.Tests
             {
                 // arrange
                 var key1 = Guid.NewGuid().ToString();
+                var region1 = Guid.NewGuid().ToString();
                 var data = new EventCallbackData();
                 cache.OnGet += (sender, args) => data.AddCall(args, key1);
                 cache.Add(key1, "something");
 
                 // act get without region, should not return anything and should not trigger the event
                 var result = cache.Get(key1);
-                var resultWithRegion = cache.Get(key1, "region");
+                var resultWithRegion = cache.Get(key1, region1);
 
                 // assert
                 result.Should().Be("something");
@@ -180,6 +181,7 @@ namespace CacheManager.Tests
             {
                 // arrange
                 var key1 = Guid.NewGuid().ToString();
+                var region1 = Guid.NewGuid().ToString();
                 var data = new EventCallbackData();
 
                 // all callbacks should be triggered, so result count should be 4
@@ -187,16 +189,16 @@ namespace CacheManager.Tests
                 cache.OnGet += (sender, args) => data.AddCall(args, key1);
                 cache.OnGet += (sender, args) => data.AddCall(args, key1);
                 cache.OnGet += (sender, args) => data.AddCall(args, key1);
-                cache.Add(key1, "something", "region");
+                cache.Add(key1, "something", region1);
 
                 // act get without region, should not return anything and should not trigger the event
-                var result = cache.Get(key1, "region");
+                var result = cache.Get(key1, region1);
 
                 // assert
                 result.Should().Be("something");
                 data.Calls.Should().Be(4, "we expect 4 hits");
                 data.Keys.ShouldAllBeEquivalentTo(Enumerable.Repeat(key1, 4), "we expect 4 hits");
-                data.Regions.ShouldAllBeEquivalentTo(Enumerable.Repeat("region", 4), "we expect 4 hits");
+                data.Regions.ShouldAllBeEquivalentTo(Enumerable.Repeat(region1, 4), "we expect 4 hits");
             }
         }
 
@@ -219,6 +221,8 @@ namespace CacheManager.Tests
                 // arrange
                 var key1 = Guid.NewGuid().ToString();
                 var key2 = Guid.NewGuid().ToString();
+                var region1 = Guid.NewGuid().ToString();
+                var region2 = Guid.NewGuid().ToString();
                 var data = new EventCallbackData();
 
                 // all callbacks should be triggered, so result count should be 4
@@ -227,18 +231,18 @@ namespace CacheManager.Tests
                 cache.OnRemove += (sender, args) => data.AddCall(args, key1, key2);
                 cache.OnRemove += (sender, args) => data.AddCall(args, key1, key2);
                 cache.OnGet += (sender, args) => data.AddCall(args, key1, key2);  // this should not trigger
-                cache.Add(key1, "something", "region");
-                cache.Add(key2, "something", "region2");
+                cache.Add(key1, "something", region1);
+                cache.Add(key2, "something", region2);
 
                 // act get without region, should not return anything and should not trigger the event
                 var r1 = cache.Remove(key1);              // false
-                var r2 = cache.Remove(key1, "region");    // true
-                var r3 = cache.Remove(key2, "region3");   // false
-                var r4 = cache.Remove(key2, "region2");   // true
+                var r2 = cache.Remove(key1, region1);    // true
+                var r3 = cache.Remove(key2, Guid.NewGuid().ToString());   // false
+                var r4 = cache.Remove(key2, region2);   // true
 
                 // assert
-                (r1 && r3).Should().BeFalse();
-                (r2 && r4).Should().BeTrue();
+                (r1 && r3).Should().BeFalse(cache.ToString());
+                (r2 && r4).Should().BeTrue(cache.ToString());
 
                 data.Calls.Should().Be(8, $"we expect 8 hits for {key1} and {key2} \n-> keys: " + string.Join(", ", data.Keys));
                 data.Keys.ShouldAllBeEquivalentTo(
@@ -247,7 +251,7 @@ namespace CacheManager.Tests
                     "we expect 8 hits");
 
                 data.Regions.ShouldAllBeEquivalentTo(
-                    Enumerable.Repeat("region", 4).Concat(Enumerable.Repeat("region2", 4)),
+                    Enumerable.Repeat(region1, 4).Concat(Enumerable.Repeat(region2, 4)),
                     cfg => cfg.WithStrictOrdering(),
                     "we expect 8 hits");
             }
@@ -272,6 +276,8 @@ namespace CacheManager.Tests
                 // arrange
                 var key1 = Guid.NewGuid().ToString();
                 var key2 = Guid.NewGuid().ToString();
+                var region1 = Guid.NewGuid().ToString();
+                var region2 = Guid.NewGuid().ToString();
                 var data = new EventCallbackData();
 
                 // all callbacks should be triggered, so result count should be 4
@@ -282,10 +288,10 @@ namespace CacheManager.Tests
                 cache.OnRemove += (sender, args) => data.AddCall(args, key1, key2);  // this should not trigger
 
                 // act get without region, should not return anything and should not trigger the event
-                var r1 = cache.Add(key1, "something", "region");  // true
-                var r2 = cache.Add(key2, "something", "region2"); // true
-                var r3 = cache.Add(key1, "something", "region");  // false
-                var r4 = cache.Add(key2, "something", "region2"); // false
+                var r1 = cache.Add(key1, "something", region1);  // true
+                var r2 = cache.Add(key2, "something", region2); // true
+                var r3 = cache.Add(key1, "something", region1);  // false
+                var r4 = cache.Add(key2, "something", region2); // false
                 var r5 = cache.Add(key1, "something");            // true
                 var r6 = cache.Add(key1, "something");            // false
 
@@ -303,8 +309,8 @@ namespace CacheManager.Tests
                     "we expect 9 hits");
 
                 data.Regions.ShouldAllBeEquivalentTo(
-                    Enumerable.Repeat("region", 3)                      // 3 times region
-                        .Concat(Enumerable.Repeat("region2", 3)),       // 3 times region2
+                    Enumerable.Repeat(region1, 3)                      // 3 times region
+                        .Concat(Enumerable.Repeat(region2, 3)),       // 3 times region2
                     cfg => cfg.WithStrictOrdering(),
                     "we expect 6 hits");
             }
@@ -327,6 +333,8 @@ namespace CacheManager.Tests
                 // arrange
                 var key1 = Guid.NewGuid().ToString();
                 var key2 = Guid.NewGuid().ToString();
+                var region1 = Guid.NewGuid().ToString();
+                var region2 = Guid.NewGuid().ToString();
                 var data = new EventCallbackData();
 
                 // all callbacks should be triggered, so result count should be 4
@@ -338,9 +346,9 @@ namespace CacheManager.Tests
                 cache.OnRemove += (sender, args) => data.AddCall(args, key1, key2);  // this should not trigger
 
                 // act get without region, should not return anything and should not trigger the event
-                cache.Put(key1, "something", "region");
-                cache.Put(key2, "something", "region2");
-                cache.Put(key1, "something", "region");
+                cache.Put(key1, "something", region1);
+                cache.Put(key2, "something", region2);
+                cache.Put(key1, "something", region1);
                 cache.Put(key1, "something");
 
                 // assert 4x Put calls x 3 event handles = 12 calls
@@ -353,9 +361,9 @@ namespace CacheManager.Tests
                     "we expect 12 hits");
 
                 data.Regions.ShouldAllBeEquivalentTo(
-                    Enumerable.Repeat("region", 3)                      // 3 times region
-                        .Concat(Enumerable.Repeat("region2", 3))        // 3 times region2
-                        .Concat(Enumerable.Repeat("region", 3)),         // 3 times region
+                    Enumerable.Repeat(region1, 3)                      // 3 times region
+                        .Concat(Enumerable.Repeat(region2, 3))        // 3 times region2
+                        .Concat(Enumerable.Repeat(region1, 3)),         // 3 times region
                     cfg => cfg.WithStrictOrdering(),
                     "we expect 12 hits");
             }
@@ -379,6 +387,8 @@ namespace CacheManager.Tests
                 var data = new EventCallbackData();
                 var key1 = Guid.NewGuid().ToString();
                 var key2 = Guid.NewGuid().ToString();
+                var region1 = Guid.NewGuid().ToString();
+                var region2 = Guid.NewGuid().ToString();
 
                 cache.OnUpdate += (sender, args) => data.AddCall(args, key1, key2);
                 cache.OnPut += (sender, args) => data.AddCall(args, key1, key2);    // this should not trigger
@@ -387,13 +397,13 @@ namespace CacheManager.Tests
                 cache.OnRemove += (sender, args) => data.AddCall(args, key1, key2);  // this should not trigger
 
                 // act get without region, should not return anything and should not trigger the event
-                cache.Add(key1, 1, "region").Should().BeTrue("add key1 to region");
-                cache.Add(key2, 1, "region2").Should().BeTrue("add key2 to region2");
+                cache.Add(key1, 1, region1).Should().BeTrue("add key1 to region");
+                cache.Add(key2, 1, region2).Should().BeTrue("add key2 to region2");
                 cache.Add(key1, 1).Should().BeTrue("add key1");
 
                 object val;
-                cache.TryUpdate(key1, "region", o => ((int)o) + 1, out val).Should().BeTrue();
-                cache.TryUpdate(key2, "region2", o => ((int)o) + 1, out val).Should().BeTrue();
+                cache.TryUpdate(key1, region1, o => ((int)o) + 1, out val).Should().BeTrue();
+                cache.TryUpdate(key2, region2, o => ((int)o) + 1, out val).Should().BeTrue();
                 cache.TryUpdate(key1, o => ((int)o) + 1, out val).Should().BeTrue();
 
                 // assert 4x Put calls x 3 event handles = 12 calls
@@ -404,7 +414,7 @@ namespace CacheManager.Tests
                     "we expect 3 adds and 3 updates in exact order");
 
                 data.Regions.ShouldAllBeEquivalentTo(
-                    new string[] { "region", "region2", "region", "region2", },
+                    new string[] { region1, region2, region1, region2, },
                     cfg => cfg.WithStrictOrdering(),
                     "we expect 4 region hits");
             }
@@ -428,8 +438,8 @@ namespace CacheManager.Tests
                 // arrange
                 var key1 = Guid.NewGuid().ToString();
                 var key2 = Guid.NewGuid().ToString();
-                var region1 = "region1";
-                var region2 = "region2";
+                var region1 = Guid.NewGuid().ToString();
+                var region2 = Guid.NewGuid().ToString();
                 var data = new EventCallbackData();
 
                 // all callbacks should be triggered, so result count should be 6
@@ -468,6 +478,8 @@ namespace CacheManager.Tests
                 // arrange
                 var key1 = Guid.NewGuid().ToString();
                 var key2 = Guid.NewGuid().ToString();
+                var region1 = Guid.NewGuid().ToString();
+                var region2 = Guid.NewGuid().ToString();
                 var data = new EventCallbackData();
 
                 // all callbacks should be triggered, so result count should be 4
@@ -477,9 +489,9 @@ namespace CacheManager.Tests
                 cache.OnClearRegion += (sender, args) => data.AddCall(args, key1, key2); // this should not trigger
                 cache.OnGet += (sender, args) => data.AddCall(args, key1, key2);  // this should not trigger
                 cache.OnRemove += (sender, args) => data.AddCall(args, key1, key2);  // this should not trigger
-                cache.Put(key1, "something", "region");
-                cache.Put(key2, "something", "region2");
-                cache.Put(key1, "something", "region");
+                cache.Put(key1, "something", region1);
+                cache.Put(key2, "something", region2);
+                cache.Put(key1, "something", region1);
                 cache.Put(key1, "something");
 
                 // act
