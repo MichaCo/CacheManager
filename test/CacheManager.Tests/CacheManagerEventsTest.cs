@@ -218,6 +218,8 @@ namespace CacheManager.Tests
         {
             using (cache)
             {
+                var mgr = cache as BaseCacheManager<T>;
+                
                 // arrange
                 var key1 = Guid.NewGuid().ToString();
                 var key2 = Guid.NewGuid().ToString();
@@ -241,8 +243,10 @@ namespace CacheManager.Tests
                 var r4 = cache.Remove(key2, region2);   // true
 
                 // assert
-                (r1 && r3).Should().BeFalse(cache.ToString());
-                (r2 && r4).Should().BeTrue(cache.ToString());
+                r1.Should().BeFalse(key1);
+                r2.Should().BeTrue($"{key1} {region1}");
+                r3.Should().BeFalse($"{key2} random region.");
+                r4.Should().BeTrue($"{key2} {region2}");
 
                 data.Calls.Should().Be(8, $"we expect 8 hits for {key1} and {key2} \n-> keys: " + string.Join(", ", data.Keys));
                 data.Keys.ShouldAllBeEquivalentTo(

@@ -100,7 +100,7 @@ namespace CacheManager.Web
             var key = this.GetItemKey(item);
             var settings = this.GetCacheSettings(item);
 
-            if (settings.SlidingExpire.TotalMilliseconds < 2000)
+            if (settings.SlidingExpire.TotalMilliseconds > 0 && settings.SlidingExpire.TotalMilliseconds < 2000)
             {
                 this.Logger.LogWarn(
                     "System.Web.Caching.Cache sliding expiration works only with a value larger than 2000ms, "
@@ -159,7 +159,7 @@ namespace CacheManager.Web
             var key = this.GetItemKey(item);
             var settings = this.GetCacheSettings(item);
 
-            if (settings.SlidingExpire.TotalMilliseconds < 2000)
+            if (settings.SlidingExpire.TotalMilliseconds > 0 && settings.SlidingExpire.TotalMilliseconds < 2000)
             {
                 this.Logger.LogWarn(
                     "System.Web.Caching.Cache sliding expiration works only with a value larger than 2000ms, "

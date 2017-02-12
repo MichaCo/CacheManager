@@ -41,7 +41,7 @@ namespace CacheManager.Tests
                 }
             }
 
-            [Trait("category", "Unreliable")]
+            [Trait("category", "Unreliable")]            
             [Theory]
             [ClassData(typeof(TestCacheManagers))]
             public async Task CacheManager_Sliding_DoesNotExpire_OnUpdate<T>(T cache)
@@ -57,7 +57,7 @@ namespace CacheManager.Tests
                         return;
                     }
 #endif
-                    var timeout = 50;
+                    var timeout = 100;
                     await TestSlidingExpiration(
                         timeout,
                         (key) => cache.Add(new CacheItem<object>(key, "value", ExpirationMode.Sliding, TimeSpan.FromMilliseconds(timeout))),

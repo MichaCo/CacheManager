@@ -186,7 +186,7 @@ namespace CacheManager.Memcached
 
             if (this.Logger.IsEnabled(LogLevel.Debug))
             {
-                this.Logger.LogDebug("Memcached: cleared region {0}, new region key is {1}.", region, regionPrefix);
+                this.Logger.LogDebug("Cleared region {0}, new region key is {1}.", region, regionPrefix);
             }
         }
 
@@ -449,7 +449,7 @@ namespace CacheManager.Memcached
 
                 if (this.Logger.IsEnabled(LogLevel.Debug))
                 {
-                    this.Logger.LogDebug("Memcached: trying to store new region prefix '{0}', for region key '{1}'.", timestamp, regionKey);
+                    this.Logger.LogDebug("Trying to store new region prefix '{0}', for region key '{1}'.", timestamp, regionKey);
                 }
 
                 created = this.Cache.Store(StoreMode.Set, regionKey, timestamp);
@@ -458,13 +458,13 @@ namespace CacheManager.Memcached
                 {
                     if (this.Logger.IsEnabled(LogLevel.Debug))
                     {
-                        this.Logger.LogDebug("Memcached: successfully stored new region prefix '{0}', for region key '{1}'.", timestamp, regionKey);
+                        this.Logger.LogDebug("Successfully stored new region prefix '{0}', for region key '{1}'.", timestamp, regionKey);
                     }
                     return timestamp.ToString();
                 }
             }
 
-            Logger.LogError("Memcached: failed to store prefix for region key '{0}'", regionKey);
+            Logger.LogError("Failed to store prefix for region key '{0}'", regionKey);
 
             throw new InvalidOperationException($"Could not store new cache region prefix.");
         }
@@ -520,7 +520,7 @@ namespace CacheManager.Memcached
                 {
                     if (this.Logger.IsEnabled(LogLevel.Debug))
                     {
-                        this.Logger.LogDebug("Memcached: region key for region '{0}' not present, creating a new one...", region);
+                        this.Logger.LogDebug("Region key for region '{0}' not present, creating a new one...", region);
                     }
 
                     regionKey = StoreNewRegionPrefix(region);
@@ -624,22 +624,32 @@ namespace CacheManager.Memcached
                 tries++;
                 var getTries = 0;
                 StatusCode getStatus;
+                IGetOperationResult<CacheItem<TCacheValue>> getResult;
                 CacheItem<TCacheValue> item;
-                CasResult<CacheItem<TCacheValue>> cas;
+                //CasResult<CacheItem<TCacheValue>> cas;
                 do
                 {
                     getTries++;
-                    cas = this.Cache.GetWithCas<CacheItem<TCacheValue>>(fullyKey);
+                    getResult = this.Cache.ExecuteGet<CacheItem<TCacheValue>>(fullyKey);
 
-                    item = cas.Result;
-                    getStatus = (StatusCode)cas.StatusCode;
+                    item = getResult.Value;
+                    getStatus = (StatusCode)(getResult.StatusCode ?? getResult.InnerResult?.StatusCode ?? -1);
                 }
                 while (ShouldRetry(getStatus) && getTries <= maxRetries);
 
                 // break operation if we cannot retrieve the object (maybe it has expired already).
-                if (getStatus != StatusCode.Success || item == null || item.IsExpired)
+                if (!getResult.Success)
                 {
-                    return UpdateItemResult.ForItemDidNotExist<TCacheValue>();
+                    if (getStatus == StatusCode.KeyNotFound || (item != null && item.IsExpired))
+                    {
+                        return UpdateItemResult.ForItemDidNotExist<TCacheValue>();
+                    }
+                    else
+                    {
+                        // log warn + retry - not 100% sure what might happen (maybe server dead).
+                        this.LogOperationResult(LogLevel.Warning, getResult, "Trying to get item '{0}' during update.", fullyKey);
+                        continue;
+                    }
                 }
 
                 var newValue = updateValue(item.Value);
@@ -660,21 +670,25 @@ namespace CacheManager.Memcached
                         throw new InvalidOperationException($"Timeout must not exceed {MaximumTimeout.TotalDays} days.");
                     }
 
-                    result = this.Cache.ExecuteCas(StoreMode.Set, fullyKey, item, item.ExpirationTimeout, cas.Cas);
+                    result = this.Cache.ExecuteCas(StoreMode.Set, fullyKey, item, item.ExpirationTimeout, getResult.Cas);
                 }
                 else
                 {
-                    result = this.Cache.ExecuteCas(StoreMode.Set, fullyKey, item, cas.Cas);
+                    result = this.Cache.ExecuteCas(StoreMode.Set, fullyKey, item, getResult.Cas);
                 }
 
                 if (result.Success)
                 {
                     return UpdateItemResult.ForSuccess(item, tries > 1, tries);
                 }
+                else
+                {
+                    this.LogOperationResult(LogLevel.Warning, result, "Update failed for '{0}'.", fullyKey);
+                }
 
                 WaitRetry(tries);
             }
-            while (!result.Success && result.StatusCode.HasValue && result.StatusCode.Value == 2 && tries < maxRetries);
+            while (tries < maxRetries);
 
             return UpdateItemResult.ForTooManyRetries<TCacheValue>(tries);
         }
