@@ -390,7 +390,12 @@ namespace CacheManager.Core.Internal
             if (!this.counters.TryGetValue(key, out counter))
             {
                 counter = new CacheStatsCounter();
-                this.counters.TryAdd(key, counter);
+                if (this.counters.TryAdd(key, counter))
+                {
+                    return counter;
+                }
+
+                return GetCounter(key);
             }
 
             return counter;

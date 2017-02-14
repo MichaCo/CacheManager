@@ -33,7 +33,7 @@ namespace CacheManager.Tests
                         return;
                     }
 #endif
-                    var timeout = 50;
+                    var timeout = 100;
                     await TestSlidingExpiration(
                         timeout,
                         (key) => cache.Add(new CacheItem<object>(key, "value", ExpirationMode.Sliding, TimeSpan.FromMilliseconds(timeout))),
@@ -41,7 +41,7 @@ namespace CacheManager.Tests
                 }
             }
 
-            [Trait("category", "Unreliable")]            
+            [Trait("category", "Unreliable")]
             [Theory]
             [ClassData(typeof(TestCacheManagers))]
             public async Task CacheManager_Sliding_DoesNotExpire_OnUpdate<T>(T cache)
@@ -58,19 +58,26 @@ namespace CacheManager.Tests
                     }
 #endif
                     var timeout = 100;
-                    await TestSlidingExpiration(
-                        timeout,
-                        (key) => cache.Add(new CacheItem<object>(key, "value", ExpirationMode.Sliding, TimeSpan.FromMilliseconds(timeout))),
-                        (key) =>
-                        {
-                            object value;
-                            if (cache.TryUpdate(key, o => o, out value))
+                    try
+                    {
+                        await TestSlidingExpiration(
+                            timeout,
+                            (key) => cache.Add(new CacheItem<object>(key, "value", ExpirationMode.Sliding, TimeSpan.FromMilliseconds(timeout))),
+                            (key) =>
                             {
-                                return value;
-                            }
+                                object value;
+                                if (cache.TryUpdate(key, o => o, out value))
+                                {
+                                    return value;
+                                }
 
-                            return null;
-                        });
+                                return null;
+                            });
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new Exception(cache.ToString(), ex);
+                    }
                 }
             }
         }
@@ -438,7 +445,7 @@ namespace CacheManager.Tests
                             .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromDays(10))))
                 {
                     var key = Guid.NewGuid().ToString();
-                    cache.Add(key, "value");
+                    cache.Put(key, "value");
 
                     cache.CacheHandles.ElementAt(0).GetCacheItem(key)
                         .ExpirationMode.Should().Be(ExpirationMode.Absolute);
@@ -939,14 +946,15 @@ namespace CacheManager.Tests
                     .WithSystemRuntimeCacheHandle();
             }))
             {
-                cache.Add("something", "stuip");
+                var key = Guid.NewGuid().ToString();
+                cache.Put(key, "stuip");
 
                 var handles = cache.CacheHandles.ToArray();
-                handles[0].GetCacheItem("something").ExpirationMode.Should().Be(ExpirationMode.Absolute);
+                handles[0].GetCacheItem(key).ExpirationMode.Should().Be(ExpirationMode.Absolute);
 
                 // second cache should not inherit the expiration
-                handles[1].GetCacheItem("something").ExpirationMode.Should().Be(ExpirationMode.None);
-                handles[1].GetCacheItem("something").ExpirationTimeout.Should().Be(default(TimeSpan));
+                handles[1].GetCacheItem(key).ExpirationMode.Should().Be(ExpirationMode.None);
+                handles[1].GetCacheItem(key).ExpirationTimeout.Should().Be(default(TimeSpan));
             }
         }
 

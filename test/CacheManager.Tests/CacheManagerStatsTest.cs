@@ -53,7 +53,16 @@ namespace CacheManager.Tests
                 r2.Should().Be("something");
 
                 // each cache handle stats should have one addCall increase
-                addCalls.ShouldAllBeEquivalentTo(Enumerable.Repeat(1, cache.CacheHandles.Count()));
+                var handleCount = cache.CacheHandles.Count();
+                if (handleCount > 1)
+                {
+                    addCalls.Last().Should().Be(1);
+                    addCalls.Take(handleCount - 1).ShouldAllBeEquivalentTo(0);
+                }
+                else
+                {
+                    addCalls.ShouldAllBeEquivalentTo(1);
+                }
 
                 items.ShouldAllBeEquivalentTo(
                     Enumerable.Repeat(0, cache.CacheHandles.Count() - 1).Concat(new[] { 1 }));
@@ -198,8 +207,15 @@ namespace CacheManager.Tests
                 (a1 && a2 && a3 && a5 && a6).Should().BeTrue();
 
                 // all handles should have 5 add increases.
-                adds.ShouldAllBeEquivalentTo(
-                    Enumerable.Repeat(5, cache.CacheHandles.Count()));
+                if (adds.Count() > 1)
+                {
+                    adds.Last().Should().Be(5);
+                    adds.Take(adds.Count() - 1).ShouldAllBeEquivalentTo(0);
+                }
+                else
+                {
+                    adds.Last().Should().Be(5);
+                }
             }
         }
 
@@ -212,7 +228,7 @@ namespace CacheManager.Tests
         {
             var puts = cache.CacheHandles.Select(p => p.Stats.GetStatistic(CacheStatsCounterType.PutCalls));
             var adds = cache.CacheHandles.Select(p => p.Stats.GetStatistic(CacheStatsCounterType.AddCalls));
-            var threads = 5;
+            var threads = 4;
             var iterations = 10;
             var putCounter = 0;
 

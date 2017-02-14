@@ -68,28 +68,48 @@ namespace CacheManager.Tests
     [ExcludeFromCodeCoverage]
     public static class TestManagers
     {
-        ////private const string RedisHost = "ubuntu-local";
-        ////private const int RedisPort = 7024; // redis 2.4
         private const string RedisHost = "127.0.0.1";
 
         private const int RedisPort = 6379;
         private const int StartDbCount = 100;
         private static int databaseCount = StartDbCount;
 
+        static TestManagers()
+        {
+            ////Log.Logger = new LoggerConfiguration()
+            ////    .MinimumLevel.Debug()
+            ////    .Enrich.FromLogContext()
+            ////    .Enrich.WithThreadId()
+            ////    .WriteTo.File(
+            ////        path: $"logs/testlog-{Environment.TickCount}.log",
+            ////        outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} {Scope} [{Level}] {Message}{NewLine}{Exception}",
+            ////        restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Warning)
+            ////    .CreateLogger();
+        }
+
+        public static ICacheManagerConfiguration BaseConfiguration
+        {
+            get
+            {
+                return new ConfigurationBuilder()
+                    ////.WithMicrosoftLogging(f => f.AddSerilog())
+                    .Build();
+            }
+        }
+
         public static ICacheManager<object> WithOneDicCacheHandle
-            => CacheFactory.Build(
-                settings => settings
+            => CacheFactory.FromConfiguration<object>(
+                BaseConfiguration.Builder
                     .WithUpdateMode(CacheUpdateMode.Up)
                     .WithDictionaryHandle()
                         .EnableStatistics()
-                    .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(1000)));
+                    .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(1000))
+                .Build());
 
         public static ICacheManager<object> WithManyDictionaryHandles
-            => CacheFactory.Build(
-                "manyDicts",
-                settings =>
-                {
-                    settings
+            => CacheFactory.FromConfiguration<object>(
+                BaseConfiguration
+                    .Builder
                         .WithUpdateMode(CacheUpdateMode.Up)
                         .WithDictionaryHandle()
                             .EnableStatistics()
@@ -110,8 +130,8 @@ namespace CacheManager.Tests
                             .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(1000))
                         .And.WithDictionaryHandle()
                             .EnableStatistics()
-                            .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1000));
-                });
+                            .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1000))
+                    .Build());
 
         public static ICacheManager<object> WithRedisCacheBinary
         {
@@ -235,23 +255,22 @@ namespace CacheManager.Tests
 #if !NETCOREAPP
 
         public static ICacheManager<object> WithOneMemoryCacheHandleSliding
-            => CacheFactory.Build(
-                settings => settings
-                    .WithUpdateMode(CacheUpdateMode.Up)
+            => CacheFactory.FromConfiguration<object>(
+                BaseConfiguration
+                    .Builder
                     .WithSystemRuntimeCacheHandle()
                         .EnableStatistics()
                         .EnablePerformanceCounters()
-                    .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(1000)));
+                    .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(1000))
+                .Build());
 
         public static ICacheManager<object> WithOneMemoryCacheHandle
             => CacheFactory.Build(settings => settings.WithSystemRuntimeCacheHandle().EnableStatistics());
 
         public static ICacheManager<object> WithMemoryAndDictionaryHandles
-            => CacheFactory.Build(
-                settings =>
-                {
-                    settings
-                        .WithUpdateMode(CacheUpdateMode.None)
+            => CacheFactory.FromConfiguration<object>(
+                BaseConfiguration
+                    .Builder
                         .WithSystemRuntimeCacheHandle()
                             .EnableStatistics()
                         .And.WithSystemRuntimeCacheHandle()
@@ -261,32 +280,29 @@ namespace CacheManager.Tests
                             .EnableStatistics()
                         .And.WithDictionaryHandle()
                             .EnableStatistics()
-                            .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1000));
-                });
+                            .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1000))
+                    .Build());
 
         public static ICacheManager<object> WithTwoNamedMemoryCaches
-            => CacheFactory.Build(
-                settings =>
-                {
-                    settings
-                        .WithUpdateMode(CacheUpdateMode.Up)
+            => CacheFactory.FromConfiguration<object>(
+                BaseConfiguration
+                    .Builder
                         .WithSystemRuntimeCacheHandle("cacheHandleA")
                             .EnableStatistics()
                         .And.WithSystemRuntimeCacheHandle("cacheHandleB")
-                            .EnableStatistics();
-                });
+                            .EnableStatistics()
+                .Build());
 
 #endif
 #if !NET40 && MOCK_HTTPCONTEXT_ENABLED && !NETCOREAPP
 
         public static ICacheManager<object> WithSystemWebCache
-            => CacheFactory.Build(
-                settings =>
-                {
-                    settings
+            => CacheFactory.FromConfiguration<object>(
+                BaseConfiguration
+                    .Builder
                     .WithHandle(typeof(SystemWebCacheHandleWrapper<>))
-                        .EnableStatistics();
-                });
+                        .EnableStatistics()
+                    .Build());
 
 #endif
 
@@ -338,13 +354,13 @@ namespace CacheManager.Tests
         public static ICacheManager<object> CreateRedisAndDicCacheWithBackplane(int database = 0, bool sharedRedisConfig = true, string channelName = null, Serializer serializer = Serializer.Proto, bool useLua = true)
         {
             var redisKey = sharedRedisConfig ? "redisConfig" + database : Guid.NewGuid().ToString();
-            var cache = CacheFactory.Build(settings =>
-            {
-                settings
-                    .WithUpdateMode(CacheUpdateMode.Up)
+
+            var builder = BaseConfiguration.Builder;
+
+            builder.WithUpdateMode(CacheUpdateMode.Up)
                     .WithDictionaryHandle()
-                        .EnableStatistics();
-                settings
+                        .EnableStatistics()
+                    .And
                     .WithMaxRetries(int.MaxValue)
                     .TestSerializer(serializer)
                     .WithRetryTimeout(1000)
@@ -358,16 +374,16 @@ namespace CacheManager.Tests
                     .WithRedisCacheHandle(redisKey, true)
                     .EnableStatistics();
 
-                if (channelName != null)
-                {
-                    settings.WithRedisBackplane(redisKey, channelName);
-                }
-                else
-                {
-                    settings.WithRedisBackplane(redisKey);
-                }
-            });
+            if (channelName != null)
+            {
+                builder.WithRedisBackplane(redisKey, channelName);
+            }
+            else
+            {
+                builder.WithRedisBackplane(redisKey);
+            }
 
+            var cache = CacheFactory.FromConfiguration<object>(builder.Build());
             foreach (var h in cache.CacheHandles.OfType<RedisCacheHandle<object>>())
             {
                 h.UseLua = useLua;
@@ -379,9 +395,8 @@ namespace CacheManager.Tests
         public static ICacheManager<object> CreateRedisCache(int database = 0, bool sharedRedisConfig = true, Serializer serializer = Serializer.GzJson, bool useLua = true)
         {
             var redisKey = sharedRedisConfig ? "redisConfig" + database : Guid.NewGuid().ToString();
-            var cache = CacheFactory.Build(settings =>
-            {
-                settings
+            var cache = CacheFactory.FromConfiguration<object>(
+                BaseConfiguration.Builder
                     .WithMaxRetries(int.MaxValue)
                     .TestSerializer(serializer)
                     .WithRetryTimeout(1000)
@@ -393,8 +408,8 @@ namespace CacheManager.Tests
                     })
                     ////.WithRedisBackplane(redisKey)
                     .WithRedisCacheHandle(redisKey, true)
-                    .EnableStatistics();
-            });
+                    .EnableStatistics()
+                .Build());
 
             foreach (var h in cache.CacheHandles.OfType<RedisCacheHandle<object>>())
             {
@@ -407,9 +422,8 @@ namespace CacheManager.Tests
         public static ICacheManager<T> CreateRedisCache<T>(int database = 0, bool sharedRedisConfig = true, Serializer serializer = Serializer.GzJson)
         {
             var redisKey = sharedRedisConfig ? "redisConfig" + database : Guid.NewGuid().ToString();
-            var cache = CacheFactory.Build<T>(settings =>
-            {
-                settings
+            var cache = CacheFactory.FromConfiguration<T>(
+                BaseConfiguration.Builder
                     .TestSerializer(serializer)
                     .WithMaxRetries(int.MaxValue)
                     .WithRetryTimeout(1000)
@@ -421,8 +435,8 @@ namespace CacheManager.Tests
                     })
                     .WithRedisBackplane(redisKey)
                     .WithRedisCacheHandle(redisKey, true)
-                    .EnableStatistics();
-            });
+                    .EnableStatistics()
+                .Build());
 
             return cache;
         }
@@ -473,14 +487,14 @@ namespace CacheManager.Tests
         {
             var memConfig = new MemcachedClientConfiguration();
             memConfig.AddServer("localhost", 11211);
-            return CacheFactory.Build<T>(settings =>
-            {
-                settings.WithUpdateMode(CacheUpdateMode.Up)
+            return CacheFactory.FromConfiguration<T>(
+                BaseConfiguration.Builder
+                    .WithUpdateMode(CacheUpdateMode.Up)
                     .TestSerializer(serializer)
                     .WithMemcachedCacheHandle(memConfig)
                         .EnableStatistics()
-                        .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1000));
-            });
+                        .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1000))
+                .Build());
         }
 
 #endif

@@ -704,7 +704,7 @@ namespace CacheManager.Tests
                 act().Should().Be(value, $"{key} {value} {cache}");
 
                 var addCalls = cache.CacheHandles.Select(h => h.Stats.GetStatistic(CacheStatsCounterType.AddCalls)).Sum();
-                addCalls.Should().Be(cache.CacheHandles.Count(), "Item should be added to each handle");
+                addCalls.Should().Be(1, "Item should be added to last handle only");
             }
         }
 
@@ -1064,7 +1064,7 @@ namespace CacheManager.Tests
             var key = Guid.NewGuid().ToString();
             var val = Guid.NewGuid().ToString();
             var counter = 0;
-            var runs = 10;
+            var runs = 6;
 
             using (cache)
             {
@@ -1088,7 +1088,7 @@ namespace CacheManager.Tests
 
                 object[] results = await Task.WhenAll(tasks.ToArray());
 
-                await Task.Delay(10);
+                await Task.Delay(0);
 
                 // one of the threads won and added the key
                 var winner = (int)cache[key];
@@ -1967,10 +1967,7 @@ namespace CacheManager.Tests
 
         private static void ValidateCacheValues<T>(ICacheManager<T> cache, IList<string> keys, IList<T> values)
         {
-            var cacheCfgText = "Cache: " + cache.Name;
-            cacheCfgText += ", Handles: " + string.Join(
-                ",",
-                cache.CacheHandles.Select(p => p.Configuration.Name).ToArray());
+            var cacheCfgText = cache.ToString();
 
             Debug.WriteLine("Validating for cache: " + cacheCfgText);
             values.Select((value, index) =>

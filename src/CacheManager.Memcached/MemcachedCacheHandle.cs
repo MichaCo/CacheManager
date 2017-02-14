@@ -351,13 +351,13 @@ namespace CacheManager.Memcached
         protected override bool RemoveInternal(string key, string region)
         {
             var result = this.Cache.ExecuteRemove(GetKey(key, region));
-            if (result.Success)
+            int statusCode = result.StatusCode ?? result.InnerResult?.StatusCode ?? -1;
+            if (result.Success && statusCode != (int)StatusCode.KeyNotFound)
             {
                 this.LogOperationResult(LogLevel.Debug, result, "Removed {0} {1}", region, key);
             }
             else
             {
-                int statusCode = result.StatusCode ?? result.InnerResult?.StatusCode ?? -1;
                 if (statusCode == (int)StatusCode.KeyNotFound)
                 {
                     this.LogOperationResult(LogLevel.Information, result, "Remove Failed, key not found: {0} {1}", region, key);
@@ -638,18 +638,14 @@ namespace CacheManager.Memcached
                 while (ShouldRetry(getStatus) && getTries <= maxRetries);
 
                 // break operation if we cannot retrieve the object (maybe it has expired already).
-                if (!getResult.Success)
+                if (!getResult.Success || item == null)
                 {
-                    if (getStatus == StatusCode.KeyNotFound || (item != null && item.IsExpired))
-                    {
-                        return UpdateItemResult.ForItemDidNotExist<TCacheValue>();
-                    }
-                    else
-                    {
-                        // log warn + retry - not 100% sure what might happen (maybe server dead).
-                        this.LogOperationResult(LogLevel.Warning, getResult, "Trying to get item '{0}' during update.", fullyKey);
-                        continue;
-                    }
+                    this.LogOperationResult(LogLevel.Warning, getResult, "Get item during update failed for '{0}'.", fullyKey);
+                    return UpdateItemResult.ForItemDidNotExist<TCacheValue>();
+                }
+                if (item.IsExpired)
+                {
+                    return UpdateItemResult.ForItemDidNotExist<TCacheValue>();
                 }
 
                 var newValue = updateValue(item.Value);

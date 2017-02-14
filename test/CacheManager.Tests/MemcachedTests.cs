@@ -17,6 +17,8 @@ namespace CacheManager.Tests
     [ExcludeFromCodeCoverage]
     public class MemcachedTests
     {
+        private object logObj = new object();
+
         public static MemcachedClientConfiguration Configuration
         {
             get
@@ -113,23 +115,30 @@ namespace CacheManager.Tests
             var longKey = string.Join(string.Empty, Enumerable.Repeat("a", 300));
 
             var item = new CacheItem<string>(longKey, "something");
-            var cache = CacheFactory.Build<string>(settings =>
-            {
-                settings.WithUpdateMode(CacheUpdateMode.Up)
+            var cache = CacheFactory.FromConfiguration<string>(
+                TestManagers.BaseConfiguration.Builder
+                    .WithUpdateMode(CacheUpdateMode.Up)
                     .WithMemcachedCacheHandle(Configuration)
-                    .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromHours(1));
-            });
+                    .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromHours(1))
+                    .Build());
 
             // act
             using (cache)
             {
-                cache.Remove(item.Key);
-                Func<bool> act = () => cache.Add(item);
-                Func<string> act2 = () => cache[item.Key];
+                try
+                {
+                    cache.Remove(item.Key);
+                    Func<bool> act = () => cache.Add(item);
+                    Func<string> act2 = () => cache[item.Key];
 
-                // assert
-                act().Should().BeTrue();
-                act2().Should().Be(item.Value);
+                    // assert
+                    act().Should().BeTrue();
+                    act2().Should().Be(item.Value);
+                }
+                catch
+                {
+                    throw;
+                }
             }
         }
 
@@ -141,12 +150,12 @@ namespace CacheManager.Tests
             var longKey = string.Join(string.Empty, Enumerable.Repeat("a", 300));
 
             var item = new CacheItem<string>(longKey, "someRegion", "something");
-            var cache = CacheFactory.Build<string>(settings =>
-            {
-                settings.WithUpdateMode(CacheUpdateMode.Up)
+            var cache = CacheFactory.FromConfiguration<string>(
+                TestManagers.BaseConfiguration.Builder
+                    .WithUpdateMode(CacheUpdateMode.Up)
                     .WithMemcachedCacheHandle(Configuration)
-                    .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMinutes(1));
-            });
+                    .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMinutes(1))
+                    .Build());
 
             // act
             using (cache)
@@ -166,12 +175,12 @@ namespace CacheManager.Tests
         public async Task Memcached_NoRaceCondition_WithCasButTooFiewRetries()
         {
             // arrange
-            using (var cache = CacheFactory.Build<RaceConditionTestElement>(settings =>
-            {
-                settings.WithUpdateMode(CacheUpdateMode.Up)
+            using (var cache = CacheFactory.FromConfiguration<RaceConditionTestElement>(
+                TestManagers.BaseConfiguration.Builder
+                    .WithUpdateMode(CacheUpdateMode.Up)
                     .WithMemcachedCacheHandle(Configuration)
-                        .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromHours(10));
-            }))
+                        .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromHours(10))
+                    .Build()))
             {
                 cache.Remove("myCounter");
                 cache.Add("myCounter", new RaceConditionTestElement() { Counter = 0 });
@@ -223,19 +232,19 @@ namespace CacheManager.Tests
         public async Task Memcached_NoRaceCondition_WithCasHandling()
         {
             // arrange
-            using (var cache = CacheFactory.Build<RaceConditionTestElement>(settings =>
-            {
-                settings.WithUpdateMode(CacheUpdateMode.Up)
+            using (var cache = CacheFactory.FromConfiguration<RaceConditionTestElement>(
+                TestManagers.BaseConfiguration.Builder
                     .WithMaxRetries(int.MaxValue)
                     .WithSystemRuntimeCacheHandle()
                         .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMilliseconds(1))
                     .And
                     .WithMemcachedCacheHandle(Configuration)
-                        .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(10));
-            }))
+                        .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(60))
+                    .Build()))
             {
-                cache.Remove("myCounter");
-                cache.Add("myCounter", new RaceConditionTestElement() { Counter = 0 });
+                var key = Guid.NewGuid().ToString();
+                cache.Remove(key);
+                cache.Add(key, new RaceConditionTestElement() { Counter = 0 }).Should().BeTrue();
                 int numThreads = 5;
                 int iterations = 10;
                 int numInnerIterations = 10;
@@ -248,7 +257,7 @@ namespace CacheManager.Tests
                         for (int i = 0; i < numInnerIterations; i++)
                         {
                             cache.Update(
-                                "myCounter",
+                                key,
                                 (value) =>
                                 {
                                     value.Counter++;
@@ -263,7 +272,7 @@ namespace CacheManager.Tests
                     iterations);
 
                 // assert
-                var result = cache.Get("myCounter");
+                var result = cache.Get(key);
                 result.Should().NotBeNull();
                 Trace.WriteLine("Counter increased to " + result.Counter + " cas calls needed " + countCasModifyCalls);
                 result.Counter.Should().Be(numThreads * numInnerIterations * iterations, "counter should be exactly the expected value");
@@ -276,13 +285,12 @@ namespace CacheManager.Tests
         public async Task Memcached_NoRaceCondition_WithCasHandling_WithRegion()
         {
             // arrange
-            using (var cache = CacheFactory.Build<RaceConditionTestElement>(settings =>
-            {
-                settings
+            using (var cache = CacheFactory.FromConfiguration<RaceConditionTestElement>(
+                TestManagers.BaseConfiguration.Builder
                     .WithMaxRetries(int.MaxValue)
                     .WithMemcachedCacheHandle(Configuration)
-                        .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMinutes(10));
-            }))
+                        .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMinutes(10))
+                    .Build()))
             {
                 var region = Guid.NewGuid().ToString();
                 var key = Guid.NewGuid().ToString();
@@ -328,12 +336,12 @@ namespace CacheManager.Tests
         public async Task Memcached_RaceCondition_WithoutCasHandling()
         {
             // arrange
-            using (var cache = CacheFactory.Build<RaceConditionTestElement>(settings =>
-            {
-                settings.WithUpdateMode(CacheUpdateMode.Up)
+            using (var cache = CacheFactory.FromConfiguration<RaceConditionTestElement>(
+                TestManagers.BaseConfiguration.Builder
+                    .WithUpdateMode(CacheUpdateMode.Up)
                     .WithMemcachedCacheHandle(Configuration)
-                    .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMinutes(20));
-            }))
+                    .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMinutes(20))
+                .Build()))
             {
                 var key = Guid.NewGuid().ToString();
                 cache.Remove(key);
@@ -373,12 +381,12 @@ namespace CacheManager.Tests
         public void Memcached_Update_ItemNotAdded()
         {
             // arrange
-            using (var cache = CacheFactory.Build<RaceConditionTestElement>(settings =>
-            {
-                settings.WithUpdateMode(CacheUpdateMode.Up)
+            using (var cache = CacheFactory.FromConfiguration<RaceConditionTestElement>(
+                TestManagers.BaseConfiguration.Builder
+                    .WithUpdateMode(CacheUpdateMode.Up)
                     .WithMemcachedCacheHandle(Configuration)
-                    .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMinutes(20));
-            }))
+                    .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMinutes(20))
+                .Build()))
             {
                 RaceConditionTestElement value;
 
@@ -395,12 +403,12 @@ namespace CacheManager.Tests
         public void Memcached_TimeoutNotBeGreaterThan30Days()
         {
             // arrange
-            using (var cache = CacheFactory.Build<object>(settings =>
-            {
-                settings.WithUpdateMode(CacheUpdateMode.Up)
+            using (var cache = CacheFactory.FromConfiguration<object>(
+                TestManagers.BaseConfiguration.Builder
+                    .WithUpdateMode(CacheUpdateMode.Up)
                     .WithMemcachedCacheHandle(Configuration)
-                    .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromDays(40));
-            }))
+                    .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromDays(40))
+                .Build()))
             {
                 // act
                 Action act = () => cache.Add(Guid.NewGuid().ToString(), "test");

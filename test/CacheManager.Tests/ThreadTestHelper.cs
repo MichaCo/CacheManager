@@ -40,7 +40,7 @@ namespace CacheManager.Tests
 
             if (exceptions.Count > 0)
             {
-                throw new AggregateException(exceptions);
+                throw new Exception(exceptions.Count + " Exceptions thrown", exceptions.First());
             }
         }
 
