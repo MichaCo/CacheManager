@@ -2,12 +2,12 @@
 <script type="text/javascript">
     //<![CDATA[
         (!!window.jQuery) || document.write(
-            '<script type="text/javascript" src="//cachemanager.net/Scripts/jquery-1.11.3.min.js"><\/script>' +
-            '<script type="text/javascript" src="//cachemanager.net/Scripts/bootstrap.min.js"><\/script>' +
-            '<script type="text/javascript" src="//cachemanager.net/Scripts/respond.min.js"><\/script>' +
-            '<link href="//cachemanager.net/Content/font-awesome.min.css" rel="stylesheet" \/>' +
-            '<link href="//cachemanager.net/Content/bootstrap.min.css" rel="stylesheet" \/>' +
-            '<link href="//cachemanager.net/Content/site" rel="stylesheet" \/>'
+            '<script type="text/javascript" src="//cachemanager.michaco.net/Scripts/jquery-1.11.3.min.js"><\/script>' +
+            '<script type="text/javascript" src="//cachemanager.michaco.net/Scripts/bootstrap.min.js"><\/script>' +
+            '<script type="text/javascript" src="//cachemanager.michaco.net/Scripts/respond.min.js"><\/script>' +
+            '<link href="//cachemanager.michaco.net/Content/font-awesome.min.css" rel="stylesheet" \/>' +
+            '<link href="//cachemanager.michaco.net/Content/bootstrap.min.css" rel="stylesheet" \/>' +
+            '<link href="//cachemanager.michaco.net/Content/site" rel="stylesheet" \/>'
             );//]]>
 </script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/js/bootstrap.min.js" type="text/javascript"></script>
@@ -20,7 +20,7 @@
 var appInsights = window.appInsights || function (config) {
 	function r(config) { t[config] = function () { var i = arguments; t.queue.push(function () { t[config].apply(t, i) }) } } var t = { config: config }, u = document, e = window, o = "script", s = u.createElement(o), i, f; for (s.src = config.url || "//az416426.vo.msecnd.net/scripts/a/ai.0.js", u.getElementsByTagName(o)[0].parentNode.appendChild(s), t.cookie = u.cookie, t.queue = [], i = ["Event", "Exception", "Metric", "PageView", "Trace"]; i.length;) r("track" + i.pop()); return r("setAuthenticatedUserContext"), r("clearAuthenticatedUserContext"), config.disableExceptionTracking || (i = "onerror", r("_" + i), f = e[i], e[i] = function (config, r, u, e, o) { var s = f && f(config, r, u, e, o); return s !== !0 && t["_" + i](config, r, u, e, o), s }), t
 }({
-	instrumentationKey: "195f28ca-b765-4ec2-ba4a-a9c53ef4fecf"
+	instrumentationKey: "d3682746-3766-4bf2-8929-b60306ade0d2"
 });
 
 window.appInsights = appInsights;

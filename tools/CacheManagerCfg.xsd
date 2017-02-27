@@ -1,9 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <xs:schema id="CacheManagerCfg"
-    targetNamespace="http://cachemanager.net/schemas/CacheManagerCfg.xsd"
+    targetNamespace="http://cachemanager.michaco.net/schemas/CacheManagerCfg.xsd"
     elementFormDefault="qualified"
-    xmlns="http://cachemanager.net/schemas/CacheManagerCfg.xsd"
-    xmlns:mstns="http://cachemanager.net/schemas/CacheManagerCfg.xsd"
+    xmlns="http://cachemanager.michaco.net/schemas/CacheManagerCfg.xsd"
+    xmlns:mstns="http://cachemanager.michaco.net/schemas/CacheManagerCfg.xsd"
     xmlns:xs="http://www.w3.org/2001/XMLSchema"
 >
   <xs:element name="handle">

@@ -3,7 +3,7 @@
   "description": "CacheManager extension package which uses System.Web.Caching and also comes with a custom OutputCache provider. CacheManager is an open source caching abstraction layer for .NET written in C#. It supports various cache providers and implements many advanced features.",
   "packOptions": {
     "licenseUrl": "https://github.com/MichaCo/CacheManager/blob/master/LICENSE",
-    "projectUrl": "http://www.cachemanager.net",
+    "projectUrl": "http://cachemanager.michaco.net",
     "repository": {
       "type": "git",
       "url": "https://github.com/MichaCo/CacheManager"

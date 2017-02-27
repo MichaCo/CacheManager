@@ -49,7 +49,7 @@ The following example shows the `serializer` property only, with all the options
 
 ```json
 {
-	"$schema" : "http://cachemanager.net/schemas/cachemanager.json",
+	"$schema" : "http://cachemanager.michaco.net/schemas/cachemanager.json",
 	"cacheManagers" : [{
 			"serializer" : {
 				"knownType" : "Json | Binary",

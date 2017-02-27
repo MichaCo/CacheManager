@@ -76,7 +76,7 @@ The `CacheManagerConfiguration` also has a new property `Builder`. Calling `conf
 
 ## Microsoft.Extensions.Configuration
 With the new Microsoft.Extensions.Configuration framework, Microsoft introduced a great way to handle custom configurations from many different sources. The preferred one is a plain JSON text file.
-For this regards, CacheManager now also has a JSON schema file, located at http://cachemanager.net/schemas/cachemanager.json.
+For this regards, CacheManager now also has a JSON schema file, located at http://cachemanager.michaco.net/schemas/cachemanager.json.
 
 ### JSON Schema
 With this schema, it is really very easy and convenient if you create new configuration files in Visual Studio,  because it gives full auto completion and validation on each element.
@@ -84,7 +84,7 @@ With this schema, it is really very easy and convenient if you create new config
 Just add a new JSON file to your project and add the "$schema" directive to it:
 ```json
 {
-  "$schema": "http://cachemanager.net/schemas/cachemanager.json#"
+  "$schema": "http://cachemanager.michaco.net/schemas/cachemanager.json#"
 }
 ```
 from there on, you should see validation messages in the error window of Visual Studio. First one will be *Missing required property cacheManagers*, which means that you have to have a `cacheManagers` property of type array... and so on.
@@ -92,7 +92,7 @@ Here is a complete example:
 
 ```json
 {
-  "$schema": "http://cachemanager.net/schemas/cachemanager.json#",
+  "$schema": "http://cachemanager.michaco.net/schemas/cachemanager.json#",
   "redis": [
     {
       "key": "redisConnection",
@@ -175,7 +175,7 @@ The Cache Manager configuration section has two main parts, the `managers`  coll
 
 And the `cacheHandles` collection which lists the available (installed) cache handle types. Those will be used by referencing the `id` to form a cache in the `managers` collection.
 ```xml
-<cacheManager xmlns="http://cachemanager.net/schemas/CacheManagerCfg.xsd">
+<cacheManager xmlns="http://cachemanager.michaco.net/schemas/CacheManagerCfg.xsd">
   <managers>
     <cache name="cacheName" updateMode="Up" enableStatistics="false" enablePerformanceCounters="false">
       <handle name="handleName" ref="systemRuntimeHandle" expirationMode="Absolute" timeout="50s"/>

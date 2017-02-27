@@ -78,8 +78,8 @@ static void Main(string[] args)
 ```
 Hopefully this worked out just fine. Now you should be set to play around with the Cache Manager!
 
-[readme]: http://cachemanager.net/Documentation/Index/cachemanager_readme
-[features]: http://cachemanager.net/Documentation/Index/cachemanager_architecture
+[readme]: http://cachemanager.michaco.net/Documentation/Index/cachemanager_readme
+[features]: http://cachemanager.michaco.net/Documentation/Index/cachemanager_architecture
 [sysCache]: https://www.nuget.org/packages/CacheManager.SystemRuntimeCaching/
 [newProject]: https://raw.githubusercontent.com/MichaCo/CacheManager/dev/Articles/media/cachemanager-getting-started/create-console-app.jpg
 [addnuget]: https://raw.githubusercontent.com/MichaCo/CacheManager/dev/Articles/media/cachemanager-getting-started/add-nuget.jpg

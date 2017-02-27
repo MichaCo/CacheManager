@@ -1,5 +1,5 @@
 {
-  "id": "http://cachemanager.net/schemas/cachemanager.json",
+  "id": "http://cachemanager.michaco.net/schemas/cachemanager.json",
   "title": "JSON schema for CacheManager configuration files",
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
@@ -195,7 +195,7 @@
       "type": "object",
       "required": [ "handles" ],
       "default": {
-        "handles": [ ]
+        "handles": []
       },
       "additionalProperties": false,
       "properties": {
@@ -349,7 +349,7 @@
       },
       "minItems": 1,
       "uniqueItems": true,
-      "default": [ ]
+      "default": []
     },
     "redis": {
       "type": "array",

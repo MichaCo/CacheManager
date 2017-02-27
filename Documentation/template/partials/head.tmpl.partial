@@ -10,7 +10,7 @@
   <meta name="generator" content="docfx {{_docfxVersion}}" />
   {{#_description}}<meta name="description" content="{{_description}}" />{{/_description}}
   <link href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet" />
-  <link href="//cachemanager.net/content/site" rel="stylesheet" />
+  <link href="//cachemanager.michaco.net/content/site" rel="stylesheet" />
   <link rel="stylesheet" href="{{_rel}}styles/docfx.css" />
   <link rel="stylesheet" href="{{_rel}}styles/main.css" />
   <meta property="docfx:navrel" content="{{_navRel}}" />

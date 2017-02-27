@@ -1,5 +1,5 @@
 ﻿{
-  "$schema": "http://cachemanager.net/schemas/cachemanager.json#",
+  "$schema": "http://cachemanager.michaco.net/schemas/cachemanager.json#",
   "cacheManagers": [
     {
       "loggerFactory": {"knownType": "Microsoft" },

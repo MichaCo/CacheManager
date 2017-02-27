@@ -284,7 +284,7 @@ And that's it, you can see the sample site in action on [cachemanager-todo.azure
 [3]: https://raw.githubusercontent.com/MichaCo/CacheManager/dev/Articles/media/cachemanager-single-page-todo-app/todo-app.jpg
 [4]: https://github.com/MichaCo/MichaCo.Websites/tree/master/cachemanager-todo.azurewebsites.net/Website
 [5]: https://raw.githubusercontent.com/MichaCo/CacheManager/dev/Articles/media/cachemanager-single-page-todo-app/adding-todosample-into-webapi-project.jpg
-[6]: http://cachemanager.net/Documentation/Index/cachemanager_update
+[6]: http://cachemanager.michaco.net/Documentation/Index/cachemanager_update
 [7]: https://raw.githubusercontent.com/MichaCo/CacheManager/dev/Articles/media/cachemanager-single-page-todo-app/cachemanager-todo-appsettings.jpg
 
 [TOC]
