@@ -20,6 +20,87 @@ namespace CacheManager.Core.Internal
     }
 
     /// <summary>
+    /// A flag indicating the reason when an item got removed from the cache.
+    /// </summary>
+    public enum CacheItemRemovedReason
+    {
+        /// <summary>
+        /// A <see cref="CacheItem{T}"/> was removed using the <see cref="ICache{TCacheValue}.Remove(string)"/> or 
+        /// <see cref="ICache{TCacheValue}.Remove(string, string)"/> method.
+        /// </summary>
+        Removed = 0,
+        
+        /// <summary>
+        /// A <see cref="CacheItem{T}"/> was removed because it expired.
+        /// </summary>
+        Expired = 1,
+        
+        /// <summary>
+        /// A <see cref="CacheItem{T}"/> was removed because the underlying cache decided to remove it.
+        /// This can happen if cache-specific memory limits are reached for example.
+        /// </summary>
+        Evicted = 2,
+    }
+
+    /// <summary>
+    /// Event arguments for cache actions.
+    /// </summary>
+    public sealed class CacheItemRemovedEventArgs : EventArgs
+    {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CacheActionEventArgs"/> class.
+        /// </summary>
+        /// <param name="key">The key.</param>
+        /// <param name="region">The region.</param>
+        /// <param name="reason">The reason.</param>
+        /// <exception cref="System.ArgumentNullException">If key is null.</exception>
+        public CacheItemRemovedEventArgs(string key, string region, CacheItemRemovedReason reason)
+        {
+            NotNullOrWhiteSpace(key, nameof(key));
+
+            this.Reason = reason;
+            this.Key = key;
+            this.Region = region;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CacheActionEventArgs"/> class.
+        /// </summary>
+        /// <param name="key">The key.</param>
+        /// <param name="region">The region.</param>
+        /// <param name="reason">The reason.</param>
+        /// <param name="origin">The origin the event ocured. If remote, the event got triggered by the backplane and was not actually excecuted locally.</param>
+        /// <exception cref="System.ArgumentNullException">If key is null.</exception>
+        public CacheItemRemovedEventArgs(string key, string region, CacheItemRemovedReason reason, CacheActionEventArgOrigin origin)
+            : this(key, region, reason)
+        {
+            this.Origin = origin;
+        }
+
+        /// <summary>
+        /// Gets the key.
+        /// </summary>
+        /// <value>The key.</value>
+        public string Key { get; }
+
+        /// <summary>
+        /// Gets the region.
+        /// </summary>
+        /// <value>The region.</value>
+        public string Region { get; }
+
+        /// <summary>
+        /// Gets the event origin indicating if the event was triggered by a local action or remotly, through the backplane.
+        /// </summary>
+        public CacheActionEventArgOrigin Origin { get; } = CacheActionEventArgOrigin.Local;
+
+        /// <summary>
+        /// Gets the reason flag indicating details why the <see cref="CacheItem{T}"/> has been removed.
+        /// </summary>
+        public CacheItemRemovedReason Reason { get; }
+    }
+
+    /// <summary>
     /// Event arguments for cache actions.
     /// </summary>
     public sealed class CacheActionEventArgs : EventArgs

@@ -4,6 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using CacheManager.Core;
 using CacheManager.Core.Internal;
+using CacheManager.Core.Logging;
 using CacheManager.Core.Utility;
 using FluentAssertions;
 using Xunit;
@@ -47,6 +48,67 @@ namespace CacheManager.Tests
 
             // assert
             act().ShouldBeEquivalentTo(new { Region = (string)null, Key = key, Origin = CacheActionEventArgOrigin.Local });
+        }
+
+        [Fact]
+        [ReplaceCulture]
+        public void CacheManager_Events_CacheItemRemovedEventArgsCtor()
+        {
+            // arrange
+            string key = null;
+            string region = null;
+
+            // act
+            Action act = () => new CacheItemRemovedEventArgs(key, region, CacheItemRemovedReason.Removed);
+
+            // assert
+            act.ShouldThrow<ArgumentNullException>()
+                .WithMessage("*Parameter name: key*");
+        }
+
+        [Fact]
+        [ReplaceCulture]
+        public void CacheManager_Events_CacheItemRemovedEventArgsCtor_Valid()
+        {
+            // arrange
+            string key = "key";
+            string region = null;
+
+            // act
+            Func<CacheItemRemovedEventArgs> act = () => new CacheItemRemovedEventArgs(key, region, CacheItemRemovedReason.Removed, CacheActionEventArgOrigin.Remote);
+
+            // assert
+            act().ShouldBeEquivalentTo(new { Region = (string)null, Key = key, Origin = CacheActionEventArgOrigin.Remote, Reason = CacheItemRemovedReason.Removed });
+        }
+
+        [Fact]
+        [ReplaceCulture]
+        public void CacheManager_Events_CacheItemRemovedEventArgsCtor_ValidB()
+        {
+            // arrange
+            string key = "key";
+            string region = "region";
+
+            // act
+            Func<CacheItemRemovedEventArgs> act = () => new CacheItemRemovedEventArgs(key, region, CacheItemRemovedReason.Expired);
+
+            // assert
+            act().ShouldBeEquivalentTo(new { Region = region, Key = key, Origin = CacheActionEventArgOrigin.Local, Reason = CacheItemRemovedReason.Expired });
+        }
+
+        [Fact]
+        [ReplaceCulture]
+        public void CacheManager_Events_CacheItemRemovedEventArgsCtor_ValidC()
+        {
+            // arrange
+            string key = "key";
+            string region = "region";
+
+            // act
+            Func<CacheItemRemovedEventArgs> act = () => new CacheItemRemovedEventArgs(key, region, CacheItemRemovedReason.Evicted);
+
+            // assert
+            act().ShouldBeEquivalentTo(new { Region = region, Key = key, Origin = CacheActionEventArgOrigin.Local, Reason = CacheItemRemovedReason.Evicted });
         }
 
         [Fact]
@@ -219,7 +281,7 @@ namespace CacheManager.Tests
             using (cache)
             {
                 var mgr = cache as BaseCacheManager<T>;
-                
+
                 // arrange
                 var key1 = Guid.NewGuid().ToString();
                 var key2 = Guid.NewGuid().ToString();
@@ -507,6 +569,78 @@ namespace CacheManager.Tests
             }
         }
 
+        [Fact]
+        public void Events_MockedCustomRemove_Evicted()
+        {
+            using (var cache = CacheFactory.Build<string>(
+                s => s.WithHandle(typeof(CustomRemoveEventTestHandle))))
+            {
+                CacheItemRemovedReason reason = 0;
+                CacheActionEventArgOrigin origin = 0;
+                string key = string.Empty;
+                string region = string.Empty;
+
+                cache.OnRemove += (sender, args) =>
+                {
+                    reason = args.Reason;
+                    key = args.Key;
+                    region = args.Region;
+                    origin = args.Origin;
+                };
+
+                var handle = cache.CacheHandles.OfType<CustomRemoveEventTestHandle>().First();
+                handle.TestTrigger("key", "region", CacheItemRemovedReason.Evicted);
+
+                reason.Should().Be(CacheItemRemovedReason.Evicted);
+                origin.Should().Be(CacheActionEventArgOrigin.Local);
+                key.Should().Be("key");
+                region.Should().Be("region");
+            }
+        }
+
+        [Fact]
+        public void Events_MockedCustomRemove_Expired()
+        {
+            using (var cache = CacheFactory.Build<string>(
+                s => s.WithHandle(typeof(CustomRemoveEventTestHandle))))
+            {
+                CacheItemRemovedReason reason = 0;
+                CacheActionEventArgOrigin origin = 0;
+                string key = string.Empty;
+                string region = string.Empty;
+
+                cache.OnRemove += (sender, args) =>
+                {
+                    reason = args.Reason;
+                    key = args.Key;
+                    region = args.Region;
+                    origin = args.Origin;
+                };
+
+                var handle = cache.CacheHandles.OfType<CustomRemoveEventTestHandle>().First();
+                handle.TestTrigger("key", "region", CacheItemRemovedReason.Expired);
+
+                reason.Should().Be(CacheItemRemovedReason.Expired);
+                origin.Should().Be(CacheActionEventArgOrigin.Local);
+                key.Should().Be("key");
+                region.Should().Be("region");
+            }
+        }
+
+        [Fact]
+        public void Events_MockedCustomRemove_RemovedIsFailing()
+        {
+            using (var cache = CacheFactory.Build<string>(
+                s => s.WithHandle(typeof(CustomRemoveEventTestHandle))))
+            {                
+                var handle = cache.CacheHandles.OfType<CustomRemoveEventTestHandle>().First();
+
+                Action act = () => handle.TestTrigger("key", "region", CacheItemRemovedReason.Removed);
+
+                act.ShouldThrow<InvalidOperationException>("Removed events are not allowed.").WithMessage("*remove events*");
+            }
+        }
+
         private class EventCallbackData
         {
             public EventCallbackData()
@@ -538,6 +672,20 @@ namespace CacheManager.Tests
                 }
             }
 
+            internal void AddCall(CacheItemRemovedEventArgs args, params string[] validKeys)
+            {
+                Guard.NotNullOrEmpty(validKeys, nameof(validKeys));
+                if (validKeys.Contains(args.Key))
+                {
+                    this.Calls++;
+                    this.Keys.Add(args.Key);
+                    if (!string.IsNullOrWhiteSpace(args.Region))
+                    {
+                        this.Regions.Add(args.Region);
+                    }
+                }
+            }
+
             internal void AddCall(CacheClearRegionEventArgs args, params string[] validKeys)
             {
                 Guard.NotNullOrEmpty(validKeys, nameof(validKeys));
@@ -551,6 +699,85 @@ namespace CacheManager.Tests
             internal void AddCall()
             {
                 this.Calls++;
+            }
+        }
+
+        private class CustomRemoveEventTestHandle : BaseCacheHandle<string>
+        {
+            public CustomRemoveEventTestHandle(ICacheManagerConfiguration managerConfiguration, CacheHandleConfiguration configuration)
+                : base(managerConfiguration, configuration)
+            {
+            }
+
+            public void TestTrigger(string key, string region, CacheItemRemovedReason reason)
+            {
+                this.TriggerCacheSpecificRemove(key, region, reason);
+            }
+
+            public override int Count
+            {
+                get
+                {
+                    return 0;
+                }
+            }
+
+            protected override ILogger Logger
+            {
+                get
+                {
+                    throw new NotImplementedException();
+                }
+            }
+
+            public override void Clear()
+            {
+                throw new NotImplementedException();
+            }
+
+            public override void ClearRegion(string region)
+            {
+                throw new NotImplementedException();
+            }
+
+            public override bool Exists(string key)
+            {
+                throw new NotImplementedException();
+            }
+
+            public override bool Exists(string key, string region)
+            {
+                throw new NotImplementedException();
+            }
+
+            protected override bool AddInternalPrepared(CacheItem<string> item)
+            {
+                throw new NotImplementedException();
+            }
+
+            protected override CacheItem<string> GetCacheItemInternal(string key)
+            {
+                throw new NotImplementedException();
+            }
+
+            protected override CacheItem<string> GetCacheItemInternal(string key, string region)
+            {
+                throw new NotImplementedException();
+            }
+
+            protected override void PutInternalPrepared(CacheItem<string> item)
+            {
+                throw new NotImplementedException();
+            }
+
+            protected override bool RemoveInternal(string key)
+            {
+                throw new NotImplementedException();
+            }
+
+            protected override bool RemoveInternal(string key, string region)
+            {
+                throw new NotImplementedException();
             }
         }
     }

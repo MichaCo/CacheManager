@@ -41,7 +41,7 @@ namespace CacheManager.Core
         /// <summary>
         /// Occurs when an item was successfully removed from the cache.
         /// </summary>
-        event EventHandler<CacheActionEventArgs> OnRemove;
+        event EventHandler<CacheItemRemovedEventArgs> OnRemove;
 
         /// <summary>
         /// Occurs when an item was successfully updated.

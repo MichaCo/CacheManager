@@ -294,7 +294,7 @@ namespace CacheManager.Web
             return key;
         }
 
-        private void ItemRemoved(string key, object item, CacheItemRemovedReason reason)
+        private void ItemRemoved(string key, object item, System.Web.Caching.CacheItemRemovedReason reason)
         {
             if (string.IsNullOrWhiteSpace(key))
             {
@@ -302,7 +302,7 @@ namespace CacheManager.Web
             }
 
             // ignore manually removed items, stats will be updated already
-            if (reason == CacheItemRemovedReason.Removed)
+            if (reason == System.Web.Caching.CacheItemRemovedReason.Removed)
             {
                 return;
             }

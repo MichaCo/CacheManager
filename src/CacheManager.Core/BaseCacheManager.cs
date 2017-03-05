@@ -75,6 +75,13 @@ namespace CacheManager.Core
             try
             {
                 this.cacheHandles = CacheReflectionHelper.CreateCacheHandles(this, loggerFactory, serializer).ToArray();
+                foreach (var handle in this.cacheHandles)
+                {
+                    handle.OnCacheSpecificRemove += (sender, args) =>
+                    {
+                        this.TriggerOnRemove(args.Key, args.Region, args.Reason, args.Origin);
+                    };
+                }
 
                 this.cacheBackplane = CacheReflectionHelper.CreateBackplane(configuration, loggerFactory);
                 if (this.cacheBackplane != null)
@@ -105,7 +112,7 @@ namespace CacheManager.Core
         public event EventHandler<CacheActionEventArgs> OnPut;
 
         /// <inheritdoc />
-        public event EventHandler<CacheActionEventArgs> OnRemove;
+        public event EventHandler<CacheItemRemovedEventArgs> OnRemove;
 
         /// <inheritdoc />
         public event EventHandler<CacheActionEventArgs> OnUpdate;
@@ -536,7 +543,7 @@ namespace CacheManager.Core
                 }
 
                 // trigger only once and not per handle
-                this.TriggerOnRemove(key, region);
+                this.TriggerOnRemove(key, region, CacheItemRemovedReason.Removed);
             }
 
             return result;
@@ -786,7 +793,7 @@ namespace CacheManager.Core
                     }
 
                     this.EvictFromHandles(args.Key, args.Region, handles());
-                    this.TriggerOnRemove(args.Key, args.Region, CacheActionEventArgOrigin.Remote);
+                    this.TriggerOnRemove(args.Key, args.Region, CacheItemRemovedReason.Removed, CacheActionEventArgOrigin.Remote);
                 };
 
                 backplane.Cleared += (sender, args) =>
@@ -838,10 +845,10 @@ namespace CacheManager.Core
             this.OnPut?.Invoke(this, new CacheActionEventArgs(key, region, origin));
         }
 
-        private void TriggerOnRemove(string key, string region, CacheActionEventArgOrigin origin = CacheActionEventArgOrigin.Local)
+        private void TriggerOnRemove(string key, string region, CacheItemRemovedReason reason, CacheActionEventArgOrigin origin = CacheActionEventArgOrigin.Local)
         {
             NotNullOrWhiteSpace(key, nameof(key));
-            this.OnRemove?.Invoke(this, new CacheActionEventArgs(key, region, origin));
+            this.OnRemove?.Invoke(this, new CacheItemRemovedEventArgs(key, region, reason, origin));
         }
 
         private void TriggerOnUpdate(string key, string region, CacheActionEventArgOrigin origin = CacheActionEventArgOrigin.Local)
