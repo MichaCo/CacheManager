@@ -397,10 +397,12 @@ namespace CacheManager.Tests
         {
             [Fact]
             [Trait("category", "Redis")]
+            [Trait("category", "Unreliable")]
             public async Task Events_Redis_ExpireTriggers()
             {
                 var cfg = new ConfigurationBuilder()
                     .WithRedisConfiguration("redis", "localhost, allowAdmin=true", 0, true)
+                    .WithJsonSerializer()
                     .WithRedisCacheHandle("redis")
                     .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1))
                     .Build();
@@ -417,12 +419,14 @@ namespace CacheManager.Tests
 
             [Fact]
             [Trait("category", "Redis")]
+            [Trait("category", "Unreliable")]
             public async Task Events_Redis_ExpireEvictsAbove()
             {
                 var cfg = new ConfigurationBuilder()
                     .WithDictionaryHandle()
                     .And
                     .WithRedisConfiguration("redis", "localhost, allowAdmin=true", 0, true)
+                    .WithJsonSerializer()
                     .WithRedisCacheHandle("redis")
                     .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1))
                     .Build();
