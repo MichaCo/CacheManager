@@ -152,6 +152,7 @@ namespace CacheManager.SystemRuntimeCaching
             {
                 // if so remove it
                 this.RemoveInternal(item.Key, item.Region);
+                this.TriggerCacheSpecificRemove(item.Key, item.Region, CacheItemRemovedReason.Expired);
                 return null;
             }
 
@@ -305,8 +306,6 @@ namespace CacheManager.SystemRuntimeCaching
                 return this.instanceKey + ":" + key;
             }
 
-            ////region = region.Replace("@", "!!").Replace(":", "!!");
-
             // key without region
             // <instance>:key
             // key with region
@@ -363,16 +362,10 @@ namespace CacheManager.SystemRuntimeCaching
                 {
                     this.TriggerCacheSpecificRemove(key, region, CacheItemRemovedReason.Evicted);
                 }
-
-                if (arguments.RemovedReason == CacheEntryRemovedReason.Expired)
+                else if (arguments.RemovedReason == CacheEntryRemovedReason.Expired)
                 {
                     this.TriggerCacheSpecificRemove(key, region, CacheItemRemovedReason.Expired);
                 }
-
-                ////if (arguments.RemovedReason == CacheEntryRemovedReason.ChangeMonitorChanged)
-                ////{
-                ////    this.TriggerCacheSpecificRemove(key, region, CacheItemRemovedReason.RemovedByClear);
-                ////}
             }
         }
 

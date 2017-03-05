@@ -94,6 +94,7 @@ namespace CacheManager.MicrosoftCachingMemory
             if (item.IsExpired)
             {
                 this.RemoveInternal(item.Key, item.Region);
+                this.TriggerCacheSpecificRemove(item.Key, item.Region, CacheItemRemovedReason.Expired);
                 return null;
             }
 
@@ -194,13 +195,13 @@ namespace CacheManager.MicrosoftCachingMemory
             if (item.ExpirationMode == ExpirationMode.Absolute)
             {
                 options.AbsoluteExpiration = new DateTimeOffset(DateTime.UtcNow.Add(item.ExpirationTimeout));
-                options.RegisterPostEvictionCallback(this.ItemRemoved, item.Region);
+                options.RegisterPostEvictionCallback(this.ItemRemoved, Tuple.Create(item.Key, item.Region));
             }
 
             if (item.ExpirationMode == ExpirationMode.Sliding)
             {
                 options.SlidingExpiration = item.ExpirationTimeout;
-                options.RegisterPostEvictionCallback(this.ItemRemoved, item.Region);
+                options.RegisterPostEvictionCallback(this.ItemRemoved, Tuple.Create(item.Key, item.Region));
             }
 
             item.LastAccessedUtc = DateTime.UtcNow;
@@ -228,15 +229,33 @@ namespace CacheManager.MicrosoftCachingMemory
                 return;
             }
 
+            // don't trigger stuff on manual remove
             if (reason == EvictionReason.Removed)
             {
                 return;
             }
+            
+            var keyRegionTupple = state as Tuple<string, string>;
 
-            // storing region in the state field for simple usage
-            if (state != null)
+            if (keyRegionTupple != null)
             {
-                this.Stats.OnRemove((string)state);
+                if (keyRegionTupple.Item2 != null)
+                {
+                    this.Stats.OnRemove(keyRegionTupple.Item2);
+                }
+                else
+                {
+                    this.Stats.OnRemove();
+                }
+
+                if (reason == EvictionReason.Capacity)
+                {
+                    this.TriggerCacheSpecificRemove(keyRegionTupple.Item1, keyRegionTupple.Item2, CacheItemRemovedReason.Evicted);
+                }
+                else if (reason == EvictionReason.Expired)
+                {
+                    this.TriggerCacheSpecificRemove(keyRegionTupple.Item1, keyRegionTupple.Item2, CacheItemRemovedReason.Expired);
+                }
             }
             else
             {

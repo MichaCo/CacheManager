@@ -125,6 +125,7 @@ namespace CacheManager.Core.Internal
                 if (result.ExpirationMode != ExpirationMode.None && IsExpired(result, DateTime.UtcNow))
                 {
                     this.cache.TryRemove(fullKey, out result);
+                    this.TriggerCacheSpecificRemove(key, region, CacheItemRemovedReason.Expired);
                     return null;
                 }
             }
@@ -206,29 +207,32 @@ namespace CacheManager.Core.Internal
             return false;
         }
 
-        private static void ScanForExpiredItems(DictionaryCacheHandle<TCacheValue> cache)
+        private static void ScanForExpiredItems(DictionaryCacheHandle<TCacheValue> cacheHandle)
         {
-            cache.scanRunning = true;
+            cacheHandle.scanRunning = true;
             var removed = 0;
             var now = DateTime.UtcNow;
-            foreach (var item in cache.cache.Values)
+            foreach (var item in cacheHandle.cache.Values)
             {
                 if (IsExpired(item, now))
                 {
-                    cache.RemoveInternal(item.Key, item.Region);
+                    cacheHandle.RemoveInternal(item.Key, item.Region);
+
+                    // trigger global eviction event
+                    cacheHandle.TriggerCacheSpecificRemove(item.Key, item.Region, CacheItemRemovedReason.Expired);
 
                     // fix stats
-                    cache.Stats.OnRemove(item.Region);
+                    cacheHandle.Stats.OnRemove(item.Region);
                     removed++;
                 }
             }
 
-            if (removed > 0 && cache.Logger.IsEnabled(LogLevel.Information))
+            if (removed > 0 && cacheHandle.Logger.IsEnabled(LogLevel.Information))
             {
-                cache.Logger.LogInfo("Removed {0} expired items.", removed);
+                cacheHandle.Logger.LogInfo("Removed {0} expired items.", removed);
             }
 
-            cache.scanRunning = false;
+            cacheHandle.scanRunning = false;
         }
 
         private void StartScanExpiredItems()

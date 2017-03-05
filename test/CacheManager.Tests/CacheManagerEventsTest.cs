@@ -151,45 +151,44 @@ namespace CacheManager.Tests
             act().ShouldBeEquivalentTo(new { Region = region, Origin = CacheActionEventArgOrigin.Local });
         }
 
-#if !NETCOREAPP
-
-        // inner class scope for parallel exec
-        public class SystemRuntimeSpecific
+        public class LongRunningEventTestBase
         {
-
-            [Fact]
-            public async Task Events_SysRuntime_ExpireTriggers()
+            public async Task<CacheItemRemovedEventArgs> RunTest(ICacheManagerConfiguration configuration, string useKey, string useRegion, bool endGetShouldBeNull = true)
             {
-                var cfg = new ConfigurationBuilder()
-                    .WithSystemRuntimeCacheHandle()
-                    .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMilliseconds(100))
-                    .Build();
-
-                string useKey = Guid.NewGuid().ToString();
-                string useRegion = "@_@23@_!!";
-
                 var triggered = false;
-                CacheItemRemovedReason reason = CacheItemRemovedReason.Evicted;
-                int level = 0;
-                string key = null;
-                string region = null;
+                CacheItemRemovedEventArgs resultArgs = null;
 
-                var cache = new BaseCacheManager<string>(cfg);
+                var cache = new BaseCacheManager<string>(configuration);
                 cache.OnRemoveByHandle += (sender, args) =>
                 {
                     triggered = true;
-                    reason = args.Reason;
-                    level = args.Level;
-                    key = args.Key;
-                    region = args.Region;
+                    resultArgs = args;
                 };
 
-                cache.Add(useKey, "value", useRegion);
+                if (useRegion == null)
+                {
+                    cache.Add(useKey, "value");
+                    cache.Get(useKey).Should().NotBeNull();
+                }
+                else
+                {
+                    cache.Add(useKey, "value", useRegion);
+                    cache.Get(useKey, useRegion).Should().NotBeNull();
+                }
 
                 // sys runtime checks roughly every 10 seconds, there is no other way to test this quicker I think
                 var count = 0;
-                while (count < 20 && !triggered)
+                while (count < 30 && !triggered)
                 {
+                    if (useRegion == null)
+                    {
+                        cache.CacheHandles.ToList().ForEach(p => p.Get(useKey));
+                    }
+                    else
+                    {
+                        cache.CacheHandles.ToList().ForEach(p => p.Get(useKey, useRegion));
+                    }
+
                     await Task.Delay(1000);
                     count++;
                 }
@@ -199,12 +198,50 @@ namespace CacheManager.Tests
                     throw new Exception("Waited pretty long, no events triggered...");
                 }
 
-                reason.Should().Be(CacheItemRemovedReason.Expired);
-                level.Should().Be(1);
-                key.Should().Be(useKey);
-                region.Should().Be(useRegion);
-            }
+                // validate on Up update mode, the handles above have been cleaned up for example
+                if (endGetShouldBeNull)
+                {
+                    if (useRegion == null)
+                    {
+                        cache.Get(useKey).Should().BeNull();
+                    }
+                    else
+                    {
+                        cache.Get(useKey, useRegion).Should().BeNull();
+                    }
+                }
 
+                return resultArgs;
+            }
+        }
+
+#if !NETCOREAPP
+
+        // exclusive inner class for parallel exec of this long running test
+        public class SystemRuntimeSpecific : LongRunningEventTestBase
+        {
+            [Fact]
+            public async Task Events_SysRuntime_ExpireTriggers()
+            {
+                var cfg = new ConfigurationBuilder()
+                    .WithSystemRuntimeCacheHandle()
+                    .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1))
+                    .Build();
+
+                string useKey = Guid.NewGuid().ToString();
+                string useRegion = "@_@23@_!!";
+                var result = await this.RunTest(cfg, useKey, useRegion);
+
+                result.Reason.Should().Be(CacheItemRemovedReason.Expired);
+                result.Level.Should().Be(1);
+                result.Key.Should().Be(useKey);
+                result.Region.Should().Be(useRegion);
+            }
+        }
+
+        // exclusive inner class for parallel exec of this long running test
+        public class SystemRuntimeSpecific2 : LongRunningEventTestBase
+        {
             [Fact]
             public async Task Events_SysRuntime_ExpireEvictsAbove()
             {
@@ -212,51 +249,113 @@ namespace CacheManager.Tests
                     .WithDictionaryHandle()
                     .And
                     .WithSystemRuntimeCacheHandle()
-                    .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMilliseconds(100))
+                    .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1))
                     .Build();
 
                 string useKey = Guid.NewGuid().ToString();
 
-                var triggered = false;
-                CacheItemRemovedReason reason = CacheItemRemovedReason.Evicted;
-                int level = 0;
-                string key = null;
-                string region = null;
+                var result = await this.RunTest(cfg, useKey, null);
 
-                var cache = new BaseCacheManager<string>(cfg);
-                cache.OnRemoveByHandle += (sender, args) =>
-                {
-                    triggered = true;
-                    reason = args.Reason;
-                    level = args.Level;
-                    key = args.Key;
-                    region = args.Region;
-                };
-
-                cache.Add(useKey, "value");
-                cache.Get(useKey).Should().NotBeNull();
-
-                var count = 0;
-                while (count < 20 && !triggered)
-                {
-                    await Task.Delay(1000);
-                    count++;
-                }
-
-                if (!triggered)
-                {
-                    throw new Exception("Waited pretty long, no events triggered...");
-                }
-
-                reason.Should().Be(CacheItemRemovedReason.Expired);
-                level.Should().Be(2);
-                key.Should().Be(useKey);
-                region.Should().BeNull();
-
-                cache.Get(useKey).Should().BeNull();
+                result.Reason.Should().Be(CacheItemRemovedReason.Expired);
+                result.Level.Should().Be(2);
+                result.Key.Should().Be(useKey);
+                result.Region.Should().BeNull();
             }
         }
 #endif
+
+        // exclusive inner class for parallel exec of this long running test
+        public class DictionarySpecific : LongRunningEventTestBase
+        {
+            [Fact]
+            public async Task Events_Dic_ExpireTriggers()
+            {
+                var cfg = new ConfigurationBuilder()
+                    .WithDictionaryHandle()
+                    .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1))
+                    .Build();
+
+                string useKey = Guid.NewGuid().ToString();
+                string useRegion = "@_@23@_!!";
+                var result = await this.RunTest(cfg, useKey, useRegion);
+
+                result.Reason.Should().Be(CacheItemRemovedReason.Expired);
+                result.Level.Should().Be(1);
+                result.Key.Should().Be(useKey);
+                result.Region.Should().Be(useRegion);
+            }
+        }
+
+        // exclusive inner class for parallel exec of this long running test
+        public class DictionarySpecific2 : LongRunningEventTestBase
+        {
+            [Fact]
+            public async Task Events_Dic_ExpireEvictsAbove()
+            {
+                var cfg = new ConfigurationBuilder()
+                    .WithDictionaryHandle()
+                    .And
+                    .WithDictionaryHandle()
+                    .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1))
+                    .Build();
+
+                string useKey = Guid.NewGuid().ToString();
+
+                var result = await this.RunTest(cfg, useKey, null);
+
+                result.Reason.Should().Be(CacheItemRemovedReason.Expired);
+                result.Level.Should().Be(2);
+                result.Key.Should().Be(useKey);
+                result.Region.Should().BeNull();
+            }
+        }
+
+
+        // exclusive inner class for parallel exec of this long running test
+        public class MsMemorySpecific : LongRunningEventTestBase
+        {
+            [Fact]
+            public async Task Events_MsMemory_ExpireTriggers()
+            {
+                var cfg = new ConfigurationBuilder()
+                    .WithMicrosoftMemoryCacheHandle()
+                    .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1))
+                    .Build();
+
+                string useKey = Guid.NewGuid().ToString();
+                string useRegion = "@_@23@_!!";
+                var result = await this.RunTest(cfg, useKey, useRegion);
+
+                result.Reason.Should().Be(CacheItemRemovedReason.Expired);
+                result.Level.Should().Be(1);
+                result.Key.Should().Be(useKey);
+                result.Region.Should().Be(useRegion);
+            }
+        }
+
+        // exclusive inner class for parallel exec of this long running test
+        public class MsMemorySpecific2 : LongRunningEventTestBase
+        {
+            [Fact]
+            public async Task Events_MsMemory_ExpireEvictsAbove()
+            {
+                var cfg = new ConfigurationBuilder()
+                    .WithDictionaryHandle()
+                    .And
+                    .WithMicrosoftMemoryCacheHandle()
+                    .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1))
+                    .Build();
+
+                string useKey = Guid.NewGuid().ToString();
+
+                var result = await this.RunTest(cfg, useKey, null);
+
+                result.Reason.Should().Be(CacheItemRemovedReason.Expired);
+                result.Level.Should().Be(2);
+                result.Key.Should().Be(useKey);
+                result.Region.Should().BeNull();
+            }
+        }
 
         [Theory]
         [ClassData(typeof(TestCacheManagers))]
@@ -730,7 +829,7 @@ namespace CacheManager.Tests
                 region.Should().Be("region");
             }
         }
-        
+
         [Fact]
         public void Events_MockedCustomRemove_TestLevel()
         {
