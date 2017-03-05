@@ -148,9 +148,9 @@ namespace CacheManager.SystemRuntimeCaching
             // maybe the item is already expired because MemoryCache implements a default interval
             // of 20 seconds! to check for expired items on each store, we do it on access to also
             // reflect smaller time frames especially for sliding expiration...
+            // cache.Get eventually triggers eviction callback, but just in case...
             if (item.IsExpired)
             {
-                // if so remove it
                 this.RemoveInternal(item.Key, item.Region);
                 this.TriggerCacheSpecificRemove(item.Key, item.Region, CacheItemRemovedReason.Expired);
                 return null;

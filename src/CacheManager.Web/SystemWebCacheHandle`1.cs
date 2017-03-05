@@ -20,6 +20,7 @@ namespace CacheManager.Web
     public class SystemWebCacheHandle<TCacheValue> : BaseCacheHandle<TCacheValue>
     {
         private string instanceKey = null;
+        private int instanceKeyLength;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SystemWebCacheHandle{TCacheValue}"/> class.
@@ -35,6 +36,7 @@ namespace CacheManager.Web
             this.Logger = loggerFactory.CreateLogger(this);
 
             this.instanceKey = Guid.NewGuid().ToString();
+            this.instanceKeyLength = this.instanceKey.Length;
 
             this.CreateInstanceToken();
         }
@@ -143,6 +145,14 @@ namespace CacheManager.Web
                 return null;
             }
 
+            // cache.Get eventually triggers eviction callback, but just in case...
+            if (item.IsExpired)
+            {
+                this.RemoveInternal(item.Key, item.Region);
+                this.TriggerCacheSpecificRemove(item.Key, item.Region, Core.Internal.CacheItemRemovedReason.Expired);
+                return null;
+            }
+
             return item;
         }
 
@@ -226,6 +236,7 @@ namespace CacheManager.Web
                 CacheItemRemovedCallback callback = (key, item, reason) =>
                 {
                     this.instanceKey = Guid.NewGuid().ToString();
+                    this.instanceKeyLength = this.instanceKey.Length;
                 };
 
                 var instanceItem = new CacheItem<string>(this.instanceKey, this.instanceKey);
@@ -252,7 +263,7 @@ namespace CacheManager.Web
         }
 
         private string GetItemKey(CacheItem<TCacheValue> item) => this.GetItemKey(item?.Key, item?.Region);
-
+        
         private string GetItemKey(string key, string region = null)
         {
             NotNullOrWhiteSpace(key, nameof(key));
@@ -261,9 +272,8 @@ namespace CacheManager.Web
             {
                 return this.instanceKey + ":" + key;
             }
-
-            region = region.Replace("@", "!!").Replace(":", "!!");
-            return this.instanceKey + "@" + region + ":" + key;
+            
+            return string.Concat(this.instanceKey, "@", region.Length, "@", region, ":", key);
         }
 
         private CacheDependency CreateDependency(CacheItem<TCacheValue> item)
@@ -290,13 +300,13 @@ namespace CacheManager.Web
 
         private string GetRegionTokenKey(string region)
         {
-            var key = string.Concat(this.instanceKey, "@", region);
+            var key = string.Concat(this.instanceKey, "_", region);
             return key;
         }
 
-        private void ItemRemoved(string key, object item, System.Web.Caching.CacheItemRemovedReason reason)
+        private void ItemRemoved(string fullKey, object item, System.Web.Caching.CacheItemRemovedReason reason)
         {
-            if (string.IsNullOrWhiteSpace(key))
+            if (string.IsNullOrWhiteSpace(fullKey))
             {
                 return;
             }
@@ -307,19 +317,53 @@ namespace CacheManager.Web
                 return;
             }
 
+            bool isToken; bool hasRegion; string key; string region;
+            ParseKeyParts(this.instanceKeyLength, fullKey, out isToken, out hasRegion, out region, out key);
+
             // identify item keys and ignore region or instance key
-            if (key.Contains(":"))
+            if (!isToken)
             {
-                if (key.Contains("@"))
+                if (hasRegion)
                 {
-                    // example instanceKey@region:itemkey , instanceKey:itemKey
-                    var region = Regex.Match(key, "@(.+?):").Groups[1].Value;
                     this.Stats.OnRemove(region);
                 }
                 else
                 {
                     this.Stats.OnRemove();
                 }
+
+                // trigger cachemanager's remove on evicted and expired items
+                if (reason == System.Web.Caching.CacheItemRemovedReason.Underused)
+                {
+                    this.TriggerCacheSpecificRemove(key, region, Core.Internal.CacheItemRemovedReason.Evicted);
+                }
+                else if (reason == System.Web.Caching.CacheItemRemovedReason.Expired)
+                {
+                    this.TriggerCacheSpecificRemove(key, region, Core.Internal.CacheItemRemovedReason.Expired);
+                }
+            }
+        }
+
+        private static void ParseKeyParts(int instanceKeyLength, string fullKey, out bool isToken, out bool hasRegion, out string region, out string key)
+        {
+            var relevantKey = fullKey.Substring(instanceKeyLength);
+            isToken = relevantKey[0] == '_';
+            hasRegion = false;
+            region = null;
+            key = null;
+
+            if (!isToken)
+            {
+                hasRegion = relevantKey[0] == '@';
+                var regionLenEnd = hasRegion ? relevantKey.IndexOf('@', 1) : -1;
+
+                int regionLen;
+                regionLen = hasRegion && regionLenEnd > 0 ? int.TryParse(relevantKey.Substring(1, regionLenEnd - 1), out regionLen) ? regionLen : 0 : 0;
+                hasRegion = hasRegion && regionLen > 0;
+
+                var restKey = hasRegion ? relevantKey.Substring(regionLenEnd + 1) : relevantKey;
+                region = hasRegion ? restKey.Substring(0, regionLen) : null;
+                key = restKey.Substring(regionLen + 1);
             }
         }
 

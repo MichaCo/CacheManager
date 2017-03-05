@@ -237,11 +237,7 @@ namespace CacheManager.Tests
                 result.Key.Should().Be(useKey);
                 result.Region.Should().Be(useRegion);
             }
-        }
 
-        // exclusive inner class for parallel exec of this long running test
-        public class SystemRuntimeSpecific2 : LongRunningEventTestBase
-        {
             [Fact]
             public async Task Events_SysRuntime_ExpireEvictsAbove()
             {
@@ -284,11 +280,7 @@ namespace CacheManager.Tests
                 result.Key.Should().Be(useKey);
                 result.Region.Should().Be(useRegion);
             }
-        }
 
-        // exclusive inner class for parallel exec of this long running test
-        public class DictionarySpecific2 : LongRunningEventTestBase
-        {
             [Fact]
             public async Task Events_Dic_ExpireEvictsAbove()
             {
@@ -310,7 +302,6 @@ namespace CacheManager.Tests
             }
         }
 
-
         // exclusive inner class for parallel exec of this long running test
         public class MsMemorySpecific : LongRunningEventTestBase
         {
@@ -331,11 +322,7 @@ namespace CacheManager.Tests
                 result.Key.Should().Be(useKey);
                 result.Region.Should().Be(useRegion);
             }
-        }
 
-        // exclusive inner class for parallel exec of this long running test
-        public class MsMemorySpecific2 : LongRunningEventTestBase
-        {
             [Fact]
             public async Task Events_MsMemory_ExpireEvictsAbove()
             {
@@ -356,6 +343,51 @@ namespace CacheManager.Tests
                 result.Region.Should().BeNull();
             }
         }
+
+#if MOCK_HTTPCONTEXT_ENABLED
+
+        // exclusive inner class for parallel exec of this long running test
+        public class WebCacheSpecific : LongRunningEventTestBase
+        {
+            [Fact]
+            public async Task Events_WebCache_ExpireTriggers()
+            {
+                var cfg = new ConfigurationBuilder()
+                    .WithHandle(typeof(SystemWebCacheHandleWrapper<>))
+                    .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1))
+                    .Build();
+
+                string useKey = Guid.NewGuid().ToString();
+                string useRegion = "@_@23@_!!";
+                var result = await this.RunTest(cfg, useKey, useRegion);
+
+                result.Reason.Should().Be(CacheItemRemovedReason.Expired);
+                result.Level.Should().Be(1);
+                result.Key.Should().Be(useKey);
+                result.Region.Should().Be(useRegion);
+            }
+
+            [Fact]
+            public async Task Events_WebCache_ExpireEvictsAbove()
+            {
+                var cfg = new ConfigurationBuilder()
+                    .WithDictionaryHandle()
+                    .And
+                    .WithHandle(typeof(SystemWebCacheHandleWrapper<>))
+                    .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1))
+                    .Build();
+
+                string useKey = Guid.NewGuid().ToString();
+
+                var result = await this.RunTest(cfg, useKey, null);
+
+                result.Reason.Should().Be(CacheItemRemovedReason.Expired);
+                result.Level.Should().Be(2);
+                result.Key.Should().Be(useKey);
+                result.Region.Should().BeNull();
+            }
+        }
+#endif
 
         [Theory]
         [ClassData(typeof(TestCacheManagers))]
