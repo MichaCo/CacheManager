@@ -379,6 +379,8 @@ namespace CacheManager.Tests
             }
 
             [Fact]
+            [Trait("category", "Redis")]
+            [Trait("category", "Unreliable")]
             public void CacheManager_Expire_InheritIsExpiredCheck()
             {
                 using (var cache = CacheFactory.Build<string>(
