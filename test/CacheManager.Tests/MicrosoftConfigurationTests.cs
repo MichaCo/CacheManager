@@ -1081,6 +1081,7 @@ namespace CacheManager.Tests
                 {"redis:0:key", key},
                 {"redis:0:password", "password"},
                 {"redis:0:sslHost", "sslHost"},
+                {"redis:0:keyspaceNotificationsEnabled", "TRUE"},
             };
 
             GetConfiguration(data).LoadRedisConfigurations();
@@ -1097,6 +1098,7 @@ namespace CacheManager.Tests
             redisConfig.Key.Should().Be(key);
             redisConfig.Password.Should().Be("password");
             redisConfig.SslHost.Should().Be("sslHost");
+            redisConfig.KeyspaceNotificationsEnabled.Should().Be(true);
         }
 
         [Fact]

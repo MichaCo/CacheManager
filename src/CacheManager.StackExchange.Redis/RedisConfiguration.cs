@@ -39,6 +39,7 @@ namespace CacheManager.Redis
         /// If set to <c>True</c> it enables the cache to use features which might be risky.
         /// <c>Clear</c> for example.
         /// </param>
+        /// <param name="keyspaceNotificationsEnabled">Enables keyspace notifications to react on eviction/expiration of items.</param>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "Using it for configuration data only.")]
         public RedisConfiguration(
             string key,
@@ -48,7 +49,8 @@ namespace CacheManager.Redis
             bool isSsl = false,
             string sslHost = null,
             int connectionTimeout = 5000,
-            bool allowAdmin = false)
+            bool allowAdmin = false,
+            bool keyspaceNotificationsEnabled = false)
         {
             NotNullOrWhiteSpace(key, nameof(key));
             NotNull(endpoints, nameof(endpoints));
@@ -66,6 +68,7 @@ namespace CacheManager.Redis
             this.SslHost = sslHost;
             this.ConnectionTimeout = connectionTimeout;
             this.AllowAdmin = allowAdmin;
+            this.KeyspaceNotificationsEnabled = keyspaceNotificationsEnabled;
         }
 
         /// <summary>
@@ -79,14 +82,17 @@ namespace CacheManager.Redis
         /// Instead of specifying all the properties, this can also be done via one connection string.
         /// </param>
         /// <param name="database">The redis database to use.</param>
+        /// <param name="keyspaceNotificationsEnabled">Enables keyspace notifications to react on eviction/expiration of items.</param>
         public RedisConfiguration(
             string key,
             string connectionString,
-            int database)
+            int database,
+            bool keyspaceNotificationsEnabled)
         {
             this.Key = key;
             this.ConnectionString = connectionString;
             this.Database = database;
+            this.KeyspaceNotificationsEnabled = keyspaceNotificationsEnabled;
         }
 
         /// <summary>
@@ -166,6 +172,16 @@ namespace CacheManager.Redis
         /// The database.
         /// </value>
         public int Database { get; set; }
+
+        /// <summary>
+        /// Gets or sets a flag indicating if the redis cache handle should use keyspace notifications to react on 
+        /// evictions or expired events from redis and then forward those events to the cache manager.
+        /// See <see href="https://redis.io/topics/notifications"/> for technical details.
+        /// <para>
+        /// To use this feature, you might have to enable this feature on your redis server(s).
+        /// </para>
+        /// </summary>
+        public bool KeyspaceNotificationsEnabled { get; set; }
     }
 
     /// <summary>

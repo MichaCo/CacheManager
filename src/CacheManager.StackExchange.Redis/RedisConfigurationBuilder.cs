@@ -17,6 +17,7 @@ namespace CacheManager.Redis
         private string key = string.Empty;
         private string password = null;
         private string sslHost = null;
+        private bool enabledKeyspaceNotifications = false;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RedisConfigurationBuilder"/> class.
@@ -36,7 +37,20 @@ namespace CacheManager.Redis
         /// </summary>
         /// <returns>The <c>RedisConfiguration</c></returns>
         public RedisConfiguration Build() =>
-            new RedisConfiguration(this.key, this.endpoints, this.database, this.password, this.isSsl, this.sslHost, this.connectionTimeout, this.allowAdmin);
+            new RedisConfiguration(this.key, this.endpoints, this.database, this.password, this.isSsl, this.sslHost, this.connectionTimeout, this.allowAdmin, this.enabledKeyspaceNotifications);
+
+        /// <summary>
+        /// Enable the flag to have CacheManager react on keyspace notifications from redis.
+        /// CacheManager will listen only for eviction and expiration events (not all events).
+        /// Use this feature only if you also have configured Redis correctly: notify-keyspace-events must be set to AT LEAST Exe.
+        /// <see href="https://redis.io/topics/notifications#configuration"/>
+        /// </summary>
+        /// <returns>The builder.</returns>
+        public RedisConfigurationBuilder EnableKeyspaceEvents()
+        {
+            this.enabledKeyspaceNotifications = true;
+            return this;
+        }
 
         /// <summary>
         /// If set to true, commands which might be risky are enabled, like Clear which will delete

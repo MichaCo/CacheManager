@@ -35,7 +35,6 @@ namespace CacheManager.Redis
             get
             {
                 var server = this.Servers.FirstOrDefault(p => p.IsConnected);
-
                 if (server == null)
                 {
                     throw new InvalidOperationException("No servers are connected or configured.");
@@ -43,6 +42,48 @@ namespace CacheManager.Redis
 
                 return server.Features;
                 ////return new StackRedis.RedisFeatures(new Version(2, 4));
+            }
+        }
+
+        public Dictionary<System.Net.EndPoint, string> GetConfiguration(string key)
+        {
+            var result = new Dictionary<System.Net.EndPoint, string>();
+            foreach (var server in Servers)
+            {
+                var values = server.ConfigGet(key).ToDictionary(k => k.Key, v => v.Value);
+
+                if (values.ContainsKey(key))
+                {
+                    var value = values.FirstOrDefault(p => p.Key == key);
+                    result.Add(server.EndPoint, value.Value);
+                }
+            }
+
+            return result;
+        }
+
+        public void SetConfigurationAllServers(string key, string value, bool addValue)
+        {
+            try
+            {
+                foreach (var server in Servers)
+                {
+                    var values = server.ConfigGet(key).ToDictionary(k => k.Key, v => v.Value);
+
+                    if (values.ContainsKey(key))
+                    {
+                        var oldValue = values.First(p => p.Key == key).Value;
+
+                        if (!oldValue.Equals(value))
+                        {
+                            server.ConfigSet(key, addValue ? oldValue + value : value);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"Failed to set '{key}' to '{value}'.", ex);
             }
         }
 

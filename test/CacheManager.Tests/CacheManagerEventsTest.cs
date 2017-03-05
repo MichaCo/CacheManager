@@ -153,7 +153,7 @@ namespace CacheManager.Tests
 
         public class LongRunningEventTestBase
         {
-            public async Task<CacheItemRemovedEventArgs> RunTest(ICacheManagerConfiguration configuration, string useKey, string useRegion, bool endGetShouldBeNull = true)
+            public async Task<CacheItemRemovedEventArgs> RunTest(ICacheManagerConfiguration configuration, string useKey, string useRegion, bool endGetShouldBeNull = true, bool runGetWhileWaiting = true)
             {
                 var triggered = false;
                 CacheItemRemovedEventArgs resultArgs = null;
@@ -180,13 +180,16 @@ namespace CacheManager.Tests
                 var count = 0;
                 while (count < 30 && !triggered)
                 {
-                    if (useRegion == null)
+                    if (runGetWhileWaiting)
                     {
-                        cache.CacheHandles.ToList().ForEach(p => p.Get(useKey));
-                    }
-                    else
-                    {
-                        cache.CacheHandles.ToList().ForEach(p => p.Get(useKey, useRegion));
+                        if (useRegion == null)
+                        {
+                            cache.CacheHandles.ToList().ForEach(p => p.Get(useKey));
+                        }
+                        else
+                        {
+                            cache.CacheHandles.ToList().ForEach(p => p.Get(useKey, useRegion));
+                        }
                     }
 
                     await Task.Delay(1000);
@@ -388,6 +391,52 @@ namespace CacheManager.Tests
             }
         }
 #endif
+
+        // exclusive inner class for parallel exec of this long running test
+        public class RedisSpecific : LongRunningEventTestBase
+        {
+            [Fact]
+            [Trait("category", "Redis")]
+            public async Task Events_Redis_ExpireTriggers()
+            {
+                var cfg = new ConfigurationBuilder()
+                    .WithRedisConfiguration("redis", "localhost, allowAdmin=true", 0, true)
+                    .WithRedisCacheHandle("redis")
+                    .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1))
+                    .Build();
+
+                string useKey = Guid.NewGuid().ToString();
+                string useRegion = "@_@23@_!!";
+                var result = await this.RunTest(cfg, useKey, useRegion);
+
+                result.Reason.Should().Be(CacheItemRemovedReason.Expired);
+                result.Level.Should().Be(1);
+                result.Key.Should().Be(useKey);
+                result.Region.Should().Be(useRegion);
+            }
+
+            [Fact]
+            [Trait("category", "Redis")]
+            public async Task Events_Redis_ExpireEvictsAbove()
+            {
+                var cfg = new ConfigurationBuilder()
+                    .WithDictionaryHandle()
+                    .And
+                    .WithRedisConfiguration("redis", "localhost, allowAdmin=true", 0, true)
+                    .WithRedisCacheHandle("redis")
+                    .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1))
+                    .Build();
+
+                string useKey = Guid.NewGuid().ToString();
+
+                var result = await this.RunTest(cfg, useKey, null);
+
+                result.Reason.Should().Be(CacheItemRemovedReason.Expired);
+                result.Level.Should().Be(2);
+                result.Key.Should().Be(useKey);
+                result.Region.Should().BeNull();
+            }
+        }
 
         [Theory]
         [ClassData(typeof(TestCacheManagers))]

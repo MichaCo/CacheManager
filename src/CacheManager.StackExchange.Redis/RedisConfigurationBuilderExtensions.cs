@@ -39,17 +39,22 @@ namespace CacheManager.Core
         /// </param>
         /// <param name="connectionString">The redis connection string.</param>
         /// <param name="database">The redis database to be used.</param>
+        /// <param name="enableKeyspaceNotifications">
+        /// Enables keyspace notifications to react on eviction/expiration of items.
+        /// Make sure that all servers are configured correctly and 'notify-keyspace-events' is at least set to 'Exe', otherwise CacheManager will not retrieve any events.
+        /// See <see href="https://redis.io/topics/notifications#configuration"/> for configuration details.
+        /// </param>
         /// <returns>The configuration builder.</returns>
         /// <exception cref="System.ArgumentNullException">
         /// If <paramref name="configurationKey"/> or <paramref name="connectionString"/> are null.
         /// </exception>
-        public static ConfigurationBuilderCachePart WithRedisConfiguration(this ConfigurationBuilderCachePart part, string configurationKey, string connectionString, int database = 0)
+        public static ConfigurationBuilderCachePart WithRedisConfiguration(this ConfigurationBuilderCachePart part, string configurationKey, string connectionString, int database = 0, bool enableKeyspaceNotifications = false)
         {
             NotNullOrWhiteSpace(configurationKey, nameof(configurationKey));
 
             NotNullOrWhiteSpace(connectionString, nameof(connectionString));
 
-            RedisConfigurations.AddConfiguration(new RedisConfiguration(configurationKey, connectionString, database));
+            RedisConfigurations.AddConfiguration(new RedisConfiguration(configurationKey, connectionString, database, enableKeyspaceNotifications));
             return part;
         }
 
@@ -77,11 +82,12 @@ namespace CacheManager.Core
             part.WithRedisConfiguration(configurationKey, connectionString, database);
 
             RedisConnectionManager.AddConnection(connectionString, redisClient);
-            
+
             return part;
         }
 
 #pragma warning disable SA1625
+
         /// <summary>
         /// Configures a cache backplane for the cache manager.
         /// The <paramref name="redisConfigurationKey"/> is used to find a matching redis configuration.
@@ -158,6 +164,7 @@ namespace CacheManager.Core
 
             return part.WithHandle(typeof(RedisCacheHandle<>), redisConfigurationKey, isBackplaneSource);
         }
+
 #pragma warning restore SA1625
     }
 }

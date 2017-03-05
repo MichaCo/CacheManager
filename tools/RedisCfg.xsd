@@ -28,10 +28,11 @@
       <xs:attribute name="connectionString" use="optional" type="xs:string" />
       <xs:attribute name="connectionTimeout" use="optional" type="xs:integer" default="5000" />
       <xs:attribute name="allowAdmin" use="optional" type="xs:boolean" default="false"/>
+      <xs:attribute name="enableKeyspaceNotifications" use="optional" type="xs:boolean" default="false"/>
       <xs:attribute name="password" use="optional" type="xs:string" />
       <xs:attribute name="ssl" use="optional" type="xs:string" />
       <xs:attribute name="sslHost" use="optional" type="xs:string" />
-      <xs:attribute name="database" use="optional" type="xs:integer" default="0" />
+      <xs:attribute name="database" use="optional" type="xs:integer" default="0" />      
     </xs:complexType>
   </xs:element>
   <xs:element name="connections">

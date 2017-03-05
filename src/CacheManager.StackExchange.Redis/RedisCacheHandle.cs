@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using CacheManager.Core;
 using CacheManager.Core.Internal;
 using CacheManager.Core.Logging;
@@ -24,6 +25,7 @@ namespace CacheManager.Redis
     [RequiresSerializer]
     public class RedisCacheHandle<TCacheValue> : BaseCacheHandle<TCacheValue>
     {
+        private const string Base64Prefix = "base64\0";
         private const string HashFieldCreated = "created";
         private const string HashFieldExpirationMode = "expiration";
         private const string HashFieldExpirationTimeout = "timeout";
@@ -110,6 +112,64 @@ return result";
             this.redisConfiguration = RedisConfigurations.GetConfiguration(configuration.Key);
             this.connection = new RedisConnectionManager(this.redisConfiguration, loggerFactory);
             this.isLuaAllowed = this.connection.Features.Scripting;
+
+            if (this.redisConfiguration.KeyspaceNotificationsEnabled)
+            {
+                // notify-keyspace-events needs to be set to "Exe" at least! Otherwise we will not receive any events.
+                // this must be configured per server and should probably not be done automagically as this needs admin rights!
+                // Let's try to check at least if those settings are configured (the check also works only if useAdmin is set to true though).
+                try
+                {
+                    var configurations = this.connection.GetConfiguration("notify-keyspace-events");
+                    foreach (var cfg in configurations)
+                    {
+                        if (!cfg.Value.Contains("E"))
+                        {
+                            this.Logger.LogWarn("Server {0} is missing configuration value 'E' in notify-keyspace-events to enable keyevents.", cfg.Key);
+                        }
+                        if (!(cfg.Value.Contains("A") ||
+                            (cfg.Value.Contains("x") && cfg.Value.Contains("e"))))
+                        {
+                            this.Logger.LogWarn("Server {0} is missing configuration value 'A' or 'x' and 'e' in notify-keyspace-events to enable keyevents for expired and evicted keys.", cfg.Key);
+                        }
+                    }
+                }
+                catch
+                {
+                    this.Logger.LogDebug("Could not read configuration from redis to validate notify-keyspace-events. Most likely useAdmin is not set to true.");
+                }
+
+                this.SubscribeKeyspaceNotifications();
+            }
+        }
+
+        private void SubscribeKeyspaceNotifications()
+        {
+            this.connection.Subscriber.Subscribe(
+                $"__keyevent@{this.redisConfiguration.Database}__:expired",
+                (channel, key) =>
+                {
+                    var tupple = ParseKey(key);
+                    if (this.Logger.IsEnabled(LogLevel.Debug))
+                    {
+                        this.Logger.LogDebug("Got expired event for key '{0}:{1}'", tupple.Item2, tupple.Item1);
+                    }
+
+                    this.TriggerCacheSpecificRemove(tupple.Item1, tupple.Item2, CacheItemRemovedReason.Expired);
+                });
+
+            this.connection.Subscriber.Subscribe(
+                $"__keyevent@{this.redisConfiguration.Database}__:evicted",
+                (channel, key) =>
+                {
+                    var tupple = ParseKey(key);
+                    if (this.Logger.IsEnabled(LogLevel.Debug))
+                    {
+                        this.Logger.LogDebug("Got evicted event for key '{0}:{1}'", tupple.Item2, tupple.Item1);
+                    }
+
+                    this.TriggerCacheSpecificRemove(tupple.Item1, tupple.Item2, CacheItemRemovedReason.Evicted);
+                });
         }
 
         /// <summary>
@@ -470,6 +530,13 @@ return result";
                 cacheItem = cacheItem.WithCreated(new DateTime((long)createdItem));
             }
 
+            if (cacheItem.IsExpired)
+            {
+                this.TriggerCacheSpecificRemove(key, region, CacheItemRemovedReason.Expired);
+
+                return null;
+            }
+
             return cacheItem;
         }
 
@@ -543,6 +610,13 @@ return result";
                     cacheItem = cacheItem.WithCreated(new DateTime((long)createdItem));
                 }
 
+                if (cacheItem.IsExpired)
+                {
+                    this.TriggerCacheSpecificRemove(key, region, CacheItemRemovedReason.Expired);
+
+                    return null;
+                }
+
                 // update sliding
                 if (expirationMode == ExpirationMode.Sliding && expirationTimeout != default(TimeSpan))
                 {
@@ -612,17 +686,64 @@ return result";
 
 #pragma warning restore CSE0003
 
-        private static string GetKey(string key, string region = null)
+        private static Tuple<string, string> ParseKey(string value)
+        {
+            if (value == null)
+            {
+                return Tuple.Create<string, string>(null, null);
+            }
+
+            var sepIndex = value.IndexOf(':');
+            var hasRegion = sepIndex > 0;
+            string key = value;
+            string region = null;
+
+            if (hasRegion)
+            {
+                region = value.Substring(0, sepIndex);
+                key = value.Substring(sepIndex + 1);
+
+                if (region.StartsWith(Base64Prefix))
+                {
+                    region = region.Substring(Base64Prefix.Length);
+                    region = Encoding.UTF8.GetString(Convert.FromBase64String(region));
+                }
+            }
+
+            if (key.StartsWith(Base64Prefix))
+            {
+                key = key.Substring(Base64Prefix.Length);
+                key = Encoding.UTF8.GetString(Convert.FromBase64String(key));
+            }
+
+            return Tuple.Create(key, region);
+        }
+
+        private string GetKey(string key, string region = null)
         {
             if (string.IsNullOrWhiteSpace(key))
             {
                 throw new ArgumentNullException(nameof(key));
             }
 
+            // for notifications, we have to get key and region back from the key stored in redis.
+            // in case the key and or region itself contains the separator, there would be no way to do so...
+            // So, only if that feature is enabled, we'll encode the key and/or region in that case
+            // and the ParseKey method will respect that, too, and decodes the key and/or region.
+            if (this.redisConfiguration.KeyspaceNotificationsEnabled && key.Contains(":"))
+            {
+                key = Base64Prefix + Convert.ToBase64String(Encoding.UTF8.GetBytes(key));
+            }
+
             var fullKey = key;
 
             if (!string.IsNullOrWhiteSpace(region))
             {
+                if (this.redisConfiguration.KeyspaceNotificationsEnabled && region.Contains(":"))
+                {
+                    region = Base64Prefix + Convert.ToBase64String(Encoding.UTF8.GetBytes(region));
+                }
+
                 fullKey = string.Concat(region, ":", key);
             }
 

@@ -222,6 +222,22 @@ namespace CacheManager.Redis
         }
 
         /// <summary>
+        /// Gets or sets a value enabling the keyspace events listener of the redis cache handle.
+        /// </summary>
+        [ConfigurationProperty("enableKeyspaceNotifications", IsRequired = false, DefaultValue = false)]
+        public bool EnableKeyspaceNotifications
+        {
+            get
+            {
+                return (bool)this["enableKeyspaceNotifications"];
+            }
+            set
+            {
+                this["enableKeyspaceNotifications"] = value;
+            }
+        }
+
+        /// <summary>
         /// Gets or sets the connection string.
         /// </summary>
         /// <value>The connection string.</value>

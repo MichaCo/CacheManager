@@ -819,6 +819,7 @@ namespace CacheManager.Tests
             redisConfig.Database.Should().Be(113);
             redisConfig.ConnectionTimeout.Should().Be(1200);
             redisConfig.AllowAdmin.Should().BeTrue();
+            redisConfig.KeyspaceNotificationsEnabled.Should().BeTrue();
         }
 
         [Fact]

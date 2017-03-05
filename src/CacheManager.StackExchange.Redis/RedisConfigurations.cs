@@ -92,7 +92,7 @@ namespace CacheManager.Redis
                 }
 
                 // defaulting to database 0, no way to set it via connection strings atm.
-                var configuration = new RedisConfiguration(configurationName, connectionStringHolder.ConnectionString, 0);
+                var configuration = new RedisConfiguration(configurationName, connectionStringHolder.ConnectionString, 0, false);
                 AddConfiguration(configuration);
 #endif
             }
@@ -101,6 +101,7 @@ namespace CacheManager.Redis
         }
 
 #if !NETSTANDARD
+
         /// <summary>
         /// Loads the configuration.
         /// </summary>
@@ -160,7 +161,8 @@ namespace CacheManager.Redis
                             isSsl: redisOption.Ssl,
                             sslHost: redisOption.SslHost,
                             connectionTimeout: redisOption.ConnectionTimeout == 0 ? 5000 : redisOption.ConnectionTimeout,
-                            allowAdmin: redisOption.AllowAdmin));
+                            allowAdmin: redisOption.AllowAdmin,
+                            keyspaceNotificationsEnabled: redisOption.EnableKeyspaceNotifications));
                 }
                 else
                 {
@@ -168,7 +170,8 @@ namespace CacheManager.Redis
                         new RedisConfiguration(
                             key: redisOption.Id,
                             connectionString: redisOption.ConnectionString,
-                            database: redisOption.Database));    // fixes #114
+                            database: redisOption.Database, // fixes #114
+                            keyspaceNotificationsEnabled: redisOption.EnableKeyspaceNotifications));
                 }
             }
         }
@@ -193,6 +196,7 @@ namespace CacheManager.Redis
         {
             LoadConfiguration(RedisConfigurationSection.DefaultSectionName);
         }
+
 #endif
     }
 }
