@@ -277,7 +277,7 @@ namespace CacheManager.Tests
         {
             var key = Guid.NewGuid().ToString();
 
-            await TestBackplaneEvent<CacheItemRemovedEventArgs>(
+            await TestBackplaneEvent<CacheActionEventArgs>(
                 CacheEvent.OnRemove,
                 (cacheA) =>
                 {
@@ -306,7 +306,7 @@ namespace CacheManager.Tests
             var key = Guid.NewGuid().ToString();
             var region = Guid.NewGuid().ToString();
 
-            await TestBackplaneEvent<CacheItemRemovedEventArgs>(
+            await TestBackplaneEvent<CacheActionEventArgs>(
                 CacheEvent.OnRemove,
                 (cacheA) =>
                 {

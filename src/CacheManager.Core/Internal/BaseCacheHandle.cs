@@ -248,22 +248,16 @@ namespace CacheManager.Core.Internal
         /// <summary>
         /// Can be used to signal a remove event to the <see cref="ICacheManager{TCacheValue}"/> in case the underlying cache supports this and the implementation
         /// can react on evictions and expiration of cache items.
-        /// All <see cref="CacheItemRemovedReason.Removed"/> events should be triggered by the cache manager itself and must not be manually triggered.
         /// </summary>
         /// <param name="key">The cache key.</param>
         /// <param name="region">The cache region. Can be null.</param>
         /// <param name="reason">The reason.</param>
-        /// <exception cref="InvalidOperationException">If the reason is <see cref="CacheItemRemovedReason.Removed"/>.</exception>
         /// <exception cref="ArgumentNullException">If <paramref name="key"/> is null.</exception>
         protected void TriggerCacheSpecificRemove(string key, string region, CacheItemRemovedReason reason)
         {
             NotNullOrWhiteSpace(key, nameof(key));
-            if(reason == CacheItemRemovedReason.Removed)
-            {
-                throw new InvalidOperationException("CacheHandle must not trigger manual remove events.");
-            }
 
-            this.OnCacheSpecificRemove?.Invoke(this, new CacheItemRemovedEventArgs(key, region, reason, CacheActionEventArgOrigin.Local));
+            this.OnCacheSpecificRemove?.Invoke(this, new CacheItemRemovedEventArgs(key, region, reason));
         }
 
         /// <summary>

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Threading.Tasks;
 using CacheManager.Core;
 using CacheManager.Core.Internal;
 using CacheManager.Core.Logging;
@@ -21,7 +22,7 @@ namespace CacheManager.Tests
     {
         [Fact]
         [ReplaceCulture]
-        public void CacheManager_Events_CacheActionEventArgsCtor()
+        public void Events_CacheActionEventArgsCtor()
         {
             // arrange
             string key = null;
@@ -37,7 +38,7 @@ namespace CacheManager.Tests
 
         [Fact]
         [ReplaceCulture]
-        public void CacheManager_Events_CacheActionEventArgsCtor_Valid()
+        public void Events_CacheActionEventArgsCtor_Valid()
         {
             // arrange
             string key = "key";
@@ -52,14 +53,14 @@ namespace CacheManager.Tests
 
         [Fact]
         [ReplaceCulture]
-        public void CacheManager_Events_CacheItemRemovedEventArgsCtor()
+        public void Events_CacheItemRemovedEventArgsCtor()
         {
             // arrange
             string key = null;
             string region = null;
 
             // act
-            Action act = () => new CacheItemRemovedEventArgs(key, region, CacheItemRemovedReason.Removed);
+            Action act = () => new CacheItemRemovedEventArgs(key, region, CacheItemRemovedReason.Expired);
 
             // assert
             act.ShouldThrow<ArgumentNullException>()
@@ -68,51 +69,51 @@ namespace CacheManager.Tests
 
         [Fact]
         [ReplaceCulture]
-        public void CacheManager_Events_CacheItemRemovedEventArgsCtor_Valid()
+        public void Events_CacheItemRemovedEventArgsCtor_Valid()
         {
             // arrange
             string key = "key";
             string region = null;
 
             // act
-            Func<CacheItemRemovedEventArgs> act = () => new CacheItemRemovedEventArgs(key, region, CacheItemRemovedReason.Removed, CacheActionEventArgOrigin.Remote);
+            Func<CacheItemRemovedEventArgs> act = () => new CacheItemRemovedEventArgs(key, region, CacheItemRemovedReason.Expired, 2);
 
             // assert
-            act().ShouldBeEquivalentTo(new { Region = (string)null, Key = key, Origin = CacheActionEventArgOrigin.Remote, Reason = CacheItemRemovedReason.Removed });
+            act().ShouldBeEquivalentTo(new { Region = (string)null, Key = key, Reason = CacheItemRemovedReason.Expired, Level = 2 });
         }
 
         [Fact]
         [ReplaceCulture]
-        public void CacheManager_Events_CacheItemRemovedEventArgsCtor_ValidB()
+        public void Events_CacheItemRemovedEventArgsCtor_ValidB()
         {
             // arrange
             string key = "key";
             string region = "region";
 
             // act
-            Func<CacheItemRemovedEventArgs> act = () => new CacheItemRemovedEventArgs(key, region, CacheItemRemovedReason.Expired);
+            Func<CacheItemRemovedEventArgs> act = () => new CacheItemRemovedEventArgs(key, region, CacheItemRemovedReason.Expired, 2);
 
             // assert
-            act().ShouldBeEquivalentTo(new { Region = region, Key = key, Origin = CacheActionEventArgOrigin.Local, Reason = CacheItemRemovedReason.Expired });
+            act().ShouldBeEquivalentTo(new { Region = region, Key = key, Reason = CacheItemRemovedReason.Expired, Level = 2 });
         }
 
         [Fact]
         [ReplaceCulture]
-        public void CacheManager_Events_CacheItemRemovedEventArgsCtor_ValidC()
+        public void Events_CacheItemRemovedEventArgsCtor_ValidC()
         {
             // arrange
             string key = "key";
             string region = "region";
 
             // act
-            Func<CacheItemRemovedEventArgs> act = () => new CacheItemRemovedEventArgs(key, region, CacheItemRemovedReason.Evicted);
+            Func<CacheItemRemovedEventArgs> act = () => new CacheItemRemovedEventArgs(key, region, CacheItemRemovedReason.Evicted, 0);
 
             // assert
-            act().ShouldBeEquivalentTo(new { Region = region, Key = key, Origin = CacheActionEventArgOrigin.Local, Reason = CacheItemRemovedReason.Evicted });
+            act().ShouldBeEquivalentTo(new { Region = region, Key = key, Reason = CacheItemRemovedReason.Evicted, Level = 0 });
         }
 
         [Fact]
-        public void CacheManager_Events_CacheClearEventArgsCtor()
+        public void Events_CacheClearEventArgsCtor()
         {
             // arrange act
             Action act = () => new CacheClearEventArgs();
@@ -123,7 +124,7 @@ namespace CacheManager.Tests
 
         [Fact]
         [ReplaceCulture]
-        public void CacheManager_Events_CacheClearRegionEventArgsCtor()
+        public void Events_CacheClearRegionEventArgsCtor()
         {
             // arrange
             string region = null;
@@ -138,7 +139,7 @@ namespace CacheManager.Tests
 
         [Fact]
         [ReplaceCulture]
-        public void CacheManager_Events_CacheClearRegionEventArgsCtor_Valid()
+        public void Events_CacheClearRegionEventArgsCtor_Valid()
         {
             // arrange
             string region = Guid.NewGuid().ToString();
@@ -150,10 +151,117 @@ namespace CacheManager.Tests
             act().ShouldBeEquivalentTo(new { Region = region, Origin = CacheActionEventArgOrigin.Local });
         }
 
+#if !NETCOREAPP
+
+        // inner class scope for parallel exec
+        public class SystemRuntimeSpecific
+        {
+
+            [Fact]
+            public async Task Events_SysRuntime_ExpireTriggers()
+            {
+                var cfg = new ConfigurationBuilder()
+                    .WithSystemRuntimeCacheHandle()
+                    .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMilliseconds(100))
+                    .Build();
+
+                string useKey = Guid.NewGuid().ToString();
+                string useRegion = "@_@23@_!!";
+
+                var triggered = false;
+                CacheItemRemovedReason reason = CacheItemRemovedReason.Evicted;
+                int level = 0;
+                string key = null;
+                string region = null;
+
+                var cache = new BaseCacheManager<string>(cfg);
+                cache.OnRemoveByHandle += (sender, args) =>
+                {
+                    triggered = true;
+                    reason = args.Reason;
+                    level = args.Level;
+                    key = args.Key;
+                    region = args.Region;
+                };
+
+                cache.Add(useKey, "value", useRegion);
+
+                // sys runtime checks roughly every 10 seconds, there is no other way to test this quicker I think
+                var count = 0;
+                while (count < 20 && !triggered)
+                {
+                    await Task.Delay(1000);
+                    count++;
+                }
+
+                if (!triggered)
+                {
+                    throw new Exception("Waited pretty long, no events triggered...");
+                }
+
+                reason.Should().Be(CacheItemRemovedReason.Expired);
+                level.Should().Be(1);
+                key.Should().Be(useKey);
+                region.Should().Be(useRegion);
+            }
+
+            [Fact]
+            public async Task Events_SysRuntime_ExpireEvictsAbove()
+            {
+                var cfg = new ConfigurationBuilder()
+                    .WithDictionaryHandle()
+                    .And
+                    .WithSystemRuntimeCacheHandle()
+                    .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMilliseconds(100))
+                    .Build();
+
+                string useKey = Guid.NewGuid().ToString();
+
+                var triggered = false;
+                CacheItemRemovedReason reason = CacheItemRemovedReason.Evicted;
+                int level = 0;
+                string key = null;
+                string region = null;
+
+                var cache = new BaseCacheManager<string>(cfg);
+                cache.OnRemoveByHandle += (sender, args) =>
+                {
+                    triggered = true;
+                    reason = args.Reason;
+                    level = args.Level;
+                    key = args.Key;
+                    region = args.Region;
+                };
+
+                cache.Add(useKey, "value");
+                cache.Get(useKey).Should().NotBeNull();
+
+                var count = 0;
+                while (count < 20 && !triggered)
+                {
+                    await Task.Delay(1000);
+                    count++;
+                }
+
+                if (!triggered)
+                {
+                    throw new Exception("Waited pretty long, no events triggered...");
+                }
+
+                reason.Should().Be(CacheItemRemovedReason.Expired);
+                level.Should().Be(2);
+                key.Should().Be(useKey);
+                region.Should().BeNull();
+
+                cache.Get(useKey).Should().BeNull();
+            }
+        }
+#endif
+
         [Theory]
         [ClassData(typeof(TestCacheManagers))]
         [ReplaceCulture]
-        public void CacheManager_Events_OnGet<T>(T cache)
+        public void Events_OnGet<T>(T cache)
             where T : ICacheManager<object>
         {
             using (cache)
@@ -181,7 +289,7 @@ namespace CacheManager.Tests
         [Theory]
         [ClassData(typeof(TestCacheManagers))]
         [ReplaceCulture]
-        public void CacheManager_Events_OnGetWithRegion<T>(T cache)
+        public void Events_OnGetWithRegion<T>(T cache)
             where T : ICacheManager<object>
         {
             using (cache)
@@ -209,7 +317,7 @@ namespace CacheManager.Tests
         [Theory]
         [ClassData(typeof(TestCacheManagers))]
         [ReplaceCulture]
-        public void CacheManager_Events_OnGetMiss<T>(T cache)
+        public void Events_OnGetMiss<T>(T cache)
             where T : ICacheManager<object>
         {
             using (cache)
@@ -236,7 +344,7 @@ namespace CacheManager.Tests
         [Theory]
         [ClassData(typeof(TestCacheManagers))]
         [ReplaceCulture]
-        public void CacheManager_Events_OnGetManyHandles<T>(T cache)
+        public void Events_OnGetManyHandles<T>(T cache)
             where T : ICacheManager<object>
         {
             using (cache)
@@ -275,7 +383,7 @@ namespace CacheManager.Tests
         [ClassData(typeof(TestCacheManagers))]
         [Trait("category", "Unreliable")]
         [ReplaceCulture]
-        public void CacheManager_Events_OnRemoveMany<T>(T cache)
+        public void Events_OnRemoveMany<T>(T cache)
             where T : ICacheManager<object>
         {
             using (cache)
@@ -334,7 +442,7 @@ namespace CacheManager.Tests
         [Theory]
         [ClassData(typeof(TestCacheManagers))]
         [ReplaceCulture]
-        public void CacheManager_Events_OnAddMany<T>(T cache)
+        public void Events_OnAddMany<T>(T cache)
             where T : ICacheManager<object>
         {
             using (cache)
@@ -391,7 +499,7 @@ namespace CacheManager.Tests
         [Theory]
         [ClassData(typeof(TestCacheManagers))]
         [ReplaceCulture]
-        public void CacheManager_Events_OnPutMany<T>(T cache)
+        public void Events_OnPutMany<T>(T cache)
             where T : ICacheManager<object>
         {
             using (cache)
@@ -444,7 +552,7 @@ namespace CacheManager.Tests
         [Theory]
         [ClassData(typeof(TestCacheManagers))]
         [ReplaceCulture]
-        public void CacheManager_Events_OnUpdate<T>(T cache)
+        public void Events_OnUpdate<T>(T cache)
             where T : ICacheManager<object>
         {
             using (cache)
@@ -496,7 +604,7 @@ namespace CacheManager.Tests
         [ClassData(typeof(TestCacheManagers))]
         [Trait("category", "Unreliable")]
         [ReplaceCulture]
-        public void CacheManager_Events_OnClearRegion<T>(T cache)
+        public void Events_OnClearRegion<T>(T cache)
             where T : ICacheManager<object>
         {
             using (cache)
@@ -514,6 +622,8 @@ namespace CacheManager.Tests
                 cache.OnClearRegion += (sender, args) => data.AddCall(args, region1, region2);
                 cache.OnClear += (sender, args) => data.AddCall();                // this should not trigger
                 cache.OnGet += (sender, args) => data.AddCall(args, key1, key2);  // this should not trigger
+
+                // on remove now triggeres per cache handle eventually
                 cache.OnRemove += (sender, args) => data.AddCall(args, key1, key2);  // this should not trigger
                 cache.Put(key1, "something", region1);
                 cache.Put(key2, "something", region2);
@@ -537,7 +647,7 @@ namespace CacheManager.Tests
 
         [Fact]
         [ReplaceCulture]
-        public void CacheManager_Events_OnClear()
+        public void Events_OnClear()
         {
             using (var cache = TestManagers.WithOneDicCacheHandle)
             {
@@ -576,23 +686,20 @@ namespace CacheManager.Tests
                 s => s.WithHandle(typeof(CustomRemoveEventTestHandle))))
             {
                 CacheItemRemovedReason reason = 0;
-                CacheActionEventArgOrigin origin = 0;
                 string key = string.Empty;
                 string region = string.Empty;
 
-                cache.OnRemove += (sender, args) =>
+                cache.OnRemoveByHandle += (sender, args) =>
                 {
                     reason = args.Reason;
                     key = args.Key;
                     region = args.Region;
-                    origin = args.Origin;
                 };
 
                 var handle = cache.CacheHandles.OfType<CustomRemoveEventTestHandle>().First();
                 handle.TestTrigger("key", "region", CacheItemRemovedReason.Evicted);
 
                 reason.Should().Be(CacheItemRemovedReason.Evicted);
-                origin.Should().Be(CacheActionEventArgOrigin.Local);
                 key.Should().Be("key");
                 region.Should().Be("region");
             }
@@ -605,39 +712,90 @@ namespace CacheManager.Tests
                 s => s.WithHandle(typeof(CustomRemoveEventTestHandle))))
             {
                 CacheItemRemovedReason reason = 0;
-                CacheActionEventArgOrigin origin = 0;
                 string key = string.Empty;
                 string region = string.Empty;
 
-                cache.OnRemove += (sender, args) =>
+                cache.OnRemoveByHandle += (sender, args) =>
                 {
                     reason = args.Reason;
                     key = args.Key;
                     region = args.Region;
-                    origin = args.Origin;
                 };
 
                 var handle = cache.CacheHandles.OfType<CustomRemoveEventTestHandle>().First();
                 handle.TestTrigger("key", "region", CacheItemRemovedReason.Expired);
 
                 reason.Should().Be(CacheItemRemovedReason.Expired);
-                origin.Should().Be(CacheActionEventArgOrigin.Local);
                 key.Should().Be("key");
                 region.Should().Be("region");
             }
         }
-
+        
         [Fact]
-        public void Events_MockedCustomRemove_RemovedIsFailing()
+        public void Events_MockedCustomRemove_TestLevel()
         {
             using (var cache = CacheFactory.Build<string>(
                 s => s.WithHandle(typeof(CustomRemoveEventTestHandle))))
-            {                
+            {
+                int? level = null;
+
+                cache.OnRemoveByHandle += (sender, args) =>
+                {
+                    level = args.Level;
+                };
+
                 var handle = cache.CacheHandles.OfType<CustomRemoveEventTestHandle>().First();
+                handle.TestTrigger("key", null, CacheItemRemovedReason.Expired);
 
-                Action act = () => handle.TestTrigger("key", "region", CacheItemRemovedReason.Removed);
+                level.Should().Be(1);
+            }
+        }
 
-                act.ShouldThrow<InvalidOperationException>("Removed events are not allowed.").WithMessage("*remove events*");
+        [Fact]
+        public void Events_MockedCustomRemove_TestMultiLevelA()
+        {
+            using (var cache = CacheFactory.Build<string>(
+                s => s.WithHandle(typeof(CustomRemoveEventTestHandle))
+                    .And.WithHandle(typeof(CustomRemoveEventTestHandle))
+                    .And.WithHandle(typeof(CustomRemoveEventTestHandle))))
+            {
+                int? level = null;
+
+                cache.OnRemoveByHandle += (sender, args) =>
+                {
+                    level = args.Level;
+                };
+
+                // tests if triggereing the first one really triggers the correct level
+                var handle = cache.CacheHandles.OfType<CustomRemoveEventTestHandle>().First();
+                handle.TestTrigger("key", null, CacheItemRemovedReason.Expired);
+
+                level.Should().Be(1);
+            }
+        }
+
+        [Fact]
+        public void Events_MockedCustomRemove_TestMultiLevelB()
+        {
+            using (var cache = CacheFactory.Build<string>(
+                s => s
+                    .WithUpdateMode(CacheUpdateMode.None) // prevent trigger cleanup above (not implemented in the mock handle)
+                    .WithHandle(typeof(CustomRemoveEventTestHandle))
+                    .And.WithHandle(typeof(CustomRemoveEventTestHandle))
+                    .And.WithHandle(typeof(CustomRemoveEventTestHandle))))
+            {
+                int? level = null;
+
+                cache.OnRemoveByHandle += (sender, args) =>
+                {
+                    level = args.Level;
+                };
+
+                // tests if triggereing the last one really triggers the correct level
+                var handle = cache.CacheHandles.OfType<CustomRemoveEventTestHandle>().Last();
+                handle.TestTrigger("key", null, CacheItemRemovedReason.Expired);
+
+                level.Should().Be(3);
             }
         }
 

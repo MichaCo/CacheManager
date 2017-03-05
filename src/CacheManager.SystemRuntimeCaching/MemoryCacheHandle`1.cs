@@ -2,7 +2,6 @@
 using System.Collections.Specialized;
 using System.Globalization;
 using System.Runtime.Caching;
-using System.Text.RegularExpressions;
 using CacheManager.Core;
 using CacheManager.Core.Internal;
 using CacheManager.Core.Logging;
@@ -26,7 +25,8 @@ namespace CacheManager.SystemRuntimeCaching
         private readonly string cacheName = string.Empty;
 
         private volatile MemoryCache cache = null;
-        private string instanceKey = null;
+        private string instanceKey;
+        private int instanceKeyLength;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MemoryCacheHandle{TCacheValue}"/> class.
@@ -53,7 +53,7 @@ namespace CacheManager.SystemRuntimeCaching
             }
 
             this.instanceKey = Guid.NewGuid().ToString();
-
+            this.instanceKeyLength = this.instanceKey.Length;
             this.CreateInstanceToken();
         }
 
@@ -248,21 +248,6 @@ namespace CacheManager.SystemRuntimeCaching
             this.cache.Add(key, region, policy);
         }
 
-        private string GetItemKey(CacheItem<TCacheValue> item) => this.GetItemKey(item?.Key, item?.Region);
-
-        private string GetItemKey(string key, string region = null)
-        {
-            NotNullOrWhiteSpace(key, nameof(key));
-
-            if (string.IsNullOrWhiteSpace(region))
-            {
-                return this.instanceKey + ":" + key;
-            }
-
-            region = region.Replace("@", "!!").Replace(":", "!!");
-            return this.instanceKey + "@" + region + ":" + key;
-        }
-
         private CacheItemPolicy GetPolicy(CacheItem<TCacheValue> item)
         {
             var monitorKeys = new[] { this.instanceKey };
@@ -272,12 +257,12 @@ namespace CacheManager.SystemRuntimeCaching
                 // this should be the only place to create the region token if it doesn't exist it
                 // might got removed by clearRegion but next time put or add gets called, the region
                 // should be re added...
-                var key = this.GetRegionTokenKey(item.Region);
-                if (!this.cache.Contains(key))
+                var regionToken = this.GetRegionTokenKey(item.Region);
+                if (!this.cache.Contains(regionToken))
                 {
                     this.CreateRegionToken(item.Region);
                 }
-                monitorKeys = new[] { this.instanceKey, key };
+                monitorKeys = new[] { this.instanceKey, regionToken };
             }
 
             var policy = new CacheItemPolicy()
@@ -309,21 +294,43 @@ namespace CacheManager.SystemRuntimeCaching
             return policy;
         }
 
+        private string GetItemKey(CacheItem<TCacheValue> item) => this.GetItemKey(item?.Key, item?.Region);
+
+        private string GetItemKey(string key, string region = null)
+        {
+            NotNullOrWhiteSpace(key, nameof(key));
+
+            if (string.IsNullOrWhiteSpace(region))
+            {
+                return this.instanceKey + ":" + key;
+            }
+
+            ////region = region.Replace("@", "!!").Replace(":", "!!");
+
+            // key without region
+            // <instance>:key
+            // key with region
+            // <instance>@<regionlen><regionstring>:<keystring>
+            // <instance>@6region:key
+            return string.Concat(this.instanceKey, "@", region.Length, "@", region, ":", key);
+        }
+
         private string GetRegionTokenKey(string region)
         {
-            var key = string.Concat(this.instanceKey, "@", region);
+            var key = string.Concat(this.instanceKey, "_", region);
             return key;
         }
 
         private void InstanceTokenRemoved(CacheEntryRemovedArguments arguments)
         {
             this.instanceKey = Guid.NewGuid().ToString();
+            this.instanceKeyLength = this.instanceKey.Length;
         }
 
         private void ItemRemoved(CacheEntryRemovedArguments arguments)
         {
-            var key = arguments.CacheItem.Key;
-            if (string.IsNullOrWhiteSpace(key))
+            var fullKey = arguments.CacheItem.Key;
+            if (string.IsNullOrWhiteSpace(fullKey))
             {
                 return;
             }
@@ -334,19 +341,61 @@ namespace CacheManager.SystemRuntimeCaching
                 return;
             }
 
-            // identify item keys and ignore region or instance key
-            if (key.Contains(":"))
+            // root@region:key;
+            // root@key;
+
+            bool isToken; bool hasRegion; string key; string region;
+            ParseKeyParts(this.instanceKeyLength, fullKey, out isToken, out hasRegion, out region, out key);
+
+            if (!isToken)
             {
-                if (key.Contains("@"))
+                if (hasRegion)
                 {
-                    // example instanceKey@region:itemkey , instanceKey:itemKey
-                    var region = Regex.Match(key, "@(.+?):").Groups[1].Value;
                     this.Stats.OnRemove(region);
                 }
                 else
                 {
                     this.Stats.OnRemove();
                 }
+
+                // trigger cachemanager's remove on evicted and expired items
+                if (arguments.RemovedReason == CacheEntryRemovedReason.Evicted || arguments.RemovedReason == CacheEntryRemovedReason.CacheSpecificEviction)
+                {
+                    this.TriggerCacheSpecificRemove(key, region, CacheItemRemovedReason.Evicted);
+                }
+
+                if (arguments.RemovedReason == CacheEntryRemovedReason.Expired)
+                {
+                    this.TriggerCacheSpecificRemove(key, region, CacheItemRemovedReason.Expired);
+                }
+
+                ////if (arguments.RemovedReason == CacheEntryRemovedReason.ChangeMonitorChanged)
+                ////{
+                ////    this.TriggerCacheSpecificRemove(key, region, CacheItemRemovedReason.RemovedByClear);
+                ////}
+            }
+        }
+
+        private static void ParseKeyParts(int instanceKeyLength, string fullKey, out bool isToken, out bool hasRegion, out string region, out string key)
+        {
+            var relevantKey = fullKey.Substring(instanceKeyLength);
+            isToken = relevantKey[0] == '_';
+            hasRegion = false;
+            region = null;
+            key = null;
+
+            if (!isToken)
+            {
+                hasRegion = relevantKey[0] == '@';
+                var regionLenEnd = hasRegion ? relevantKey.IndexOf('@', 1) : -1;
+
+                int regionLen;
+                regionLen = hasRegion && regionLenEnd > 0 ? int.TryParse(relevantKey.Substring(1, regionLenEnd - 1), out regionLen) ? regionLen : 0 : 0;
+                hasRegion = hasRegion && regionLen > 0;
+
+                var restKey = hasRegion ? relevantKey.Substring(regionLenEnd + 1) : relevantKey;
+                region = hasRegion ? restKey.Substring(0, regionLen) : null;
+                key = restKey.Substring(regionLen + 1);
             }
         }
     }

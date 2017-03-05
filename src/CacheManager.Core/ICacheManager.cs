@@ -41,7 +41,14 @@ namespace CacheManager.Core
         /// <summary>
         /// Occurs when an item was successfully removed from the cache.
         /// </summary>
-        event EventHandler<CacheItemRemovedEventArgs> OnRemove;
+        event EventHandler<CacheActionEventArgs> OnRemove;
+
+        /// <summary>
+        /// Occurs when an item was removed by the cache handle due to expiration or e.g. memory pressure eviction.
+        /// The <see cref="CacheItemRemovedEventArgs.Reason"/> property indicates the reason while the <see cref="CacheItemRemovedEventArgs.Level"/> indicates 
+        /// which handle triggered the event.
+        /// </summary>
+        event EventHandler<CacheItemRemovedEventArgs> OnRemoveByHandle;
 
         /// <summary>
         /// Occurs when an item was successfully updated.
