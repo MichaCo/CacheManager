@@ -597,10 +597,10 @@ namespace CacheManager.Tests
                 var r4 = cache.Remove(key2, region2);   // true
 
                 // assert
-                r1.Should().BeFalse(key1);
-                r2.Should().BeTrue($"{key1} {region1}");
-                r3.Should().BeFalse($"{key2} random region.");
-                r4.Should().BeTrue($"{key2} {region2}");
+                r1.Should().BeFalse(key1 + cache.ToString());
+                r2.Should().BeTrue($"{key1} {region1}" + cache.ToString());
+                r3.Should().BeFalse($"{key2} random region." + cache.ToString());
+                r4.Should().BeTrue($"{key2} {region2}" + cache.ToString());
 
                 data.Calls.Should().Be(8, $"we expect 8 hits for {key1} and {key2} \n-> keys: " + string.Join(", ", data.Keys));
                 data.Keys.ShouldAllBeEquivalentTo(

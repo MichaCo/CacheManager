@@ -136,64 +136,7 @@ namespace CacheManager.Core
         /// <param name="region">The cache region.</param>
         /// <returns><c>True</c> if the <paramref name="key"/> exists, <c>False</c> otherwise.</returns>
         bool Exists(string key, string region);
-
-        /// <summary>
-        /// Changes the expiration <paramref name="mode"/> and <paramref name="timeout"/> for the
-        /// given <paramref name="key"/>.
-        /// </summary>
-        /// <param name="key">The cache key.</param>
-        /// <param name="mode">The expiration mode.</param>
-        /// <param name="timeout">The expiration timeout.</param>
-        void Expire(string key, ExpirationMode mode, TimeSpan timeout);
-
-        /// <summary>
-        /// Changes the expiration <paramref name="mode"/> and <paramref name="timeout"/> for the
-        /// given <paramref name="key"/> in <paramref name="region"/>.
-        /// </summary>
-        /// <param name="key">The cache key.</param>
-        /// <param name="region">The cache region.</param>
-        /// <param name="mode">The expiration mode.</param>
-        /// <param name="timeout">The expiration timeout.</param>
-        void Expire(string key, string region, ExpirationMode mode, TimeSpan timeout);
-
-        /// <summary>
-        /// Sets an absolute expiration date for the cache <paramref name="key"/>.
-        /// </summary>
-        /// <param name="key">The cache key.</param>
-        /// <param name="absoluteExpiration">
-        /// The expiration date. The value must be greater than zero.
-        /// </param>
-        void Expire(string key, DateTimeOffset absoluteExpiration);
-
-        /// <summary>
-        /// Sets an absolute expiration date for the cache <paramref name="key"/> in <paramref name="region"/>.
-        /// </summary>
-        /// <param name="key">The cache key.</param>
-        /// <param name="region">The cache region.</param>
-        /// <param name="absoluteExpiration">
-        /// The expiration date. The value must be greater than zero.
-        /// </param>
-        void Expire(string key, string region, DateTimeOffset absoluteExpiration);
-
-        /// <summary>
-        /// Sets a sliding expiration date for the cache <paramref name="key"/>.
-        /// </summary>
-        /// <param name="key">The cache key.</param>
-        /// <param name="slidingExpiration">
-        /// The expiration timeout. The value must be greater than zero.
-        /// </param>
-        void Expire(string key, TimeSpan slidingExpiration);
-
-        /// <summary>
-        /// Sets a sliding expiration date for the cache <paramref name="key"/> in <paramref name="region"/>.
-        /// </summary>
-        /// <param name="key">The cache key.</param>
-        /// <param name="region">The cache region.</param>
-        /// <param name="slidingExpiration">
-        /// The expiration timeout. The value must be greater than zero.
-        /// </param>
-        void Expire(string key, string region, TimeSpan slidingExpiration);
-
+        
         /// <summary>
         /// Gets a value for the specified key.
         /// </summary>
@@ -338,19 +281,5 @@ namespace CacheManager.Core
         /// If the <paramref name="key"/> or <paramref name="region"/> is null.
         /// </exception>
         bool Remove(string key, string region);
-
-        /// <summary>
-        /// Removes any expiration settings, previously defined, for the cache <paramref name="key"/>.
-        /// </summary>
-        /// <param name="key">The cache key.</param>
-        void RemoveExpiration(string key);
-
-        /// <summary>
-        /// Removes any expiration settings, previously defined, for the cache
-        /// <paramref name="key"/> in <paramref name="region"/>.
-        /// </summary>
-        /// <param name="key">The cache key.</param>
-        /// <param name="region">The cache region.</param>
-        void RemoveExpiration(string key, string region);
     }
 }

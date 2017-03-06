@@ -199,97 +199,6 @@ namespace CacheManager.Core.Internal
         public abstract bool Exists(string key, string region);
 
         /// <summary>
-        /// Changes the expiration <paramref name="mode"/> and <paramref name="timeout"/> for the
-        /// given <paramref name="key"/>.
-        /// </summary>
-        /// <param name="key">The cache key.</param>
-        /// <param name="mode">The expiration mode.</param>
-        /// <param name="timeout">The expiration timeout.</param>
-        public abstract void Expire(string key, ExpirationMode mode, TimeSpan timeout);
-
-        /// <summary>
-        /// Changes the expiration <paramref name="mode"/> and <paramref name="timeout"/> for the
-        /// given <paramref name="key"/> in <paramref name="region"/>.
-        /// </summary>
-        /// <param name="key">The cache key.</param>
-        /// <param name="region">The cache region.</param>
-        /// <param name="mode">The expiration mode.</param>
-        /// <param name="timeout">The expiration timeout.</param>
-        public abstract void Expire(string key, string region, ExpirationMode mode, TimeSpan timeout);
-
-        /// <summary>
-        /// Sets an absolute expiration date for the cache <paramref name="key"/>.
-        /// </summary>
-        /// <param name="key">The cache key.</param>
-        /// <param name="absoluteExpiration">
-        /// The expiration date. The value must be greater than zero.
-        /// </param>
-        public void Expire(string key, DateTimeOffset absoluteExpiration)
-        {
-            TimeSpan timeout = absoluteExpiration.UtcDateTime - DateTime.UtcNow;
-            if (timeout <= TimeSpan.Zero)
-            {
-                throw new ArgumentException("Expiration value must be greater than zero.", nameof(absoluteExpiration));
-            }
-
-            this.Expire(key, ExpirationMode.Absolute, timeout);
-        }
-
-        /// <summary>
-        /// Sets an absolute expiration date for the cache <paramref name="key"/> in <paramref name="region"/>.
-        /// </summary>
-        /// <param name="key">The cache key.</param>
-        /// <param name="region">The cache region.</param>
-        /// <param name="absoluteExpiration">
-        /// The expiration date. The value must be greater than zero.
-        /// </param>
-        public void Expire(string key, string region, DateTimeOffset absoluteExpiration)
-        {
-            TimeSpan timeout = absoluteExpiration.UtcDateTime - DateTime.UtcNow;
-            if (timeout <= TimeSpan.Zero)
-            {
-                throw new ArgumentException("Expiration value must be greater than zero.", nameof(absoluteExpiration));
-            }
-
-            this.Expire(key, region, ExpirationMode.Absolute, timeout);
-        }
-
-        /// <summary>
-        /// Sets a sliding expiration date for the cache <paramref name="key"/>.
-        /// </summary>
-        /// <param name="key">The cache key.</param>
-        /// <param name="slidingExpiration">
-        /// The expiration timeout. The value must be greater than zero.
-        /// </param>
-        public void Expire(string key, TimeSpan slidingExpiration)
-        {
-            if (slidingExpiration <= TimeSpan.Zero)
-            {
-                throw new ArgumentException("Expiration value must be greater than zero.", nameof(slidingExpiration));
-            }
-
-            this.Expire(key, ExpirationMode.Sliding, slidingExpiration);
-        }
-
-        /// <summary>
-        /// Sets a sliding expiration date for the cache <paramref name="key"/> in <paramref name="region"/>.
-        /// </summary>
-        /// <param name="key">The cache key.</param>
-        /// <param name="region">The cache region.</param>
-        /// <param name="slidingExpiration">
-        /// The expiration timeout. The value must be greater than zero.
-        /// </param>
-        public void Expire(string key, string region, TimeSpan slidingExpiration)
-        {
-            if (slidingExpiration <= TimeSpan.Zero)
-            {
-                throw new ArgumentException("Expiration value must be greater than zero.", nameof(slidingExpiration));
-            }
-
-            this.Expire(key, region, ExpirationMode.Sliding, slidingExpiration);
-        }
-
-        /// <summary>
         /// Gets a value for the specified key.
         /// </summary>
         /// <param name="key">The key being used to identify the item within the cache.</param>
@@ -495,26 +404,6 @@ namespace CacheManager.Core.Internal
             NotNullOrWhiteSpace(region, nameof(region));
 
             return this.RemoveInternal(key, region);
-        }
-
-        /// <summary>
-        /// Removes any expiration settings, previously defined, for the cache <paramref name="key"/>.
-        /// </summary>
-        /// <param name="key">The cache key.</param>
-        public void RemoveExpiration(string key)
-        {
-            this.Expire(key, ExpirationMode.None, default(TimeSpan));
-        }
-
-        /// <summary>
-        /// Removes any expiration settings, previously defined, for the cache
-        /// <paramref name="key"/> in <paramref name="region"/>.
-        /// </summary>
-        /// <param name="key">The cache key.</param>
-        /// <param name="region">The cache region.</param>
-        public void RemoveExpiration(string key, string region)
-        {
-            this.Expire(key, region, ExpirationMode.None, default(TimeSpan));
         }
 
         /// <summary>

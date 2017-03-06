@@ -5,8 +5,7 @@ using CacheManager.Core.Internal;
 namespace CacheManager.Core
 {
     /// <summary>
-    /// This interface extends the <c>ICache</c> interface by some cache manager specific methods
-    /// and also defines the events someone can register with.
+    /// This interface extends the <c>ICache</c> interface by some cache manager specific methods and events.
     /// </summary>
     /// <typeparam name="TCacheValue">The type of the cache item value.</typeparam>
     public interface ICacheManager<TCacheValue> : ICache<TCacheValue>
@@ -45,7 +44,7 @@ namespace CacheManager.Core
 
         /// <summary>
         /// Occurs when an item was removed by the cache handle due to expiration or e.g. memory pressure eviction.
-        /// The <see cref="CacheItemRemovedEventArgs.Reason"/> property indicates the reason while the <see cref="CacheItemRemovedEventArgs.Level"/> indicates 
+        /// The <see cref="CacheItemRemovedEventArgs.Reason"/> property indicates the reason while the <see cref="CacheItemRemovedEventArgs.Level"/> indicates
         /// which handle triggered the event.
         /// </summary>
         event EventHandler<CacheItemRemovedEventArgs> OnRemoveByHandle;
@@ -610,5 +609,117 @@ namespace CacheManager.Core
         /// as Get plus Put.
         /// </remarks>
         bool TryUpdate(string key, string region, Func<TCacheValue, TCacheValue> updateValue, int maxRetries, out TCacheValue value);
+
+        /// <summary>
+        /// Explicitly sets the expiration <paramref name="mode"/> and <paramref name="timeout"/> for the
+        /// <paramref name="key"/> in all cache layers.
+        /// This operation overrides any configured expiration per cache handle for this particular item.
+        /// </summary>
+        /// <remarks>
+        /// Don't use this in concurrency critical scenarios if you are using distributed caches as <code>Expire</code> is not atomic;
+        /// <code>Expire</code> uses <see cref="ICache{TCacheValue}.Put(CacheItem{TCacheValue})"/> to store the item with the new expiration.
+        /// </remarks>
+        /// <param name="key">The cache key.</param>
+        /// <param name="mode">The expiration mode.</param>
+        /// <param name="timeout">The expiration timeout.</param>
+        void Expire(string key, ExpirationMode mode, TimeSpan timeout);
+
+        /// <summary>
+        /// Explicitly sets the expiration <paramref name="mode"/> and <paramref name="timeout"/> for the
+        /// <paramref name="key"/> in <paramref name="region"/> in all cache layers.
+        /// This operation overrides any configured expiration per cache handle for this particular item.
+        /// </summary>
+        /// <remarks>
+        /// Don't use this in concurrency critical scenarios if you are using distributed caches as <code>Expire</code> is not atomic;
+        /// <code>Expire</code> uses <see cref="ICache{TCacheValue}.Put(CacheItem{TCacheValue})"/> to store the item with the new expiration.
+        /// </remarks>
+        /// <param name="key">The cache key.</param>
+        /// <param name="region">The cache region.</param>
+        /// <param name="mode">The expiration mode.</param>
+        /// <param name="timeout">The expiration timeout.</param>
+        void Expire(string key, string region, ExpirationMode mode, TimeSpan timeout);
+
+        /// <summary>
+        /// Explicitly sets an absolute expiration date for the <paramref name="key"/> in all cache layers.
+        /// This operation overrides any configured expiration per cache handle for this particular item.
+        /// </summary>
+        /// <remarks>
+        /// Don't use this in concurrency critical scenarios if you are using distributed caches as <code>Expire</code> is not atomic;
+        /// <code>Expire</code> uses <see cref="ICache{TCacheValue}.Put(CacheItem{TCacheValue})"/> to store the item with the new expiration.
+        /// </remarks>
+        /// <param name="key">The cache key.</param>
+        /// <param name="absoluteExpiration">
+        /// The expiration date. The value must be greater than zero.
+        /// </param>
+        void Expire(string key, DateTimeOffset absoluteExpiration);
+
+        /// <summary>
+        /// Explicitly sets an absolute expiration date for the <paramref name="key"/> in <paramref name="region"/> in all cache layers.
+        /// This operation overrides any configured expiration per cache handle for this particular item.
+        /// </summary>
+        /// <remarks>
+        /// Don't use this in concurrency critical scenarios if you are using distributed caches as <code>Expire</code> is not atomic;
+        /// <code>Expire</code> uses <see cref="ICache{TCacheValue}.Put(CacheItem{TCacheValue})"/> to store the item with the new expiration.
+        /// </remarks>
+        /// <param name="key">The cache key.</param>
+        /// <param name="region">The cache region.</param>
+        /// <param name="absoluteExpiration">
+        /// The expiration date. The value must be greater than zero.
+        /// </param>
+        void Expire(string key, string region, DateTimeOffset absoluteExpiration);
+
+        /// <summary>
+        /// Explicitly sets a sliding expiration date for the <paramref name="key"/> in all cache layers.
+        /// This operation overrides any configured expiration per cache handle for this particular item.
+        /// </summary>
+        /// <remarks>
+        /// Don't use this in concurrency critical scenarios if you are using distributed caches as <code>Expire</code> is not atomic;
+        /// <code>Expire</code> uses <see cref="ICache{TCacheValue}.Put(CacheItem{TCacheValue})"/> to store the item with the new expiration.
+        /// </remarks>
+        /// <param name="key">The cache key.</param>
+        /// <param name="slidingExpiration">
+        /// The expiration timeout. The value must be greater than zero.
+        /// </param>
+        void Expire(string key, TimeSpan slidingExpiration);
+
+        /// <summary>
+        /// Explicitly sets a sliding expiration date for the <paramref name="key"/> in <paramref name="region"/> in all cache layers.
+        /// This operation overrides any configured expiration per cache handle for this particular item.
+        /// </summary>
+        /// <remarks>
+        /// Don't use this in concurrency critical scenarios if you are using distributed caches as <code>Expire</code> is not atomic;
+        /// <code>Expire</code> uses <see cref="ICache{TCacheValue}.Put(CacheItem{TCacheValue})"/> to store the item with the new expiration.
+        /// </remarks>
+        /// <param name="key">The cache key.</param>
+        /// <param name="region">The cache region.</param>
+        /// <param name="slidingExpiration">
+        /// The expiration timeout. The value must be greater than zero.
+        /// </param>
+        void Expire(string key, string region, TimeSpan slidingExpiration);
+
+        /// <summary>
+        /// Explicitly removes any expiration settings previously defined for the <paramref name="key"/> 
+        /// in all cache layers and sets the expiration mode to <see cref="ExpirationMode.None"/>.
+        /// This operation overrides any configured expiration per cache handle for this particular item.
+        /// </summary>
+        /// <remarks>
+        /// Don't use this in concurrency critical scenarios if you are using distributed caches as <code>Expire</code> is not atomic;
+        /// <code>Expire</code> uses <see cref="ICache{TCacheValue}.Put(CacheItem{TCacheValue})"/> to store the item with the new expiration.
+        /// </remarks>
+        /// <param name="key">The cache key.</param>
+        void RemoveExpiration(string key);
+
+        /// <summary>
+        /// Explicitly removes any expiration settings previously defined for the <paramref name="key"/> in <paramref name="region"/>
+        /// in all cache layers and sets the expiration mode to <see cref="ExpirationMode.None"/>.
+        /// This operation overrides any configured expiration per cache handle for this particular item.
+        /// </summary>
+        /// <remarks>
+        /// Don't use this in concurrency critical scenarios if you are using distributed caches as <code>Expire</code> is not atomic;
+        /// <code>Expire</code> uses <see cref="ICache{TCacheValue}.Put(CacheItem{TCacheValue})"/> to store the item with the new expiration.
+        /// </remarks>
+        /// <param name="key">The cache key.</param>
+        /// <param name="region">The cache region.</param>
+        void RemoveExpiration(string key, string region);
     }
 }

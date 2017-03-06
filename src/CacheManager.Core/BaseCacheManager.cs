@@ -222,46 +222,6 @@ namespace CacheManager.Core
         }
 
         /// <inheritdoc />
-        public override void Expire(string key, ExpirationMode mode, TimeSpan timeout)
-        {
-            this.CheckDisposed();
-            if (this.logTrace)
-            {
-                this.Logger.LogTrace("Expire [{0}] stareted.", key);
-            }
-
-            foreach (var handle in this.cacheHandles)
-            {
-                if (this.logTrace)
-                {
-                    this.Logger.LogTrace("Update expiration of [{0}] on handle {1}.", key, handle.Configuration.Name);
-                }
-
-                handle.Expire(key, mode, timeout);
-            }
-        }
-
-        /// <inheritdoc />
-        public override void Expire(string key, string region, ExpirationMode mode, TimeSpan timeout)
-        {
-            this.CheckDisposed();
-            if (this.logTrace)
-            {
-                this.Logger.LogTrace("Expire [{0}:{1}] stareted.", region, key);
-            }
-
-            foreach (var handle in this.cacheHandles)
-            {
-                if (this.logTrace)
-                {
-                    this.Logger.LogTrace("Update expiration of [{0}:{1}] on handle {2}.", region, key, handle.Configuration.Name);
-                }
-
-                handle.Expire(key, region, mode, timeout);
-            }
-        }
-
-        /// <inheritdoc />
         public override bool Exists(string key)
         {
             foreach (var handle in this.cacheHandles)

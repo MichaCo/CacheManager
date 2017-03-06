@@ -280,7 +280,7 @@ namespace CacheManager.Tests
 
                     if (!cache.Add(key, value, region))
                     {
-                        throw new InvalidOperationException("Adding key " + key + ":" + value + " didn't work.");
+                        throw new InvalidOperationException("Adding key " + key + ":" + value + " didn't work. For cache\n" + cache.ToString());
                     }
 
                     keys.Add(new Tuple<string, string, string>(region, key, value));
