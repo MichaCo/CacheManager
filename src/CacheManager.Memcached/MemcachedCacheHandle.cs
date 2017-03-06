@@ -193,7 +193,7 @@ namespace CacheManager.Memcached
         /// <inheritdoc />
         public override bool Exists(string key)
         {
-            var result = this.Cache.ExecuteAppend(GetKey(key), default(ArraySegment<byte>));
+            var result = this.Cache.ExecuteAppend(GetKey(key, null, false), default(ArraySegment<byte>));
             return result.StatusCode.HasValue && result.StatusCode.Value != (int)StatusCode.KeyNotFound;
         }
 
@@ -202,7 +202,7 @@ namespace CacheManager.Memcached
         {
             NotNullOrWhiteSpace(region, nameof(region));
 
-            var result = this.Cache.ExecuteAppend(GetKey(key, region), default(ArraySegment<byte>));
+            var result = this.Cache.ExecuteAppend(GetKey(key, region, false), default(ArraySegment<byte>));
             return result.StatusCode.HasValue && result.StatusCode.Value != (int)StatusCode.KeyNotFound;
         }
 
@@ -350,7 +350,7 @@ namespace CacheManager.Memcached
         /// </returns>
         protected override bool RemoveInternal(string key, string region)
         {
-            var result = this.Cache.ExecuteRemove(GetKey(key, region));
+            var result = this.Cache.ExecuteRemove(GetKey(key, region, false));
             int statusCode = result.StatusCode ?? result.InnerResult?.StatusCode ?? -1;
             if (result.Success && statusCode != (int)StatusCode.KeyNotFound)
             {
@@ -504,7 +504,7 @@ namespace CacheManager.Memcached
             }
         }
 
-        private string GetKey(string key, string region = null)
+        private string GetKey(string key, string region = null, bool eventuallyCreateNewRegion = true)
         {
             if (string.IsNullOrWhiteSpace(key))
             {
@@ -518,12 +518,20 @@ namespace CacheManager.Memcached
                 var regionKey = this.GetRegionPrefix(region);
                 if (regionKey == null)
                 {
-                    if (this.Logger.IsEnabled(LogLevel.Debug))
+                    if (eventuallyCreateNewRegion)
                     {
-                        this.Logger.LogDebug("Region key for region '{0}' not present, creating a new one...", region);
-                    }
+                        if (this.Logger.IsEnabled(LogLevel.Debug))
+                        {
+                            this.Logger.LogDebug("Region key for region '{0}' not present, creating a new one...", region);
+                        }
 
-                    regionKey = StoreNewRegionPrefix(region);
+                        regionKey = StoreNewRegionPrefix(region);
+                    }
+                    else
+                    {
+                        // create a fake one (e.g. on Remove key, we don't have to create a region if it doesn't exist at all)
+                        regionKey = (Clock.GetUnixTimestampMillis() * -1).ToString();
+                    }
                 }
 
                 fullKey = string.Concat(regionKey, ":", key);
