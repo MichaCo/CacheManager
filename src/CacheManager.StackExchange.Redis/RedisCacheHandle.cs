@@ -527,7 +527,7 @@ return result";
 
             if (createdItem.HasValue)
             {
-                cacheItem = cacheItem.WithCreated(new DateTime((long)createdItem));
+                cacheItem = cacheItem.WithCreated(new DateTime((long)createdItem, DateTimeKind.Utc));
             }
 
             if (cacheItem.IsExpired)
@@ -607,7 +607,7 @@ return result";
 
                 if (createdItem.HasValue)
                 {
-                    cacheItem = cacheItem.WithCreated(new DateTime((long)createdItem));
+                    cacheItem = cacheItem.WithCreated(new DateTime((long)createdItem, DateTimeKind.Utc));
                 }
 
                 if (cacheItem.IsExpired)

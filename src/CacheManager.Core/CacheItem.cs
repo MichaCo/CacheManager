@@ -120,7 +120,6 @@ namespace CacheManager.Core
             this.ExpirationTimeout = (this.ExpirationMode == ExpirationMode.None || this.ExpirationMode == ExpirationMode.Default) ? TimeSpan.Zero : timeout ?? TimeSpan.Zero;
             this.UsesExpirationDefaults = expirationDefaults;
 
-
             // validation check for very high expiration time.
             // Otherwise this will lead to all kinds of errors (e.g. adding time to sliding while using a TimeSpan with long.MaxValue ticks)
             if (this.ExpirationTimeout.TotalDays > 365)
@@ -130,6 +129,15 @@ namespace CacheManager.Core
             if (this.ExpirationMode != ExpirationMode.Default && this.ExpirationMode != ExpirationMode.None && this.ExpirationTimeout <= TimeSpan.Zero)
             {
                 throw new ArgumentOutOfRangeException(nameof(timeout), "Expiration timeout must be greater than zero if expiration mode is defined.");
+            }
+
+            if (created.HasValue && created.Value.Kind != DateTimeKind.Utc)
+            {
+                throw new ArgumentException($"Created date kind must be {DateTimeKind.Utc}.", nameof(created));
+            }
+            if (lastAccessed.HasValue && lastAccessed.Value.Kind != DateTimeKind.Utc)
+            {
+                throw new ArgumentException($"Last accessed date kind must be {DateTimeKind.Utc}.", nameof(lastAccessed));
             }
 
             this.CreatedUtc = created ?? DateTime.UtcNow;
