@@ -594,7 +594,7 @@ namespace CacheManager.Core
             if (this.logTrace)
             {
                 this.Logger.LogTrace(
-                    "Add [{0}] to handles with update mode '{1}'.",
+                    "Start updating handles with [{0}] and update mode '{1}'.",
                     item,
                     this.Configuration.UpdateMode);
             }
@@ -613,7 +613,7 @@ namespace CacheManager.Core
                         {
                             if (this.logTrace)
                             {
-                                this.Logger.LogTrace("Add [{0}:{1}] to handles, handle '{2}'.", item.Region, item.Key, handleIndex);
+                                this.Logger.LogTrace("Updating handles, added [{0}] to handle '{1}'.", item, this.cacheHandles[handleIndex].Configuration.Name);
                             }
 
                             this.cacheHandles[handleIndex].Add(item);
@@ -636,7 +636,7 @@ namespace CacheManager.Core
                         {
                             if (this.logTrace)
                             {
-                                this.Logger.LogTrace("Add [{0}:{1}] to handles, handle '{2}'.", item.Region, item.Key, handleIndex);
+                                this.Logger.LogTrace("Updating handles, added [{0}] to handle '{1}'.", item, this.cacheHandles[handleIndex].Configuration.Name);
                             }
 
                             this.cacheHandles[handleIndex].Add(item);

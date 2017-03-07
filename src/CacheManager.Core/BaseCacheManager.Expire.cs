@@ -14,7 +14,7 @@ namespace CacheManager.Core
         public void Expire(string key, string region, ExpirationMode mode, TimeSpan timeout)
             => this.ExpireInternal(key, region, mode, timeout);
 
-        internal void ExpireInternal(string key, string region, ExpirationMode mode, TimeSpan timeout)
+        private void ExpireInternal(string key, string region, ExpirationMode mode, TimeSpan timeout)
         {
             this.CheckDisposed();
             
