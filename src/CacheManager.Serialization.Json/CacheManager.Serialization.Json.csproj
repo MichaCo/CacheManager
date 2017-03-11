@@ -1,0 +1,35 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Description>CacheManager extension package providing JSON serialization for distributed caches. CacheManager is an open source caching abstraction layer for .NET written in C#. It supports various cache providers and implements many advanced features. The Core library contains a Newtonsoft.Json based serializer implementation which can be used instead of the default binary serializer.</Description>
+    <Copyright>Copyright (c) 2017 MichaConrad</Copyright>
+    <VersionPrefix>1.0.0</VersionPrefix>
+    <Authors>MichaConrad</Authors>
+    <TargetFrameworks>netstandard1.1;net40;net45</TargetFrameworks>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <LangVersion>6</LangVersion>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <AssemblyName>CacheManager.Serialization.Json</AssemblyName>
+    <AssemblyOriginatorKeyFile>../../tools/key.snk</AssemblyOriginatorKeyFile>
+    <SignAssembly>true</SignAssembly>
+    <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
+    <PackageId>CacheManager.Serialization.Json</PackageId>
+    <PackageTags>Caching;Cache;CacheManager;Distributed Cache;StackExchange Redis;Azure AppFabric;Memcached</PackageTags>
+    <PackageProjectUrl>http://cachemanager.michaco.net</PackageProjectUrl>
+    <PackageLicenseUrl>https://github.com/MichaCo/CacheManager/blob/master/LICENSE</PackageLicenseUrl>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/MichaCo/CacheManager</RepositoryUrl>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
+    <ProjectReference Include="..\CacheManager.Core\CacheManager.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.1' ">
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net40' ">
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
+  </ItemGroup>
+</Project>

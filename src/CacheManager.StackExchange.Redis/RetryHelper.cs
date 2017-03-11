@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using CacheManager.Core.Logging;
-using StackRedis = StackExchange.Redis;
+using StackExchange.Redis;
 
 namespace CacheManager.Redis
 {
@@ -24,7 +24,7 @@ namespace CacheManager.Redis
 
                 // might occur on lua script execution on a readonly slave because the master just died.
                 // Should recover via fail over
-                catch (StackRedis.RedisServerException ex)
+                catch (RedisServerException ex)
                 {
                     if (tries >= retries)
                     {
@@ -39,7 +39,7 @@ namespace CacheManager.Redis
                     Task.Delay(timeOut).Wait();
 #endif
                 }
-                catch (StackRedis.RedisConnectionException ex)
+                catch (RedisConnectionException ex)
                 {
                     if (tries >= retries)
                     {
@@ -79,7 +79,7 @@ namespace CacheManager.Redis
 
                     aggregateException.Handle(e =>
                     {
-                        if (e is StackRedis.RedisConnectionException || e is System.TimeoutException || e is StackRedis.RedisServerException)
+                        if (e is RedisConnectionException || e is System.TimeoutException || e is RedisServerException)
                         {
                             logger.LogWarn(e, WarningMessage, tries, retries);
 #if NET40

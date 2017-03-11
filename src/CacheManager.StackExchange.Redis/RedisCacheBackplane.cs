@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 using CacheManager.Core;
 using CacheManager.Core.Internal;
 using CacheManager.Core.Logging;
+using StackExchange.Redis;
 using static CacheManager.Core.Utility.Guard;
-using StackRedis = StackExchange.Redis;
 
 namespace CacheManager.Redis
 {
@@ -138,7 +138,7 @@ namespace CacheManager.Redis
 
         private void Publish(string message)
         {
-            this.connection.Subscriber.Publish(this.channelName, message, StackRedis.CommandFlags.HighPriority);
+            this.connection.Subscriber.Publish(this.channelName, message, CommandFlags.HighPriority);
         }
 
         private void PublishMessage(BackplaneMessage message)
@@ -292,7 +292,7 @@ namespace CacheManager.Redis
                         }
                     }
                 },
-                StackRedis.CommandFlags.FireAndForget);
+                CommandFlags.FireAndForget);
         }
     }
 }

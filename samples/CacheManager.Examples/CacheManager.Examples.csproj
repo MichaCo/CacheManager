@@ -1,0 +1,42 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Description>CacheManager.Examples Console Application</Description>
+    <Authors>MICHA</Authors>
+    <TargetFramework>net451</TargetFramework>
+    <AssemblyName>CacheManager.Examples</AssemblyName>
+    <OutputType>Exe</OutputType>
+    <PackageId>CacheManager.Examples</PackageId>
+    <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
+    <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>
+    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
+    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
+    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+    <GenerateAssemblyCopyrightAttribute>false</GenerateAssemblyCopyrightAttribute>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\CacheManager.Core\CacheManager.Core.csproj" />
+    <ProjectReference Include="..\..\src\CacheManager.Microsoft.Extensions.Configuration\CacheManager.Microsoft.Extensions.Configuration.csproj" />
+    <ProjectReference Include="..\..\src\CacheManager.Microsoft.Extensions.Logging\CacheManager.Microsoft.Extensions.Logging.csproj" />
+    <ProjectReference Include="..\..\src\CacheManager.Serialization.Json\CacheManager.Serialization.Json.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net451' ">
+    <ProjectReference Include="..\..\src\CacheManager.StackExchange.Redis\CacheManager.StackExchange.Redis.csproj" />
+    <ProjectReference Include="..\..\src\CacheManager.SystemRuntimeCaching\CacheManager.SystemRuntimeCaching.csproj" />
+    <Reference Include="System" />
+    <Reference Include="Microsoft.CSharp" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="1.0.2" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="1.0.2" />
+    <PackageReference Include="Unity" Version="4.0.1" />
+  </ItemGroup>
+
+</Project>

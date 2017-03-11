@@ -5,8 +5,8 @@ using System.Text;
 using CacheManager.Core;
 using CacheManager.Core.Internal;
 using CacheManager.Core.Logging;
+using StackExchange.Redis;
 using static CacheManager.Core.Utility.Guard;
-using StackRedis = StackExchange.Redis;
 
 namespace CacheManager.Redis
 {
@@ -79,7 +79,7 @@ if (result[2] and result[2] == '2') then
 end
 return result";
 
-        private readonly IDictionary<ScriptType, StackRedis.LoadedLuaScript> shaScripts = new Dictionary<ScriptType, StackRedis.LoadedLuaScript>();
+        private readonly IDictionary<ScriptType, LoadedLuaScript> shaScripts = new Dictionary<ScriptType, LoadedLuaScript>();
         private readonly ICacheManagerConfiguration managerConfiguration;
         private readonly RedisValueConverter valueConverter;
         private readonly RedisConnectionManager connection;
@@ -198,13 +198,13 @@ return result";
         /// Gets the servers.
         /// </summary>
         /// <value>The list of servers.</value>
-        public IEnumerable<StackRedis.IServer> Servers => this.connection.Servers;
+        public IEnumerable<IServer> Servers => this.connection.Servers;
 
         /// <summary>
         /// Gets the features the redis server supports.
         /// </summary>
         /// <value>The server features.</value>
-        public StackRedis.RedisFeatures Features => this.connection.Features;
+        public RedisFeatures Features => this.connection.Features;
 
 #pragma warning restore CS3003 // Type is not CLS-compliant
 
@@ -261,7 +261,7 @@ return result";
                     // 01/32/16 changed to remove one by one because on clusters the keys could belong to multiple slots
                     foreach (var key in hashKeys.Where(p => p.HasValue))
                     {
-                        this.connection.Database.KeyDelete(key.ToString(), StackRedis.CommandFlags.FireAndForget);
+                        this.connection.Database.KeyDelete(key.ToString(), CommandFlags.FireAndForget);
                     }
                 }
 
@@ -374,7 +374,7 @@ return result";
                     var oldValue = this.ToRedisValue(item.Value);
 
                     var tran = this.connection.Database.CreateTransaction();
-                    tran.AddCondition(StackRedis.Condition.HashEqual(fullKey, HashFieldValue, oldValue));
+                    tran.AddCondition(Condition.HashEqual(fullKey, HashFieldValue, oldValue));
 
                     // run update
                     var newValue = updateValue(item.Value);
@@ -396,7 +396,7 @@ return result";
 
                         if (newItem.ExpirationMode == ExpirationMode.Sliding && newItem.ExpirationTimeout != TimeSpan.Zero)
                         {
-                            this.connection.Database.KeyExpire(fullKey, newItem.ExpirationTimeout, StackRedis.CommandFlags.FireAndForget);
+                            this.connection.Database.KeyExpire(fullKey, newItem.ExpirationTimeout, CommandFlags.FireAndForget);
                         }
 
                         return UpdateItemResult.ForSuccess(newItem, tries > 1, tries);
@@ -425,7 +425,7 @@ return result";
         /// <c>true</c> if the key was not already added to the cache, <c>false</c> otherwise.
         /// </returns>
         protected override bool AddInternalPrepared(CacheItem<TCacheValue> item) =>
-            this.Retry(() => this.Set(item, StackRedis.When.NotExists, true));
+            this.Retry(() => this.Set(item, When.NotExists, true));
 
         /// <summary>
         /// Performs application-defined tasks associated with freeing, releasing, or resetting
@@ -480,7 +480,7 @@ return result";
                 throw new InvalidOperationException("Error retrieving " + fullKey);
             }
 
-            var values = (StackRedis.RedisValue[])result;
+            var values = (RedisValue[])result;
 
             // the first item stores the value
             var item = values[0];
@@ -552,7 +552,7 @@ return result";
                 // and it is sliding, we also retrieve the timeout later
                 var values = this.connection.Database.HashGet(
                     fullKey,
-                    new StackRedis.RedisValue[]
+                    new RedisValue[]
                     {
                         HashFieldValue,
                         HashFieldExpirationMode,
@@ -620,7 +620,7 @@ return result";
                 // update sliding
                 if (expirationMode == ExpirationMode.Sliding && expirationTimeout != default(TimeSpan))
                 {
-                    this.connection.Database.KeyExpire(fullKey, cacheItem.ExpirationTimeout, StackRedis.CommandFlags.FireAndForget);
+                    this.connection.Database.KeyExpire(fullKey, cacheItem.ExpirationTimeout, CommandFlags.FireAndForget);
                 }
 
                 return cacheItem;
@@ -644,7 +644,7 @@ return result";
         /// </summary>
         /// <param name="item">The <c>CacheItem</c> to be added to the cache.</param>
         protected override void PutInternalPrepared(CacheItem<TCacheValue> item) =>
-            this.Retry(() => this.Set(item, StackRedis.When.Always, false));
+            this.Retry(() => this.Set(item, When.Always, false));
 
         /// <summary>
         /// Removes a value from the cache for the specified key.
@@ -674,7 +674,7 @@ return result";
                 // clean up region
                 if (!string.IsNullOrWhiteSpace(region))
                 {
-                    this.connection.Database.HashDelete(region, fullKey, StackRedis.CommandFlags.FireAndForget);
+                    this.connection.Database.HashDelete(region, fullKey, CommandFlags.FireAndForget);
                 }
 
                 // remove key
@@ -750,7 +750,7 @@ return result";
             return fullKey;
         }
 
-        private TCacheValue FromRedisValue(StackRedis.RedisValue value, string valueType)
+        private TCacheValue FromRedisValue(RedisValue value, string valueType)
         {
             if (value.IsNull || value.IsNullOrEmpty || !value.HasValue)
             {
@@ -766,7 +766,7 @@ return result";
             return this.valueConverter.FromRedisValue<TCacheValue>(value, valueType);
         }
 
-        private StackRedis.RedisValue ToRedisValue(TCacheValue value)
+        private RedisValue ToRedisValue(TCacheValue value)
         {
             var typedConverter = this.valueConverter as IRedisValueConverter<TCacheValue>;
             if (typedConverter != null)
@@ -788,7 +788,7 @@ return result";
                     return true;
                 });
 
-        private bool Set(CacheItem<TCacheValue> item, StackRedis.When when, bool sync = false)
+        private bool Set(CacheItem<TCacheValue> item, When when, bool sync = false)
         {
             if (!this.isLuaAllowed)
             {
@@ -798,10 +798,10 @@ return result";
             var fullKey = GetKey(item.Key, item.Region);
             var value = this.ToRedisValue(item.Value);
 
-            var flags = sync ? StackRedis.CommandFlags.None : StackRedis.CommandFlags.FireAndForget;
+            var flags = sync ? CommandFlags.None : CommandFlags.FireAndForget;
 
             // ARGV [1]: value, [2]: type, [3]: expirationMode, [4]: expirationTimeout(millis), [5]: created(ticks)
-            var parameters = new StackRedis.RedisValue[]
+            var parameters = new RedisValue[]
             {
                 value,
                 item.ValueType.AssemblyQualifiedName,
@@ -811,8 +811,8 @@ return result";
                 item.UsesExpirationDefaults
             };
 
-            StackRedis.RedisResult result;
-            if (when == StackRedis.When.NotExists)
+            RedisResult result;
+            if (when == When.NotExists)
             {
                 result = this.Eval(ScriptType.Add, fullKey, parameters, flags);
             }
@@ -823,12 +823,12 @@ return result";
 
             if (result == null)
             {
-                if (flags.HasFlag(StackRedis.CommandFlags.FireAndForget))
+                if (flags.HasFlag(CommandFlags.FireAndForget))
                 {
                     if (!string.IsNullOrWhiteSpace(item.Region))
                     {
                         // setting region lookup key if region is being used
-                        this.connection.Database.HashSet(item.Region, fullKey, "regionKey", StackRedis.When.Always, StackRedis.CommandFlags.FireAndForget);
+                        this.connection.Database.HashSet(item.Region, fullKey, "regionKey", When.Always, CommandFlags.FireAndForget);
                     }
 
                     // put runs via fire and forget, so we don't get a result back
@@ -840,7 +840,7 @@ return result";
             }
             else
             {
-                if (result.IsNull && when == StackRedis.When.NotExists)
+                if (result.IsNull && when == When.NotExists)
                 {
                     // add failed because element exists already
                     if (this.Logger.IsEnabled(LogLevel.Information))
@@ -850,7 +850,7 @@ return result";
                     return false;
                 }
 
-                var resultValue = (StackRedis.RedisValue)result;
+                var resultValue = (RedisValue)result;
 
                 if (resultValue.HasValue && resultValue.ToString().Equals("OK", StringComparison.OrdinalIgnoreCase))
                 {
@@ -859,7 +859,7 @@ return result";
                     {
                         // setting region lookup key if region is being used
                         // we cannot do that within the lua because the region could be on another cluster node!
-                        this.connection.Database.HashSet(item.Region, fullKey, "regionKey", StackRedis.When.Always, StackRedis.CommandFlags.FireAndForget);
+                        this.connection.Database.HashSet(item.Region, fullKey, "regionKey", When.Always, CommandFlags.FireAndForget);
                     }
 
                     return true;
@@ -870,35 +870,35 @@ return result";
             }
         }
 
-        private bool SetNoScript(CacheItem<TCacheValue> item, StackRedis.When when, bool sync = false)
+        private bool SetNoScript(CacheItem<TCacheValue> item, When when, bool sync = false)
         {
             return this.Retry(() =>
             {
                 var fullKey = GetKey(item.Key, item.Region);
                 var value = this.ToRedisValue(item.Value);
 
-                StackRedis.HashEntry[] metaValues = new[]
+                HashEntry[] metaValues = new[]
                 {
-                    new StackRedis.HashEntry(HashFieldType, item.ValueType.AssemblyQualifiedName),
-                    new StackRedis.HashEntry(HashFieldExpirationMode, (int)item.ExpirationMode),
-                    new StackRedis.HashEntry(HashFieldExpirationTimeout, (long)item.ExpirationTimeout.TotalMilliseconds),
-                    new StackRedis.HashEntry(HashFieldCreated, item.CreatedUtc.Ticks),
-                    new StackRedis.HashEntry(HashFieldUsesDefaultExp, item.UsesExpirationDefaults)
+                    new HashEntry(HashFieldType, item.ValueType.AssemblyQualifiedName),
+                    new HashEntry(HashFieldExpirationMode, (int)item.ExpirationMode),
+                    new HashEntry(HashFieldExpirationTimeout, (long)item.ExpirationTimeout.TotalMilliseconds),
+                    new HashEntry(HashFieldCreated, item.CreatedUtc.Ticks),
+                    new HashEntry(HashFieldUsesDefaultExp, item.UsesExpirationDefaults)
                 };
 
-                var flags = sync ? StackRedis.CommandFlags.None : StackRedis.CommandFlags.FireAndForget;
+                var flags = sync ? CommandFlags.None : CommandFlags.FireAndForget;
 
                 var setResult = this.connection.Database.HashSet(fullKey, HashFieldValue, value, when, flags);
 
                 // setResult from fire and forget is alwys false, so we have to assume it works...
-                setResult = flags == StackRedis.CommandFlags.FireAndForget ? true : setResult;
+                setResult = flags == CommandFlags.FireAndForget ? true : setResult;
 
                 if (setResult)
                 {
                     if (!string.IsNullOrWhiteSpace(item.Region))
                     {
                         // setting region lookup key if region is being used
-                        this.connection.Database.HashSet(item.Region, fullKey, "regionKey", StackRedis.When.Always, StackRedis.CommandFlags.FireAndForget);
+                        this.connection.Database.HashSet(item.Region, fullKey, "regionKey", When.Always, CommandFlags.FireAndForget);
                     }
 
                     // set the additional fields in case sliding expiration should be used in this
@@ -911,12 +911,12 @@ return result";
 
                     if (item.ExpirationMode != ExpirationMode.None && item.ExpirationMode != ExpirationMode.Default)
                     {
-                        this.connection.Database.KeyExpire(fullKey, item.ExpirationTimeout, StackRedis.CommandFlags.FireAndForget);
+                        this.connection.Database.KeyExpire(fullKey, item.ExpirationTimeout, CommandFlags.FireAndForget);
                     }
                     else
                     {
                         // bugfix #9
-                        this.connection.Database.KeyPersist(fullKey, StackRedis.CommandFlags.FireAndForget);
+                        this.connection.Database.KeyPersist(fullKey, CommandFlags.FireAndForget);
                     }
                 }
 
@@ -924,7 +924,7 @@ return result";
             });
         }
 
-        private StackRedis.RedisResult Eval(ScriptType scriptType, StackRedis.RedisKey redisKey, StackRedis.RedisValue[] values = null, StackRedis.CommandFlags flags = StackRedis.CommandFlags.None)
+        private RedisResult Eval(ScriptType scriptType, RedisKey redisKey, RedisValue[] values = null, CommandFlags flags = CommandFlags.None)
         {
             if (!this.scriptsLoaded)
             {
@@ -938,7 +938,7 @@ return result";
                 }
             }
 
-            StackRedis.LoadedLuaScript script;
+            LoadedLuaScript script;
             if (!this.shaScripts.TryGetValue(scriptType, out script))
             {
                 this.Logger.LogCritical("Something is wrong with the Lua scripts. Seem to be not loaded.");
@@ -950,7 +950,7 @@ return result";
             {
                 return this.connection.Database.ScriptEvaluate(script.Hash, new[] { redisKey }, values, flags);
             }
-            catch (StackRedis.RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.OrdinalIgnoreCase))
+            catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.OrdinalIgnoreCase))
             {
                 this.Logger.LogInfo("Received NOSCRIPT from server. Reloading scripts...");
                 this.LoadScripts();
@@ -966,10 +966,10 @@ return result";
             {
                 this.Logger.LogInfo("Loading scripts.");
 
-                var putLua = StackRedis.LuaScript.Prepare(ScriptPut);
-                var addLua = StackRedis.LuaScript.Prepare(ScriptAdd);
-                var updateLua = StackRedis.LuaScript.Prepare(ScriptUpdate);
-                var getLua = StackRedis.LuaScript.Prepare(ScriptGet);
+                var putLua = LuaScript.Prepare(ScriptPut);
+                var addLua = LuaScript.Prepare(ScriptAdd);
+                var updateLua = LuaScript.Prepare(ScriptUpdate);
+                var getLua = LuaScript.Prepare(ScriptGet);
 
                 foreach (var server in this.Servers)
                 {

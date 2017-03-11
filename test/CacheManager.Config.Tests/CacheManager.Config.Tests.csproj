@@ -1,0 +1,59 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Description>CacheManager is an open source caching abstraction layer for .NET written in C#. It supports various cache providers and implements many advanced features.</Description>
+    <VersionPrefix>1.0.1</VersionPrefix>
+    <Authors>MichaConrad</Authors>
+    <TargetFrameworks>net451;netcoreapp1.0</TargetFrameworks>
+    <AssemblyName>CacheManager.Config.Tests</AssemblyName>
+    <OutputType>Exe</OutputType>
+    <AssemblyOriginatorKeyFile>../../tools/key.snk</AssemblyOriginatorKeyFile>
+    <SignAssembly>true</SignAssembly>
+    <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
+    <PackageId>CacheManager.Config.Tests</PackageId>
+    <RuntimeFrameworkVersion Condition=" '$(TargetFramework)' == 'netcoreapp1.0' ">1.0.4</RuntimeFrameworkVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Update="cache.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\CacheManager.Microsoft.Extensions.Logging\CacheManager.Microsoft.Extensions.Logging.csproj" />
+    <ProjectReference Include="..\..\src\CacheManager.Microsoft.Extensions.Configuration\CacheManager.Microsoft.Extensions.Configuration.csproj" />
+    <ProjectReference Include="..\..\src\CacheManager.Core\CacheManager.Core.csproj" />
+    <ProjectReference Include="..\..\src\CacheManager.Serialization.Json\CacheManager.Serialization.Json.csproj" />
+    <ProjectReference Include="..\..\src\CacheManager.Serialization.Bond\CacheManager.Serialization.Bond.csproj" />
+    <ProjectReference Include="..\..\src\CacheManager.StackExchange.Redis\CacheManager.StackExchange.Redis.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net451' ">
+    <ProjectReference Include="..\..\src\CacheManager.Memcached\CacheManager.Memcached.csproj" />
+    <ProjectReference Include="..\..\src\CacheManager.SystemRuntimeCaching\CacheManager.SystemRuntimeCaching.csproj" />
+    <ProjectReference Include="..\..\src\CacheManager.Couchbase\CacheManager.Couchbase.csproj" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System" />
+    <Reference Include="Microsoft.CSharp" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="1.0.2" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="1.0.2" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="1.0.2" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="1.0.2" />
+  </ItemGroup>
+
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp1.0' ">
+    <DefineConstants>$(DefineConstants);NETCOREAPP</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp1.0' ">
+    <PackageReference Include="System.Threading.Thread" Version="4.0.0" />
+    <PackageReference Include="System.Threading.Tasks.Parallel" Version="4.0.1" />
+    <PackageReference Include="System.Console" Version="4.0.0" />
+    <PackageReference Include="System.Runtime" Version="4.1.0" />
+  </ItemGroup>
+
+</Project>

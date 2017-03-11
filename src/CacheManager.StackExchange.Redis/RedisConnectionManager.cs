@@ -5,14 +5,14 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using CacheManager.Core.Logging;
+using StackExchange.Redis;
 using static CacheManager.Core.Utility.Guard;
-using StackRedis = StackExchange.Redis;
 
 namespace CacheManager.Redis
 {
     internal class RedisConnectionManager
     {
-        private static IDictionary<string, StackRedis.IConnectionMultiplexer> connections = new Dictionary<string, StackRedis.IConnectionMultiplexer>();
+        private static IDictionary<string, IConnectionMultiplexer> connections = new Dictionary<string, IConnectionMultiplexer>();
         private static object connectLock = new object();
 
         private readonly ILogger logger;
@@ -30,7 +30,7 @@ namespace CacheManager.Redis
             this.logger = loggerFactory.CreateLogger(this);
         }
 
-        public StackRedis.RedisFeatures Features
+        public RedisFeatures Features
         {
             get
             {
@@ -41,7 +41,7 @@ namespace CacheManager.Redis
                 }
 
                 return server.Features;
-                ////return new StackRedis.RedisFeatures(new Version(2, 4));
+                ////return new RedisFeatures(new Version(2, 4));
             }
         }
 
@@ -87,7 +87,7 @@ namespace CacheManager.Redis
             }
         }
 
-        public IEnumerable<StackRedis.IServer> Servers
+        public IEnumerable<IServer> Servers
         {
             get
             {
@@ -100,11 +100,11 @@ namespace CacheManager.Redis
             }
         }
 
-        public StackRedis.IDatabase Database => this.Connect().GetDatabase(this.configuration.Database);
+        public IDatabase Database => this.Connect().GetDatabase(this.configuration.Database);
 
-        public StackRedis.ISubscriber Subscriber => this.Connect().GetSubscriber();
+        public ISubscriber Subscriber => this.Connect().GetSubscriber();
 
-        public static void AddConnection(string connectionString, StackRedis.IConnectionMultiplexer connection)
+        public static void AddConnection(string connectionString, IConnectionMultiplexer connection)
         {
             lock (connectLock)
             {
@@ -127,9 +127,9 @@ namespace CacheManager.Redis
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "nope")]
-        public StackRedis.IConnectionMultiplexer Connect()
+        public IConnectionMultiplexer Connect()
         {
-            StackRedis.IConnectionMultiplexer connection;
+            IConnectionMultiplexer connection;
             if (!connections.TryGetValue(this.connectionString, out connection))
             {
                 lock (connectLock)
@@ -141,7 +141,7 @@ namespace CacheManager.Redis
                             this.logger.LogInfo("Trying to connect with the following configuration: '{0}'", RemoveCredentials(this.connectionString));
                         }
 
-                        connection = StackRedis.ConnectionMultiplexer.Connect(this.connectionString, new LogWriter(this.logger));
+                        connection = ConnectionMultiplexer.Connect(this.connectionString, new LogWriter(this.logger));
 
                         if (!connection.IsConnected)
                         {
@@ -202,9 +202,9 @@ namespace CacheManager.Redis
             return conString;
         }
 
-        private static StackRedis.ConfigurationOptions CreateConfigurationOptions(RedisConfiguration configuration)
+        private static ConfigurationOptions CreateConfigurationOptions(RedisConfiguration configuration)
         {
-            var configurationOptions = new StackRedis.ConfigurationOptions()
+            var configurationOptions = new ConfigurationOptions()
             {
                 AllowAdmin = configuration.AllowAdmin,
                 ConnectTimeout = configuration.ConnectionTimeout,

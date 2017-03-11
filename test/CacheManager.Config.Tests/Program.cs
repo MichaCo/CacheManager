@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading;
 using CacheManager.Core;
+using CacheManager.Redis;
 #if !NETCOREAPP
 using Enyim.Caching;
 using Enyim.Caching.Configuration;
@@ -15,7 +16,7 @@ namespace CacheManager.Config.Tests
     {
         public static void Main(string[] args)
         {
-            int iterations = 10;
+            int iterations = 1000;
             try
             {
                 var builder = new Core.ConfigurationBuilder("myCache");
@@ -25,8 +26,8 @@ namespace CacheManager.Config.Tests
                     f.AddDebug(LogLevel.Debug);
                 });
                 
-                builder.WithRetryTimeout(1000);
-                builder.WithMaxRetries(10);
+                builder.WithRetryTimeout(100);
+                builder.WithMaxRetries(5);
                 builder.WithDictionaryHandle()
                     .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(20))
                     .DisableStatistics();
@@ -43,7 +44,7 @@ namespace CacheManager.Config.Tests
                         .WithAllowAdmin()
                         .WithDatabase(0)
                         .WithConnectionTimeout(5000)
-                        .WithEndpoint("127.0.0.1", 6379);
+                        .WithEndpoint("127.0.0.1", 7000);
                 });
 
                 //builder.WithGzJsonSerializer();
@@ -60,6 +61,12 @@ namespace CacheManager.Config.Tests
 
                 for (int i = 0; i < iterations; i++)
                 {
+                    var redisHandle = cacheA.CacheHandles.OfType<RedisCacheHandle<string>>().First();
+                    foreach(var server in redisHandle.Servers)
+                    {
+                        Console.WriteLine($"{server.ToString()}=>{server.EndPoint} connected:{server.IsConnected} isSlave:{server.IsSlave}");
+                    }
+
                     try
                     {
                         Tests.PutAndMultiGetTest(cacheA);

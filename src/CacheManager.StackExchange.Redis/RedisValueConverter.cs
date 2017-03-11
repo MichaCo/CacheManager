@@ -2,23 +2,23 @@
 using System.Collections;
 using System.Linq;
 using CacheManager.Core.Internal;
+using StackExchange.Redis;
 using static CacheManager.Core.Utility.Guard;
-using StackRedis = StackExchange.Redis;
 
 namespace CacheManager.Redis
 {
     internal interface IRedisValueConverter
     {
-        StackRedis.RedisValue ToRedisValue<T>(T value);
+        RedisValue ToRedisValue<T>(T value);
 
-        T FromRedisValue<T>(StackRedis.RedisValue value, string valueType);
+        T FromRedisValue<T>(RedisValue value, string valueType);
     }
 
     internal interface IRedisValueConverter<T>
     {
-        StackRedis.RedisValue ToRedisValue(T value);
+        RedisValue ToRedisValue(T value);
 
-        T FromRedisValue(StackRedis.RedisValue value, string valueType);
+        T FromRedisValue(RedisValue value, string valueType);
     }
 
     internal class RedisValueConverter :
@@ -60,62 +60,62 @@ namespace CacheManager.Redis
             this.serializer = serializer;
         }
 
-        StackRedis.RedisValue IRedisValueConverter<byte[]>.ToRedisValue(byte[] value) => value;
+        RedisValue IRedisValueConverter<byte[]>.ToRedisValue(byte[] value) => value;
 
-        byte[] IRedisValueConverter<byte[]>.FromRedisValue(StackRedis.RedisValue value, string valueType) => value;
+        byte[] IRedisValueConverter<byte[]>.FromRedisValue(RedisValue value, string valueType) => value;
 
-        StackRedis.RedisValue IRedisValueConverter<byte>.ToRedisValue(byte value) => value;
+        RedisValue IRedisValueConverter<byte>.ToRedisValue(byte value) => value;
 
-        byte IRedisValueConverter<byte>.FromRedisValue(StackRedis.RedisValue value, string valueType) => (byte)value;
+        byte IRedisValueConverter<byte>.FromRedisValue(RedisValue value, string valueType) => (byte)value;
 
-        StackRedis.RedisValue IRedisValueConverter<string>.ToRedisValue(string value) => value;
+        RedisValue IRedisValueConverter<string>.ToRedisValue(string value) => value;
 
-        string IRedisValueConverter<string>.FromRedisValue(StackRedis.RedisValue value, string valueType) => value;
+        string IRedisValueConverter<string>.FromRedisValue(RedisValue value, string valueType) => value;
 
-        StackRedis.RedisValue IRedisValueConverter<int>.ToRedisValue(int value) => value;
+        RedisValue IRedisValueConverter<int>.ToRedisValue(int value) => value;
 
-        int IRedisValueConverter<int>.FromRedisValue(StackRedis.RedisValue value, string valueType) => (int)value;
+        int IRedisValueConverter<int>.FromRedisValue(RedisValue value, string valueType) => (int)value;
 
-        StackRedis.RedisValue IRedisValueConverter<uint>.ToRedisValue(uint value) => value;
+        RedisValue IRedisValueConverter<uint>.ToRedisValue(uint value) => value;
 
-        uint IRedisValueConverter<uint>.FromRedisValue(StackRedis.RedisValue value, string valueType) => (uint)value;
+        uint IRedisValueConverter<uint>.FromRedisValue(RedisValue value, string valueType) => (uint)value;
 
-        StackRedis.RedisValue IRedisValueConverter<short>.ToRedisValue(short value) => value;
+        RedisValue IRedisValueConverter<short>.ToRedisValue(short value) => value;
 
-        short IRedisValueConverter<short>.FromRedisValue(StackRedis.RedisValue value, string valueType) => (short)value;
+        short IRedisValueConverter<short>.FromRedisValue(RedisValue value, string valueType) => (short)value;
 
-        StackRedis.RedisValue IRedisValueConverter<ushort>.ToRedisValue(ushort value) => value;
+        RedisValue IRedisValueConverter<ushort>.ToRedisValue(ushort value) => value;
 
-        ushort IRedisValueConverter<ushort>.FromRedisValue(StackRedis.RedisValue value, string valueType) => (ushort)value;
+        ushort IRedisValueConverter<ushort>.FromRedisValue(RedisValue value, string valueType) => (ushort)value;
 
-        StackRedis.RedisValue IRedisValueConverter<float>.ToRedisValue(float value) => (double)value;
+        RedisValue IRedisValueConverter<float>.ToRedisValue(float value) => (double)value;
 
-        float IRedisValueConverter<float>.FromRedisValue(StackRedis.RedisValue value, string valueType) => (float)(double)value;
+        float IRedisValueConverter<float>.FromRedisValue(RedisValue value, string valueType) => (float)(double)value;
 
-        StackRedis.RedisValue IRedisValueConverter<double>.ToRedisValue(double value) => value;
+        RedisValue IRedisValueConverter<double>.ToRedisValue(double value) => value;
 
-        double IRedisValueConverter<double>.FromRedisValue(StackRedis.RedisValue value, string valueType) => (double)value;
+        double IRedisValueConverter<double>.FromRedisValue(RedisValue value, string valueType) => (double)value;
 
-        StackRedis.RedisValue IRedisValueConverter<bool>.ToRedisValue(bool value) => value;
+        RedisValue IRedisValueConverter<bool>.ToRedisValue(bool value) => value;
 
-        bool IRedisValueConverter<bool>.FromRedisValue(StackRedis.RedisValue value, string valueType) => (bool)value;
+        bool IRedisValueConverter<bool>.FromRedisValue(RedisValue value, string valueType) => (bool)value;
 
-        StackRedis.RedisValue IRedisValueConverter<long>.ToRedisValue(long value) => value;
+        RedisValue IRedisValueConverter<long>.ToRedisValue(long value) => value;
 
-        long IRedisValueConverter<long>.FromRedisValue(StackRedis.RedisValue value, string valueType) => (long)value;
+        long IRedisValueConverter<long>.FromRedisValue(RedisValue value, string valueType) => (long)value;
 
         // ulong can exceed the supported lenght of storing integers (which is signed 64bit integer)
         // also, even if we do not exceed long.MaxValue, the SA client stores it as double for no aparent reason => cast to long fixes it.
-        StackRedis.RedisValue IRedisValueConverter<ulong>.ToRedisValue(ulong value) => value > long.MaxValue ? (StackRedis.RedisValue)value.ToString() : checked((long)value);
+        RedisValue IRedisValueConverter<ulong>.ToRedisValue(ulong value) => value > long.MaxValue ? (RedisValue)value.ToString() : checked((long)value);
 
-        ulong IRedisValueConverter<ulong>.FromRedisValue(StackRedis.RedisValue value, string valueType) => ulong.Parse(value);
+        ulong IRedisValueConverter<ulong>.FromRedisValue(RedisValue value, string valueType) => ulong.Parse(value);
 
-        StackRedis.RedisValue IRedisValueConverter<char>.ToRedisValue(char value) => value;
+        RedisValue IRedisValueConverter<char>.ToRedisValue(char value) => value;
 
-        char IRedisValueConverter<char>.FromRedisValue(StackRedis.RedisValue value, string valueType) => (char)value;
+        char IRedisValueConverter<char>.FromRedisValue(RedisValue value, string valueType) => (char)value;
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0", Scope = "member", Target = "CacheManager.Redis.RedisValueConverter.#CacheManager.Redis.IRedisValueConverter`1<System.Object>.ToRedisValue(System.Object)", Justification = "For performance reasons we don't do checks at this point. Also, its internally used only.")]
-        StackRedis.RedisValue IRedisValueConverter<object>.ToRedisValue(object value)
+        RedisValue IRedisValueConverter<object>.ToRedisValue(object value)
         {
             var valueType = value.GetType();
             if (valueType == ByteArrayType)
@@ -187,7 +187,7 @@ namespace CacheManager.Redis
             return this.serializer.Serialize(value);
         }
 
-        object IRedisValueConverter<object>.FromRedisValue(StackRedis.RedisValue value, string type)
+        object IRedisValueConverter<object>.FromRedisValue(RedisValue value, string type)
         {
             var valueType = TypeCache.GetType(type);
 
@@ -260,11 +260,11 @@ namespace CacheManager.Redis
             return this.Deserialize(value, type);
         }
 
-        public StackRedis.RedisValue ToRedisValue<T>(T value) => this.serializer.Serialize(value);
+        public RedisValue ToRedisValue<T>(T value) => this.serializer.Serialize(value);
 
-        public T FromRedisValue<T>(StackRedis.RedisValue value, string valueType) => (T)this.Deserialize(value, valueType);
+        public T FromRedisValue<T>(RedisValue value, string valueType) => (T)this.Deserialize(value, valueType);
 
-        private object Deserialize(StackRedis.RedisValue value, string valueType)
+        private object Deserialize(RedisValue value, string valueType)
         {
             var type = TypeCache.GetType(valueType);
             EnsureNotNull(type, "Type could not be loaded, {0}.", valueType);

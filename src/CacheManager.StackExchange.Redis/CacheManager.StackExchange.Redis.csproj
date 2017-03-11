@@ -1,0 +1,38 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Description>CacheManager extension package which adds support for Redis as a distributed cache layer. CacheManager is an open source caching abstraction layer for .NET written in C#. It supports various cache providers and implements many advanced features.</Description>
+    <Copyright>Copyright (c) 2017 MichaConrad</Copyright>
+    <VersionPrefix>1.0.0</VersionPrefix>
+    <Authors>MichaConrad</Authors>
+    <TargetFrameworks>net45;netstandard1.5</TargetFrameworks>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <LangVersion>6</LangVersion>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <AssemblyName>CacheManager.StackExchange.Redis</AssemblyName>
+    <AssemblyOriginatorKeyFile>../../tools/key.snk</AssemblyOriginatorKeyFile>
+    <SignAssembly>true</SignAssembly>
+    <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
+    <PackageId>CacheManager.StackExchange.Redis</PackageId>
+    <PackageTags>Caching;Cache;CacheManager;Distributed Cache;StackExchange Redis;Azure AppFabric;Memcached</PackageTags>
+    <PackageProjectUrl>http://cachemanager.michaco.net</PackageProjectUrl>
+    <PackageLicenseUrl>https://github.com/MichaCo/CacheManager/blob/master/LICENSE</PackageLicenseUrl>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/MichaCo/CacheManager</RepositoryUrl>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="StackExchange.Redis.StrongName" Version="1.2.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CacheManager.Core\CacheManager.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
+    <Reference Include="System.Configuration" />
+  </ItemGroup>
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard1.5' ">
+    <DefineConstants>$(DefineConstants);NETSTANDARD</DefineConstants>
+  </PropertyGroup>
+</Project>

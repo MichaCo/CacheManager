@@ -1,0 +1,40 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Description>CacheManager extension package to work with Memcached as a distributed cache. CacheManager is an open source caching abstraction layer for .NET written in C#. It supports various cache providers and implements many advanced features. This package contains the specific Memcached handles.</Description>
+    <Copyright>Copyright (c) 2017 MichaConrad</Copyright>
+    <VersionPrefix>1.0.0</VersionPrefix>
+    <Authors>MichaConrad</Authors>
+    <TargetFrameworks>net40;net45</TargetFrameworks>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <LangVersion>6</LangVersion>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <AssemblyName>CacheManager.Memcached</AssemblyName>
+    <AssemblyOriginatorKeyFile>../../tools/key.snk</AssemblyOriginatorKeyFile>
+    <SignAssembly>true</SignAssembly>
+    <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
+    <PackageId>CacheManager.Memcached</PackageId>
+    <PackageTags>Caching;Cache;CacheManager;Distributed Cache;StackExchange Redis;Azure AppFabric;Memcached</PackageTags>
+    <PackageProjectUrl>http://cachemanager.michaco.net</PackageProjectUrl>
+    <PackageLicenseUrl>https://github.com/MichaCo/CacheManager/blob/master/LICENSE</PackageLicenseUrl>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/MichaCo/CacheManager</RepositoryUrl>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CacheManager.Core\CacheManager.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="EnyimMemcached" Version="2.16.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net40' ">
+    <Reference Include="System.Configuration" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
+    <Reference Include="System.Configuration" />
+  </ItemGroup>
+
+</Project>

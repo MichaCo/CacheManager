@@ -74,10 +74,10 @@ namespace CacheManager.Core.Internal
 
                             if (typeResult == null)
                             {
-                                // try remove version from the type string and resolve it (should work even for signed assemblies).
-                                var withoutVersion = Regex.Replace(type, @", Version=\d+.\d+.\d+.\d+", string.Empty);
+                                // try remove version from the type string and resolve it (should work even for signed assemblies).                                
                                 try
                                 {
+                                    var withoutVersion = Regex.Replace(type, @", Version=\d+.\d+.\d+.\d+", string.Empty);
                                     typeResult = Type.GetType(withoutVersion, false);
                                 }
                                 catch { }

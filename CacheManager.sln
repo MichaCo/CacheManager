@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.26228.4
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{58CC885F-40A7-4C82-990D-3F36AAA088A7}"
 EndProject
@@ -14,27 +14,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		build.sh = build.sh
 		tools\cacheManager.json = tools\cacheManager.json
 		tools\CacheManagerCfg.xsd = tools\CacheManagerCfg.xsd
-		global.json = global.json
 		NuGet.Config = NuGet.Config
 		README.md = README.md
 		tools\RedisCfg.xsd = tools\RedisCfg.xsd
 	EndProjectSection
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "CacheManager.Core", "src\CacheManager.Core\CacheManager.Core.xproj", "{C9B4E53B-15FC-42AF-9107-0C2E52E8680B}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{C013E552-43F5-4496-BE29-DB401C3334BB}"
-EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "CacheManager.SystemRuntimeCaching", "src\CacheManager.SystemRuntimeCaching\CacheManager.SystemRuntimeCaching.xproj", "{49A1A508-1A92-4F6A-8654-B0E71C07BD53}"
-EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "CacheManager.StackExchange.Redis", "src\CacheManager.StackExchange.Redis\CacheManager.StackExchange.Redis.xproj", "{BA03975E-39CD-4318-8ED3-239AA399DC87}"
-EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "CacheManager.Couchbase", "src\CacheManager.Couchbase\CacheManager.Couchbase.xproj", "{6436C729-A28B-4D90-B3B8-7ED003341199}"
-EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "CacheManager.Web", "src\CacheManager.Web\CacheManager.Web.xproj", "{4FBE8026-2FAE-462C-9446-33B49CA5A25D}"
-EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "CacheManager.Config.Tests", "test\CacheManager.Config.Tests\CacheManager.Config.Tests.xproj", "{35A16A79-63DE-418E-AF5E-6865E5718008}"
-EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "CacheManager.Tests", "test\CacheManager.Tests\CacheManager.Tests.xproj", "{EEED5086-976C-4063-A61D-D5FAE7652758}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Articles", "Articles", "{E24CC0B1-4854-44B5-AC61-58BEEA768455}"
 	ProjectSection(SolutionItems) = preProject
@@ -49,18 +34,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Articles", "Articles", "{E2
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{C23C189C-3AFC-45D6-8E32-9B5E190BBA20}"
-EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "CacheManager.Examples", "samples\CacheManager.Examples\CacheManager.Examples.xproj", "{8F8E0F73-F11A-4F9A-91F5-9C8E798752D9}"
-EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "CacheManager.Serialization.Json", "src\CacheManager.Serialization.Json\CacheManager.Serialization.Json.xproj", "{3F3A3386-DFED-489C-A97D-541D43AA6C12}"
-EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "CacheManager.Microsoft.Extensions.Configuration", "src\CacheManager.Microsoft.Extensions.Configuration\CacheManager.Microsoft.Extensions.Configuration.xproj", "{D68182DA-FB4D-45A9-9A09-AD07A45FE5FF}"
-EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "CacheManager.Microsoft.Extensions.Logging", "src\CacheManager.Microsoft.Extensions.Logging\CacheManager.Microsoft.Extensions.Logging.xproj", "{97C864BD-D4C7-4DF6-92D0-4D76A89F6706}"
-EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "CacheManager.Memcached", "src\CacheManager.Memcached\CacheManager.Memcached.xproj", "{5E5AFEF6-C13E-4D78-87D6-50407002A9B1}"
-EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "CacheManager.MSConfiguration.TypeLoad.Tests", "test\CacheManager.MSConfiguration.TypeLoad.Tests\CacheManager.MSConfiguration.TypeLoad.Tests.xproj", "{360D0B25-F9EB-4553-92DC-FB0FD24EF344}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentation", "{E026FBD6-8112-46A7-BB3C-C8FB901CB93A}"
 	ProjectSection(SolutionItems) = preProject
@@ -102,15 +75,41 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "api", "api", "{F2761882-C68
 		Documentation\api\index.md = Documentation\api\index.md
 	EndProjectSection
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "CacheManager.Microsoft.Extensions.Caching.Memory", "src\CacheManager.Microsoft.Extensions.Caching.Memory\CacheManager.Microsoft.Extensions.Caching.Memory.xproj", "{48DD6E04-0CFD-4FB4-A178-749B0FBFBA36}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CacheManager.Core", "src\CacheManager.Core\CacheManager.Core.csproj", "{C9B4E53B-15FC-42AF-9107-0C2E52E8680B}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "CacheManager.Serialization.ProtoBuf", "src\CacheManager.Serialization.ProtoBuf\CacheManager.Serialization.ProtoBuf.xproj", "{85CD8BC7-3E72-422E-AF91-6FDF2133E155}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CacheManager.SystemRuntimeCaching", "src\CacheManager.SystemRuntimeCaching\CacheManager.SystemRuntimeCaching.csproj", "{49A1A508-1A92-4F6A-8654-B0E71C07BD53}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "AspnetCore.WebApp", "samples\AspnetCore.WebApp\AspnetCore.WebApp.xproj", "{CB9C05BF-E567-412F-B3C8-C85289E60DBC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CacheManager.StackExchange.Redis", "src\CacheManager.StackExchange.Redis\CacheManager.StackExchange.Redis.csproj", "{BA03975E-39CD-4318-8ED3-239AA399DC87}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "CacheManager.Serialization.Bond", "src\CacheManager.Serialization.Bond\CacheManager.Serialization.Bond.xproj", "{2FB30F61-B2E7-43AC-80AF-C45218F1D4BA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CacheManager.Couchbase", "src\CacheManager.Couchbase\CacheManager.Couchbase.csproj", "{6436C729-A28B-4D90-B3B8-7ED003341199}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "CacheManager.Benchmarks", "test\CacheManager.Benchmarks\CacheManager.Benchmarks.xproj", "{987C4CD7-D162-4635-8C50-214A25494676}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CacheManager.Web", "src\CacheManager.Web\CacheManager.Web.csproj", "{4FBE8026-2FAE-462C-9446-33B49CA5A25D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CacheManager.Config.Tests", "test\CacheManager.Config.Tests\CacheManager.Config.Tests.csproj", "{35A16A79-63DE-418E-AF5E-6865E5718008}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CacheManager.Tests", "test\CacheManager.Tests\CacheManager.Tests.csproj", "{EEED5086-976C-4063-A61D-D5FAE7652758}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CacheManager.Examples", "samples\CacheManager.Examples\CacheManager.Examples.csproj", "{8F8E0F73-F11A-4F9A-91F5-9C8E798752D9}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CacheManager.Serialization.Json", "src\CacheManager.Serialization.Json\CacheManager.Serialization.Json.csproj", "{3F3A3386-DFED-489C-A97D-541D43AA6C12}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CacheManager.Microsoft.Extensions.Configuration", "src\CacheManager.Microsoft.Extensions.Configuration\CacheManager.Microsoft.Extensions.Configuration.csproj", "{D68182DA-FB4D-45A9-9A09-AD07A45FE5FF}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CacheManager.Microsoft.Extensions.Logging", "src\CacheManager.Microsoft.Extensions.Logging\CacheManager.Microsoft.Extensions.Logging.csproj", "{97C864BD-D4C7-4DF6-92D0-4D76A89F6706}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CacheManager.Memcached", "src\CacheManager.Memcached\CacheManager.Memcached.csproj", "{5E5AFEF6-C13E-4D78-87D6-50407002A9B1}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CacheManager.MSConfiguration.TypeLoad.Tests", "test\CacheManager.MSConfiguration.TypeLoad.Tests\CacheManager.MSConfiguration.TypeLoad.Tests.csproj", "{360D0B25-F9EB-4553-92DC-FB0FD24EF344}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CacheManager.Microsoft.Extensions.Caching.Memory", "src\CacheManager.Microsoft.Extensions.Caching.Memory\CacheManager.Microsoft.Extensions.Caching.Memory.csproj", "{48DD6E04-0CFD-4FB4-A178-749B0FBFBA36}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CacheManager.Serialization.ProtoBuf", "src\CacheManager.Serialization.ProtoBuf\CacheManager.Serialization.ProtoBuf.csproj", "{85CD8BC7-3E72-422E-AF91-6FDF2133E155}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspnetCore.WebApp", "samples\AspnetCore.WebApp\AspnetCore.WebApp.csproj", "{CB9C05BF-E567-412F-B3C8-C85289E60DBC}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CacheManager.Serialization.Bond", "src\CacheManager.Serialization.Bond\CacheManager.Serialization.Bond.csproj", "{2FB30F61-B2E7-43AC-80AF-C45218F1D4BA}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CacheManager.Benchmarks", "test\CacheManager.Benchmarks\CacheManager.Benchmarks.csproj", "{987C4CD7-D162-4635-8C50-214A25494676}"
 EndProject
 Global
 	GlobalSection(Performance) = preSolution
@@ -198,6 +197,11 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
+		{75D61766-6604-4FAD-8451-FCF300CCCD48} = {E026FBD6-8112-46A7-BB3C-C8FB901CB93A}
+		{42E99581-4D8D-44E1-848D-1EAB564A3129} = {75D61766-6604-4FAD-8451-FCF300CCCD48}
+		{5FFC2D23-4EA5-4402-B251-C83B453DC423} = {75D61766-6604-4FAD-8451-FCF300CCCD48}
+		{96C0965D-2375-4780-9DAC-640927D74161} = {E026FBD6-8112-46A7-BB3C-C8FB901CB93A}
+		{F2761882-C68D-4CC4-A906-3C46EF6A6573} = {E026FBD6-8112-46A7-BB3C-C8FB901CB93A}
 		{C9B4E53B-15FC-42AF-9107-0C2E52E8680B} = {58CC885F-40A7-4C82-990D-3F36AAA088A7}
 		{49A1A508-1A92-4F6A-8654-B0E71C07BD53} = {58CC885F-40A7-4C82-990D-3F36AAA088A7}
 		{BA03975E-39CD-4318-8ED3-239AA399DC87} = {58CC885F-40A7-4C82-990D-3F36AAA088A7}
@@ -211,15 +215,13 @@ Global
 		{97C864BD-D4C7-4DF6-92D0-4D76A89F6706} = {58CC885F-40A7-4C82-990D-3F36AAA088A7}
 		{5E5AFEF6-C13E-4D78-87D6-50407002A9B1} = {58CC885F-40A7-4C82-990D-3F36AAA088A7}
 		{360D0B25-F9EB-4553-92DC-FB0FD24EF344} = {C013E552-43F5-4496-BE29-DB401C3334BB}
-		{75D61766-6604-4FAD-8451-FCF300CCCD48} = {E026FBD6-8112-46A7-BB3C-C8FB901CB93A}
-		{42E99581-4D8D-44E1-848D-1EAB564A3129} = {75D61766-6604-4FAD-8451-FCF300CCCD48}
-		{5FFC2D23-4EA5-4402-B251-C83B453DC423} = {75D61766-6604-4FAD-8451-FCF300CCCD48}
-		{96C0965D-2375-4780-9DAC-640927D74161} = {E026FBD6-8112-46A7-BB3C-C8FB901CB93A}
-		{F2761882-C68D-4CC4-A906-3C46EF6A6573} = {E026FBD6-8112-46A7-BB3C-C8FB901CB93A}
 		{48DD6E04-0CFD-4FB4-A178-749B0FBFBA36} = {58CC885F-40A7-4C82-990D-3F36AAA088A7}
 		{85CD8BC7-3E72-422E-AF91-6FDF2133E155} = {58CC885F-40A7-4C82-990D-3F36AAA088A7}
 		{CB9C05BF-E567-412F-B3C8-C85289E60DBC} = {C23C189C-3AFC-45D6-8E32-9B5E190BBA20}
 		{2FB30F61-B2E7-43AC-80AF-C45218F1D4BA} = {58CC885F-40A7-4C82-990D-3F36AAA088A7}
 		{987C4CD7-D162-4635-8C50-214A25494676} = {C013E552-43F5-4496-BE29-DB401C3334BB}
+	EndGlobalSection
+	GlobalSection(Performance) = preSolution
+		HasPerformanceSessions = true
 	EndGlobalSection
 EndGlobal

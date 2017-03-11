@@ -1153,8 +1153,7 @@ namespace CacheManager.Tests
 
             Func<Exception, string> formatError = (err) =>
             {
-                var xunitError = err as XunitException;
-                if (xunitError != null)
+                if (err is XunitException xunitError)
                 {
                     return xunitError.Message;
                 }

@@ -1,0 +1,38 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Description>CacheManager extension package to work with Microsoft.Extensions.Logging as logging provider. CacheManager is an open source caching abstraction layer for .NET written in C#. The ASP.NET Core logging provides a bridge to the Microsoft.Extensions.Logging framework.</Description>
+    <Copyright>Copyright (c) 2017 MichaConrad</Copyright>
+    <VersionPrefix>1.0.0</VersionPrefix>
+    <Authors>MichaConrad</Authors>
+    <TargetFrameworks>net45;netstandard1.1</TargetFrameworks>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <LangVersion>6</LangVersion>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <AssemblyName>CacheManager.Microsoft.Extensions.Logging</AssemblyName>
+    <AssemblyOriginatorKeyFile>../../tools/key.snk</AssemblyOriginatorKeyFile>
+    <SignAssembly>true</SignAssembly>
+    <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
+    <PackageId>CacheManager.Microsoft.Extensions.Logging</PackageId>
+    <PackageTags>Caching;Cache;CacheManager;Distributed Cache;StackExchange Redis;Azure AppFabric;Memcached</PackageTags>
+    <PackageProjectUrl>http://cachemanager.michaco.net</PackageProjectUrl>
+    <PackageLicenseUrl>https://github.com/MichaCo/CacheManager/blob/master/LICENSE</PackageLicenseUrl>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/MichaCo/CacheManager</RepositoryUrl>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CacheManager.Core\CacheManager.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="1.0.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.1' ">
+  </ItemGroup>
+
+</Project>
