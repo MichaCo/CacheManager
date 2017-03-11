@@ -1,0 +1,21 @@
+<Project>
+  <Import Project="version.props" />
+
+  <PropertyGroup>
+    <Copyright>Copyright (c) 2017 MichaConrad</Copyright>
+    <Authors>MichaConrad</Authors>
+    <LangVersion>6</LangVersion>
+
+    <PackageProjectUrl>http://cachemanager.michaco.net</PackageProjectUrl>
+    <PackageLicenseUrl>https://github.com/MichaCo/CacheManager/blob/master/LICENSE</PackageLicenseUrl>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/MichaCo/CacheManager</RepositoryUrl>
+
+    <Product>CacheManager.NET</Product>
+
+    <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)Key.snk</AssemblyOriginatorKeyFile>
+    <SignAssembly>true</SignAssembly>
+    <PublicSign Condition="'$(OS)' != 'Windows_NT'">true</PublicSign>
+    <VersionSuffix Condition="'$(VersionSuffix)'!='' AND '$(BuildNumber)' != ''">$(VersionSuffix)-$(BuildNumber)</VersionSuffix>
+  </PropertyGroup>
+</Project>
