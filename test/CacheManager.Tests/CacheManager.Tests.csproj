@@ -53,7 +53,7 @@
   </ItemGroup>
 
   <PropertyGroup Condition=" '$(TargetFramework)' == 'net452' ">
-    <DefineConstants>$(DefineConstants);REDISENABLED;MEMCACHEDENABLED;MOCK_HTTPCONTEXT_ENABLED;NO_APP_CONFIG</DefineConstants>
+    <DefineConstants>$(DefineConstants);REDISENABLED;<!--MEMCACHEDENABLED-->;MOCK_HTTPCONTEXT_ENABLED;NO_APP_CONFIG</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp1.1' ">
     <DefineConstants>$(DefineConstants);REDISENABLED;NETCOREAPP</DefineConstants>

@@ -1,30 +1,15 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
+  <Import Project="..\..\tools\common.props" />
   <PropertyGroup>
     <Description>CacheManager extension package which uses System.Web.Caching and also comes with a custom OutputCache provider. CacheManager is an open source caching abstraction layer for .NET written in C#. It supports various cache providers and implements many advanced features.</Description>
-    <Copyright>Copyright (c) 2017 MichaConrad</Copyright>
-    <VersionPrefix>1.0.0</VersionPrefix>
-    <Authors>MichaConrad</Authors>
     <TargetFrameworks>net40;net45</TargetFrameworks>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <LangVersion>6</LangVersion>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <AssemblyName>CacheManager.Web</AssemblyName>
-    <AssemblyOriginatorKeyFile>../../tools/key.snk</AssemblyOriginatorKeyFile>
-    <SignAssembly>true</SignAssembly>
-    <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
-    <PackageId>CacheManager.Web</PackageId>
     <PackageTags>Caching;Cache;CacheManager;Distributed Cache;StackExchange Redis;Azure AppFabric;Memcached</PackageTags>
-    <PackageProjectUrl>http://cachemanager.michaco.net</PackageProjectUrl>
-    <PackageLicenseUrl>https://github.com/MichaCo/CacheManager/blob/master/LICENSE</PackageLicenseUrl>
-    <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://github.com/MichaCo/CacheManager</RepositoryUrl>
   </PropertyGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\CacheManager.Core\CacheManager.Core.csproj" />
   </ItemGroup>
-
   <ItemGroup Condition=" '$(TargetFramework)' == 'net40' ">
     <Reference Include="System.Configuration" />
     <Reference Include="System.Web" />

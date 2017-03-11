@@ -34,26 +34,20 @@
     <ProjectReference Include="..\..\src\CacheManager.SystemRuntimeCaching\CacheManager.SystemRuntimeCaching.csproj" />
     <ProjectReference Include="..\..\src\CacheManager.Couchbase\CacheManager.Couchbase.csproj" />
     <Reference Include="System.Configuration" />
-    <Reference Include="System" />
-    <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="1.0.2" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="1.0.2" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="1.0.2" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="1.0.2" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="1.1.1" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="1.1.1" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="1.1.1" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="1.1.1" />
   </ItemGroup>
 
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp1.0' ">
     <DefineConstants>$(DefineConstants);NETCOREAPP</DefineConstants>
   </PropertyGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp1.0' ">
-    <PackageReference Include="System.Threading.Thread" Version="4.0.0" />
-    <PackageReference Include="System.Threading.Tasks.Parallel" Version="4.0.1" />
-    <PackageReference Include="System.Console" Version="4.0.0" />
-    <PackageReference Include="System.Runtime" Version="4.1.0" />
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp1.0' ">    
   </ItemGroup>
 
 </Project>

@@ -7,7 +7,6 @@ using CacheManager.Redis;
 using Enyim.Caching;
 using Enyim.Caching.Configuration;
 #endif
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace CacheManager.Config.Tests
@@ -25,7 +24,7 @@ namespace CacheManager.Config.Tests
                     f.AddConsole(LogLevel.Warning);
                     f.AddDebug(LogLevel.Debug);
                 });
-                
+
                 builder.WithRetryTimeout(100);
                 builder.WithMaxRetries(5);
                 builder.WithDictionaryHandle()
@@ -44,7 +43,7 @@ namespace CacheManager.Config.Tests
                         .WithAllowAdmin()
                         .WithDatabase(0)
                         .WithConnectionTimeout(5000)
-                        .WithEndpoint("127.0.0.1", 7000);
+                        .WithEndpoint("127.0.0.1", 6379);
                 });
 
                 //builder.WithGzJsonSerializer();
@@ -55,14 +54,14 @@ namespace CacheManager.Config.Tests
                 //memcachedCfg.AddServer("localhost", 11211);
                 //builder.WithMemcachedCacheHandle(memcachedCfg);
 #endif
-                 
+
                 var cacheA = new BaseCacheManager<string>(builder.Build());
                 cacheA.Clear();
 
                 for (int i = 0; i < iterations; i++)
                 {
                     var redisHandle = cacheA.CacheHandles.OfType<RedisCacheHandle<string>>().First();
-                    foreach(var server in redisHandle.Servers)
+                    foreach (var server in redisHandle.Servers)
                     {
                         Console.WriteLine($"{server.ToString()}=>{server.EndPoint} connected:{server.IsConnected} isSlave:{server.IsSlave}");
                     }

@@ -1,5 +1,4 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>net46</TargetFramework>
     <AssemblyName>CacheManager.Benchmarks</AssemblyName>
@@ -9,7 +8,6 @@
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
   </PropertyGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\..\src\CacheManager.Memcached\CacheManager.Memcached.csproj" />
     <ProjectReference Include="..\..\src\CacheManager.Microsoft.Extensions.Caching.Memory\CacheManager.Microsoft.Extensions.Caching.Memory.csproj" />
@@ -19,20 +17,14 @@
     <ProjectReference Include="..\..\src\CacheManager.StackExchange.Redis\CacheManager.StackExchange.Redis.csproj" />
     <ProjectReference Include="..\..\src\CacheManager.SystemRuntimeCaching\CacheManager.SystemRuntimeCaching.csproj" />
   </ItemGroup>
-
   <ItemGroup>
-    <PackageReference Include="BenchmarkDotNet" Version="0.10.2" />
+    <PackageReference Include="BenchmarkDotNet" Version="0.10.3" />
     <PackageReference Include="System.Buffers" Version="4.3.0" />
     <PackageReference Include="Microsoft.Extensions.ObjectPool" Version="1.1.0" />
   </ItemGroup>
-
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
-
   <ItemGroup Condition=" '$(TargetFramework)' == 'net46' ">
-    <Reference Include="System" />
-    <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
-
 </Project>
