@@ -1,16 +1,50 @@
-version: 0.9.4-beta-{build}
-os: Visual Studio 2015
-clone_depth: 10
+version: 1.0.0-beta-{build}
+image: Visual Studio 2017
+configuration: Release
 clone_folder: C:\projects\CacheManager\
 install:
-- cmd: C:\projects\CacheManager\tools\redis\install-service.cmd
-build_script:
+- ps: C:\projects\CacheManager\tools\redis\install-service.cmd
+before_build:
+- cmd: dotnet restore
+build:
+  project: CacheManager.sln
+  parallel: true
+  verbosity: minimal
+after_build:
 - cmd: >-
-    SET DNX_BUILD_VERSION=beta-%APPVEYOR_BUILD_NUMBER%
+    dotnet pack -o C:\projects\CacheManager\artifacts -c Release src\CacheManager.Core --version-suffix beta-%APPVEYOR_BUILD_NUMBER%
 
-    C:\projects\CacheManager\build.cmd --quiet verify
-test: off
+    dotnet pack -o C:\projects\CacheManager\artifacts -c Release src\CacheManager.Couchbase --version-suffix beta-%APPVEYOR_BUILD_NUMBER%
+
+    dotnet pack -o C:\projects\CacheManager\artifacts -c Release src\CacheManager.Memcached --version-suffix beta-%APPVEYOR_BUILD_NUMBER%
+
+    dotnet pack -o C:\projects\CacheManager\artifacts -c Release src\CacheManager.Microsoft.Extensions.Caching.Memory --version-suffix beta-%APPVEYOR_BUILD_NUMBER%
+
+    dotnet pack -o C:\projects\CacheManager\artifacts -c Release src\CacheManager.Microsoft.Extensions.Configuration --version-suffix beta-%APPVEYOR_BUILD_NUMBER%
+
+    dotnet pack -o C:\projects\CacheManager\artifacts -c Release src\CacheManager.Microsoft.Extensions.Logging --version-suffix beta-%APPVEYOR_BUILD_NUMBER%
+
+    dotnet pack -o C:\projects\CacheManager\artifacts -c Release src\CacheManager.Serialization.Json --version-suffix beta-%APPVEYOR_BUILD_NUMBER%
+
+    dotnet pack -o C:\projects\CacheManager\artifacts -c Release src\CacheManager.Serialization.ProtoBuf --version-suffix beta-%APPVEYOR_BUILD_NUMBER%
+
+    dotnet pack -o C:\projects\CacheManager\artifacts -c Release src\CacheManager.StackExchange.Redis --version-suffix beta-%APPVEYOR_BUILD_NUMBER%
+
+    dotnet pack -o C:\projects\CacheManager\artifacts -c Release src\CacheManager.SystemRuntimeCaching --version-suffix beta-%APPVEYOR_BUILD_NUMBER%
+
+    dotnet pack -o C:\projects\CacheManager\artifacts -c Release src\CacheManager.Web --version-suffix beta-%APPVEYOR_BUILD_NUMBER%
+
+    dotnet pack -o C:\projects\CacheManager\artifacts -c Release src\CacheManager.Serialization.Bond --version-suffix beta-%APPVEYOR_BUILD_NUMBER%
+test_script:
+- cmd: >-
+    dotnet test test\CacheManager.Tests\CacheManager.Tests.csproj -c Release --no-build --filter "category!=Unreliable&category!=memcached&category!=Redis"
+
+    dotnet test test\CacheManager.MSConfiguration.TypeLoad.Tests\CacheManager.MSConfiguration.TypeLoad.Tests.csproj --no-build -c Release
 artifacts:
-- path: artifacts\build\*.nupkg
+- path: artifacts\*.nupkg
   name: nugets
-deploy: off
+deploy:
+- provider: NuGet
+  server: https://www.myget.org/F/cachemanager/api/v2/package
+  symbol_server: https://www.myget.org/F/cachemanager/api/v2/package
+  artifact: nugets
