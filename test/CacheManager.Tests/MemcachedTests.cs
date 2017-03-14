@@ -31,6 +31,19 @@ namespace CacheManager.Tests
 
         [Fact]
         [Trait("category", "Memcached")]
+        public void Memcached_ExtensionsWork_FromSection()
+        {
+            var cache = CacheFactory.Build(
+                settings =>
+                settings.WithMemcachedCacheHandle("default"));
+
+            Assert.NotNull(cache);
+            cache.Put("key", "value");
+            Assert.NotNull(cache.Get("key"));
+        }
+
+        [Fact]
+        [Trait("category", "Memcached")]
         public void Memcached_ExtensionsWork_WithClient()
         {
             var client = new MemcachedClient(Configuration);

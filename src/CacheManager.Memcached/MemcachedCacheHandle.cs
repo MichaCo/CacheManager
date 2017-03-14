@@ -60,11 +60,7 @@ namespace CacheManager.Memcached
                 var sectionName = GetEnyimSectionName(configuration.Key);
                 var section = GetSection(sectionName);
 
-                this.Cache = new MemcachedClient(
-                    section.CreatePool(),
-                    section.CreateKeyTransformer(),
-                    section.CreateTranscoder() ?? new CacheManagerTanscoder<TCacheValue>(serializer),
-                    section.CreatePerformanceMonitor());
+                this.Cache = new MemcachedClient(section);                
             }
             catch (ConfigurationErrorsException ex)
             {
@@ -106,7 +102,6 @@ namespace CacheManager.Memcached
             : this(configuration, managerConfiguration, loggerFactory)
         {
             NotNull(clientConfiguration, nameof(clientConfiguration));
-            this.managerConfiguration = managerConfiguration;
             if (clientConfiguration.Transcoder.GetType() == typeof(DefaultTranscoder))
             {
                 clientConfiguration.Transcoder = new CacheManagerTanscoder<TCacheValue>(serializer);
@@ -125,6 +120,9 @@ namespace CacheManager.Memcached
         {
             NotNull(configuration, nameof(configuration));
             NotNull(loggerFactory, nameof(loggerFactory));
+            NotNull(managerConfiguration, nameof(managerConfiguration));
+
+            this.managerConfiguration = managerConfiguration;
             this.Logger = loggerFactory.CreateLogger(this);
         }
 
@@ -559,7 +557,7 @@ namespace CacheManager.Memcached
             {
                 throw new ConfigurationErrorsException("Section " + sectionName + " is not found.");
             }
-
+            
             return section;
         }
 
@@ -696,7 +694,7 @@ namespace CacheManager.Memcached
 
             return UpdateItemResult.ForTooManyRetries<TCacheValue>(tries);
         }
-
+        
         private class CacheManagerTanscoder<T> : DefaultTranscoder
         {
             private readonly ICacheSerializer _serializer;
@@ -706,7 +704,7 @@ namespace CacheManager.Memcached
                 NotNull(serializer, nameof(serializer));
                 _serializer = serializer;
             }
-
+            
             protected override object DeserializeObject(ArraySegment<byte> value)
             {
                 int position = value.Offset;
