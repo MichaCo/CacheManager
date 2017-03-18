@@ -12,12 +12,12 @@ namespace CacheManager.Serialization.ProtoBuf
     /// </summary>
     public class ProtoBufSerializer : CacheSerializer
     {
-        private static readonly Type OpenGenericItemType = typeof(ProtoBufCacheItem<>);
+        private static readonly Type _openGenericItemType = typeof(ProtoBufCacheItem<>);
 
         /// <inheritdoc/>
         public override object Deserialize(byte[] data, Type target)
         {
-            int offset = 0;
+            var offset = 0;
             if (data.Length > 0)
             {
                 offset = 1;
@@ -52,7 +52,7 @@ namespace CacheManager.Serialization.ProtoBuf
         /// <inheritdoc/>
         protected override Type GetOpenGeneric()
         {
-            return OpenGenericItemType;
+            return _openGenericItemType;
         }
     }
 }

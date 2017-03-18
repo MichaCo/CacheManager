@@ -8,11 +8,11 @@ namespace CacheManager.Core
     {
         /// <inheritdoc />
         public TCacheValue GetOrAdd(string key, TCacheValue value)
-            => this.GetOrAdd(key, (k) => value);
+            => GetOrAdd(key, (k) => value);
 
         /// <inheritdoc />
         public TCacheValue GetOrAdd(string key, string region, TCacheValue value)
-            => this.GetOrAdd(key, region, (k, r) => value);
+            => GetOrAdd(key, region, (k, r) => value);
 
         /// <inheritdoc />
         public TCacheValue GetOrAdd(string key, Func<string, TCacheValue> valueFactory)
@@ -20,7 +20,7 @@ namespace CacheManager.Core
             NotNullOrWhiteSpace(key, nameof(key));
             NotNull(valueFactory, nameof(valueFactory));
 
-            return this.GetOrAddInternal(key, null, (k, r) => valueFactory(k));
+            return GetOrAddInternal(key, null, (k, r) => valueFactory(k));
         }
 
         /// <inheritdoc />
@@ -30,7 +30,7 @@ namespace CacheManager.Core
             NotNullOrWhiteSpace(region, nameof(region));
             NotNull(valueFactory, nameof(valueFactory));
 
-            return this.GetOrAddInternal(key, region, (k, r) => valueFactory(k, r));
+            return GetOrAddInternal(key, region, (k, r) => valueFactory(k, r));
         }
 
         /// <inheritdoc />
@@ -39,7 +39,7 @@ namespace CacheManager.Core
             NotNullOrWhiteSpace(key, nameof(key));
             NotNull(valueFactory, nameof(valueFactory));
 
-            return this.TryGetOrAddInternal(key, null, (k, r) => valueFactory(k), out value);
+            return TryGetOrAddInternal(key, null, (k, r) => valueFactory(k), out value);
         }
 
         /// <inheritdoc />
@@ -49,7 +49,7 @@ namespace CacheManager.Core
             NotNullOrWhiteSpace(region, nameof(region));
             NotNull(valueFactory, nameof(valueFactory));
 
-            return this.TryGetOrAddInternal(key, region, (k, r) => valueFactory(k, r), out value);
+            return TryGetOrAddInternal(key, region, (k, r) => valueFactory(k, r), out value);
         }
 
         private bool TryGetOrAddInternal(string key, string region, Func<string, string, TCacheValue> valueFactory, out TCacheValue value)
@@ -59,7 +59,7 @@ namespace CacheManager.Core
             do
             {
                 tries++;
-                var item = this.GetCacheItemInternal(key, region);
+                var item = GetCacheItemInternal(key, region);
                 if (item != null)
                 {
                     value = item.Value;
@@ -74,12 +74,12 @@ namespace CacheManager.Core
                 }
 
                 item = string.IsNullOrWhiteSpace(region) ? new CacheItem<TCacheValue>(key, value) : new CacheItem<TCacheValue>(key, region, value);
-                if (this.AddInternal(item))
+                if (AddInternal(item))
                 {
                     return true;
                 }
             }
-            while (tries <= this.Configuration.MaxRetries);
+            while (tries <= Configuration.MaxRetries);
 
             return false;
         }
@@ -90,7 +90,7 @@ namespace CacheManager.Core
             do
             {
                 tries++;
-                var item = this.GetCacheItemInternal(key, region);
+                var item = GetCacheItemInternal(key, region);
                 if (item != null)
                 {
                     return item.Value;
@@ -105,12 +105,12 @@ namespace CacheManager.Core
                 }
 
                 item = string.IsNullOrWhiteSpace(region) ? new CacheItem<TCacheValue>(key, newValue) : new CacheItem<TCacheValue>(key, region, newValue);
-                if (this.AddInternal(item))
+                if (AddInternal(item))
                 {
                     return newValue;
                 }
             }
-            while (tries <= this.Configuration.MaxRetries);
+            while (tries <= Configuration.MaxRetries);
 
             // should usually never occur, but could if e.g. max retries is 1 and an item gets added between the get and add.
             // pretty unusual, so keep the max tries at least around 50

@@ -34,7 +34,7 @@ namespace CacheManager.Redis
         private const string HashFieldVersion = "version";
         private const string HashFieldUsesDefaultExp = "defaultExpiration";
 
-        private static readonly string ScriptAdd = $@"
+        private static readonly string _scriptAdd = $@"
 if redis.call('HSETNX', KEYS[1], '{HashFieldValue}', ARGV[1]) == 1 then
     local result=redis.call('HMSET', KEYS[1], '{HashFieldType}', ARGV[2], '{HashFieldExpirationMode}', ARGV[3], '{HashFieldExpirationTimeout}', ARGV[4], '{HashFieldCreated}', ARGV[5], '{HashFieldVersion}', 1, '{HashFieldUsesDefaultExp}', ARGV[6])
     if ARGV[3] > '1' and ARGV[4] ~= '0' then
@@ -47,7 +47,7 @@ else
     return nil
 end";
 
-        private static readonly string ScriptPut = $@"
+        private static readonly string _scriptPut = $@"
 local result=redis.call('HMSET', KEYS[1], '{HashFieldValue}', ARGV[1], '{HashFieldType}', ARGV[2], '{HashFieldExpirationMode}', ARGV[3], '{HashFieldExpirationTimeout}', ARGV[4], '{HashFieldCreated}', ARGV[5], '{HashFieldUsesDefaultExp}', ARGV[6])
 redis.call('HINCRBY', KEYS[1], '{HashFieldVersion}', 1)
 if ARGV[3] > '1' and ARGV[4] ~= '0' then
@@ -58,7 +58,7 @@ end
 return result";
 
         // script should also update expire now. If sliding, update the sliding window
-        private static readonly string ScriptUpdate = $@"
+        private static readonly string _scriptUpdate = $@"
 if redis.call('HGET', KEYS[1], '{HashFieldVersion}') == ARGV[2] then
     local result=redis.call('HSET', KEYS[1], '{HashFieldValue}', ARGV[1])
     redis.call('HINCRBY', KEYS[1], '{HashFieldVersion}', 1)
@@ -70,7 +70,7 @@ else
     return nil
 end";
 
-        private static readonly string ScriptGet = $@"
+        private static readonly string _scriptGet = $@"
 local result = redis.call('HMGET', KEYS[1], '{HashFieldValue}', '{HashFieldExpirationMode}', '{HashFieldExpirationTimeout}', '{HashFieldCreated}', '{HashFieldType}', '{HashFieldVersion}', '{HashFieldUsesDefaultExp}')
 if (result[2] and result[2] == '2') then
     if (result[3] and result[3] ~= '' and result[3] ~= '0') then
@@ -79,17 +79,17 @@ if (result[2] and result[2] == '2') then
 end
 return result";
 
-        private readonly IDictionary<ScriptType, LoadedLuaScript> shaScripts = new Dictionary<ScriptType, LoadedLuaScript>();
-        private readonly ICacheManagerConfiguration managerConfiguration;
-        private readonly RedisValueConverter valueConverter;
-        private readonly RedisConnectionManager connection;
-        private bool isLuaAllowed;
-        private RedisConfiguration redisConfiguration = null;
+        private readonly IDictionary<ScriptType, LoadedLuaScript> _shaScripts = new Dictionary<ScriptType, LoadedLuaScript>();
+        private readonly ICacheManagerConfiguration _managerConfiguration;
+        private readonly RedisValueConverter _valueConverter;
+        private readonly RedisConnectionManager _connection;
+        private bool _isLuaAllowed;
+        private RedisConfiguration _redisConfiguration = null;
 
         // flag if scripts are initially loaded to the server
-        private bool scriptsLoaded = false;
+        private bool _scriptsLoaded = false;
 
-        private object lockObject = new object();
+        private object _lockObject = new object();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RedisCacheHandle{TCacheValue}"/> class.
@@ -106,70 +106,42 @@ return result";
             NotNull(configuration, nameof(configuration));
             EnsureNotNull(serializer, "A serializer is required for the redis cache handle");
 
-            this.managerConfiguration = managerConfiguration;
-            this.Logger = loggerFactory.CreateLogger(this);
-            this.valueConverter = new RedisValueConverter(serializer);
-            this.redisConfiguration = RedisConfigurations.GetConfiguration(configuration.Key);
-            this.connection = new RedisConnectionManager(this.redisConfiguration, loggerFactory);
-            this.isLuaAllowed = this.connection.Features.Scripting;
+            Logger = loggerFactory.CreateLogger(this);
+            _managerConfiguration = managerConfiguration;
+            _valueConverter = new RedisValueConverter(serializer);
+            _redisConfiguration = RedisConfigurations.GetConfiguration(configuration.Key);
+            _connection = new RedisConnectionManager(_redisConfiguration, loggerFactory);
+            _isLuaAllowed = _connection.Features.Scripting;
 
-            if (this.redisConfiguration.KeyspaceNotificationsEnabled)
+            if (_redisConfiguration.KeyspaceNotificationsEnabled)
             {
                 // notify-keyspace-events needs to be set to "Exe" at least! Otherwise we will not receive any events.
                 // this must be configured per server and should probably not be done automagically as this needs admin rights!
                 // Let's try to check at least if those settings are configured (the check also works only if useAdmin is set to true though).
                 try
                 {
-                    var configurations = this.connection.GetConfiguration("notify-keyspace-events");
+                    var configurations = _connection.GetConfiguration("notify-keyspace-events");
                     foreach (var cfg in configurations)
                     {
                         if (!cfg.Value.Contains("E"))
                         {
-                            this.Logger.LogWarn("Server {0} is missing configuration value 'E' in notify-keyspace-events to enable keyevents.", cfg.Key);
+                            Logger.LogWarn("Server {0} is missing configuration value 'E' in notify-keyspace-events to enable keyevents.", cfg.Key);
                         }
+
                         if (!(cfg.Value.Contains("A") ||
                             (cfg.Value.Contains("x") && cfg.Value.Contains("e"))))
                         {
-                            this.Logger.LogWarn("Server {0} is missing configuration value 'A' or 'x' and 'e' in notify-keyspace-events to enable keyevents for expired and evicted keys.", cfg.Key);
+                            Logger.LogWarn("Server {0} is missing configuration value 'A' or 'x' and 'e' in notify-keyspace-events to enable keyevents for expired and evicted keys.", cfg.Key);
                         }
                     }
                 }
                 catch
                 {
-                    this.Logger.LogDebug("Could not read configuration from redis to validate notify-keyspace-events. Most likely useAdmin is not set to true.");
+                    Logger.LogDebug("Could not read configuration from redis to validate notify-keyspace-events. Most likely useAdmin is not set to true.");
                 }
 
-                this.SubscribeKeyspaceNotifications();
+                SubscribeKeyspaceNotifications();
             }
-        }
-
-        private void SubscribeKeyspaceNotifications()
-        {
-            this.connection.Subscriber.Subscribe(
-                $"__keyevent@{this.redisConfiguration.Database}__:expired",
-                (channel, key) =>
-                {
-                    var tupple = ParseKey(key);
-                    if (this.Logger.IsEnabled(LogLevel.Debug))
-                    {
-                        this.Logger.LogDebug("Got expired event for key '{0}:{1}'", tupple.Item2, tupple.Item1);
-                    }
-
-                    this.TriggerCacheSpecificRemove(tupple.Item1, tupple.Item2, CacheItemRemovedReason.Expired);
-                });
-
-            this.connection.Subscriber.Subscribe(
-                $"__keyevent@{this.redisConfiguration.Database}__:evicted",
-                (channel, key) =>
-                {
-                    var tupple = ParseKey(key);
-                    if (this.Logger.IsEnabled(LogLevel.Debug))
-                    {
-                        this.Logger.LogDebug("Got evicted event for key '{0}:{1}'", tupple.Item2, tupple.Item1);
-                    }
-
-                    this.TriggerCacheSpecificRemove(tupple.Item1, tupple.Item2, CacheItemRemovedReason.Evicted);
-                });
         }
 
         /// <summary>
@@ -182,9 +154,9 @@ return result";
             get
             {
                 var count = 0;
-                foreach (var server in this.Servers.Where(p => !p.IsSlave && p.IsConnected))
+                foreach (var server in Servers.Where(p => !p.IsSlave && p.IsConnected))
                 {
-                    count += (int)server.DatabaseSize(this.redisConfiguration.Database);
+                    count += (int)server.DatabaseSize(_redisConfiguration.Database);
                 }
 
                 // approx size, only size on the master..
@@ -198,29 +170,29 @@ return result";
         /// Gets the servers.
         /// </summary>
         /// <value>The list of servers.</value>
-        public IEnumerable<IServer> Servers => this.connection.Servers;
+        public IEnumerable<IServer> Servers => _connection.Servers;
 
         /// <summary>
         /// Gets the features the redis server supports.
         /// </summary>
         /// <value>The server features.</value>
-        public RedisFeatures Features => this.connection.Features;
+        public RedisFeatures Features => _connection.Features;
 
 #pragma warning restore CS3003 // Type is not CLS-compliant
 
         /// <summary>
-        /// Gets or sets a flag indicating if we can use the lua implementation instead of manual.
+        /// Gets or sets a value indicating whether we can use the lua implementation instead of manual.
         /// This flag will be set automatically via feature detection based on the Redis server version and should never be set manually except for testing.
         /// </summary>
         public bool UseLua
         {
             get
             {
-                return this.isLuaAllowed;
+                return _isLuaAllowed;
             }
             set
             {
-                this.isLuaAllowed = value;
+                _isLuaAllowed = value;
             }
         }
 
@@ -232,13 +204,13 @@ return result";
         /// </summary>
         public override void Clear()
         {
-            foreach (var server in this.Servers.Where(p => !p.IsSlave))
+            foreach (var server in Servers.Where(p => !p.IsSlave))
             {
-                this.Retry(() =>
+                Retry(() =>
                 {
                     if (server.IsConnected)
                     {
-                        server.FlushDatabase(this.redisConfiguration.Database);
+                        server.FlushDatabase(_redisConfiguration.Database);
                     }
                 });
             }
@@ -250,10 +222,10 @@ return result";
         /// <param name="region">The cache region.</param>
         public override void ClearRegion(string region)
         {
-            this.Retry(() =>
+            Retry(() =>
             {
                 // we are storing all keys stored in the region in the hash for key=region
-                var hashKeys = this.connection.Database.HashKeys(region);
+                var hashKeys = _connection.Database.HashKeys(region);
 
                 if (hashKeys.Length > 0)
                 {
@@ -261,12 +233,12 @@ return result";
                     // 01/32/16 changed to remove one by one because on clusters the keys could belong to multiple slots
                     foreach (var key in hashKeys.Where(p => p.HasValue))
                     {
-                        this.connection.Database.KeyDelete(key.ToString(), CommandFlags.FireAndForget);
+                        _connection.Database.KeyDelete(key.ToString(), CommandFlags.FireAndForget);
                     }
                 }
 
                 // now delete the region
-                this.connection.Database.KeyDelete(region);
+                _connection.Database.KeyDelete(region);
             });
         }
 
@@ -274,7 +246,7 @@ return result";
         public override bool Exists(string key)
         {
             var fullKey = GetKey(key);
-            return this.Retry(() => this.connection.Database.KeyExists(fullKey));
+            return Retry(() => _connection.Database.KeyExists(fullKey));
         }
 
         /// <inheritdoc />
@@ -283,32 +255,32 @@ return result";
             NotNullOrWhiteSpace(region, nameof(region));
 
             var fullKey = GetKey(key, region);
-            return this.Retry(() => this.connection.Database.KeyExists(fullKey));
+            return Retry(() => _connection.Database.KeyExists(fullKey));
         }
 
         /// <inheritdoc />
         public override UpdateItemResult<TCacheValue> Update(string key, Func<TCacheValue, TCacheValue> updateValue, int maxRetries)
-            => this.Update(key, null, updateValue, maxRetries);
+            => Update(key, null, updateValue, maxRetries);
 
         /// <inheritdoc />
         public override UpdateItemResult<TCacheValue> Update(string key, string region, Func<TCacheValue, TCacheValue> updateValue, int maxRetries)
         {
-            if (!this.isLuaAllowed)
+            if (!_isLuaAllowed)
             {
-                return this.UpdateNoScript(key, region, updateValue, maxRetries);
+                return UpdateNoScript(key, region, updateValue, maxRetries);
             }
 
             var tries = 0;
             var fullKey = GetKey(key, region);
 
-            return this.Retry(() =>
+            return Retry(() =>
             {
                 do
                 {
                     tries++;
 
                     int version;
-                    var item = this.GetCacheItemAndVersion(key, region, out version);
+                    var item = GetCacheItemAndVersion(key, region, out version);
 
                     if (item == null)
                     {
@@ -325,9 +297,9 @@ return result";
                     }
 
                     // resetting TTL on update, too
-                    var result = this.Eval(ScriptType.Update, fullKey, new[]
+                    var result = Eval(ScriptType.Update, fullKey, new[]
                     {
-                        this.ToRedisValue(newValue),
+                        ToRedisValue(newValue),
                         version,
                         (int)item.ExpirationMode,
                         (long)item.ExpirationTimeout.TotalMilliseconds,
@@ -342,7 +314,7 @@ return result";
                         return UpdateItemResult.ForSuccess(newItem, tries > 1, tries);
                     }
 
-                    this.Logger.LogDebug("Update of {0} {1} failed with version conflict, retrying {2}/{3}", key, region, tries, maxRetries);
+                    Logger.LogDebug("Update of {0} {1} failed with version conflict, retrying {2}/{3}", key, region, tries, maxRetries);
                 }
                 while (tries <= maxRetries);
 
@@ -350,6 +322,7 @@ return result";
             });
         }
 
+#pragma warning disable SA1600
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 
         protected UpdateItemResult<TCacheValue> UpdateNoScript(string key, string region, Func<TCacheValue, TCacheValue> updateValue, int maxRetries)
@@ -358,22 +331,22 @@ return result";
             var tries = 0;
             var fullKey = GetKey(key, region);
 
-            return this.Retry(() =>
+            return Retry(() =>
             {
                 do
                 {
                     tries++;
 
-                    var item = this.GetCacheItemInternal(key, region);
+                    var item = GetCacheItemInternal(key, region);
 
                     if (item == null)
                     {
                         return UpdateItemResult.ForItemDidNotExist<TCacheValue>();
                     }
 
-                    var oldValue = this.ToRedisValue(item.Value);
+                    var oldValue = ToRedisValue(item.Value);
 
-                    var tran = this.connection.Database.CreateTransaction();
+                    var tran = _connection.Database.CreateTransaction();
                     tran.AddCondition(Condition.HashEqual(fullKey, HashFieldValue, oldValue));
 
                     // run update
@@ -385,7 +358,7 @@ return result";
                         return UpdateItemResult.ForFactoryReturnedNull<TCacheValue>();
                     }
 
-                    tran.HashSetAsync(fullKey, HashFieldValue, this.ToRedisValue(newValue));
+                    tran.HashSetAsync(fullKey, HashFieldValue, ToRedisValue(newValue));
 
                     committed = tran.Execute();
 
@@ -396,13 +369,13 @@ return result";
 
                         if (newItem.ExpirationMode == ExpirationMode.Sliding && newItem.ExpirationTimeout != TimeSpan.Zero)
                         {
-                            this.connection.Database.KeyExpire(fullKey, newItem.ExpirationTimeout, CommandFlags.FireAndForget);
+                            _connection.Database.KeyExpire(fullKey, newItem.ExpirationTimeout, CommandFlags.FireAndForget);
                         }
 
                         return UpdateItemResult.ForSuccess(newItem, tries > 1, tries);
                     }
 
-                    this.Logger.LogDebug("Update of {0} {1} failed with version conflict, retrying {2}/{3}", key, region, tries, maxRetries);
+                    Logger.LogDebug("Update of {0} {1} failed with version conflict, retrying {2}/{3}", key, region, tries, maxRetries);
                 }
                 while (committed == false && tries <= maxRetries);
 
@@ -410,7 +383,8 @@ return result";
             });
         }
 
-#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
+#pragma warning restore CS1591
+#pragma warning restore SA1600
 
         /// <summary>
         /// Adds a value to the cache.
@@ -425,7 +399,7 @@ return result";
         /// <c>true</c> if the key was not already added to the cache, <c>false</c> otherwise.
         /// </returns>
         protected override bool AddInternalPrepared(CacheItem<TCacheValue> item) =>
-            this.Retry(() => this.Set(item, When.NotExists, true));
+            Retry(() => Set(item, When.NotExists, true));
 
         /// <summary>
         /// Performs application-defined tasks associated with freeing, releasing, or resetting
@@ -447,9 +421,7 @@ return result";
         /// <param name="key">The key being used to identify the item within the cache.</param>
         /// <returns>The <c>CacheItem</c>.</returns>
         protected override CacheItem<TCacheValue> GetCacheItemInternal(string key)
-            => this.GetCacheItemInternal(key, null);
-
-#pragma warning disable CSE0003
+            => GetCacheItemInternal(key, null);
 
         /// <summary>
         /// Gets a <c>CacheItem</c> for the specified key.
@@ -460,20 +432,20 @@ return result";
         protected override CacheItem<TCacheValue> GetCacheItemInternal(string key, string region)
         {
             int version;
-            return this.GetCacheItemAndVersion(key, region, out version);
+            return GetCacheItemAndVersion(key, region, out version);
         }
 
         private CacheItem<TCacheValue> GetCacheItemAndVersion(string key, string region, out int version)
         {
             version = -1;
-            if (!this.isLuaAllowed)
+            if (!_isLuaAllowed)
             {
-                return this.GetCacheItemInternalNoScript(key, region);
+                return GetCacheItemInternalNoScript(key, region);
             }
 
             var fullKey = GetKey(key, region);
 
-            var result = this.Retry(() => this.Eval(ScriptType.Get, fullKey));
+            var result = Retry(() => Eval(ScriptType.Get, fullKey));
             if (result == null || result.IsNull)
             {
                 // something went wrong. HMGET should return at least a null result for each requested field
@@ -510,11 +482,11 @@ return result";
                 }
                 else
                 {
-                    this.Logger.LogWarn("Expiration mode and timeout are set but are not valid '{0}', '{1}'.", expirationModeItem, timeoutItem);
+                    Logger.LogWarn("Expiration mode and timeout are set but are not valid '{0}', '{1}'.", expirationModeItem, timeoutItem);
                 }
             }
 
-            var value = this.FromRedisValue(item, (string)valueTypeItem);
+            var value = FromRedisValue(item, (string)valueTypeItem);
 
             var cacheItem =
                 usesDefaultExpiration ?
@@ -532,7 +504,7 @@ return result";
 
             if (cacheItem.IsExpired)
             {
-                this.TriggerCacheSpecificRemove(key, region, CacheItemRemovedReason.Expired);
+                TriggerCacheSpecificRemove(key, region, CacheItemRemovedReason.Expired);
 
                 return null;
             }
@@ -541,16 +513,17 @@ return result";
         }
 
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
+#pragma warning disable SA1600
 
         protected CacheItem<TCacheValue> GetCacheItemInternalNoScript(string key, string region)
         {
-            return this.Retry(() =>
+            return Retry(() =>
             {
                 var fullKey = GetKey(key, region);
 
                 // getting both, the value and, if exists, the expiration mode. if that one is set
                 // and it is sliding, we also retrieve the timeout later
-                var values = this.connection.Database.HashGet(
+                var values = _connection.Database.HashGet(
                     fullKey,
                     new RedisValue[]
                     {
@@ -590,11 +563,11 @@ return result";
                     }
                     else
                     {
-                        this.Logger.LogWarn("Expiration mode and timeout are set but are not valid '{0}', '{1}'.", expirationModeItem, timeoutItem);
+                        Logger.LogWarn("Expiration mode and timeout are set but are not valid '{0}', '{1}'.", expirationModeItem, timeoutItem);
                     }
                 }
 
-                var value = this.FromRedisValue(item, (string)valueTypeItem);
+                var value = FromRedisValue(item, (string)valueTypeItem);
 
                 var cacheItem =
                     usesDefaultExpiration ?
@@ -612,7 +585,7 @@ return result";
 
                 if (cacheItem.IsExpired)
                 {
-                    this.TriggerCacheSpecificRemove(key, region, CacheItemRemovedReason.Expired);
+                    TriggerCacheSpecificRemove(key, region, CacheItemRemovedReason.Expired);
 
                     return null;
                 }
@@ -620,7 +593,7 @@ return result";
                 // update sliding
                 if (expirationMode == ExpirationMode.Sliding && expirationTimeout != default(TimeSpan))
                 {
-                    this.connection.Database.KeyExpire(fullKey, cacheItem.ExpirationTimeout, CommandFlags.FireAndForget);
+                    _connection.Database.KeyExpire(fullKey, cacheItem.ExpirationTimeout, CommandFlags.FireAndForget);
                 }
 
                 return cacheItem;
@@ -628,7 +601,7 @@ return result";
         }
 
 #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
-#pragma warning restore CSE0003
+#pragma warning restore SA1600
 
         /// <summary>
         /// Puts the <paramref name="item"/> into the cache. If the item exists it will get updated
@@ -644,7 +617,7 @@ return result";
         /// </summary>
         /// <param name="item">The <c>CacheItem</c> to be added to the cache.</param>
         protected override void PutInternalPrepared(CacheItem<TCacheValue> item) =>
-            this.Retry(() => this.Set(item, When.Always, false));
+            Retry(() => Set(item, When.Always, false));
 
         /// <summary>
         /// Removes a value from the cache for the specified key.
@@ -653,7 +626,7 @@ return result";
         /// <returns>
         /// <c>true</c> if the key was found and removed from the cache, <c>false</c> otherwise.
         /// </returns>
-        protected override bool RemoveInternal(string key) => this.RemoveInternal(key, null);
+        protected override bool RemoveInternal(string key) => RemoveInternal(key, null);
 
 #pragma warning disable CSE0003
 
@@ -667,21 +640,50 @@ return result";
         /// </returns>
         protected override bool RemoveInternal(string key, string region)
         {
-            return this.Retry(() =>
+            return Retry(() =>
             {
                 var fullKey = GetKey(key, region);
 
                 // clean up region
                 if (!string.IsNullOrWhiteSpace(region))
                 {
-                    this.connection.Database.HashDelete(region, fullKey, CommandFlags.FireAndForget);
+                    _connection.Database.HashDelete(region, fullKey, CommandFlags.FireAndForget);
                 }
 
                 // remove key
-                var result = this.connection.Database.KeyDelete(fullKey);
+                var result = _connection.Database.KeyDelete(fullKey);
 
                 return result;
             });
+        }
+
+        private void SubscribeKeyspaceNotifications()
+        {
+            _connection.Subscriber.Subscribe(
+                $"__keyevent@{_redisConfiguration.Database}__:expired",
+                (channel, key) =>
+                {
+                    var tupple = ParseKey(key);
+                    if (Logger.IsEnabled(LogLevel.Debug))
+                    {
+                        Logger.LogDebug("Got expired event for key '{0}:{1}'", tupple.Item2, tupple.Item1);
+                    }
+
+                    TriggerCacheSpecificRemove(tupple.Item1, tupple.Item2, CacheItemRemovedReason.Expired);
+                });
+
+            _connection.Subscriber.Subscribe(
+                $"__keyevent@{_redisConfiguration.Database}__:evicted",
+                (channel, key) =>
+                {
+                    var tupple = ParseKey(key);
+                    if (Logger.IsEnabled(LogLevel.Debug))
+                    {
+                        Logger.LogDebug("Got evicted event for key '{0}:{1}'", tupple.Item2, tupple.Item1);
+                    }
+
+                    TriggerCacheSpecificRemove(tupple.Item1, tupple.Item2, CacheItemRemovedReason.Evicted);
+                });
         }
 
 #pragma warning restore CSE0003
@@ -695,7 +697,7 @@ return result";
 
             var sepIndex = value.IndexOf(':');
             var hasRegion = sepIndex > 0;
-            string key = value;
+            var key = value;
             string region = null;
 
             if (hasRegion)
@@ -730,7 +732,7 @@ return result";
             // in case the key and or region itself contains the separator, there would be no way to do so...
             // So, only if that feature is enabled, we'll encode the key and/or region in that case
             // and the ParseKey method will respect that, too, and decodes the key and/or region.
-            if (this.redisConfiguration.KeyspaceNotificationsEnabled && key.Contains(":"))
+            if (_redisConfiguration.KeyspaceNotificationsEnabled && key.Contains(":"))
             {
                 key = Base64Prefix + Convert.ToBase64String(Encoding.UTF8.GetBytes(key));
             }
@@ -739,7 +741,7 @@ return result";
 
             if (!string.IsNullOrWhiteSpace(region))
             {
-                if (this.redisConfiguration.KeyspaceNotificationsEnabled && region.Contains(":"))
+                if (_redisConfiguration.KeyspaceNotificationsEnabled && region.Contains(":"))
                 {
                     region = Base64Prefix + Convert.ToBase64String(Encoding.UTF8.GetBytes(region));
                 }
@@ -757,31 +759,31 @@ return result";
                 return default(TCacheValue);
             }
 
-            var typedConverter = this.valueConverter as IRedisValueConverter<TCacheValue>;
+            var typedConverter = _valueConverter as IRedisValueConverter<TCacheValue>;
             if (typedConverter != null)
             {
                 return typedConverter.FromRedisValue(value, valueType);
             }
 
-            return this.valueConverter.FromRedisValue<TCacheValue>(value, valueType);
+            return _valueConverter.FromRedisValue<TCacheValue>(value, valueType);
         }
 
         private RedisValue ToRedisValue(TCacheValue value)
         {
-            var typedConverter = this.valueConverter as IRedisValueConverter<TCacheValue>;
+            var typedConverter = _valueConverter as IRedisValueConverter<TCacheValue>;
             if (typedConverter != null)
             {
                 return typedConverter.ToRedisValue(value);
             }
 
-            return this.valueConverter.ToRedisValue(value);
+            return _valueConverter.ToRedisValue(value);
         }
 
         private T Retry<T>(Func<T> retryme) =>
-            RetryHelper.Retry(retryme, this.managerConfiguration.RetryTimeout, this.managerConfiguration.MaxRetries, this.Logger);
+            RetryHelper.Retry(retryme, _managerConfiguration.RetryTimeout, _managerConfiguration.MaxRetries, Logger);
 
         private void Retry(Action retryme)
-            => this.Retry<bool>(
+            => Retry(
                 () =>
                 {
                     retryme();
@@ -790,13 +792,13 @@ return result";
 
         private bool Set(CacheItem<TCacheValue> item, When when, bool sync = false)
         {
-            if (!this.isLuaAllowed)
+            if (!_isLuaAllowed)
             {
-                return this.SetNoScript(item, when, sync);
+                return SetNoScript(item, when, sync);
             }
 
             var fullKey = GetKey(item.Key, item.Region);
-            var value = this.ToRedisValue(item.Value);
+            var value = ToRedisValue(item.Value);
 
             var flags = sync ? CommandFlags.None : CommandFlags.FireAndForget;
 
@@ -814,11 +816,11 @@ return result";
             RedisResult result;
             if (when == When.NotExists)
             {
-                result = this.Eval(ScriptType.Add, fullKey, parameters, flags);
+                result = Eval(ScriptType.Add, fullKey, parameters, flags);
             }
             else
             {
-                result = this.Eval(ScriptType.Put, fullKey, parameters, flags);
+                result = Eval(ScriptType.Put, fullKey, parameters, flags);
             }
 
             if (result == null)
@@ -828,7 +830,7 @@ return result";
                     if (!string.IsNullOrWhiteSpace(item.Region))
                     {
                         // setting region lookup key if region is being used
-                        this.connection.Database.HashSet(item.Region, fullKey, "regionKey", When.Always, CommandFlags.FireAndForget);
+                        _connection.Database.HashSet(item.Region, fullKey, "regionKey", When.Always, CommandFlags.FireAndForget);
                     }
 
                     // put runs via fire and forget, so we don't get a result back
@@ -843,10 +845,11 @@ return result";
                 if (result.IsNull && when == When.NotExists)
                 {
                     // add failed because element exists already
-                    if (this.Logger.IsEnabled(LogLevel.Information))
+                    if (Logger.IsEnabled(LogLevel.Information))
                     {
-                        this.Logger.LogInfo("DB {0} | Failed to add item [{1}] because it exists.", this.connection.Database.Database, item.ToString());
+                        Logger.LogInfo("DB {0} | Failed to add item [{1}] because it exists.", _connection.Database.Database, item.ToString());
                     }
+
                     return false;
                 }
 
@@ -859,25 +862,25 @@ return result";
                     {
                         // setting region lookup key if region is being used
                         // we cannot do that within the lua because the region could be on another cluster node!
-                        this.connection.Database.HashSet(item.Region, fullKey, "regionKey", When.Always, CommandFlags.FireAndForget);
+                        _connection.Database.HashSet(item.Region, fullKey, "regionKey", When.Always, CommandFlags.FireAndForget);
                     }
 
                     return true;
                 }
 
-                this.Logger.LogWarn("DB {0} | Failed to set item [{1}]: {2}.", this.connection.Database.Database, item.ToString(), resultValue.ToString());
+                Logger.LogWarn("DB {0} | Failed to set item [{1}]: {2}.", _connection.Database.Database, item.ToString(), resultValue.ToString());
                 return false;
             }
         }
 
         private bool SetNoScript(CacheItem<TCacheValue> item, When when, bool sync = false)
         {
-            return this.Retry(() =>
+            return Retry(() =>
             {
                 var fullKey = GetKey(item.Key, item.Region);
-                var value = this.ToRedisValue(item.Value);
+                var value = ToRedisValue(item.Value);
 
-                HashEntry[] metaValues = new[]
+                var metaValues = new[]
                 {
                     new HashEntry(HashFieldType, item.ValueType.AssemblyQualifiedName),
                     new HashEntry(HashFieldExpirationMode, (int)item.ExpirationMode),
@@ -888,7 +891,7 @@ return result";
 
                 var flags = sync ? CommandFlags.None : CommandFlags.FireAndForget;
 
-                var setResult = this.connection.Database.HashSet(fullKey, HashFieldValue, value, when, flags);
+                var setResult = _connection.Database.HashSet(fullKey, HashFieldValue, value, when, flags);
 
                 // setResult from fire and forget is alwys false, so we have to assume it works...
                 setResult = flags == CommandFlags.FireAndForget ? true : setResult;
@@ -898,7 +901,7 @@ return result";
                     if (!string.IsNullOrWhiteSpace(item.Region))
                     {
                         // setting region lookup key if region is being used
-                        this.connection.Database.HashSet(item.Region, fullKey, "regionKey", When.Always, CommandFlags.FireAndForget);
+                        _connection.Database.HashSet(item.Region, fullKey, "regionKey", When.Always, CommandFlags.FireAndForget);
                     }
 
                     // set the additional fields in case sliding expiration should be used in this
@@ -906,17 +909,17 @@ return result";
                     // that we can extend the expiration period every time we do a get
                     if (metaValues != null)
                     {
-                        this.connection.Database.HashSet(fullKey, metaValues, flags);
+                        _connection.Database.HashSet(fullKey, metaValues, flags);
                     }
 
                     if (item.ExpirationMode != ExpirationMode.None && item.ExpirationMode != ExpirationMode.Default)
                     {
-                        this.connection.Database.KeyExpire(fullKey, item.ExpirationTimeout, CommandFlags.FireAndForget);
+                        _connection.Database.KeyExpire(fullKey, item.ExpirationTimeout, CommandFlags.FireAndForget);
                     }
                     else
                     {
                         // bugfix #9
-                        this.connection.Database.KeyPersist(fullKey, CommandFlags.FireAndForget);
+                        _connection.Database.KeyPersist(fullKey, CommandFlags.FireAndForget);
                     }
                 }
 
@@ -926,34 +929,34 @@ return result";
 
         private RedisResult Eval(ScriptType scriptType, RedisKey redisKey, RedisValue[] values = null, CommandFlags flags = CommandFlags.None)
         {
-            if (!this.scriptsLoaded)
+            if (!_scriptsLoaded)
             {
-                lock (this.lockObject)
+                lock (_lockObject)
                 {
-                    if (!this.scriptsLoaded)
+                    if (!_scriptsLoaded)
                     {
-                        this.LoadScripts();
-                        this.scriptsLoaded = true;
+                        LoadScripts();
+                        _scriptsLoaded = true;
                     }
                 }
             }
 
             LoadedLuaScript script;
-            if (!this.shaScripts.TryGetValue(scriptType, out script))
+            if (!_shaScripts.TryGetValue(scriptType, out script))
             {
-                this.Logger.LogCritical("Something is wrong with the Lua scripts. Seem to be not loaded.");
-                this.scriptsLoaded = false;
+                Logger.LogCritical("Something is wrong with the Lua scripts. Seem to be not loaded.");
+                _scriptsLoaded = false;
                 throw new InvalidOperationException("Something is wrong with the Lua scripts. Seem to be not loaded.");
             }
 
             try
             {
-                return this.connection.Database.ScriptEvaluate(script.Hash, new[] { redisKey }, values, flags);
+                return _connection.Database.ScriptEvaluate(script.Hash, new[] { redisKey }, values, flags);
             }
             catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.OrdinalIgnoreCase))
             {
-                this.Logger.LogInfo("Received NOSCRIPT from server. Reloading scripts...");
-                this.LoadScripts();
+                Logger.LogInfo("Received NOSCRIPT from server. Reloading scripts...");
+                LoadScripts();
 
                 // retry
                 throw;
@@ -962,23 +965,23 @@ return result";
 
         private void LoadScripts()
         {
-            lock (this.lockObject)
+            lock (_lockObject)
             {
-                this.Logger.LogInfo("Loading scripts.");
+                Logger.LogInfo("Loading scripts.");
 
-                var putLua = LuaScript.Prepare(ScriptPut);
-                var addLua = LuaScript.Prepare(ScriptAdd);
-                var updateLua = LuaScript.Prepare(ScriptUpdate);
-                var getLua = LuaScript.Prepare(ScriptGet);
+                var putLua = LuaScript.Prepare(_scriptPut);
+                var addLua = LuaScript.Prepare(_scriptAdd);
+                var updateLua = LuaScript.Prepare(_scriptUpdate);
+                var getLua = LuaScript.Prepare(_scriptGet);
 
-                foreach (var server in this.Servers)
+                foreach (var server in Servers)
                 {
                     if (server.IsConnected)
                     {
-                        this.shaScripts[ScriptType.Put] = putLua.Load(server);
-                        this.shaScripts[ScriptType.Add] = addLua.Load(server);
-                        this.shaScripts[ScriptType.Update] = updateLua.Load(server);
-                        this.shaScripts[ScriptType.Get] = getLua.Load(server);
+                        _shaScripts[ScriptType.Put] = putLua.Load(server);
+                        _shaScripts[ScriptType.Add] = addLua.Load(server);
+                        _shaScripts[ScriptType.Update] = updateLua.Load(server);
+                        _shaScripts[ScriptType.Get] = getLua.Load(server);
                     }
                 }
             }

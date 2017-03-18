@@ -13,7 +13,7 @@ namespace CacheManager.Core
         /// </summary>
         public CacheHandleConfiguration()
         {
-            this.Name = this.Key = Guid.NewGuid().ToString();
+            Name = Key = Guid.NewGuid().ToString();
         }
 
         /// <summary>
@@ -25,7 +25,7 @@ namespace CacheManager.Core
         {
             NotNullOrWhiteSpace(handleName, nameof(handleName));
 
-            this.Name = this.Key = handleName;
+            Name = Key = handleName;
         }
 
         /// <summary>
@@ -41,8 +41,8 @@ namespace CacheManager.Core
             NotNullOrWhiteSpace(handleName, nameof(handleName));
             NotNullOrWhiteSpace(configurationKey, nameof(configurationKey));
 
-            this.Name = handleName;
-            this.Key = configurationKey;
+            Name = handleName;
+            Key = configurationKey;
         }
 
         /// <summary>
@@ -108,7 +108,7 @@ namespace CacheManager.Core
         /// <inheritdoc />
         public override string ToString()
         {
-            return $"{this.HandleType}";
+            return $"{HandleType}";
         }
     }
 }

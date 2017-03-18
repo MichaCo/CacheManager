@@ -94,15 +94,15 @@ namespace CacheManager.Core
         {
             NotNull(info, nameof(info));
 
-            this.Key = info.GetString(nameof(this.Key));
-            this.Value = (T)info.GetValue(nameof(this.Value), typeof(T));
-            this.ValueType = (Type)info.GetValue(nameof(this.ValueType), typeof(Type));
-            this.Region = info.GetString(nameof(this.Region));
-            this.ExpirationMode = (ExpirationMode)info.GetValue(nameof(this.ExpirationMode), typeof(ExpirationMode));
-            this.ExpirationTimeout = (TimeSpan)info.GetValue(nameof(this.ExpirationTimeout), typeof(TimeSpan));
-            this.CreatedUtc = info.GetDateTime(nameof(this.CreatedUtc));
-            this.LastAccessedUtc = info.GetDateTime(nameof(this.LastAccessedUtc));
-            this.UsesExpirationDefaults = info.GetBoolean(nameof(this.UsesExpirationDefaults));
+            Key = info.GetString(nameof(Key));
+            Value = (T)info.GetValue(nameof(Value), typeof(T));
+            ValueType = (Type)info.GetValue(nameof(ValueType), typeof(Type));
+            Region = info.GetString(nameof(Region));
+            ExpirationMode = (ExpirationMode)info.GetValue(nameof(ExpirationMode), typeof(ExpirationMode));
+            ExpirationTimeout = (TimeSpan)info.GetValue(nameof(ExpirationTimeout), typeof(TimeSpan));
+            CreatedUtc = info.GetDateTime(nameof(CreatedUtc));
+            LastAccessedUtc = info.GetDateTime(nameof(LastAccessedUtc));
+            UsesExpirationDefaults = info.GetBoolean(nameof(UsesExpirationDefaults));
         }
 
 #endif
@@ -112,21 +112,22 @@ namespace CacheManager.Core
             NotNullOrWhiteSpace(key, nameof(key));
             NotNull(value, nameof(value));
 
-            this.Key = key;
-            this.Region = region;
-            this.Value = value;
-            this.ValueType = value.GetType();
-            this.ExpirationMode = expiration ?? ExpirationMode.Default;
-            this.ExpirationTimeout = (this.ExpirationMode == ExpirationMode.None || this.ExpirationMode == ExpirationMode.Default) ? TimeSpan.Zero : timeout ?? TimeSpan.Zero;
-            this.UsesExpirationDefaults = expirationDefaults;
+            Key = key;
+            Region = region;
+            Value = value;
+            ValueType = value.GetType();
+            ExpirationMode = expiration ?? ExpirationMode.Default;
+            ExpirationTimeout = (ExpirationMode == ExpirationMode.None || ExpirationMode == ExpirationMode.Default) ? TimeSpan.Zero : timeout ?? TimeSpan.Zero;
+            UsesExpirationDefaults = expirationDefaults;
 
             // validation check for very high expiration time.
             // Otherwise this will lead to all kinds of errors (e.g. adding time to sliding while using a TimeSpan with long.MaxValue ticks)
-            if (this.ExpirationTimeout.TotalDays > 365)
+            if (ExpirationTimeout.TotalDays > 365)
             {
                 throw new ArgumentOutOfRangeException(nameof(timeout), "Expiration timeout must be between 00:00:00 and 365:00:00:00.");
             }
-            if (this.ExpirationMode != ExpirationMode.Default && this.ExpirationMode != ExpirationMode.None && this.ExpirationTimeout <= TimeSpan.Zero)
+
+            if (ExpirationMode != ExpirationMode.Default && ExpirationMode != ExpirationMode.None && ExpirationTimeout <= TimeSpan.Zero)
             {
                 throw new ArgumentOutOfRangeException(nameof(timeout), "Expiration timeout must be greater than zero if expiration mode is defined.");
             }
@@ -135,13 +136,14 @@ namespace CacheManager.Core
             {
                 throw new ArgumentException($"Created date kind must be {DateTimeKind.Utc}.", nameof(created));
             }
+
             if (lastAccessed.HasValue && lastAccessed.Value.Kind != DateTimeKind.Utc)
             {
                 throw new ArgumentException($"Last accessed date kind must be {DateTimeKind.Utc}.", nameof(lastAccessed));
             }
 
-            this.CreatedUtc = created ?? DateTime.UtcNow;
-            this.LastAccessedUtc = lastAccessed ?? DateTime.UtcNow;
+            CreatedUtc = created ?? DateTime.UtcNow;
+            LastAccessedUtc = lastAccessed ?? DateTime.UtcNow;
         }
 
         /// <summary>
@@ -153,14 +155,14 @@ namespace CacheManager.Core
         {
             get
             {
-                DateTime now = DateTime.UtcNow;
-                if (this.ExpirationMode == ExpirationMode.Absolute
-                    && this.CreatedUtc.Add(this.ExpirationTimeout) < now)
+                var now = DateTime.UtcNow;
+                if (ExpirationMode == ExpirationMode.Absolute
+                    && CreatedUtc.Add(ExpirationTimeout) < now)
                 {
                     return true;
                 }
-                else if (this.ExpirationMode == ExpirationMode.Sliding
-                    && this.LastAccessedUtc.Add(this.ExpirationTimeout) < now)
+                else if (ExpirationMode == ExpirationMode.Sliding
+                    && LastAccessedUtc.Add(ExpirationTimeout) < now)
                 {
                     return true;
                 }
@@ -219,7 +221,7 @@ namespace CacheManager.Core
         public Type ValueType { get; }
 
         /// <summary>
-        /// Gets a value indicating if the cache item uses the cache handle's configured expiration.
+        /// Gets a value indicating whether the cache item uses the cache handle's configured expiration.
         /// </summary>
         public bool UsesExpirationDefaults { get; } = true;
 
@@ -241,15 +243,15 @@ namespace CacheManager.Core
         {
             NotNull(info, nameof(info));
 
-            info.AddValue(nameof(this.Key), this.Key);
-            info.AddValue(nameof(this.Value), this.Value);
-            info.AddValue(nameof(this.ValueType), this.ValueType);
-            info.AddValue(nameof(this.Region), this.Region);
-            info.AddValue(nameof(this.ExpirationMode), this.ExpirationMode);
-            info.AddValue(nameof(this.ExpirationTimeout), this.ExpirationTimeout);
-            info.AddValue(nameof(this.CreatedUtc), this.CreatedUtc);
-            info.AddValue(nameof(this.LastAccessedUtc), this.LastAccessedUtc);
-            info.AddValue(nameof(this.UsesExpirationDefaults), this.UsesExpirationDefaults);
+            info.AddValue(nameof(Key), Key);
+            info.AddValue(nameof(Value), Value);
+            info.AddValue(nameof(ValueType), ValueType);
+            info.AddValue(nameof(Region), Region);
+            info.AddValue(nameof(ExpirationMode), ExpirationMode);
+            info.AddValue(nameof(ExpirationTimeout), ExpirationTimeout);
+            info.AddValue(nameof(CreatedUtc), CreatedUtc);
+            info.AddValue(nameof(LastAccessedUtc), LastAccessedUtc);
+            info.AddValue(nameof(UsesExpirationDefaults), UsesExpirationDefaults);
         }
 
 #endif
@@ -257,13 +259,13 @@ namespace CacheManager.Core
         /// <inheritdoc />
         public override string ToString()
         {
-            return !string.IsNullOrWhiteSpace(this.Region) ?
-                $"'{this.Region}:{this.Key}', exp:{this.ExpirationMode.ToString()} {this.ExpirationTimeout}, lastAccess:{this.LastAccessedUtc}"
-                : $"'{this.Key}', exp:{this.ExpirationMode.ToString()} {this.ExpirationTimeout}, lastAccess:{this.LastAccessedUtc}";
+            return !string.IsNullOrWhiteSpace(Region) ?
+                $"'{Region}:{Key}', exp:{ExpirationMode.ToString()} {ExpirationTimeout}, lastAccess:{LastAccessedUtc}"
+                : $"'{Key}', exp:{ExpirationMode.ToString()} {ExpirationTimeout}, lastAccess:{LastAccessedUtc}";
         }
 
         internal CacheItem<T> WithExpiration(ExpirationMode mode, TimeSpan timeout, bool usesHandleDefault = true) =>
-            new CacheItem<T>(this.Key, this.Region, this.Value, mode, timeout, this.CreatedUtc, this.LastAccessedUtc, usesHandleDefault);
+            new CacheItem<T>(Key, Region, Value, mode, timeout, CreatedUtc, LastAccessedUtc, usesHandleDefault);
 
         /// <summary>
         /// Creates a copy of the current cache item and sets a new absolute expiration date.
@@ -274,13 +276,13 @@ namespace CacheManager.Core
         /// <returns>The new instance of the cache item.</returns>
         public CacheItem<T> WithAbsoluteExpiration(DateTimeOffset absoluteExpiration)
         {
-            TimeSpan timeout = absoluteExpiration - DateTimeOffset.UtcNow;
+            var timeout = absoluteExpiration - DateTimeOffset.UtcNow;
             if (timeout <= TimeSpan.Zero)
             {
                 throw new ArgumentException("Expiration value must be greater than zero.", nameof(absoluteExpiration));
             }
 
-            return new CacheItem<T>(this.Key, this.Region, this.Value, ExpirationMode.Absolute, timeout, this.CreatedUtc, this.LastAccessedUtc, false);
+            return new CacheItem<T>(Key, Region, Value, ExpirationMode.Absolute, timeout, CreatedUtc, LastAccessedUtc, false);
         }
 
         /// <summary>
@@ -297,7 +299,7 @@ namespace CacheManager.Core
                 throw new ArgumentException("Expiration value must be greater than zero.", nameof(absoluteExpiration));
             }
 
-            return new CacheItem<T>(this.Key, this.Region, this.Value, ExpirationMode.Absolute, absoluteExpiration, this.CreatedUtc, this.LastAccessedUtc, false);
+            return new CacheItem<T>(Key, Region, Value, ExpirationMode.Absolute, absoluteExpiration, CreatedUtc, LastAccessedUtc, false);
         }
 
         /// <summary>
@@ -314,7 +316,7 @@ namespace CacheManager.Core
                 throw new ArgumentException("Expiration value must be greater than zero.", nameof(slidingExpiration));
             }
 
-            return new CacheItem<T>(this.Key, this.Region, this.Value, ExpirationMode.Sliding, slidingExpiration, this.CreatedUtc, this.LastAccessedUtc, false);
+            return new CacheItem<T>(Key, Region, Value, ExpirationMode.Sliding, slidingExpiration, CreatedUtc, LastAccessedUtc, false);
         }
 
         /// <summary>
@@ -325,7 +327,7 @@ namespace CacheManager.Core
         /// <remarks>We do not clone the cache item or value.</remarks>
         /// <returns>The new instance of the cache item.</returns>
         public CacheItem<T> WithNoExpiration() =>
-            new CacheItem<T>(this.Key, this.Region, this.Value, ExpirationMode.None, TimeSpan.Zero, this.CreatedUtc, this.LastAccessedUtc, false);
+            new CacheItem<T>(Key, Region, Value, ExpirationMode.None, TimeSpan.Zero, CreatedUtc, LastAccessedUtc, false);
 
         /// <summary>
         /// Creates a copy of the current cache item with no explicit expiration, instructing the cache to use the default defined in the cache handle configuration.
@@ -334,7 +336,7 @@ namespace CacheManager.Core
         /// <remarks>We do not clone the cache item or value.</remarks>
         /// <returns>The new instance of the cache item.</returns>
         public CacheItem<T> WithDefaultExpiration() =>
-            new CacheItem<T>(this.Key, this.Region, this.Value, ExpirationMode.Default, TimeSpan.Zero, this.CreatedUtc, this.LastAccessedUtc, true);
+            new CacheItem<T>(Key, Region, Value, ExpirationMode.Default, TimeSpan.Zero, CreatedUtc, LastAccessedUtc, true);
 
         /// <summary>
         /// Creates a copy of the current cache item with new value.
@@ -344,7 +346,7 @@ namespace CacheManager.Core
         /// <param name="value">The new value.</param>
         /// <returns>The new instance of the cache item.</returns>
         public CacheItem<T> WithValue(T value) =>
-            new CacheItem<T>(this.Key, this.Region, value, this.ExpirationMode, this.ExpirationTimeout, this.CreatedUtc, this.LastAccessedUtc, this.UsesExpirationDefaults);
+            new CacheItem<T>(Key, Region, value, ExpirationMode, ExpirationTimeout, CreatedUtc, LastAccessedUtc, UsesExpirationDefaults);
 
         /// <summary>
         /// Creates a copy of the current cache item with a given created date.
@@ -354,6 +356,6 @@ namespace CacheManager.Core
         /// <param name="created">The new created date.</param>
         /// <returns>The new instance of the cache item.</returns>
         public CacheItem<T> WithCreated(DateTime created) =>
-            new CacheItem<T>(this.Key, this.Region, this.Value, this.ExpirationMode, this.ExpirationTimeout, created, this.LastAccessedUtc, this.UsesExpirationDefaults);
+            new CacheItem<T>(Key, Region, Value, ExpirationMode, ExpirationTimeout, created, LastAccessedUtc, UsesExpirationDefaults);
     }
 }

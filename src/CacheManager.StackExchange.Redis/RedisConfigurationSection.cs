@@ -79,7 +79,7 @@ namespace CacheManager.Redis
         /// </summary>
         public EndpointCollection()
         {
-            this.AddElementName = "endpoint";
+            AddElementName = "endpoint";
         }
 
         /// <summary>
@@ -159,7 +159,7 @@ namespace CacheManager.Redis
         /// </summary>
         public RedisOptionCollection()
         {
-            this.AddElementName = "connection";
+            AddElementName = "connection";
         }
 
         /// <summary>
@@ -222,7 +222,7 @@ namespace CacheManager.Redis
         }
 
         /// <summary>
-        /// Gets or sets a value enabling the keyspace events listener of the redis cache handle.
+        /// Gets or sets a value indicating whether keyspace events should be enabled and the redis cache handle should listen for them.
         /// </summary>
         [ConfigurationProperty("enableKeyspaceNotifications", IsRequired = false, DefaultValue = false)]
         public bool EnableKeyspaceNotifications

@@ -7,41 +7,42 @@ using LogLevel = CacheManager.Core.Logging.LogLevel;
 
 namespace CacheManager.Logging
 {
+#pragma warning disable SA1600
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
     public class MicrosoftLoggerFactoryAdapter : Core.Logging.ILoggerFactory, IDisposable
     {
-        private readonly ILoggerFactory parentFactory;
+        private readonly ILoggerFactory _parentFactory;
 
         public MicrosoftLoggerFactoryAdapter()
         {
-            this.parentFactory = new LoggerFactory();
+            _parentFactory = new LoggerFactory();
         }
 
         public MicrosoftLoggerFactoryAdapter(ILoggerFactory parentFactory)
         {
             Guard.NotNull(parentFactory, nameof(parentFactory));
-            this.parentFactory = parentFactory;
+            _parentFactory = parentFactory;
         }
 
         ~MicrosoftLoggerFactoryAdapter()
         {
             // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
-            this.Dispose(false);
+            Dispose(false);
         }
 
         public ILogger CreateLogger(string categoryName)
         {
-            return new MicrosoftLoggerAdapter(this.parentFactory.CreateLogger(categoryName));
+            return new MicrosoftLoggerAdapter(_parentFactory.CreateLogger(categoryName));
         }
 
         public ILogger CreateLogger<T>(T instance)
         {
-            return new MicrosoftLoggerAdapter(new Logger<T>(this.parentFactory));
+            return new MicrosoftLoggerAdapter(new Logger<T>(_parentFactory));
         }
 
         public void Dispose()
         {
-            this.Dispose(true);
+            Dispose(true);
             GC.SuppressFinalize(this);
         }
 
@@ -49,36 +50,36 @@ namespace CacheManager.Logging
         {
             if (disposing)
             {
-                this.parentFactory.Dispose();
+                _parentFactory.Dispose();
             }
         }
     }
 
     internal class MicrosoftLoggerAdapter : ILogger
     {
-        private static readonly Func<object, Exception, string> Formatter = MessageFormatter;
-        private readonly Microsoft.Extensions.Logging.ILogger logger;
+        private static readonly Func<object, Exception, string> _formatter = MessageFormatter;
+        private readonly Microsoft.Extensions.Logging.ILogger _logger;
 
         public MicrosoftLoggerAdapter(Microsoft.Extensions.Logging.ILogger logger)
         {
             Guard.NotNull(logger, nameof(logger));
 
-            this.logger = logger;
+            _logger = logger;
         }
 
         public IDisposable BeginScope(object state)
         {
-            return this.logger.BeginScope(state);
+            return _logger.BeginScope(state);
         }
 
         public bool IsEnabled(LogLevel logLevel)
         {
-            return this.logger.IsEnabled(GetExternalLogLevel(logLevel));
+            return _logger.IsEnabled(GetExternalLogLevel(logLevel));
         }
 
         public void Log(LogLevel logLevel, int eventId, object message, Exception exception)
         {
-            this.logger.Log(GetExternalLogLevel(logLevel), eventId, message, exception, Formatter);
+            _logger.Log(GetExternalLogLevel(logLevel), eventId, message, exception, _formatter);
         }
 
         private static string MessageFormatter(object state, Exception error)
@@ -123,4 +124,5 @@ namespace CacheManager.Logging
         }
     }
 #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
+#pragma warning restore SA1600
 }

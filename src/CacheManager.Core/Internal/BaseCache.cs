@@ -28,7 +28,7 @@ namespace CacheManager.Core.Internal
         /// </summary>
         ~BaseCache()
         {
-            this.Dispose(false);
+            Dispose(false);
         }
 
         /// <summary>
@@ -60,11 +60,11 @@ namespace CacheManager.Core.Internal
         {
             get
             {
-                return this.Get(key);
+                return Get(key);
             }
             set
             {
-                this.Put(key, value);
+                Put(key, value);
             }
         }
 
@@ -89,11 +89,11 @@ namespace CacheManager.Core.Internal
         {
             get
             {
-                return this.Get(key, region);
+                return Get(key, region);
             }
             set
             {
-                this.Put(key, value, region);
+                Put(key, value, region);
             }
         }
 
@@ -116,7 +116,7 @@ namespace CacheManager.Core.Internal
         {
             // null checks are done within ctor of the item
             var item = new CacheItem<TCacheValue>(key, value);
-            return this.Add(item);
+            return Add(item);
         }
 
         /// <summary>
@@ -142,7 +142,7 @@ namespace CacheManager.Core.Internal
         {
             // null checks are done within ctor of the item
             var item = new CacheItem<TCacheValue>(key, region, value);
-            return this.Add(item);
+            return Add(item);
         }
 
         /// <summary>
@@ -167,7 +167,7 @@ namespace CacheManager.Core.Internal
         {
             NotNull(item, nameof(item));
 
-            return this.AddInternal(item);
+            return AddInternal(item);
         }
 
         /// <summary>
@@ -188,7 +188,7 @@ namespace CacheManager.Core.Internal
         /// </summary>
         public void Dispose()
         {
-            this.Dispose(true);
+            Dispose(true);
             GC.SuppressFinalize(this);
         }
 
@@ -207,7 +207,7 @@ namespace CacheManager.Core.Internal
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Get", Justification = "Maybe at some point.")]
         public virtual TCacheValue Get(string key)
         {
-            CacheItem<TCacheValue> item = this.GetCacheItem(key);
+            var item = GetCacheItem(key);
 
             if (item != null && item.Key.Equals(key))
             {
@@ -231,7 +231,7 @@ namespace CacheManager.Core.Internal
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Get", Justification = "Maybe at some point.")]
         public virtual TCacheValue Get(string key, string region)
         {
-            CacheItem<TCacheValue> item = this.GetCacheItem(key, region);
+            var item = GetCacheItem(key, region);
 
             if (item != null && item.Key.Equals(key) && item.Region != null && item.Region.Equals(region))
             {
@@ -254,7 +254,7 @@ namespace CacheManager.Core.Internal
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Get", Justification = "Maybe at some point.")]
         public virtual TOut Get<TOut>(string key)
         {
-            object value = this.Get(key);
+            object value = Get(key);
             return GetCasted<TOut>(value);
         }
 
@@ -276,7 +276,7 @@ namespace CacheManager.Core.Internal
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Get", Justification = "Maybe at some point.")]
         public virtual TOut Get<TOut>(string key, string region)
         {
-            object value = this.Get(key, region);
+            object value = Get(key, region);
             return GetCasted<TOut>(value);
         }
 
@@ -290,7 +290,7 @@ namespace CacheManager.Core.Internal
         {
             NotNullOrWhiteSpace(key, nameof(key));
 
-            return this.GetCacheItemInternal(key);
+            return GetCacheItemInternal(key);
         }
 
         /// <summary>
@@ -307,7 +307,7 @@ namespace CacheManager.Core.Internal
             NotNullOrWhiteSpace(key, nameof(key));
             NotNullOrWhiteSpace(region, nameof(region));
 
-            return this.GetCacheItemInternal(key, region);
+            return GetCacheItemInternal(key, region);
         }
 
         /// <summary>
@@ -325,7 +325,7 @@ namespace CacheManager.Core.Internal
         public virtual void Put(string key, TCacheValue value)
         {
             var item = new CacheItem<TCacheValue>(key, value);
-            this.Put(item);
+            Put(item);
         }
 
         /// <summary>
@@ -347,7 +347,7 @@ namespace CacheManager.Core.Internal
         public virtual void Put(string key, TCacheValue value, string region)
         {
             var item = new CacheItem<TCacheValue>(key, region, value);
-            this.Put(item);
+            Put(item);
         }
 
         /// <summary>
@@ -369,7 +369,7 @@ namespace CacheManager.Core.Internal
         {
             NotNull(item, nameof(item));
 
-            this.PutInternal(item);
+            PutInternal(item);
         }
 
         /// <summary>
@@ -384,7 +384,7 @@ namespace CacheManager.Core.Internal
         {
             NotNullOrWhiteSpace(key, nameof(key));
 
-            return this.RemoveInternal(key);
+            return RemoveInternal(key);
         }
 
         /// <summary>
@@ -403,7 +403,7 @@ namespace CacheManager.Core.Internal
             NotNullOrWhiteSpace(key, nameof(key));
             NotNullOrWhiteSpace(region, nameof(region));
 
-            return this.RemoveInternal(key, region);
+            return RemoveInternal(key, region);
         }
 
         /// <summary>
@@ -430,16 +430,18 @@ namespace CacheManager.Core.Internal
         /// </param>
         protected virtual void Dispose(bool disposeManaged)
         {
-            this.Disposing = true;
-            if (!this.Disposed)
+            Disposing = true;
+            if (!Disposed)
             {
                 if (disposeManaged)
                 {
                     // do not do anything
                 }
-                this.Disposed = true;
+
+                Disposed = true;
             }
-            this.Disposing = false;
+
+            Disposing = false;
         }
 
         /// <summary>
@@ -482,9 +484,9 @@ namespace CacheManager.Core.Internal
         /// <exception cref="ObjectDisposedException">If the instance is disposed.</exception>
         protected void CheckDisposed()
         {
-            if (this.Disposed)
+            if (Disposed)
             {
-                throw new ObjectDisposedException(this.GetType().Name);
+                throw new ObjectDisposedException(GetType().Name);
             }
         }
 
@@ -503,7 +505,7 @@ namespace CacheManager.Core.Internal
 
             try
             {
-                object changed = Convert.ChangeType(value, typeof(TOut), CultureInfo.InvariantCulture);
+                var changed = Convert.ChangeType(value, typeof(TOut), CultureInfo.InvariantCulture);
                 return changed == null ? (TOut)value : (TOut)changed;
             }
             catch

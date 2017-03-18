@@ -26,7 +26,7 @@ namespace CacheManager.Serialization.Bond
         {
             _cache = new BinarySerializerCache();
         }
-        
+
         /// <inheritdoc/>
         public override byte[] Serialize<T>(T value)
         {
@@ -43,7 +43,6 @@ namespace CacheManager.Serialization.Bond
         }
 
         /// <inheritdoc/>
-
         public override object Deserialize(byte[] data, Type target)
         {
             var deserializer = _cache.GetDeserializer(target);

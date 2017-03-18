@@ -16,16 +16,9 @@ namespace CacheManager.MicrosoftCachingMemory
     {
         private const string DefaultName = "default";
 
-        private readonly string cacheName = string.Empty;
+        private readonly string _cacheName = string.Empty;
 
-        private volatile MemoryCache cache = null;
-        internal readonly MemoryCacheOptions memoryCacheOptions;
-
-        /// <inheritdoc/>
-        public override int Count => this.cache.Count;
-
-        /// <inheritdoc/>
-        protected override ILogger Logger { get; }
+        private volatile MemoryCache _cache = null;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MemoryCacheHandle{TCacheValue}"/> class.
@@ -41,29 +34,37 @@ namespace CacheManager.MicrosoftCachingMemory
             NotNull(configuration, nameof(configuration));
             NotNull(loggerFactory, nameof(loggerFactory));
 
-            this.Logger = loggerFactory.CreateLogger(this);
-            this.cacheName = configuration.Name;
-            this.memoryCacheOptions = memoryCacheOptions ?? new MemoryCacheOptions();
-            this.cache = new MemoryCache(this.memoryCacheOptions);
+            Logger = loggerFactory.CreateLogger(this);
+            _cacheName = configuration.Name;
+            MemoryCacheOptions = memoryCacheOptions ?? new MemoryCacheOptions();
+            _cache = new MemoryCache(MemoryCacheOptions);
         }
+
+        /// <inheritdoc/>
+        public override int Count => _cache.Count;
+
+        /// <inheritdoc/>
+        protected override ILogger Logger { get; }
+
+        internal MemoryCacheOptions MemoryCacheOptions { get; }
 
         /// <inheritdoc/>
         public override void Clear()
         {
-            this.cache = new MemoryCache(this.memoryCacheOptions);
+            _cache = new MemoryCache(MemoryCacheOptions);
         }
 
         /// <inheritdoc/>
         public override void ClearRegion(string region)
         {
-            this.cache.RemoveChilds(region);
-            this.cache.Remove(region);
+            _cache.RemoveChilds(region);
+            _cache.Remove(region);
         }
 
         /// <inheritdoc />
         public override bool Exists(string key)
         {
-            return this.cache.Contains(GetItemKey(key));
+            return _cache.Contains(GetItemKey(key));
         }
 
         /// <inheritdoc />
@@ -71,20 +72,20 @@ namespace CacheManager.MicrosoftCachingMemory
         {
             NotNullOrWhiteSpace(region, nameof(region));
 
-            return this.cache.Contains(GetItemKey(key, region));
+            return _cache.Contains(GetItemKey(key, region));
         }
 
         /// <inheritdoc/>
         protected override CacheItem<TCacheValue> GetCacheItemInternal(string key)
         {
-            return this.GetCacheItemInternal(key, null);
+            return GetCacheItemInternal(key, null);
         }
 
         /// <inheritdoc/>
         protected override CacheItem<TCacheValue> GetCacheItemInternal(string key, string region)
         {
-            string fullKey = this.GetItemKey(key, region);
-            var item = this.cache.Get(fullKey) as CacheItem<TCacheValue>;
+            var fullKey = GetItemKey(key, region);
+            var item = _cache.Get(fullKey) as CacheItem<TCacheValue>;
 
             if (item == null)
             {
@@ -93,15 +94,15 @@ namespace CacheManager.MicrosoftCachingMemory
 
             if (item.IsExpired)
             {
-                this.RemoveInternal(item.Key, item.Region);
-                this.TriggerCacheSpecificRemove(item.Key, item.Region, CacheItemRemovedReason.Expired);
+                RemoveInternal(item.Key, item.Region);
+                TriggerCacheSpecificRemove(item.Key, item.Region, CacheItemRemovedReason.Expired);
                 return null;
             }
 
             if (item.ExpirationMode == ExpirationMode.Sliding)
             {
                 // item = this.GetItemExpiration(item); // done by basecachehandle already
-                this.cache.Set(fullKey, item, this.GetOptions(item));
+                _cache.Set(fullKey, item, GetOptions(item));
             }
 
             return item;
@@ -110,17 +111,17 @@ namespace CacheManager.MicrosoftCachingMemory
         /// <inheritdoc/>
         protected override bool RemoveInternal(string key)
         {
-            return this.RemoveInternal(key, null);
+            return RemoveInternal(key, null);
         }
 
         /// <inheritdoc/>
         protected override bool RemoveInternal(string key, string region)
         {
-            var fullKey = this.GetItemKey(key, region);
-            bool result = this.cache.Contains(fullKey);
+            var fullKey = GetItemKey(key, region);
+            var result = _cache.Contains(fullKey);
             if (result)
             {
-                this.cache.Remove(fullKey);
+                _cache.Remove(fullKey);
             }
 
             return result;
@@ -129,19 +130,19 @@ namespace CacheManager.MicrosoftCachingMemory
         /// <inheritdoc/>
         protected override bool AddInternalPrepared(CacheItem<TCacheValue> item)
         {
-            var key = this.GetItemKey(item);
+            var key = GetItemKey(item);
 
-            if (this.cache.Contains(key))
+            if (_cache.Contains(key))
             {
                 return false;
             }
 
-            var options = this.GetOptions(item);
-            this.cache.Set(key, item, options);
+            var options = GetOptions(item);
+            _cache.Set(key, item, options);
 
             if (item.Region != null)
             {
-                this.cache.RegisterChild(item.Region, key);
+                _cache.RegisterChild(item.Region, key);
             }
 
             return true;
@@ -150,18 +151,18 @@ namespace CacheManager.MicrosoftCachingMemory
         /// <inheritdoc/>
         protected override void PutInternalPrepared(CacheItem<TCacheValue> item)
         {
-            var key = this.GetItemKey(item);
+            var key = GetItemKey(item);
 
-            var options = this.GetOptions(item);
-            this.cache.Set(key, item, options);
+            var options = GetOptions(item);
+            _cache.Set(key, item, options);
 
             if (item.Region != null)
             {
-                this.cache.RegisterChild(item.Region, key);
+                _cache.RegisterChild(item.Region, key);
             }
         }
 
-        private string GetItemKey(CacheItem<TCacheValue> item) => this.GetItemKey(item?.Key, item?.Region);
+        private string GetItemKey(CacheItem<TCacheValue> item) => GetItemKey(item?.Key, item?.Region);
 
         private string GetItemKey(string key, string region = null)
         {
@@ -179,9 +180,9 @@ namespace CacheManager.MicrosoftCachingMemory
         {
             if (item.Region != null)
             {
-                if (!this.cache.Contains(item.Region))
+                if (!_cache.Contains(item.Region))
                 {
-                    this.CreateRegionToken(item.Region);
+                    CreateRegionToken(item.Region);
                 }
             }
 
@@ -195,13 +196,13 @@ namespace CacheManager.MicrosoftCachingMemory
             if (item.ExpirationMode == ExpirationMode.Absolute)
             {
                 options.AbsoluteExpiration = new DateTimeOffset(DateTime.UtcNow.Add(item.ExpirationTimeout));
-                options.RegisterPostEvictionCallback(this.ItemRemoved, Tuple.Create(item.Key, item.Region));
+                options.RegisterPostEvictionCallback(ItemRemoved, Tuple.Create(item.Key, item.Region));
             }
 
             if (item.ExpirationMode == ExpirationMode.Sliding)
             {
                 options.SlidingExpiration = item.ExpirationTimeout;
-                options.RegisterPostEvictionCallback(this.ItemRemoved, Tuple.Create(item.Key, item.Region));
+                options.RegisterPostEvictionCallback(ItemRemoved, Tuple.Create(item.Key, item.Region));
             }
 
             item.LastAccessedUtc = DateTime.UtcNow;
@@ -218,7 +219,7 @@ namespace CacheManager.MicrosoftCachingMemory
                 SlidingExpiration = TimeSpan.MaxValue,
             };
 
-            this.cache.Set(region, new HashSet<object>(), options);
+            _cache.Set(region, new HashSet<object>(), options);
         }
 
         private void ItemRemoved(object key, object value, EvictionReason reason, object state)
@@ -234,32 +235,32 @@ namespace CacheManager.MicrosoftCachingMemory
             {
                 return;
             }
-            
+
             var keyRegionTupple = state as Tuple<string, string>;
 
             if (keyRegionTupple != null)
             {
                 if (keyRegionTupple.Item2 != null)
                 {
-                    this.Stats.OnRemove(keyRegionTupple.Item2);
+                    Stats.OnRemove(keyRegionTupple.Item2);
                 }
                 else
                 {
-                    this.Stats.OnRemove();
+                    Stats.OnRemove();
                 }
 
                 if (reason == EvictionReason.Capacity)
                 {
-                    this.TriggerCacheSpecificRemove(keyRegionTupple.Item1, keyRegionTupple.Item2, CacheItemRemovedReason.Evicted);
+                    TriggerCacheSpecificRemove(keyRegionTupple.Item1, keyRegionTupple.Item2, CacheItemRemovedReason.Evicted);
                 }
                 else if (reason == EvictionReason.Expired)
                 {
-                    this.TriggerCacheSpecificRemove(keyRegionTupple.Item1, keyRegionTupple.Item2, CacheItemRemovedReason.Expired);
+                    TriggerCacheSpecificRemove(keyRegionTupple.Item1, keyRegionTupple.Item2, CacheItemRemovedReason.Expired);
                 }
             }
             else
             {
-                this.Stats.OnRemove();
+                Stats.OnRemove();
             }
         }
     }

@@ -18,9 +18,9 @@ namespace CacheManager.Core
     /// <typeparam name="TCacheValue">The type of the cache value.</typeparam>
     public sealed partial class BaseCacheManager<TCacheValue> : BaseCache<TCacheValue>, ICacheManager<TCacheValue>, IDisposable
     {
-        private readonly bool logTrace = false;
-        private readonly BaseCacheHandle<TCacheValue>[] cacheHandles;
-        private readonly CacheBackplane cacheBackplane;
+        private readonly bool _logTrace = false;
+        private readonly BaseCacheHandle<TCacheValue>[] _cacheHandles;
+        private readonly CacheBackplane _cacheBackplane;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BaseCacheManager{TCacheValue}"/> class
@@ -63,44 +63,44 @@ namespace CacheManager.Core
             NotNullOrWhiteSpace(name, nameof(name));
             NotNull(configuration, nameof(configuration));
 
-            this.Name = name;
-            this.Configuration = configuration;
+            Name = name;
+            Configuration = configuration;
 
             var loggerFactory = CacheReflectionHelper.CreateLoggerFactory(configuration);
             var serializer = CacheReflectionHelper.CreateSerializer(configuration, loggerFactory);
 
-            this.Logger = loggerFactory.CreateLogger(this);
-            this.logTrace = this.Logger.IsEnabled(LogLevel.Trace);
-            this.Logger.LogInfo("Cache manager: adding cache handles...");
+            Logger = loggerFactory.CreateLogger(this);
+            _logTrace = Logger.IsEnabled(LogLevel.Trace);
+            Logger.LogInfo("Cache manager: adding cache handles...");
             try
             {
-                this.cacheHandles = CacheReflectionHelper.CreateCacheHandles(this, loggerFactory, serializer).ToArray();
+                _cacheHandles = CacheReflectionHelper.CreateCacheHandles(this, loggerFactory, serializer).ToArray();
 
                 var index = 0;
-                foreach (var handle in this.cacheHandles)
+                foreach (var handle in _cacheHandles)
                 {
                     var handleIndex = index;
                     handle.OnCacheSpecificRemove += (sender, args) =>
                     {
-                        this.TriggerOnRemoveByHandle(args.Key, args.Region, args.Reason, handleIndex + 1);
-                        if (this.Configuration.UpdateMode == CacheUpdateMode.Up)
+                        TriggerOnRemoveByHandle(args.Key, args.Region, args.Reason, handleIndex + 1);
+                        if (Configuration.UpdateMode == CacheUpdateMode.Up)
                         {
-                            this.EvictFromHandlesAbove(args.Key, args.Region, handleIndex);
+                            EvictFromHandlesAbove(args.Key, args.Region, handleIndex);
                         }
                     };
 
                     index++;
                 }
 
-                this.cacheBackplane = CacheReflectionHelper.CreateBackplane(configuration, loggerFactory);
-                if (this.cacheBackplane != null)
+                _cacheBackplane = CacheReflectionHelper.CreateBackplane(configuration, loggerFactory);
+                if (_cacheBackplane != null)
                 {
-                    this.RegisterCacheBackplane(this.cacheBackplane);
+                    RegisterCacheBackplane(_cacheBackplane);
                 }
             }
             catch (Exception ex)
             {
-                this.Logger.LogError(ex, "Error occurred while creating the cache manager.");
+                Logger.LogError(ex, "Error occurred while creating the cache manager.");
                 throw ex.InnerException ?? ex;
             }
         }
@@ -136,13 +136,13 @@ namespace CacheManager.Core
         public IEnumerable<BaseCacheHandle<TCacheValue>> CacheHandles
             => new ReadOnlyCollection<BaseCacheHandle<TCacheValue>>(
                 new List<BaseCacheHandle<TCacheValue>>(
-                    this.cacheHandles));
+                    _cacheHandles));
 
         /// <summary>
         /// Gets the configured cache backplane.
         /// </summary>
         /// <value>The backplane.</value>
-        public CacheBackplane Backplane => this.cacheBackplane;
+        public CacheBackplane Backplane => _cacheBackplane;
 
         /// <summary>
         /// Gets the cache name.
@@ -156,34 +156,34 @@ namespace CacheManager.Core
         /// <inheritdoc />
         public override void Clear()
         {
-            this.CheckDisposed();
-            if (this.logTrace)
+            CheckDisposed();
+            if (_logTrace)
             {
-                this.Logger.LogTrace("Clear: flushing cache...");
+                Logger.LogTrace("Clear: flushing cache...");
             }
 
-            foreach (var handle in this.cacheHandles)
+            foreach (var handle in _cacheHandles)
             {
-                if (this.logTrace)
+                if (_logTrace)
                 {
-                    this.Logger.LogTrace("Clear: clearing handle {0}.", handle.Configuration.Name);
+                    Logger.LogTrace("Clear: clearing handle {0}.", handle.Configuration.Name);
                 }
 
                 handle.Clear();
                 handle.Stats.OnClear();
             }
 
-            if (this.cacheBackplane != null)
+            if (_cacheBackplane != null)
             {
-                if (this.logTrace)
+                if (_logTrace)
                 {
-                    this.Logger.LogTrace("Clear: notifies backplane.");
+                    Logger.LogTrace("Clear: notifies backplane.");
                 }
 
-                this.cacheBackplane.NotifyClear();
+                _cacheBackplane.NotifyClear();
             }
 
-            this.TriggerOnClear();
+            TriggerOnClear();
         }
 
         /// <inheritdoc />
@@ -191,44 +191,44 @@ namespace CacheManager.Core
         {
             NotNullOrWhiteSpace(region, nameof(region));
 
-            this.CheckDisposed();
-            if (this.logTrace)
+            CheckDisposed();
+            if (_logTrace)
             {
-                this.Logger.LogTrace("Clear region: {0}.", region);
+                Logger.LogTrace("Clear region: {0}.", region);
             }
 
-            foreach (var handle in this.cacheHandles)
+            foreach (var handle in _cacheHandles)
             {
-                if (this.logTrace)
+                if (_logTrace)
                 {
-                    this.Logger.LogTrace("Clear region: {0} in handle {1}.", region, handle.Configuration.Name);
+                    Logger.LogTrace("Clear region: {0} in handle {1}.", region, handle.Configuration.Name);
                 }
 
                 handle.ClearRegion(region);
                 handle.Stats.OnClearRegion(region);
             }
 
-            if (this.cacheBackplane != null)
+            if (_cacheBackplane != null)
             {
-                if (this.logTrace)
+                if (_logTrace)
                 {
-                    this.Logger.LogTrace("Clear region: {0}: notifies backplane [clear region].", region);
+                    Logger.LogTrace("Clear region: {0}: notifies backplane [clear region].", region);
                 }
 
-                this.cacheBackplane.NotifyClearRegion(region);
+                _cacheBackplane.NotifyClearRegion(region);
             }
 
-            this.TriggerOnClearRegion(region);
+            TriggerOnClearRegion(region);
         }
 
         /// <inheritdoc />
         public override bool Exists(string key)
         {
-            foreach (var handle in this.cacheHandles)
+            foreach (var handle in _cacheHandles)
             {
-                if (this.logTrace)
+                if (_logTrace)
                 {
-                    this.Logger.LogTrace("Checking if [{0}] exists on handle '{1}'.", key, handle.Configuration.Name);
+                    Logger.LogTrace("Checking if [{0}] exists on handle '{1}'.", key, handle.Configuration.Name);
                 }
 
                 if (handle.Exists(key))
@@ -243,11 +243,11 @@ namespace CacheManager.Core
         /// <inheritdoc />
         public override bool Exists(string key, string region)
         {
-            foreach (var handle in this.cacheHandles)
+            foreach (var handle in _cacheHandles)
             {
-                if (this.logTrace)
+                if (_logTrace)
                 {
-                    this.Logger.LogTrace("Checking if [{0}:{1}] exists on handle '{2}'.", region, key, handle.Configuration.Name);
+                    Logger.LogTrace("Checking if [{0}:{1}] exists on handle '{2}'.", region, key, handle.Configuration.Name);
                 }
 
                 if (handle.Exists(key, region))
@@ -266,49 +266,49 @@ namespace CacheManager.Core
         /// A <see cref="string" /> that represents this instance.
         /// </returns>
         public override string ToString() =>
-            string.Format(CultureInfo.InvariantCulture, "Name: {0}, Handles: [{1}]", this.Name, string.Join(",", this.cacheHandles.Select(p => p.GetType().Name)));
+            string.Format(CultureInfo.InvariantCulture, "Name: {0}, Handles: [{1}]", Name, string.Join(",", _cacheHandles.Select(p => p.GetType().Name)));
 
         /// <inheritdoc />
         protected internal override bool AddInternal(CacheItem<TCacheValue> item)
         {
             NotNull(item, nameof(item));
 
-            this.CheckDisposed();
-            if (this.logTrace)
+            CheckDisposed();
+            if (_logTrace)
             {
-                this.Logger.LogTrace("Add [{0}] started.", item);
+                Logger.LogTrace("Add [{0}] started.", item);
             }
 
-            var handleIndex = this.cacheHandles.Length - 1;
+            var handleIndex = _cacheHandles.Length - 1;
 
-            var result = AddItemToHandle(item, this.cacheHandles[handleIndex]);
+            var result = AddItemToHandle(item, _cacheHandles[handleIndex]);
 
             // evict from other handles in any case because if it exists, it might be a different version
             // if not exist, its just a sanity check to invalidate other versions in upper layers.
-            this.EvictFromOtherHandles(item.Key, item.Region, handleIndex);
+            EvictFromOtherHandles(item.Key, item.Region, handleIndex);
 
             if (result)
             {
                 // update backplane
-                if (this.cacheBackplane != null)
+                if (_cacheBackplane != null)
                 {
                     if (string.IsNullOrWhiteSpace(item.Region))
                     {
-                        this.cacheBackplane.NotifyChange(item.Key, CacheItemChangedEventAction.Add);
+                        _cacheBackplane.NotifyChange(item.Key, CacheItemChangedEventAction.Add);
                     }
                     else
                     {
-                        this.cacheBackplane.NotifyChange(item.Key, item.Region, CacheItemChangedEventAction.Add);
+                        _cacheBackplane.NotifyChange(item.Key, item.Region, CacheItemChangedEventAction.Add);
                     }
 
-                    if (this.logTrace)
+                    if (_logTrace)
                     {
-                        this.Logger.LogTrace("Notified backplane 'change' because [{0}] was added.", item);
+                        Logger.LogTrace("Notified backplane 'change' because [{0}] was added.", item);
                     }
                 }
 
                 // trigger only once and not per handle and only if the item was added!
-                this.TriggerOnAdd(item.Key, item.Region);
+                TriggerOnAdd(item.Key, item.Region);
             }
 
             return result;
@@ -319,13 +319,13 @@ namespace CacheManager.Core
         {
             NotNull(item, nameof(item));
 
-            this.CheckDisposed();
-            if (this.logTrace)
+            CheckDisposed();
+            if (_logTrace)
             {
-                this.Logger.LogTrace("Put [{0}] started.", item);
+                Logger.LogTrace("Put [{0}] started.", item);
             }
 
-            foreach (var handle in this.cacheHandles)
+            foreach (var handle in _cacheHandles)
             {
                 if (handle.Configuration.EnableStatistics)
                 {
@@ -339,9 +339,9 @@ namespace CacheManager.Core
                     handle.Stats.OnPut(item, oldItem == null);
                 }
 
-                if (this.logTrace)
+                if (_logTrace)
                 {
-                    this.Logger.LogTrace(
+                    Logger.LogTrace(
                         "Put [{0}:{1}] successfully to handle '{2}'.",
                         item.Region,
                         item.Key,
@@ -352,24 +352,24 @@ namespace CacheManager.Core
             }
 
             // update backplane
-            if (this.cacheBackplane != null)
+            if (_cacheBackplane != null)
             {
-                if (this.logTrace)
+                if (_logTrace)
                 {
-                    this.Logger.LogTrace("Put [{0}:{1}] was scuccessful. Notifying backplane [change].", item.Region, item.Key);
+                    Logger.LogTrace("Put [{0}:{1}] was scuccessful. Notifying backplane [change].", item.Region, item.Key);
                 }
 
                 if (string.IsNullOrWhiteSpace(item.Region))
                 {
-                    this.cacheBackplane.NotifyChange(item.Key, CacheItemChangedEventAction.Put);
+                    _cacheBackplane.NotifyChange(item.Key, CacheItemChangedEventAction.Put);
                 }
                 else
                 {
-                    this.cacheBackplane.NotifyChange(item.Key, item.Region, CacheItemChangedEventAction.Put);
+                    _cacheBackplane.NotifyChange(item.Key, item.Region, CacheItemChangedEventAction.Put);
                 }
             }
 
-            this.TriggerOnPut(item.Key, item.Region);
+            TriggerOnPut(item.Key, item.Region);
         }
 
         /// <inheritdoc />
@@ -377,14 +377,14 @@ namespace CacheManager.Core
         {
             if (disposeManaged)
             {
-                foreach (var handle in this.cacheHandles)
+                foreach (var handle in _cacheHandles)
                 {
                     handle.Dispose();
                 }
 
-                if (this.cacheBackplane != null)
+                if (_cacheBackplane != null)
                 {
-                    this.cacheBackplane.Dispose();
+                    _cacheBackplane.Dispose();
                 }
             }
 
@@ -393,23 +393,23 @@ namespace CacheManager.Core
 
         /// <inheritdoc />
         protected override CacheItem<TCacheValue> GetCacheItemInternal(string key) =>
-            this.GetCacheItemInternal(key, null);
+            GetCacheItemInternal(key, null);
 
         /// <inheritdoc />
         protected override CacheItem<TCacheValue> GetCacheItemInternal(string key, string region)
         {
-            this.CheckDisposed();
+            CheckDisposed();
 
             CacheItem<TCacheValue> cacheItem = null;
 
-            if (this.logTrace)
+            if (_logTrace)
             {
-                this.Logger.LogTrace("Get [{0}:{1}] started.", region, key);
+                Logger.LogTrace("Get [{0}:{1}] started.", region, key);
             }
 
-            for (int handleIndex = 0; handleIndex < this.cacheHandles.Length; handleIndex++)
+            for (var handleIndex = 0; handleIndex < _cacheHandles.Length; handleIndex++)
             {
-                var handle = this.cacheHandles[handleIndex];
+                var handle = _cacheHandles[handleIndex];
                 if (string.IsNullOrWhiteSpace(region))
                 {
                     cacheItem = handle.GetCacheItem(key);
@@ -423,25 +423,25 @@ namespace CacheManager.Core
 
                 if (cacheItem != null)
                 {
-                    if (this.logTrace)
+                    if (_logTrace)
                     {
-                        this.Logger.LogTrace("Get [{0}:{1}], found in handle[{2}] '{3}'.", region, key, handleIndex, handle.Configuration.Name);
+                        Logger.LogTrace("Get [{0}:{1}], found in handle[{2}] '{3}'.", region, key, handleIndex, handle.Configuration.Name);
                     }
 
                     // update last accessed, might be used for custom sliding implementations
                     cacheItem.LastAccessedUtc = DateTime.UtcNow;
 
                     // update other handles if needed
-                    this.AddToHandles(cacheItem, handleIndex);
+                    AddToHandles(cacheItem, handleIndex);
                     handle.Stats.OnHit(region);
-                    this.TriggerOnGet(key, region);
+                    TriggerOnGet(key, region);
                     break;
                 }
                 else
                 {
-                    if (this.logTrace)
+                    if (_logTrace)
                     {
-                        this.Logger.LogTrace("Get [{0}:{1}], item NOT found in handle[{2}] '{3}'.", region, key, handleIndex, handle.Configuration.Name);
+                        Logger.LogTrace("Get [{0}:{1}], item NOT found in handle[{2}] '{3}'.", region, key, handleIndex, handle.Configuration.Name);
                     }
 
                     handle.Stats.OnMiss(region);
@@ -453,21 +453,21 @@ namespace CacheManager.Core
 
         /// <inheritdoc />
         protected override bool RemoveInternal(string key) =>
-            this.RemoveInternal(key, null);
+            RemoveInternal(key, null);
 
         /// <inheritdoc />
         protected override bool RemoveInternal(string key, string region)
         {
-            this.CheckDisposed();
+            CheckDisposed();
 
             var result = false;
 
-            if (this.logTrace)
+            if (_logTrace)
             {
-                this.Logger.LogTrace("Removing [{0}:{1}].", region, key);
+                Logger.LogTrace("Removing [{0}:{1}].", region, key);
             }
 
-            foreach (var handle in this.cacheHandles)
+            foreach (var handle in _cacheHandles)
             {
                 var handleResult = false;
                 if (!string.IsNullOrWhiteSpace(region))
@@ -481,14 +481,15 @@ namespace CacheManager.Core
 
                 if (handleResult)
                 {
-                    if (this.logTrace)
+                    if (_logTrace)
                     {
-                        this.Logger.LogTrace(
+                        Logger.LogTrace(
                             "Remove [{0}:{1}], successfully removed from handle '{2}'.",
                             region,
                             key,
                             handle.Configuration.Name);
                     }
+
                     result = true;
                     handle.Stats.OnRemove(region);
                 }
@@ -497,25 +498,25 @@ namespace CacheManager.Core
             if (result)
             {
                 // update backplane
-                if (this.cacheBackplane != null)
+                if (_cacheBackplane != null)
                 {
-                    if (this.logTrace)
+                    if (_logTrace)
                     {
-                        this.Logger.LogTrace("Removed [{0}:{1}], notifying backplane [remove].", region, key);
+                        Logger.LogTrace("Removed [{0}:{1}], notifying backplane [remove].", region, key);
                     }
 
                     if (string.IsNullOrWhiteSpace(region))
                     {
-                        this.cacheBackplane.NotifyRemove(key);
+                        _cacheBackplane.NotifyRemove(key);
                     }
                     else
                     {
-                        this.cacheBackplane.NotifyRemove(key, region);
+                        _cacheBackplane.NotifyRemove(key, region);
                     }
                 }
 
                 // trigger only once and not per handle
-                this.TriggerOnRemove(key, region);
+                TriggerOnRemove(key, region);
             }
 
             return result;
@@ -558,15 +559,15 @@ namespace CacheManager.Core
         {
             foreach (var handle in handles)
             {
-                this.EvictFromHandle(key, region, handle);
+                EvictFromHandle(key, region, handle);
             }
         }
 
         private void EvictFromHandle(string key, string region, BaseCacheHandle<TCacheValue> handle)
         {
-            if (this.logTrace)
+            if (_logTrace)
             {
-                this.Logger.LogTrace(
+                Logger.LogTrace(
                     "Evict [{0}:{1}] from handle '{2}'.",
                     region,
                     key,
@@ -591,15 +592,15 @@ namespace CacheManager.Core
 
         private void AddToHandles(CacheItem<TCacheValue> item, int foundIndex)
         {
-            if (this.logTrace)
+            if (_logTrace)
             {
-                this.Logger.LogTrace(
+                Logger.LogTrace(
                     "Start updating handles with [{0}] and update mode '{1}'.",
                     item,
-                    this.Configuration.UpdateMode);
+                    Configuration.UpdateMode);
             }
 
-            switch (this.Configuration.UpdateMode)
+            switch (Configuration.UpdateMode)
             {
                 case CacheUpdateMode.None:
                     // do basically nothing
@@ -630,16 +631,16 @@ namespace CacheManager.Core
                     }
 
                     // update all cache handles with lower order, up the list
-                    for (int handleIndex = 0; handleIndex < this.cacheHandles.Length; handleIndex++)
+                    for (var handleIndex = 0; handleIndex < _cacheHandles.Length; handleIndex++)
                     {
                         if (handleIndex < foundIndex)
                         {
-                            if (this.logTrace)
+                            if (_logTrace)
                             {
-                                this.Logger.LogTrace("Updating handles, added [{0}] to handle '{1}'.", item, this.cacheHandles[handleIndex].Configuration.Name);
+                                Logger.LogTrace("Updating handles, added [{0}] to handle '{1}'.", item, _cacheHandles[handleIndex].Configuration.Name);
                             }
 
-                            this.cacheHandles[handleIndex].Add(item);
+                            _cacheHandles[handleIndex].Add(item);
                         }
                     }
 
@@ -654,18 +655,18 @@ namespace CacheManager.Core
                 return;
             }
 
-            if (this.logTrace)
+            if (_logTrace)
             {
-                this.Logger.LogTrace("Add [{0}] to handles below handle '{1}'.", item, foundIndex);
+                Logger.LogTrace("Add [{0}] to handles below handle '{1}'.", item, foundIndex);
             }
 
-            for (int handleIndex = 0; handleIndex < this.cacheHandles.Length; handleIndex++)
+            for (var handleIndex = 0; handleIndex < _cacheHandles.Length; handleIndex++)
             {
                 if (handleIndex > foundIndex)
                 {
-                    if (this.cacheHandles[handleIndex].Add(item))
+                    if (_cacheHandles[handleIndex].Add(item))
                     {
-                        this.cacheHandles[handleIndex].Stats.OnAdd(item);
+                        _cacheHandles[handleIndex].Stats.OnAdd(item);
                     }
                 }
             }
@@ -673,42 +674,42 @@ namespace CacheManager.Core
 
         private void EvictFromOtherHandles(string key, string region, int excludeIndex)
         {
-            if (excludeIndex < 0 || excludeIndex >= this.cacheHandles.Length)
+            if (excludeIndex < 0 || excludeIndex >= _cacheHandles.Length)
             {
                 throw new ArgumentOutOfRangeException(nameof(excludeIndex));
             }
 
-            if (this.logTrace)
+            if (_logTrace)
             {
-                this.Logger.LogTrace("Evict [{0}:{1}] from other handles excluding handle '{2}'.", region, key, excludeIndex);
+                Logger.LogTrace("Evict [{0}:{1}] from other handles excluding handle '{2}'.", region, key, excludeIndex);
             }
 
-            for (int handleIndex = 0; handleIndex < this.cacheHandles.Length; handleIndex++)
+            for (var handleIndex = 0; handleIndex < _cacheHandles.Length; handleIndex++)
             {
                 if (handleIndex != excludeIndex)
                 {
-                    this.EvictFromHandle(key, region, this.cacheHandles[handleIndex]);
+                    EvictFromHandle(key, region, _cacheHandles[handleIndex]);
                 }
             }
         }
 
         private void EvictFromHandlesAbove(string key, string region, int excludeIndex)
         {
-            if (this.logTrace)
+            if (_logTrace)
             {
-                this.Logger.LogTrace("Evict from handles above: {0} {1}: above handle {2}.", key, region, excludeIndex);
+                Logger.LogTrace("Evict from handles above: {0} {1}: above handle {2}.", key, region, excludeIndex);
             }
 
-            if (excludeIndex < 0 || excludeIndex >= this.cacheHandles.Length)
+            if (excludeIndex < 0 || excludeIndex >= _cacheHandles.Length)
             {
                 throw new ArgumentOutOfRangeException(nameof(excludeIndex));
             }
 
-            for (int handleIndex = 0; handleIndex < this.cacheHandles.Length; handleIndex++)
+            for (var handleIndex = 0; handleIndex < _cacheHandles.Length; handleIndex++)
             {
                 if (handleIndex < excludeIndex)
                 {
-                    this.EvictFromHandle(key, region, this.cacheHandles[handleIndex]);
+                    EvictFromHandle(key, region, _cacheHandles[handleIndex]);
                 }
             }
         }
@@ -718,12 +719,12 @@ namespace CacheManager.Core
             NotNull(backplane, nameof(backplane));
 
             // this should have been checked during activation already, just to be totally sure...
-            if (this.cacheHandles.Any(p => p.Configuration.IsBackplaneSource))
+            if (_cacheHandles.Any(p => p.Configuration.IsBackplaneSource))
             {
                 var handles = new Func<BaseCacheHandle<TCacheValue>[]>(() =>
                 {
                     var handleList = new List<BaseCacheHandle<TCacheValue>>();
-                    foreach (var handle in this.cacheHandles)
+                    foreach (var handle in _cacheHandles)
                     {
                         if (!handle.Configuration.IsBackplaneSource)
                         {
@@ -735,103 +736,103 @@ namespace CacheManager.Core
 
                 backplane.Changed += (sender, args) =>
                 {
-                    if (this.logTrace)
+                    if (_logTrace)
                     {
-                        this.Logger.LogTrace("Backplane event: [Changed] of {0} {1}.", args.Key, args.Region);
+                        Logger.LogTrace("Backplane event: [Changed] of {0} {1}.", args.Key, args.Region);
                     }
 
-                    this.EvictFromHandles(args.Key, args.Region, handles());
+                    EvictFromHandles(args.Key, args.Region, handles());
                     switch (args.Action)
                     {
                         case CacheItemChangedEventAction.Add:
-                            this.TriggerOnAdd(args.Key, args.Region, CacheActionEventArgOrigin.Remote);
+                            TriggerOnAdd(args.Key, args.Region, CacheActionEventArgOrigin.Remote);
                             break;
 
                         case CacheItemChangedEventAction.Put:
-                            this.TriggerOnPut(args.Key, args.Region, CacheActionEventArgOrigin.Remote);
+                            TriggerOnPut(args.Key, args.Region, CacheActionEventArgOrigin.Remote);
                             break;
 
                         case CacheItemChangedEventAction.Update:
-                            this.TriggerOnUpdate(args.Key, args.Region, CacheActionEventArgOrigin.Remote);
+                            TriggerOnUpdate(args.Key, args.Region, CacheActionEventArgOrigin.Remote);
                             break;
                     }
                 };
 
                 backplane.Removed += (sender, args) =>
                 {
-                    if (this.logTrace)
+                    if (_logTrace)
                     {
-                        this.Logger.LogTrace("Backplane event: [Remove] of {0} {1}.", args.Key, args.Region);
+                        Logger.LogTrace("Backplane event: [Remove] of {0} {1}.", args.Key, args.Region);
                     }
 
-                    this.EvictFromHandles(args.Key, args.Region, handles());
-                    this.TriggerOnRemove(args.Key, args.Region, CacheActionEventArgOrigin.Remote);
+                    EvictFromHandles(args.Key, args.Region, handles());
+                    TriggerOnRemove(args.Key, args.Region, CacheActionEventArgOrigin.Remote);
                 };
 
                 backplane.Cleared += (sender, args) =>
                 {
-                    if (this.logTrace)
+                    if (_logTrace)
                     {
-                        this.Logger.LogTrace("Backplane event: [Clear].");
+                        Logger.LogTrace("Backplane event: [Clear].");
                     }
 
                     ClearHandles(handles());
-                    this.TriggerOnClear(CacheActionEventArgOrigin.Remote);
+                    TriggerOnClear(CacheActionEventArgOrigin.Remote);
                 };
 
                 backplane.ClearedRegion += (sender, args) =>
                 {
-                    if (this.logTrace)
+                    if (_logTrace)
                     {
-                        this.Logger.LogTrace("Backplane event: [Clear Region] region: {0}.", args.Region);
+                        Logger.LogTrace("Backplane event: [Clear Region] region: {0}.", args.Region);
                     }
 
                     ClearRegionHandles(args.Region, handles());
-                    this.TriggerOnClearRegion(args.Region, CacheActionEventArgOrigin.Remote);
+                    TriggerOnClearRegion(args.Region, CacheActionEventArgOrigin.Remote);
                 };
             }
         }
 
         private void TriggerOnAdd(string key, string region, CacheActionEventArgOrigin origin = CacheActionEventArgOrigin.Local)
         {
-            this.OnAdd?.Invoke(this, new CacheActionEventArgs(key, region, origin));
+            OnAdd?.Invoke(this, new CacheActionEventArgs(key, region, origin));
         }
 
         private void TriggerOnClear(CacheActionEventArgOrigin origin = CacheActionEventArgOrigin.Local)
         {
-            this.OnClear?.Invoke(this, new CacheClearEventArgs(origin));
+            OnClear?.Invoke(this, new CacheClearEventArgs(origin));
         }
 
         private void TriggerOnClearRegion(string region, CacheActionEventArgOrigin origin = CacheActionEventArgOrigin.Local)
         {
-            this.OnClearRegion?.Invoke(this, new CacheClearRegionEventArgs(region, origin));
+            OnClearRegion?.Invoke(this, new CacheClearRegionEventArgs(region, origin));
         }
 
         private void TriggerOnGet(string key, string region, CacheActionEventArgOrigin origin = CacheActionEventArgOrigin.Local)
         {
-            this.OnGet?.Invoke(this, new CacheActionEventArgs(key, region, origin));
+            OnGet?.Invoke(this, new CacheActionEventArgs(key, region, origin));
         }
 
         private void TriggerOnPut(string key, string region, CacheActionEventArgOrigin origin = CacheActionEventArgOrigin.Local)
         {
-            this.OnPut?.Invoke(this, new CacheActionEventArgs(key, region, origin));
+            OnPut?.Invoke(this, new CacheActionEventArgs(key, region, origin));
         }
 
         private void TriggerOnRemove(string key, string region, CacheActionEventArgOrigin origin = CacheActionEventArgOrigin.Local)
         {
             NotNullOrWhiteSpace(key, nameof(key));
-            this.OnRemove?.Invoke(this, new CacheActionEventArgs(key, region, origin));
+            OnRemove?.Invoke(this, new CacheActionEventArgs(key, region, origin));
         }
 
         private void TriggerOnRemoveByHandle(string key, string region, CacheItemRemovedReason reason, int level)
         {
             NotNullOrWhiteSpace(key, nameof(key));
-            this.OnRemoveByHandle?.Invoke(this, new CacheItemRemovedEventArgs(key, region, reason, level));
+            OnRemoveByHandle?.Invoke(this, new CacheItemRemovedEventArgs(key, region, reason, level));
         }
 
         private void TriggerOnUpdate(string key, string region, CacheActionEventArgOrigin origin = CacheActionEventArgOrigin.Local)
         {
-            this.OnUpdate?.Invoke(this, new CacheActionEventArgs(key, region, origin));
+            OnUpdate?.Invoke(this, new CacheActionEventArgs(key, region, origin));
         }
     }
 }

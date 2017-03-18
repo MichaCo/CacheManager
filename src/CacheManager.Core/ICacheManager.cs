@@ -698,7 +698,7 @@ namespace CacheManager.Core
         void Expire(string key, string region, TimeSpan slidingExpiration);
 
         /// <summary>
-        /// Explicitly removes any expiration settings previously defined for the <paramref name="key"/> 
+        /// Explicitly removes any expiration settings previously defined for the <paramref name="key"/>
         /// in all cache layers and sets the expiration mode to <see cref="ExpirationMode.None"/>.
         /// This operation overrides any configured expiration per cache handle for this particular item.
         /// </summary>

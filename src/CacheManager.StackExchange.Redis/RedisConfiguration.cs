@@ -60,15 +60,15 @@ namespace CacheManager.Redis
                 throw new InvalidOperationException("List of endpoints must not be empty.");
             }
 
-            this.Key = key;
-            this.Database = database;
-            this.Endpoints = endpoints;
-            this.Password = password;
-            this.IsSsl = isSsl;
-            this.SslHost = sslHost;
-            this.ConnectionTimeout = connectionTimeout;
-            this.AllowAdmin = allowAdmin;
-            this.KeyspaceNotificationsEnabled = keyspaceNotificationsEnabled;
+            Key = key;
+            Database = database;
+            Endpoints = endpoints;
+            Password = password;
+            IsSsl = isSsl;
+            SslHost = sslHost;
+            ConnectionTimeout = connectionTimeout;
+            AllowAdmin = allowAdmin;
+            KeyspaceNotificationsEnabled = keyspaceNotificationsEnabled;
         }
 
         /// <summary>
@@ -89,10 +89,10 @@ namespace CacheManager.Redis
             int database,
             bool keyspaceNotificationsEnabled)
         {
-            this.Key = key;
-            this.ConnectionString = connectionString;
-            this.Database = database;
-            this.KeyspaceNotificationsEnabled = keyspaceNotificationsEnabled;
+            Key = key;
+            ConnectionString = connectionString;
+            Database = database;
+            KeyspaceNotificationsEnabled = keyspaceNotificationsEnabled;
         }
 
         /// <summary>
@@ -174,7 +174,7 @@ namespace CacheManager.Redis
         public int Database { get; set; }
 
         /// <summary>
-        /// Gets or sets a flag indicating if the redis cache handle should use keyspace notifications to react on 
+        /// Gets or sets a value indicating whether the redis cache handle should use keyspace notifications to react on
         /// evictions or expired events from redis and then forward those events to the cache manager.
         /// See <see href="https://redis.io/topics/notifications"/> for technical details.
         /// <para>
@@ -206,8 +206,8 @@ namespace CacheManager.Redis
         {
             NotNullOrWhiteSpace(host, nameof(host));
 
-            this.Host = host;
-            this.Port = port;
+            Host = host;
+            Port = port;
         }
 
         /// <summary>

@@ -49,7 +49,7 @@ namespace CacheManager.Core
             : base()
         {
             NotNullOrWhiteSpace(name, nameof(name));
-            this.Configuration.Name = name;
+            Configuration.Name = name;
         }
 
         /// <summary>
@@ -74,7 +74,7 @@ namespace CacheManager.Core
             : base((CacheManagerConfiguration)forConfiguration)
         {
             NotNullOrWhiteSpace(name, nameof(name));
-            this.Configuration.Name = name;
+            Configuration.Name = name;
         }
 
         /// <summary>
@@ -205,11 +205,13 @@ namespace CacheManager.Core
 
             Ensure(File.Exists(configFileName), "Configuration file not found [{0}].", configFileName);
 
-            var fileConfig = new ExeConfigurationFileMap();
-            fileConfig.ExeConfigFilename = configFileName; // setting exe config file name, this is the one the GetSection method expects.
+            var fileConfig = new ExeConfigurationFileMap()
+            {
+                ExeConfigFilename = configFileName // setting exe config file name, this is the one the GetSection method expects.
+            };
 
             // open the file map
-            System.Configuration.Configuration cfg = ConfigurationManager.OpenMappedExeConfiguration(fileConfig, ConfigurationUserLevel.None);
+            var cfg = ConfigurationManager.OpenMappedExeConfiguration(fileConfig, ConfigurationUserLevel.None);
 
             // use the opened configuration and load our section
             var section = cfg.GetSection(sectionName) as CacheManagerSection;
@@ -228,7 +230,7 @@ namespace CacheManager.Core
 
             // load handle definitions as lookup
             var handleDefs = new SortedList<string, CacheHandleConfiguration>();
-            foreach (CacheHandleDefinition def in handleDefsSection)
+            foreach (var def in handleDefsSection)
             {
                 //// don't validate at this point, otherwise we will get an exception if any defined handle doesn't match with the requested type...
                 //// CacheReflectionHelper.ValidateCacheHandleGenericTypeArguments(def.HandleType, cacheValue);
@@ -245,17 +247,17 @@ namespace CacheManager.Core
             }
 
             // retrieve the handles collection with the correct name
-            CacheManagerHandleCollection managerCfg = section.CacheManagers.FirstOrDefault(p => p.Name.Equals(configName, StringComparison.OrdinalIgnoreCase));
+            var managerCfg = section.CacheManagers.FirstOrDefault(p => p.Name.Equals(configName, StringComparison.OrdinalIgnoreCase));
 
             EnsureNotNull(managerCfg, "No cache manager configuration found for name [{0}]", configName);
 
-            int? maxRetries = managerCfg.MaximumRetries;
+            var maxRetries = managerCfg.MaximumRetries;
             if (maxRetries.HasValue && maxRetries.Value <= 0)
             {
                 throw new InvalidOperationException("Maximum number of retries must be greater than zero.");
             }
 
-            int? retryTimeout = managerCfg.RetryTimeout;
+            var retryTimeout = managerCfg.RetryTimeout;
             if (retryTimeout.HasValue && retryTimeout.Value < 0)
             {
                 throw new InvalidOperationException("Retry timeout must be greater than or equal to zero.");
@@ -265,8 +267,8 @@ namespace CacheManager.Core
             var cfg = new CacheManagerConfiguration()
             {
                 UpdateMode = managerCfg.UpdateMode,
-                MaxRetries = maxRetries.HasValue ? maxRetries.Value : 50,
-                RetryTimeout = retryTimeout.HasValue ? retryTimeout.Value : 100
+                MaxRetries = maxRetries ?? 50,
+                RetryTimeout = retryTimeout ?? 100
             };
 
             if (string.IsNullOrWhiteSpace(managerCfg.BackplaneType))
@@ -299,7 +301,7 @@ namespace CacheManager.Core
                 cfg.SerializerType = serializerType;
             }
 
-            foreach (CacheManagerHandle handleItem in managerCfg)
+            foreach (var handleItem in managerCfg)
             {
                 var normRefId = handleItem.RefHandleId.ToUpper(CultureInfo.InvariantCulture);
 
@@ -367,13 +369,13 @@ namespace CacheManager.Core
                 return TimeSpan.Zero;
             }
 
-            string normValue = timespanCfgValue.ToUpper(CultureInfo.InvariantCulture);
+            var normValue = timespanCfgValue.ToUpper(CultureInfo.InvariantCulture);
 
-            bool hasSuffix = Regex.IsMatch(normValue, @"\b[0-9]+[S|H|M]\b");
+            var hasSuffix = Regex.IsMatch(normValue, @"\b[0-9]+[S|H|M]\b");
 
-            string suffix = hasSuffix ? new string(normValue.Last(), 1) : string.Empty;
+            var suffix = hasSuffix ? new string(normValue.Last(), 1) : string.Empty;
 
-            int timeoutValue = 0;
+            var timeoutValue = 0;
             if (!int.TryParse(hasSuffix ? normValue.Substring(0, normValue.Length - 1) : normValue, out timeoutValue))
             {
                 throw new InvalidOperationException(
@@ -405,12 +407,12 @@ namespace CacheManager.Core
     /// <see cref="CacheManagerConfiguration"/>
     public sealed class ConfigurationBuilderCacheHandlePart
     {
-        private ConfigurationBuilderCachePart parent;
+        private ConfigurationBuilderCachePart _parent;
 
         internal ConfigurationBuilderCacheHandlePart(CacheHandleConfiguration cfg, ConfigurationBuilderCachePart parentPart)
         {
-            this.Configuration = cfg;
-            this.parent = parentPart;
+            Configuration = cfg;
+            _parent = parentPart;
         }
 
         /// <summary>
@@ -418,7 +420,7 @@ namespace CacheManager.Core
         /// multiple cache handles.
         /// </summary>
         /// <value>The parent builder part.</value>
-        public ConfigurationBuilderCachePart And => this.parent;
+        public ConfigurationBuilderCachePart And => _parent;
 
         internal CacheHandleConfiguration Configuration { get; }
 
@@ -428,7 +430,7 @@ namespace CacheManager.Core
         /// <returns>The <see cref="CacheManagerConfiguration"/>.</returns>
         public ICacheManagerConfiguration Build()
         {
-            return this.parent.Build();
+            return _parent.Build();
         }
 
         /// <summary>
@@ -437,7 +439,7 @@ namespace CacheManager.Core
         /// <returns>The builder part.</returns>
         public ConfigurationBuilderCacheHandlePart DisablePerformanceCounters()
         {
-            this.Configuration.EnablePerformanceCounters = false;
+            Configuration.EnablePerformanceCounters = false;
             return this;
         }
 
@@ -448,8 +450,8 @@ namespace CacheManager.Core
         /// <returns>The builder part.</returns>
         public ConfigurationBuilderCacheHandlePart DisableStatistics()
         {
-            this.Configuration.EnableStatistics = false;
-            this.Configuration.EnablePerformanceCounters = false;
+            Configuration.EnableStatistics = false;
+            Configuration.EnablePerformanceCounters = false;
             return this;
         }
 
@@ -460,8 +462,8 @@ namespace CacheManager.Core
         /// <returns>The builder part.</returns>
         public ConfigurationBuilderCacheHandlePart EnablePerformanceCounters()
         {
-            this.Configuration.EnablePerformanceCounters = true;
-            this.Configuration.EnableStatistics = true;
+            Configuration.EnablePerformanceCounters = true;
+            Configuration.EnableStatistics = true;
             return this;
         }
 
@@ -472,7 +474,7 @@ namespace CacheManager.Core
         /// <returns>The builder part.</returns>
         public ConfigurationBuilderCacheHandlePart EnableStatistics()
         {
-            this.Configuration.EnableStatistics = true;
+            Configuration.EnableStatistics = true;
             return this;
         }
 
@@ -496,8 +498,8 @@ namespace CacheManager.Core
                 throw new InvalidOperationException("If expiration mode is not set to 'None', timeout cannot be zero.");
             }
 
-            this.Configuration.ExpirationMode = expirationMode;
-            this.Configuration.ExpirationTimeout = timeout;
+            Configuration.ExpirationMode = expirationMode;
+            Configuration.ExpirationTimeout = timeout;
             return this;
         }
     }
@@ -510,13 +512,13 @@ namespace CacheManager.Core
     {
         internal ConfigurationBuilderCachePart()
         {
-            this.Configuration = new CacheManagerConfiguration();
+            Configuration = new CacheManagerConfiguration();
         }
 
         internal ConfigurationBuilderCachePart(CacheManagerConfiguration forConfiguration)
         {
             NotNull(forConfiguration, nameof(forConfiguration));
-            this.Configuration = forConfiguration;
+            Configuration = forConfiguration;
         }
 
         /// <summary>
@@ -547,9 +549,9 @@ namespace CacheManager.Core
             NotNull(backplaneType, nameof(backplaneType));
             NotNullOrWhiteSpace(configurationKey, nameof(configurationKey));
 
-            this.Configuration.BackplaneType = backplaneType;
-            this.Configuration.BackplaneTypeArguments = args;
-            this.Configuration.BackplaneConfigurationKey = configurationKey;
+            Configuration.BackplaneType = backplaneType;
+            Configuration.BackplaneTypeArguments = args;
+            Configuration.BackplaneConfigurationKey = configurationKey;
             return this;
         }
 
@@ -579,10 +581,10 @@ namespace CacheManager.Core
             NotNullOrWhiteSpace(configurationKey, nameof(configurationKey));
             NotNullOrWhiteSpace(channelName, nameof(channelName));
 
-            this.Configuration.BackplaneType = backplaneType;
-            this.Configuration.BackplaneTypeArguments = args;
-            this.Configuration.BackplaneChannelName = channelName;
-            this.Configuration.BackplaneConfigurationKey = configurationKey;
+            Configuration.BackplaneType = backplaneType;
+            Configuration.BackplaneTypeArguments = args;
+            Configuration.BackplaneChannelName = channelName;
+            Configuration.BackplaneConfigurationKey = configurationKey;
             return this;
         }
 
@@ -591,7 +593,7 @@ namespace CacheManager.Core
         /// </summary>
         /// <returns>The builder part.</returns>
         public ConfigurationBuilderCacheHandlePart WithDictionaryHandle() =>
-            this.WithHandle(typeof(DictionaryCacheHandle<>));
+            WithHandle(typeof(DictionaryCacheHandle<>));
 
         /// <summary>
         /// Adds a cache dictionary cache handle to the cache manager.
@@ -600,7 +602,7 @@ namespace CacheManager.Core
         /// <param name="handleName">The name of the cache handle.</param>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="handleName"/> is null.</exception>
         public ConfigurationBuilderCacheHandlePart WithDictionaryHandle(string handleName) =>
-            this.WithHandle(typeof(DictionaryCacheHandle<>), handleName);
+            WithHandle(typeof(DictionaryCacheHandle<>), handleName);
 
         /// <summary>
         /// Adds a cache handle with the given <c>Type</c> and name.
@@ -634,12 +636,12 @@ namespace CacheManager.Core
 
             handleCfg.IsBackplaneSource = isBackplaneSource;
 
-            if (isBackplaneSource && this.Configuration.CacheHandleConfigurations.Any(p => p.IsBackplaneSource))
+            if (isBackplaneSource && Configuration.CacheHandleConfigurations.Any(p => p.IsBackplaneSource))
             {
                 throw new InvalidOperationException("Only one cache handle can be the backplane's source.");
             }
 
-            this.Configuration.CacheHandleConfigurations.Add(handleCfg);
+            Configuration.CacheHandleConfigurations.Add(handleCfg);
             var part = new ConfigurationBuilderCacheHandlePart(handleCfg, this);
             return part;
         }
@@ -655,7 +657,7 @@ namespace CacheManager.Core
         /// Thrown if handleName or cacheHandleBaseType are null.
         /// </exception>
         public ConfigurationBuilderCacheHandlePart WithHandle(Type cacheHandleBaseType, string handleName)
-            => this.WithHandle(cacheHandleBaseType, handleName, false);
+            => WithHandle(cacheHandleBaseType, handleName, false);
 
         /// <summary>
         /// Adds a cache handle with the given <c>Type</c>.
@@ -667,7 +669,7 @@ namespace CacheManager.Core
         /// Thrown if handleName or cacheHandleBaseType are null.
         /// </exception>
         public ConfigurationBuilderCacheHandlePart WithHandle(Type cacheHandleBaseType)
-            => this.WithHandle(cacheHandleBaseType, Guid.NewGuid().ToString("N"), false);
+            => WithHandle(cacheHandleBaseType, Guid.NewGuid().ToString("N"), false);
 
         /// <summary>
         /// Sets the maximum number of retries per action.
@@ -685,7 +687,7 @@ namespace CacheManager.Core
         {
             Ensure(retries > 0, "Maximum number of retries must be greater than 0.");
 
-            this.Configuration.MaxRetries = retries;
+            Configuration.MaxRetries = retries;
             return this;
         }
 
@@ -705,7 +707,7 @@ namespace CacheManager.Core
         {
             Ensure(timeoutMillis >= 0, "Retry timeout must be greater than or equal to zero.");
 
-            this.Configuration.RetryTimeout = timeoutMillis;
+            Configuration.RetryTimeout = timeoutMillis;
             return this;
         }
 
@@ -718,7 +720,7 @@ namespace CacheManager.Core
         /// <seealso cref="CacheUpdateMode"/>
         public ConfigurationBuilderCachePart WithUpdateMode(CacheUpdateMode updateMode)
         {
-            this.Configuration.UpdateMode = updateMode;
+            Configuration.UpdateMode = updateMode;
             return this;
         }
 
@@ -732,8 +734,8 @@ namespace CacheManager.Core
         {
             NotNull(serializerType, nameof(serializerType));
 
-            this.Configuration.SerializerType = serializerType;
-            this.Configuration.SerializerTypeArguments = args;
+            Configuration.SerializerType = serializerType;
+            Configuration.SerializerTypeArguments = args;
             return this;
         }
 
@@ -744,7 +746,7 @@ namespace CacheManager.Core
         /// <returns>The builder part.</returns>
         public ConfigurationBuilderCachePart WithBinarySerializer()
         {
-            this.Configuration.SerializerType = typeof(BinaryCacheSerializer);
+            Configuration.SerializerType = typeof(BinaryCacheSerializer);
             return this;
         }
 
@@ -756,8 +758,8 @@ namespace CacheManager.Core
         /// <returns>The builder part.</returns>
         public ConfigurationBuilderCachePart WithBinarySerializer(BinaryFormatter serializationFormatter, BinaryFormatter deserializationFormatter)
         {
-            this.Configuration.SerializerType = typeof(BinaryCacheSerializer);
-            this.Configuration.SerializerTypeArguments = new object[] { serializationFormatter, deserializationFormatter };
+            Configuration.SerializerType = typeof(BinaryCacheSerializer);
+            Configuration.SerializerTypeArguments = new object[] { serializationFormatter, deserializationFormatter };
             return this;
         }
 
@@ -773,8 +775,8 @@ namespace CacheManager.Core
         {
             NotNull(loggerFactoryType, nameof(loggerFactoryType));
 
-            this.Configuration.LoggerFactoryType = loggerFactoryType;
-            this.Configuration.LoggerFactoryTypeArguments = args;
+            Configuration.LoggerFactoryType = loggerFactoryType;
+            Configuration.LoggerFactoryTypeArguments = args;
             return this;
         }
 
@@ -784,7 +786,7 @@ namespace CacheManager.Core
         /// <returns>The <see cref="ICacheManagerConfiguration"/>.</returns>
         public ICacheManagerConfiguration Build()
         {
-            return this.Configuration;
+            return Configuration;
         }
     }
 }

@@ -13,9 +13,9 @@ namespace CacheManager.Web
     /// </summary>
     public class CacheManagerOutputCacheProvider : OutputCacheProvider
     {
-        private static readonly object ConfigLock = new object();
-        private static ICacheManager<object> cacheInstance;
-        private static bool isInitialized = false;
+        private static readonly object _configLock = new object();
+        private static ICacheManager<object> _cacheInstance;
+        private static bool _isInitialized = false;
 
         /// <summary>
         /// Gets the cache.
@@ -28,9 +28,9 @@ namespace CacheManager.Web
         {
             get
             {
-                Ensure(isInitialized, "Output cache provider has not yet been initialized.");
+                Ensure(_isInitialized, "Output cache provider has not yet been initialized.");
 
-                return cacheInstance;
+                return _cacheInstance;
             }
         }
 
@@ -43,7 +43,7 @@ namespace CacheManager.Web
         /// <returns>A reference to the specified provider.</returns>
         public override object Add(string key, object entry, DateTime utcExpiry)
         {
-            if (!cacheInstance.Add(GetCacheItem(key, entry, utcExpiry)))
+            if (!_cacheInstance.Add(GetCacheItem(key, entry, utcExpiry)))
             {
                 return Cache.Get(key);
             }
@@ -76,11 +76,11 @@ namespace CacheManager.Web
 
             try
             {
-                if (!isInitialized)
+                if (!_isInitialized)
                 {
-                    lock (ConfigLock)
+                    lock (_configLock)
                     {
-                        if (!isInitialized)
+                        if (!_isInitialized)
                         {
                             var cacheName = config["cacheName"];
                             if (string.IsNullOrWhiteSpace(cacheName))
@@ -89,7 +89,7 @@ namespace CacheManager.Web
                             }
 
                             InitializeStaticCache(cacheName);
-                            isInitialized = true;
+                            _isInitialized = true;
                         }
                     }
                 }
@@ -148,7 +148,7 @@ namespace CacheManager.Web
 
         private static void InitializeStaticCache(string cacheName)
         {
-            cacheInstance = CacheFactory.FromConfiguration<object>(cacheName);
+            _cacheInstance = CacheFactory.FromConfiguration<object>(cacheName);
         }
     }
 }

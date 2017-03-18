@@ -72,7 +72,7 @@ namespace CacheManager.Core
         /// <value>
         /// <c>true</c> if this instance has cache backplane; otherwise, <c>false</c>.
         /// </value>
-        public bool HasBackplane => this.BackplaneType != null;
+        public bool HasBackplane => BackplaneType != null;
 
         /// <summary>
         /// Gets or sets the factory method for a cache backplane.
@@ -124,7 +124,7 @@ namespace CacheManager.Core
         /// <inheritdoc />
         public override string ToString()
         {
-            return $"{this.Name}: {string.Join(", ", this.CacheHandleConfigurations)}";
+            return $"{Name}: {string.Join(", ", CacheHandleConfigurations)}";
         }
     }
 }

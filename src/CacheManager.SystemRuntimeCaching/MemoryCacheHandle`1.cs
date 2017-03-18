@@ -22,11 +22,11 @@ namespace CacheManager.SystemRuntimeCaching
         private const string DefaultName = "default";
 
         // can be default or any other name
-        private readonly string cacheName = string.Empty;
+        private readonly string _cacheName = string.Empty;
 
-        private volatile MemoryCache cache = null;
-        private string instanceKey;
-        private int instanceKeyLength;
+        private volatile MemoryCache _cache = null;
+        private string _instanceKey;
+        private int _instanceKeyLength;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MemoryCacheHandle{TCacheValue}"/> class.
@@ -40,34 +40,34 @@ namespace CacheManager.SystemRuntimeCaching
             NotNull(configuration, nameof(configuration));
             NotNull(loggerFactory, nameof(loggerFactory));
 
-            this.Logger = loggerFactory.CreateLogger(this);
-            this.cacheName = configuration.Name;
+            Logger = loggerFactory.CreateLogger(this);
+            _cacheName = configuration.Name;
 
-            if (this.cacheName.ToUpper(CultureInfo.InvariantCulture).Equals(DefaultName.ToUpper(CultureInfo.InvariantCulture)))
+            if (_cacheName.ToUpper(CultureInfo.InvariantCulture).Equals(DefaultName.ToUpper(CultureInfo.InvariantCulture)))
             {
-                this.cache = MemoryCache.Default;
+                _cache = MemoryCache.Default;
             }
             else
             {
-                this.cache = new MemoryCache(this.cacheName);
+                _cache = new MemoryCache(_cacheName);
             }
 
-            this.instanceKey = Guid.NewGuid().ToString();
-            this.instanceKeyLength = this.instanceKey.Length;
-            this.CreateInstanceToken();
+            _instanceKey = Guid.NewGuid().ToString();
+            _instanceKeyLength = _instanceKey.Length;
+            CreateInstanceToken();
         }
 
         /// <summary>
         /// Gets the cache settings.
         /// </summary>
         /// <value>The cache settings.</value>
-        public NameValueCollection CacheSettings => GetSettings(this.cache);
+        public NameValueCollection CacheSettings => GetSettings(_cache);
 
         /// <summary>
         /// Gets the number of items the cache handle currently maintains.
         /// </summary>
         /// <value>The count.</value>
-        public override int Count => (int)this.cache.GetCount();
+        public override int Count => (int)_cache.GetCount();
 
         /// <inheritdoc />
         protected override ILogger Logger { get; }
@@ -77,8 +77,8 @@ namespace CacheManager.SystemRuntimeCaching
         /// </summary>
         public override void Clear()
         {
-            this.cache.Remove(this.instanceKey);
-            this.CreateInstanceToken();
+            _cache.Remove(_instanceKey);
+            CreateInstanceToken();
         }
 
         /// <summary>
@@ -86,20 +86,20 @@ namespace CacheManager.SystemRuntimeCaching
         /// </summary>
         /// <param name="region">The cache region.</param>
         public override void ClearRegion(string region) =>
-            this.cache.Remove(this.GetRegionTokenKey(region));
+            _cache.Remove(GetRegionTokenKey(region));
 
         /// <inheritdoc />
         public override bool Exists(string key)
         {
-            return this.cache.Contains(this.GetItemKey(key));
+            return _cache.Contains(GetItemKey(key));
         }
 
         /// <inheritdoc />
         public override bool Exists(string key, string region)
         {
             NotNullOrWhiteSpace(region, nameof(region));
-            var fullKey = this.GetItemKey(key, region);
-            return this.cache.Contains(fullKey);
+            var fullKey = GetItemKey(key, region);
+            return _cache.Contains(fullKey);
         }
 
         /// <summary>
@@ -111,15 +111,15 @@ namespace CacheManager.SystemRuntimeCaching
         /// </returns>
         protected override bool AddInternalPrepared(CacheItem<TCacheValue> item)
         {
-            var key = this.GetItemKey(item);
+            var key = GetItemKey(item);
 
-            if (this.cache.Contains(key))
+            if (_cache.Contains(key))
             {
                 return false;
             }
 
-            CacheItemPolicy policy = this.GetPolicy(item);
-            return this.cache.Add(key, item, policy);
+            var policy = GetPolicy(item);
+            return _cache.Add(key, item, policy);
         }
 
         /// <summary>
@@ -127,7 +127,7 @@ namespace CacheManager.SystemRuntimeCaching
         /// </summary>
         /// <param name="key">The key being used to identify the item within the cache.</param>
         /// <returns>The <c>CacheItem</c>.</returns>
-        protected override CacheItem<TCacheValue> GetCacheItemInternal(string key) => this.GetCacheItemInternal(key, null);
+        protected override CacheItem<TCacheValue> GetCacheItemInternal(string key) => GetCacheItemInternal(key, null);
 
         /// <summary>
         /// Gets a <c>CacheItem</c> for the specified key.
@@ -137,8 +137,8 @@ namespace CacheManager.SystemRuntimeCaching
         /// <returns>The <c>CacheItem</c>.</returns>
         protected override CacheItem<TCacheValue> GetCacheItemInternal(string key, string region)
         {
-            string fullKey = this.GetItemKey(key, region);
-            var item = this.cache.Get(fullKey) as CacheItem<TCacheValue>;
+            var fullKey = GetItemKey(key, region);
+            var item = _cache.Get(fullKey) as CacheItem<TCacheValue>;
 
             if (item == null)
             {
@@ -151,8 +151,8 @@ namespace CacheManager.SystemRuntimeCaching
             // cache.Get eventually triggers eviction callback, but just in case...
             if (item.IsExpired)
             {
-                this.RemoveInternal(item.Key, item.Region);
-                this.TriggerCacheSpecificRemove(item.Key, item.Region, CacheItemRemovedReason.Expired);
+                RemoveInternal(item.Key, item.Region);
+                TriggerCacheSpecificRemove(item.Key, item.Region, CacheItemRemovedReason.Expired);
                 return null;
             }
 
@@ -161,7 +161,7 @@ namespace CacheManager.SystemRuntimeCaching
                 // because we don't use UpdateCallback because of some multithreading issues lets
                 // try to simply reset the item by setting it again.
                 // item = this.GetItemExpiration(item); // done via base cache handle
-                this.cache.Set(fullKey, item, this.GetPolicy(item));
+                _cache.Set(fullKey, item, GetPolicy(item));
             }
 
             return item;
@@ -174,9 +174,9 @@ namespace CacheManager.SystemRuntimeCaching
         /// <param name="item">The <c>CacheItem</c> to be added to the cache.</param>
         protected override void PutInternalPrepared(CacheItem<TCacheValue> item)
         {
-            var key = this.GetItemKey(item);
-            CacheItemPolicy policy = this.GetPolicy(item);
-            this.cache.Set(key, item, policy);
+            var key = GetItemKey(item);
+            var policy = GetPolicy(item);
+            _cache.Set(key, item, policy);
         }
 
         /// <summary>
@@ -186,7 +186,7 @@ namespace CacheManager.SystemRuntimeCaching
         /// <returns>
         /// <c>true</c> if the key was found and removed from the cache, <c>false</c> otherwise.
         /// </returns>
-        protected override bool RemoveInternal(string key) => this.RemoveInternal(key, null);
+        protected override bool RemoveInternal(string key) => RemoveInternal(key, null);
 
         /// <summary>
         /// Removes a value from the cache for the specified key.
@@ -198,19 +198,20 @@ namespace CacheManager.SystemRuntimeCaching
         /// </returns>
         protected override bool RemoveInternal(string key, string region)
         {
-            var fullKey = this.GetItemKey(key, region);
-            var obj = this.cache.Remove(fullKey);
+            var fullKey = GetItemKey(key, region);
+            var obj = _cache.Remove(fullKey);
 
             return obj != null;
         }
 
         private static NameValueCollection GetSettings(MemoryCache instance)
         {
-            var cacheCfg = new NameValueCollection();
-
-            cacheCfg.Add("CacheMemoryLimitMegabytes", (instance.CacheMemoryLimit / 1024 / 1024).ToString(CultureInfo.InvariantCulture));
-            cacheCfg.Add("PhysicalMemoryLimitPercentage", instance.PhysicalMemoryLimit.ToString(CultureInfo.InvariantCulture));
-            cacheCfg.Add("PollingInterval", instance.PollingInterval.ToString());
+            var cacheCfg = new NameValueCollection
+            {
+                { "CacheMemoryLimitMegabytes", (instance.CacheMemoryLimit / 1024 / 1024).ToString(CultureInfo.InvariantCulture) },
+                { "PhysicalMemoryLimitPercentage", instance.PhysicalMemoryLimit.ToString(CultureInfo.InvariantCulture) },
+                { "PollingInterval", instance.PollingInterval.ToString() }
+            };
 
             return cacheCfg;
         }
@@ -218,58 +219,59 @@ namespace CacheManager.SystemRuntimeCaching
         private void CreateInstanceToken()
         {
             // don't add a new key while we are disposing our instance
-            if (!this.Disposing)
+            if (!Disposing)
             {
-                var instanceItem = new CacheItem<string>(this.instanceKey, this.instanceKey);
-                CacheItemPolicy policy = new CacheItemPolicy()
+                var instanceItem = new CacheItem<string>(_instanceKey, _instanceKey);
+                var policy = new CacheItemPolicy()
                 {
                     Priority = CacheItemPriority.NotRemovable,
-                    RemovedCallback = new CacheEntryRemovedCallback(this.InstanceTokenRemoved),
+                    RemovedCallback = new CacheEntryRemovedCallback(InstanceTokenRemoved),
                     AbsoluteExpiration = System.Runtime.Caching.ObjectCache.InfiniteAbsoluteExpiration,
                     SlidingExpiration = System.Runtime.Caching.ObjectCache.NoSlidingExpiration,
                 };
 
-                this.cache.Add(instanceItem.Key, instanceItem, policy);
+                _cache.Add(instanceItem.Key, instanceItem, policy);
             }
         }
 
         private void CreateRegionToken(string region)
         {
-            var key = this.GetRegionTokenKey(region);
+            var key = GetRegionTokenKey(region);
 
             // add region token with dependency on our instance token, so that all regions get
             // removed whenever the instance gets cleared.
-            CacheItemPolicy policy = new CacheItemPolicy()
+            var policy = new CacheItemPolicy()
             {
                 Priority = CacheItemPriority.NotRemovable,
                 AbsoluteExpiration = System.Runtime.Caching.ObjectCache.InfiniteAbsoluteExpiration,
                 SlidingExpiration = System.Runtime.Caching.ObjectCache.NoSlidingExpiration,
-                ChangeMonitors = { this.cache.CreateCacheEntryChangeMonitor(new[] { this.instanceKey }) },
+                ChangeMonitors = { _cache.CreateCacheEntryChangeMonitor(new[] { _instanceKey }) },
             };
-            this.cache.Add(key, region, policy);
+            _cache.Add(key, region, policy);
         }
 
         private CacheItemPolicy GetPolicy(CacheItem<TCacheValue> item)
         {
-            var monitorKeys = new[] { this.instanceKey };
+            var monitorKeys = new[] { _instanceKey };
 
             if (!string.IsNullOrWhiteSpace(item.Region))
             {
                 // this should be the only place to create the region token if it doesn't exist it
                 // might got removed by clearRegion but next time put or add gets called, the region
                 // should be re added...
-                var regionToken = this.GetRegionTokenKey(item.Region);
-                if (!this.cache.Contains(regionToken))
+                var regionToken = GetRegionTokenKey(item.Region);
+                if (!_cache.Contains(regionToken))
                 {
-                    this.CreateRegionToken(item.Region);
+                    CreateRegionToken(item.Region);
                 }
-                monitorKeys = new[] { this.instanceKey, regionToken };
+
+                monitorKeys = new[] { _instanceKey, regionToken };
             }
 
             var policy = new CacheItemPolicy()
             {
                 Priority = CacheItemPriority.Default,
-                ChangeMonitors = { this.cache.CreateCacheEntryChangeMonitor(monitorKeys) },
+                ChangeMonitors = { _cache.CreateCacheEntryChangeMonitor(monitorKeys) },
                 AbsoluteExpiration = System.Runtime.Caching.ObjectCache.InfiniteAbsoluteExpiration,
                 SlidingExpiration = System.Runtime.Caching.ObjectCache.NoSlidingExpiration,
             };
@@ -277,13 +279,13 @@ namespace CacheManager.SystemRuntimeCaching
             if (item.ExpirationMode == ExpirationMode.Absolute)
             {
                 policy.AbsoluteExpiration = new DateTimeOffset(DateTime.UtcNow.Add(item.ExpirationTimeout));
-                policy.RemovedCallback = new CacheEntryRemovedCallback(this.ItemRemoved);
+                policy.RemovedCallback = new CacheEntryRemovedCallback(ItemRemoved);
             }
 
             if (item.ExpirationMode == ExpirationMode.Sliding)
             {
                 policy.SlidingExpiration = item.ExpirationTimeout;
-                policy.RemovedCallback = new CacheEntryRemovedCallback(this.ItemRemoved);
+                policy.RemovedCallback = new CacheEntryRemovedCallback(ItemRemoved);
 
                 //// for some reason, we'll get issues with multithreading if we set this...
                 //// see http://stackoverflow.com/questions/21680429/why-does-memorycache-throw-nullreferenceexception
@@ -295,7 +297,7 @@ namespace CacheManager.SystemRuntimeCaching
             return policy;
         }
 
-        private string GetItemKey(CacheItem<TCacheValue> item) => this.GetItemKey(item?.Key, item?.Region);
+        private string GetItemKey(CacheItem<TCacheValue> item) => GetItemKey(item?.Key, item?.Region);
 
         private string GetItemKey(string key, string region = null)
         {
@@ -303,7 +305,7 @@ namespace CacheManager.SystemRuntimeCaching
 
             if (string.IsNullOrWhiteSpace(region))
             {
-                return this.instanceKey + ":" + key;
+                return _instanceKey + ":" + key;
             }
 
             // key without region
@@ -311,19 +313,19 @@ namespace CacheManager.SystemRuntimeCaching
             // key with region
             // <instance>@<regionlen><regionstring>:<keystring>
             // <instance>@6region:key
-            return string.Concat(this.instanceKey, "@", region.Length, "@", region, ":", key);
+            return string.Concat(_instanceKey, "@", region.Length, "@", region, ":", key);
         }
 
         private string GetRegionTokenKey(string region)
         {
-            var key = string.Concat(this.instanceKey, "_", region);
+            var key = string.Concat(_instanceKey, "_", region);
             return key;
         }
 
         private void InstanceTokenRemoved(CacheEntryRemovedArguments arguments)
         {
-            this.instanceKey = Guid.NewGuid().ToString();
-            this.instanceKeyLength = this.instanceKey.Length;
+            _instanceKey = Guid.NewGuid().ToString();
+            _instanceKeyLength = _instanceKey.Length;
         }
 
         private void ItemRemoved(CacheEntryRemovedArguments arguments)
@@ -340,31 +342,31 @@ namespace CacheManager.SystemRuntimeCaching
                 return;
             }
 
-            // root@region:key;
-            // root@key;
-
-            bool isToken; bool hasRegion; string key; string region;
-            ParseKeyParts(this.instanceKeyLength, fullKey, out isToken, out hasRegion, out region, out key);
+            bool isToken;
+            bool hasRegion;
+            string key;
+            string region;
+            ParseKeyParts(_instanceKeyLength, fullKey, out isToken, out hasRegion, out region, out key);
 
             if (!isToken)
             {
                 if (hasRegion)
                 {
-                    this.Stats.OnRemove(region);
+                    Stats.OnRemove(region);
                 }
                 else
                 {
-                    this.Stats.OnRemove();
+                    Stats.OnRemove();
                 }
 
                 // trigger cachemanager's remove on evicted and expired items
                 if (arguments.RemovedReason == CacheEntryRemovedReason.Evicted || arguments.RemovedReason == CacheEntryRemovedReason.CacheSpecificEviction)
                 {
-                    this.TriggerCacheSpecificRemove(key, region, CacheItemRemovedReason.Evicted);
+                    TriggerCacheSpecificRemove(key, region, CacheItemRemovedReason.Evicted);
                 }
                 else if (arguments.RemovedReason == CacheEntryRemovedReason.Expired)
                 {
-                    this.TriggerCacheSpecificRemove(key, region, CacheItemRemovedReason.Expired);
+                    TriggerCacheSpecificRemove(key, region, CacheItemRemovedReason.Expired);
                 }
             }
         }

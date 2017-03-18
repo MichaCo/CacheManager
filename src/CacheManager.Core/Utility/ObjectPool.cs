@@ -5,6 +5,26 @@ using System.Threading;
 namespace CacheManager.Core.Utility
 {
     /// <summary>
+    /// Contract used by <see cref="ObjectPool{T}"/> to define how to create and return instances to a pool.
+    /// </summary>
+    /// <typeparam name="T">The type of objects of the pool.</typeparam>
+    public interface IObjectPoolPolicy<T>
+    {
+        /// <summary>
+        /// Creates a new instance of <typeparamref name="T"/>.
+        /// </summary>
+        /// <returns>The new instance.</returns>
+        T CreateNew();
+
+        /// <summary>
+        /// Checks if the instance can be returned and may reset the instance to a state which can be reused.
+        /// </summary>
+        /// <param name="value">The instance which should be returned.</param>
+        /// <returns><c>True</c> if the instance can be returned, <c>False</c> otherwise.</returns>
+        bool Return(T value);
+    }
+
+    /// <summary>
     /// Simple policy based pool for objects.
     /// </summary>
     /// <typeparam name="T">The object type to pool.</typeparam>
@@ -20,7 +40,11 @@ namespace CacheManager.Core.Utility
         /// <param name="maxItems">Number of items to keep, defaults to number of processors * 2.</param>
         public ObjectPool(IObjectPoolPolicy<T> policy, int? maxItems = null)
         {
-            if (policy == null) throw new ArgumentNullException(nameof(policy));
+            if (policy == null)
+            {
+                throw new ArgumentNullException(nameof(policy));
+            }
+
             if (maxItems == null || maxItems == 0)
             {
                 maxItems = Environment.ProcessorCount * 2;
@@ -68,25 +92,5 @@ namespace CacheManager.Core.Utility
                 }
             }
         }
-    }
-
-    /// <summary>
-    /// Contract used by <see cref="ObjectPool{T}"/> to define how to create and return instances to a pool.
-    /// </summary>
-    /// <typeparam name="T">The type of objects of the pool.</typeparam>
-    public interface IObjectPoolPolicy<T>
-    {
-        /// <summary>
-        /// Creates a new instance of <typeparamref name="T"/>.
-        /// </summary>
-        /// <returns>The new instance.</returns>
-        T CreateNew();
-
-        /// <summary>
-        /// Checks if the instance can be returned and may reset the instance to a state which can be reused.
-        /// </summary>
-        /// <param name="value">The instance which should be returned.</param>
-        /// <returns><c>True</c> if the instance can be returned, <c>False</c> otherwise.</returns>
-        bool Return(T value);
     }
 }

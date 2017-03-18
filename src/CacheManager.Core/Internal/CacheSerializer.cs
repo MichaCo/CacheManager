@@ -17,12 +17,13 @@ namespace CacheManager.Core.Internal
 
         /// <summary>
         /// Creates a new instance of the serializer specific cache item.
-        /// Items should implement <see cref="SerializerCacheItem{T}"/> and the implementation should call 
+        /// Items should implement <see cref="SerializerCacheItem{T}"/> and the implementation should call
         /// the second constructor taking exactly these two arguments.
         /// </summary>
         /// <param name="properties">The item properties to copy from.</param>
         /// <param name="value">The actual cache item value.</param>
         /// <returns>The serializer specific cache item instance.</returns>
+        /// <typeparam name="TCacheValue">The cache value type.</typeparam>
         protected abstract object CreateNewItem<TCacheValue>(ICacheItemProperties properties, object value);
 
         /// <inheritdoc/>
@@ -35,22 +36,22 @@ namespace CacheManager.Core.Internal
         public virtual byte[] SerializeCacheItem<T>(CacheItem<T> value)
         {
             Guard.NotNull(value, nameof(value));
-            var item = this.CreateFromCacheItem<T>(value);
-            return this.Serialize(item);
+            var item = CreateFromCacheItem(value);
+            return Serialize(item);
         }
 
         /// <inheritdoc/>
         public virtual CacheItem<T> DeserializeCacheItem<T>(byte[] value, Type valueType)
         {
             var targetType = GetOpenGeneric().MakeGenericType(valueType);
-            var item = (ICacheItemConverter)this.Deserialize(value, targetType);
+            var item = (ICacheItemConverter)Deserialize(value, targetType);
 
             return item.ToCacheItem<T>();
         }
 
         private object CreateFromCacheItem<TCacheValue>(CacheItem<TCacheValue> source)
         {
-            Type tType = typeof(TCacheValue);
+            var tType = typeof(TCacheValue);
 
             if (tType != source.ValueType || tType == TypeCache.ObjectType)
             {

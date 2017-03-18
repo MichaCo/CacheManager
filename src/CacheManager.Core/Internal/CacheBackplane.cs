@@ -26,8 +26,8 @@ namespace CacheManager.Core.Internal
         protected CacheBackplane(ICacheManagerConfiguration configuration)
         {
             NotNull(configuration, nameof(configuration));
-            this.CacheConfiguration = configuration;
-            this.ConfigurationKey = configuration.BackplaneConfigurationKey;
+            CacheConfiguration = configuration;
+            ConfigurationKey = configuration.BackplaneConfigurationKey;
         }
 
         /// <summary>
@@ -35,7 +35,7 @@ namespace CacheManager.Core.Internal
         /// </summary>
         ~CacheBackplane()
         {
-            this.Dispose(false);
+            Dispose(false);
         }
 
         /// <summary>
@@ -80,7 +80,7 @@ namespace CacheManager.Core.Internal
         /// </summary>
         public void Dispose()
         {
-            this.Dispose(true);
+            Dispose(true);
 
             GC.SuppressFinalize(this);
         }
@@ -131,7 +131,7 @@ namespace CacheManager.Core.Internal
         /// <param name="action">The action.</param>
         protected internal void TriggerChanged(string key, CacheItemChangedEventAction action)
         {
-            this.Changed?.Invoke(this, new CacheItemChangedEventArgs(key, action));
+            Changed?.Invoke(this, new CacheItemChangedEventArgs(key, action));
         }
 
         /// <summary>
@@ -142,7 +142,7 @@ namespace CacheManager.Core.Internal
         /// <param name="action">The action.</param>
         protected internal void TriggerChanged(string key, string region, CacheItemChangedEventAction action)
         {
-            this.Changed?.Invoke(this, new CacheItemChangedEventArgs(key, region, action));
+            Changed?.Invoke(this, new CacheItemChangedEventArgs(key, region, action));
         }
 
         /// <summary>
@@ -150,7 +150,7 @@ namespace CacheManager.Core.Internal
         /// </summary>
         protected internal void TriggerCleared()
         {
-            this.Cleared?.Invoke(this, new EventArgs());
+            Cleared?.Invoke(this, new EventArgs());
         }
 
         /// <summary>
@@ -159,7 +159,7 @@ namespace CacheManager.Core.Internal
         /// <param name="region">The region.</param>
         protected internal void TriggerClearedRegion(string region)
         {
-            this.ClearedRegion?.Invoke(this, new RegionEventArgs(region));
+            ClearedRegion?.Invoke(this, new RegionEventArgs(region));
         }
 
         /// <summary>
@@ -168,7 +168,7 @@ namespace CacheManager.Core.Internal
         /// <param name="key">The key</param>
         protected internal void TriggerRemoved(string key)
         {
-            this.Removed?.Invoke(this, new CacheItemEventArgs(key));
+            Removed?.Invoke(this, new CacheItemEventArgs(key));
         }
 
         /// <summary>
@@ -178,7 +178,7 @@ namespace CacheManager.Core.Internal
         /// <param name="region">The region.</param>
         protected internal void TriggerRemoved(string key, string region)
         {
-            this.Removed?.Invoke(this, new CacheItemEventArgs(key, region));
+            Removed?.Invoke(this, new CacheItemEventArgs(key, region));
         }
 
         /// <summary>
@@ -205,7 +205,7 @@ namespace CacheManager.Core.Internal
         public RegionEventArgs(string region)
         {
             NotNull(region, nameof(region));
-            this.Region = region;
+            Region = region;
         }
 
         /// <summary>
@@ -227,7 +227,7 @@ namespace CacheManager.Core.Internal
         public CacheItemEventArgs(string key)
         {
             NotNull(key, nameof(key));
-            this.Key = key;
+            Key = key;
         }
 
         /// <summary>
@@ -239,7 +239,7 @@ namespace CacheManager.Core.Internal
             : this(key)
         {
             NotNull(region, nameof(region));
-            this.Region = region;
+            Region = region;
         }
 
         /// <summary>
@@ -266,7 +266,7 @@ namespace CacheManager.Core.Internal
         public CacheItemChangedEventArgs(string key, CacheItemChangedEventAction action)
             : base(key)
         {
-            this.Action = action;
+            Action = action;
         }
 
         /// <summary>
@@ -278,7 +278,7 @@ namespace CacheManager.Core.Internal
         public CacheItemChangedEventArgs(string key, string region, CacheItemChangedEventAction action)
             : base(key, region)
         {
-            this.Action = action;
+            Action = action;
         }
 
         /// <summary>

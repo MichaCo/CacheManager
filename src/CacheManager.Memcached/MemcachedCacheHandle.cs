@@ -27,10 +27,10 @@ namespace CacheManager.Memcached
     [RequiresSerializer]
     public class MemcachedCacheHandle<TCacheValue> : BaseCacheHandle<TCacheValue>
     {
-        private static readonly string DefaultEnyimSectionName = "enyim.com/memcached";
-        private static readonly string DefaultSectionName = "default";
-        private static readonly TimeSpan MaximumTimeout = TimeSpan.FromDays(30);
-        private readonly ICacheManagerConfiguration managerConfiguration;
+        private static readonly string _defaultEnyimSectionName = "enyim.com/memcached";
+        private static readonly string _defaultSectionName = "default";
+        private static readonly TimeSpan _maximumTimeout = TimeSpan.FromDays(30);
+        private readonly ICacheManagerConfiguration _managerConfiguration;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MemcachedCacheHandle{TCacheValue}"/> class.
@@ -60,11 +60,11 @@ namespace CacheManager.Memcached
                 var sectionName = GetEnyimSectionName(configuration.Key);
                 var section = GetSection(sectionName);
 
-                this.Cache = new MemcachedClient(section);                
+                Cache = new MemcachedClient(section);
             }
             catch (ConfigurationErrorsException ex)
             {
-                throw new InvalidOperationException("Failed to initialize " + this.GetType().Name + ". " + ex.BareMessage, ex);
+                throw new InvalidOperationException("Failed to initialize " + GetType().Name + ". " + ex.BareMessage, ex);
             }
         }
 
@@ -81,7 +81,7 @@ namespace CacheManager.Memcached
         {
             // serializer gets ignored, just added to the ctor to satisfy the ctor finder in our custom DI to actually hit this ctor if the client is specified.
             NotNull(client, nameof(client));
-            this.Cache = client;
+            Cache = client;
         }
 
         /// <summary>
@@ -105,11 +105,12 @@ namespace CacheManager.Memcached
             if (clientConfiguration.Transcoder.GetType() == typeof(DefaultTranscoder))
             {
                 clientConfiguration.Transcoder = new CacheManagerTanscoder<TCacheValue>(serializer);
+
                 // default is 10, that might be too long as it can take up to 10sec to recover during retries
                 clientConfiguration.SocketPool.DeadTimeout = TimeSpan.FromSeconds(2);
             }
 
-            this.Cache = new MemcachedClient(clientConfiguration);
+            Cache = new MemcachedClient(clientConfiguration);
         }
 
         private MemcachedCacheHandle(
@@ -122,21 +123,21 @@ namespace CacheManager.Memcached
             NotNull(loggerFactory, nameof(loggerFactory));
             NotNull(managerConfiguration, nameof(managerConfiguration));
 
-            this.managerConfiguration = managerConfiguration;
-            this.Logger = loggerFactory.CreateLogger(this);
+            _managerConfiguration = managerConfiguration;
+            Logger = loggerFactory.CreateLogger(this);
         }
 
         /// <summary>
         /// Gets the number of items the cache handle currently maintains.
         /// </summary>
         /// <value>The count.</value>
-        public override int Count => int.Parse(this.Cache.Stats().GetRaw("curr_items").First().Value);
+        public override int Count => int.Parse(Cache.Stats().GetRaw("curr_items").First().Value);
 
         /// <summary>
         /// Gets the get memcached client configuration.
         /// </summary>
         /// <value>The get memcached client configuration.</value>
-        public IMemcachedClientConfiguration GetMemcachedClientConfiguration => this.GetSection();
+        public IMemcachedClientConfiguration GetMemcachedClientConfiguration => GetSection();
 
         /// <summary>
         /// Gets the total number of items per server.
@@ -146,7 +147,7 @@ namespace CacheManager.Memcached
         {
             get
             {
-                foreach (var count in this.Cache.Stats().GetRaw("total_items"))
+                foreach (var count in Cache.Stats().GetRaw("total_items"))
                 {
                     yield return long.Parse(count.Value, CultureInfo.InvariantCulture);
                 }
@@ -157,10 +158,10 @@ namespace CacheManager.Memcached
         /// Gets the servers.
         /// </summary>
         /// <value>The servers.</value>
-        public IList<IPEndPoint> Servers => this.GetServers();
+        public IList<IPEndPoint> Servers => GetServers();
 
         /// <summary>
-        /// Gets or sets the cache.
+        /// Gets the cache.
         /// </summary>
         /// <value>The cache.</value>
         public MemcachedClient Cache { get; }
@@ -171,7 +172,7 @@ namespace CacheManager.Memcached
         /// <summary>
         /// Clears this cache, removing all items in the base cache and all regions.
         /// </summary>
-        public override void Clear() => this.Cache.FlushAll();
+        public override void Clear() => Cache.FlushAll();
 
         /// <summary>
         /// Clears the cache region, removing all items from the specified <paramref name="region"/> only.
@@ -182,16 +183,16 @@ namespace CacheManager.Memcached
         {
             var regionPrefix = StoreNewRegionPrefix(region);
 
-            if (this.Logger.IsEnabled(LogLevel.Debug))
+            if (Logger.IsEnabled(LogLevel.Debug))
             {
-                this.Logger.LogDebug("Cleared region {0}, new region key is {1}.", region, regionPrefix);
+                Logger.LogDebug("Cleared region {0}, new region key is {1}.", region, regionPrefix);
             }
         }
 
         /// <inheritdoc />
         public override bool Exists(string key)
         {
-            var result = this.Cache.ExecuteAppend(GetKey(key, null, false), default(ArraySegment<byte>));
+            var result = Cache.ExecuteAppend(GetKey(key, null, false), default(ArraySegment<byte>));
             return result.StatusCode.HasValue && result.StatusCode.Value != (int)StatusCode.KeyNotFound;
         }
 
@@ -200,17 +201,17 @@ namespace CacheManager.Memcached
         {
             NotNullOrWhiteSpace(region, nameof(region));
 
-            var result = this.Cache.ExecuteAppend(GetKey(key, region, false), default(ArraySegment<byte>));
+            var result = Cache.ExecuteAppend(GetKey(key, region, false), default(ArraySegment<byte>));
             return result.StatusCode.HasValue && result.StatusCode.Value != (int)StatusCode.KeyNotFound;
         }
 
         /// <inheritdoc />
         public override UpdateItemResult<TCacheValue> Update(string key, Func<TCacheValue, TCacheValue> updateValue, int maxRetries) =>
-            this.Update(key, null, updateValue, maxRetries);
+            Update(key, null, updateValue, maxRetries);
 
         /// <inheritdoc />
         public override UpdateItemResult<TCacheValue> Update(string key, string region, Func<TCacheValue, TCacheValue> updateValue, int maxRetries) =>
-            this.Set(key, region, updateValue, maxRetries);
+            Set(key, region, updateValue, maxRetries);
 
         /// <summary>
         /// Adds a value to the cache.
@@ -222,19 +223,20 @@ namespace CacheManager.Memcached
         protected override bool AddInternalPrepared(CacheItem<TCacheValue> item)
         {
             IOperationResult result;
-            bool shouldRetry = false;
-            int tries = 0;
+            var shouldRetry = false;
+            var tries = 0;
             do
             {
                 tries++;
-                result = this.Store(StoreMode.Add, item, out shouldRetry);
+                result = Store(StoreMode.Add, item, out shouldRetry);
                 if (!shouldRetry)
                 {
                     return result.Success;
                 }
 
                 WaitRetry(tries);
-            } while (shouldRetry && tries < this.managerConfiguration.MaxRetries);
+            }
+            while (shouldRetry && tries < _managerConfiguration.MaxRetries);
 
             throw new InvalidOperationException($"Add failed after {tries} tries for [{item.ToString()}]. {result.InnerResult?.Message ?? result.Message}");
         }
@@ -248,7 +250,7 @@ namespace CacheManager.Memcached
         {
             if (disposeManaged)
             {
-                this.Cache.Dispose();
+                Cache.Dispose();
             }
 
             base.Dispose(disposeManaged);
@@ -260,7 +262,7 @@ namespace CacheManager.Memcached
         /// <param name="key">The key being used to identify the item within the cache.</param>
         /// <returns>The <c>CacheItem</c>.</returns>
         protected override CacheItem<TCacheValue> GetCacheItemInternal(string key) =>
-            this.GetCacheItemInternal(key, null);
+            GetCacheItemInternal(key, null);
 
         /// <summary>
         /// Gets a <c>CacheItem</c> for the specified key.
@@ -270,7 +272,7 @@ namespace CacheManager.Memcached
         /// <returns>The <c>CacheItem</c>.</returns>
         protected override CacheItem<TCacheValue> GetCacheItemInternal(string key, string region)
         {
-            var item = this.Cache.Get(GetKey(key, region)) as CacheItem<TCacheValue>;
+            var item = Cache.Get(GetKey(key, region)) as CacheItem<TCacheValue>;
             if (item != null)
             {
                 if (item.IsExpired)
@@ -283,7 +285,7 @@ namespace CacheManager.Memcached
                     // is to store them again with updated TTL... What a b...t
                     item.LastAccessedUtc = DateTime.UtcNow;
                     bool shouldRetry;
-                    this.Store(StoreMode.Set, item, out shouldRetry);
+                    Store(StoreMode.Set, item, out shouldRetry);
                 }
             }
 
@@ -298,29 +300,33 @@ namespace CacheManager.Memcached
         protected override void PutInternalPrepared(CacheItem<TCacheValue> item)
         {
             IOperationResult result;
-            bool shouldRetry = false;
-            int tries = 0;
+            var shouldRetry = false;
+            var tries = 0;
             do
             {
                 tries++;
-                result = this.Store(StoreMode.Set, item, out shouldRetry);
+                result = Store(StoreMode.Set, item, out shouldRetry);
                 if (!shouldRetry)
                 {
                     return;
                 }
 
                 WaitRetry(tries);
-            } while (shouldRetry && tries < this.managerConfiguration.MaxRetries);
+            }
+            while (shouldRetry && tries < _managerConfiguration.MaxRetries);
 
             throw new InvalidOperationException($"Put failed after {tries} tries for [{item.ToString()}]. {result.InnerResult?.Message ?? result.Message}");
         }
 
         private void WaitRetry(int currentTry)
         {
-            var delay = this.managerConfiguration.RetryTimeout == 0 ? 10 : this.managerConfiguration.RetryTimeout;
+            var delay = _managerConfiguration.RetryTimeout == 0 ? 10 : _managerConfiguration.RetryTimeout;
 
             var adjusted = delay * currentTry;
-            if (adjusted > 10000) adjusted = 10000;
+            if (adjusted > 10000)
+            {
+                adjusted = 10000;
+            }
 
 #if !NET40
             Task.Delay(adjusted).ConfigureAwait(false).GetAwaiter().GetResult();
@@ -336,7 +342,7 @@ namespace CacheManager.Memcached
         /// <returns>
         /// <c>true</c> if the key was found and removed from the cache, <c>false</c> otherwise.
         /// </returns>
-        protected override bool RemoveInternal(string key) => this.RemoveInternal(key, null);
+        protected override bool RemoveInternal(string key) => RemoveInternal(key, null);
 
         /// <summary>
         /// Removes a value from the cache for the specified key.
@@ -348,22 +354,22 @@ namespace CacheManager.Memcached
         /// </returns>
         protected override bool RemoveInternal(string key, string region)
         {
-            var result = this.Cache.ExecuteRemove(GetKey(key, region, false));
-            int statusCode = result.StatusCode ?? result.InnerResult?.StatusCode ?? -1;
+            var result = Cache.ExecuteRemove(GetKey(key, region, false));
+            var statusCode = result.StatusCode ?? result.InnerResult?.StatusCode ?? -1;
             if (result.Success && statusCode != (int)StatusCode.KeyNotFound)
             {
-                this.LogOperationResult(LogLevel.Debug, result, "Removed {0} {1}", region, key);
+                LogOperationResult(LogLevel.Debug, result, "Removed {0} {1}", region, key);
             }
             else
             {
                 if (statusCode == (int)StatusCode.KeyNotFound)
                 {
-                    this.LogOperationResult(LogLevel.Information, result, "Remove Failed, key not found: {0} {1}", region, key);
+                    LogOperationResult(LogLevel.Information, result, "Remove Failed, key not found: {0} {1}", region, key);
                 }
                 else
                 {
-                    this.LogOperationResult(LogLevel.Error, result, "Remove Failed for {0} {1}", region, key);
-                    // throw new InvalidOperationException($"Remove failed for {region} {key}; statusCode:{statusCode}, message:{result.InnerResult?.Message ?? result.Message}");
+                    LogOperationResult(LogLevel.Error, result, "Remove Failed for {0} {1}", region, key);
+                    //// throw new InvalidOperationException($"Remove failed for {region} {key}; statusCode:{statusCode}, message:{result.InnerResult?.Message ?? result.Message}");
                 }
             }
 
@@ -390,16 +396,16 @@ namespace CacheManager.Memcached
 
             if (item.ExpirationMode == ExpirationMode.Absolute || item.ExpirationMode == ExpirationMode.Sliding)
             {
-                if (item.ExpirationTimeout > MaximumTimeout)
+                if (item.ExpirationTimeout > _maximumTimeout)
                 {
-                    throw new InvalidOperationException($"Timeout must not exceed {MaximumTimeout.TotalDays} days.");
+                    throw new InvalidOperationException($"Timeout must not exceed {_maximumTimeout.TotalDays} days.");
                 }
 
-                result = this.Cache.ExecuteStore(mode, key, item, item.ExpirationTimeout);
+                result = Cache.ExecuteStore(mode, key, item, item.ExpirationTimeout);
             }
             else
             {
-                result = this.Cache.ExecuteStore(mode, key, item);
+                result = Cache.ExecuteStore(mode, key, item);
             }
 
             if (mode == StoreMode.Add && result.StatusCode == (int?)StatusCode.KeyExists)
@@ -421,10 +427,10 @@ namespace CacheManager.Memcached
 
         private void LogOperationResult(LogLevel level, IOperationResult result, string message, params object[] args)
         {
-            if (this.Logger.IsEnabled(level))
+            if (Logger.IsEnabled(level))
             {
                 var msg = $"{string.Format(message, args)}; Result Success:'{result.Success}' Code:'{result.InnerResult?.StatusCode ?? result.StatusCode}' Message:'{result.InnerResult?.Message ?? result.Message}'.";
-                this.Logger.Log(level, 0, msg, result.Exception);
+                Logger.Log(level, 0, msg, result.Exception);
             }
         }
 
@@ -432,9 +438,9 @@ namespace CacheManager.Memcached
         {
             var regionKey = ComputeRegionLookupKey(region);
             var oldRegionPredix = GetRegionPrefix(region);
-            int tries = 0;
-            bool created = false;
-            while (!created && tries <= this.managerConfiguration.MaxRetries)
+            var tries = 0;
+            var created = false;
+            while (!created && tries <= _managerConfiguration.MaxRetries)
             {
                 var timestamp = Clock.GetUnixTimestampMillis();
                 if (timestamp.ToString() == oldRegionPredix)
@@ -445,19 +451,20 @@ namespace CacheManager.Memcached
 
                 tries++;
 
-                if (this.Logger.IsEnabled(LogLevel.Debug))
+                if (Logger.IsEnabled(LogLevel.Debug))
                 {
-                    this.Logger.LogDebug("Trying to store new region prefix '{0}', for region key '{1}'.", timestamp, regionKey);
+                    Logger.LogDebug("Trying to store new region prefix '{0}', for region key '{1}'.", timestamp, regionKey);
                 }
 
-                created = this.Cache.Store(StoreMode.Set, regionKey, timestamp);
+                created = Cache.Store(StoreMode.Set, regionKey, timestamp);
 
                 if (created)
                 {
-                    if (this.Logger.IsEnabled(LogLevel.Debug))
+                    if (Logger.IsEnabled(LogLevel.Debug))
                     {
-                        this.Logger.LogDebug("Successfully stored new region prefix '{0}', for region key '{1}'.", timestamp, regionKey);
+                        Logger.LogDebug("Successfully stored new region prefix '{0}', for region key '{1}'.", timestamp, regionKey);
                     }
+
                     return timestamp.ToString();
                 }
             }
@@ -472,7 +479,7 @@ namespace CacheManager.Memcached
             var regionKey = ComputeRegionLookupKey(region);
 
             object val;
-            if (this.Cache.ExecuteTryGet(regionKey, out val).Success)
+            if (Cache.ExecuteTryGet(regionKey, out val).Success)
             {
                 return val?.ToString();
             }
@@ -492,9 +499,9 @@ namespace CacheManager.Memcached
         /// <returns>The section name.</returns>
         private static string GetEnyimSectionName(string handleName)
         {
-            if (handleName.Equals(DefaultSectionName, StringComparison.OrdinalIgnoreCase))
+            if (handleName.Equals(_defaultSectionName, StringComparison.OrdinalIgnoreCase))
             {
-                return DefaultEnyimSectionName;
+                return _defaultEnyimSectionName;
             }
             else
             {
@@ -513,14 +520,14 @@ namespace CacheManager.Memcached
 
             if (!string.IsNullOrWhiteSpace(region))
             {
-                var regionKey = this.GetRegionPrefix(region);
+                var regionKey = GetRegionPrefix(region);
                 if (regionKey == null)
                 {
                     if (eventuallyCreateNewRegion)
                     {
-                        if (this.Logger.IsEnabled(LogLevel.Debug))
+                        if (Logger.IsEnabled(LogLevel.Debug))
                         {
-                            this.Logger.LogDebug("Region key for region '{0}' not present, creating a new one...", region);
+                            Logger.LogDebug("Region key for region '{0}' not present, creating a new one...", region);
                         }
 
                         regionKey = StoreNewRegionPrefix(region);
@@ -552,12 +559,12 @@ namespace CacheManager.Memcached
         // TODO: test the config section ctor now with this
         private static IMemcachedClientConfiguration GetSection(string sectionName)
         {
-            MemcachedClientSection section = (MemcachedClientSection)ConfigurationManager.GetSection(sectionName);
+            var section = (MemcachedClientSection)ConfigurationManager.GetSection(sectionName);
             if (section == null)
             {
                 throw new ConfigurationErrorsException("Section " + sectionName + " is not found.");
             }
-            
+
             return section;
         }
 
@@ -565,7 +572,7 @@ namespace CacheManager.Memcached
         {
             using (var sha = SHA256Managed.Create())
             {
-                byte[] hashBytes = sha.ComputeHash(Encoding.UTF8.GetBytes(key));
+                var hashBytes = sha.ComputeHash(Encoding.UTF8.GetBytes(key));
                 return Convert.ToBase64String(hashBytes);
             }
         }
@@ -596,8 +603,8 @@ namespace CacheManager.Memcached
         /// </exception>
         private IMemcachedClientConfiguration GetSection()
         {
-            string sectionName = GetEnyimSectionName(this.Configuration.Name);
-            MemcachedClientSection section = (MemcachedClientSection)ConfigurationManager.GetSection(sectionName);
+            var sectionName = GetEnyimSectionName(Configuration.Name);
+            var section = (MemcachedClientSection)ConfigurationManager.GetSection(sectionName);
 
             if (section == null)
             {
@@ -615,7 +622,7 @@ namespace CacheManager.Memcached
 
         private IList<IPEndPoint> GetServers()
         {
-            var section = this.GetSection();
+            var section = GetSection();
             return section.Servers;
         }
 
@@ -632,11 +639,10 @@ namespace CacheManager.Memcached
                 StatusCode getStatus;
                 IGetOperationResult<CacheItem<TCacheValue>> getResult;
                 CacheItem<TCacheValue> item;
-                //CasResult<CacheItem<TCacheValue>> cas;
                 do
                 {
                     getTries++;
-                    getResult = this.Cache.ExecuteGet<CacheItem<TCacheValue>>(fullyKey);
+                    getResult = Cache.ExecuteGet<CacheItem<TCacheValue>>(fullyKey);
 
                     item = getResult.Value;
                     getStatus = (StatusCode)(getResult.StatusCode ?? getResult.InnerResult?.StatusCode ?? -1);
@@ -646,9 +652,10 @@ namespace CacheManager.Memcached
                 // break operation if we cannot retrieve the object (maybe it has expired already).
                 if (!getResult.Success || item == null)
                 {
-                    this.LogOperationResult(LogLevel.Warning, getResult, "Get item during update failed for '{0}'.", fullyKey);
+                    LogOperationResult(LogLevel.Warning, getResult, "Get item during update failed for '{0}'.", fullyKey);
                     return UpdateItemResult.ForItemDidNotExist<TCacheValue>();
                 }
+
                 if (item.IsExpired)
                 {
                     return UpdateItemResult.ForItemDidNotExist<TCacheValue>();
@@ -667,16 +674,16 @@ namespace CacheManager.Memcached
 
                 if (item.ExpirationMode == ExpirationMode.Absolute || item.ExpirationMode == ExpirationMode.Sliding)
                 {
-                    if (item.ExpirationTimeout > MaximumTimeout)
+                    if (item.ExpirationTimeout > _maximumTimeout)
                     {
-                        throw new InvalidOperationException($"Timeout must not exceed {MaximumTimeout.TotalDays} days.");
+                        throw new InvalidOperationException($"Timeout must not exceed {_maximumTimeout.TotalDays} days.");
                     }
 
-                    result = this.Cache.ExecuteCas(StoreMode.Set, fullyKey, item, item.ExpirationTimeout, getResult.Cas);
+                    result = Cache.ExecuteCas(StoreMode.Set, fullyKey, item, item.ExpirationTimeout, getResult.Cas);
                 }
                 else
                 {
-                    result = this.Cache.ExecuteCas(StoreMode.Set, fullyKey, item, getResult.Cas);
+                    result = Cache.ExecuteCas(StoreMode.Set, fullyKey, item, getResult.Cas);
                 }
 
                 if (result.Success)
@@ -685,7 +692,7 @@ namespace CacheManager.Memcached
                 }
                 else
                 {
-                    this.LogOperationResult(LogLevel.Warning, result, "Update failed for '{0}'.", fullyKey);
+                    LogOperationResult(LogLevel.Warning, result, "Update failed for '{0}'.", fullyKey);
                 }
 
                 WaitRetry(tries);
@@ -694,7 +701,7 @@ namespace CacheManager.Memcached
 
             return UpdateItemResult.ForTooManyRetries<TCacheValue>(tries);
         }
-        
+
         private class CacheManagerTanscoder<T> : DefaultTranscoder
         {
             private readonly ICacheSerializer _serializer;
@@ -704,14 +711,14 @@ namespace CacheManager.Memcached
                 NotNull(serializer, nameof(serializer));
                 _serializer = serializer;
             }
-            
+
             protected override object DeserializeObject(ArraySegment<byte> value)
             {
-                int position = value.Offset;
-                ushort typeNameLen = BitConverter.ToUInt16(value.Array, position);
+                var position = value.Offset;
+                var typeNameLen = BitConverter.ToUInt16(value.Array, position);
                 position += 2;
 
-                string typeName = Encoding.UTF8.GetString(value.Array, position, typeNameLen);
+                var typeName = Encoding.UTF8.GetString(value.Array, position, typeNameLen);
                 position += typeNameLen;
                 if (value.Array[position++] != 0)
                 {
@@ -731,9 +738,9 @@ namespace CacheManager.Memcached
                     throw new ArgumentException($"Value is not {nameof(CacheItem<T>)}.", nameof(value));
                 }
 
-                string typeName = cacheItem.Value.GetType().AssemblyQualifiedName;
-                byte[] typeNameBytes = Encoding.UTF8.GetBytes(typeName);
-                byte[] typeBytesLength = BitConverter.GetBytes((ushort)typeNameBytes.Length);
+                var typeName = cacheItem.Value.GetType().AssemblyQualifiedName;
+                var typeNameBytes = Encoding.UTF8.GetBytes(typeName);
+                var typeBytesLength = BitConverter.GetBytes((ushort)typeNameBytes.Length);
                 var data = _serializer.SerializeCacheItem(cacheItem);
 
                 var result = new byte[typeNameBytes.Length + typeBytesLength.Length + data.Length + 1];

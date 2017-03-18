@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Linq;
 using CacheManager.Core.Internal;
 using StackExchange.Redis;
@@ -38,26 +37,26 @@ namespace CacheManager.Redis
         IRedisValueConverter<char>,
         IRedisValueConverter<object>
     {
-        private static readonly Type ByteArrayType = typeof(byte[]);
-        private static readonly Type ByteType = typeof(byte);
-        private static readonly Type StringType = typeof(string);
-        private static readonly Type IntType = typeof(int);
-        private static readonly Type UIntType = typeof(uint);
-        private static readonly Type ShortType = typeof(short);
-        private static readonly Type UShortType = typeof(ushort);
-        private static readonly Type SingleType = typeof(float);
-        private static readonly Type DoubleType = typeof(double);
-        private static readonly Type BoolType = typeof(bool);
-        private static readonly Type LongType = typeof(long);
-        private static readonly Type ULongType = typeof(ulong);
-        private static readonly Type CharType = typeof(char);
-        private readonly ICacheSerializer serializer;
+        private static readonly Type _byteArrayType = typeof(byte[]);
+        private static readonly Type _byteType = typeof(byte);
+        private static readonly Type _stringType = typeof(string);
+        private static readonly Type _intType = typeof(int);
+        private static readonly Type _uIntType = typeof(uint);
+        private static readonly Type _shortType = typeof(short);
+        private static readonly Type _uShortType = typeof(ushort);
+        private static readonly Type _singleType = typeof(float);
+        private static readonly Type _doubleType = typeof(double);
+        private static readonly Type _boolType = typeof(bool);
+        private static readonly Type _longType = typeof(long);
+        private static readonly Type _uLongType = typeof(ulong);
+        private static readonly Type _charType = typeof(char);
+        private readonly ICacheSerializer _serializer;
 
         public RedisValueConverter(ICacheSerializer serializer)
         {
             NotNull(serializer, nameof(serializer));
 
-            this.serializer = serializer;
+            _serializer = serializer;
         }
 
         RedisValue IRedisValueConverter<byte[]>.ToRedisValue(byte[] value) => value;
@@ -118,158 +117,158 @@ namespace CacheManager.Redis
         RedisValue IRedisValueConverter<object>.ToRedisValue(object value)
         {
             var valueType = value.GetType();
-            if (valueType == ByteArrayType)
+            if (valueType == _byteArrayType)
             {
                 var converter = (IRedisValueConverter<byte[]>)this;
                 return converter.ToRedisValue((byte[])value);
             }
-            else if (valueType == ByteType)
+            else if (valueType == _byteType)
             {
                 var converter = (IRedisValueConverter<byte>)this;
                 return converter.ToRedisValue((byte)value);
             }
-            else if (valueType == StringType)
+            else if (valueType == _stringType)
             {
                 var converter = (IRedisValueConverter<string>)this;
                 return converter.ToRedisValue((string)value);
             }
-            else if (valueType == IntType)
+            else if (valueType == _intType)
             {
                 var converter = (IRedisValueConverter<int>)this;
                 return converter.ToRedisValue((int)value);
             }
-            else if (valueType == UIntType)
+            else if (valueType == _uIntType)
             {
                 var converter = (IRedisValueConverter<uint>)this;
                 return converter.ToRedisValue((uint)value);
             }
-            else if (valueType == ShortType)
+            else if (valueType == _shortType)
             {
                 var converter = (IRedisValueConverter<short>)this;
                 return converter.ToRedisValue((short)value);
             }
-            else if (valueType == UShortType)
+            else if (valueType == _uShortType)
             {
                 var converter = (IRedisValueConverter<ushort>)this;
                 return converter.ToRedisValue((ushort)value);
             }
-            else if (valueType == SingleType)
+            else if (valueType == _singleType)
             {
                 var converter = (IRedisValueConverter<float>)this;
                 return converter.ToRedisValue((float)value);
             }
-            else if (valueType == DoubleType)
+            else if (valueType == _doubleType)
             {
                 var converter = (IRedisValueConverter<double>)this;
                 return converter.ToRedisValue((double)value);
             }
-            else if (valueType == BoolType)
+            else if (valueType == _boolType)
             {
                 var converter = (IRedisValueConverter<bool>)this;
                 return converter.ToRedisValue((bool)value);
             }
-            else if (valueType == LongType)
+            else if (valueType == _longType)
             {
                 var converter = (IRedisValueConverter<long>)this;
                 return converter.ToRedisValue((long)value);
             }
-            else if (valueType == ULongType)
+            else if (valueType == _uLongType)
             {
                 var converter = (IRedisValueConverter<ulong>)this;
                 return converter.ToRedisValue((ulong)value);
             }
-            else if (valueType == CharType)
+            else if (valueType == _charType)
             {
                 var converter = (IRedisValueConverter<char>)this;
                 return converter.ToRedisValue((char)value);
             }
 
-            return this.serializer.Serialize(value);
+            return _serializer.Serialize(value);
         }
 
         object IRedisValueConverter<object>.FromRedisValue(RedisValue value, string type)
         {
             var valueType = TypeCache.GetType(type);
 
-            if (valueType == ByteArrayType)
+            if (valueType == _byteArrayType)
             {
                 var converter = (IRedisValueConverter<byte[]>)this;
                 return converter.FromRedisValue(value, type);
             }
-            else if (valueType == ByteType)
+            else if (valueType == _byteType)
             {
                 var converter = (IRedisValueConverter<byte>)this;
                 return converter.FromRedisValue(value, type);
             }
-            else if (valueType == StringType)
+            else if (valueType == _stringType)
             {
                 var converter = (IRedisValueConverter<string>)this;
                 return converter.FromRedisValue(value, type);
             }
-            else if (valueType == IntType)
+            else if (valueType == _intType)
             {
                 var converter = (IRedisValueConverter<int>)this;
                 return converter.FromRedisValue(value, type);
             }
-            else if (valueType == UIntType)
+            else if (valueType == _uIntType)
             {
                 var converter = (IRedisValueConverter<uint>)this;
                 return converter.FromRedisValue(value, type);
             }
-            else if (valueType == ShortType)
+            else if (valueType == _shortType)
             {
                 var converter = (IRedisValueConverter<short>)this;
                 return converter.FromRedisValue(value, type);
             }
-            else if (valueType == UShortType)
+            else if (valueType == _uShortType)
             {
                 var converter = (IRedisValueConverter<ushort>)this;
                 return converter.FromRedisValue(value, type);
             }
-            else if (valueType == SingleType)
+            else if (valueType == _singleType)
             {
                 var converter = (IRedisValueConverter<float>)this;
                 return converter.FromRedisValue(value, type);
             }
-            else if (valueType == DoubleType)
+            else if (valueType == _doubleType)
             {
                 var converter = (IRedisValueConverter<double>)this;
                 return converter.FromRedisValue(value, type);
             }
-            else if (valueType == BoolType)
+            else if (valueType == _boolType)
             {
                 var converter = (IRedisValueConverter<bool>)this;
                 return converter.FromRedisValue(value, type);
             }
-            else if (valueType == LongType)
+            else if (valueType == _longType)
             {
                 var converter = (IRedisValueConverter<long>)this;
                 return converter.FromRedisValue(value, type);
             }
-            else if (valueType == ULongType)
+            else if (valueType == _uLongType)
             {
                 var converter = (IRedisValueConverter<ulong>)this;
                 return converter.FromRedisValue(value, type);
             }
-            else if (valueType == CharType)
+            else if (valueType == _charType)
             {
                 var converter = (IRedisValueConverter<char>)this;
                 return converter.FromRedisValue(value, type);
             }
 
-            return this.Deserialize(value, type);
+            return Deserialize(value, type);
         }
 
-        public RedisValue ToRedisValue<T>(T value) => this.serializer.Serialize(value);
+        public RedisValue ToRedisValue<T>(T value) => _serializer.Serialize(value);
 
-        public T FromRedisValue<T>(RedisValue value, string valueType) => (T)this.Deserialize(value, valueType);
+        public T FromRedisValue<T>(RedisValue value, string valueType) => (T)Deserialize(value, valueType);
 
         private object Deserialize(RedisValue value, string valueType)
         {
             var type = TypeCache.GetType(valueType);
             EnsureNotNull(type, "Type could not be loaded, {0}.", valueType);
 
-            return this.serializer.Deserialize(value, type);
+            return _serializer.Deserialize(value, type);
         }
     }
 }

@@ -44,7 +44,7 @@ namespace CacheManager.Core
         string Region { get; }
 
         /// <summary>
-        /// Gets a value indicating if the cache item uses the cache handle's configured expiration.
+        /// Gets a value indicating whether the cache item uses the cache handle's configured expiration.
         /// </summary>
         bool UsesExpirationDefaults { get; }
 

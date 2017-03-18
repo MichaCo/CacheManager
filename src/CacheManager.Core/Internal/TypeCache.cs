@@ -15,7 +15,7 @@ namespace CacheManager.Core.Internal
         private static List<Func<string, Type>> _resolvers = new List<Func<string, Type>>();
 
         /// <summary>
-        /// Returns <c>typeof(object)</c>.
+        /// Gets <c>typeof(object)</c>.
         /// </summary>
         public static Type ObjectType { get; } = typeof(object);
 
@@ -60,7 +60,9 @@ namespace CacheManager.Core.Internal
                                         typeResult = result;
                                     }
                                 }
-                                catch { }
+                                catch
+                                {
+                                }
                             }
                         }
 
@@ -70,17 +72,22 @@ namespace CacheManager.Core.Internal
                             {
                                 typeResult = Type.GetType(type, false);
                             }
-                            catch { /* catching file load exceptions which seem to be thrown although we don't want any exceptions... */ }
+                            catch
+                            {
+                                /* catching file load exceptions which seem to be thrown although we don't want any exceptions... */
+                            }
 
                             if (typeResult == null)
                             {
-                                // try remove version from the type string and resolve it (should work even for signed assemblies).                                
+                                // try remove version from the type string and resolve it (should work even for signed assemblies).
                                 try
                                 {
                                     var withoutVersion = Regex.Replace(type, @", Version=\d+.\d+.\d+.\d+", string.Empty);
                                     typeResult = Type.GetType(withoutVersion, false);
                                 }
-                                catch { }
+                                catch
+                                {
+                                }
                             }
 
                             if (typeResult == null)
@@ -93,7 +100,9 @@ namespace CacheManager.Core.Internal
                                 {
                                     typeResult = Type.GetType(typeName, false);
                                 }
-                                catch { }
+                                catch
+                                {
+                                }
                             }
                         }
 

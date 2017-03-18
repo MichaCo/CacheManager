@@ -17,8 +17,8 @@ namespace CacheManager.Couchbase
     /// </summary>
     public static class CouchbaseConfigurationManager
     {
-        private static Dictionary<string, ClientConfiguration> configurations = new Dictionary<string, ClientConfiguration>();
-        private static Dictionary<string, IBucket> buckets = new Dictionary<string, IBucket>();
+        private static Dictionary<string, ClientConfiguration> _configurations = new Dictionary<string, ClientConfiguration>();
+        private static Dictionary<string, IBucket> _buckets = new Dictionary<string, IBucket>();
 
         /// <summary>
         /// Adds the configuration.
@@ -31,9 +31,9 @@ namespace CacheManager.Couchbase
             NotNullOrWhiteSpace(name, nameof(name));
             NotNull(configuration, nameof(configuration));
 
-            if (!configurations.ContainsKey(name))
+            if (!_configurations.ContainsKey(name))
             {
-                configurations.Add(name, configuration);
+                _configurations.Add(name, configuration);
             }
         }
 
@@ -50,16 +50,16 @@ namespace CacheManager.Couchbase
         {
             NotNullOrWhiteSpace(name, nameof(name));
 
-            if (configurations.ContainsKey(name))
+            if (_configurations.ContainsKey(name))
             {
-                return configurations[name];
+                return _configurations[name];
             }
 
             var section = ConfigurationManager.GetSection(name) as CouchbaseClientSection;
             EnsureNotNull(section, "No configuration or section found for configuration: {0}.", name);
 
             var clientConfiguration = new ClientConfiguration(section);
-            configurations.Add(name, clientConfiguration);
+            _configurations.Add(name, clientConfiguration);
             return clientConfiguration;
         }
 
@@ -110,9 +110,9 @@ namespace CacheManager.Couchbase
 
             var bucketKey = configurationName + "_" + bucketName;
 
-            if (buckets.ContainsKey(bucketKey))
+            if (_buckets.ContainsKey(bucketKey))
             {
-                bucket = buckets[bucketKey];
+                bucket = _buckets[bucketKey];
             }
             else
             {
@@ -127,7 +127,7 @@ namespace CacheManager.Couchbase
                     bucket = GetCluster(clientConfiguration).OpenBucket(bucketName);
                 }
 
-                buckets.Add(bucketKey, bucket);
+                _buckets.Add(bucketKey, bucket);
             }
 
             return bucket;

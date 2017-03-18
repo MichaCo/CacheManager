@@ -73,8 +73,8 @@ namespace CacheManager.Core.Internal
         {
             NotNullOrWhiteSpace(owner, nameof(owner));
 
-            this.OwnerIdentity = owner;
-            this.Action = action;
+            OwnerIdentity = owner;
+            Action = action;
         }
 
         private BackplaneMessage(string owner, BackplaneAction action, string key)
@@ -82,7 +82,7 @@ namespace CacheManager.Core.Internal
         {
             NotNullOrWhiteSpace(key, nameof(key));
 
-            this.Key = key;
+            Key = key;
         }
 
         private BackplaneMessage(string owner, BackplaneAction action, string key, string region)
@@ -90,19 +90,19 @@ namespace CacheManager.Core.Internal
         {
             NotNullOrWhiteSpace(region, nameof(region));
 
-            this.Region = region;
+            Region = region;
         }
 
         private BackplaneMessage(string owner, BackplaneAction action, string key, CacheItemChangedEventAction changeAction)
             : this(owner, action, key)
         {
-            this.ChangeAction = changeAction;
+            ChangeAction = changeAction;
         }
 
         private BackplaneMessage(string owner, BackplaneAction action, string key, string region, CacheItemChangedEventAction changeAction)
             : this(owner, action, key, region)
         {
-            this.ChangeAction = changeAction;
+            ChangeAction = changeAction;
         }
 
         /// <summary>
@@ -191,10 +191,12 @@ namespace CacheManager.Core.Internal
             {
                 changeAction = CacheItemChangedEventAction.Put;
             }
+
             if (cacheActionVal.Equals("Add", StringComparison.OrdinalIgnoreCase))
             {
                 changeAction = CacheItemChangedEventAction.Add;
             }
+
             if (cacheActionVal.Equals("Update", StringComparison.OrdinalIgnoreCase))
             {
                 changeAction = CacheItemChangedEventAction.Update;
@@ -284,30 +286,30 @@ namespace CacheManager.Core.Internal
         /// <returns>The string representing this message.</returns>
         public string Serialize()
         {
-            var action = (int)this.Action;
-            if (this.Action == Clear)
+            var action = (int)Action;
+            if (Action == Clear)
             {
-                return this.OwnerIdentity + ":" + action;
+                return OwnerIdentity + ":" + action;
             }
-            else if (this.Action == ClearRegion)
+            else if (Action == ClearRegion)
             {
-                return this.OwnerIdentity + ":" + action + ":" + Encode(this.Region);
+                return OwnerIdentity + ":" + action + ":" + Encode(Region);
             }
-            else if (this.Action == Removed)
+            else if (Action == Removed)
             {
-                if (string.IsNullOrWhiteSpace(this.Region))
+                if (string.IsNullOrWhiteSpace(Region))
                 {
-                    return this.OwnerIdentity + ":" + action + ":" + ":" + Encode(this.Key);
+                    return OwnerIdentity + ":" + action + ":" + ":" + Encode(Key);
                 }
 
-                return this.OwnerIdentity + ":" + action + ":" + Encode(this.Key) + ":" + Encode(this.Region);
+                return OwnerIdentity + ":" + action + ":" + Encode(Key) + ":" + Encode(Region);
             }
-            else if (string.IsNullOrWhiteSpace(this.Region))
+            else if (string.IsNullOrWhiteSpace(Region))
             {
-                return this.OwnerIdentity + ":" + action + ":" + this.ChangeAction + ":" + Encode(this.Key);
+                return OwnerIdentity + ":" + action + ":" + ChangeAction + ":" + Encode(Key);
             }
 
-            return this.OwnerIdentity + ":" + action + ":" + this.ChangeAction + ":" + Encode(this.Key) + ":" + Encode(this.Region);
+            return OwnerIdentity + ":" + action + ":" + ChangeAction + ":" + Encode(Key) + ":" + Encode(Region);
         }
 
         private static string Decode(string value)

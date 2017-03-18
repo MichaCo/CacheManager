@@ -51,6 +51,7 @@ namespace CacheManager.Core.Utility
             {
                 throw new ArgumentNullException(name);
             }
+
             if (value.Length == 0)
             {
                 throw new ArgumentException("Value must not be empty", name);
@@ -77,6 +78,7 @@ namespace CacheManager.Core.Utility
             {
                 throw new ArgumentNullException(name);
             }
+
             if (value.Count == 0)
             {
                 throw new ArgumentException("Value must not be empty", name);

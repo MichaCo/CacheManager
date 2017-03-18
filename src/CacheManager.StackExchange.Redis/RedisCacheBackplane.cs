@@ -26,14 +26,14 @@ namespace CacheManager.Redis
     /// </remarks>
     public sealed class RedisCacheBackplane : CacheBackplane
     {
-        private readonly string channelName;
-        private readonly string identifier;
-        private readonly ILogger logger;
-        private readonly RedisConnectionManager connection;
-        private HashSet<string> messages = new HashSet<string>();
-        private object messageLock = new object();
-        private int skippedMessages = 0;
-        private bool sending = false;
+        private readonly string _channelName;
+        private readonly string _identifier;
+        private readonly ILogger _logger;
+        private readonly RedisConnectionManager _connection;
+        private HashSet<string> _messages = new HashSet<string>();
+        private object _messageLock = new object();
+        private int _skippedMessages = 0;
+        private bool _sending = false;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RedisCacheBackplane"/> class.
@@ -46,16 +46,16 @@ namespace CacheManager.Redis
             NotNull(configuration, nameof(configuration));
             NotNull(loggerFactory, nameof(loggerFactory));
 
-            this.logger = loggerFactory.CreateLogger(this);
-            this.channelName = configuration.BackplaneChannelName ?? "CacheManagerBackplane";
-            this.identifier = Guid.NewGuid().ToString();
+            _logger = loggerFactory.CreateLogger(this);
+            _channelName = configuration.BackplaneChannelName ?? "CacheManagerBackplane";
+            _identifier = Guid.NewGuid().ToString();
 
-            var cfg = RedisConfigurations.GetConfiguration(this.ConfigurationKey);
-            this.connection = new RedisConnectionManager(
+            var cfg = RedisConfigurations.GetConfiguration(ConfigurationKey);
+            _connection = new RedisConnectionManager(
                 cfg,
                 loggerFactory);
 
-            RetryHelper.Retry(() => this.Subscribe(), configuration.RetryTimeout, configuration.MaxRetries, this.logger);
+            RetryHelper.Retry(() => Subscribe(), configuration.RetryTimeout, configuration.MaxRetries, _logger);
         }
 
         /// <summary>
@@ -65,7 +65,7 @@ namespace CacheManager.Redis
         /// <param name="action">The cache action.</param>
         public override void NotifyChange(string key, CacheItemChangedEventAction action)
         {
-            this.PublishMessage(BackplaneMessage.ForChanged(this.identifier, key, action));
+            PublishMessage(BackplaneMessage.ForChanged(_identifier, key, action));
         }
 
         /// <summary>
@@ -76,7 +76,7 @@ namespace CacheManager.Redis
         /// <param name="action">The cache action.</param>
         public override void NotifyChange(string key, string region, CacheItemChangedEventAction action)
         {
-            this.PublishMessage(BackplaneMessage.ForChanged(this.identifier, key, region, action));
+            PublishMessage(BackplaneMessage.ForChanged(_identifier, key, region, action));
         }
 
         /// <summary>
@@ -84,7 +84,7 @@ namespace CacheManager.Redis
         /// </summary>
         public override void NotifyClear()
         {
-            this.PublishMessage(BackplaneMessage.ForClear(this.identifier));
+            PublishMessage(BackplaneMessage.ForClear(_identifier));
         }
 
         /// <summary>
@@ -93,7 +93,7 @@ namespace CacheManager.Redis
         /// <param name="region">The region.</param>
         public override void NotifyClearRegion(string region)
         {
-            this.PublishMessage(BackplaneMessage.ForClearRegion(this.identifier, region));
+            PublishMessage(BackplaneMessage.ForClearRegion(_identifier, region));
         }
 
         /// <summary>
@@ -102,7 +102,7 @@ namespace CacheManager.Redis
         /// <param name="key">The key.</param>
         public override void NotifyRemove(string key)
         {
-            this.PublishMessage(BackplaneMessage.ForRemoved(this.identifier, key));
+            PublishMessage(BackplaneMessage.ForRemoved(_identifier, key));
         }
 
         /// <summary>
@@ -112,7 +112,7 @@ namespace CacheManager.Redis
         /// <param name="region">The region.</param>
         public override void NotifyRemove(string key, string region)
         {
-            this.PublishMessage(BackplaneMessage.ForRemoved(this.identifier, key, region));
+            PublishMessage(BackplaneMessage.ForRemoved(_identifier, key, region));
         }
 
         /// <summary>
@@ -128,9 +128,11 @@ namespace CacheManager.Redis
             {
                 try
                 {
-                    this.connection.Subscriber.Unsubscribe(this.channelName);
+                    _connection.Subscriber.Unsubscribe(_channelName);
                 }
-                catch { }
+                catch
+                {
+                }
             }
 
             base.Dispose(managed);
@@ -138,38 +140,38 @@ namespace CacheManager.Redis
 
         private void Publish(string message)
         {
-            this.connection.Subscriber.Publish(this.channelName, message, CommandFlags.HighPriority);
+            _connection.Subscriber.Publish(_channelName, message, CommandFlags.HighPriority);
         }
 
         private void PublishMessage(BackplaneMessage message)
         {
             var msg = message.Serialize();
 
-            lock (this.messageLock)
+            lock (_messageLock)
             {
                 if (message.Action == BackplaneAction.Clear)
                 {
-                    Interlocked.Exchange(ref this.skippedMessages, this.messages.Count);
-                    this.messages.Clear();
+                    Interlocked.Exchange(ref _skippedMessages, _messages.Count);
+                    _messages.Clear();
                 }
 
-                if (!this.messages.Add(msg))
+                if (!_messages.Add(msg))
                 {
-                    Interlocked.Increment(ref this.skippedMessages);
-                    if (this.logger.IsEnabled(LogLevel.Trace))
+                    Interlocked.Increment(ref _skippedMessages);
+                    if (_logger.IsEnabled(LogLevel.Trace))
                     {
-                        this.logger.LogTrace("Skipped duplicate message: {0}.", msg);
+                        _logger.LogTrace("Skipped duplicate message: {0}.", msg);
                     }
                 }
 
-                this.SendMessages();
+                SendMessages();
             }
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "No other way")]
         private void SendMessages()
         {
-            if (this.sending || this.messages == null || this.messages.Count == 0)
+            if (_sending || _messages == null || _messages.Count == 0)
             {
                 return;
             }
@@ -177,44 +179,44 @@ namespace CacheManager.Redis
             Task.Factory.StartNew(
                 (obj) =>
                 {
-                    if (this.sending || this.messages == null || this.messages.Count == 0)
+                    if (_sending || _messages == null || _messages.Count == 0)
                     {
                         return;
                     }
 
-                    this.sending = true;
+                    _sending = true;
 #if !NET40
                     Task.Delay(10).Wait();
 #endif
-                    string msgs = string.Empty;
-                    lock (this.messageLock)
+                    var msgs = string.Empty;
+                    lock (_messageLock)
                     {
-                        if (this.messages != null && this.messages.Count > 0)
+                        if (_messages != null && _messages.Count > 0)
                         {
-                            msgs = string.Join(",", this.messages);
+                            msgs = string.Join(",", _messages);
 
-                            if (this.logger.IsEnabled(LogLevel.Debug))
+                            if (_logger.IsEnabled(LogLevel.Debug))
                             {
-                                this.logger.LogDebug("Backplane is sending {0} messages ({1} skipped).", this.messages.Count, this.skippedMessages);
+                                _logger.LogDebug("Backplane is sending {0} messages ({1} skipped).", _messages.Count, _skippedMessages);
                             }
 
-                            this.skippedMessages = 0;
-                            this.messages.Clear();
+                            _skippedMessages = 0;
+                            _messages.Clear();
                         }
 
                         try
                         {
                             if (msgs.Length > 0)
                             {
-                                this.Publish(msgs);
+                                Publish(msgs);
                             }
                         }
                         catch (Exception ex)
                         {
-                            this.logger.LogError(ex, "Error occurred sending backplane messages.");
+                            _logger.LogError(ex, "Error occurred sending backplane messages.");
                         }
 
-                        this.sending = false;
+                        _sending = false;
                     }
 #if NET40
                 },
@@ -235,12 +237,12 @@ namespace CacheManager.Redis
 
         private void Subscribe()
         {
-            this.connection.Subscriber.Subscribe(
-                this.channelName,
+            _connection.Subscriber.Subscribe(
+                _channelName,
                 (channel, msg) =>
                 {
                     var fullMessage = ((string)msg).Split(',')
-                        .Where(s => !s.StartsWith(this.identifier, StringComparison.Ordinal))
+                        .Where(s => !s.StartsWith(_identifier, StringComparison.Ordinal))
                         .ToArray();
 
                     if (fullMessage.Length == 0)
@@ -249,9 +251,9 @@ namespace CacheManager.Redis
                         return;
                     }
 
-                    if (this.logger.IsEnabled(LogLevel.Information))
+                    if (_logger.IsEnabled(LogLevel.Information))
                     {
-                        this.logger.LogInfo("Backplane got notified with {0} new messages.", fullMessage.Length);
+                        _logger.LogInfo("Backplane got notified with {0} new messages.", fullMessage.Length);
                     }
 
                     foreach (var messageStr in fullMessage)
@@ -261,32 +263,32 @@ namespace CacheManager.Redis
                         switch (message.Action)
                         {
                             case BackplaneAction.Clear:
-                                this.TriggerCleared();
+                                TriggerCleared();
                                 break;
 
                             case BackplaneAction.ClearRegion:
-                                this.TriggerClearedRegion(message.Region);
+                                TriggerClearedRegion(message.Region);
                                 break;
 
                             case BackplaneAction.Changed:
                                 if (string.IsNullOrWhiteSpace(message.Region))
                                 {
-                                    this.TriggerChanged(message.Key, message.ChangeAction);
+                                    TriggerChanged(message.Key, message.ChangeAction);
                                 }
                                 else
                                 {
-                                    this.TriggerChanged(message.Key, message.Region, message.ChangeAction);
+                                    TriggerChanged(message.Key, message.Region, message.ChangeAction);
                                 }
                                 break;
 
                             case BackplaneAction.Removed:
                                 if (string.IsNullOrWhiteSpace(message.Region))
                                 {
-                                    this.TriggerRemoved(message.Key);
+                                    TriggerRemoved(message.Key);
                                 }
                                 else
                                 {
-                                    this.TriggerRemoved(message.Key, message.Region);
+                                    TriggerRemoved(message.Key, message.Region);
                                 }
                                 break;
                         }

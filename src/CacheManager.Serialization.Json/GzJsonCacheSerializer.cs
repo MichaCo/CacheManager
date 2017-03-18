@@ -36,7 +36,7 @@ namespace CacheManager.Serialization.Json
         public override object Deserialize(byte[] data, Type target)
         {
             Guard.NotNull(data, nameof(data));
-            var compressedData = this.Decompression(data);
+            var compressedData = Decompression(data);
 
             return base.Deserialize(compressedData, target);
         }
@@ -47,7 +47,7 @@ namespace CacheManager.Serialization.Json
             Guard.NotNull(value, nameof(value));
             var data = base.Serialize<T>(value);
 
-            return this.Compression(data);
+            return Compression(data);
         }
 
         /// <summary>
@@ -80,12 +80,12 @@ namespace CacheManager.Serialization.Json
         /// <returns>The uncompressed data.</returns>
         protected virtual byte[] Decompression(byte[] compressedData)
         {
-            byte[] buffer = new byte[compressedData.Length * 2];
+            var buffer = new byte[compressedData.Length * 2];
             using (var inputStream = new MemoryStream(compressedData, 0, compressedData.Length))
             using (var gzReader = new GZipStream(inputStream, CompressionMode.Decompress))
             using (var stream = new MemoryStream(compressedData.Length * 2))
             {
-                int readBytes = 0;
+                var readBytes = 0;
                 while ((readBytes = gzReader.Read(buffer, 0, buffer.Length)) > 0)
                 {
                     stream.Write(buffer, 0, readBytes);

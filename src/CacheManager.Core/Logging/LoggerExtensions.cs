@@ -3,6 +3,7 @@ using System.Globalization;
 
 namespace CacheManager.Core.Logging
 {
+#pragma warning disable SA1600
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
     public static class LoggerExtensions
     {
@@ -260,25 +261,26 @@ namespace CacheManager.Core.Logging
 
         private class FormatMessage
         {
-            private readonly string format;
-            private readonly object[] args;
+            private readonly string _format;
+            private readonly object[] _args;
 
             public FormatMessage(string format, params object[] args)
             {
-                this.format = format;
-                this.args = args;
+                _format = format;
+                _args = args;
             }
 
             public override string ToString()
             {
-                if (this.args == null || this.args.Length == 0)
+                if (_args == null || _args.Length == 0)
                 {
-                    return this.format;
+                    return _format;
                 }
 
-                return string.Format(CultureInfo.CurrentCulture, this.format, this.args);
+                return string.Format(CultureInfo.CurrentCulture, _format, _args);
             }
         }
     }
 #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
+#pragma warning restore SA1600
 }

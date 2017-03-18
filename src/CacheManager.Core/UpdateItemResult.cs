@@ -44,7 +44,7 @@ namespace CacheManager.Core
             new UpdateItemResult<TCacheValue>(null, UpdateItemResultState.ItemDidNotExist, false, 1);
 
         /// <summary>
-        /// Creates a new instance of the <see cref="UpdateItemResult{TCacheValue}"/> indicating that the 
+        /// Creates a new instance of the <see cref="UpdateItemResult{TCacheValue}"/> indicating that the
         /// cache value factory returned null instead of a valid value.
         /// </summary>
         /// <typeparam name="TCacheValue">The type of the cache value.</typeparam>
@@ -89,10 +89,10 @@ namespace CacheManager.Core
                 throw new ArgumentOutOfRangeException(nameof(triesNeeded), "Value must be higher than 0.");
             }
 
-            this.VersionConflictOccurred = conflictOccurred;
-            this.UpdateState = state;
-            this.NumberOfTriesNeeded = triesNeeded;
-            this.Value = value;
+            VersionConflictOccurred = conflictOccurred;
+            UpdateState = state;
+            NumberOfTriesNeeded = triesNeeded;
+            Value = value;
         }
 
         /// <summary>

@@ -10,7 +10,6 @@ namespace CacheManager.Core
     {
         private const string DefaultName = "default";
 
-#pragma warning disable SA1625
         /// <summary>
         /// Adds a <see cref="MemoryCacheHandle{TCacheValue}" /> using a <see cref="System.Runtime.Caching.MemoryCache"/> instance with the given <paramref name="instanceName"/>.
         /// The named cache instance can be configured via <c>app/web.config</c> <c>system.runtime.caching</c> section.
@@ -46,6 +45,5 @@ namespace CacheManager.Core
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="instanceName"/> is null.</exception>
         public static ConfigurationBuilderCacheHandlePart WithSystemRuntimeCacheHandle(this ConfigurationBuilderCachePart part, string instanceName, bool isBackplaneSource)
             => part?.WithHandle(typeof(MemoryCacheHandle<>), instanceName, isBackplaneSource);
-#pragma warning restore SA1625
     }
 }

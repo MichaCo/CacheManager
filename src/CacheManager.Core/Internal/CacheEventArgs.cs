@@ -25,16 +25,16 @@ namespace CacheManager.Core.Internal
     public enum CacheItemRemovedReason
     {
         /////// <summary>
-        /////// A <see cref="CacheItem{T}"/> was removed using the <see cref="ICache{TCacheValue}.Remove(string)"/> or 
+        /////// A <see cref="CacheItem{T}"/> was removed using the <see cref="ICache{TCacheValue}.Remove(string)"/> or
         /////// <see cref="ICache{TCacheValue}.Remove(string, string)"/> method.
         /////// </summary>
         ////Removed = 0,
-        
+
         /// <summary>
         /// A <see cref="CacheItem{T}"/> was removed because it expired.
         /// </summary>
         Expired = 0,
-        
+
         /// <summary>
         /// A <see cref="CacheItem{T}"/> was removed because the underlying cache decided to remove it.
         /// This can happen if cache-specific memory limits are reached for example.
@@ -48,7 +48,7 @@ namespace CacheManager.Core.Internal
     public sealed class CacheItemRemovedEventArgs : EventArgs
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="CacheActionEventArgs"/> class.
+        /// Initializes a new instance of the <see cref="CacheItemRemovedEventArgs"/> class.
         /// </summary>
         /// <param name="key">The key.</param>
         /// <param name="region">The region.</param>
@@ -59,11 +59,12 @@ namespace CacheManager.Core.Internal
         {
             NotNullOrWhiteSpace(key, nameof(key));
 
-            this.Reason = reason;
-            this.Key = key;
-            this.Region = region;
-            this.Level = level;
+            Reason = reason;
+            Key = key;
+            Region = region;
+            Level = level;
         }
+
         /// <summary>
         /// Gets the key.
         /// </summary>
@@ -75,14 +76,14 @@ namespace CacheManager.Core.Internal
         /// </summary>
         /// <value>The region.</value>
         public string Region { get; }
-        
+
         /// <summary>
         /// Gets the reason flag indicating details why the <see cref="CacheItem{T}"/> has been removed.
         /// </summary>
         public CacheItemRemovedReason Reason { get; }
 
         /// <summary>
-        /// Indicates the cache level the event got triggered by.
+        /// Gets a value indicating the cache level the event got triggered by.
         /// </summary>
         public int Level { get; }
     }
@@ -102,8 +103,8 @@ namespace CacheManager.Core.Internal
         {
             NotNullOrWhiteSpace(key, nameof(key));
 
-            this.Key = key;
-            this.Region = region;
+            Key = key;
+            Region = region;
         }
 
         /// <summary>
@@ -116,7 +117,7 @@ namespace CacheManager.Core.Internal
         public CacheActionEventArgs(string key, string region, CacheActionEventArgOrigin origin)
             : this(key, region)
         {
-            this.Origin = origin;
+            Origin = origin;
         }
 
         /// <summary>
@@ -148,7 +149,7 @@ namespace CacheManager.Core.Internal
         /// <param name="origin">The origin the event ocured. If remote, the event got triggered by the backplane and was not actually excecuted locally.</param>
         public CacheClearEventArgs(CacheActionEventArgOrigin origin = CacheActionEventArgOrigin.Local)
         {
-            this.Origin = origin;
+            Origin = origin;
         }
 
         /// <summary>
@@ -172,8 +173,8 @@ namespace CacheManager.Core.Internal
         {
             NotNullOrWhiteSpace(region, nameof(region));
 
-            this.Region = region;
-            this.Origin = origin;
+            Region = region;
+            Origin = origin;
         }
 
         /// <summary>

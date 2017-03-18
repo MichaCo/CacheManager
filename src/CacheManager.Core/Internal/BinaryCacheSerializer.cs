@@ -25,8 +25,8 @@ namespace CacheManager.Core.Internal
             Guard.NotNull(serializationFormatter, nameof(serializationFormatter));
             Guard.NotNull(deserializationFormatter, nameof(deserializationFormatter));
 
-            this.SerializationFormatter = serializationFormatter;
-            this.DeserializationFormatter = deserializationFormatter;
+            SerializationFormatter = serializationFormatter;
+            DeserializationFormatter = deserializationFormatter;
         }
 
         /// <summary>
@@ -34,7 +34,7 @@ namespace CacheManager.Core.Internal
         /// </summary>
         public BinaryCacheSerializer()
         {
-            this.DeserializationFormatter = this.SerializationFormatter = new BinaryFormatter()
+            DeserializationFormatter = SerializationFormatter = new BinaryFormatter()
             {
                 AssemblyFormat = FormatterAssemblyStyle.Simple
             };
@@ -62,15 +62,15 @@ namespace CacheManager.Core.Internal
                 return null;
             }
 
-            using (MemoryStream memoryStream = new MemoryStream(data))
+            using (var memoryStream = new MemoryStream(data))
             {
-                return this.DeserializationFormatter.Deserialize(memoryStream);
+                return DeserializationFormatter.Deserialize(memoryStream);
             }
         }
 
         /// <inheritdoc/>
         public CacheItem<T> DeserializeCacheItem<T>(byte[] value, Type valueType)
-            => (CacheItem<T>)this.Deserialize(value, valueType);
+            => (CacheItem<T>)Deserialize(value, valueType);
 
         /// <inheritdoc/>
         public byte[] Serialize<T>(T value)
@@ -80,17 +80,17 @@ namespace CacheManager.Core.Internal
                 return null;
             }
 
-            using (MemoryStream memoryStream = new MemoryStream())
+            using (var memoryStream = new MemoryStream())
             {
-                this.SerializationFormatter.Serialize(memoryStream, value);
-                byte[] objectDataAsStream = memoryStream.ToArray();
+                SerializationFormatter.Serialize(memoryStream, value);
+                var objectDataAsStream = memoryStream.ToArray();
                 return objectDataAsStream;
             }
         }
 
         /// <inheritdoc/>
         public byte[] SerializeCacheItem<T>(CacheItem<T> value)
-            => this.Serialize(value);
+            => Serialize(value);
     }
 }
 #endif

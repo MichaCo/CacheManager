@@ -89,7 +89,7 @@ namespace CacheManager.Tests
             cfg.CacheHandleConfigurations.First().IsBackplaneSource.Should().BeFalse();
 
             cache.CacheHandles.Count().Should().Be(1);
-            cache.CacheHandles.OfType<MemoryCacheHandle<string>>().First().memoryCacheOptions.ShouldBeEquivalentTo(expectedCacheOptions);
+            cache.CacheHandles.OfType<MemoryCacheHandle<string>>().First().MemoryCacheOptions.ShouldBeEquivalentTo(expectedCacheOptions);
         }
 
         [Fact]
@@ -113,7 +113,7 @@ namespace CacheManager.Tests
             cfg.CacheHandleConfigurations.First().IsBackplaneSource.Should().BeFalse();
 
             cache.CacheHandles.Count().Should().Be(1);
-            cache.CacheHandles.OfType<MemoryCacheHandle<string>>().First().memoryCacheOptions.ShouldBeEquivalentTo(expectedCacheOptions);
+            cache.CacheHandles.OfType<MemoryCacheHandle<string>>().First().MemoryCacheOptions.ShouldBeEquivalentTo(expectedCacheOptions);
         }
 
         [Fact]
@@ -137,7 +137,7 @@ namespace CacheManager.Tests
             cfg.CacheHandleConfigurations.First().IsBackplaneSource.Should().BeTrue();
 
             cache.CacheHandles.Count().Should().Be(1);
-            cache.CacheHandles.OfType<MemoryCacheHandle<string>>().First().memoryCacheOptions.ShouldBeEquivalentTo(expectedCacheOptions);
+            cache.CacheHandles.OfType<MemoryCacheHandle<string>>().First().MemoryCacheOptions.ShouldBeEquivalentTo(expectedCacheOptions);
         }
 
         #endregion MS Memory Cache

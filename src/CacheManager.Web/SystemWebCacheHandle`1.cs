@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Text.RegularExpressions;
 using System.Web;
 using System.Web.Caching;
 using CacheManager.Core;
@@ -19,8 +18,8 @@ namespace CacheManager.Web
     /// </remarks>
     public class SystemWebCacheHandle<TCacheValue> : BaseCacheHandle<TCacheValue>
     {
-        private string instanceKey = null;
-        private int instanceKeyLength;
+        private string _instanceKey = null;
+        private int _instanceKeyLength;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SystemWebCacheHandle{TCacheValue}"/> class.
@@ -33,19 +32,19 @@ namespace CacheManager.Web
             : base(managerConfiguration, configuration)
         {
             NotNull(loggerFactory, nameof(loggerFactory));
-            this.Logger = loggerFactory.CreateLogger(this);
+            Logger = loggerFactory.CreateLogger(this);
 
-            this.instanceKey = Guid.NewGuid().ToString();
-            this.instanceKeyLength = this.instanceKey.Length;
+            _instanceKey = Guid.NewGuid().ToString();
+            _instanceKeyLength = _instanceKey.Length;
 
-            this.CreateInstanceToken();
+            CreateInstanceToken();
         }
 
         /// <summary>
         /// Gets the number of items the cache handle currently maintains.
         /// </summary>
         /// <value>The count.</value>
-        public override int Count => (int)this.Context.Cache.Count;
+        public override int Count => (int)Context.Cache.Count;
 
         /// <summary>
         /// Gets the http context being used to get the <c>Cache</c> instance.
@@ -62,8 +61,8 @@ namespace CacheManager.Web
         /// </summary>
         public override void Clear()
         {
-            this.Context.Cache.Remove(this.instanceKey);
-            this.CreateInstanceToken();
+            Context.Cache.Remove(_instanceKey);
+            CreateInstanceToken();
         }
 
         /// <summary>
@@ -71,12 +70,12 @@ namespace CacheManager.Web
         /// </summary>
         /// <param name="region">The cache region.</param>
         public override void ClearRegion(string region) =>
-            this.Context.Cache.Remove(this.GetRegionTokenKey(region));
+            Context.Cache.Remove(GetRegionTokenKey(region));
 
         /// <inheritdoc />
         public override bool Exists(string key)
         {
-            return this.GetCacheItemInternal(key) != null;
+            return GetCacheItemInternal(key) != null;
         }
 
         /// <inheritdoc />
@@ -84,7 +83,7 @@ namespace CacheManager.Web
         {
             NotNullOrWhiteSpace(region, nameof(region));
 
-            return this.GetCacheItemInternal(key, region) != null;
+            return GetCacheItemInternal(key, region) != null;
         }
 
         /// <summary>
@@ -99,24 +98,24 @@ namespace CacheManager.Web
         /// </returns>
         protected override bool AddInternalPrepared(CacheItem<TCacheValue> item)
         {
-            var key = this.GetItemKey(item);
-            var settings = this.GetCacheSettings(item);
+            var key = GetItemKey(item);
+            var settings = GetCacheSettings(item);
 
             if (settings.SlidingExpire.TotalMilliseconds > 0 && settings.SlidingExpire.TotalMilliseconds < 2000)
             {
-                this.Logger.LogWarn(
+                Logger.LogWarn(
                     "System.Web.Caching.Cache sliding expiration works only with a value larger than 2000ms, "
                     + $"but you configured '{settings.SlidingExpire.TotalMilliseconds}' for key {item.Key}:{item.Region}.");
             }
 
-            var result = this.Context.Cache.Add(
+            var result = Context.Cache.Add(
                 key: key,
                 value: item,
                 dependencies: settings.Dependency,
                 absoluteExpiration: settings.AbsoluteExpire,
                 slidingExpiration: settings.SlidingExpire,
                 priority: CacheItemPriority.Normal,
-                onRemoveCallback: this.ItemRemoved);
+                onRemoveCallback: ItemRemoved);
 
             // result will be the existing value if the key is already stored, the new value will not override the key
             return result == null;
@@ -127,7 +126,7 @@ namespace CacheManager.Web
         /// </summary>
         /// <param name="key">The key being used to identify the item within the cache.</param>
         /// <returns>The <c>CacheItem</c>.</returns>
-        protected override CacheItem<TCacheValue> GetCacheItemInternal(string key) => this.GetCacheItemInternal(key, null);
+        protected override CacheItem<TCacheValue> GetCacheItemInternal(string key) => GetCacheItemInternal(key, null);
 
         /// <summary>
         /// Gets a <c>CacheItem</c> for the specified key.
@@ -137,8 +136,8 @@ namespace CacheManager.Web
         /// <returns>The <c>CacheItem</c>.</returns>
         protected override CacheItem<TCacheValue> GetCacheItemInternal(string key, string region)
         {
-            string fullKey = this.GetItemKey(key, region);
-            var item = this.Context.Cache.Get(fullKey) as CacheItem<TCacheValue>;
+            var fullKey = GetItemKey(key, region);
+            var item = Context.Cache.Get(fullKey) as CacheItem<TCacheValue>;
 
             if (item == null)
             {
@@ -148,8 +147,8 @@ namespace CacheManager.Web
             // cache.Get eventually triggers eviction callback, but just in case...
             if (item.IsExpired)
             {
-                this.RemoveInternal(item.Key, item.Region);
-                this.TriggerCacheSpecificRemove(item.Key, item.Region, Core.Internal.CacheItemRemovedReason.Expired);
+                RemoveInternal(item.Key, item.Region);
+                TriggerCacheSpecificRemove(item.Key, item.Region, Core.Internal.CacheItemRemovedReason.Expired);
                 return null;
             }
 
@@ -166,24 +165,24 @@ namespace CacheManager.Web
         /// <param name="item">The <c>CacheItem</c> to be added to the cache.</param>
         protected override void PutInternalPrepared(CacheItem<TCacheValue> item)
         {
-            var key = this.GetItemKey(item);
-            var settings = this.GetCacheSettings(item);
+            var key = GetItemKey(item);
+            var settings = GetCacheSettings(item);
 
             if (settings.SlidingExpire.TotalMilliseconds > 0 && settings.SlidingExpire.TotalMilliseconds < 2000)
             {
-                this.Logger.LogWarn(
+                Logger.LogWarn(
                     "System.Web.Caching.Cache sliding expiration works only with a value larger than 2000ms, "
                     + $"but you configured '{settings.SlidingExpire.TotalMilliseconds}' for key {item.Key}:{item.Region}.");
             }
 
-            this.Context.Cache.Insert(
+            Context.Cache.Insert(
                 key: key,
                 value: item,
                 dependencies: settings.Dependency,
                 absoluteExpiration: settings.AbsoluteExpire,
                 slidingExpiration: settings.SlidingExpire,
                 priority: CacheItemPriority.Normal,
-                onRemoveCallback: this.ItemRemoved);
+                onRemoveCallback: ItemRemoved);
         }
 
         /// <summary>
@@ -193,7 +192,7 @@ namespace CacheManager.Web
         /// <returns>
         /// <c>true</c> if the key was found and removed from the cache, <c>false</c> otherwise.
         /// </returns>
-        protected override bool RemoveInternal(string key) => this.RemoveInternal(key, null);
+        protected override bool RemoveInternal(string key) => RemoveInternal(key, null);
 
         /// <summary>
         /// Removes a value from the cache for the specified key.
@@ -205,8 +204,8 @@ namespace CacheManager.Web
         /// </returns>
         protected override bool RemoveInternal(string key, string region)
         {
-            var fullKey = this.GetItemKey(key, region);
-            var obj = this.Context.Cache.Remove(fullKey);
+            var fullKey = GetItemKey(key, region);
+            var obj = Context.Cache.Remove(fullKey);
 
             return obj != null;
         }
@@ -231,17 +230,17 @@ namespace CacheManager.Web
         private void CreateInstanceToken()
         {
             // don't add a new key while we are disposing our instance
-            if (!this.Disposing)
+            if (!Disposing)
             {
                 CacheItemRemovedCallback callback = (key, item, reason) =>
                 {
-                    this.instanceKey = Guid.NewGuid().ToString();
-                    this.instanceKeyLength = this.instanceKey.Length;
+                    _instanceKey = Guid.NewGuid().ToString();
+                    _instanceKeyLength = _instanceKey.Length;
                 };
 
-                var instanceItem = new CacheItem<string>(this.instanceKey, this.instanceKey);
-                this.Context.Cache.Add(
-                    this.instanceKey,
+                var instanceItem = new CacheItem<string>(_instanceKey, _instanceKey);
+                Context.Cache.Add(
+                    _instanceKey,
                     instanceItem,
                     null,
                     Cache.NoAbsoluteExpiration,
@@ -254,26 +253,26 @@ namespace CacheManager.Web
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "We don't own the instance")]
         private void CreateRegionToken(string region)
         {
-            var key = this.GetRegionTokenKey(region);
+            var key = GetRegionTokenKey(region);
 
             // add region token with dependency on our instance token, so that all regions get
             // removed whenever the instance gets cleared.
-            var dependency = new CacheDependency(null, new[] { this.instanceKey });
-            this.Context.Cache.Add(key, region, dependency, Cache.NoAbsoluteExpiration, Cache.NoSlidingExpiration, CacheItemPriority.NotRemovable, null);
+            var dependency = new CacheDependency(null, new[] { _instanceKey });
+            Context.Cache.Add(key, region, dependency, Cache.NoAbsoluteExpiration, Cache.NoSlidingExpiration, CacheItemPriority.NotRemovable, null);
         }
 
-        private string GetItemKey(CacheItem<TCacheValue> item) => this.GetItemKey(item?.Key, item?.Region);
-        
+        private string GetItemKey(CacheItem<TCacheValue> item) => GetItemKey(item?.Key, item?.Region);
+
         private string GetItemKey(string key, string region = null)
         {
             NotNullOrWhiteSpace(key, nameof(key));
 
             if (string.IsNullOrWhiteSpace(region))
             {
-                return this.instanceKey + ":" + key;
+                return _instanceKey + ":" + key;
             }
-            
-            return string.Concat(this.instanceKey, "@", region.Length, "@", region, ":", key);
+
+            return string.Concat(_instanceKey, "@", region.Length, "@", region, ":", key);
         }
 
         private CacheDependency CreateDependency(CacheItem<TCacheValue> item)
@@ -282,17 +281,17 @@ namespace CacheManager.Web
 
             if (string.IsNullOrWhiteSpace(item.Region))
             {
-                cacheKeys = new string[] { this.instanceKey };
+                cacheKeys = new string[] { _instanceKey };
             }
             else
             {
-                var regionKey = this.GetRegionTokenKey(item.Region);
-                if (this.Context.Cache[regionKey] == null)
+                var regionKey = GetRegionTokenKey(item.Region);
+                if (Context.Cache[regionKey] == null)
                 {
-                    this.CreateRegionToken(item.Region);
+                    CreateRegionToken(item.Region);
                 }
 
-                cacheKeys = new string[] { this.instanceKey, regionKey };
+                cacheKeys = new string[] { _instanceKey, regionKey };
             }
 
             return new CacheDependency(null, cacheKeys);
@@ -300,7 +299,7 @@ namespace CacheManager.Web
 
         private string GetRegionTokenKey(string region)
         {
-            var key = string.Concat(this.instanceKey, "_", region);
+            var key = string.Concat(_instanceKey, "_", region);
             return key;
         }
 
@@ -317,29 +316,32 @@ namespace CacheManager.Web
                 return;
             }
 
-            bool isToken; bool hasRegion; string key; string region;
-            ParseKeyParts(this.instanceKeyLength, fullKey, out isToken, out hasRegion, out region, out key);
+            bool isToken;
+            bool hasRegion;
+            string key;
+            string region;
+            ParseKeyParts(_instanceKeyLength, fullKey, out isToken, out hasRegion, out region, out key);
 
             // identify item keys and ignore region or instance key
             if (!isToken)
             {
                 if (hasRegion)
                 {
-                    this.Stats.OnRemove(region);
+                    Stats.OnRemove(region);
                 }
                 else
                 {
-                    this.Stats.OnRemove();
+                    Stats.OnRemove();
                 }
 
                 // trigger cachemanager's remove on evicted and expired items
                 if (reason == System.Web.Caching.CacheItemRemovedReason.Underused)
                 {
-                    this.TriggerCacheSpecificRemove(key, region, Core.Internal.CacheItemRemovedReason.Evicted);
+                    TriggerCacheSpecificRemove(key, region, Core.Internal.CacheItemRemovedReason.Evicted);
                 }
                 else if (reason == System.Web.Caching.CacheItemRemovedReason.Expired)
                 {
-                    this.TriggerCacheSpecificRemove(key, region, Core.Internal.CacheItemRemovedReason.Expired);
+                    TriggerCacheSpecificRemove(key, region, Core.Internal.CacheItemRemovedReason.Expired);
                 }
             }
         }
@@ -371,7 +373,7 @@ namespace CacheManager.Web
         {
             var settings = new CacheSettings()
             {
-                Dependency = this.CreateDependency(item),
+                Dependency = CreateDependency(item),
                 AbsoluteExpire = item.ExpirationMode == ExpirationMode.Absolute ? DateTime.UtcNow.Add(item.ExpirationTimeout) : Cache.NoAbsoluteExpiration,
                 SlidingExpire = item.ExpirationMode == ExpirationMode.Sliding ? item.ExpirationTimeout : Cache.NoSlidingExpiration,
             };

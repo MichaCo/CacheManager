@@ -1,14 +1,17 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26228.4
+VisualStudioVersion = 15.0.26228.9
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{58CC885F-40A7-4C82-990D-3F36AAA088A7}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{D83D3737-3BD4-4AEE-8C42-CDED9410DB79}"
 	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
 		Benchmarks.md = Benchmarks.md
+		tools\CodeAnalysis.ruleset = tools\CodeAnalysis.ruleset
 		README.md = README.md
+		tools\stylecop.json = tools\stylecop.json
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{C013E552-43F5-4496-BE29-DB401C3334BB}"

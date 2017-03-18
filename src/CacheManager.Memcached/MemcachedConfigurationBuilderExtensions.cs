@@ -27,7 +27,7 @@ namespace CacheManager.Core
         public static ConfigurationBuilderCacheHandlePart WithMemcachedCacheHandle(this ConfigurationBuilderCachePart part, string configurationName, bool isBackplaneSource = true)
         {
             NotNull(part, nameof(part));
-            
+
             return part.WithHandle(typeof(MemcachedCacheHandle<>), configurationName, isBackplaneSource);
         }
 

@@ -15,10 +15,10 @@ namespace CacheManager.Core.Internal
     public class DictionaryCacheHandle<TCacheValue> : BaseCacheHandle<TCacheValue>
     {
         private const int ScanInterval = 10000;
-        private ConcurrentDictionary<string, CacheItem<TCacheValue>> cache;
-        private long lastScan = 0L;
-        private bool scanRunning;
-        private object startScanLock = new object();
+        private ConcurrentDictionary<string, CacheItem<TCacheValue>> _cache;
+        private long _lastScan = 0L;
+        private bool _scanRunning;
+        private object _startScanLock = new object();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DictionaryCacheHandle{TCacheValue}"/> class.
@@ -30,15 +30,15 @@ namespace CacheManager.Core.Internal
             : base(managerConfiguration, configuration)
         {
             NotNull(loggerFactory, nameof(loggerFactory));
-            this.Logger = loggerFactory.CreateLogger(this);
-            this.cache = new ConcurrentDictionary<string, CacheItem<TCacheValue>>();
+            Logger = loggerFactory.CreateLogger(this);
+            _cache = new ConcurrentDictionary<string, CacheItem<TCacheValue>>();
         }
 
         /// <summary>
         /// Gets the count.
         /// </summary>
         /// <value>The count.</value>
-        public override int Count => this.cache.Count;
+        public override int Count => _cache.Count;
 
         /// <inheritdoc />
         protected override ILogger Logger { get; }
@@ -46,7 +46,7 @@ namespace CacheManager.Core.Internal
         /// <summary>
         /// Clears this cache, removing all items in the base cache and all regions.
         /// </summary>
-        public override void Clear() => this.cache.Clear();
+        public override void Clear() => _cache.Clear();
 
         /// <summary>
         /// Clears the cache region, removing all items from the specified <paramref name="region"/> only.
@@ -58,13 +58,13 @@ namespace CacheManager.Core.Internal
             NotNullOrWhiteSpace(region, nameof(region));
 
             var key = string.Concat(region, ":");
-            foreach (var item in this.cache.Where(p => p.Key.StartsWith(key, StringComparison.OrdinalIgnoreCase)))
+            foreach (var item in _cache.Where(p => p.Key.StartsWith(key, StringComparison.OrdinalIgnoreCase)))
             {
                 CacheItem<TCacheValue> val = null;
-                this.cache.TryRemove(item.Key, out val);
+                _cache.TryRemove(item.Key, out val);
             }
 
-            this.StartScanExpiredItems();
+            StartScanExpiredItems();
         }
 
         /// <inheritdoc />
@@ -72,7 +72,7 @@ namespace CacheManager.Core.Internal
         {
             NotNullOrWhiteSpace(key, nameof(key));
 
-            return this.cache.ContainsKey(key);
+            return _cache.ContainsKey(key);
         }
 
         /// <inheritdoc />
@@ -80,7 +80,7 @@ namespace CacheManager.Core.Internal
         {
             NotNullOrWhiteSpace(region, nameof(region));
             var fullKey = GetKey(key, region);
-            return this.cache.ContainsKey(fullKey);
+            return _cache.ContainsKey(fullKey);
         }
 
         /// <summary>
@@ -97,8 +97,8 @@ namespace CacheManager.Core.Internal
 
             var key = GetKey(item.Key, item.Region);
 
-            this.StartScanExpiredItems();
-            return this.cache.TryAdd(key, item);
+            StartScanExpiredItems();
+            return _cache.TryAdd(key, item);
         }
 
         /// <summary>
@@ -107,7 +107,7 @@ namespace CacheManager.Core.Internal
         /// <param name="key">The key being used to identify the item within the cache.</param>
         /// <returns>The <c>CacheItem</c>.</returns>
         protected override CacheItem<TCacheValue> GetCacheItemInternal(string key) =>
-            this.GetCacheItemInternal(key, null);
+            GetCacheItemInternal(key, null);
 
         /// <summary>
         /// Gets a <c>CacheItem</c> for the specified key.
@@ -120,17 +120,17 @@ namespace CacheManager.Core.Internal
             var fullKey = GetKey(key, region);
 
             CacheItem<TCacheValue> result = null;
-            if (this.cache.TryGetValue(fullKey, out result))
+            if (_cache.TryGetValue(fullKey, out result))
             {
                 if (result.ExpirationMode != ExpirationMode.None && IsExpired(result, DateTime.UtcNow))
                 {
-                    this.cache.TryRemove(fullKey, out result);
-                    this.TriggerCacheSpecificRemove(key, region, CacheItemRemovedReason.Expired);
+                    _cache.TryRemove(fullKey, out result);
+                    TriggerCacheSpecificRemove(key, region, CacheItemRemovedReason.Expired);
                     return null;
                 }
             }
 
-            this.StartScanExpiredItems();
+            StartScanExpiredItems();
             return result;
         }
 
@@ -144,8 +144,8 @@ namespace CacheManager.Core.Internal
         {
             NotNull(item, nameof(item));
 
-            this.cache[GetKey(item.Key, item.Region)] = item;
-            this.StartScanExpiredItems();
+            _cache[GetKey(item.Key, item.Region)] = item;
+            StartScanExpiredItems();
         }
 
         /// <summary>
@@ -155,7 +155,7 @@ namespace CacheManager.Core.Internal
         /// <returns>
         /// <c>true</c> if the key was found and removed from the cache, <c>false</c> otherwise.
         /// </returns>
-        protected override bool RemoveInternal(string key) => this.RemoveInternal(key, null);
+        protected override bool RemoveInternal(string key) => RemoveInternal(key, null);
 
         /// <summary>
         /// Removes a value from the cache for the specified key.
@@ -169,7 +169,7 @@ namespace CacheManager.Core.Internal
         {
             var fullKey = GetKey(key, region);
             CacheItem<TCacheValue> val = null;
-            return this.cache.TryRemove(fullKey, out val);
+            return _cache.TryRemove(fullKey, out val);
         }
 
         /// <summary>
@@ -209,10 +209,10 @@ namespace CacheManager.Core.Internal
 
         private static void ScanForExpiredItems(DictionaryCacheHandle<TCacheValue> cacheHandle)
         {
-            cacheHandle.scanRunning = true;
+            cacheHandle._scanRunning = true;
             var removed = 0;
             var now = DateTime.UtcNow;
-            foreach (var item in cacheHandle.cache.Values)
+            foreach (var item in cacheHandle._cache.Values)
             {
                 if (IsExpired(item, now))
                 {
@@ -232,21 +232,21 @@ namespace CacheManager.Core.Internal
                 cacheHandle.Logger.LogInfo("Removed {0} expired items.", removed);
             }
 
-            cacheHandle.scanRunning = false;
+            cacheHandle._scanRunning = false;
         }
 
         private void StartScanExpiredItems()
         {
             var currentTicks = Environment.TickCount & int.MaxValue;
-            if (!this.scanRunning && (this.lastScan + ScanInterval < currentTicks || this.lastScan > currentTicks))
+            if (!_scanRunning && (_lastScan + ScanInterval < currentTicks || _lastScan > currentTicks))
             {
-                lock (this.startScanLock)
+                lock (_startScanLock)
                 {
-                    if (!this.scanRunning && (this.lastScan + ScanInterval < currentTicks || this.lastScan > currentTicks))
+                    if (!_scanRunning && (_lastScan + ScanInterval < currentTicks || _lastScan > currentTicks))
                     {
-                        this.lastScan = currentTicks;
+                        _lastScan = currentTicks;
 
-                        this.Logger.LogInfo("Starting scan for expired items. Next scan in {0}sec.", ScanInterval / 1000);
+                        Logger.LogInfo("Starting scan for expired items. Next scan in {0}sec.", ScanInterval / 1000);
 #if NET40
                         Task.Factory.StartNew(
                             state => ScanForExpiredItems((DictionaryCacheHandle<TCacheValue>)state),

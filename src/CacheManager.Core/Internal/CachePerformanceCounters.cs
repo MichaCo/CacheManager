@@ -18,15 +18,15 @@
         private const string ReadsPerSecond = "Avg gets per second";
         private const string Writes = "Total cache writes";
         private const string WritesPerSecond = "Avg writes per second";
-        private static readonly int NumStatsCounters = Enum.GetValues(typeof(CacheStatsCounterType)).Length;
+        private static readonly int _numStatsCounters = Enum.GetValues(typeof(CacheStatsCounterType)).Length;
 
-        private readonly Timer counterTimer;
-        private readonly string instanceName = string.Empty;
-        private readonly CacheStats<T> stats;
-        private readonly long[] statsCounts;
-        private PerformanceCounter[] counters;
-        private bool enabled = true;
-        private object updateLock = new object();
+        private readonly Timer _counterTimer;
+        private readonly string _instanceName = string.Empty;
+        private readonly CacheStats<T> _stats;
+        private readonly long[] _statsCounts;
+        private PerformanceCounter[] _counters;
+        private bool _enabled = true;
+        private object _updateLock = new object();
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Mobility", "CA1601:DoNotUseTimersThatPreventPowerStateChanges", Justification = "If perfCounters are enabled, we can live with the power consumption...")]
         public CachePerformanceCounters(string cacheName, string handleName, CacheStats<T> stats)
@@ -35,61 +35,61 @@
 
             NotNullOrWhiteSpace(handleName, nameof(handleName));
 
-            string processName = Process.GetCurrentProcess().ProcessName;
+            var processName = Process.GetCurrentProcess().ProcessName;
 
-            this.instanceName = string.Concat(processName + ":" + cacheName + ":" + handleName);
+            _instanceName = string.Concat(processName + ":" + cacheName + ":" + handleName);
 
             var invalidInstanceChars = new string[] { "(", ")", "#", "\\", "/" };
 
             foreach (var ichar in invalidInstanceChars)
             {
-                this.instanceName = this.instanceName.Replace(ichar, string.Empty);
+                _instanceName = _instanceName.Replace(ichar, string.Empty);
             }
 
-            if (this.instanceName.Length > 128)
+            if (_instanceName.Length > 128)
             {
-                this.instanceName = this.instanceName.Substring(0, 128);
+                _instanceName = _instanceName.Substring(0, 128);
             }
 
-            this.InitializeCounters();
-            this.stats = stats;
-            this.statsCounts = new long[NumStatsCounters];
+            InitializeCounters();
+            _stats = stats;
+            _statsCounts = new long[_numStatsCounters];
 
-            if (this.enabled)
+            if (_enabled)
             {
-                this.counterTimer = new Timer(new TimerCallback(this.PerformanceCounterWorker), null, 450L, 450L);
+                _counterTimer = new Timer(new TimerCallback(PerformanceCounterWorker), null, 450L, 450L);
             }
         }
 
         ~CachePerformanceCounters()
         {
-            this.Dispose(false);
+            Dispose(false);
         }
 
         public void Decrement(CachePerformanceCounterType type)
         {
-            this.GetCounter(type).Decrement();
+            GetCounter(type).Decrement();
         }
 
         public void Dispose()
         {
-            this.Dispose(true);
+            Dispose(true);
             GC.SuppressFinalize(this);
         }
 
         public void Increment(CachePerformanceCounterType type)
         {
-            this.GetCounter(type).Increment();
+            GetCounter(type).Increment();
         }
 
         public void IncrementBy(CachePerformanceCounterType type, long value)
         {
-            this.GetCounter(type).IncrementBy(value);
+            GetCounter(type).IncrementBy(value);
         }
 
         public void SetValue(CachePerformanceCounterType type, long value)
         {
-            this.GetCounter(type).RawValue = value < 0 ? 0 : value;
+            GetCounter(type).RawValue = value < 0 ? 0 : value;
         }
 
         private static void InitializeCategory()
@@ -169,13 +169,14 @@
             {
                 try
                 {
-                    this.ResetCounters();
+                    ResetCounters();
 
-                    if (this.counterTimer != null)
+                    if (_counterTimer != null)
                     {
-                        this.counterTimer.Dispose();
+                        _counterTimer.Dispose();
                     }
-                    foreach (var counter in this.counters)
+
+                    foreach (var counter in _counters)
                     {
                         counter.Dispose();
                     }
@@ -186,7 +187,7 @@
             }
         }
 
-        private PerformanceCounter GetCounter(CachePerformanceCounterType type) => this.counters[(int)type];
+        private PerformanceCounter GetCounter(CachePerformanceCounterType type) => _counters[(int)type];
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "At this point its fine")]
         private void InitializeCounters()
@@ -195,74 +196,74 @@
             {
                 InitializeCategory();
 
-                this.counters = new PerformanceCounter[9];
-                this.counters[0] = new PerformanceCounter(Category, Entries, this.instanceName, false);
-                this.counters[1] = new PerformanceCounter(Category, HitRatio, this.instanceName, false);
-                this.counters[2] = new PerformanceCounter(Category, HitRatioBase, this.instanceName, false);
-                this.counters[3] = new PerformanceCounter(Category, Hits, this.instanceName, false);
-                this.counters[4] = new PerformanceCounter(Category, Misses, this.instanceName, false);
-                this.counters[5] = new PerformanceCounter(Category, Writes, this.instanceName, false);
-                this.counters[6] = new PerformanceCounter(Category, ReadsPerSecond, this.instanceName, false);
-                this.counters[7] = new PerformanceCounter(Category, WritesPerSecond, this.instanceName, false);
-                this.counters[8] = new PerformanceCounter(Category, HitsPerSecond, this.instanceName, false);
+                _counters = new PerformanceCounter[9];
+                _counters[0] = new PerformanceCounter(Category, Entries, _instanceName, false);
+                _counters[1] = new PerformanceCounter(Category, HitRatio, _instanceName, false);
+                _counters[2] = new PerformanceCounter(Category, HitRatioBase, _instanceName, false);
+                _counters[3] = new PerformanceCounter(Category, Hits, _instanceName, false);
+                _counters[4] = new PerformanceCounter(Category, Misses, _instanceName, false);
+                _counters[5] = new PerformanceCounter(Category, Writes, _instanceName, false);
+                _counters[6] = new PerformanceCounter(Category, ReadsPerSecond, _instanceName, false);
+                _counters[7] = new PerformanceCounter(Category, WritesPerSecond, _instanceName, false);
+                _counters[8] = new PerformanceCounter(Category, HitsPerSecond, _instanceName, false);
 
                 // resetting them cleans up previous runs on the same category, which will otherwise
                 // stay in perfmon forever
-                this.ResetCounters();
+                ResetCounters();
             }
             catch
             {
-                this.enabled = false;
+                _enabled = false;
             }
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "Is just fine at that point.")]
         private void PerformanceCounterWorker(object state)
         {
-            if (this.enabled && Monitor.TryEnter(this.updateLock))
+            if (_enabled && Monitor.TryEnter(_updateLock))
             {
                 try
                 {
-                    long[] previousCounts = new long[NumStatsCounters];
-                    Array.Copy(this.statsCounts, previousCounts, NumStatsCounters);
+                    var previousCounts = new long[_numStatsCounters];
+                    Array.Copy(_statsCounts, previousCounts, _numStatsCounters);
 
-                    for (int i = 0; i < NumStatsCounters; i++)
+                    for (var i = 0; i < _numStatsCounters; i++)
                     {
-                        this.statsCounts[i] = this.stats.GetStatistic((CacheStatsCounterType)i);
+                        _statsCounts[i] = _stats.GetStatistic((CacheStatsCounterType)i);
                     }
 
-                    var writes = this.statsCounts[4] + this.statsCounts[5] + this.statsCounts[7] + this.statsCounts[8];
+                    var writes = _statsCounts[4] + _statsCounts[5] + _statsCounts[7] + _statsCounts[8];
                     var previousWrites = previousCounts[4] + previousCounts[5] + previousCounts[7] + previousCounts[8];
-                    var hits = this.statsCounts[0] - previousCounts[0];
+                    var hits = _statsCounts[0] - previousCounts[0];
 
-                    this.SetValue(CachePerformanceCounterType.Items, this.statsCounts[2]);
+                    SetValue(CachePerformanceCounterType.Items, _statsCounts[2]);
 
-                    this.IncrementBy(CachePerformanceCounterType.HitRatioBase, this.statsCounts[6] - previousCounts[6]);
-                    this.IncrementBy(CachePerformanceCounterType.HitRatio, hits);
-                    this.IncrementBy(CachePerformanceCounterType.TotalHits, hits);
-                    this.IncrementBy(CachePerformanceCounterType.TotalMisses, this.statsCounts[1] - previousCounts[1]);
-                    this.IncrementBy(CachePerformanceCounterType.TotalWrites, writes - previousWrites);
-                    this.IncrementBy(CachePerformanceCounterType.ReadsPerSecond, this.statsCounts[6] - previousCounts[6]);
-                    this.IncrementBy(CachePerformanceCounterType.WritesPerSecond, writes - previousWrites);
-                    this.IncrementBy(CachePerformanceCounterType.HitsPerSecond, hits);
+                    IncrementBy(CachePerformanceCounterType.HitRatioBase, _statsCounts[6] - previousCounts[6]);
+                    IncrementBy(CachePerformanceCounterType.HitRatio, hits);
+                    IncrementBy(CachePerformanceCounterType.TotalHits, hits);
+                    IncrementBy(CachePerformanceCounterType.TotalMisses, _statsCounts[1] - previousCounts[1]);
+                    IncrementBy(CachePerformanceCounterType.TotalWrites, writes - previousWrites);
+                    IncrementBy(CachePerformanceCounterType.ReadsPerSecond, _statsCounts[6] - previousCounts[6]);
+                    IncrementBy(CachePerformanceCounterType.WritesPerSecond, writes - previousWrites);
+                    IncrementBy(CachePerformanceCounterType.HitsPerSecond, hits);
                 }
                 catch (Exception e)
                 {
-                    this.enabled = false;
+                    _enabled = false;
                     Trace.TraceError(e.Message + "\n" + e.StackTrace);
                 }
                 finally
                 {
-                    Monitor.Exit(this.updateLock);
+                    Monitor.Exit(_updateLock);
                 }
             }
         }
 
         private void ResetCounters()
         {
-            for (int i = 0; i < Enum.GetValues(typeof(CachePerformanceCounterType)).Length; i++)
+            for (var i = 0; i < Enum.GetValues(typeof(CachePerformanceCounterType)).Length; i++)
             {
-                this.SetValue((CachePerformanceCounterType)i, 0L);
+                SetValue((CachePerformanceCounterType)i, 0L);
             }
         }
     }

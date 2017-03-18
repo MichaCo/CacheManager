@@ -17,11 +17,11 @@ namespace CacheManager.Couchbase
     /// <typeparam name="TCacheValue">The type of the cache value.</typeparam>
     public class BucketCacheHandle<TCacheValue> : BaseCacheHandle<TCacheValue>
     {
-        private readonly IBucket bucket;
-        private readonly BucketConfiguration bucketConfiguration;
-        private readonly string bucketName = "default";
-        private readonly ClientConfiguration configuration;
-        private readonly string configurationName = string.Empty;
+        private readonly IBucket _bucket;
+        private readonly BucketConfiguration _bucketConfiguration;
+        private readonly string _bucketName = "default";
+        private readonly ClientConfiguration _configuration;
+        private readonly string _configurationName = string.Empty;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BucketCacheHandle{TCacheValue}"/> class.
@@ -38,30 +38,30 @@ namespace CacheManager.Couchbase
             NotNull(configuration, nameof(configuration));
             NotNull(loggerFactory, nameof(loggerFactory));
 
-            this.Logger = loggerFactory.CreateLogger(this);
+            Logger = loggerFactory.CreateLogger(this);
 
             // we can configure the bucket name by having "<configKey>:<bucketName>" as handle's
             // name value
             var nameParts = configuration.Key.Split(new[] { ":" }, StringSplitOptions.RemoveEmptyEntries);
             Ensure(nameParts.Length > 0, "Handle key is not valid {0}", configuration.Key);
 
-            this.configurationName = nameParts[0];
+            _configurationName = nameParts[0];
 
             if (nameParts.Length == 2)
             {
-                this.bucketName = nameParts[1];
+                _bucketName = nameParts[1];
             }
 
-            this.configuration = CouchbaseConfigurationManager.GetConfiguration(this.configurationName);
-            this.bucketConfiguration = CouchbaseConfigurationManager.GetBucketConfiguration(this.configuration, this.bucketName);
-            this.bucket = CouchbaseConfigurationManager.GetBucket(this.configuration, this.configurationName, this.bucketName);
+            _configuration = CouchbaseConfigurationManager.GetConfiguration(_configurationName);
+            _bucketConfiguration = CouchbaseConfigurationManager.GetBucketConfiguration(_configuration, _bucketName);
+            _bucket = CouchbaseConfigurationManager.GetBucket(_configuration, _configurationName, _bucketName);
         }
 
         /// <summary>
         /// Gets the number of items the cache handle currently maintains.
         /// </summary>
         /// <value>The count.</value>
-        public override int Count => (int)this.Stats.GetStatistic(CacheStatsCounterType.Items);
+        public override int Count => (int)Stats.GetStatistic(CacheStatsCounterType.Items);
 
         /// <inheritdoc />
         protected override ILogger Logger { get; }
@@ -72,7 +72,7 @@ namespace CacheManager.Couchbase
         public override void Clear()
         {
             // warning: takes ~20seconds to flush the bucket... thats rigged
-            var manager = this.bucket.CreateManager(this.bucketConfiguration.Username, this.bucketConfiguration.Password);
+            var manager = _bucket.CreateManager(_bucketConfiguration.Username, _bucketConfiguration.Password);
             if (manager != null)
             {
                 manager.Flush();
@@ -94,7 +94,7 @@ namespace CacheManager.Couchbase
         public override bool Exists(string key)
         {
             var fullKey = GetKey(key);
-            return this.bucket.Exists(fullKey);
+            return _bucket.Exists(fullKey);
         }
 
         /// <inheritdoc />
@@ -103,7 +103,7 @@ namespace CacheManager.Couchbase
             NotNullOrWhiteSpace(region, nameof(region));
 
             var fullKey = GetKey(key, region);
-            return this.bucket.Exists(fullKey);
+            return _bucket.Exists(fullKey);
         }
 
         /// <summary>
@@ -120,10 +120,10 @@ namespace CacheManager.Couchbase
             var fullKey = GetKey(item.Key, item.Region);
             if (item.ExpirationMode != ExpirationMode.None)
             {
-                return this.bucket.Insert(fullKey, item, item.ExpirationTimeout).Success;
+                return _bucket.Insert(fullKey, item, item.ExpirationTimeout).Success;
             }
 
-            return this.bucket.Insert(fullKey, item).Success;
+            return _bucket.Insert(fullKey, item).Success;
         }
 
         /// <summary>
@@ -146,7 +146,7 @@ namespace CacheManager.Couchbase
         /// <param name="key">The key being used to identify the item within the cache.</param>
         /// <returns>The <c>CacheItem</c>.</returns>
         protected override CacheItem<TCacheValue> GetCacheItemInternal(string key) =>
-            this.GetCacheItemInternal(key, null);
+            GetCacheItemInternal(key, null);
 
         /// <summary>
         /// Gets a <c>CacheItem</c> for the specified key.
@@ -157,7 +157,7 @@ namespace CacheManager.Couchbase
         protected override CacheItem<TCacheValue> GetCacheItemInternal(string key, string region)
         {
             var fullkey = GetKey(key, region);
-            var result = this.bucket.Get<CacheItem<TCacheValue>>(fullkey);
+            var result = _bucket.Get<CacheItem<TCacheValue>>(fullkey);
 
             if (result.Success)
             {
@@ -172,7 +172,7 @@ namespace CacheManager.Couchbase
                 // extend sliding expiration
                 if (cacheItem.ExpirationMode == ExpirationMode.Sliding)
                 {
-                    this.bucket.Touch(fullkey, cacheItem.ExpirationTimeout);
+                    _bucket.Touch(fullkey, cacheItem.ExpirationTimeout);
                 }
 
                 return cacheItem;
@@ -193,11 +193,11 @@ namespace CacheManager.Couchbase
             var fullKey = GetKey(item.Key, item.Region);
             if (item.ExpirationMode != ExpirationMode.None)
             {
-                this.bucket.Upsert(fullKey, item, item.ExpirationTimeout);
+                _bucket.Upsert(fullKey, item, item.ExpirationTimeout);
             }
             else
             {
-                this.bucket.Upsert(fullKey, item);
+                _bucket.Upsert(fullKey, item);
             }
         }
 
@@ -208,7 +208,7 @@ namespace CacheManager.Couchbase
         /// <returns>
         /// <c>true</c> if the key was found and removed from the cache, <c>false</c> otherwise.
         /// </returns>
-        protected override bool RemoveInternal(string key) => this.RemoveInternal(key, null);
+        protected override bool RemoveInternal(string key) => RemoveInternal(key, null);
 
         /// <summary>
         /// Removes a value from the cache for the specified key.
@@ -221,7 +221,7 @@ namespace CacheManager.Couchbase
         protected override bool RemoveInternal(string key, string region)
         {
             var fullKey = GetKey(key, region);
-            var result = this.bucket.Remove(fullKey);
+            var result = _bucket.Remove(fullKey);
             return result.Success;
         }
 
@@ -229,7 +229,7 @@ namespace CacheManager.Couchbase
         {
             using (var sha = SHA256.Create())
             {
-                byte[] hashBytes = sha.ComputeHash(Encoding.UTF8.GetBytes(key));
+                var hashBytes = sha.ComputeHash(Encoding.UTF8.GetBytes(key));
                 return Convert.ToBase64String(hashBytes);
             }
         }

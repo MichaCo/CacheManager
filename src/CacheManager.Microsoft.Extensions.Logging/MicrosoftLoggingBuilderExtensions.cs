@@ -16,7 +16,7 @@ namespace CacheManager.Core
         /// Enables logging for the cache manager instance.
         /// Using this extension will create a NEW instance of <c>Microsoft.Extensions.Logging.ILoggerFactory</c>.
         /// <para>
-        /// If you use the standard Micorosft AspNetCore DI, you might want to use the other extensions which make CacheManager use 
+        /// If you use the standard Micorosft AspNetCore DI, you might want to use the other extensions which make CacheManager use
         /// the already injected/shared instance of <see cref="Microsoft.Extensions.Logging.ILoggerFactory"/>.
         /// </para>
         /// <para>
@@ -50,11 +50,12 @@ namespace CacheManager.Core
         }
 
         /// <summary>
-        /// 
+        /// Configures cache manager logging to use a <c>Microsoft.Extensions.Logging.ILoggerFactory</c>
+        /// which gets resolved from the <paramref name="serviceCollection"/>.
         /// </summary>
-        /// <param name="part"></param>
-        /// <param name="serviceCollection"></param>
-        /// <returns></returns>
+        /// <param name="part">The builder part.</param>
+        /// <param name="serviceCollection">The services collection.</param>
+        /// <returns>The builder.</returns>
         public static ConfigurationBuilderCachePart WithMicrosoftLogging(this ConfigurationBuilderCachePart part, IServiceCollection serviceCollection)
         {
             NotNull(part, nameof(part));
@@ -65,12 +66,12 @@ namespace CacheManager.Core
 
             return WithMicrosoftLogging(part, loggerFactory);
         }
-        
+
         private static ILoggerFactory GetLoggerFactory(IServiceCollection serviceCollection)
         {
             var loggerFactoryDescriptor = serviceCollection.FirstOrDefault(p => p.ServiceType.Equals(typeof(ILoggerFactory)));
 
-            return loggerFactoryDescriptor?.ImplementationInstance as ILoggerFactory;            
+            return loggerFactoryDescriptor?.ImplementationInstance as ILoggerFactory;
         }
     }
 }

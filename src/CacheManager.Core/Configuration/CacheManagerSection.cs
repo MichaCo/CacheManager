@@ -136,7 +136,7 @@
         /// </summary>
         public CacheHandleDefinitionCollection()
         {
-            this.AddElementName = "handleDef";
+            AddElementName = "handleDef";
         }
 
         /// <summary>
@@ -333,7 +333,7 @@
         /// </summary>
         public CacheManagerHandleCollection()
         {
-            this.AddElementName = "handle";
+            AddElementName = "handle";
         }
 
         /// <summary>

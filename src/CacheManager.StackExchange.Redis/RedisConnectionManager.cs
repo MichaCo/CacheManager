@@ -12,29 +12,46 @@ namespace CacheManager.Redis
 {
     internal class RedisConnectionManager
     {
-        private static IDictionary<string, IConnectionMultiplexer> connections = new Dictionary<string, IConnectionMultiplexer>();
-        private static object connectLock = new object();
+        private static IDictionary<string, IConnectionMultiplexer> _connections = new Dictionary<string, IConnectionMultiplexer>();
+        private static object _connectLock = new object();
 
-        private readonly ILogger logger;
-        private readonly string connectionString;
-        private readonly RedisConfiguration configuration;
+        private readonly ILogger _logger;
+        private readonly string _connectionString;
+        private readonly RedisConfiguration _configuration;
 
         public RedisConnectionManager(RedisConfiguration configuration, ILoggerFactory loggerFactory)
         {
             NotNull(configuration, nameof(configuration));
             NotNull(loggerFactory, nameof(loggerFactory));
 
-            this.connectionString = GetConnectionString(configuration);
+            _connectionString = GetConnectionString(configuration);
 
-            this.configuration = configuration;
-            this.logger = loggerFactory.CreateLogger(this);
+            _configuration = configuration;
+            _logger = loggerFactory.CreateLogger(this);
         }
+
+        public IEnumerable<IServer> Servers
+        {
+            get
+            {
+                var endpoints = Connect().GetEndPoints();
+                foreach (var endpoint in endpoints)
+                {
+                    var server = Connect().GetServer(endpoint);
+                    yield return server;
+                }
+            }
+        }
+
+        public IDatabase Database => Connect().GetDatabase(_configuration.Database);
+
+        public ISubscriber Subscriber => Connect().GetSubscriber();
 
         public RedisFeatures Features
         {
             get
             {
-                var server = this.Servers.FirstOrDefault(p => p.IsConnected);
+                var server = Servers.FirstOrDefault(p => p.IsConnected);
                 if (server == null)
                 {
                     throw new InvalidOperationException("No servers are connected or configured.");
@@ -87,41 +104,24 @@ namespace CacheManager.Redis
             }
         }
 
-        public IEnumerable<IServer> Servers
-        {
-            get
-            {
-                var endpoints = this.Connect().GetEndPoints();
-                foreach (var endpoint in endpoints)
-                {
-                    var server = this.Connect().GetServer(endpoint);
-                    yield return server;
-                }
-            }
-        }
-
-        public IDatabase Database => this.Connect().GetDatabase(this.configuration.Database);
-
-        public ISubscriber Subscriber => this.Connect().GetSubscriber();
-
         public static void AddConnection(string connectionString, IConnectionMultiplexer connection)
         {
-            lock (connectLock)
+            lock (_connectLock)
             {
-                if (!connections.ContainsKey(connectionString))
+                if (!_connections.ContainsKey(connectionString))
                 {
-                    connections.Add(connectionString, connection);
+                    _connections.Add(connectionString, connection);
                 }
             }
         }
 
         public static void RemoveConnection(string connectionString)
         {
-            lock (connectLock)
+            lock (_connectLock)
             {
-                if (connections.ContainsKey(connectionString))
+                if (_connections.ContainsKey(connectionString))
                 {
-                    connections.Remove(connectionString);
+                    _connections.Remove(connectionString);
                 }
             }
         }
@@ -130,28 +130,28 @@ namespace CacheManager.Redis
         public IConnectionMultiplexer Connect()
         {
             IConnectionMultiplexer connection;
-            if (!connections.TryGetValue(this.connectionString, out connection))
+            if (!_connections.TryGetValue(_connectionString, out connection))
             {
-                lock (connectLock)
+                lock (_connectLock)
                 {
-                    if (!connections.TryGetValue(this.connectionString, out connection))
+                    if (!_connections.TryGetValue(_connectionString, out connection))
                     {
-                        if (this.logger.IsEnabled(LogLevel.Information))
+                        if (_logger.IsEnabled(LogLevel.Information))
                         {
-                            this.logger.LogInfo("Trying to connect with the following configuration: '{0}'", RemoveCredentials(this.connectionString));
+                            _logger.LogInfo("Trying to connect with the following configuration: '{0}'", RemoveCredentials(_connectionString));
                         }
 
-                        connection = ConnectionMultiplexer.Connect(this.connectionString, new LogWriter(this.logger));
+                        connection = ConnectionMultiplexer.Connect(_connectionString, new LogWriter(_logger));
 
                         if (!connection.IsConnected)
                         {
                             connection.Dispose();
-                            throw new InvalidOperationException($"Connection to '{RemoveCredentials(this.connectionString)}' failed.");
+                            throw new InvalidOperationException($"Connection to '{RemoveCredentials(_connectionString)}' failed.");
                         }
 
                         connection.ConnectionRestored += (sender, args) =>
                         {
-                            this.logger.LogInfo(args.Exception, "Connection restored, type: '{0}', failure: '{1}'", args.ConnectionType, args.FailureType);
+                            _logger.LogInfo(args.Exception, "Connection restored, type: '{0}', failure: '{1}'", args.ConnectionType, args.FailureType);
                         };
 
                         var endpoints = connection.GetEndPoints();
@@ -162,7 +162,7 @@ namespace CacheManager.Redis
                         }
 
                         connection.PreserveAsyncOrder = false;
-                        connections.Add(this.connectionString, connection);
+                        _connections.Add(_connectionString, connection);
                     }
                 }
             }
@@ -173,7 +173,7 @@ namespace CacheManager.Redis
                     string.Format(
                         CultureInfo.InvariantCulture,
                         "Couldn't establish a connection for '{0}'.",
-                        RemoveCredentials(this.connectionString)));
+                        RemoveCredentials(_connectionString)));
             }
 
             return connection;
@@ -191,7 +191,7 @@ namespace CacheManager.Redis
 
         private static string GetConnectionString(RedisConfiguration configuration)
         {
-            string conString = configuration.ConnectionString;
+            var conString = configuration.ConnectionString;
 
             if (string.IsNullOrWhiteSpace(configuration.ConnectionString))
             {
@@ -225,11 +225,11 @@ namespace CacheManager.Redis
 
         private class LogWriter : StringWriter
         {
-            private readonly ILogger logger;
+            private readonly ILogger _logger;
 
             public LogWriter(ILogger logger)
             {
-                this.logger = logger;
+                _logger = logger;
             }
 
             public override void Write(char value)
@@ -238,13 +238,13 @@ namespace CacheManager.Redis
 
             public override void Write(string value)
             {
-                this.logger.LogDebug(value);
+                _logger.LogDebug(value);
             }
 
             public override void Write(char[] buffer, int index, int count)
             {
                 var logValue = new string(buffer, index, count);
-                this.logger.LogDebug(RemoveCredentials(logValue));
+                _logger.LogDebug(RemoveCredentials(logValue));
             }
         }
     }

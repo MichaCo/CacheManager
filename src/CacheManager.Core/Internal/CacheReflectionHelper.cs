@@ -99,8 +99,8 @@ namespace CacheManager.Core.Internal
             foreach (var handleConfiguration in managerConfiguration.CacheHandleConfigurations)
             {
                 logger.LogInfo("Creating handle {0} of type {1}.", handleConfiguration.Name, handleConfiguration.HandleType);
-                Type handleType = handleConfiguration.HandleType;
-                bool requiresSerializer = false;
+                var handleType = handleConfiguration.HandleType;
+                var requiresSerializer = false;
 #if !NETSTANDARD
                 requiresSerializer = handleType.GetCustomAttributes(typeof(RequiresSerializerAttribute), false).Any();
 #else
@@ -172,9 +172,9 @@ namespace CacheManager.Core.Internal
         internal static object CreateInstance(Type instanceType, object[] knownInstances)
         {
 #if NET40
-            IEnumerable<ConstructorInfo> constructors = instanceType.GetConstructors();
+            var constructors = instanceType.GetConstructors();
 #else
-            IEnumerable<ConstructorInfo> constructors = instanceType.GetTypeInfo().DeclaredConstructors;
+            var constructors = instanceType.GetTypeInfo().DeclaredConstructors;
 #endif
 
             constructors = constructors
@@ -188,7 +188,7 @@ namespace CacheManager.Core.Internal
                     string.Format(CultureInfo.InvariantCulture, "No matching public non static constructor found for type {0}.", instanceType.FullName));
             }
 
-            object[] args = MatchArguments(constructors, knownInstances);
+            var args = MatchArguments(constructors, knownInstances);
 
             try
             {
@@ -227,7 +227,7 @@ namespace CacheManager.Core.Internal
                 var parameters = constructor.GetParameters();
                 var instancesCopy = new List<object>(instances);
 
-                foreach (ParameterInfo param in parameters)
+                foreach (var param in parameters)
                 {
 #if NET40
                     var paramValue = instancesCopy

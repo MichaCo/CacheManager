@@ -73,7 +73,7 @@ namespace CacheManager.Tests
                 {"cacheManagers:2:name", "myCacheName3"},
                 {"cacheManagers:2:maxRetries", "300"},
                 {"cacheManagers:2:retryTimeout", "300"},
-                {"cacheManagers:2:updateMode", "Full"},
+                {"cacheManagers:2:updateMode", "Up"},
                 {"cacheManagers:2:handles:0:knownType", "Dictionary"},
                 {"cacheManagers:2:handles:1:knownType", "Dictionary"},
                 {"cacheManagers:2:handles:2:knownType", "Dictionary"},

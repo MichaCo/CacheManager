@@ -9,15 +9,15 @@ namespace CacheManager.Redis
     /// </summary>
     public class RedisConfigurationBuilder
     {
-        private bool allowAdmin = false;
-        private int connectionTimeout = 5000;
-        private int database = 0;
-        private IList<ServerEndPoint> endpoints = new List<ServerEndPoint>();
-        private bool isSsl = false;
-        private string key = string.Empty;
-        private string password = null;
-        private string sslHost = null;
-        private bool enabledKeyspaceNotifications = false;
+        private bool _allowAdmin = false;
+        private int _connectionTimeout = 5000;
+        private int _database = 0;
+        private IList<ServerEndPoint> _endpoints = new List<ServerEndPoint>();
+        private bool _isSsl = false;
+        private string _key = string.Empty;
+        private string _password = null;
+        private string _sslHost = null;
+        private bool _enabledKeyspaceNotifications = false;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RedisConfigurationBuilder"/> class.
@@ -28,7 +28,7 @@ namespace CacheManager.Redis
         {
             NotNullOrWhiteSpace(configurationKey, nameof(configurationKey));
 
-            this.key = configurationKey;
+            _key = configurationKey;
         }
 
         /// <summary>
@@ -37,7 +37,7 @@ namespace CacheManager.Redis
         /// </summary>
         /// <returns>The <c>RedisConfiguration</c></returns>
         public RedisConfiguration Build() =>
-            new RedisConfiguration(this.key, this.endpoints, this.database, this.password, this.isSsl, this.sslHost, this.connectionTimeout, this.allowAdmin, this.enabledKeyspaceNotifications);
+            new RedisConfiguration(_key, _endpoints, _database, _password, _isSsl, _sslHost, _connectionTimeout, _allowAdmin, _enabledKeyspaceNotifications);
 
         /// <summary>
         /// Enable the flag to have CacheManager react on keyspace notifications from redis.
@@ -48,7 +48,7 @@ namespace CacheManager.Redis
         /// <returns>The builder.</returns>
         public RedisConfigurationBuilder EnableKeyspaceEvents()
         {
-            this.enabledKeyspaceNotifications = true;
+            _enabledKeyspaceNotifications = true;
             return this;
         }
 
@@ -59,7 +59,7 @@ namespace CacheManager.Redis
         /// <returns>The builder.</returns>
         public RedisConfigurationBuilder WithAllowAdmin()
         {
-            this.allowAdmin = true;
+            _allowAdmin = true;
             return this;
         }
 
@@ -70,7 +70,7 @@ namespace CacheManager.Redis
         /// <returns>The builder.</returns>
         public RedisConfigurationBuilder WithConnectionTimeout(int timeout)
         {
-            this.connectionTimeout = timeout;
+            _connectionTimeout = timeout;
             return this;
         }
 
@@ -83,7 +83,7 @@ namespace CacheManager.Redis
         /// <returns>The builder.</returns>
         public RedisConfigurationBuilder WithDatabase(int databaseIndex)
         {
-            this.database = databaseIndex;
+            _database = databaseIndex;
             return this;
         }
 
@@ -97,7 +97,7 @@ namespace CacheManager.Redis
         public RedisConfigurationBuilder WithEndpoint(string host, int port)
         {
             var endpoint = new ServerEndPoint(host, port);
-            this.endpoints.Add(endpoint);
+            _endpoints.Add(endpoint);
             return this;
         }
 
@@ -108,7 +108,7 @@ namespace CacheManager.Redis
         /// <returns>The builder.</returns>
         public RedisConfigurationBuilder WithPassword(string serverPassword)
         {
-            this.password = serverPassword;
+            _password = serverPassword;
             return this;
         }
 
@@ -123,8 +123,8 @@ namespace CacheManager.Redis
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "Using it for configuration data only.")]
         public RedisConfigurationBuilder WithSsl(string host = null)
         {
-            this.isSsl = true;
-            this.sslHost = host;
+            _isSsl = true;
+            _sslHost = host;
             return this;
         }
     }

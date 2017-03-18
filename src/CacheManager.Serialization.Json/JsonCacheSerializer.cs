@@ -14,7 +14,7 @@ namespace CacheManager.Serialization.Json
     /// </summary>
     public class JsonCacheSerializer : CacheSerializer
     {
-        private static readonly Type OpenGenericItemType = typeof(JsonCacheItem<>);
+        private static readonly Type _openGenericItemType = typeof(JsonCacheItem<>);
         private readonly ObjectPool<StringBuilder> _stringBuilderPool;
         private readonly JsonSerializer _deserializer;
         private readonly JsonSerializer _serializer;
@@ -41,8 +41,8 @@ namespace CacheManager.Serialization.Json
             _serializer = JsonSerializer.Create(serializationSettings);
             _deserializer = JsonSerializer.Create(deserializationSettings);
             _stringBuilderPool = new ObjectPool<StringBuilder>(new StringBuilderPoolPolicy(100));
-            this.SerializationSettings = serializationSettings;
-            this.DeserializationSettings = deserializationSettings;
+            SerializationSettings = serializationSettings;
+            DeserializationSettings = deserializationSettings;
         }
 
         /// <summary>
@@ -62,7 +62,7 @@ namespace CacheManager.Serialization.Json
         /// <inheritdoc/>
         public override object Deserialize(byte[] data, Type target)
         {
-            string value = Encoding.UTF8.GetString(data, 0, data.Length);
+            var value = Encoding.UTF8.GetString(data, 0, data.Length);
             using (var reader = new StringReader(value))
             using (var jsonReader = new JsonTextReader(reader))
             {
@@ -88,7 +88,7 @@ namespace CacheManager.Serialization.Json
         /// <inheritdoc/>
         protected override Type GetOpenGeneric()
         {
-            return OpenGenericItemType;
+            return _openGenericItemType;
         }
 
         /// <inheritdoc/>
@@ -113,10 +113,10 @@ namespace CacheManager.Serialization.Json
 
             public bool Return(StringBuilder value)
             {
-                //if (value.Data.Count > _defaultBufferSize * 1000)
-                //{
-                //    return false;
-                //}
+                ////if (value.Data.Count > _defaultBufferSize * 1000)
+                ////{
+                ////    return false;
+                ////}
 
                 value.Clear();
                 return true;

@@ -17,20 +17,20 @@ namespace CacheManager.Redis
     /// </summary>
     public static class RedisConfigurations
     {
-        private static Dictionary<string, RedisConfiguration> config = null;
-        private static object configLock = new object();
+        private static Dictionary<string, RedisConfiguration> _config = null;
+        private static object _configLock = new object();
 
         private static Dictionary<string, RedisConfiguration> Configurations
         {
             get
             {
-                if (config == null)
+                if (_config == null)
                 {
-                    lock (configLock)
+                    lock (_configLock)
                     {
-                        if (config == null)
+                        if (_config == null)
                         {
-                            config = new Dictionary<string, RedisConfiguration>();
+                            _config = new Dictionary<string, RedisConfiguration>();
 
 #if !NETSTANDARD
                             var section = ConfigurationManager.GetSection(RedisConfigurationSection.DefaultSectionName) as RedisConfigurationSection;
@@ -43,7 +43,7 @@ namespace CacheManager.Redis
                     }
                 }
 
-                return config;
+                return _config;
             }
         }
 
@@ -54,7 +54,7 @@ namespace CacheManager.Redis
         /// <exception cref="System.ArgumentNullException">If configuration is null.</exception>
         public static void AddConfiguration(RedisConfiguration configuration)
         {
-            lock (configLock)
+            lock (_configLock)
             {
                 NotNull(configuration, nameof(configuration));
                 NotNullOrWhiteSpace(configuration.Key, nameof(configuration.Key));
@@ -120,11 +120,13 @@ namespace CacheManager.Redis
 
             Ensure(File.Exists(configFileName), "Configuration file not found [{0}].", configFileName);
 
-            var fileConfig = new ExeConfigurationFileMap();
-            fileConfig.ExeConfigFilename = configFileName; // setting exe config file name, this is the one the GetSection method expects.
+            var fileConfig = new ExeConfigurationFileMap()
+            {
+                ExeConfigFilename = configFileName // setting exe config file name, this is the one the GetSection method expects.
+            };
 
             // open the file map
-            Configuration cfg = ConfigurationManager.OpenMappedExeConfiguration(fileConfig, ConfigurationUserLevel.None);
+            var cfg = ConfigurationManager.OpenMappedExeConfiguration(fileConfig, ConfigurationUserLevel.None);
 
             // use the opened configuration and load our section
             var section = cfg.GetSection(sectionName) as RedisConfigurationSection;

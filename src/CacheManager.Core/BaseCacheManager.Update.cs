@@ -10,23 +10,23 @@ namespace CacheManager.Core
     {
         /// <inheritdoc />
         public TCacheValue AddOrUpdate(string key, TCacheValue addValue, Func<TCacheValue, TCacheValue> updateValue) =>
-            this.AddOrUpdate(key, addValue, updateValue, this.Configuration.MaxRetries);
+            AddOrUpdate(key, addValue, updateValue, Configuration.MaxRetries);
 
         /// <inheritdoc />
         public TCacheValue AddOrUpdate(string key, string region, TCacheValue addValue, Func<TCacheValue, TCacheValue> updateValue) =>
-            this.AddOrUpdate(key, region, addValue, updateValue, this.Configuration.MaxRetries);
+            AddOrUpdate(key, region, addValue, updateValue, Configuration.MaxRetries);
 
         /// <inheritdoc />
         public TCacheValue AddOrUpdate(string key, TCacheValue addValue, Func<TCacheValue, TCacheValue> updateValue, int maxRetries) =>
-            this.AddOrUpdate(new CacheItem<TCacheValue>(key, addValue), updateValue, maxRetries);
+            AddOrUpdate(new CacheItem<TCacheValue>(key, addValue), updateValue, maxRetries);
 
         /// <inheritdoc />
         public TCacheValue AddOrUpdate(string key, string region, TCacheValue addValue, Func<TCacheValue, TCacheValue> updateValue, int maxRetries) =>
-            this.AddOrUpdate(new CacheItem<TCacheValue>(key, region, addValue), updateValue, maxRetries);
+            AddOrUpdate(new CacheItem<TCacheValue>(key, region, addValue), updateValue, maxRetries);
 
         /// <inheritdoc />
         public TCacheValue AddOrUpdate(CacheItem<TCacheValue> addItem, Func<TCacheValue, TCacheValue> updateValue) =>
-            this.AddOrUpdate(addItem, updateValue, this.Configuration.MaxRetries);
+            AddOrUpdate(addItem, updateValue, Configuration.MaxRetries);
 
         /// <inheritdoc />
         public TCacheValue AddOrUpdate(CacheItem<TCacheValue> addItem, Func<TCacheValue, TCacheValue> updateValue, int maxRetries)
@@ -35,15 +35,15 @@ namespace CacheManager.Core
             NotNull(updateValue, nameof(updateValue));
             Ensure(maxRetries >= 0, "Maximum number of retries must be greater than or equal to zero.");
 
-            return this.AddOrUpdateInternal(addItem, updateValue, maxRetries);
+            return AddOrUpdateInternal(addItem, updateValue, maxRetries);
         }
 
         private TCacheValue AddOrUpdateInternal(CacheItem<TCacheValue> item, Func<TCacheValue, TCacheValue> updateValue, int maxRetries)
         {
-            this.CheckDisposed();
-            if (this.logTrace)
+            CheckDisposed();
+            if (_logTrace)
             {
-                this.Logger.LogTrace("Add or update: {0} {1}.", item.Key, item.Region);
+                Logger.LogTrace("Add or update: {0} {1}.", item.Key, item.Region);
             }
 
             var tries = 0;
@@ -51,47 +51,47 @@ namespace CacheManager.Core
             {
                 tries++;
 
-                if (this.AddInternal(item))
+                if (AddInternal(item))
                 {
-                    if (this.logTrace)
+                    if (_logTrace)
                     {
-                        this.Logger.LogTrace("Add or update: {0} {1}: successfully added the item.", item.Key, item.Region);
+                        Logger.LogTrace("Add or update: {0} {1}: successfully added the item.", item.Key, item.Region);
                     }
 
                     return item.Value;
                 }
 
-                if (this.logTrace)
+                if (_logTrace)
                 {
-                    this.Logger.LogTrace(
+                    Logger.LogTrace(
                         "Add or update: {0} {1}: add failed, trying to update...",
                         item.Key,
                         item.Region);
                 }
 
                 TCacheValue returnValue;
-                bool updated = string.IsNullOrWhiteSpace(item.Region) ?
-                    this.TryUpdate(item.Key, updateValue, maxRetries, out returnValue) :
-                    this.TryUpdate(item.Key, item.Region, updateValue, maxRetries, out returnValue);
+                var updated = string.IsNullOrWhiteSpace(item.Region) ?
+                    TryUpdate(item.Key, updateValue, maxRetries, out returnValue) :
+                    TryUpdate(item.Key, item.Region, updateValue, maxRetries, out returnValue);
 
                 if (updated)
                 {
-                    if (this.logTrace)
+                    if (_logTrace)
                     {
-                        this.Logger.LogTrace("Add or update: {0} {1}: successfully updated.", item.Key, item.Region);
+                        Logger.LogTrace("Add or update: {0} {1}: successfully updated.", item.Key, item.Region);
                     }
 
                     return returnValue;
                 }
 
-                if (this.logTrace)
+                if (_logTrace)
                 {
-                    this.Logger.LogTrace(
+                    Logger.LogTrace(
                         "Add or update: {0} {1}: update FAILED, retrying [{2}/{3}].",
                         item.Key,
                         item.Region,
                         tries,
-                        this.Configuration.MaxRetries);
+                        Configuration.MaxRetries);
                 }
             }
             while (tries <= maxRetries);
@@ -102,11 +102,11 @@ namespace CacheManager.Core
 
         /// <inheritdoc />
         public bool TryUpdate(string key, Func<TCacheValue, TCacheValue> updateValue, out TCacheValue value) =>
-            this.TryUpdate(key, updateValue, this.Configuration.MaxRetries, out value);
+            TryUpdate(key, updateValue, Configuration.MaxRetries, out value);
 
         /// <inheritdoc />
         public bool TryUpdate(string key, string region, Func<TCacheValue, TCacheValue> updateValue, out TCacheValue value) =>
-            this.TryUpdate(key, region, updateValue, this.Configuration.MaxRetries, out value);
+            TryUpdate(key, region, updateValue, Configuration.MaxRetries, out value);
 
         /// <inheritdoc />
         public bool TryUpdate(string key, Func<TCacheValue, TCacheValue> updateValue, int maxRetries, out TCacheValue value)
@@ -115,7 +115,7 @@ namespace CacheManager.Core
             NotNull(updateValue, nameof(updateValue));
             Ensure(maxRetries >= 0, "Maximum number of retries must be greater than or equal to zero.");
 
-            return this.UpdateInternal(this.cacheHandles, key, updateValue, maxRetries, false, out value);
+            return UpdateInternal(_cacheHandles, key, updateValue, maxRetries, false, out value);
         }
 
         /// <inheritdoc />
@@ -126,16 +126,16 @@ namespace CacheManager.Core
             NotNull(updateValue, nameof(updateValue));
             Ensure(maxRetries >= 0, "Maximum number of retries must be greater than or equal to zero.");
 
-            return this.UpdateInternal(this.cacheHandles, key, region, updateValue, maxRetries, false, out value);
+            return UpdateInternal(_cacheHandles, key, region, updateValue, maxRetries, false, out value);
         }
 
         /// <inheritdoc />
         public TCacheValue Update(string key, Func<TCacheValue, TCacheValue> updateValue) =>
-            this.Update(key, updateValue, this.Configuration.MaxRetries);
+            Update(key, updateValue, Configuration.MaxRetries);
 
         /// <inheritdoc />
         public TCacheValue Update(string key, string region, Func<TCacheValue, TCacheValue> updateValue) =>
-            this.Update(key, region, updateValue, this.Configuration.MaxRetries);
+            Update(key, region, updateValue, Configuration.MaxRetries);
 
         /// <inheritdoc />
         public TCacheValue Update(string key, Func<TCacheValue, TCacheValue> updateValue, int maxRetries)
@@ -144,8 +144,8 @@ namespace CacheManager.Core
             NotNull(updateValue, nameof(updateValue));
             Ensure(maxRetries >= 0, "Maximum number of retries must be greater than or equal to zero.");
 
-            TCacheValue value = default(TCacheValue);
-            this.UpdateInternal(this.cacheHandles, key, updateValue, maxRetries, true, out value);
+            var value = default(TCacheValue);
+            UpdateInternal(_cacheHandles, key, updateValue, maxRetries, true, out value);
 
             return value;
         }
@@ -158,8 +158,8 @@ namespace CacheManager.Core
             NotNull(updateValue, nameof(updateValue));
             Ensure(maxRetries >= 0, "Maximum number of retries must be greater than or equal to zero.");
 
-            TCacheValue value = default(TCacheValue);
-            this.UpdateInternal(this.cacheHandles, key, region, updateValue, maxRetries, true, out value);
+            var value = default(TCacheValue);
+            UpdateInternal(_cacheHandles, key, region, updateValue, maxRetries, true, out value);
 
             return value;
         }
@@ -171,7 +171,7 @@ namespace CacheManager.Core
             int maxRetries,
             bool throwOnFailure,
             out TCacheValue value) =>
-            this.UpdateInternal(handles, key, null, updateValue, maxRetries, throwOnFailure, out value);
+            UpdateInternal(handles, key, null, updateValue, maxRetries, throwOnFailure, out value);
 
         private bool UpdateInternal(
             BaseCacheHandle<TCacheValue>[] handles,
@@ -182,7 +182,7 @@ namespace CacheManager.Core
             bool throwOnFailure,
             out TCacheValue value)
         {
-            this.CheckDisposed();
+            CheckDisposed();
 
             // assign null
             value = default(TCacheValue);
@@ -192,9 +192,9 @@ namespace CacheManager.Core
                 return false;
             }
 
-            if (this.logTrace)
+            if (_logTrace)
             {
-                this.Logger.LogTrace("Update: {0} {1}.", key, region);
+                Logger.LogTrace("Update: {0} {1}.", key, region);
             }
 
             // lowest level
@@ -206,9 +206,9 @@ namespace CacheManager.Core
                 handle.Update(key, updateValue, maxRetries) :
                 handle.Update(key, region, updateValue, maxRetries);
 
-            if (this.logTrace)
+            if (_logTrace)
             {
-                this.Logger.LogTrace(
+                Logger.LogTrace(
                     "Update: {0} {1}: tried on handle {2}: result: {3}.",
                     key,
                     region,
@@ -226,16 +226,16 @@ namespace CacheManager.Core
                 // succeed... There is a risk the update on other handles could create a
                 // different version than we created with the first successful update... we can
                 // safely add the item to handles below us though.
-                this.EvictFromHandlesAbove(key, region, handleIndex);
+                EvictFromHandlesAbove(key, region, handleIndex);
 
                 // optimizing - not getting the item again from cache. We already have it
                 // var item = string.IsNullOrWhiteSpace(region) ? handle.GetCacheItem(key) : handle.GetCacheItem(key, region);
-                this.AddToHandlesBelow(result.Value, handleIndex);
-                this.TriggerOnUpdate(key, region);
+                AddToHandlesBelow(result.Value, handleIndex);
+                TriggerOnUpdate(key, region);
             }
             else if (result.UpdateState == UpdateItemResultState.FactoryReturnedNull)
             {
-                this.Logger.LogWarn($"Update failed on '{region}:{key}' because value factory returned null.");
+                Logger.LogWarn($"Update failed on '{region}:{key}' because value factory returned null.");
 
                 if (throwOnFailure)
                 {
@@ -247,9 +247,9 @@ namespace CacheManager.Core
                 // if we had too many retries, this basically indicates an
                 // invalid state of the cache: The item is there, but we couldn't update it and
                 // it most likely has a different version
-                this.Logger.LogWarn($"Update failed on '{region}:{key}' because of too many retries.");
+                Logger.LogWarn($"Update failed on '{region}:{key}' because of too many retries.");
 
-                this.EvictFromOtherHandles(key, region, handleIndex);
+                EvictFromOtherHandles(key, region, handleIndex);
 
                 if (throwOnFailure)
                 {
@@ -261,9 +261,9 @@ namespace CacheManager.Core
                 // If update fails because item doesn't exist AND the current handle is backplane source or the lowest cache handle level,
                 // remove the item from other handles (if exists).
                 // Otherwise, if we do not exit here, calling update on the next handle might succeed and would return a misleading result.
-                this.Logger.LogWarn($"Update failed on '{region}:{key}' because the region/key did not exist.");
+                Logger.LogWarn($"Update failed on '{region}:{key}' because the region/key did not exist.");
 
-                this.EvictFromOtherHandles(key, region, handleIndex);
+                EvictFromOtherHandles(key, region, handleIndex);
 
                 if (throwOnFailure)
                 {
@@ -272,20 +272,20 @@ namespace CacheManager.Core
             }
 
             // update backplane
-            if (result.UpdateState == UpdateItemResultState.Success && this.cacheBackplane != null)
+            if (result.UpdateState == UpdateItemResultState.Success && _cacheBackplane != null)
             {
-                if (this.logTrace)
+                if (_logTrace)
                 {
-                    this.Logger.LogTrace("Update: {0} {1}: notifies backplane [change].", key, region);
+                    Logger.LogTrace("Update: {0} {1}: notifies backplane [change].", key, region);
                 }
 
                 if (string.IsNullOrWhiteSpace(region))
                 {
-                    this.cacheBackplane.NotifyChange(key, CacheItemChangedEventAction.Update);
+                    _cacheBackplane.NotifyChange(key, CacheItemChangedEventAction.Update);
                 }
                 else
                 {
-                    this.cacheBackplane.NotifyChange(key, region, CacheItemChangedEventAction.Update);
+                    _cacheBackplane.NotifyChange(key, region, CacheItemChangedEventAction.Update);
                 }
             }
 

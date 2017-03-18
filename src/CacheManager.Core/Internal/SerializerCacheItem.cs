@@ -14,33 +14,66 @@ namespace CacheManager.Core.Internal
         /// Converts the current instance to a <see cref="CacheItem{T}"/>.
         /// The returned item must return the orignial created and last accessed date!
         /// </summary>
-        /// <typeparam name="TTarget"></typeparam>
+        /// <typeparam name="TTarget">The type.</typeparam>
         /// <returns>The cache item.</returns>
         CacheItem<TTarget> ToCacheItem<TTarget>();
     }
 
     /// <summary>
-    ///
+    /// Basic abstraction for serializers to work with cache items.
     /// </summary>
-    /// <typeparam name="T"></typeparam>
+    /// <typeparam name="T">The type.</typeparam>
     public abstract class SerializerCacheItem<T> : ICacheItemConverter
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SerializerCacheItem{T}"/> class.
+        /// </summary>
+        public SerializerCacheItem()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SerializerCacheItem{T}"/> class.
+        /// </summary>
+        /// <param name="properties">The actual properties.</param>
+        /// <param name="value">The cache value.</param>
+        public SerializerCacheItem(ICacheItemProperties properties, object value)
+            : this()
+        {
+            Guard.NotNull(properties, nameof(properties));
+            Guard.NotNull(value, nameof(value));
+
+            CreatedUtc = properties.CreatedUtc.Ticks;
+            ExpirationMode = properties.ExpirationMode;
+            ExpirationTimeout = properties.ExpirationTimeout.TotalMilliseconds;
+            Key = properties.Key;
+            LastAccessedUtc = properties.LastAccessedUtc.Ticks;
+            Region = properties.Region;
+            UsesExpirationDefaults = properties.UsesExpirationDefaults;
+            ValueType = properties.ValueType.AssemblyQualifiedName;
+            Value = (T)value;
+        }
+
         /// <summary>
         /// Gets or sets the created utc date in ticks.
         /// Can be converted from and to <see cref="DateTime"/>.
         /// </summary>
         public abstract long CreatedUtc { get; set; }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Gets or sets the expiration mode.
+        /// </summary>
         public abstract ExpirationMode ExpirationMode { get; set; }
 
         /// <summary>
-        /// Gets or set the expiration timeout in milliseconds.
+        /// Gets or sets the expiration timeout in milliseconds.
         /// Can be coverted from and to <see cref="TimeSpan"/>.
         /// </summary>
         public abstract double ExpirationTimeout { get; set; }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Gets or sets the key.
+        /// </summary>
         public abstract string Key { get; set; }
 
         /// <summary>
@@ -49,67 +82,45 @@ namespace CacheManager.Core.Internal
         /// </summary>
         public abstract long LastAccessedUtc { get; set; }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Gets or sets the region.
+        /// </summary>
         public abstract string Region { get; set; }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Gets or sets a value indicating whether the default expiration should be used.
+        /// </summary>
         public abstract bool UsesExpirationDefaults { get; set; }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Gets or sets the value type.
+        /// </summary>
         public abstract string ValueType { get; set; }
 
         /// <summary>
-        /// The value.
+        /// Gets or sets the value.
         /// </summary>
         public abstract T Value { get; set; }
-
-        /// <summary>
-        ///
-        /// </summary>
-        public SerializerCacheItem()
-        {
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="properties"></param>
-        /// <param name="value"></param>
-        public SerializerCacheItem(ICacheItemProperties properties, object value) : this()
-        {
-            Guard.NotNull(properties, nameof(properties));
-            Guard.NotNull(value, nameof(value));
-
-            this.CreatedUtc = properties.CreatedUtc.Ticks;
-            this.ExpirationMode = properties.ExpirationMode;
-            this.ExpirationTimeout = properties.ExpirationTimeout.TotalMilliseconds;
-            this.Key = properties.Key;
-            this.LastAccessedUtc = properties.LastAccessedUtc.Ticks;
-            this.Region = properties.Region;
-            this.UsesExpirationDefaults = properties.UsesExpirationDefaults;
-            this.ValueType = properties.ValueType.AssemblyQualifiedName;
-            this.Value = (T)value;
-        }
 
         /// <inheritdoc/>
         public CacheItem<TTarget> ToCacheItem<TTarget>()
         {
-            var item = string.IsNullOrWhiteSpace(this.Region) ?
-                new CacheItem<TTarget>(this.Key, (TTarget)(object)Value) :
-                new CacheItem<TTarget>(this.Key, this.Region, (TTarget)(object)Value);
+            var item = string.IsNullOrWhiteSpace(Region) ?
+                new CacheItem<TTarget>(Key, (TTarget)(object)Value) :
+                new CacheItem<TTarget>(Key, Region, (TTarget)(object)Value);
 
             // resetting expiration in case the serializer actually stores serialization properties (Redis does for example).
-            if (!this.UsesExpirationDefaults)
+            if (!UsesExpirationDefaults)
             {
-                if (this.ExpirationMode == ExpirationMode.Sliding)
+                if (ExpirationMode == ExpirationMode.Sliding)
                 {
-                    item = item.WithSlidingExpiration(TimeSpan.FromMilliseconds(this.ExpirationTimeout));
+                    item = item.WithSlidingExpiration(TimeSpan.FromMilliseconds(ExpirationTimeout));
                 }
-                else if (this.ExpirationMode == ExpirationMode.Absolute)
+                else if (ExpirationMode == ExpirationMode.Absolute)
                 {
-                    item = item.WithAbsoluteExpiration(TimeSpan.FromMilliseconds(this.ExpirationTimeout));
+                    item = item.WithAbsoluteExpiration(TimeSpan.FromMilliseconds(ExpirationTimeout));
                 }
-                else if (this.ExpirationMode == ExpirationMode.None)
+                else if (ExpirationMode == ExpirationMode.None)
                 {
                     item = item.WithNoExpiration();
                 }
@@ -119,9 +130,9 @@ namespace CacheManager.Core.Internal
                 item = item.WithDefaultExpiration();
             }
 
-            item.LastAccessedUtc = new DateTime(this.LastAccessedUtc, DateTimeKind.Utc);
+            item.LastAccessedUtc = new DateTime(LastAccessedUtc, DateTimeKind.Utc);
 
-            return item.WithCreated(new DateTime(this.CreatedUtc, DateTimeKind.Utc));
+            return item.WithCreated(new DateTime(CreatedUtc, DateTimeKind.Utc));
         }
     }
 }

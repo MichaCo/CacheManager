@@ -8,7 +8,6 @@ namespace CacheManager.Core
     /// </summary>
     public static class WebConfigurationBuilderExtensions
     {
-#pragma warning disable SA1625
         /// <summary>
         /// Adds a <see cref="SystemWebCacheHandle{TCacheValue}" /> to the cache manager.
         /// This handle uses <c>System.Web.Caching.Cache</c> and requires <c>HttpContext.Current</c> to be not null.
@@ -44,6 +43,5 @@ namespace CacheManager.Core
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="instanceName"/> is null.</exception>
         public static ConfigurationBuilderCacheHandlePart WithSystemWebCacheHandle(this ConfigurationBuilderCachePart part, string instanceName, bool isBackplaneSource)
             => part?.WithHandle(typeof(SystemWebCacheHandle<>), instanceName, isBackplaneSource);
-#pragma warning restore SA1625
     }
 }

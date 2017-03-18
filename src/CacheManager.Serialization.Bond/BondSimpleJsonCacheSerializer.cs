@@ -21,8 +21,9 @@ namespace CacheManager.Serialization.Bond
         private readonly SimpleJsonSerializerCache _cache;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="BondCompactBinaryCacheSerializer"/> class.
+        /// Initializes a new instance of the <see cref="BondSimpleJsonCacheSerializer"/> class.
         /// </summary>
+        /// <param name="defaultWriteBufferSize">The default buffer size.</param>
         public BondSimpleJsonCacheSerializer(int defaultWriteBufferSize = 1024) : base(defaultWriteBufferSize)
         {
             _cache = new SimpleJsonSerializerCache();
@@ -50,7 +51,7 @@ namespace CacheManager.Serialization.Bond
         {
             var deserializer = _cache.GetDeserializer(target);
 
-            string value = Encoding.UTF8.GetString(data, 0, data.Length);
+            var value = Encoding.UTF8.GetString(data, 0, data.Length);
             using (var reader = new StringReader(value))
             {
                 var jsonReader = new SimpleJsonReader(reader);

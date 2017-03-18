@@ -136,7 +136,7 @@ namespace CacheManager.Core
         /// <param name="region">The cache region.</param>
         /// <returns><c>True</c> if the <paramref name="key"/> exists, <c>False</c> otherwise.</returns>
         bool Exists(string key, string region);
-        
+
         /// <summary>
         /// Gets a value for the specified key.
         /// </summary>

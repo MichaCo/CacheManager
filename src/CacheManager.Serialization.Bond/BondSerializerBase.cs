@@ -17,31 +17,20 @@ namespace CacheManager.Serialization.Bond
     /// </summary>
     public abstract class BondSerializerBase : CacheSerializer
     {
-        private static readonly Type OpenItemType = typeof(BondCacheItem<>);
-
-        private BondSerializerBase()
-        {
-        }
+        private static readonly Type _openItemType = typeof(BondCacheItem<>);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BondSerializerBase"/> class.
         /// </summary>
+        /// <param name="defaultBufferSize">The default buffer size.</param>
         public BondSerializerBase(int defaultBufferSize = 1024)
         {
             OutputBufferPool = new ObjectPool<OutputBuffer>(new OutputBufferPoolPolicy(defaultBufferSize));
             StringBuilderPool = new ObjectPool<StringBuilder>(new StringBuilderPoolPolicy(defaultBufferSize));
         }
 
-        /// <inheritdoc/>
-        protected override Type GetOpenGeneric()
+        private BondSerializerBase()
         {
-            return OpenItemType;
-        }
-
-        /// <inheritdoc/>
-        protected override object CreateNewItem<TCacheValue>(ICacheItemProperties properties, object value)
-        {
-            return new BondCacheItem<TCacheValue>(properties, value);
         }
 
         /// <summary>
@@ -54,6 +43,18 @@ namespace CacheManager.Serialization.Bond
         /// Gets a pool handling <see cref="StringBuilder"/>s.
         /// </summary>
         protected ObjectPool<StringBuilder> StringBuilderPool { get; }
+
+        /// <inheritdoc/>
+        protected override Type GetOpenGeneric()
+        {
+            return _openItemType;
+        }
+
+        /// <inheritdoc/>
+        protected override object CreateNewItem<TCacheValue>(ICacheItemProperties properties, object value)
+        {
+            return new BondCacheItem<TCacheValue>(properties, value);
+        }
 
         private class OutputBufferPoolPolicy : IObjectPoolPolicy<OutputBuffer>
         {
@@ -71,10 +72,10 @@ namespace CacheManager.Serialization.Bond
 
             public bool Return(OutputBuffer value)
             {
-                //if (value.Data.Count > _defaultBufferSize * 1000)
-                //{
-                //    return false;
-                //}
+                ////if (value.Data.Count > _defaultBufferSize * 1000)
+                ////{
+                ////    return false;
+                ////}
 
                 value.Position = 0;
                 return true;
@@ -97,10 +98,10 @@ namespace CacheManager.Serialization.Bond
 
             public bool Return(StringBuilder value)
             {
-                //if (value.Data.Count > _defaultBufferSize * 1000)
-                //{
-                //    return false;
-                //}
+                ////if (value.Data.Count > _defaultBufferSize * 1000)
+                ////{
+                ////    return false;
+                ////}
 
                 value.Clear();
                 return true;
