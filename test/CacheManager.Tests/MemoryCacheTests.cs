@@ -181,8 +181,7 @@ namespace CacheManager.Tests
 
             cache.CacheHandles.Count().Should().Be(1);
         }
-
-#if !NO_APP_CONFIG
+        
         [Fact]
         [Trait("category", "NotOnMono")]
         public void SysRuntime_CreateDefaultCache()
@@ -190,7 +189,7 @@ namespace CacheManager.Tests
             using (var act = CacheFactory.Build(_ => _.WithSystemRuntimeCacheHandle()))
             {
                 // arrange
-                var settings = ((RuntimeCache.MemoryCacheHandle<object>)act.CacheHandles.ElementAt(0)).CacheSettings;
+                var settings = ((CacheManager.SystemRuntimeCaching.MemoryCacheHandle<object>)act.CacheHandles.ElementAt(0)).CacheSettings;
 
                 // act assert
                 settings["CacheMemoryLimitMegabytes"].Should().Be("42");
@@ -206,7 +205,7 @@ namespace CacheManager.Tests
             using (var act = CacheFactory.Build(_ => _.WithSystemRuntimeCacheHandle("NamedTest")))
             {
                 // arrange
-                var settings = ((RuntimeCache.MemoryCacheHandle<object>)act.CacheHandles.ElementAt(0)).CacheSettings;
+                var settings = ((CacheManager.SystemRuntimeCaching.MemoryCacheHandle<object>)act.CacheHandles.ElementAt(0)).CacheSettings;
 
                 // act assert
                 settings["CacheMemoryLimitMegabytes"].Should().Be("12");
@@ -214,7 +213,6 @@ namespace CacheManager.Tests
                 settings["PollingInterval"].Should().Be("00:02:00");
             }
         }
-#endif
 
         #endregion
 #endif

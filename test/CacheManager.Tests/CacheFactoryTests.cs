@@ -569,8 +569,7 @@ namespace CacheManager.Tests
             act.CacheHandles.ElementAt(2).Configuration.ExpirationMode.Should().Be(ExpirationMode.Sliding);
             act.CacheHandles.ElementAt(2).Configuration.ExpirationTimeout.Should().Be(new TimeSpan(0, 0, 231));
         }
-
-#if !NO_APP_CONFIG
+        
         [Fact]
         [ReplaceCulture]
         [Trait("category", "NotOnMono")]
@@ -630,7 +629,6 @@ namespace CacheManager.Tests
             cache.Should().NotBeNull();
             cache.CacheHandles.Count().Should().Be(1);
         }
-#endif
 
         [Fact]
         [ReplaceCulture]
