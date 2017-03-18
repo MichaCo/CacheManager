@@ -625,6 +625,7 @@ namespace CacheManager.Tests
         ////[Theory(Skip = "Doesn't work well in parallel")]
         [Theory]
         [ClassData(typeof(TestCacheManagers))]
+        [Trait("category", "Unreliable")]
         [ReplaceCulture]
         public void Events_OnAddMany<T>(T cache)
             where T : ICacheManager<object>

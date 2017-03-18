@@ -375,7 +375,10 @@ namespace CacheManager.Tests
                 builder.WithRedisBackplane(redisKey);
             }
 
-            var cache = CacheFactory.FromConfiguration<object>(builder.Build());
+            var cache = CacheFactory.FromConfiguration<object>(
+                $"{database}|{sharedRedisConfig}|{serializer}|{useLua}" + Guid.NewGuid().ToString(), 
+                builder.Build());
+
             foreach (var h in cache.CacheHandles.OfType<RedisCacheHandle<object>>())
             {
                 h.UseLua = useLua;

@@ -943,6 +943,7 @@ namespace CacheManager.Tests
 
         [Theory]
         [ClassData(typeof(TestCacheManagers))]
+        [Trait("category", "Unreliable")]
         public async Task Expiration_ExtendAbsolut_YieldFalseIsExpired_Expire<T>(T cache)
                 where T : ICacheManager<object>
         {

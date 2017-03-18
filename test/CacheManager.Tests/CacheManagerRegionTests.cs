@@ -22,17 +22,14 @@ namespace CacheManager.Tests
     {
         [Theory]
         [ClassData(typeof(TestCacheManagers))]
+        [Trait("category", "Unreliable")]
         public void CacheManager_Region_AddItems_UseSameKeys<T>(T cache)
             where T : ICacheManager<object>
         {
             using (cache)
             {
-                // arrange
-                List<Tuple<string, string, string>> keys;
-                List<string> regions;
-
                 // act
-                AddRegionData(cache, 23, 3, true, out keys, out regions);
+                AddRegionData(cache, 23, 3, true, out List<Tuple<string, string, string>> keys, out List<string> regions);
 
                 // assert
                 foreach (var item in keys)
@@ -275,13 +272,13 @@ namespace CacheManager.Tests
 
                 for (var i = 0; i < numItems; i++)
                 {
-                    var key = sameKey ? sameKeyAllRegions + i : Guid.NewGuid().ToString();
-                    var value = "Value in region " + r + ": " + i;
-
-                    if (!cache.Add(key, value, region))
+                    string key; string value;
+                    do
                     {
-                        throw new InvalidOperationException("Adding key " + key + ":" + value + " didn't work. For cache\n" + cache.ToString());
+                        key = sameKey ? sameKeyAllRegions + i : Guid.NewGuid().ToString();
+                        value = "Value in region " + r + ": " + i;
                     }
+                    while (!cache.Add(key, value, region));
 
                     keys.Add(new Tuple<string, string, string>(region, key, value));
                 }
