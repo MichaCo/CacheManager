@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Reflection;
+using CacheManager.Core.Configuration;
 using static CacheManager.Core.Utility.Guard;
 
 namespace CacheManager.Core

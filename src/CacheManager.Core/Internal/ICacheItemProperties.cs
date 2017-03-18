@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace CacheManager.Core
+namespace CacheManager.Core.Internal
 {
     /// <summary>
     /// Contract which exposes only the properties of the <see cref="CacheItem{T}"/> without T value.

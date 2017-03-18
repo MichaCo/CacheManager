@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace CacheManager.Core
+namespace CacheManager.Core.Internal
 {
     /// <summary>
     /// Represents that state of an update operation.
