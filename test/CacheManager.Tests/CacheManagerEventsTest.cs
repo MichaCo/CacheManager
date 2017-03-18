@@ -678,6 +678,7 @@ namespace CacheManager.Tests
         /// <param name="cache">The cache instance.</param>
         [Theory]
         [ClassData(typeof(TestCacheManagers))]
+        [Trait("category", "Unreliable")]
         [ReplaceCulture]
         public void Events_OnPutMany<T>(T cache)
             where T : ICacheManager<object>
@@ -731,6 +732,7 @@ namespace CacheManager.Tests
         /// <param name="cache">The cache instance.</param>
         [Theory]
         [ClassData(typeof(TestCacheManagers))]
+        [Trait("category", "Unreliable")]
         [ReplaceCulture]
         public void Events_OnUpdate<T>(T cache)
             where T : ICacheManager<object>

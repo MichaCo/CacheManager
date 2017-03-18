@@ -896,7 +896,7 @@ namespace CacheManager.Tests
             // It might be, if we don't renew the created date... Created date must be updated whenever absolute expiration gets renewed!
             item.IsExpired.Should().BeFalse();
 
-            await Task.Delay(100);
+            await Task.Delay(110);
             item.IsExpired.Should().BeTrue();
         }
 
@@ -914,7 +914,7 @@ namespace CacheManager.Tests
             // It might be, if we don't renew the created date... Created date must be updated whenever absolute expiration gets renewed!
             item.IsExpired.Should().BeFalse();
 
-            await Task.Delay(100);
+            await Task.Delay(110);
             item.IsExpired.Should().BeTrue();
         }
 
@@ -932,7 +932,7 @@ namespace CacheManager.Tests
             // It might be, if we don't renew the created date... Created date must be updated whenever absolute expiration gets renewed!
             item.IsExpired.Should().BeFalse();
 
-            await Task.Delay(100);
+            await Task.Delay(110);
             item.IsExpired.Should().BeTrue();
         }
 
