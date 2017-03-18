@@ -18,12 +18,12 @@ namespace CacheManager.Core
         /// </summary>
         None,
 
-        /// <summary>
-        /// <c>Full</c> instructs the cache manager to add the cache item found to all cache
-        /// handles, except the one the item was found in.
-        /// </summary>
-        [Obsolete("Will be removed in 1.0.0. I don't really see any actual value using this setting and it might actually cause issues.")]
-        Full,
+        /////// <summary>
+        /////// <c>Full</c> instructs the cache manager to add the cache item found to all cache
+        /////// handles, except the one the item was found in.
+        /////// </summary>
+        ////[Obsolete("Will be removed in 1.0.0. I don't really see any actual value using this setting and it might actually cause issues.")]
+        ////Full,
 
         /// <summary>
         /// <c>Up</c> instructs the cache manager to add the cache item found to cache handles which

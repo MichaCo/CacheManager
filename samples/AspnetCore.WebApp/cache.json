@@ -2,7 +2,6 @@
   "$schema": "http://cachemanager.michaco.net/schemas/cachemanager.json#",
   "cacheManagers": [
     {
-      "loggerFactory": {"knownType": "Microsoft" },
       "name": "simpleMemoryCache",
       "handles": [
         {

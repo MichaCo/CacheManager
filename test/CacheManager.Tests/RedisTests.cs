@@ -170,7 +170,15 @@ namespace CacheManager.Tests
         [Trait("category", "Unreliable")]
         public void Redis_UseExistingConnection()
         {
-            var multiplexer = ConnectionMultiplexer.Connect("localhost:6379");
+            var conConfig = new ConfigurationOptions()
+            {
+                ConnectTimeout = 10000,
+                AbortOnConnectFail = false,
+                ConnectRetry = 10                
+            };
+            conConfig.EndPoints.Add("localhost:6379");
+
+            var multiplexer = ConnectionMultiplexer.Connect(conConfig);
 
             var cfg = ConfigurationBuilder.BuildConfiguration(
                 s => s

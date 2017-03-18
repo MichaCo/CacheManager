@@ -16,7 +16,7 @@ namespace AspnetCore.WebApp
                 .UseIISIntegration()
                 .UseStartup<Startup>()
                 .Build();
-
+            
             host.Run();
         }
     }

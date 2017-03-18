@@ -605,22 +605,22 @@ namespace CacheManager.Core
                     // do basically nothing
                     break;
 
-                case CacheUpdateMode.Full:
-                    // update all cache handles except the one where we found the item
-                    for (int handleIndex = 0; handleIndex < this.cacheHandles.Length; handleIndex++)
-                    {
-                        if (handleIndex != foundIndex)
-                        {
-                            if (this.logTrace)
-                            {
-                                this.Logger.LogTrace("Updating handles, added [{0}] to handle '{1}'.", item, this.cacheHandles[handleIndex].Configuration.Name);
-                            }
+                ////case CacheUpdateMode.Full:
+                ////    // update all cache handles except the one where we found the item
+                ////    for (int handleIndex = 0; handleIndex < this.cacheHandles.Length; handleIndex++)
+                ////    {
+                ////        if (handleIndex != foundIndex)
+                ////        {
+                ////            if (this.logTrace)
+                ////            {
+                ////                this.Logger.LogTrace("Updating handles, added [{0}] to handle '{1}'.", item, this.cacheHandles[handleIndex].Configuration.Name);
+                ////            }
 
-                            this.cacheHandles[handleIndex].Add(item);
-                        }
-                    }
+                ////            this.cacheHandles[handleIndex].Add(item);
+                ////        }
+                ////    }
 
-                    break;
+                ////    break;
 
                 case CacheUpdateMode.Up:
                     // optimizing so we don't even have to iterate
