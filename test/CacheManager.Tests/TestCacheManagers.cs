@@ -54,7 +54,7 @@ namespace CacheManager.Tests
 #if COUCHBASEENABLED
             yield return new object[] { TestManagers.WithCouchbaseMemcached };
 #endif
-#if !NET40 && MOCK_HTTPCONTEXT_ENABLED
+#if MOCK_HTTPCONTEXT_ENABLED
             yield return new object[] { TestManagers.WithSystemWebCache };
 #endif
         }
@@ -286,7 +286,7 @@ namespace CacheManager.Tests
                 .Build());
 
 #endif
-#if !NET40 && MOCK_HTTPCONTEXT_ENABLED && !NETCOREAPP
+#if MOCK_HTTPCONTEXT_ENABLED && !NETCOREAPP
 
         public static ICacheManager<object> WithSystemWebCache
             => CacheFactory.FromConfiguration<object>(

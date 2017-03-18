@@ -14,11 +14,6 @@ namespace CacheManager.Tests
     /// To run the test, the app.config of the test project must at least contain a cacheManager section.
     /// </summary>
     [ExcludeFromCodeCoverage]
-#if NET40
-    [Trait("Framework", "NET40")]
-#else
-    [Trait("Framework", "NET45")]
-#endif
     public class InvalidConfigurationValidationTests
     {
         [Fact]

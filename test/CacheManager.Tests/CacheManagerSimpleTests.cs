@@ -17,11 +17,6 @@ namespace CacheManager.Tests
     /// removes an item from all handles defined.
     /// </summary>
     [ExcludeFromCodeCoverage]
-#if NET40
-    [Trait("Framework", "NET40")]
-#else
-    [Trait("Framework", "NET45")]
-#endif
     public class CacheManagerSimpleTests
     {
         private static object runLock = new object();

@@ -1,6 +1,5 @@
-﻿// disabling for NET40, our Web implementation is not available on that framework
-// disabling it for builds on Mono because setting the HttpContext.Current causes all kinds of strange exceptions
-#if !NET40 && MOCK_HTTPCONTEXT_ENABLED
+﻿// disabling it for builds on Mono because setting the HttpContext.Current causes all kinds of strange exceptions
+#if MOCK_HTTPCONTEXT_ENABLED
 using System.IO;
 using System.Web;
 using CacheManager.Core;

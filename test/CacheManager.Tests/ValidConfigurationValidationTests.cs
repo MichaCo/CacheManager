@@ -11,11 +11,6 @@ using Xunit;
 namespace CacheManager.Tests
 {
     [ExcludeFromCodeCoverage]
-#if NET40
-    [Trait("Framework", "NET40")]
-#else
-    [Trait("Framework", "NET45")]
-#endif
     public class ValidConfigurationValidationTests
     {
         [Fact]

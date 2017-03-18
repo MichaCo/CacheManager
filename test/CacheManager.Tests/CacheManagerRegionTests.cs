@@ -13,11 +13,6 @@ namespace CacheManager.Tests
     /// removes an item from all handles defined.
     /// </summary>
     [ExcludeFromCodeCoverage]
-#if NET40
-    [Trait("Framework", "NET40")]
-#else
-    [Trait("Framework", "NET45")]
-#endif
     public class CacheManagerRegionTests
     {
         [Theory]
@@ -58,6 +53,7 @@ namespace CacheManager.Tests
 
         [Theory]
         [ClassData(typeof(TestCacheManagers))]
+        [Trait("category", "Unreliable")]
         public void CacheManager_Region_AddItems_UseDifferentKeys<T>(T cache)
             where T : ICacheManager<object>
         {
@@ -90,6 +86,7 @@ namespace CacheManager.Tests
 
         [Theory]
         [ClassData(typeof(TestCacheManagers))]
+        [Trait("category", "Unreliable")]
         public void CacheManager_Region_ClearRegion<T>(T cache)
             where T : ICacheManager<object>
         {
@@ -210,6 +207,7 @@ namespace CacheManager.Tests
 
         [Theory]
         [ClassData(typeof(TestCacheManagers))]
+        [Trait("category", "Unreliable")]
         public void CacheManager_Region_RemoveItem_RandomRemoveSomeItems<T>(T cache)
             where T : ICacheManager<object>
         {
@@ -272,13 +270,13 @@ namespace CacheManager.Tests
 
                 for (var i = 0; i < numItems; i++)
                 {
-                    string key; string value;
-                    do
+                    var key = sameKey ? sameKeyAllRegions + i : Guid.NewGuid().ToString();
+                    var value = "Value in region " + r + ": " + i;
+
+                    if (!cache.Add(key, value, region))
                     {
-                        key = sameKey ? sameKeyAllRegions + i : Guid.NewGuid().ToString();
-                        value = "Value in region " + r + ": " + i;
+                        throw new InvalidOperationException("Adding key " + key + ":" + value + " didn't work. For cache\n" + cache.ToString());
                     }
-                    while (!cache.Add(key, value, region));
 
                     keys.Add(new Tuple<string, string, string>(region, key, value));
                 }

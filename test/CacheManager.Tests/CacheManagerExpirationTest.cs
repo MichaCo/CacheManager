@@ -9,11 +9,6 @@ using Xunit;
 namespace CacheManager.Tests
 {
     [ExcludeFromCodeCoverage]
-#if NET40
-    [Trait("Framework", "NET40")]
-#else
-    [Trait("Framework", "NET45")]
-#endif
     public class CacheManagerExpirationTest
     {
         public class AllCaches
@@ -26,7 +21,7 @@ namespace CacheManager.Tests
             {
                 using (cache)
                 {
-#if !NET40 && MOCK_HTTPCONTEXT_ENABLED
+#if MOCK_HTTPCONTEXT_ENABLED
                     if (cache.CacheHandles.OfType<SystemWebCacheHandleWrapper<object>>().Any())
                     {
                         // system.web caching doesn't support short sliding expiration. must be higher than 2000ms for some strange reason...
@@ -50,7 +45,7 @@ namespace CacheManager.Tests
                 // see #50, update doesn't copy custom expire settings per item
                 using (cache)
                 {
-#if !NET40 && MOCK_HTTPCONTEXT_ENABLED
+#if MOCK_HTTPCONTEXT_ENABLED
                     if (cache.CacheHandles.OfType<SystemWebCacheHandleWrapper<object>>().Any())
                     {
                         // system.web caching doesn't support short sliding expiration. must be higher than 2000ms for some strange reason...
@@ -897,7 +892,7 @@ namespace CacheManager.Tests
             await Task.Delay(100);
             item = item.WithAbsoluteExpiration(DateTimeOffset.UtcNow.AddMilliseconds(100));
 
-            // right after changing expiration, should not be expired already. 
+            // right after changing expiration, should not be expired already.
             // It might be, if we don't renew the created date... Created date must be updated whenever absolute expiration gets renewed!
             item.IsExpired.Should().BeFalse();
 
@@ -915,7 +910,7 @@ namespace CacheManager.Tests
             await Task.Delay(100);
             item = item.WithAbsoluteExpiration(TimeSpan.FromMilliseconds(100));
 
-            // right after changing expiration, should not be expired already. 
+            // right after changing expiration, should not be expired already.
             // It might be, if we don't renew the created date... Created date must be updated whenever absolute expiration gets renewed!
             item.IsExpired.Should().BeFalse();
 
@@ -933,7 +928,7 @@ namespace CacheManager.Tests
             await Task.Delay(100);
             item = item.WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMilliseconds(100), false);
 
-            // right after changing expiration, should not be expired already. 
+            // right after changing expiration, should not be expired already.
             // It might be, if we don't renew the created date... Created date must be updated whenever absolute expiration gets renewed!
             item.IsExpired.Should().BeFalse();
 
