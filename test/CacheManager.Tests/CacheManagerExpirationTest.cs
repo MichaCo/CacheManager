@@ -21,7 +21,7 @@ namespace CacheManager.Tests
             [Trait("category", "Unreliable")]
             [Theory]
             [ClassData(typeof(TestCacheManagers))]
-            public async Task CacheManager_Sliding_DoesNotExpire_OnGet<T>(T cache)
+            public async Task Expiration_Sliding_DoesNotExpire_OnGet<T>(T cache)
                 where T : ICacheManager<object>
             {
                 using (cache)
@@ -44,7 +44,7 @@ namespace CacheManager.Tests
             [Trait("category", "Unreliable")]
             [Theory]
             [ClassData(typeof(TestCacheManagers))]
-            public async Task CacheManager_Sliding_DoesNotExpire_OnUpdate<T>(T cache)
+            public async Task Expiration_Sliding_DoesNotExpire_OnUpdate<T>(T cache)
                 where T : ICacheManager<object>
             {
                 // see #50, update doesn't copy custom expire settings per item
@@ -65,8 +65,7 @@ namespace CacheManager.Tests
                             (key) => cache.Add(new CacheItem<object>(key, "value", ExpirationMode.Sliding, TimeSpan.FromMilliseconds(timeout))),
                             (key) =>
                             {
-                                object value;
-                                if (cache.TryUpdate(key, o => o, out value))
+                                if (cache.TryUpdate(key, o => o, out object value))
                                 {
                                     return value;
                                 }
@@ -356,7 +355,7 @@ namespace CacheManager.Tests
         {
             // Issue #97 - Unable to reset expiration to 'None'
             [Fact]
-            public void CacheManager_Expire_UnableToResetToNone()
+            public void Expiration_UnableToResetToNone()
             {
                 using (var cache = CacheFactory.Build<string>(
                     s => s
@@ -381,7 +380,7 @@ namespace CacheManager.Tests
             [Fact]
             [Trait("category", "Redis")]
             [Trait("category", "Unreliable")]
-            public void CacheManager_Expire_InheritIsExpiredCheck()
+            public void Expiration_InheritIsExpiredCheck()
             {
                 using (var cache = CacheFactory.Build<string>(
                     s => s
@@ -407,7 +406,7 @@ namespace CacheManager.Tests
             }
 
             [Fact]
-            public void CacheManager_Expire_DoesNotInheritExpiration()
+            public void Expiration_DoesNotInheritExpiration()
             {
                 using (var cache = CacheFactory.Build<string>(
                     s => s
@@ -433,7 +432,7 @@ namespace CacheManager.Tests
             }
 
             [Fact]
-            public void CacheManager_Expire_RespectDefaultPerHandle()
+            public void Expiration_RespectDefaultPerHandle()
             {
                 using (var cache = CacheFactory.Build<string>(
                     s => s
@@ -467,7 +466,7 @@ namespace CacheManager.Tests
             }
 
             [Fact]
-            public void CacheManager_Expire_RespectDefaultPerHandleAfterAutofill()
+            public void Expiration_RespectDefaultPerHandleAfterAutofill()
             {
                 using (var cache = CacheFactory.Build<string>(
                     s => s
@@ -505,7 +504,7 @@ namespace CacheManager.Tests
 
             [Theory]
             [ClassData(typeof(TestCacheManagers))]
-            public void CacheManager_Expire_ValidateUsesDefaultExpirationFlag<T>(T cache)
+            public void Expiration_ValidateUsesDefaultExpirationFlag<T>(T cache)
                 where T : ICacheManager<object>
             {
                 using (cache)
@@ -521,7 +520,7 @@ namespace CacheManager.Tests
 
             [Theory]
             [ClassData(typeof(TestCacheManagers))]
-            public void CacheManager_Expire_NotDefaultExpirationFlag_Item<T>(T cache)
+            public void Expiration_NotDefaultExpirationFlag_Item<T>(T cache)
                 where T : ICacheManager<object>
             {
                 using (cache)
@@ -537,7 +536,7 @@ namespace CacheManager.Tests
 
             [Theory]
             [ClassData(typeof(TestCacheManagers))]
-            public void CacheManager_Expire_NotDefaultExpirationFlag_Expire<T>(T cache)
+            public void Expiration_NotDefaultExpirationFlag_Expire<T>(T cache)
                 where T : ICacheManager<object>
             {
                 using (cache)
@@ -558,7 +557,7 @@ namespace CacheManager.Tests
             // #74
             [Theory]
             [ClassData(typeof(TestCacheManagers))]
-            public void CacheManager_Expire_DoesNotAcceptExpirationInThePast<T>(T cache)
+            public void Expiration_DoesNotAcceptExpirationInThePast<T>(T cache)
                 where T : ICacheManager<object>
             {
                 using (cache)
@@ -575,7 +574,7 @@ namespace CacheManager.Tests
             // Issue #57 - Verifying diggits will be ignored and stored as proper milliseconds value (integer).
             [Theory]
             [ClassData(typeof(TestCacheManagers))]
-            public void CacheManager_Expire_DoesNotBreak_OnVeryPreciseValue<T>(T cache)
+            public void Expiration_DoesNotBreak_OnVeryPreciseValue<T>(T cache)
                 where T : ICacheManager<object>
             {
                 using (cache)
@@ -598,7 +597,7 @@ namespace CacheManager.Tests
             [Theory]
             [ClassData(typeof(TestCacheManagers))]
             [Trait("category", "Unreliable")]
-            public async Task CacheManager_RemoveExpiration_DoesNotExpire<T>(T cache)
+            public async Task Expiration_Remove_DoesNotExpire<T>(T cache)
                 where T : ICacheManager<object>
             {
                 using (cache)
@@ -624,7 +623,7 @@ namespace CacheManager.Tests
             [Theory]
             [ClassData(typeof(TestCacheManagers))]
             [Trait("category", "Unreliable")]
-            public async Task CacheManager_RemoveExpiration_CheckUpdate_Absolut<T>(T cache)
+            public async Task Expiration_Remove_CheckUpdate_Absolut<T>(T cache)
                 where T : ICacheManager<object>
             {
                 using (cache)
@@ -660,7 +659,7 @@ namespace CacheManager.Tests
             [Theory]
             [ClassData(typeof(TestCacheManagers))]
             [Trait("category", "Unreliable")]
-            public async Task CacheManager_RemoveExpiration_CheckUpdate_Sliding<T>(T cache)
+            public async Task Expiration_Remove_CheckUpdate_Sliding<T>(T cache)
                 where T : ICacheManager<object>
             {
                 using (cache)
@@ -699,7 +698,7 @@ namespace CacheManager.Tests
             [Theory]
             [ClassData(typeof(TestCacheManagers))]
             [Trait("category", "Unreliable")]
-            public async Task CacheManager_RemoveExpiration_Explicit_Absolut<T>(T cache)
+            public async Task Expiration_Remove_Explicit_Absolut<T>(T cache)
                 where T : ICacheManager<object>
             {
                 using (cache)
@@ -730,7 +729,7 @@ namespace CacheManager.Tests
             [Theory]
             [ClassData(typeof(TestCacheManagers))]
             [Trait("category", "Unreliable")]
-            public async Task CacheManager_RemoveExpiration_Explicit_Sliding<T>(T cache)
+            public async Task Expiration_Remove_Explicit_Sliding<T>(T cache)
                 where T : ICacheManager<object>
             {
                 using (cache)
@@ -763,7 +762,7 @@ namespace CacheManager.Tests
         {
             [Theory]
             [ClassData(typeof(TestCacheManagers))]
-            public void CacheManager_Expire_Absolute_ForKey_Validate<T>(T cache)
+            public void Expiration_Absolute_ForKey_Validate<T>(T cache)
                 where T : ICacheManager<object>
             {
                 using (cache)
@@ -783,7 +782,7 @@ namespace CacheManager.Tests
 
             [Theory]
             [ClassData(typeof(TestCacheManagers))]
-            public void CacheManager_Expire_Absolute_ForKeyRegion_Validate<T>(T cache)
+            public void Expiration_Absolute_ForKeyRegion_Validate<T>(T cache)
                 where T : ICacheManager<object>
             {
                 using (cache)
@@ -804,7 +803,7 @@ namespace CacheManager.Tests
 
             [Theory]
             [ClassData(typeof(TestCacheManagers))]
-            public void CacheManager_Expire_Sliding_ForKey_Validate<T>(T cache)
+            public void Expiration_Sliding_ForKey_Validate<T>(T cache)
                 where T : ICacheManager<object>
             {
                 using (cache)
@@ -824,7 +823,7 @@ namespace CacheManager.Tests
 
             [Theory]
             [ClassData(typeof(TestCacheManagers))]
-            public void CacheManager_Expire_Sliding_ForKeyRegion_Validate<T>(T cache)
+            public void Expiration_Sliding_ForKeyRegion_Validate<T>(T cache)
                 where T : ICacheManager<object>
             {
                 using (cache)
@@ -845,7 +844,7 @@ namespace CacheManager.Tests
 
             [Theory]
             [ClassData(typeof(TestCacheManagers))]
-            public void CacheManager_RemoveExpiration_ForKey_Validate<T>(T cache)
+            public void Expiration_Remove_ForKey_Validate<T>(T cache)
                 where T : ICacheManager<object>
             {
                 using (cache)
@@ -865,7 +864,7 @@ namespace CacheManager.Tests
 
             [Theory]
             [ClassData(typeof(TestCacheManagers))]
-            public void CacheManager_RemoveExpiration_ForKeyRegion_Validate<T>(T cache)
+            public void Expiration_Remove_ForKeyRegion_Validate<T>(T cache)
                 where T : ICacheManager<object>
             {
                 using (cache)
@@ -882,6 +881,85 @@ namespace CacheManager.Tests
                     item.ExpirationTimeout.Should().Be(default(TimeSpan));
                     item.ExpirationMode.Should().Be(ExpirationMode.None);
                 }
+            }
+        }
+
+        /* General expiration tests */
+
+        // Related to #136
+        [Fact]
+        public async Task Expiration_ExtendAbsolut_YieldFalseIsExpired()
+        {
+            var key = Guid.NewGuid().ToString();
+
+            var item = new CacheItem<string>(key, "value", ExpirationMode.Absolute, TimeSpan.FromMinutes(1));
+
+            await Task.Delay(100);
+            item = item.WithAbsoluteExpiration(DateTimeOffset.UtcNow.AddMilliseconds(100));
+
+            // right after changing expiration, should not be expired already. 
+            // It might be, if we don't renew the created date... Created date must be updated whenever absolute expiration gets renewed!
+            item.IsExpired.Should().BeFalse();
+
+            await Task.Delay(100);
+            item.IsExpired.Should().BeTrue();
+        }
+
+        [Fact]
+        public async Task Expiration_ExtendAbsolut_YieldFalseIsExpired_B()
+        {
+            var key = Guid.NewGuid().ToString();
+
+            var item = new CacheItem<string>(key, "value", ExpirationMode.Absolute, TimeSpan.FromMinutes(1));
+
+            await Task.Delay(100);
+            item = item.WithAbsoluteExpiration(TimeSpan.FromMilliseconds(100));
+
+            // right after changing expiration, should not be expired already. 
+            // It might be, if we don't renew the created date... Created date must be updated whenever absolute expiration gets renewed!
+            item.IsExpired.Should().BeFalse();
+
+            await Task.Delay(100);
+            item.IsExpired.Should().BeTrue();
+        }
+
+        [Fact]
+        public async Task Expiration_ExtendAbsolut_YieldFalseIsExpired_C()
+        {
+            var key = Guid.NewGuid().ToString();
+
+            var item = new CacheItem<string>(key, "value", ExpirationMode.Absolute, TimeSpan.FromMinutes(1));
+
+            await Task.Delay(100);
+            item = item.WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMilliseconds(100), false);
+
+            // right after changing expiration, should not be expired already. 
+            // It might be, if we don't renew the created date... Created date must be updated whenever absolute expiration gets renewed!
+            item.IsExpired.Should().BeFalse();
+
+            await Task.Delay(100);
+            item.IsExpired.Should().BeTrue();
+        }
+
+        [Theory]
+        [ClassData(typeof(TestCacheManagers))]
+        public async Task Expiration_ExtendAbsolut_YieldFalseIsExpired_Expire<T>(T cache)
+                where T : ICacheManager<object>
+        {
+            var key = Guid.NewGuid().ToString();
+
+            var item = new CacheItem<object>(key, "value", ExpirationMode.Absolute, TimeSpan.FromMinutes(1));
+
+            using (cache)
+            {
+                cache.Add(item);
+                await Task.Delay(300);
+
+                cache.Expire(key, DateTimeOffset.UtcNow.AddMilliseconds(300));
+
+                // right after expire, should not be expired already.
+                // It might be, if we don't renew the created date... Created date must be updated whenever absolute expiration gets renewed!
+                cache.GetCacheItem(key).IsExpired.Should().BeFalse();
             }
         }
 
@@ -985,7 +1063,7 @@ namespace CacheManager.Tests
             }
         }
 
-        public static async Task TestSlidingExpiration(int timeoutMillis, Func<string, bool> addFunc, Func<string, object> getFunc)
+        private static async Task TestSlidingExpiration(int timeoutMillis, Func<string, bool> addFunc, Func<string, object> getFunc)
         {
             var tries = 0;
             while (true)
@@ -1044,7 +1122,7 @@ namespace CacheManager.Tests
             }
         }
 
-        public static async Task TestAbsoluteExpiration(int timeoutMillis, Func<string, bool> addFunc, Func<string, object> getFunc)
+        private static async Task TestAbsoluteExpiration(int timeoutMillis, Func<string, bool> addFunc, Func<string, object> getFunc)
         {
             var tries = 0;
             while (true)
@@ -1092,7 +1170,7 @@ namespace CacheManager.Tests
             }
         }
 
-        public static async Task TestRemoveExpiration(int timeoutMillis, Func<string, bool> addFunc, Func<string, bool> removeFunc, Func<string, object> getFunc)
+        private static async Task TestRemoveExpiration(int timeoutMillis, Func<string, bool> addFunc, Func<string, bool> removeFunc, Func<string, object> getFunc)
         {
             var tries = 0;
             while (true)

@@ -157,7 +157,7 @@ namespace CacheManager.Tests
             result.Value.Should().Be(baseItem.Value);
             result.Region.Should().Be(baseItem.Region);
             result.Key.Should().Be(baseItem.Key);
-            result.CreatedUtc.Should().Be(baseItem.CreatedUtc);
+            result.CreatedUtc.Should().Be(result.CreatedUtc); // !! Changed due to issue #136
             result.LastAccessedUtc.Should().Be(baseItem.LastAccessedUtc);
         }
 

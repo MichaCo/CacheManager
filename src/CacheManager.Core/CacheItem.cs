@@ -265,7 +265,7 @@ namespace CacheManager.Core
         }
 
         internal CacheItem<T> WithExpiration(ExpirationMode mode, TimeSpan timeout, bool usesHandleDefault = true) =>
-            new CacheItem<T>(Key, Region, Value, mode, timeout, CreatedUtc, LastAccessedUtc, usesHandleDefault);
+            new CacheItem<T>(Key, Region, Value, mode, timeout, mode == ExpirationMode.Absolute ? DateTime.UtcNow : CreatedUtc, LastAccessedUtc, usesHandleDefault);
 
         /// <summary>
         /// Creates a copy of the current cache item and sets a new absolute expiration date.
@@ -282,7 +282,7 @@ namespace CacheManager.Core
                 throw new ArgumentException("Expiration value must be greater than zero.", nameof(absoluteExpiration));
             }
 
-            return new CacheItem<T>(Key, Region, Value, ExpirationMode.Absolute, timeout, CreatedUtc, LastAccessedUtc, false);
+            return WithExpiration(ExpirationMode.Absolute, timeout, false);
         }
 
         /// <summary>
@@ -299,7 +299,7 @@ namespace CacheManager.Core
                 throw new ArgumentException("Expiration value must be greater than zero.", nameof(absoluteExpiration));
             }
 
-            return new CacheItem<T>(Key, Region, Value, ExpirationMode.Absolute, absoluteExpiration, CreatedUtc, LastAccessedUtc, false);
+            return WithExpiration(ExpirationMode.Absolute, absoluteExpiration, false);
         }
 
         /// <summary>
@@ -316,7 +316,7 @@ namespace CacheManager.Core
                 throw new ArgumentException("Expiration value must be greater than zero.", nameof(slidingExpiration));
             }
 
-            return new CacheItem<T>(Key, Region, Value, ExpirationMode.Sliding, slidingExpiration, CreatedUtc, LastAccessedUtc, false);
+            return WithExpiration(ExpirationMode.Sliding, slidingExpiration, false);
         }
 
         /// <summary>

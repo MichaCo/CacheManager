@@ -59,10 +59,7 @@ namespace CacheManager.Tests
 #endif
         }
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 
     [ExcludeFromCodeCoverage]
@@ -72,7 +69,7 @@ namespace CacheManager.Tests
 
         private const int RedisPort = 6379;
         private const int StartDbCount = 100;
-        private static int databaseCount = StartDbCount;
+        private static int _databaseCount = StartDbCount;
 
         static TestManagers()
         {
@@ -87,15 +84,10 @@ namespace CacheManager.Tests
             ////    .CreateLogger();
         }
 
-        public static ICacheManagerConfiguration BaseConfiguration
-        {
-            get
-            {
-                return new ConfigurationBuilder()
+        public static ICacheManagerConfiguration BaseConfiguration 
+            => new ConfigurationBuilder()
                     ////.WithMicrosoftLogging(f => f.AddSerilog())
                     .Build();
-            }
-        }
 
         public static ICacheManager<object> WithOneDicCacheHandle
             => CacheFactory.FromConfiguration<object>(
@@ -137,13 +129,13 @@ namespace CacheManager.Tests
         {
             get
             {
-                Interlocked.Increment(ref databaseCount);
-                if (databaseCount >= 2000)
+                Interlocked.Increment(ref _databaseCount);
+                if (_databaseCount >= 2000)
                 {
-                    databaseCount = StartDbCount;
+                    _databaseCount = StartDbCount;
                 }
 
-                return CreateRedisCache(databaseCount, false, Serializer.Binary);
+                return CreateRedisCache(_databaseCount, false, Serializer.Binary);
             }
         }
 
@@ -151,13 +143,13 @@ namespace CacheManager.Tests
         {
             get
             {
-                Interlocked.Increment(ref databaseCount);
-                if (databaseCount >= 2000)
+                Interlocked.Increment(ref _databaseCount);
+                if (_databaseCount >= 2000)
                 {
-                    databaseCount = StartDbCount;
+                    _databaseCount = StartDbCount;
                 }
 
-                return CreateRedisCache(databaseCount, false, Serializer.BondBinary);
+                return CreateRedisCache(_databaseCount, false, Serializer.BondBinary);
             }
         }
 
@@ -165,13 +157,13 @@ namespace CacheManager.Tests
         {
             get
             {
-                Interlocked.Increment(ref databaseCount);
-                if (databaseCount >= 2000)
+                Interlocked.Increment(ref _databaseCount);
+                if (_databaseCount >= 2000)
                 {
-                    databaseCount = StartDbCount;
+                    _databaseCount = StartDbCount;
                 }
 
-                return CreateRedisCache(database: databaseCount, sharedRedisConfig: false, serializer: Serializer.Json);
+                return CreateRedisCache(database: _databaseCount, sharedRedisConfig: false, serializer: Serializer.Json);
             }
         }
 
@@ -179,13 +171,13 @@ namespace CacheManager.Tests
         {
             get
             {
-                Interlocked.Increment(ref databaseCount);
-                if (databaseCount >= 2000)
+                Interlocked.Increment(ref _databaseCount);
+                if (_databaseCount >= 2000)
                 {
-                    databaseCount = StartDbCount;
+                    _databaseCount = StartDbCount;
                 }
 
-                return CreateRedisCache(database: databaseCount, sharedRedisConfig: false, serializer: Serializer.Json, useLua: false);
+                return CreateRedisCache(database: _databaseCount, sharedRedisConfig: false, serializer: Serializer.Json, useLua: false);
             }
         }
 
@@ -193,13 +185,13 @@ namespace CacheManager.Tests
         {
             get
             {
-                Interlocked.Increment(ref databaseCount);
-                if (databaseCount >= 2000)
+                Interlocked.Increment(ref _databaseCount);
+                if (_databaseCount >= 2000)
                 {
-                    databaseCount = StartDbCount;
+                    _databaseCount = StartDbCount;
                 }
 
-                return CreateRedisCache(databaseCount, false, Serializer.GzJson);
+                return CreateRedisCache(_databaseCount, false, Serializer.GzJson);
             }
         }
 
@@ -207,13 +199,13 @@ namespace CacheManager.Tests
         {
             get
             {
-                Interlocked.Increment(ref databaseCount);
-                if (databaseCount >= 2000)
+                Interlocked.Increment(ref _databaseCount);
+                if (_databaseCount >= 2000)
                 {
-                    databaseCount = StartDbCount;
+                    _databaseCount = StartDbCount;
                 }
 
-                return CreateRedisCache(databaseCount, false, Serializer.Proto);
+                return CreateRedisCache(_databaseCount, false, Serializer.Proto);
             }
         }
 
@@ -221,13 +213,13 @@ namespace CacheManager.Tests
         {
             get
             {
-                Interlocked.Increment(ref databaseCount);
-                if (databaseCount >= 2000)
+                Interlocked.Increment(ref _databaseCount);
+                if (_databaseCount >= 2000)
                 {
-                    databaseCount = StartDbCount;
+                    _databaseCount = StartDbCount;
                 }
 
-                return CreateRedisAndDicCacheWithBackplane(database: databaseCount, sharedRedisConfig: false, channelName: Guid.NewGuid().ToString(), useLua: true);
+                return CreateRedisAndDicCacheWithBackplane(database: _databaseCount, sharedRedisConfig: false, channelName: Guid.NewGuid().ToString(), useLua: true);
             }
         }
 
@@ -235,13 +227,13 @@ namespace CacheManager.Tests
         {
             get
             {
-                Interlocked.Increment(ref databaseCount);
-                if (databaseCount >= 2000)
+                Interlocked.Increment(ref _databaseCount);
+                if (_databaseCount >= 2000)
                 {
-                    databaseCount = StartDbCount;
+                    _databaseCount = StartDbCount;
                 }
 
-                return CreateRedisAndDicCacheWithBackplane(database: databaseCount, sharedRedisConfig: false, channelName: Guid.NewGuid().ToString(), useLua: false);
+                return CreateRedisAndDicCacheWithBackplane(database: _databaseCount, sharedRedisConfig: false, channelName: Guid.NewGuid().ToString(), useLua: false);
             }
         }
 
@@ -396,6 +388,7 @@ namespace CacheManager.Tests
         {
             var redisKey = sharedRedisConfig ? "redisConfig" + database : Guid.NewGuid().ToString();
             var cache = CacheFactory.FromConfiguration<object>(
+                $"{database}|{sharedRedisConfig}|{serializer}|{useLua}" + Guid.NewGuid().ToString(),
                 BaseConfiguration.Builder
                     .WithMaxRetries(int.MaxValue)
                     .TestSerializer(serializer)
@@ -443,45 +436,15 @@ namespace CacheManager.Tests
 
 #if MEMCACHEDENABLED
 
-        public static ICacheManager<object> WithMemcachedBinary
-        {
-            get
-            {
-                return CreateMemcachedCache<object>(Serializer.Binary);
-            }
-        }
+        public static ICacheManager<object> WithMemcachedBinary => CreateMemcachedCache<object>(Serializer.Binary);
 
-        public static ICacheManager<object> WithMemcachedJson
-        {
-            get
-            {
-                return CreateMemcachedCache<object>(Serializer.Json);
-            }
-        }
+        public static ICacheManager<object> WithMemcachedJson => CreateMemcachedCache<object>(Serializer.Json);
 
-        public static ICacheManager<object> WithMemcachedGzJson
-        {
-            get
-            {
-                return CreateMemcachedCache<object>(Serializer.GzJson);
-            }
-        }
+        public static ICacheManager<object> WithMemcachedGzJson => CreateMemcachedCache<object>(Serializer.GzJson);
 
-        public static ICacheManager<object> WithMemcachedProto
-        {
-            get
-            {
-                return CreateMemcachedCache<object>(Serializer.Proto);
-            }
-        }
+        public static ICacheManager<object> WithMemcachedProto => CreateMemcachedCache<object>(Serializer.Proto);
 
-        public static ICacheManager<object> WithMemcachedBondBinary
-        {
-            get
-            {
-                return CreateMemcachedCache<object>(Serializer.BondBinary);
-            }
-        }
+        public static ICacheManager<object> WithMemcachedBondBinary => CreateMemcachedCache<object>(Serializer.BondBinary);
 
         public static ICacheManager<T> CreateMemcachedCache<T>(Serializer serializer = Serializer.Json)
         {
