@@ -539,13 +539,10 @@ namespace CacheManager.Tests
                 var pocco = SerializerPoccoSerializable.Create();
 
                 // act
-                Action actSet = () =>
-                {
-                    cache.Add(key, pocco);
-                };
+                Func<bool> actSet = () => cache.Add(key, pocco); 
 
                 // assert
-                actSet.ShouldNotThrow();
+                actSet().Should().BeTrue("Should add the key");
                 cache.Get<SerializerPoccoSerializable>(key).ShouldBeEquivalentTo(pocco);
             }
         }
