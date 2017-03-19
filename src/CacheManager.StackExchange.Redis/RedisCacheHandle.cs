@@ -10,14 +10,6 @@ using static CacheManager.Core.Utility.Guard;
 
 namespace CacheManager.Redis
 {
-    internal enum ScriptType
-    {
-        Put,
-        Add,
-        Update,
-        Get
-    }
-
     /// <summary>
     /// Cache handle implementation for Redis.
     /// </summary>
@@ -660,17 +652,17 @@ return result";
         private void SubscribeKeyspaceNotifications()
         {
             _connection.Subscriber.Subscribe(
-                $"__keyevent@{_redisConfiguration.Database}__:expired",
-                (channel, key) =>
-                {
-                    var tupple = ParseKey(key);
-                    if (Logger.IsEnabled(LogLevel.Debug))
-                    {
-                        Logger.LogDebug("Got expired event for key '{0}:{1}'", tupple.Item2, tupple.Item1);
-                    }
+                 $"__keyevent@{_redisConfiguration.Database}__:expired",
+                 (channel, key) =>
+                 {
+                     var tupple = ParseKey(key);
+                     if (Logger.IsEnabled(LogLevel.Debug))
+                     {
+                         Logger.LogDebug("Got expired event for key '{0}:{1}'", tupple.Item2, tupple.Item1);
+                     }
 
-                    TriggerCacheSpecificRemove(tupple.Item1, tupple.Item2, CacheItemRemovedReason.Expired);
-                });
+                     TriggerCacheSpecificRemove(tupple.Item1, tupple.Item2, CacheItemRemovedReason.Expired);
+                 });
 
             _connection.Subscriber.Subscribe(
                 $"__keyevent@{_redisConfiguration.Database}__:evicted",

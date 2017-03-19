@@ -51,6 +51,9 @@ namespace CacheManager.Tests
             config.CacheHandleConfigurations[1].Key.Should().Be(key + "2");
             config.CacheHandleConfigurations[0].Name.Should().Be("handleName");
             config.CacheHandleConfigurations[1].Name.Should().Be("handleName2");
+
+            var cache = new BaseCacheManager<string>(config);
+            cache.Add("key", "value").Should().BeTrue();
         }
 
         [Fact]
@@ -80,13 +83,16 @@ namespace CacheManager.Tests
             };
 
             var configs = GetConfiguration(data).GetCacheConfigurations().ToArray();
-            for(var i = 1; i <= configs.Count(); i++)
+            for (var i = 1; i <= configs.Count(); i++)
             {
                 var config = configs[i - 1];
-                config.Name.Should().Be("myCacheName" +i);
+                config.Name.Should().Be("myCacheName" + i);
                 config.MaxRetries.Should().Be(i * 100);
                 config.RetryTimeout.Should().Be(i * 100);
                 config.CacheHandleConfigurations.Count.Should().Be(i);
+
+                var cache = new BaseCacheManager<string>(config);
+                cache.Add("key", "value").Should().BeTrue();
             }
         }
 
@@ -121,6 +127,9 @@ namespace CacheManager.Tests
             config.MaxRetries.Should().Be(200);
             config.RetryTimeout.Should().Be(200);
             config.CacheHandleConfigurations.Count.Should().Be(2);
+
+            var cache = new BaseCacheManager<string>(config);
+            cache.Add("key", "value").Should().BeTrue();
         }
 
         [Fact]
@@ -191,6 +200,8 @@ namespace CacheManager.Tests
             config.MaxRetries.Should().Be(42);
             config.RetryTimeout.Should().Be(21);
             config.UpdateMode.Should().Be(CacheUpdateMode.Up);
+            var cache = new BaseCacheManager<string>(config);
+            cache.Add("key", "value").Should().BeTrue();
         }
 
         [Fact]
@@ -296,6 +307,7 @@ namespace CacheManager.Tests
         }
 
 #if !NETCOREAPP
+
         [Fact]
         public void Configuration_CacheHandle_KnownType_SystemRuntime()
         {
@@ -309,7 +321,10 @@ namespace CacheManager.Tests
             config.Name.Should().Be("name");
             config.CacheHandleConfigurations.Count.Should().Be(1);
             config.CacheHandleConfigurations[0].HandleType.Should().Be(typeof(SystemRuntimeCaching.MemoryCacheHandle<>));
+            var cache = new BaseCacheManager<string>(config);
+            cache.Add("key", "value").Should().BeTrue();
         }
+
 #endif
 
         [Fact]
@@ -364,6 +379,7 @@ namespace CacheManager.Tests
         }
 
 #if !NETCOREAPP
+
         [Fact]
         public void Configuration_CacheHandle_KnownType_CouchbaseNoKey()
         {
@@ -429,10 +445,13 @@ namespace CacheManager.Tests
             action.ShouldThrow<InvalidOperationException>().WithMessage("*'key' or 'name'*");
         }
 
+#if MEMCACHEDENABLED
+
         [Fact]
+        [Trait("category", "memcached")]
         public void Configuration_CacheHandle_KnownType_Memcached()
         {
-            var key = Guid.NewGuid().ToString();
+            var key = "default";
             var data = new Dictionary<string, string>
             {
                 {"cacheManagers:0:name", "name"},
@@ -446,7 +465,12 @@ namespace CacheManager.Tests
             config.CacheHandleConfigurations[0].HandleType.Should().Be(typeof(Memcached.MemcachedCacheHandle<>));
             config.CacheHandleConfigurations[0].Key.Should().Be(key);
             config.CacheHandleConfigurations[0].Name.Should().NotBeNullOrWhiteSpace();  // name is random in this case
+
+            var cache = new BaseCacheManager<string>(config);
+            cache.Add(Guid.NewGuid().ToString(), "value").Should().BeTrue();
         }
+
+#endif
 
         [Fact]
         public void Configuration_CacheHandle_KnownType_MemcachedB()
@@ -465,7 +489,7 @@ namespace CacheManager.Tests
             config.CacheHandleConfigurations[0].Name.Should().Be("name");
             config.CacheHandleConfigurations[0].Key.Should().Be("name");    // now key gets set to name
         }
-        
+
         [Fact]
         public void Configuration_CacheHandle_Type_MemcachedB()
         {
@@ -498,6 +522,7 @@ namespace CacheManager.Tests
             config.CacheHandleConfigurations.Count.Should().Be(1);
             config.CacheHandleConfigurations[0].HandleType.Should().Be(typeof(Web.SystemWebCacheHandle<>));
         }
+
 #endif
 
         [Fact]
@@ -513,8 +538,10 @@ namespace CacheManager.Tests
             config.Name.Should().Be("name");
             config.CacheHandleConfigurations.Count.Should().Be(1);
             config.CacheHandleConfigurations[0].HandleType.Should().Be(typeof(Core.Internal.DictionaryCacheHandle<>));
-        }
 
+            var cache = new BaseCacheManager<string>(config);
+            cache.Add("key", "value").Should().BeTrue();
+        }
 
         [Fact]
         public void Configuration_CacheHandle_KnownType_MsMemory()
@@ -529,6 +556,9 @@ namespace CacheManager.Tests
             config.Name.Should().Be("name");
             config.CacheHandleConfigurations.Count.Should().Be(1);
             config.CacheHandleConfigurations[0].HandleType.Should().Be(typeof(CacheManager.MicrosoftCachingMemory.MemoryCacheHandle<>));
+
+            var cache = new BaseCacheManager<string>(config);
+            cache.Add("key", "value").Should().BeTrue();
         }
 
         [Fact]
@@ -557,6 +587,9 @@ namespace CacheManager.Tests
             config.CacheHandleConfigurations[0].IsBackplaneSource.Should().BeTrue();
             config.CacheHandleConfigurations[0].Name.Should().Be("handleName");
             config.CacheHandleConfigurations[0].Key.Should().Be(key);
+
+            var cache = new BaseCacheManager<string>(config);
+            cache.Add("key", "value").Should().BeTrue();
         }
 
         [Fact]
@@ -704,7 +737,7 @@ namespace CacheManager.Tests
             Action act = () => GetConfiguration(data).GetCacheConfiguration("name");
             act.ShouldThrow<InvalidOperationException>().WithMessage("*Known backplane type 'Something' is invalid*");
         }
-        
+
         [Fact]
         public void Configuration_Backplane_Redis_MissingKey()
         {
@@ -719,7 +752,11 @@ namespace CacheManager.Tests
             act.ShouldThrow<InvalidOperationException>().WithMessage("*The key property is required*");
         }
 
+#if REDISENABLED
+
         [Fact]
+        [Trait("category", "Redis")]
+        [Trait("category", "Unreliable")]
         public void Configuration_Backplane_Redis_Valid()
         {
             var key = Guid.NewGuid().ToString();
@@ -742,7 +779,12 @@ namespace CacheManager.Tests
             config.BackplaneConfigurationKey.Should().Be(key);
             config.BackplaneType.Should().Be(typeof(Redis.RedisCacheBackplane));
             config.HasBackplane.Should().BeTrue();
+
+            var cache = new BaseCacheManager<string>(config);
+            cache.Add(Guid.NewGuid().ToString(), "value").Should().BeTrue();
         }
+
+#endif
 
         [Fact]
         public void Configuration_Backplane_SomeType_Valid()
@@ -834,6 +876,9 @@ namespace CacheManager.Tests
 
             var config = GetConfiguration(data).GetCacheConfiguration("name");
             config.LoggerFactoryType.Should().Be(typeof(Logging.MicrosoftLoggerFactoryAdapter));
+
+            var cache = new BaseCacheManager<string>(config);
+            cache.Add("key", "value").Should().BeTrue();
         }
 
         [Fact]
@@ -901,6 +946,7 @@ namespace CacheManager.Tests
         }
 
 #if !NETCOREAPP
+
         [Fact]
         public void Configuration_Serializer_KnownType_Binary()
         {
@@ -921,6 +967,7 @@ namespace CacheManager.Tests
             config.SerializerType.Should().Be(typeof(Core.Internal.BinaryCacheSerializer));
             act.ShouldNotThrow();
         }
+
 #endif
 
         [Fact]
@@ -1024,7 +1071,7 @@ namespace CacheManager.Tests
                 cache.Add("key", "value");
             };
 
-            config.SerializerType.Should().Be(typeof(Serialization.Bond.BondCompactBinaryCacheSerializer));            
+            config.SerializerType.Should().Be(typeof(Serialization.Bond.BondCompactBinaryCacheSerializer));
             act.ShouldNotThrow();
         }
 
@@ -1048,7 +1095,6 @@ namespace CacheManager.Tests
             config.SerializerType.Should().Be(typeof(Serialization.Bond.BondFastBinaryCacheSerializer));
             act.ShouldNotThrow();
         }
-
 
         [Fact]
         public void Configuration_Serializer_KnownType_BondJosn()
@@ -1168,7 +1214,7 @@ namespace CacheManager.Tests
             Action act = () => GetConfiguration(data).LoadRedisConfigurations();
             act.ShouldThrow<InvalidOperationException>().WithMessage("*Failed to convert 'invalid'*");
         }
-        
+
         [Fact]
         public void Configuration_Redis_Properties()
         {

@@ -26,9 +26,21 @@ namespace CacheManager.MicrosoftCachingMemory
         /// <param name="managerConfiguration">The manager configuration.</param>
         /// <param name="configuration">The cache handle configuration.</param>
         /// <param name="loggerFactory">The logger factory.</param>
+        [CLSCompliant(false)]
+        public MemoryCacheHandle(ICacheManagerConfiguration managerConfiguration, CacheHandleConfiguration configuration, ILoggerFactory loggerFactory)
+            : this(managerConfiguration, configuration, loggerFactory, null)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MemoryCacheHandle{TCacheValue}"/> class.
+        /// </summary>
+        /// <param name="managerConfiguration">The manager configuration.</param>
+        /// <param name="configuration">The cache handle configuration.</param>
+        /// <param name="loggerFactory">The logger factory.</param>
         /// <param name="memoryCacheOptions">The vendor specific options.</param>
         [CLSCompliant(false)]
-        public MemoryCacheHandle(ICacheManagerConfiguration managerConfiguration, CacheHandleConfiguration configuration, ILoggerFactory loggerFactory, MemoryCacheOptions memoryCacheOptions = null)
+        public MemoryCacheHandle(ICacheManagerConfiguration managerConfiguration, CacheHandleConfiguration configuration, ILoggerFactory loggerFactory, MemoryCacheOptions memoryCacheOptions)
             : base(managerConfiguration, configuration)
         {
             NotNull(configuration, nameof(configuration));
