@@ -12,9 +12,9 @@ namespace CacheManager.Benchmarks
     [Config(typeof(CacheManagerBenchConfig))]
     public class GzBenchmark
     {
-        private static ArrayPool<byte> pool = ArrayPool<byte>.Create();
+        private static ArrayPool<byte> _pool = ArrayPool<byte>.Create();
 
-        private byte[] payload;
+        private byte[] _payload;
 
         [Setup]
         public void Setup()
@@ -26,17 +26,17 @@ namespace CacheManager.Benchmarks
                 list.Add(Guid.NewGuid().ToString());
             }
 
-            payload = new JsonCacheSerializer().Serialize(list);
+            _payload = new JsonCacheSerializer().Serialize(list);
         }
 
         [Benchmark(Baseline = true)]
         public void Naive()
         {
             var compress = new NaiveCompression();
-            var a = compress.Compression(payload);
+            var a = compress.Compression(_payload);
             var b = compress.Decompression(a);
 
-            if (payload.Length != b.Length)
+            if (_payload.Length != b.Length)
             {
                 throw new Exception();
             }
@@ -46,10 +46,10 @@ namespace CacheManager.Benchmarks
         public void Manuel()
         {
             var compress = new Manual();
-            var a = compress.Compression(payload);
+            var a = compress.Compression(_payload);
             var b = compress.Decompression(a);
 
-            if (payload.Length != b.Count)
+            if (_payload.Length != b.Count)
             {
                 throw new Exception();
             }
@@ -60,18 +60,18 @@ namespace CacheManager.Benchmarks
         {
             var compress = new ManualPooled();
 
-            var buffer = pool.Rent((int)(payload.Length * 1.2));
+            var buffer = _pool.Rent((int)(_payload.Length * 1.2));
 
-            var a = compress.Compression(payload, buffer);
+            var a = compress.Compression(_payload, buffer);
 
             var b = compress.Decompression(a);
 
-            if (payload.Length != b.Count)
+            if (_payload.Length != b.Count)
             {
                 throw new Exception();
             }
 
-            pool.Return(buffer);
+            _pool.Return(buffer);
         }
 
         private class ManualPooled
@@ -95,15 +95,15 @@ namespace CacheManager.Benchmarks
                 using (var gzReader = new GZipStream(inputStream, CompressionMode.Decompress))
                 using (var stream = new MemoryStream(compressedData.Count * 2))
                 {
-                    var buffer = pool.Rent(compressedData.Count);
-                    int readBytes = 0;
+                    var buffer = _pool.Rent(compressedData.Count);
+                    var readBytes = 0;
 
                     while ((readBytes = gzReader.Read(buffer, 0, buffer.Length)) > 0)
                     {
                         stream.Write(buffer, 0, readBytes);
                     }
 
-                    pool.Return(buffer);
+                    _pool.Return(buffer);
                     return new ArraySegment<byte>(stream.GetBuffer(), 0, (int)stream.Length);
                 }
             }
@@ -128,12 +128,12 @@ namespace CacheManager.Benchmarks
 
             public ArraySegment<byte> Decompression(ArraySegment<byte> compressedData)
             {
-                byte[] buffer = new byte[compressedData.Count * 2];
+                var buffer = new byte[compressedData.Count * 2];
                 using (var inputStream = new MemoryStream(compressedData.Array, 0, compressedData.Count))
                 using (var gzReader = new GZipStream(inputStream, CompressionMode.Decompress))
                 using (var stream = new MemoryStream(compressedData.Count * 2))
                 {
-                    int readBytes = 0;
+                    var readBytes = 0;
                     while ((readBytes = gzReader.Read(buffer, 0, buffer.Length)) > 0)
                     {
                         stream.Write(buffer, 0, readBytes);

@@ -180,7 +180,7 @@ namespace CacheManager.Examples
 
         private static void UnityInjectionExample()
         {
-            UnityContainer container = new UnityContainer();
+            var container = new UnityContainer();
             container.RegisterType<ICacheManager<object>>(
                 new ContainerControlledLifetimeManager(),
                 new InjectionFactory((c) => CacheFactory.Build(s => s.WithDictionaryHandle())));
@@ -199,7 +199,7 @@ namespace CacheManager.Examples
 
         private static void UnityInjectionExample_Advanced()
         {
-            UnityContainer container = new UnityContainer();
+            var container = new UnityContainer();
             container.RegisterType(
                 typeof(ICacheManager<>),
                 new ContainerControlledLifetimeManager(),
@@ -233,8 +233,7 @@ namespace CacheManager.Examples
 
             Console.WriteLine("Testing update...");
 
-            string newValue;
-            if (!cache.TryUpdate("test", v => "item has not yet been added", out newValue))
+            if (!cache.TryUpdate("test", v => "item has not yet been added", out string newValue))
             {
                 Console.WriteLine("Value not added?: {0}", newValue == null);
             }
@@ -256,8 +255,7 @@ namespace CacheManager.Examples
             }
 
             // use try update to not deal with exceptions
-            string removedValue;
-            if (!cache.TryUpdate("test", v => v, out removedValue))
+            if (!cache.TryUpdate("test", v => v, out string removedValue))
             {
                 Console.WriteLine("Value after remove is null?: {0}", removedValue == null);
             }
@@ -273,7 +271,7 @@ namespace CacheManager.Examples
 
             Console.WriteLine("Initial value: {0}", cache.Get("counter"));
 
-            for (int i = 0; i < 12345; i++)
+            for (var i = 0; i < 12345; i++)
             {
                 cache.Update("counter", v => v + 1);
             }
@@ -284,21 +282,16 @@ namespace CacheManager.Examples
 
     public class UnityInjectionExampleTarget
     {
-        private ICacheManager<object> cache;
+        private ICacheManager<object> _cache;
 
         public UnityInjectionExampleTarget(ICacheManager<object> cache)
         {
-            if (cache == null)
-            {
-                throw new ArgumentNullException(nameof(cache));
-            }
-
-            this.cache = cache;
+            _cache = cache ?? throw new ArgumentNullException(nameof(cache));
         }
 
         public void GetSomething()
         {
-            var value = this.cache.Get("myKey");
+            var value = _cache.Get("myKey");
             var x = value;
             if (value == null)
             {
@@ -308,7 +301,7 @@ namespace CacheManager.Examples
 
         public void PutSomethingIntoTheCache()
         {
-            this.cache.Put("myKey", "something");
+            _cache.Put("myKey", "something");
         }
     }
 }

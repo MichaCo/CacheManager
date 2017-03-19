@@ -15,7 +15,7 @@ namespace CacheManager.Config.Tests
     {
         public static void Main(string[] args)
         {
-            int iterations = 1000;
+            var iterations = 1000;
             try
             {
                 var builder = new Core.ConfigurationBuilder("myCache");
@@ -58,7 +58,7 @@ namespace CacheManager.Config.Tests
                 var cacheA = new BaseCacheManager<string>(builder.Build());
                 cacheA.Clear();
 
-                for (int i = 0; i < iterations; i++)
+                for (var i = 0; i < iterations; i++)
                 {
                     var redisHandle = cacheA.CacheHandles.OfType<RedisCacheHandle<string>>().First();
                     foreach (var server in redisHandle.Servers)

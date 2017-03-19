@@ -29,12 +29,12 @@ namespace CacheManager.Config.Tests
 
             Action test = () =>
             {
-                for (int i = 0; i < numItems; i++)
+                for (var i = 0; i < numItems; i++)
                 {
                     cache.AddOrUpdate(keyGet(i), i.ToString(), _ => i.ToString() + "update");
                 }
 
-                for (int i = 0; i < numItems; i++)
+                for (var i = 0; i < numItems; i++)
                 {
                     if (i % 10 == 0)
                     {
@@ -42,9 +42,9 @@ namespace CacheManager.Config.Tests
                     }
                 }
 
-                for (int i = 0; i < numItems; i++)
+                for (var i = 0; i < numItems; i++)
                 {
-                    string val = cache.Get(keyGet(i));
+                    var val = cache.Get(keyGet(i));
                 }
             };
 
@@ -114,10 +114,9 @@ namespace CacheManager.Config.Tests
                             }
                         }
 
-                        string value;
                         Interlocked.Increment(ref ops);
                         Interlocked.Increment(ref ops); // update does a get and then set = 2 ops
-                        if (!cache.TryUpdate("key" + rand.Next(0, items - 1), region, v => Guid.NewGuid().ToString(), out value))
+                        if (!cache.TryUpdate("key" + rand.Next(0, items - 1), region, v => Guid.NewGuid().ToString(), out string value))
                         {
                             Interlocked.Increment(ref fails);
                         }
@@ -183,10 +182,9 @@ namespace CacheManager.Config.Tests
                             }
                         }
 
-                        object value;
                         Interlocked.Increment(ref ops);
                         Interlocked.Increment(ref ops); // update does a get and then set = 2 ops
-                        if (!cache.TryUpdate("key" + rand.Next(0, items - 1), region, v => Guid.NewGuid().ToString(), out value))
+                        if (!cache.TryUpdate("key" + rand.Next(0, items - 1), region, v => Guid.NewGuid().ToString(), out object value))
                         {
                             Interlocked.Increment(ref fails);
                         }
@@ -246,10 +244,9 @@ namespace CacheManager.Config.Tests
                             }
                             if (ta % 1000 == 0)
                             {
-                                object value;
                                 Interlocked.Increment(ref ops);
                                 Interlocked.Increment(ref ops); // update does a get and then set = 2 ops
-                                if (!cache.TryUpdate("key" + rand.Next(0, items - 1), region, v => Guid.NewGuid().ToString(), out value))
+                                if (!cache.TryUpdate("key" + rand.Next(0, items - 1), region, v => Guid.NewGuid().ToString(), out object value))
                                 {
                                     Interlocked.Increment(ref fails);
                                 }
@@ -275,8 +272,8 @@ namespace CacheManager.Config.Tests
             const string keyPrefix = "RWKey_";
             const int actionsPerIteration = 104;
             const int initialLoad = 1000;
-            int iterations = 0;
-            int removeFails = 0;
+            var iterations = 0;
+            var removeFails = 0;
             var keyIndex = 0;
             var random = new Random();
 
@@ -310,7 +307,7 @@ namespace CacheManager.Config.Tests
             Action remove = () =>
             {
                 const int maxTries = 10;
-                bool result = false;
+                var result = false;
                 var tries = 0;
                 string key;
                 do
@@ -399,10 +396,9 @@ namespace CacheManager.Config.Tests
             cache.Put("key", "put value");
             cache.RemoveExpiration("key");
 
-            object update2;
-            cache.TryUpdate("key", "region", _ => "update 2 value", out update2);
+            cache.TryUpdate("key", "region", _ => "update 2 value", out object update2);
 
-            object update3 = cache.Update("key", "region", _ => "update 3 value");
+            var update3 = cache.Update("key", "region", _ => "update 3 value");
 
             cache.Remove("key", "region");
 
@@ -413,11 +409,11 @@ namespace CacheManager.Config.Tests
 
     public class Item
     {
-        private static Random random = new Random();
+        private static Random _random = new Random();
 
         public Item()
         {
-            this.SomeStrings = new List<string>();
+            SomeStrings = new List<string>();
         }
 
         public string Name { get; set; }
@@ -427,13 +423,11 @@ namespace CacheManager.Config.Tests
         public long Number { get; set; }
 
         public static Item Generate()
-        {
-            return new Item()
+            => new Item()
             {
                 Name = Guid.NewGuid().ToString(),
-                Number = random.Next(0, int.MaxValue),
+                Number = _random.Next(0, int.MaxValue),
                 SomeStrings = new List<string>() { "Something", "more", "or", "less" }
             };
-        }
     }
 }

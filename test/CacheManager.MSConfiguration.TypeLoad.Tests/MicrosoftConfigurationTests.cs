@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using CacheManager.Core;
 using FluentAssertions;
 using Microsoft.Extensions.Configuration;
 using Xunit;
@@ -97,6 +96,96 @@ namespace CacheManager.MSConfiguration.TypeLoad.Tests
             action.ShouldThrow<InvalidOperationException>().WithMessage("*'SystemWeb' could not be loaded*");
         }
 
+        [Fact]
+        public void Configuration_Serializer_Json_NotReferenced()
+        {
+            var data = new Dictionary<string, string>
+            {
+                {"cacheManagers:0:name", "name"},
+                {"cacheManagers:0:handles:0:knownType", "Dictionary"},
+                {"cacheManagers:0:serializer:knownType", "Json"}
+            };
+
+            var config = GetConfiguration(data);
+            Action action = () => config.GetCacheConfiguration("name");
+            action.ShouldThrow<InvalidOperationException>().WithMessage("*serializer type 'Json' could not be loaded*");
+        }
+
+        [Fact]
+        public void Configuration_Serializer_GzJson_NotReferenced()
+        {
+            var data = new Dictionary<string, string>
+            {
+                {"cacheManagers:0:name", "name"},
+                {"cacheManagers:0:handles:0:knownType", "Dictionary"},
+                {"cacheManagers:0:serializer:knownType", "GzJson"}
+            };
+
+            var config = GetConfiguration(data);
+            Action action = () => config.GetCacheConfiguration("name");
+            action.ShouldThrow<InvalidOperationException>().WithMessage("*serializer type 'GzJson' could not be loaded*");
+        }
+
+        [Fact]
+        public void Configuration_Serializer_Protobuf_NotReferenced()
+        {
+            var data = new Dictionary<string, string>
+            {
+                {"cacheManagers:0:name", "name"},
+                {"cacheManagers:0:handles:0:knownType", "Dictionary"},
+                {"cacheManagers:0:serializer:knownType", "Protobuf"}
+            };
+
+            var config = GetConfiguration(data);
+            Action action = () => config.GetCacheConfiguration("name");
+            action.ShouldThrow<InvalidOperationException>().WithMessage("*serializer type 'Protobuf' could not be loaded*");
+        }
+
+        [Fact]
+        public void Configuration_Serializer_BondCompactBinary_NotReferenced()
+        {
+            var data = new Dictionary<string, string>
+            {
+                {"cacheManagers:0:name", "name"},
+                {"cacheManagers:0:handles:0:knownType", "Dictionary"},
+                {"cacheManagers:0:serializer:knownType", "BondCompactBinary"}
+            };
+
+            var config = GetConfiguration(data);
+            Action action = () => config.GetCacheConfiguration("name");
+            action.ShouldThrow<InvalidOperationException>().WithMessage("*serializer type 'BondCompactBinary' could not be loaded*");
+        }
+
+        [Fact]
+        public void Configuration_Serializer_BondFastBinary_NotReferenced()
+        {
+            var data = new Dictionary<string, string>
+            {
+                {"cacheManagers:0:name", "name"},
+                {"cacheManagers:0:handles:0:knownType", "Dictionary"},
+                {"cacheManagers:0:serializer:knownType", "BondFastBinary"}
+            };
+
+            var config = GetConfiguration(data);
+            Action action = () => config.GetCacheConfiguration("name");
+            action.ShouldThrow<InvalidOperationException>().WithMessage("*serializer type 'BondFastBinary' could not be loaded*");
+        }
+
+        [Fact]
+        public void Configuration_Serializer_BondSimpleJson_NotReferenced()
+        {
+            var data = new Dictionary<string, string>
+            {
+                {"cacheManagers:0:name", "name"},
+                {"cacheManagers:0:handles:0:knownType", "Dictionary"},
+                {"cacheManagers:0:serializer:knownType", "BondSimpleJson"}
+            };
+
+            var config = GetConfiguration(data);
+            Action action = () => config.GetCacheConfiguration("name");
+            action.ShouldThrow<InvalidOperationException>().WithMessage("*serializer type 'BondSimpleJson' could not be loaded*");
+        }
+
 #if NETCOREAPP
         [Fact]
         public void Configuration_Serializer_BinaryInvalidOnCore()
@@ -109,7 +198,7 @@ namespace CacheManager.MSConfiguration.TypeLoad.Tests
             };
 
             Action act = () => GetConfiguration(data).GetCacheConfiguration("name");
-            act.ShouldThrow<InvalidOperationException>().WithMessage("*BinaryCacheSerializer is not available*");
+            act.ShouldThrow<PlatformNotSupportedException>().WithMessage("*BinaryCacheSerializer is not available*");
         }
 #endif
 

@@ -48,42 +48,42 @@ namespace CacheManager.Benchmarks
         [Setup]
         public void Setup()
         {
-            this.DictionaryCache.Clear();
-            this.RuntimeCache.Clear();
-            this.RedisCache.Clear();
-            this.MsMemoryCache.Clear();
-            this.MemcachedCache.Clear();
-            this.SetupBench();
+            DictionaryCache.Clear();
+            RuntimeCache.Clear();
+            RedisCache.Clear();
+            MsMemoryCache.Clear();
+            MemcachedCache.Clear();
+            SetupBench();
         }
 
         [Benchmark(Baseline = true)]
         public void Dictionary()
         {
-            Excecute(this.DictionaryCache);
+            Excecute(DictionaryCache);
         }
 
         [Benchmark]
         public void Runtime()
         {
-            Excecute(this.RuntimeCache);
+            Excecute(RuntimeCache);
         }
 
         [Benchmark]
         public void MsMemory()
         {
-            Excecute(this.MsMemoryCache);
+            Excecute(MsMemoryCache);
         }
 
         [Benchmark]
         public void Redis()
         {
-            Excecute(this.RedisCache);
+            Excecute(RedisCache);
         }
 
         [Benchmark]
         public void Memcached()
         {
-            Excecute(this.MemcachedCache);
+            Excecute(MemcachedCache);
         }
 
         protected abstract void Excecute(ICacheManager<string> cache);
@@ -97,26 +97,26 @@ namespace CacheManager.Benchmarks
 
     public class AddSingleBenchmark : BaseCacheBenchmark
     {
-        private string key = Guid.NewGuid().ToString();
+        private string _key = Guid.NewGuid().ToString();
 
         protected override void Excecute(ICacheManager<string> cache)
         {
-            if (!cache.Add(key, "value"))
+            if (!cache.Add(_key, "value"))
             {
-                cache.Remove(key);
+                cache.Remove(_key);
             }
         }
     }
 
     public class AddWithRegionSingleBenchmark : BaseCacheBenchmark
     {
-        private string key = Guid.NewGuid().ToString();
+        private string _key = Guid.NewGuid().ToString();
 
         protected override void Excecute(ICacheManager<string> cache)
         {
-            if (!cache.Add(key, "value", "region"))
+            if (!cache.Add(_key, "value", "region"))
             {
-                cache.Remove(key);
+                cache.Remove(_key);
             }
         }
     }
@@ -127,21 +127,21 @@ namespace CacheManager.Benchmarks
 
     public class PutSingleBenchmark : BaseCacheBenchmark
     {
-        private string key = Guid.NewGuid().ToString();
+        private string _key = Guid.NewGuid().ToString();
 
         protected override void Excecute(ICacheManager<string> cache)
         {
-            cache.Put(key, "value");
+            cache.Put(_key, "value");
         }
     }
 
     public class PutWithRegionSingleBenchmark : BaseCacheBenchmark
     {
-        private string key = Guid.NewGuid().ToString();
+        private string _key = Guid.NewGuid().ToString();
 
         protected override void Excecute(ICacheManager<string> cache)
         {
-            cache.Put(key, "value", "region");
+            cache.Put(_key, "value", "region");
         }
     }
 
@@ -151,11 +151,11 @@ namespace CacheManager.Benchmarks
 
     public class GetSingleBenchmark : BaseCacheBenchmark
     {
-        protected string key = Guid.NewGuid().ToString();
+        protected string Key = Guid.NewGuid().ToString();
 
         protected override void Excecute(ICacheManager<string> cache)
         {
-            var val = cache.Get(key);
+            var val = cache.Get(Key);
             if (val == null)
             {
                 throw new InvalidOperationException();
@@ -166,16 +166,16 @@ namespace CacheManager.Benchmarks
         {
             base.SetupBench();
 
-            this.DictionaryCache.Add(key, key);
-            this.DictionaryCache.Add(key, key, "region");
-            this.RuntimeCache.Add(key, key);
-            this.RuntimeCache.Add(key, key, "region");
-            this.MsMemoryCache.Add(key, key);
-            this.MsMemoryCache.Add(key, key, "region");
-            this.MemcachedCache.Add(key, key);
-            this.MemcachedCache.Add(key, key, "region");
-            this.RedisCache.Add(key, key);
-            this.RedisCache.Add(key, key, "region");
+            DictionaryCache.Add(Key, Key);
+            DictionaryCache.Add(Key, Key, "region");
+            RuntimeCache.Add(Key, Key);
+            RuntimeCache.Add(Key, Key, "region");
+            MsMemoryCache.Add(Key, Key);
+            MsMemoryCache.Add(Key, Key, "region");
+            MemcachedCache.Add(Key, Key);
+            MemcachedCache.Add(Key, Key, "region");
+            RedisCache.Add(Key, Key);
+            RedisCache.Add(Key, Key, "region");
         }
     }
 
@@ -183,7 +183,7 @@ namespace CacheManager.Benchmarks
     {
         protected override void Excecute(ICacheManager<string> cache)
         {
-            var val = cache.Get(key, "region");
+            var val = cache.Get(Key, "region");
             if (val == null)
             {
                 throw new InvalidOperationException();
@@ -199,7 +199,7 @@ namespace CacheManager.Benchmarks
     {
         protected override void Excecute(ICacheManager<string> cache)
         {
-            var val = cache.Update(key, (v) => v.Equals("bla") ? "bla" : "blub");
+            var val = cache.Update(Key, (v) => v.Equals("bla") ? "bla" : "blub");
             if (val == null)
             {
                 throw new InvalidOperationException();

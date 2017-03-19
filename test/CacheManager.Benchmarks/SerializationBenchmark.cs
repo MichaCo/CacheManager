@@ -21,23 +21,23 @@ namespace CacheManager.Benchmarks
     [Config(typeof(CacheManagerBenchConfig))]
     public class SerializationBenchmark
     {
-        private int iterations = 1000;
-        private Queue<CacheItem<TestPoco>> payload;
-        private BinaryCacheSerializer binary = new BinaryCacheSerializer();
-        private JsonCacheSerializer json = new JsonCacheSerializer();
-        private GzJsonCacheSerializer jsonGz = new GzJsonCacheSerializer();
-        private ProtoBufSerializer proto = new Serialization.ProtoBuf.ProtoBufSerializer();
-        private BondCompactBinaryCacheSerializer bondBinary = new BondCompactBinaryCacheSerializer(18000);
-        private BondFastBinaryCacheSerializer bondFastBinary = new BondFastBinaryCacheSerializer(18000);
-        private BondSimpleJsonCacheSerializer bondSimpleJson = new BondSimpleJsonCacheSerializer();
-        private readonly Type pocoType = typeof(TestPoco);
+        private int _iterations = 1000;
+        private Queue<CacheItem<TestPoco>> _payload;
+        private BinaryCacheSerializer _binary = new BinaryCacheSerializer();
+        private JsonCacheSerializer _json = new JsonCacheSerializer();
+        private GzJsonCacheSerializer _jsonGz = new GzJsonCacheSerializer();
+        private ProtoBufSerializer _proto = new Serialization.ProtoBuf.ProtoBufSerializer();
+        private BondCompactBinaryCacheSerializer _bondBinary = new BondCompactBinaryCacheSerializer(18000);
+        private BondFastBinaryCacheSerializer _bondFastBinary = new BondFastBinaryCacheSerializer(18000);
+        private BondSimpleJsonCacheSerializer _bondSimpleJson = new BondSimpleJsonCacheSerializer();
+        private readonly Type _pocoType = typeof(TestPoco);
 
         [Setup]
         public void Setup()
         {
             var rnd = new Random();
             var items = new List<CacheItem<TestPoco>>();
-            for (var iter = 0; iter < iterations; iter++)
+            for (var iter = 0; iter < _iterations; iter++)
             {
                 var list = new List<string>();
                 for (var i = 0; i < 300; i++)
@@ -64,14 +64,14 @@ namespace CacheManager.Benchmarks
                 }));
             }
 
-            payload = new Queue<CacheItem<TestPoco>>(items);
+            _payload = new Queue<CacheItem<TestPoco>>(items);
         }
         
         private void ExecRun(Action<CacheItem<TestPoco>> action)
         {
-            var item = payload.Dequeue();
+            var item = _payload.Dequeue();
             action(item);
-            payload.Enqueue(item);
+            _payload.Enqueue(item);
         }
         
         [Benchmark()]
@@ -79,8 +79,8 @@ namespace CacheManager.Benchmarks
         {
             ExecRun((item) =>
             {
-                var data = binary.SerializeCacheItem(item);
-                var result = binary.DeserializeCacheItem<TestPoco>(data, pocoType);
+                var data = _binary.SerializeCacheItem(item);
+                var result = _binary.DeserializeCacheItem<TestPoco>(data, _pocoType);
                 if (result == null)
                 {
                     throw new Exception();
@@ -93,8 +93,8 @@ namespace CacheManager.Benchmarks
         {
             ExecRun((item) =>
             {
-                var data = json.SerializeCacheItem(item);
-                var result = json.DeserializeCacheItem<TestPoco>(data, pocoType);
+                var data = _json.SerializeCacheItem(item);
+                var result = _json.DeserializeCacheItem<TestPoco>(data, _pocoType);
                 if (result == null)
                 {
                     throw new Exception();
@@ -107,8 +107,8 @@ namespace CacheManager.Benchmarks
         {
             ExecRun((item) =>
             {
-                var data = jsonGz.SerializeCacheItem(item);
-                var result = jsonGz.DeserializeCacheItem<TestPoco>(data, pocoType);
+                var data = _jsonGz.SerializeCacheItem(item);
+                var result = _jsonGz.DeserializeCacheItem<TestPoco>(data, _pocoType);
                 if (result == null)
                 {
                     throw new Exception();
@@ -121,8 +121,8 @@ namespace CacheManager.Benchmarks
         {
             ExecRun((item) =>
             {
-                var data = proto.SerializeCacheItem(item);
-                var result = proto.DeserializeCacheItem<TestPoco>(data, pocoType);
+                var data = _proto.SerializeCacheItem(item);
+                var result = _proto.DeserializeCacheItem<TestPoco>(data, _pocoType);
                 if (result == null)
                 {
                     throw new Exception();
@@ -135,8 +135,8 @@ namespace CacheManager.Benchmarks
         {
             ExecRun((item) =>
             {
-                var data = bondBinary.SerializeCacheItem(item);
-                var result = bondBinary.DeserializeCacheItem<TestPoco>(data, pocoType);
+                var data = _bondBinary.SerializeCacheItem(item);
+                var result = _bondBinary.DeserializeCacheItem<TestPoco>(data, _pocoType);
                 if (result == null)
                 {
                     throw new Exception();
@@ -149,8 +149,8 @@ namespace CacheManager.Benchmarks
         {
             ExecRun((item) =>
             {
-                var data = bondFastBinary.SerializeCacheItem(item);
-                var result = bondFastBinary.DeserializeCacheItem<TestPoco>(data, pocoType);
+                var data = _bondFastBinary.SerializeCacheItem(item);
+                var result = _bondFastBinary.DeserializeCacheItem<TestPoco>(data, _pocoType);
                 if (result == null)
                 {
                     throw new Exception();
@@ -163,8 +163,8 @@ namespace CacheManager.Benchmarks
         {
             ExecRun((item) =>
             {
-                var data = bondSimpleJson.SerializeCacheItem(item);
-                var result = bondSimpleJson.DeserializeCacheItem<TestPoco>(data, pocoType);
+                var data = _bondSimpleJson.SerializeCacheItem(item);
+                var result = _bondSimpleJson.DeserializeCacheItem<TestPoco>(data, _pocoType);
                 if (result == null)
                 {
                     throw new Exception();

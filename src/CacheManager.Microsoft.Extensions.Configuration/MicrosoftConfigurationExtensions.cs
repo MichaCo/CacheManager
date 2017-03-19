@@ -457,33 +457,42 @@ namespace Microsoft.Extensions.Configuration
 
         private static Type GetKnownSerializerType(string knownTypeName, string path)
         {
-            switch (knownTypeName.ToLowerInvariant())
+            try
             {
-                case KnonwSerializerBinary:
+                switch (knownTypeName.ToLowerInvariant())
+                {
+                    case KnonwSerializerBinary:
 #if NETSTANDARD
-                    throw new PlatformNotSupportedException("BinaryCacheSerializer is not available on this platform");
+                        throw new PlatformNotSupportedException("BinaryCacheSerializer is not available on this platform");
 #else
-                    return typeof(BinaryCacheSerializer);
+                        return typeof(BinaryCacheSerializer);
 #endif
-                case KnonwSerializerJson:
-                    return Type.GetType(TypeJsonCacheSerializer, true);
+                    case KnonwSerializerJson:
+                        return Type.GetType(TypeJsonCacheSerializer, true);
 
-                case KnonwSerializerGzJson:
-                    return Type.GetType(TypeGzJsonCacheSerializer, true);
+                    case KnonwSerializerGzJson:
+                        return Type.GetType(TypeGzJsonCacheSerializer, true);
 
-                case KnonwSerializerProto:
-                    return Type.GetType(TypeProtobufCacheSerializer, true);
+                    case KnonwSerializerProto:
+                        return Type.GetType(TypeProtobufCacheSerializer, true);
 
-                case KnonwSerializerBondCompact:
-                    return Type.GetType(TypeBondCompactBinarySerializer, true);
+                    case KnonwSerializerBondCompact:
+                        return Type.GetType(TypeBondCompactBinarySerializer, true);
 
-                case KnonwSerializerBondFast:
-                    return Type.GetType(TypeBondFastBinarySerializer, true);
+                    case KnonwSerializerBondFast:
+                        return Type.GetType(TypeBondFastBinarySerializer, true);
 
-                case KnonwSerializerBondJson:
-                    return Type.GetType(TypeBondSimpleJsonSerializer, true);
+                    case KnonwSerializerBondJson:
+                        return Type.GetType(TypeBondSimpleJsonSerializer, true);
+                }
+            }
+            catch (Exception ex) when (!(ex is PlatformNotSupportedException))
+            {
+                throw new InvalidOperationException(
+                    $"Known serializer type '{knownTypeName}' could not be loaded. Make sure the corresponding Nuget package is installed and check configuration at '{path}'.", ex);
             }
 
+            // specified known type is actually not known - configuration error...
             throw new InvalidOperationException(
                 $"Known serializer type '{knownTypeName}' is invalid. Check configuration at '{path}'.");
         }

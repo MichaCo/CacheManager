@@ -14,12 +14,12 @@ namespace CacheManager.Benchmarks
             return DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
         }
 
-        private static readonly DateTime Date1970 = new DateTime(1970, 1, 1);
+        private static readonly DateTime _date1970 = new DateTime(1970, 1, 1);
 
         [Benchmark()]
         public long ManualCalcNaive()
         {
-            return (long)(DateTime.UtcNow - Date1970).TotalMilliseconds;
+            return (long)(DateTime.UtcNow - _date1970).TotalMilliseconds;
         }
         
         [Benchmark()]
