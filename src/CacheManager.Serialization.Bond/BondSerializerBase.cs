@@ -6,7 +6,6 @@ using Bond.IO.Unsafe;
 #else
 using Bond.IO.Safe;
 #endif
-using CacheManager.Core;
 using CacheManager.Core.Internal;
 using CacheManager.Core.Utility;
 
@@ -22,17 +21,21 @@ namespace CacheManager.Serialization.Bond
         /// <summary>
         /// Initializes a new instance of the <see cref="BondSerializerBase"/> class.
         /// </summary>
+        public BondSerializerBase()
+            : this(1024)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="BondSerializerBase"/> class.
+        /// </summary>
         /// <param name="defaultBufferSize">The default buffer size.</param>
-        public BondSerializerBase(int defaultBufferSize = 1024)
+        public BondSerializerBase(int defaultBufferSize)
         {
             OutputBufferPool = new ObjectPool<OutputBuffer>(new OutputBufferPoolPolicy(defaultBufferSize));
             StringBuilderPool = new ObjectPool<StringBuilder>(new StringBuilderPoolPolicy(defaultBufferSize));
         }
-
-        private BondSerializerBase()
-        {
-        }
-
+        
         /// <summary>
         /// Gets a pool handling <see cref="OutputBuffer"/>s.
         /// </summary>

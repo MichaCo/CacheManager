@@ -21,8 +21,16 @@ namespace CacheManager.Serialization.Bond
         /// <summary>
         /// Initializes a new instance of the <see cref="BondFastBinaryCacheSerializer"/> class.
         /// </summary>
+        public BondFastBinaryCacheSerializer() : base()
+        {
+            _cache = new FastBinarySerializerCache();
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="BondFastBinaryCacheSerializer"/> class.
+        /// </summary>
         /// <param name="defaultWriteBufferSize">The default buffer size.</param>
-        public BondFastBinaryCacheSerializer(int defaultWriteBufferSize = 1024) : base(defaultWriteBufferSize)
+        public BondFastBinaryCacheSerializer(int defaultWriteBufferSize) : base(defaultWriteBufferSize)
         {
             _cache = new FastBinarySerializerCache();
         }

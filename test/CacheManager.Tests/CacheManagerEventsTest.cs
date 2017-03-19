@@ -228,7 +228,7 @@ namespace CacheManager.Tests
 
                 string useKey = Guid.NewGuid().ToString();
                 string useRegion = "@_@23@_!!";
-                var result = await this.RunTest(cfg, useKey, useRegion);
+                var result = await RunTest(cfg, useKey, useRegion);
 
                 result.Reason.Should().Be(CacheItemRemovedReason.Expired);
                 result.Level.Should().Be(1);
@@ -248,7 +248,7 @@ namespace CacheManager.Tests
 
                 string useKey = Guid.NewGuid().ToString();
 
-                var result = await this.RunTest(cfg, useKey, null);
+                var result = await RunTest(cfg, useKey, null);
 
                 result.Reason.Should().Be(CacheItemRemovedReason.Expired);
                 result.Level.Should().Be(2);
@@ -271,7 +271,7 @@ namespace CacheManager.Tests
 
                 string useKey = Guid.NewGuid().ToString();
                 string useRegion = "@_@23@_!!";
-                var result = await this.RunTest(cfg, useKey, useRegion);
+                var result = await RunTest(cfg, useKey, useRegion);
 
                 result.Reason.Should().Be(CacheItemRemovedReason.Expired);
                 result.Level.Should().Be(1);
@@ -291,7 +291,7 @@ namespace CacheManager.Tests
 
                 string useKey = Guid.NewGuid().ToString();
 
-                var result = await this.RunTest(cfg, useKey, null);
+                var result = await RunTest(cfg, useKey, null);
 
                 result.Reason.Should().Be(CacheItemRemovedReason.Expired);
                 result.Level.Should().Be(2);
@@ -313,7 +313,7 @@ namespace CacheManager.Tests
 
                 string useKey = Guid.NewGuid().ToString();
                 string useRegion = "@_@23@_!!";
-                var result = await this.RunTest(cfg, useKey, useRegion);
+                var result = await RunTest(cfg, useKey, useRegion);
 
                 result.Reason.Should().Be(CacheItemRemovedReason.Expired);
                 result.Level.Should().Be(1);
@@ -333,7 +333,7 @@ namespace CacheManager.Tests
 
                 string useKey = Guid.NewGuid().ToString();
 
-                var result = await this.RunTest(cfg, useKey, null);
+                var result = await RunTest(cfg, useKey, null);
 
                 result.Reason.Should().Be(CacheItemRemovedReason.Expired);
                 result.Level.Should().Be(2);
@@ -357,7 +357,7 @@ namespace CacheManager.Tests
 
                 string useKey = Guid.NewGuid().ToString();
                 string useRegion = "@_@23@_!!";
-                var result = await this.RunTest(cfg, useKey, useRegion);
+                var result = await RunTest(cfg, useKey, useRegion);
 
                 result.Reason.Should().Be(CacheItemRemovedReason.Expired);
                 result.Level.Should().Be(1);
@@ -377,7 +377,7 @@ namespace CacheManager.Tests
 
                 string useKey = Guid.NewGuid().ToString();
 
-                var result = await this.RunTest(cfg, useKey, null);
+                var result = await RunTest(cfg, useKey, null);
 
                 result.Reason.Should().Be(CacheItemRemovedReason.Expired);
                 result.Level.Should().Be(2);
@@ -404,7 +404,7 @@ namespace CacheManager.Tests
 
                 string useKey = Guid.NewGuid().ToString();
                 string useRegion = "@_@23@_!!";
-                var result = await this.RunTest(cfg, useKey, useRegion);
+                var result = await RunTest(cfg, useKey, useRegion);
 
                 result.Reason.Should().Be(CacheItemRemovedReason.Expired);
                 result.Level.Should().Be(1);
@@ -428,7 +428,7 @@ namespace CacheManager.Tests
 
                 string useKey = Guid.NewGuid().ToString();
 
-                var result = await this.RunTest(cfg, useKey, null);
+                var result = await RunTest(cfg, useKey, null);
 
                 result.Reason.Should().Be(CacheItemRemovedReason.Expired);
                 result.Level.Should().Be(2);
@@ -985,9 +985,9 @@ namespace CacheManager.Tests
         {
             public EventCallbackData()
             {
-                this.Keys = new List<string>();
-                this.Regions = new List<string>();
-                this.Results = new List<UpdateItemResult<object>>();
+                Keys = new List<string>();
+                Regions = new List<string>();
+                Results = new List<UpdateItemResult<object>>();
             }
 
             public int Calls { get; set; }
@@ -1003,11 +1003,11 @@ namespace CacheManager.Tests
                 Guard.NotNullOrEmpty(validKeys, nameof(validKeys));
                 if (validKeys.Contains(args.Key))
                 {
-                    this.Calls++;
-                    this.Keys.Add(args.Key);
+                    Calls++;
+                    Keys.Add(args.Key);
                     if (!string.IsNullOrWhiteSpace(args.Region))
                     {
-                        this.Regions.Add(args.Region);
+                        Regions.Add(args.Region);
                     }
                 }
             }
@@ -1017,11 +1017,11 @@ namespace CacheManager.Tests
                 Guard.NotNullOrEmpty(validKeys, nameof(validKeys));
                 if (validKeys.Contains(args.Key))
                 {
-                    this.Calls++;
-                    this.Keys.Add(args.Key);
+                    Calls++;
+                    Keys.Add(args.Key);
                     if (!string.IsNullOrWhiteSpace(args.Region))
                     {
-                        this.Regions.Add(args.Region);
+                        Regions.Add(args.Region);
                     }
                 }
             }
@@ -1031,14 +1031,14 @@ namespace CacheManager.Tests
                 Guard.NotNullOrEmpty(validKeys, nameof(validKeys));
                 if (validKeys.Contains(args.Region))
                 {
-                    this.Calls++;
-                    this.Regions.Add(args.Region);
+                    Calls++;
+                    Regions.Add(args.Region);
                 }
             }
 
             internal void AddCall()
             {
-                this.Calls++;
+                Calls++;
             }
         }
 
@@ -1051,7 +1051,7 @@ namespace CacheManager.Tests
 
             public void TestTrigger(string key, string region, CacheItemRemovedReason reason)
             {
-                this.TriggerCacheSpecificRemove(key, region, reason);
+                TriggerCacheSpecificRemove(key, region, reason);
             }
 
             public override int Count

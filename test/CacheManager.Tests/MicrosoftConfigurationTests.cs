@@ -891,7 +891,13 @@ namespace CacheManager.Tests
             };
 
             var config = GetConfiguration(data).GetCacheConfiguration("name");
+            Action act = () =>
+            {
+                var cache = new BaseCacheManager<string>(config);
+            };
+
             config.SerializerType.Should().Be(typeof(object));
+            act.ShouldThrow<InvalidOperationException>().WithMessage("*ICacheSerializer*");
         }
 
 #if !NETCOREAPP
@@ -906,7 +912,14 @@ namespace CacheManager.Tests
             };
 
             var config = GetConfiguration(data).GetCacheConfiguration("name");
+            Action act = () =>
+            {
+                var cache = new BaseCacheManager<string>(config);
+                cache.Add("key", "value");
+            };
+
             config.SerializerType.Should().Be(typeof(Core.Internal.BinaryCacheSerializer));
+            act.ShouldNotThrow();
         }
 #endif
 
@@ -921,7 +934,14 @@ namespace CacheManager.Tests
             };
 
             var config = GetConfiguration(data).GetCacheConfiguration("name");
+            Action act = () =>
+            {
+                var cache = new BaseCacheManager<string>(config);
+                cache.Add("key", "value");
+            };
+
             config.SerializerType.Should().Be(typeof(Serialization.Json.JsonCacheSerializer));
+            act.ShouldNotThrow();
         }
 
         [Fact]
@@ -935,7 +955,14 @@ namespace CacheManager.Tests
             };
 
             var config = GetConfiguration(data).GetCacheConfiguration("name");
+            Action act = () =>
+            {
+                var cache = new BaseCacheManager<string>(config);
+                cache.Add("key", "value");
+            };
+
             config.SerializerType.Should().Be(typeof(Serialization.Json.GzJsonCacheSerializer));
+            act.ShouldNotThrow();
         }
 
         [Fact]
@@ -949,7 +976,14 @@ namespace CacheManager.Tests
             };
 
             var config = GetConfiguration(data).GetCacheConfiguration("name");
+            Action act = () =>
+            {
+                var cache = new BaseCacheManager<string>(config);
+                cache.Add("key", "value");
+            };
+
             config.SerializerType.Should().Be(typeof(Serialization.ProtoBuf.ProtoBufSerializer));
+            act.ShouldNotThrow();
         }
 
         [Fact]
@@ -963,7 +997,14 @@ namespace CacheManager.Tests
             };
 
             var config = GetConfiguration(data).GetCacheConfiguration("name");
+            Action act = () =>
+            {
+                var cache = new BaseCacheManager<string>(config);
+                cache.Add("key", "value");
+            };
+
             config.SerializerType.Should().Be(typeof(Serialization.ProtoBuf.ProtoBufSerializer));
+            act.ShouldNotThrow();
         }
 
         [Fact]
@@ -977,7 +1018,14 @@ namespace CacheManager.Tests
             };
 
             var config = GetConfiguration(data).GetCacheConfiguration("name");
-            config.SerializerType.Should().Be(typeof(Serialization.Bond.BondCompactBinaryCacheSerializer));
+            Action act = () =>
+            {
+                var cache = new BaseCacheManager<string>(config);
+                cache.Add("key", "value");
+            };
+
+            config.SerializerType.Should().Be(typeof(Serialization.Bond.BondCompactBinaryCacheSerializer));            
+            act.ShouldNotThrow();
         }
 
         [Fact]
@@ -991,7 +1039,14 @@ namespace CacheManager.Tests
             };
 
             var config = GetConfiguration(data).GetCacheConfiguration("name");
+            Action act = () =>
+            {
+                var cache = new BaseCacheManager<string>(config);
+                cache.Add("key", "value");
+            };
+
             config.SerializerType.Should().Be(typeof(Serialization.Bond.BondFastBinaryCacheSerializer));
+            act.ShouldNotThrow();
         }
 
 
@@ -1006,7 +1061,14 @@ namespace CacheManager.Tests
             };
 
             var config = GetConfiguration(data).GetCacheConfiguration("name");
+            Action act = () =>
+            {
+                var cache = new BaseCacheManager<string>(config);
+                cache.Add("key", "value");
+            };
+
             config.SerializerType.Should().Be(typeof(Serialization.Bond.BondSimpleJsonCacheSerializer));
+            act.ShouldNotThrow();
         }
 
         [Fact]

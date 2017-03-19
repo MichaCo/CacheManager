@@ -2,7 +2,7 @@
   "parallelizeTestCollections": true,
   "methodDisplay": "method",
   "preEnumerateTheories": false,
-  "diagnosticMessages": false,
+  "diagnosticMessages": true,
   "longRunningTestSeconds": 5,
-  "maxParallelThreads": 16
+  "maxParallelThreads": 2
 }

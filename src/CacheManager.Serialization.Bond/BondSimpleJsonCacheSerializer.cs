@@ -23,8 +23,16 @@ namespace CacheManager.Serialization.Bond
         /// <summary>
         /// Initializes a new instance of the <see cref="BondSimpleJsonCacheSerializer"/> class.
         /// </summary>
+        public BondSimpleJsonCacheSerializer() : base()
+        {
+            _cache = new SimpleJsonSerializerCache();
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="BondSimpleJsonCacheSerializer"/> class.
+        /// </summary>
         /// <param name="defaultWriteBufferSize">The default buffer size.</param>
-        public BondSimpleJsonCacheSerializer(int defaultWriteBufferSize = 1024) : base(defaultWriteBufferSize)
+        public BondSimpleJsonCacheSerializer(int defaultWriteBufferSize) : base(defaultWriteBufferSize)
         {
             _cache = new SimpleJsonSerializerCache();
         }

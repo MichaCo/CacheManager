@@ -47,8 +47,8 @@ namespace CacheManager.Tests
             yield return new object[] { TestManagers.WithMemcachedBinary };
 #endif
             yield return new object[] { TestManagers.WithMemcachedJson };
-            yield return new object[] { TestManagers.WithMemcachedGzJson };
-            yield return new object[] { TestManagers.WithMemcachedProto };
+            //yield return new object[] { TestManagers.WithMemcachedGzJson };
+            //yield return new object[] { TestManagers.WithMemcachedProto };
             yield return new object[] { TestManagers.WithMemcachedBondBinary };
 #endif
 #if COUCHBASEENABLED
