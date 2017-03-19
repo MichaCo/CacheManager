@@ -434,6 +434,7 @@ namespace CacheManager.Tests
         }
     }
 
+    [ExcludeFromCodeCoverage]
     public class TestLoggerFactory : ILoggerFactory
     {
         private readonly TestLogger useLogger;
@@ -454,6 +455,7 @@ namespace CacheManager.Tests
         }
     }
 
+    [ExcludeFromCodeCoverage]
     public class TestLogger : ILogger
     {
         public TestLogger()
@@ -481,6 +483,7 @@ namespace CacheManager.Tests
         }
     }
 
+    [ExcludeFromCodeCoverage]
     public class LogMessage
     {
         public LogMessage(LogLevel level, int eventId, object message, Exception exception)

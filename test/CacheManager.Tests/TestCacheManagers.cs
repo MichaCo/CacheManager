@@ -467,7 +467,7 @@ namespace CacheManager.Tests
 
         private static string NewKey() => Guid.NewGuid().ToString();
     }
-
+    
     public enum Serializer
     {
         Binary,
@@ -477,6 +477,7 @@ namespace CacheManager.Tests
         BondBinary
     }
 
+    [ExcludeFromCodeCoverage]
     public static class ConfigurationExtension
     {
         public static ConfigurationBuilderCachePart TestSerializer(this ConfigurationBuilderCachePart part, Serializer serializer)

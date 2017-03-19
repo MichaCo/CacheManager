@@ -1,5 +1,6 @@
 ﻿// disabling it for builds on Mono because setting the HttpContext.Current causes all kinds of strange exceptions
 #if MOCK_HTTPCONTEXT_ENABLED
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Web;
 using CacheManager.Core;
@@ -8,6 +9,7 @@ using CacheManager.Web;
 
 namespace CacheManager.Tests
 {
+    [ExcludeFromCodeCoverage]
     internal class SystemWebCacheHandleWrapper<TCacheValue> : SystemWebCacheHandle<TCacheValue>
     {
         public SystemWebCacheHandleWrapper(CacheManagerConfiguration managerConfiguration, CacheHandleConfiguration configuration, ILoggerFactory loggerFactory)

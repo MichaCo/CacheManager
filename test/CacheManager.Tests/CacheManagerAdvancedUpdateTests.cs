@@ -283,6 +283,7 @@ namespace CacheManager.Tests
         }
     }
 
+    [ExcludeFromCodeCoverage]
     public class MockCacheHandle<TCacheValue> : BaseCacheHandle<TCacheValue>
     {
         public MockCacheHandle(CacheManagerConfiguration managerConfiguration, CacheHandleConfiguration configuration, ILoggerFactory loggerFactory)

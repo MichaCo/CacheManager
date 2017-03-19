@@ -15,7 +15,7 @@ namespace CacheManager.Config.Tests
     {
         public static void Main(string[] args)
         {
-            var iterations = 1000;
+            var iterations = 10;
             try
             {
                 var builder = new Core.ConfigurationBuilder("myCache");
