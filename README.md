@@ -18,18 +18,18 @@ Linux, Mono | -
 
 | Package Name | .Net 4.0  | .Net 4.5  | Minimum .NET Platform Standard version *
 |--------------| :-------: | :-------: | :-------: 
-| [CacheManager.Core] [Core.nuget] | x | x | 1.2
-| [CacheManager.StackExchange.Redis] [Redis.nuget] | x | x | 1.5
-| [CacheManager.SystemRuntimeCaching] [SystemRuntimeCaching.nuget]  | x | x | -
-| [CacheManager.Microsoft.Extensions.Caching.Memory] [MSCache.nuget] | - | \>=4.5.1 | 1.3
-| [CacheManager.Microsoft.Extensions.Configuration] [Configuration.nuget] | - | x | 1.2
-| [CacheManager.Microsoft.Extensions.Logging] [Logging.nuget] | - | x | 1.2
-| [CacheManager.Serialization.Bond] [Bond.nuget] | x | x | 1.2
-| [CacheManager.Serialization.Json] [Json.nuget] | x | x | 1.2
-| [CacheManager.Serialization.ProtoBuf] [ProtoBuf.nuget] | x | x | 1.3
-| [CacheManager.Web] [Web.nuget]  | - | x | -
-| [CacheManager.Memcached] [Memcached.nuget]  | x | x | -
-| [CacheManager.Couchbase] [Couchbase.nuget]  | - | x | -
+| [CacheManager.Core][Core.nuget] | x | x | 1.2
+| [CacheManager.StackExchange.Redis][Redis.nuget] | x | x | 1.5
+| [CacheManager.SystemRuntimeCaching][SystemRuntimeCaching.nuget]  | x | x | -
+| [CacheManager.Microsoft.Extensions.Caching.Memory][MSCache.nuget] | - | \>=4.5.1 | 1.3
+| [CacheManager.Microsoft.Extensions.Configuration][Configuration.nuget] | - | x | 1.2
+| [CacheManager.Microsoft.Extensions.Logging][Logging.nuget] | - | x | 1.2
+| [CacheManager.Serialization.Bond][Bond.nuget] | x | x | 1.2
+| [CacheManager.Serialization.Json][Json.nuget] | x | x | 1.2
+| [CacheManager.Serialization.ProtoBuf][ProtoBuf.nuget] | x | x | 1.3
+| [CacheManager.Web][Web.nuget]  | - | x | -
+| [CacheManager.Memcached][Memcached.nuget]  | x | x | -
+| [CacheManager.Couchbase][Couchbase.nuget]  | - | x | -
 
 \* *"Minimum .NET Platform Standard" version means, that at least the listed version per package must be targeted if you want to use it. See the [documentation](https://github.com/dotnet/corefx/blob/master/Documentation/architecture/net-platform-standard.md) for more details of what .NET platform standard means.*
 
@@ -153,5 +153,6 @@ OnGet, OnAdd, OnPut, OnRemove, OnClear, OnClearRegion
 [Configuration.nuget]: https://www.nuget.org/packages/CacheManager.Microsoft.Extensions.Configuration
 [MSCache.nuget]: https://www.nuget.org/packages/CacheManager.Microsoft.Extensions.Caching.Memory
 [ProtoBuf.nuget]: https://www.nuget.org/packages/CacheManager.Serialization.ProtoBuf
+[Bond.nuget]: https://www.nuget.org/packages/CacheManager.Serialization.Bond
 
 [TOC]
