@@ -71,7 +71,7 @@ There is also from source generated [html documentation][help] available online.
 ## Benchmarks
 See [benchmarks page](https://github.com/MichaCo/CacheManager/blob/dev/Benchmarks.md)
 
-## Features in Version: [0.9.x][releases] 
+## Features in Version [1.0.x][releases] 
 
 * One common interface for handling different caching technologies: `ICache<T>`
 * Configurable by
@@ -92,6 +92,7 @@ The following are the currently available serialization options:
 	* Binary (build in if the full CLR is being used)
 	* **Json** based on the popular Newtonsoft.Json library
 	* **Json** with Gzip compression
+    * **Bond** based on Microsoft.Bond supporting all three available variants
 	* **Protocol Buffer** Google's protobuf. The package uses Mark's [protobuf-net](https://github.com/mgravell/protobuf-net) implementation.
 * **Update values with lock or transaction** for distributed caches. 
 The interfaced provides a simple update method which internally ensures you work with the latest version.
@@ -113,13 +114,15 @@ CacheManager will synchronize those layers for you.
 The following are the supported expiration modes:
     * Sliding expiration: On cache hit, the cache item expiration timeout will be extended by the configured amount.
     * Absolute expiration: The cache item will expire after the configured timeout.
+    * Since 1.0.0, evictions triggered by the cache vendor can trigger events and updates
 * **Cache Regions**: Even if some cache systems do not support or implement cache regions, the CacheManager implements the mechanism.
 This can be used to for example group elements and remove all of them at once.
 * **Statistics**: Counters for all kind of cache actions.
 * **Performance Counters**: To be able to inspect certain numbers with `perfmon`, CacheManager supports performance counters per instance of the manager and per cache handle.
 * **Event System**: CacheManager triggers events for common cache actions:
 OnGet, OnAdd, OnPut, OnRemove, OnClear, OnClearRegion
-   * Events now also get triggered through the backplane (if enabled) when multiple instances are sharing the same cache.
+   * Events also get triggered by the backplane (if enabled) when multiple instances are sharing the same cache.
+   * New `OnRemoveByHandle` events triggered by actual expiration or memory pressure eviction by the cache vendor
 * **System.Web.OutputCache** implementation to use CacheManager as OutputCache provider which makes the OutputCache extremely flexible, for example by using a distributed cache like Redis across many web servers.
 * **Cache clients synchronization** 
     * Implemented with the Redis pub/sub feature
