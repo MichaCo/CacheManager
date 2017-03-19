@@ -967,6 +967,49 @@ namespace CacheManager.Tests
         }
 
         [Fact]
+        public void Configuration_Serializer_KnownType_BondCompact()
+        {
+            var data = new Dictionary<string, string>
+            {
+                {"cacheManagers:0:name", "name"},
+                {"cacheManagers:0:handles:0:knownType", "Dictionary"},
+                {"cacheManagers:0:serializer:knownType", "BondCompactBinary"}
+            };
+
+            var config = GetConfiguration(data).GetCacheConfiguration("name");
+            config.SerializerType.Should().Be(typeof(Serialization.Bond.BondCompactBinaryCacheSerializer));
+        }
+
+        [Fact]
+        public void Configuration_Serializer_KnownType_BondFast()
+        {
+            var data = new Dictionary<string, string>
+            {
+                {"cacheManagers:0:name", "name"},
+                {"cacheManagers:0:handles:0:knownType", "Dictionary"},
+                {"cacheManagers:0:serializer:knownType", "BondFastBinary"}
+            };
+
+            var config = GetConfiguration(data).GetCacheConfiguration("name");
+            config.SerializerType.Should().Be(typeof(Serialization.Bond.BondFastBinaryCacheSerializer));
+        }
+
+
+        [Fact]
+        public void Configuration_Serializer_KnownType_BondJosn()
+        {
+            var data = new Dictionary<string, string>
+            {
+                {"cacheManagers:0:name", "name"},
+                {"cacheManagers:0:handles:0:knownType", "Dictionary"},
+                {"cacheManagers:0:serializer:knownType", "BondSimpleJson"}
+            };
+
+            var config = GetConfiguration(data).GetCacheConfiguration("name");
+            config.SerializerType.Should().Be(typeof(Serialization.Bond.BondSimpleJsonCacheSerializer));
+        }
+
+        [Fact]
         public void Configuration_Redis_NothingDefined()
         {
             var key = Guid.NewGuid().ToString();

@@ -25,6 +25,9 @@ namespace Microsoft.Extensions.Configuration
         private const string TypeJsonCacheSerializer = "CacheManager.Serialization.Json.JsonCacheSerializer, CacheManager.Serialization.Json";
         private const string TypeGzJsonCacheSerializer = "CacheManager.Serialization.Json.GzJsonCacheSerializer, CacheManager.Serialization.Json";
         private const string TypeProtobufCacheSerializer = "CacheManager.Serialization.ProtoBuf.ProtoBufSerializer, CacheManager.Serialization.ProtoBuf";
+        private const string TypeBondCompactBinarySerializer = "CacheManager.Serialization.Bond.BondCompactBinaryCacheSerializer, CacheManager.Serialization.Bond";
+        private const string TypeBondFastBinarySerializer = "CacheManager.Serialization.Bond.BondFastBinaryCacheSerializer, CacheManager.Serialization.Bond";
+        private const string TypeBondSimpleJsonSerializer = "CacheManager.Serialization.Bond.BondSimpleJsonCacheSerializer, CacheManager.Serialization.Bond";
         private const string TypeMicrosoftLoggerFactory = "CacheManager.Logging.MicrosoftLoggerFactoryAdapter, CacheManager.Microsoft.Extensions.Logging";
         private const string TypeRedisBackplane = "CacheManager.Redis.RedisCacheBackplane, CacheManager.StackExchange.Redis";
         private const string TypeSystemRuntimeHandle = "CacheManager.SystemRuntimeCaching.MemoryCacheHandle`1, CacheManager.SystemRuntimeCaching";
@@ -35,6 +38,13 @@ namespace Microsoft.Extensions.Configuration
         private const string TypeMsExtensionMemoryCacheHandle = "CacheManager.MicrosoftCachingMemory.MemoryCacheHandle`1, CacheManager.Microsoft.Extensions.Caching.Memory";
         private const string TypeRedisConfiguration = "CacheManager.Redis.RedisConfiguration, CacheManager.StackExchange.Redis";
         private const string TypeRedisConfigurations = "CacheManager.Redis.RedisConfigurations, CacheManager.StackExchange.Redis";
+        private const string KnonwSerializerBinary = "binary";
+        private const string KnonwSerializerJson = "json";
+        private const string KnonwSerializerGzJson = "gzjson";
+        private const string KnonwSerializerProto = "protobuf";
+        private const string KnonwSerializerBondCompact = "bondcompactbinary";
+        private const string KnonwSerializerBondFast = "bondfastbinary";
+        private const string KnonwSerializerBondJson = "bondsimplejson";
 
         /// <summary>
         /// Gets the first and only <see cref="CacheManagerConfiguration"/> defined in
@@ -449,20 +459,29 @@ namespace Microsoft.Extensions.Configuration
         {
             switch (knownTypeName.ToLowerInvariant())
             {
-                case "binary":
+                case KnonwSerializerBinary:
 #if NETSTANDARD
-                    throw new InvalidOperationException("BinaryCacheSerializer is not available on this platform");
+                    throw new PlatformNotSupportedException("BinaryCacheSerializer is not available on this platform");
 #else
                     return typeof(BinaryCacheSerializer);
 #endif
-                case "json":
+                case KnonwSerializerJson:
                     return Type.GetType(TypeJsonCacheSerializer, true);
 
-                case "gzjson":
+                case KnonwSerializerGzJson:
                     return Type.GetType(TypeGzJsonCacheSerializer, true);
 
-                case "protobuf":
+                case KnonwSerializerProto:
                     return Type.GetType(TypeProtobufCacheSerializer, true);
+
+                case KnonwSerializerBondCompact:
+                    return Type.GetType(TypeBondCompactBinarySerializer, true);
+
+                case KnonwSerializerBondFast:
+                    return Type.GetType(TypeBondFastBinarySerializer, true);
+
+                case KnonwSerializerBondJson:
+                    return Type.GetType(TypeBondSimpleJsonSerializer, true);
             }
 
             throw new InvalidOperationException(
