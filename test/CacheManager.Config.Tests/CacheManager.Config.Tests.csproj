@@ -21,11 +21,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\CacheManager.Microsoft.Extensions.Caching.Memory\CacheManager.Microsoft.Extensions.Caching.Memory.csproj" />
     <ProjectReference Include="..\..\src\CacheManager.Microsoft.Extensions.Logging\CacheManager.Microsoft.Extensions.Logging.csproj" />
     <ProjectReference Include="..\..\src\CacheManager.Microsoft.Extensions.Configuration\CacheManager.Microsoft.Extensions.Configuration.csproj" />
     <ProjectReference Include="..\..\src\CacheManager.Core\CacheManager.Core.csproj" />
     <ProjectReference Include="..\..\src\CacheManager.Serialization.Json\CacheManager.Serialization.Json.csproj" />
     <ProjectReference Include="..\..\src\CacheManager.Serialization.Bond\CacheManager.Serialization.Bond.csproj" />
+    <ProjectReference Include="..\..\src\CacheManager.Serialization.ProtoBuf\CacheManager.Serialization.ProtoBuf.csproj" />
     <ProjectReference Include="..\..\src\CacheManager.StackExchange.Redis\CacheManager.StackExchange.Redis.csproj" />
   </ItemGroup>
 

@@ -2,7 +2,7 @@
   <Import Project="..\..\tools\common.props" />
   <PropertyGroup>
     <Description>CacheManager extension package to use Microsoft.Extensions.Configuration to configure the CacheManager instance. CacheManager is an open source caching abstraction layer for .NET written in C#. This is the ASP.NET Core configuration integration package.</Description>
-    <TargetFrameworks>net45;netstandard1.1</TargetFrameworks>
+    <TargetFrameworks>net45;netstandard1.2</TargetFrameworks>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageTags>Caching;Cache;CacheManager;Distributed Cache;StackExchange Redis;Azure AppFabric;Memcached</PackageTags>
@@ -17,9 +17,9 @@
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
   </ItemGroup>
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard1.1' ">
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard1.2' ">
     <DefineConstants>$(DefineConstants);NETSTANDARD</DefineConstants>
   </PropertyGroup>
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.1' ">
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.2' ">
   </ItemGroup>
 </Project>

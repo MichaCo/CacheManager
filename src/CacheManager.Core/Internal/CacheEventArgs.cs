@@ -86,6 +86,12 @@ namespace CacheManager.Core.Internal
         /// Gets a value indicating the cache level the event got triggered by.
         /// </summary>
         public int Level { get; }
+
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            return $"CacheItemRemovedEventArgs {Region}:{Key} - {Reason} {Level}";
+        }
     }
 
     /// <summary>
@@ -136,6 +142,12 @@ namespace CacheManager.Core.Internal
         /// Gets the event origin indicating if the event was triggered by a local action or remotly, through the backplane.
         /// </summary>
         public CacheActionEventArgOrigin Origin { get; } = CacheActionEventArgOrigin.Local;
+
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            return $"CacheActionEventArgs {Region}:{Key} - {Origin}";
+        }
     }
 
     /// <summary>
@@ -156,6 +168,12 @@ namespace CacheManager.Core.Internal
         /// Gets the event origin indicating if the event was triggered by a local action or remotly, through the backplane.
         /// </summary>
         public CacheActionEventArgOrigin Origin { get; }
+
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            return $"CacheClearEventArgs {Origin}";
+        }
     }
 
     /// <summary>
@@ -187,5 +205,11 @@ namespace CacheManager.Core.Internal
         /// Gets the event origin indicating if the event was triggered by a local action or remotly, through the backplane.
         /// </summary>
         public CacheActionEventArgOrigin Origin { get; }
+
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            return $"CacheClearRegionEventArgs {Region} - {Origin}";
+        }
     }
 }

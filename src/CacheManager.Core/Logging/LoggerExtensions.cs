@@ -5,6 +5,7 @@ namespace CacheManager.Core.Logging
 {
 #pragma warning disable SA1600
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
+
     public static class LoggerExtensions
     {
         //// Critical
@@ -277,7 +278,14 @@ namespace CacheManager.Core.Logging
                     return _format;
                 }
 
-                return string.Format(CultureInfo.CurrentCulture, _format, _args);
+                try
+                {
+                    return string.Format(CultureInfo.CurrentCulture, _format, _args);
+                }
+                catch
+                {
+                    return "Failed to format string";
+                }
             }
         }
     }

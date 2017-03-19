@@ -1066,7 +1066,7 @@ namespace CacheManager.Tests
             {
                 get
                 {
-                    throw new NotImplementedException();
+                    return new NullLogger();
                 }
             }
 

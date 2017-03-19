@@ -1,4 +1,5 @@
 ﻿using System;
+using CacheManager.Core.Logging;
 using static CacheManager.Core.Utility.Guard;
 
 namespace CacheManager.Core.Internal
@@ -202,6 +203,11 @@ namespace CacheManager.Core.Internal
         protected void TriggerCacheSpecificRemove(string key, string region, CacheItemRemovedReason reason)
         {
             NotNullOrWhiteSpace(key, nameof(key));
+
+            if (Logger.IsEnabled(LogLevel.Debug))
+            {
+                Logger.LogDebug("'{0}' triggered remove '{1}:{2}' because '{3}'.", Configuration.Name, region, key, reason);
+            }
 
             OnCacheSpecificRemove?.Invoke(this, new CacheItemRemovedEventArgs(key, region, reason));
         }

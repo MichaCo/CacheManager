@@ -2,7 +2,6 @@
 using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 using CacheManager.Core.Logging;
 using static CacheManager.Core.Utility.Guard;
 
@@ -14,11 +13,15 @@ namespace CacheManager.Core.Internal
     /// <typeparam name="TCacheValue">The type of the cache value.</typeparam>
     public class DictionaryCacheHandle<TCacheValue> : BaseCacheHandle<TCacheValue>
     {
-        private const int ScanInterval = 10000;
-        private ConcurrentDictionary<string, CacheItem<TCacheValue>> _cache;
-        private long _lastScan = 0L;
-        private bool _scanRunning;
-        private object _startScanLock = new object();
+        private const int ScanInterval = 5000;
+        private readonly static Random _random = new Random();
+        private readonly ConcurrentDictionary<string, CacheItem<TCacheValue>> _cache;
+        private readonly Timer _timer;
+
+        //private long _lastScan = 0L;
+        private int _scanRunning;
+
+        //private object _startScanLock = new object();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DictionaryCacheHandle{TCacheValue}"/> class.
@@ -32,6 +35,7 @@ namespace CacheManager.Core.Internal
             NotNull(loggerFactory, nameof(loggerFactory));
             Logger = loggerFactory.CreateLogger(this);
             _cache = new ConcurrentDictionary<string, CacheItem<TCacheValue>>();
+            _timer = new Timer(TimerLoop, null, _random.Next(100, ScanInterval), ScanInterval);
         }
 
         /// <summary>
@@ -63,8 +67,6 @@ namespace CacheManager.Core.Internal
                 CacheItem<TCacheValue> val = null;
                 _cache.TryRemove(item.Key, out val);
             }
-
-            StartScanExpiredItems();
         }
 
         /// <inheritdoc />
@@ -97,7 +99,6 @@ namespace CacheManager.Core.Internal
 
             var key = GetKey(item.Key, item.Region);
 
-            StartScanExpiredItems();
             return _cache.TryAdd(key, item);
         }
 
@@ -130,7 +131,6 @@ namespace CacheManager.Core.Internal
                 }
             }
 
-            StartScanExpiredItems();
             return result;
         }
 
@@ -145,7 +145,6 @@ namespace CacheManager.Core.Internal
             NotNull(item, nameof(item));
 
             _cache[GetKey(item.Key, item.Region)] = item;
-            StartScanExpiredItems();
         }
 
         /// <summary>
@@ -207,64 +206,60 @@ namespace CacheManager.Core.Internal
             return false;
         }
 
-        private static void ScanForExpiredItems(DictionaryCacheHandle<TCacheValue> cacheHandle)
+        private void TimerLoop(object state)
         {
-            cacheHandle._scanRunning = true;
+            if (_scanRunning > 0)
+            {
+                return;
+            }
+
+            if (Interlocked.CompareExchange(ref _scanRunning, 1, 0) == 0)
+            {
+                try
+                {
+                    if (Logger.IsEnabled(LogLevel.Debug))
+                    {
+                        Logger.LogDebug("'{0}' starting eviction scan.", Configuration.Name);
+                    }
+
+                    ScanForExpiredItems();
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogError(ex, "Error occurred during eviction scan.");
+                }
+                finally
+                {
+                    Interlocked.Exchange(ref _scanRunning, 0);
+                }
+            }
+        }
+
+        private int ScanForExpiredItems()
+        {
             var removed = 0;
             var now = DateTime.UtcNow;
-            foreach (var item in cacheHandle._cache.Values)
+            foreach (var item in _cache.Values)
             {
                 if (IsExpired(item, now))
                 {
-                    cacheHandle.RemoveInternal(item.Key, item.Region);
+                    RemoveInternal(item.Key, item.Region);
 
                     // trigger global eviction event
-                    cacheHandle.TriggerCacheSpecificRemove(item.Key, item.Region, CacheItemRemovedReason.Expired);
+                    TriggerCacheSpecificRemove(item.Key, item.Region, CacheItemRemovedReason.Expired);
 
                     // fix stats
-                    cacheHandle.Stats.OnRemove(item.Region);
+                    Stats.OnRemove(item.Region);
                     removed++;
                 }
             }
 
-            if (removed > 0 && cacheHandle.Logger.IsEnabled(LogLevel.Information))
+            if (removed > 0 && Logger.IsEnabled(LogLevel.Information))
             {
-                cacheHandle.Logger.LogInfo("Removed {0} expired items.", removed);
+                Logger.LogInfo("'{0}' removed '{1}' expired items during eviction run.", Configuration.Name, removed);
             }
 
-            cacheHandle._scanRunning = false;
-        }
-
-        private void StartScanExpiredItems()
-        {
-            var currentTicks = Environment.TickCount & int.MaxValue;
-            if (!_scanRunning && (_lastScan + ScanInterval < currentTicks || _lastScan > currentTicks))
-            {
-                lock (_startScanLock)
-                {
-                    if (!_scanRunning && (_lastScan + ScanInterval < currentTicks || _lastScan > currentTicks))
-                    {
-                        _lastScan = currentTicks;
-
-                        Logger.LogInfo("Starting scan for expired items. Next scan in {0}sec.", ScanInterval / 1000);
-#if NET40
-                        Task.Factory.StartNew(
-                            state => ScanForExpiredItems((DictionaryCacheHandle<TCacheValue>)state),
-                            this,
-                            CancellationToken.None,
-                            TaskCreationOptions.None,
-                            TaskScheduler.Default);
-#else
-                        Task.Factory.StartNew(
-                            state => ScanForExpiredItems((DictionaryCacheHandle<TCacheValue>)state),
-                            this,
-                            CancellationToken.None,
-                            TaskCreationOptions.DenyChildAttach,
-                            TaskScheduler.Default);
-#endif
-                    }
-                }
-            }
+            return removed;
         }
     }
 }

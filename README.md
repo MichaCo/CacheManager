@@ -18,12 +18,13 @@ Linux, Mono | -
 
 | Package Name | .Net 4.0  | .Net 4.5  | Minimum .NET Platform Standard version *
 |--------------| :-------: | :-------: | :-------: 
-| [CacheManager.Core] [Core.nuget] | x | x | 1.1
+| [CacheManager.Core] [Core.nuget] | x | x | 1.2
 | [CacheManager.StackExchange.Redis] [Redis.nuget] | x | x | 1.5
 | [CacheManager.SystemRuntimeCaching] [SystemRuntimeCaching.nuget]  | x | x | -
 | [CacheManager.Microsoft.Extensions.Caching.Memory] [MSCache.nuget] | - | \>=4.5.1 | 1.3
-| [CacheManager.Microsoft.Extensions.Configuration] [Configuration.nuget] | - | x | 1.3
-| [CacheManager.Microsoft.Extensions.Logging] [Logging.nuget] | - | x | 1.3
+| [CacheManager.Microsoft.Extensions.Configuration] [Configuration.nuget] | - | x | 1.2
+| [CacheManager.Microsoft.Extensions.Logging] [Logging.nuget] | - | x | 1.2
+| [CacheManager.Serialization.Bond] [Bond.nuget] | x | x | 1.2
 | [CacheManager.Serialization.Json] [Json.nuget] | x | x | 1.2
 | [CacheManager.Serialization.ProtoBuf] [ProtoBuf.nuget] | x | x | 1.3
 | [CacheManager.Web] [Web.nuget]  | - | x | -

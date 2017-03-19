@@ -70,8 +70,11 @@ namespace CacheManager.Core
             var serializer = CacheReflectionHelper.CreateSerializer(configuration, loggerFactory);
 
             Logger = loggerFactory.CreateLogger(this);
+
             _logTrace = Logger.IsEnabled(LogLevel.Trace);
+
             Logger.LogInfo("Cache manager: adding cache handles...");
+
             try
             {
                 _cacheHandles = CacheReflectionHelper.CreateCacheHandles(this, loggerFactory, serializer).ToArray();
@@ -82,9 +85,15 @@ namespace CacheManager.Core
                     var handleIndex = index;
                     handle.OnCacheSpecificRemove += (sender, args) =>
                     {
+                        // base cache handle does logging for this
                         TriggerOnRemoveByHandle(args.Key, args.Region, args.Reason, handleIndex + 1);
                         if (Configuration.UpdateMode == CacheUpdateMode.Up)
                         {
+                            if (_logTrace)
+                            {
+                                Logger.LogTrace("Cleaning handles above '{0}' because of remove event.", handleIndex);
+                            }
+
                             EvictFromHandlesAbove(args.Key, args.Region, handleIndex);
                         }
                     };
