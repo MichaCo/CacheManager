@@ -27,23 +27,23 @@ In general, it is good to see how fast the Dictionary handle is compared to the 
 
 Method |  Platform |  Median |    StdDev | Scaled |
 -----------: |:-----------: |-----------: |----------: |-------: |
- Dictionary |      X64 |  1.7254 us | 0.0511 us |   1.00 |
- Dictionary |      X86 |  1.9563 us | 0.0399 us |   1.00 |
-    Runtime |      X64 |  4.9839 us | 0.0778 us |   2.89 |
-    Runtime |      X86 |  7.0324 us | 0.2012 us |   3.59 |
-      Redis |      X64 | 56.6671 us | 1.7202 us |  32.84 |
-      Redis |      X86 | 58.0775 us | 0.9517 us |  29.69 |      
+Dictionary |      X64 |  1.7254 us | 0.0511 us |   1.00 |
+Dictionary |      X86 |  1.9563 us | 0.0399 us |   1.00 |
+Runtime |      X64 |  4.9839 us | 0.0778 us |   2.89 |
+Runtime |      X86 |  7.0324 us | 0.2012 us |   3.59 |
+Redis |      X64 | 56.6671 us | 1.7202 us |  32.84 |
+Redis |      X86 | 58.0775 us | 0.9517 us |  29.69 |      
 
 *Adding one item per run with using region*
 
 Method |  Platform |  Median |    StdDev | Scaled |
 -----------: |:-----------: |-----------: |----------: |-------: |
- Dictionary |      X64 |  1.8094 us | 0.0386 us |   1.00 |
- Dictionary |      X86 |  2.5029 us | 0.1179 us |   1.00 |
-    Runtime |      X64 |  6.6934 us | 0.1275 us |   3.70 |
-    Runtime |      X86 |  9.2334 us | 0.1637 us |   3.69 |
-      Redis |      X64 | 58.5355 us | 1.7054 us |  32.35 |
-      Redis |      X86 | 61.0272 us | 1.4178 us |  24.38 |      
+Dictionary |      X64 |  1.8094 us | 0.0386 us |   1.00 |
+Dictionary |      X86 |  2.5029 us | 0.1179 us |   1.00 |
+Runtime |      X64 |  6.6934 us | 0.1275 us |   3.70 |
+Runtime |      X86 |  9.2334 us | 0.1637 us |   3.69 |
+Redis |      X64 | 58.5355 us | 1.7054 us |  32.35 |
+Redis |      X86 | 61.0272 us | 1.4178 us |  24.38 |      
 
 ### Put
 *Put 1 item per run*
@@ -51,23 +51,23 @@ Redis is as fast as the other handles in this scenario because CacheManager uses
 
 Method |  Platform |  Median |    StdDev | Scaled |
 -----------: |:-----------: |-----------: |----------: |-------: |
- Dictionary |      X64 | 1.6802 us | 0.0235 us |   1.00 |
- Dictionary |      X86 | 1.9445 us | 0.0341 us |   1.00 |
-    Runtime |      X64 | 4.4431 us | 0.0651 us |   2.64 |
-    Runtime |      X86 | 6.5231 us | 0.1063 us |   3.35 |
-      Redis |      X64 | 2.6869 us | 0.0934 us |   1.60 |
-      Redis |      X86 | 3.5490 us | 0.0848 us |   1.83 |
+Dictionary |      X64 | 1.6802 us | 0.0235 us |   1.00 |
+Dictionary |      X86 | 1.9445 us | 0.0341 us |   1.00 |
+Runtime |      X64 | 4.4431 us | 0.0651 us |   2.64 |
+Runtime |      X86 | 6.5231 us | 0.1063 us |   3.35 |
+Redis |      X64 | 2.6869 us | 0.0934 us |   1.60 |
+Redis |      X86 | 3.5490 us | 0.0848 us |   1.83 |
       
 *Put 1 item per run with region*
 
 Method |  Platform |  Median |    StdDev | Scaled |
 -----------: |:-----------: |-----------: |----------: |-------: |
- Dictionary |      X64 | 1.7401 us | 0.0365 us |   1.00 |
- Dictionary |      X86 | 2.4589 us | 0.1022 us |   1.00 |
-    Runtime |      X64 | 6.1772 us | 0.3683 us |   3.55 |
-    Runtime |      X86 | 9.9298 us | 0.5574 us |   4.04 |
-      Redis |      X64 | 3.0807 us | 0.0906 us |   1.77 |
-      Redis |      X86 | 3.6385 us | 0.2123 us |   1.48 |
+Dictionary |      X64 | 1.7401 us | 0.0365 us |   1.00 |
+Dictionary |      X86 | 2.4589 us | 0.1022 us |   1.00 |
+Runtime |      X64 | 6.1772 us | 0.3683 us |   3.55 |
+Runtime |      X86 | 9.9298 us | 0.5574 us |   4.04 |
+Redis |      X64 | 3.0807 us | 0.0906 us |   1.77 |
+Redis |      X86 | 3.6385 us | 0.2123 us |   1.48 |
 
 ### Get
 *Get 1 item per run*
@@ -75,23 +75,23 @@ With `Get` operations we can clearly see how much faster an in-memory cache is, 
 
 Method |  Platform |  Median |    StdDev | Scaled |
 -----------: |:-----------: |-----------: |----------: |-------: |
- Dictionary |      X64 |    169.8708 ns |     4.6186 ns |   1.00 |
- Dictionary |      X86 |    540.0879 ns |     8.9363 ns |   1.00 |
-    Runtime |      X64 |    310.4025 ns |     8.2928 ns |   1.83 |
-    Runtime |      X86 |  1,030.5911 ns |     8.0532 ns |   1.91 |
-      Redis |      X64 | 56,917.3537 ns | 2,035.4765 ns | 335.06 |
-      Redis |      X86 | 59,519.5459 ns | 1,527.9613 ns | 110.20 |
+Dictionary |      X64 |    169.8708 ns |     4.6186 ns |   1.00 |
+Dictionary |      X86 |    540.0879 ns |     8.9363 ns |   1.00 |
+Runtime |      X64 |    310.4025 ns |     8.2928 ns |   1.83 |
+Runtime |      X86 |  1,030.5911 ns |     8.0532 ns |   1.91 |
+Redis |      X64 | 56,917.3537 ns | 2,035.4765 ns | 335.06 |
+Redis |      X86 | 59,519.5459 ns | 1,527.9613 ns | 110.20 |
 
 *Get 1 item per run with region*
 
 Method |  Platform |  Median |    StdDev | Scaled |
 -----------: |:-----------: |-----------: |----------: |-------: |
- Dictionary |      X64 |    234.9676 ns |     7.9172 ns |   1.00 |
- Dictionary |      X86 |    600.0429 ns |    13.7090 ns |   1.00 |
-    Runtime |      X64 |    497.4116 ns |    15.6998 ns |   2.12 |
-    Runtime |      X86 |  1,191.6452 ns |    19.8484 ns |   1.99 |
-      Redis |      X64 | 57,257.9868 ns | 1,705.0148 ns | 243.68 |
-      Redis |      X86 | 61,789.3944 ns | 1,775.6064 ns | 102.97 |
+Dictionary |      X64 |    234.9676 ns |     7.9172 ns |   1.00 |
+Dictionary |      X86 |    600.0429 ns |    13.7090 ns |   1.00 |
+Runtime |      X64 |    497.4116 ns |    15.6998 ns |   2.12 |
+Runtime |      X86 |  1,191.6452 ns |    19.8484 ns |   1.99 |
+Redis |      X64 | 57,257.9868 ns | 1,705.0148 ns | 243.68 |
+Redis |      X86 | 61,789.3944 ns | 1,775.6064 ns | 102.97 |
 
 
 ### Serializer comparison
@@ -146,12 +146,14 @@ Pretty simple but large enough to analyze the performance.
 
 **Results:**
 
-             Method | Platform |      Median |    StdDev | Scaled | Scaled-SD |
-------------------- |--------- |------------ |---------- |------- |---------- |
-   BinarySerializer |      X64 |  62.4158 ms | 1.8668 ms |   2.20 |      0.07 |
-     JsonSerializer |      X64 |  28.5521 ms | 0.4633 ms |   1.00 |      0.00 |
-   JsonGzSerializer |      X64 | 102.5552 ms | 4.8584 ms |   3.60 |      0.18 |
- ProtoBufSerializer |      X64 |  11.1276 ms | 0.1252 ms |   0.39 |      0.01 |
- 
+
+Method | Platform |      Median |    StdDev | Scaled | Scaled-SD |
+-----: |:-------: |-----------: |----------: |-------: |-------: |
+BinarySerializer |      X64 |  62.4158 ms | 1.8668 ms |   2.20 |      0.07 |
+JsonSerializer |      X64 |  28.5521 ms | 0.4633 ms |   1.00 |      0.00 |
+JsonGzSerializer |      X64 | 102.5552 ms | 4.8584 ms |   3.60 |      0.18 |
+ProtoBufSerializer |      X64 |  11.1276 ms | 0.1252 ms |   0.39 |      0.01 |
+
+
  As expected the protobuf serialization outperforms everything else by a huge margin!
  The compression overhead of the JsonGz serializer seems to be pretty large and may have some potential for optimizations...
