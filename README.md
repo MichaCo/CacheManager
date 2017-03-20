@@ -31,7 +31,7 @@ Linux, Mono | -
 | [CacheManager.Memcached][Memcached.nuget]  | x | x | -
 | [CacheManager.Couchbase][Couchbase.nuget]  | - | x | -
 
-\* *"Minimum .NET Platform Standard" version means, that at least the listed version per package must be targeted if you want to use it. See the [documentation](https://github.com/dotnet/corefx/blob/master/Documentation/architecture/net-platform-standard.md) for more details of what .NET platform standard means.*
+\* *"Minimum .NET Platform Standard" version means, that at least the listed version per package must be targeted if you want to use it. See the [documentation](https://github.com/dotnet/standard/blob/master/docs/versions.md) for more details of what .NET platform standard means.*
 
 ### Beta Packages
 Beta versions of the CacheManager packages are getting pushed to https://www.myget.org/gallery/cachemanager on each build. 
@@ -39,11 +39,11 @@ Add the following feed, if you want to play with the not yet released bits:
 
     https://www.myget.org/F/cachemanager/api/v3/index.json
 
-To find which check-in created which build, use this [build history](https://ci.appveyor.com/project/MichaCo/cachemanager/history).
+To find which check-in created which build, use this [build history](https://ci.appveyor.com/project/MichaCo/cachemanager-ak9g3/history).
 
 ## Documentation
  
-Documentation can be found within the [articles folder][articles] of the Cache Manager's repository and  hosted on my [website][mcweb]:
+Documentation can be found within the [articles folder][articles] of the Cache Manager's repository and  hosted on my [website][cmweb]:
 
 * [**Getting Started**][gettingstarted]
 Is a very basic introduction of how to install and use Cache Manager
@@ -65,7 +65,7 @@ There is also from source generated [html documentation][help] available online.
 ## Examples
 * Examples included in the Cache Manager repository
 	* [**Some usage examples**][program.cs]
-	* [**ASP.NET MVC website**][outputcachesample] showcasing usage of the Cache Manager `OutputCache` provider
+	* [**Sample ASP.NET Core website**][corewebsample]
 * [**Single Page Todo App with Cache Manager on Azure using Redis**][todosample]
 
 ## Benchmarks
@@ -97,7 +97,7 @@ The following are the currently available serialization options:
 * **Update values with lock or transaction** for distributed caches. 
 The interfaced provides a simple update method which internally ensures you work with the latest version.
 And CacheManager handles version conflicts for you.
-* **Logging** CacheManager comes with an extensible logging API ([see samples](https://github.com/MichaCo/CacheManager/blob/master/samples/CacheManager.Examples/Program.cs#L31)).
+* **Logging** CacheManager comes with an extensible logging API.
     * All standard cache operations are logged
     * Based on log levels more or less information will be logged (try Trace and Debug)
     * Current concrete implementation is based on the ASP.NET Core logging. Other implementation of CacheManager's ILoggerFactory might follow.
@@ -139,6 +139,7 @@ OnGet, OnAdd, OnPut, OnRemove, OnClear, OnClearRegion
 [Web.nuget]: https://www.nuget.org/packages/CacheManager.Web
 [Couchbase.nuget]: https://www.nuget.org/packages/CacheManager.Couchbase
 [mcweb]: http://michaconrad.com
+[cmweb]:  http://cachemanager.michaco.net
 [articles]: https://github.com/MichaCo/CacheManager/tree/master/Articles
 [help]: http://cachemanager.michaco.net/Documentation/api
 [gettingstarted]: http://cachemanager.michaco.net/Documentation/Index/cachemanager_getting_started
@@ -149,7 +150,7 @@ OnGet, OnAdd, OnPut, OnRemove, OnClear, OnClearRegion
 [logging]: http://cachemanager.michaco.net/Documentation/Index/cachemanager_logging
 [serialization]: http://cachemanager.michaco.net/Documentation/Index/cachemanager_serialization
 [program.cs]: https://github.com/MichaCo/CacheManager/blob/master/samples/CacheManager.Examples/Program.cs
-[outputcachesample]: https://github.com/MichaCo/CacheManager/tree/master/samples/CacheManager.Samples.Mvc
+[corewebsample]: https://github.com/MichaCo/CacheManager/tree/dev/samples/AspnetCore.WebApp
 [todosample]: http://cachemanager.michaco.net/Documentation/Index/cachemanager_backed_todo_web_app
 [Json.nuget]: https://www.nuget.org/packages/CacheManager.Serialization.Json
 [Logging.nuget]: https://www.nuget.org/packages/CacheManager.Microsoft.Extensions.Logging
