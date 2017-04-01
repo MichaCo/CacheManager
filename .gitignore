@@ -171,3 +171,5 @@ $RECYCLE.BIN/
 /tools/redis/.nuget
 /.build
 /.vs
+/Documentation/DocFxBin
+/Documentation/*.zip

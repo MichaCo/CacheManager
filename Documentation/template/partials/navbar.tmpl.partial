@@ -28,7 +28,7 @@
 						<li><a href="/Documentation/Index/cachemanager_architecture">Features and Architecture</a></li>
 						<li><a href="/Documentation/Index/cachemanager_update">Update operations</a></li>
 						<li><a href="/Documentation/Index/cachemanager_synchronization">Cache Synchronization</a></li>
-						<li><a href="/Documentation/Index/cachemanager_logging"">Logging</a></li>
+						<li><a href="/Documentation/Index/cachemanager_logging">Logging</a></li>
 					</ul>
 				</li>
 				<li class="dropdown">

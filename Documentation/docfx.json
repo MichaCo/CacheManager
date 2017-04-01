@@ -3,33 +3,39 @@
     {
       "src": [
         {
-          "files": [ "**project.json" ],
-          "exclude": [
-            "**/bin/**",
-            "**/obj/**"
+          "files": [
+            "**/*.csproj",
+			      "**/*.cs"
           ],
-		  "cwd": "../src"
+          "src": "../src",
+          "exclude": [
+            "**/obj/**",
+            "**/bin/**",
+            "_site/**"
+          ]
         }
       ],
-      "dest": "api"
+      "dest": "obj/api"
     }
   ],
   "build": {
     "content": [
       {
         "files": [
-          "api/**.yml",
-          "api/*.md"
-        ]
+          "api/**.yml"
+        ],
+        "src": "obj"
       },
       {
         "files": [
+          "api/*.md",
+          "articles/**.md",
           "toc.yml",
-          "*.md"
+          "index.md"
         ],
         "exclude": [
-          "**/bin/**",
-          "**/obj/**"
+          "obj/**",
+          "_site/**"
         ]
       }
     ],
@@ -39,18 +45,24 @@
           "images/**"
         ],
         "exclude": [
-          "**/bin/**",
-          "**/obj/**"
+          "obj/**",
+          "_site/**"
         ]
       }
     ],
-    "overwrite": "apispec/*.md",
-    "externalReference": [
+    "overwrite": [
       {
-        "files": "msdn.4.5.2/content/*.rpk"
+        "files": [
+          "apispec/**.md"
+        ],
+        "exclude": [
+          "obj/**",
+          "_site/**"
+        ]
       }
     ],
-    "dest": "../../michaconrad.com/website/Documentation",
+    "xref": "msdn.4.5.2/content/msdn.4.5.2.zip",
+    "dest": "..\\..\\cachemanager.net\\website\\Documentation",
     "template": [
       "default",
       "template"

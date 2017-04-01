@@ -13,8 +13,7 @@ namespace CacheManager.Core
     public enum CacheUpdateMode
     {
         /// <summary>
-        /// <c>None</c> instructs the cache manager to not set a cache item to other cache handles
-        /// at all.
+        /// Instructs the cache manager not to synchronize cache items with other cache handles (on <see cref="ICache{TCacheValue}.Get(string)"/> for example).
         /// </summary>
         None,
 
@@ -26,10 +25,12 @@ namespace CacheManager.Core
         ////Full,
 
         /// <summary>
-        /// <c>Up</c> instructs the cache manager to add the cache item found to cache handles which
-        /// are 'above' the one the item was found in. The order of the cache handles is defined by
-        /// the configuration (order they have been added). First cache handle added is the top most one.
+        /// Instructs the cache manager to synchronize cache items with other cache handles above in the list of cache handles.
+        /// The order of cache handles is defined by the configuration.
         /// </summary>
+        /// <remarks>
+        /// This is the default behavior and should only be turned off if really needed.
+        /// </remarks>
         Up
     }
 }
