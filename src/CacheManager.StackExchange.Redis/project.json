@@ -1,0 +1,21 @@
+{
+  "packOptions": {
+    "licenseUrl": "https://github.com/MichaCo/CacheManager/blob/master/LICENSE",
+    "projectUrl": "http://www.cachemanager.net",
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/MichaCo/CacheManager"
+    },
+    "summary": "CacheManager is an open source caching abstraction layer for .NET written in C#",
+    "tags": [ "Caching", "Cache", "CacheManager", "Distributed Cache", "StackExchange Redis", "Azure AppFabric", "Memcached" ]
+  },
+  "authors": [ "MichaConrad" ],
+  "copyright": "Copyright (c) 2016 MichaConrad",
+  "frameworks": {
+    "net462": {
+      "frameworkAssemblies": {
+        "System.Configuration": ""
+      }
+    }
+  }
+}

@@ -10,7 +10,7 @@ using Newtonsoft.Json;
 namespace CacheManager.Serialization.Json
 {
     /// <summary>
-    /// Implements the <see cref="ICacheSerializer"/> contract using <c>Newtonsoft.Json</c>.
+    /// Implements the <c>ICacheSerializer</c> contract using <c>Newtonsoft.Json</c>.
     /// </summary>
     public class JsonCacheSerializer : CacheSerializer
     {

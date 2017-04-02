@@ -2,14 +2,13 @@
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using CacheManager.Core.Internal;
 using CacheManager.Core.Utility;
 using Newtonsoft.Json;
 
 namespace CacheManager.Serialization.Json
 {
     /// <summary>
-    /// Implements the <see cref="ICacheSerializer"/> contract using <c>Newtonsoft.Json</c> and the <see cref="GZipStream "/> loseless compression.
+    /// Implements the <c>ICacheSerializer</c> contract using <c>Newtonsoft.Json</c> and the <see cref="GZipStream "/> loseless compression.
     /// </summary>
     public class GzJsonCacheSerializer : JsonCacheSerializer
     {

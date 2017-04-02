@@ -4,8 +4,9 @@
   <meta http-equiv="Content-Language" content="en" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
   <meta name="application-name" content="CacheManager" />
-  <title>{{title}} | CacheManager.NET</title>
+  <title>{{#title}}{{title}}{{/title}}{{^title}}{{>partials/title}}{{/title}} {{#_appTitle}}| {{_appTitle}} {{/_appTitle}} | CacheManager.NET</title>
   <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1.0" />
+  <meta name="title" content="{{#title}}{{title}}{{/title}}{{^title}}{{>partials/title}}{{/title}} {{#_appTitle}}| {{_appTitle}} {{/_appTitle}} | CacheManager.NET">
   <meta name="title" content="{{title}} | CacheManager.NET" />
   <meta name="generator" content="docfx {{_docfxVersion}}" />
   {{#_description}}<meta name="description" content="{{_description}}" />{{/_description}}

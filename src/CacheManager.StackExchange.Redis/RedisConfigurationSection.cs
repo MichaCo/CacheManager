@@ -7,7 +7,9 @@ namespace CacheManager.Redis
     /// <summary>
     /// Configuration section for the CacheManager.
     /// </summary>
-    /// <example><![CDATA[
+    /// <example>
+    /// <code>
+    /// <![CDATA[
     /// <cacheManager.redis>
     ///   <connections>
     ///    <connection id="redis1"
@@ -31,6 +33,7 @@ namespace CacheManager.Redis
     ///  <connections/>
     /// </cacheManager.redis>
     /// ]]>
+    /// </code>
     /// </example>
     public sealed class Endpoint : ConfigurationElement
     {

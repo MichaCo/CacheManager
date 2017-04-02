@@ -9,7 +9,7 @@ using CacheManager.Core.Internal;
 namespace Microsoft.Extensions.Configuration
 {
     /// <summary>
-    /// Extensions for the <see cref="IConfiguration"/> to load <see cref="CacheManagerConfiguration"/>s from <see cref="IConfigurationProvider"/>s.
+    /// Extensions for the Microsoft configuration framework to load <see cref="CacheManagerConfiguration"/>s.
     /// </summary>
     public static class MicrosoftConfigurationExtensions
     {
@@ -51,7 +51,7 @@ namespace Microsoft.Extensions.Configuration
         /// the <code>cacheManagers</code> section of the provided <paramref name="configuration"/>.
         /// </summary>
         /// <param name="configuration">The source configuration.</param>
-        /// <returns>The <see cref="ICacheManagerConfiguration"/>.</returns>
+        /// <returns>The <c cref="ICacheManagerConfiguration"/>.</returns>
         /// <exception cref="InvalidOperationException">If no cacheManagers section is defined or more than one manager is configured.</exception>
         public static ICacheManagerConfiguration GetCacheConfiguration(this IConfiguration configuration)
         {

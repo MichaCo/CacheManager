@@ -1,32 +1,31 @@
 @echo off
 cd %~dp0
 
+call GetMsdn.cmd
+
 SETLOCAL
-SET NUGET_VERSION=latest
-SET CACHED_NUGET=%LocalAppData%\NuGet\nuget.%NUGET_VERSION%.exe
+SET DOCFX_VERSION=2.15.4
+SET CACHED_ZIP=%LocalAppData%\DocFx\docfx.%DOCFX_VERSION%.zip
 
-@powershell -NoProfile -ExecutionPolicy unrestricted -Command "&{$Branch='dev';iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/aspnet/Home/dev/dnvminstall.ps1'))}"
-call dnvm install latest
+IF EXIST %CACHED_ZIP% goto extract
+echo Downloading latest version of docfx...
+IF NOT EXIST %LocalAppData%\DocFx md %LocalAppData%\DocFx
+SET DWL_FILE=https://github.com/dotnet/docfx/releases/download/v%DOCFX_VERSION%/docfx.zip
+echo Downloading %DWL_FILE%
+@powershell -NoProfile -ExecutionPolicy unrestricted -Command "$ProgressPreference = 'SilentlyContinue'; Invoke-WebRequest '%DWL_FILE%' -OutFile '%CACHED_ZIP%'"
 
-IF EXIST %CACHED_NUGET% goto copynuget
+:extract
 
-echo Downloading latest version of NuGet.exe...
-IF NOT EXIST %LocalAppData%\NuGet md %LocalAppData%\NuGet
-@powershell -NoProfile -ExecutionPolicy unrestricted -Command "$ProgressPreference = 'SilentlyContinue'; Invoke-WebRequest 'https://dist.nuget.org/win-x86-commandline/%NUGET_VERSION%/nuget.exe' -OutFile '%CACHED_NUGET%'"
+copy %CACHED_ZIP% docfx.zip > nul
 
-:copynuget
-IF EXIST .nuget\nuget.exe goto restore
-md .nuget
-copy %CACHED_NUGET% .nuget\nuget.exe > nul
+RMDIR /S /Q  "DocFxBin"
+IF NOT EXIST \DocFxBin md \DocFxBin
+@powershell -nologo -noprofile -command "& { Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory('docfx.zip', 'DocFxBin'); }"
 
 :restore
-IF EXIST msdn.4.5.2 goto build
-.nuget\nuget.exe install msdn.4.5.2 -pre -ExcludeVersion
-.nuget\nuget.exe install docfx -ExcludeVersion -pre -Out packages
 
-:build
+:run
 
-call dnu restore packages\docfx\app
-del "*.log"
-call packages\docfx\app\docfx.cmd metadata -l meta.log --logLevel info -f
-call packages\docfx\app\docfx.cmd build -l build.log --logLevel info -f
+rd /S /Q ..\..\cachemanager.net\website\Documentation
+rd /S /Q obj
+DocFxBin\docfx.exe

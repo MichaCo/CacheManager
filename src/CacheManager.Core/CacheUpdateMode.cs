@@ -27,10 +27,10 @@ namespace CacheManager.Core
         /// <summary>
         /// Instructs the cache manager to synchronize cache items with other cache handles above in the list of cache handles.
         /// The order of cache handles is defined by the configuration.
-        /// </summary>
         /// <remarks>
         /// This is the default behavior and should only be turned off if really needed.
         /// </remarks>
+        /// </summary>
         Up
     }
 }

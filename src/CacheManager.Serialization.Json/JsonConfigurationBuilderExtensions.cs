@@ -5,7 +5,7 @@ using static CacheManager.Core.Utility.Guard;
 namespace CacheManager.Core
 {
     /// <summary>
-    /// Extensions for the configuration builder for the <code>Newtonsoft.Json</code> based <see cref="CacheManager.Core.Internal.ICacheSerializer"/>.
+    /// Extensions for the configuration builder for the <c>Newtonsoft.Json</c> based <c>ICacheSerializer</c>.
     /// </summary>
     public static class JsonConfigurationBuilderExtensions
     {
