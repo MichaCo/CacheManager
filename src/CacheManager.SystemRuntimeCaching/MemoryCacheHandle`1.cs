@@ -152,7 +152,7 @@ namespace CacheManager.SystemRuntimeCaching
             if (item.IsExpired)
             {
                 RemoveInternal(item.Key, item.Region);
-                TriggerCacheSpecificRemove(item.Key, item.Region, CacheItemRemovedReason.Expired);
+                TriggerCacheSpecificRemove(item.Key, item.Region, CacheItemRemovedReason.Expired, item.Value);
                 return null;
             }
 
@@ -359,14 +359,21 @@ namespace CacheManager.SystemRuntimeCaching
                     Stats.OnRemove();
                 }
 
+                var item = arguments.CacheItem.Value as CacheItem<TCacheValue>;
+                object originalValue = null;
+                if (item != null)
+                {
+                    originalValue = item.Value;
+                }
+
                 // trigger cachemanager's remove on evicted and expired items
                 if (arguments.RemovedReason == CacheEntryRemovedReason.Evicted || arguments.RemovedReason == CacheEntryRemovedReason.CacheSpecificEviction)
                 {
-                    TriggerCacheSpecificRemove(key, region, CacheItemRemovedReason.Evicted);
+                    TriggerCacheSpecificRemove(key, region, CacheItemRemovedReason.Evicted, originalValue);
                 }
                 else if (arguments.RemovedReason == CacheEntryRemovedReason.Expired)
                 {
-                    TriggerCacheSpecificRemove(key, region, CacheItemRemovedReason.Expired);
+                    TriggerCacheSpecificRemove(key, region, CacheItemRemovedReason.Expired, originalValue);
                 }
             }
         }

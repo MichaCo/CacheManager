@@ -55,7 +55,7 @@ namespace CacheManager.Tests
             string region = null;
 
             // act
-            Action act = () => new CacheItemRemovedEventArgs(key, region, CacheItemRemovedReason.Expired);
+            Action act = () => new CacheItemRemovedEventArgs(key, region, CacheItemRemovedReason.Expired, null);
 
             // assert
             act.ShouldThrow<ArgumentNullException>()
@@ -71,10 +71,10 @@ namespace CacheManager.Tests
             string region = null;
 
             // act
-            Func<CacheItemRemovedEventArgs> act = () => new CacheItemRemovedEventArgs(key, region, CacheItemRemovedReason.Expired, 2);
+            Func<CacheItemRemovedEventArgs> act = () => new CacheItemRemovedEventArgs(key, region, CacheItemRemovedReason.Expired, null, 2);
 
             // assert
-            act().ShouldBeEquivalentTo(new { Region = (string)null, Key = key, Reason = CacheItemRemovedReason.Expired, Level = 2 });
+            act().ShouldBeEquivalentTo(new { Region = (string)null, Key = key, Reason = CacheItemRemovedReason.Expired, Level = 2, Value = (object)null });
         }
 
         [Fact]
@@ -86,10 +86,10 @@ namespace CacheManager.Tests
             string region = "region";
 
             // act
-            Func<CacheItemRemovedEventArgs> act = () => new CacheItemRemovedEventArgs(key, region, CacheItemRemovedReason.Expired, 2);
+            Func<CacheItemRemovedEventArgs> act = () => new CacheItemRemovedEventArgs(key, region, CacheItemRemovedReason.Expired, "value", 2);
 
             // assert
-            act().ShouldBeEquivalentTo(new { Region = region, Key = key, Reason = CacheItemRemovedReason.Expired, Level = 2 });
+            act().ShouldBeEquivalentTo(new { Region = region, Key = key, Reason = CacheItemRemovedReason.Expired, Level = 2, Value = "value" });
         }
 
         [Fact]
@@ -101,10 +101,10 @@ namespace CacheManager.Tests
             string region = "region";
 
             // act
-            Func<CacheItemRemovedEventArgs> act = () => new CacheItemRemovedEventArgs(key, region, CacheItemRemovedReason.Evicted, 0);
+            Func<CacheItemRemovedEventArgs> act = () => new CacheItemRemovedEventArgs(key, region, CacheItemRemovedReason.Evicted, "value", 0);
 
             // assert
-            act().ShouldBeEquivalentTo(new { Region = region, Key = key, Reason = CacheItemRemovedReason.Evicted, Level = 0 });
+            act().ShouldBeEquivalentTo(new { Region = region, Key = key, Reason = CacheItemRemovedReason.Evicted, Level = 0, Value = "value" });
         }
 
         [Fact]
@@ -148,7 +148,7 @@ namespace CacheManager.Tests
 
         public class LongRunningEventTestBase
         {
-            public async Task<CacheItemRemovedEventArgs> RunTest(ICacheManagerConfiguration configuration, string useKey, string useRegion, bool endGetShouldBeNull = true, bool runGetWhileWaiting = true)
+            public async Task<CacheItemRemovedEventArgs> RunTest(ICacheManagerConfiguration configuration, string useKey, string useRegion, bool endGetShouldBeNull = true, bool runGetWhileWaiting = true, bool expectValue = true)
             {
                 var triggered = false;
                 CacheItemRemovedEventArgs resultArgs = null;
@@ -209,6 +209,11 @@ namespace CacheManager.Tests
                     }
                 }
 
+                if (expectValue)
+                {
+                    resultArgs.Value.Should().Be("value");
+                }
+
                 return resultArgs;
             }
         }
@@ -237,6 +242,7 @@ namespace CacheManager.Tests
             }
 
             [Fact]
+            [Trait("category", "Unreliable")]
             public async Task Events_SysRuntime_ExpireEvictsAbove()
             {
                 var cfg = new ConfigurationBuilder()
@@ -248,7 +254,7 @@ namespace CacheManager.Tests
 
                 string useKey = Guid.NewGuid().ToString();
 
-                var result = await RunTest(cfg, useKey, null);
+                var result = await RunTest(cfg, useKey, null, true, false);
 
                 result.Reason.Should().Be(CacheItemRemovedReason.Expired);
                 result.Level.Should().Be(2);
@@ -271,7 +277,7 @@ namespace CacheManager.Tests
 
                 string useKey = Guid.NewGuid().ToString();
                 string useRegion = "@_@23@_!!";
-                var result = await RunTest(cfg, useKey, useRegion);
+                var result = await RunTest(cfg, useKey, useRegion, true, true);
 
                 result.Reason.Should().Be(CacheItemRemovedReason.Expired);
                 result.Level.Should().Be(1);
@@ -280,6 +286,7 @@ namespace CacheManager.Tests
             }
 
             [Fact]
+            [Trait("category", "Unreliable")]
             public async Task Events_Dic_ExpireEvictsAbove()
             {
                 var cfg = new ConfigurationBuilder()
@@ -291,7 +298,7 @@ namespace CacheManager.Tests
 
                 string useKey = Guid.NewGuid().ToString();
 
-                var result = await RunTest(cfg, useKey, null);
+                var result = await RunTest(cfg, useKey, null, true, false);
 
                 result.Reason.Should().Be(CacheItemRemovedReason.Expired);
                 result.Level.Should().Be(2);
@@ -322,6 +329,7 @@ namespace CacheManager.Tests
             }
 
             [Fact]
+            [Trait("category", "Unreliable")]
             public async Task Events_MsMemory_ExpireEvictsAbove()
             {
                 var cfg = new ConfigurationBuilder()
@@ -333,7 +341,8 @@ namespace CacheManager.Tests
 
                 string useKey = Guid.NewGuid().ToString();
 
-                var result = await RunTest(cfg, useKey, null);
+                // we cannot wait for the cache to expire it on its own, it only checks if you actually actively do something...
+                var result = await RunTest(cfg, useKey, null, true, true);
 
                 result.Reason.Should().Be(CacheItemRemovedReason.Expired);
                 result.Level.Should().Be(2);
@@ -366,6 +375,7 @@ namespace CacheManager.Tests
             }
 
             [Fact]
+            [Trait("category", "Unreliable")]
             public async Task Events_WebCache_ExpireEvictsAbove()
             {
                 var cfg = new ConfigurationBuilder()
@@ -377,7 +387,7 @@ namespace CacheManager.Tests
 
                 string useKey = Guid.NewGuid().ToString();
 
-                var result = await RunTest(cfg, useKey, null);
+                var result = await RunTest(cfg, useKey, null, true, false);
 
                 result.Reason.Should().Be(CacheItemRemovedReason.Expired);
                 result.Level.Should().Be(2);
@@ -404,7 +414,7 @@ namespace CacheManager.Tests
 
                 string useKey = Guid.NewGuid().ToString();
                 string useRegion = "@_@23@_!!";
-                var result = await RunTest(cfg, useKey, useRegion);
+                var result = await RunTest(cfg, useKey, useRegion, true, true, false);
 
                 result.Reason.Should().Be(CacheItemRemovedReason.Expired);
                 result.Level.Should().Be(1);
@@ -428,7 +438,7 @@ namespace CacheManager.Tests
 
                 string useKey = Guid.NewGuid().ToString();
 
-                var result = await RunTest(cfg, useKey, null);
+                var result = await RunTest(cfg, useKey, null, true, false, false);
 
                 result.Reason.Should().Be(CacheItemRemovedReason.Expired);
                 result.Level.Should().Be(2);
@@ -870,20 +880,23 @@ namespace CacheManager.Tests
                 CacheItemRemovedReason reason = 0;
                 string key = string.Empty;
                 string region = string.Empty;
+                object value = null;
 
                 cache.OnRemoveByHandle += (sender, args) =>
                 {
                     reason = args.Reason;
                     key = args.Key;
                     region = args.Region;
+                    value = args.Value;
                 };
 
                 var handle = cache.CacheHandles.OfType<CustomRemoveEventTestHandle>().First();
-                handle.TestTrigger("key", "region", CacheItemRemovedReason.Evicted);
+                handle.TestTrigger("key", "region", CacheItemRemovedReason.Evicted, "value");
 
                 reason.Should().Be(CacheItemRemovedReason.Evicted);
                 key.Should().Be("key");
                 region.Should().Be("region");
+                value.Should().Be("value");
             }
         }
 
@@ -896,20 +909,23 @@ namespace CacheManager.Tests
                 CacheItemRemovedReason reason = 0;
                 string key = string.Empty;
                 string region = string.Empty;
+                object value = null;
 
                 cache.OnRemoveByHandle += (sender, args) =>
                 {
                     reason = args.Reason;
                     key = args.Key;
                     region = args.Region;
+                    value = args.Value;
                 };
 
                 var handle = cache.CacheHandles.OfType<CustomRemoveEventTestHandle>().First();
-                handle.TestTrigger("key", "region", CacheItemRemovedReason.Expired);
+                handle.TestTrigger("key", "region", CacheItemRemovedReason.Expired, "value");
 
                 reason.Should().Be(CacheItemRemovedReason.Expired);
                 key.Should().Be("key");
                 region.Should().Be("region");
+                value.Should().Be("value");
             }
         }
 
@@ -927,7 +943,7 @@ namespace CacheManager.Tests
                 };
 
                 var handle = cache.CacheHandles.OfType<CustomRemoveEventTestHandle>().First();
-                handle.TestTrigger("key", null, CacheItemRemovedReason.Expired);
+                handle.TestTrigger("key", null, CacheItemRemovedReason.Expired, null);
 
                 level.Should().Be(1);
             }
@@ -950,7 +966,7 @@ namespace CacheManager.Tests
 
                 // tests if triggereing the first one really triggers the correct level
                 var handle = cache.CacheHandles.OfType<CustomRemoveEventTestHandle>().First();
-                handle.TestTrigger("key", null, CacheItemRemovedReason.Expired);
+                handle.TestTrigger("key", null, CacheItemRemovedReason.Expired, null);
 
                 level.Should().Be(1);
             }
@@ -975,7 +991,7 @@ namespace CacheManager.Tests
 
                 // tests if triggereing the last one really triggers the correct level
                 var handle = cache.CacheHandles.OfType<CustomRemoveEventTestHandle>().Last();
-                handle.TestTrigger("key", null, CacheItemRemovedReason.Expired);
+                handle.TestTrigger("key", null, CacheItemRemovedReason.Expired, null);
 
                 level.Should().Be(3);
             }
@@ -1049,9 +1065,9 @@ namespace CacheManager.Tests
             {
             }
 
-            public void TestTrigger(string key, string region, CacheItemRemovedReason reason)
+            public void TestTrigger(string key, string region, CacheItemRemovedReason reason, object value)
             {
-                TriggerCacheSpecificRemove(key, region, reason);
+                TriggerCacheSpecificRemove(key, region, reason, value);
             }
 
             public override int Count

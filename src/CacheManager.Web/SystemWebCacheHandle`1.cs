@@ -148,7 +148,7 @@ namespace CacheManager.Web
             if (item.IsExpired)
             {
                 RemoveInternal(item.Key, item.Region);
-                TriggerCacheSpecificRemove(item.Key, item.Region, Core.Internal.CacheItemRemovedReason.Expired);
+                TriggerCacheSpecificRemove(item.Key, item.Region, Core.Internal.CacheItemRemovedReason.Expired, item.Value);
                 return null;
             }
 
@@ -321,8 +321,7 @@ namespace CacheManager.Web
             string key;
             string region;
             ParseKeyParts(_instanceKeyLength, fullKey, out isToken, out hasRegion, out region, out key);
-
-            // identify item keys and ignore region or instance key
+            
             if (!isToken)
             {
                 if (hasRegion)
@@ -334,14 +333,21 @@ namespace CacheManager.Web
                     Stats.OnRemove();
                 }
 
+                var cacheItem = item as CacheItem<TCacheValue>;
+                object originalValue = null;
+                if (item != null)
+                {
+                    originalValue = cacheItem.Value;
+                }
+
                 // trigger cachemanager's remove on evicted and expired items
                 if (reason == System.Web.Caching.CacheItemRemovedReason.Underused)
                 {
-                    TriggerCacheSpecificRemove(key, region, Core.Internal.CacheItemRemovedReason.Evicted);
+                    TriggerCacheSpecificRemove(key, region, Core.Internal.CacheItemRemovedReason.Evicted, originalValue);
                 }
                 else if (reason == System.Web.Caching.CacheItemRemovedReason.Expired)
                 {
-                    TriggerCacheSpecificRemove(key, region, Core.Internal.CacheItemRemovedReason.Expired);
+                    TriggerCacheSpecificRemove(key, region, Core.Internal.CacheItemRemovedReason.Expired, originalValue);
                 }
             }
         }

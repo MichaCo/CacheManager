@@ -53,9 +53,10 @@ namespace CacheManager.Core.Internal
         /// <param name="key">The key.</param>
         /// <param name="region">The region.</param>
         /// <param name="reason">The reason.</param>
+        /// <param name="value">The original cached value which got removed. Might be null depending on the cache sub system.</param>
         /// <param name="level">The cache level the event got triggered by.</param>
         /// <exception cref="System.ArgumentNullException">If key is null.</exception>
-        public CacheItemRemovedEventArgs(string key, string region, CacheItemRemovedReason reason, int level = 0)
+        public CacheItemRemovedEventArgs(string key, string region, CacheItemRemovedReason reason, object value, int level = 0)
         {
             NotNullOrWhiteSpace(key, nameof(key));
 
@@ -63,6 +64,7 @@ namespace CacheManager.Core.Internal
             Key = key;
             Region = region;
             Level = level;
+            Value = value;
         }
 
         /// <summary>
@@ -86,6 +88,15 @@ namespace CacheManager.Core.Internal
         /// Gets a value indicating the cache level the event got triggered by.
         /// </summary>
         public int Level { get; }
+
+        /// <summary>
+        /// Gets the original cached value which was removed by this event.
+        /// <para>
+        /// The property might return <c>Null</c> if the underlying cache system doesn't 
+        /// support returning the value on eviction (for example Redis).
+        /// </para>
+        /// </summary>
+        public object Value { get; }
 
         /// <inheritdoc />
         public override string ToString()

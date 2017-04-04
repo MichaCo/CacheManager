@@ -496,7 +496,7 @@ return result";
 
             if (cacheItem.IsExpired)
             {
-                TriggerCacheSpecificRemove(key, region, CacheItemRemovedReason.Expired);
+                TriggerCacheSpecificRemove(key, region, CacheItemRemovedReason.Expired, cacheItem.Value);
 
                 return null;
             }
@@ -577,7 +577,7 @@ return result";
 
                 if (cacheItem.IsExpired)
                 {
-                    TriggerCacheSpecificRemove(key, region, CacheItemRemovedReason.Expired);
+                    TriggerCacheSpecificRemove(key, region, CacheItemRemovedReason.Expired, cacheItem.Value);
 
                     return null;
                 }
@@ -661,7 +661,8 @@ return result";
                          Logger.LogDebug("Got expired event for key '{0}:{1}'", tupple.Item2, tupple.Item1);
                      }
 
-                     TriggerCacheSpecificRemove(tupple.Item1, tupple.Item2, CacheItemRemovedReason.Expired);
+                     // we cannot return the original value here because we don't have it
+                     TriggerCacheSpecificRemove(tupple.Item1, tupple.Item2, CacheItemRemovedReason.Expired, null);
                  });
 
             _connection.Subscriber.Subscribe(
@@ -674,7 +675,8 @@ return result";
                         Logger.LogDebug("Got evicted event for key '{0}:{1}'", tupple.Item2, tupple.Item1);
                     }
 
-                    TriggerCacheSpecificRemove(tupple.Item1, tupple.Item2, CacheItemRemovedReason.Evicted);
+                    // we cannot return the original value here because we don't have it
+                    TriggerCacheSpecificRemove(tupple.Item1, tupple.Item2, CacheItemRemovedReason.Evicted, null);
                 });
         }
 

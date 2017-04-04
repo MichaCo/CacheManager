@@ -86,7 +86,7 @@ namespace CacheManager.Core
                     handle.OnCacheSpecificRemove += (sender, args) =>
                     {
                         // base cache handle does logging for this
-                        TriggerOnRemoveByHandle(args.Key, args.Region, args.Reason, handleIndex + 1);
+                        TriggerOnRemoveByHandle(args.Key, args.Region, args.Reason, handleIndex + 1, args.Value);
                         if (Configuration.UpdateMode == CacheUpdateMode.Up)
                         {
                             if (_logTrace)
@@ -833,10 +833,10 @@ namespace CacheManager.Core
             OnRemove?.Invoke(this, new CacheActionEventArgs(key, region, origin));
         }
 
-        private void TriggerOnRemoveByHandle(string key, string region, CacheItemRemovedReason reason, int level)
+        private void TriggerOnRemoveByHandle(string key, string region, CacheItemRemovedReason reason, int level, object value)
         {
             NotNullOrWhiteSpace(key, nameof(key));
-            OnRemoveByHandle?.Invoke(this, new CacheItemRemovedEventArgs(key, region, reason, level));
+            OnRemoveByHandle?.Invoke(this, new CacheItemRemovedEventArgs(key, region, reason, value, level));
         }
 
         private void TriggerOnUpdate(string key, string region, CacheActionEventArgOrigin origin = CacheActionEventArgOrigin.Local)

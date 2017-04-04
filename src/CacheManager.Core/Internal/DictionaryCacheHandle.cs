@@ -126,7 +126,7 @@ namespace CacheManager.Core.Internal
                 if (result.ExpirationMode != ExpirationMode.None && IsExpired(result, DateTime.UtcNow))
                 {
                     _cache.TryRemove(fullKey, out result);
-                    TriggerCacheSpecificRemove(key, region, CacheItemRemovedReason.Expired);
+                    TriggerCacheSpecificRemove(key, region, CacheItemRemovedReason.Expired, result.Value);
                     return null;
                 }
             }
@@ -246,7 +246,7 @@ namespace CacheManager.Core.Internal
                     RemoveInternal(item.Key, item.Region);
 
                     // trigger global eviction event
-                    TriggerCacheSpecificRemove(item.Key, item.Region, CacheItemRemovedReason.Expired);
+                    TriggerCacheSpecificRemove(item.Key, item.Region, CacheItemRemovedReason.Expired, item.Value);
 
                     // fix stats
                     Stats.OnRemove(item.Region);

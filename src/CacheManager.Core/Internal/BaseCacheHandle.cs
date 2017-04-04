@@ -199,8 +199,9 @@ namespace CacheManager.Core.Internal
         /// <param name="key">The cache key.</param>
         /// <param name="region">The cache region. Can be null.</param>
         /// <param name="reason">The reason.</param>
+        /// <param name="value">The original cache value. The value might be null if the underlying cache system doesn't support returning the value on eviction.</param>
         /// <exception cref="ArgumentNullException">If <paramref name="key"/> is null.</exception>
-        protected void TriggerCacheSpecificRemove(string key, string region, CacheItemRemovedReason reason)
+        protected void TriggerCacheSpecificRemove(string key, string region, CacheItemRemovedReason reason, object value)
         {
             NotNullOrWhiteSpace(key, nameof(key));
 
@@ -209,7 +210,8 @@ namespace CacheManager.Core.Internal
                 Logger.LogDebug("'{0}' triggered remove '{1}:{2}' because '{3}'.", Configuration.Name, region, key, reason);
             }
 
-            OnCacheSpecificRemove?.Invoke(this, new CacheItemRemovedEventArgs(key, region, reason));
+            // internal remove event, we don't know the level at this point => emit 0
+            OnCacheSpecificRemove?.Invoke(this, new CacheItemRemovedEventArgs(key, region, reason, value, 0));
         }
 
         /// <summary>

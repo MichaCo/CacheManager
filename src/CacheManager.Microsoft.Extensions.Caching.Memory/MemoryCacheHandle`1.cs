@@ -107,7 +107,7 @@ namespace CacheManager.MicrosoftCachingMemory
             if (item.IsExpired)
             {
                 RemoveInternal(item.Key, item.Region);
-                TriggerCacheSpecificRemove(item.Key, item.Region, CacheItemRemovedReason.Expired);
+                TriggerCacheSpecificRemove(item.Key, item.Region, CacheItemRemovedReason.Expired, item.Value);
                 return null;
             }
 
@@ -199,21 +199,17 @@ namespace CacheManager.MicrosoftCachingMemory
             }
 
             var options = new MemoryCacheEntryOptions()
-            {
-                Priority = CacheItemPriority.Normal,
-                AbsoluteExpiration = DateTimeOffset.MaxValue,
-                SlidingExpiration = TimeSpan.MaxValue,
-            };
-
+                .SetPriority(CacheItemPriority.Normal);
+            
             if (item.ExpirationMode == ExpirationMode.Absolute)
             {
-                options.AbsoluteExpiration = new DateTimeOffset(DateTime.UtcNow.Add(item.ExpirationTimeout));
+                options.SetAbsoluteExpiration(item.ExpirationTimeout);
                 options.RegisterPostEvictionCallback(ItemRemoved, Tuple.Create(item.Key, item.Region));
             }
 
             if (item.ExpirationMode == ExpirationMode.Sliding)
             {
-                options.SlidingExpiration = item.ExpirationTimeout;
+                options.SetSlidingExpiration(item.ExpirationTimeout);
                 options.RegisterPostEvictionCallback(ItemRemoved, Tuple.Create(item.Key, item.Region));
             }
 
@@ -261,13 +257,20 @@ namespace CacheManager.MicrosoftCachingMemory
                     Stats.OnRemove();
                 }
 
+                var item = value as CacheItem<TCacheValue>;
+                object originalValue = null;
+                if (item != null)
+                {
+                    originalValue = item.Value;
+                }
+
                 if (reason == EvictionReason.Capacity)
                 {
-                    TriggerCacheSpecificRemove(keyRegionTupple.Item1, keyRegionTupple.Item2, CacheItemRemovedReason.Evicted);
+                    TriggerCacheSpecificRemove(keyRegionTupple.Item1, keyRegionTupple.Item2, CacheItemRemovedReason.Evicted, originalValue);
                 }
                 else if (reason == EvictionReason.Expired)
                 {
-                    TriggerCacheSpecificRemove(keyRegionTupple.Item1, keyRegionTupple.Item2, CacheItemRemovedReason.Expired);
+                    TriggerCacheSpecificRemove(keyRegionTupple.Item1, keyRegionTupple.Item2, CacheItemRemovedReason.Expired, originalValue);
                 }
             }
             else
