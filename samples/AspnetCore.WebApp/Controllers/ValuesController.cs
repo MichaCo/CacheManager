@@ -10,7 +10,7 @@ namespace AspnetCore.WebApp.Controllers
     {
         private readonly ICacheManager<string> cache;
 
-        public ValuesController(ICacheManager<string> valuesCache)
+        public ValuesController(ICacheManager<string> valuesCache, ICacheManager<int> intCache)
         {
             this.cache = valuesCache;
         }

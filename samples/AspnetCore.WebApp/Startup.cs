@@ -35,17 +35,8 @@ namespace AspnetCore.WebApp
             // using the new overload which adds a singleton of the configuration to services and the configure method to add logging
             // TODO: still not 100% happy with the logging part
             services.AddCacheManagerConfiguration(Configuration, cfg => cfg.WithMicrosoftLogging(services));
-
-            ////// above is the same as the following:
-            ////// add CacheManager configuration. This will get injected to any new singleton instance of CacheManager
-            ////services.AddSingleton(
-            ////    Configuration.GetCacheConfiguration()       // loads the CacheManager configuration from cache.json
-            ////    .Builder.WithMicrosoftLogging(services)     // adds the loggerFactory which is already available via DI
-            ////    .Build());
-
-            // Now, register CacheManager as open generic so that you can inject instances of any value type without
-            // having to register each of them indivdually
-            services.AddSingleton(typeof(ICacheManager<>), typeof(BaseCacheManager<>));
+            services.AddCacheManager<int>(Configuration, configure: builder => builder.WithJsonSerializer());
+            services.AddCacheManager();
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
