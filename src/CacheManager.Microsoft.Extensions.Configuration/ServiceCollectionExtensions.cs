@@ -12,11 +12,29 @@ namespace Microsoft.Extensions.DependencyInjection
     public static class ServiceCollectionExtensions
     {
         /// <summary>
-        /// Adds one cache manager configuration as singleton to the DI framework reading it from <paramref name="fromConfiguration"/>.
+        /// Adds a new <see cref="ICacheManagerConfiguration"/> as singleton to the DI framework.
+        /// </summary>
+        /// <param name="collection">The services collection.</param>
+        /// <param name="configure">The <see cref="CacheManager.Core.ConfigurationBuilder"/> used for defining the <see cref="ICacheManagerConfiguration"/>.</param>
+        /// <param name="name">The (optional) name to be used for the configuration.</param>
+        public static IServiceCollection AddCacheManagerConfiguration(this IServiceCollection collection, Action<CacheManager.Core.ConfigurationBuilder> configure, string name = null)
+        {
+            Guard.NotNull(configure, nameof(configure));
+            var builder = string.IsNullOrWhiteSpace(name) ?
+                new CacheManager.Core.ConfigurationBuilder() :
+                new CacheManager.Core.ConfigurationBuilder(name);
+
+            configure(builder);
+            collection.AddSingleton(builder.Build());
+            return collection;
+        }
+
+        /// <summary>
+        /// Adds one <see cref="ICacheManagerConfiguration"/> as singleton to the DI framework reading it from <paramref name="fromConfiguration"/>.
         /// This overload will throw in case there are multiple cache manager configurations defined.
         /// </summary>
         /// <param name="collection">The services collection.</param>
-        /// <param name="fromConfiguration">The configuration with a cacheManagers section.</param>
+        /// <param name="fromConfiguration">The <see cref="IConfiguration"/> section which contains a <c>cacheManagers</c> section.</param>
         /// <returns>The services collection</returns>
         public static IServiceCollection AddCacheManagerConfiguration(this IServiceCollection collection, IConfiguration fromConfiguration)
         {
@@ -27,10 +45,10 @@ namespace Microsoft.Extensions.DependencyInjection
         }
 
         /// <summary>
-        /// Adds one named cache manager configuration as singleton to the DI framework reading it from <paramref name="fromConfiguration"/>.
+        /// Adds one named <see cref="ICacheManagerConfiguration"/> as singleton to the DI framework reading it from <paramref name="fromConfiguration"/>.
         /// </summary>
         /// <param name="collection">The services collection.</param>
-        /// <param name="fromConfiguration">The configuration with a cacheManagers section.</param>
+        /// <param name="fromConfiguration">The <see cref="IConfiguration"/> section which contains a <c>cacheManagers</c> section.</param>
         /// <param name="name">The name used in the configuration.</param>
         /// <returns>The services collection</returns>
         public static IServiceCollection AddCacheManagerConfiguration(this IServiceCollection collection, IConfiguration fromConfiguration, string name)
@@ -42,11 +60,11 @@ namespace Microsoft.Extensions.DependencyInjection
         }
 
         /// <summary>
-        /// Adds one cache manager configuration as singleton to the DI framework reading it from <paramref name="fromConfiguration"/>.
+        /// Adds one <see cref="ICacheManagerConfiguration"/> as singleton to the DI framework reading it from <paramref name="fromConfiguration"/>.
         /// This overload will throw in case there are multiple cache manager configurations defined.
         /// </summary>
         /// <param name="collection">The services collection.</param>
-        /// <param name="fromConfiguration">The configuration with a cacheManagers section.</param>
+        /// <param name="fromConfiguration">The <see cref="IConfiguration"/> section which contains a <c>cacheManagers</c> section.</param>
         /// <param name="configure">Can be used to further configure the configuration.</param>
         /// <returns>The services collection</returns>
         public static IServiceCollection AddCacheManagerConfiguration(this IServiceCollection collection, IConfiguration fromConfiguration, Action<CacheManager.Core.ConfigurationBuilder> configure)
@@ -61,10 +79,10 @@ namespace Microsoft.Extensions.DependencyInjection
         }
 
         /// <summary>
-        /// Adds one named cache manager configuration as singleton to the DI framework reading it from <paramref name="fromConfiguration"/>.
+        /// Adds one named <see cref="ICacheManagerConfiguration"/> as singleton to the DI framework reading it from <paramref name="fromConfiguration"/>.
         /// </summary>
         /// <param name="collection">The services collection.</param>
-        /// <param name="fromConfiguration">The configuration with a cacheManagers section.</param>
+        /// <param name="fromConfiguration">The <see cref="IConfiguration"/> section which contains a <c>cacheManagers</c> section.</param>
         /// <param name="name">The name used in the configuration.</param>
         /// <param name="configure">Can be used to further configure the configuration.</param>
         /// <returns>The services collection</returns>
@@ -80,16 +98,13 @@ namespace Microsoft.Extensions.DependencyInjection
         }
 
         /// <summary>
-        /// Adds the open generic CacheManager service for <see cref="ICacheManager{TCacheValue}"/>.
+        /// Adds a singleton open generic service for <see cref="ICacheManager{TCacheValue}"/> to the <see cref="IServiceCollection"/>.
         /// <para>
-        /// This requires a <see cref="ICacheManagerConfiguration"/> to be registered. Use one of the <see cref="AddCacheManagerConfiguration(IServiceCollection, IConfiguration)"/> overloads or manually register one.
+        /// This requires one <see cref="ICacheManagerConfiguration"/> to be registered.
         /// </para>
         /// </summary>
         /// <remarks>
-        /// With this setup, you can inject <see cref="ICacheManager{TCacheValue}"/> to your controllers.
-        /// <para>
-        /// This will create a new singleton instance of CacheManager for every type.
-        /// </para>
+        /// With this setup, you can inject <see cref="ICacheManager{TCacheValue}"/> with any kind ot <c>T</c> to your controllers and the DI framework will resolve a new singleton instance for each type.
         /// </remarks>
         /// <param name="collection">The services collection.</param>
         /// <returns>The services collection.</returns>
@@ -101,32 +116,22 @@ namespace Microsoft.Extensions.DependencyInjection
         }
 
         /// <summary>
-        /// Adds a CacheManager service for <see cref="ICacheManager{TCacheValue}"/> for the specified <typeparamref name="T"/>.
+        /// Adds a singleton service for <see cref="ICacheManager{TCacheValue}"/> for the specified <typeparamref name="T"/> to the <see cref="IServiceCollection"/>.
         /// <para>
-        /// This requires a <see cref="ICacheManagerConfiguration"/> to be registered unless you pass in <paramref name="fromConfiguration"/>. 
-        /// The <paramref name="name"/> and <paramref name="configure"/> is also optional. If <paramref name="name"/> is specified, the configuration for that name will be used.
-        /// If <paramref name="configure"/> is specified, the configuration will be passed into the action the moment the CacheManager gets initialized.
+        /// This requires at least one <see cref="ICacheManagerConfiguration"/> to be registered. 
+        /// If more than one <see cref="ICacheManagerConfiguration"/>s are registered, use <paramref name="configurationName"/> to specify which one to use.
         /// </para>
         /// </summary>
-        /// <remarks>
-        /// <para>
-        /// Important to note, this overload does a lazy initialization of the configuration, the moment <see cref="ICacheManager{TCacheValue}"/> gets instantiated the first time.
-        /// </para>
-        /// With this setup, you can inject <see cref="ICacheManager{TCacheValue}"/> to your controllers.
-        /// <para>
-        /// This will create one singleton instance of CacheManager for the given type <typeparamref name="T"/>.
-        /// </para>
-        /// </remarks>
         /// <param name="collection">The services collection.</param>
-        /// <param name="fromConfiguration">The configuration with a cacheManagers section.</param>
-        /// <param name="name">The name used in the configuration.</param>
-        /// <param name="configure">Can be used to further configure the configuration.</param>
+        /// <param name="fromConfiguration">The <see cref="IConfiguration"/> section which contains a <c>cacheManagers</c> section.</param>
+        /// <param name="configurationName">The name of the <see cref="ICacheManagerConfiguration"/> to use.</param>
+        /// <param name="configure">Can be used to further configure the <see cref="ICacheManagerConfiguration"/>.</param>
         /// <returns>The services collection.</returns>
-        public static IServiceCollection AddCacheManager<T>(this IServiceCollection collection, IConfiguration fromConfiguration = null, string name = null, Action<CacheManager.Core.ConfigurationBuilder> configure = null)
+        public static IServiceCollection AddCacheManager<T>(this IServiceCollection collection, IConfiguration fromConfiguration = null, string configurationName = null, Action<CacheManager.Core.ConfigurationBuilder> configure = null)
         {
             collection.AddSingleton<ICacheManager<T>, BaseCacheManager<T>>((provider) =>
             {
-                var configuration = string.IsNullOrWhiteSpace(name) ? fromConfiguration.GetCacheConfiguration() : fromConfiguration.GetCacheConfiguration(name);
+                var configuration = string.IsNullOrWhiteSpace(configurationName) ? fromConfiguration.GetCacheConfiguration() : fromConfiguration.GetCacheConfiguration(configurationName);
 
                 configure?.Invoke(configuration.Builder);
 
