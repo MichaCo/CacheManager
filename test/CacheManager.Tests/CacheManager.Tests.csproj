@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net452;netcoreapp1.1</TargetFrameworks>
+    <TargetFrameworks>net452;<!--netcoreapp1.1--></TargetFrameworks>
     <Version>1.0.0</Version>
     <AssemblyName>CacheManager.Tests</AssemblyName>
     <AssemblyOriginatorKeyFile>../../tools/key.snk</AssemblyOriginatorKeyFile>
@@ -53,7 +53,7 @@
   </ItemGroup>
 
   <PropertyGroup Condition=" '$(TargetFramework)' == 'net452' ">
-    <DefineConstants>$(DefineConstants);REDISENABLED;<!--MEMCACHEDENABLED-->;MOCK_HTTPCONTEXT_ENABLED;NO_APP_CONFIG</DefineConstants>
+    <DefineConstants>$(DefineConstants);REDISENABLED;MEMCACHEDENABLED;MOCK_HTTPCONTEXT_ENABLED;NO_APP_CONFIG</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp1.1' ">
     <DefineConstants>$(DefineConstants);REDISENABLED;NETCOREAPP</DefineConstants>

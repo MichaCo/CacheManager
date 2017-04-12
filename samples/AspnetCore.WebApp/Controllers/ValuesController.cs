@@ -10,9 +10,12 @@ namespace AspnetCore.WebApp.Controllers
     {
         private readonly ICacheManager<string> cache;
 
-        public ValuesController(ICacheManager<string> valuesCache, ICacheManager<int> intCache)
+        public ValuesController(ICacheManager<string> valuesCache, ICacheManager<int> intCache, ICacheManager<DateTime> dates)
         {
             this.cache = valuesCache;
+
+            dates.Add("now", DateTime.UtcNow);
+            intCache.Add("count", 1);
         }
 
         // DELETE api/values/key

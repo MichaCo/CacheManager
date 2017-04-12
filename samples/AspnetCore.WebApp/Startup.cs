@@ -4,17 +4,18 @@ using CacheManager.Core;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace AspnetCore.WebApp
 {
+    using Microsoft.Extensions.Configuration;
+
     public class Startup
     {
         public Startup(IHostingEnvironment env)
         {
-            var builder = new Microsoft.Extensions.Configuration.ConfigurationBuilder()
+            var builder = new ConfigurationBuilder()
                 .SetBasePath(env.ContentRootPath)
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
                 .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
@@ -35,7 +36,14 @@ namespace AspnetCore.WebApp
             // using the new overload which adds a singleton of the configuration to services and the configure method to add logging
             // TODO: still not 100% happy with the logging part
             services.AddCacheManagerConfiguration(Configuration, cfg => cfg.WithMicrosoftLogging(services));
+
+            // uses a refined configurastion (this will not log, as we added the MS Logger only to the configuration above
             services.AddCacheManager<int>(Configuration, configure: builder => builder.WithJsonSerializer());
+
+            // creates a completely new configuration for this instance (also not logging)
+            services.AddCacheManager<DateTime>(inline => inline.WithDictionaryHandle());
+
+            // any other type will be this. Configurastion used will be the one defined by AddCacheManagerConfiguration earlier.
             services.AddCacheManager();
         }
 

@@ -16,9 +16,10 @@ namespace Microsoft.Extensions.DependencyInjection
         /// </summary>
         /// <param name="collection">The services collection.</param>
         /// <param name="configure">The <see cref="CacheManager.Core.ConfigurationBuilder"/> used for defining the <see cref="ICacheManagerConfiguration"/>.</param>
-        /// <param name="name">The (optional) name to be used for the configuration.</param>
+        /// <param name="name">The (optional) name to be used for the <see cref="ICacheManagerConfiguration"/>.</param>
         public static IServiceCollection AddCacheManagerConfiguration(this IServiceCollection collection, Action<CacheManager.Core.ConfigurationBuilder> configure, string name = null)
         {
+            Guard.NotNull(collection, nameof(collection));
             Guard.NotNull(configure, nameof(configure));
             var builder = string.IsNullOrWhiteSpace(name) ?
                 new CacheManager.Core.ConfigurationBuilder() :
@@ -38,6 +39,7 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <returns>The services collection</returns>
         public static IServiceCollection AddCacheManagerConfiguration(this IServiceCollection collection, IConfiguration fromConfiguration)
         {
+            Guard.NotNull(collection, nameof(collection));
             Guard.NotNull(fromConfiguration, nameof(fromConfiguration));
             var configuration = fromConfiguration.GetCacheConfiguration();
             collection.AddSingleton(configuration);
@@ -53,6 +55,7 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <returns>The services collection</returns>
         public static IServiceCollection AddCacheManagerConfiguration(this IServiceCollection collection, IConfiguration fromConfiguration, string name)
         {
+            Guard.NotNull(collection, nameof(collection));
             Guard.NotNull(fromConfiguration, nameof(fromConfiguration));
             var configuration = fromConfiguration.GetCacheConfiguration(name);
             collection.AddSingleton(configuration);
@@ -69,6 +72,7 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <returns>The services collection</returns>
         public static IServiceCollection AddCacheManagerConfiguration(this IServiceCollection collection, IConfiguration fromConfiguration, Action<CacheManager.Core.ConfigurationBuilder> configure)
         {
+            Guard.NotNull(collection, nameof(collection));
             Guard.NotNull(fromConfiguration, nameof(fromConfiguration));
             Guard.NotNull(configure, nameof(configure));
 
@@ -88,6 +92,7 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <returns>The services collection</returns>
         public static IServiceCollection AddCacheManagerConfiguration(this IServiceCollection collection, IConfiguration fromConfiguration, string name, Action<CacheManager.Core.ConfigurationBuilder> configure)
         {
+            Guard.NotNull(collection, nameof(collection));
             Guard.NotNull(fromConfiguration, nameof(fromConfiguration));
             Guard.NotNull(configure, nameof(configure));
 
@@ -110,6 +115,7 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <returns>The services collection.</returns>
         public static IServiceCollection AddCacheManager(this IServiceCollection collection)
         {
+            Guard.NotNull(collection, nameof(collection));
             collection.AddSingleton(typeof(ICacheManager<>), typeof(BaseCacheManager<>));
 
             return collection;
@@ -127,8 +133,11 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <param name="configurationName">The name of the <see cref="ICacheManagerConfiguration"/> to use.</param>
         /// <param name="configure">Can be used to further configure the <see cref="ICacheManagerConfiguration"/>.</param>
         /// <returns>The services collection.</returns>
-        public static IServiceCollection AddCacheManager<T>(this IServiceCollection collection, IConfiguration fromConfiguration = null, string configurationName = null, Action<CacheManager.Core.ConfigurationBuilder> configure = null)
+        public static IServiceCollection AddCacheManager<T>(this IServiceCollection collection, IConfiguration fromConfiguration, string configurationName = null, Action<CacheManager.Core.ConfigurationBuilder> configure = null)
         {
+            Guard.NotNull(collection, nameof(collection));
+            Guard.NotNull(fromConfiguration, nameof(fromConfiguration));
+
             collection.AddSingleton<ICacheManager<T>, BaseCacheManager<T>>((provider) =>
             {
                 var configuration = string.IsNullOrWhiteSpace(configurationName) ? fromConfiguration.GetCacheConfiguration() : fromConfiguration.GetCacheConfiguration(configurationName);
@@ -136,6 +145,34 @@ namespace Microsoft.Extensions.DependencyInjection
                 configure?.Invoke(configuration.Builder);
 
                 return new BaseCacheManager<T>(configuration);
+            });
+
+            return collection;
+        }
+
+        /// <summary>
+        /// Adds a singleton service for <see cref="ICacheManager{TCacheValue}"/> for the specified <typeparamref name="T"/> to the <see cref="IServiceCollection"/> 
+        /// using the inline configuration defined by <paramref name="configure"/>.
+        /// </summary>
+        /// <param name="collection">The services collection.</param>
+        /// <param name="configure">Used to configure the instance of <see cref="ICacheManager{TCacheValue}"/>.</param>
+        /// <param name="name">The (optional) name for the <see cref="ICacheManagerConfiguration"/>.</param>
+        /// <returns>The services collection.</returns>
+        public static IServiceCollection AddCacheManager<T>(this IServiceCollection collection, Action<CacheManager.Core.ConfigurationBuilder> configure, string name = null)
+        {
+            Guard.NotNull(collection, nameof(collection));
+            Guard.NotNull(configure, nameof(configure));
+
+            collection.AddSingleton<ICacheManager<T>, BaseCacheManager<T>>((provider) =>
+            {
+                Guard.NotNull(configure, nameof(configure));
+                var builder = string.IsNullOrWhiteSpace(name) ?
+                    new CacheManager.Core.ConfigurationBuilder() :
+                    new CacheManager.Core.ConfigurationBuilder(name);
+
+                configure(builder);
+                
+                return new BaseCacheManager<T>(builder.Build());
             });
 
             return collection;

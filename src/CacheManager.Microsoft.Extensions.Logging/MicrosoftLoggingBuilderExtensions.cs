@@ -71,6 +71,7 @@ namespace CacheManager.Core
         {
             var loggerFactoryDescriptor = serviceCollection.FirstOrDefault(p => p.ServiceType.Equals(typeof(ILoggerFactory)));
 
+            // relying on singleton here, which should be fine ~~ still hacked
             return loggerFactoryDescriptor?.ImplementationInstance as ILoggerFactory;
         }
     }
