@@ -85,6 +85,20 @@ namespace CacheManager.Core
                     var handleIndex = index;
                     handle.OnCacheSpecificRemove += (sender, args) =>
                     {
+                        // added sync for using backplane with in-memory caches on cache specific removal
+                        // but commented for now, this is not really needed if all instances use the same expiration etc, would just cause dublicated events 
+                        ////if (_cacheBackplane != null && handle.Configuration.IsBackplaneSource && !handle.IsDistributedCache)
+                        ////{
+                        ////    if (string.IsNullOrEmpty(args.Region))
+                        ////    {
+                        ////        _cacheBackplane.NotifyRemove(args.Key);
+                        ////    }
+                        ////    else
+                        ////    {
+                        ////        _cacheBackplane.NotifyRemove(args.Key, args.Region);
+                        ////    }
+                        ////}
+
                         // base cache handle does logging for this
                         TriggerOnRemoveByHandle(args.Key, args.Region, args.Reason, handleIndex + 1, args.Value);
                         if (Configuration.UpdateMode == CacheUpdateMode.Up)
@@ -574,10 +588,10 @@ namespace CacheManager.Core
 
         private void EvictFromHandle(string key, string region, BaseCacheHandle<TCacheValue> handle)
         {
-            if (_logTrace)
+            if (Logger.IsEnabled(LogLevel.Debug))
             {
-                Logger.LogTrace(
-                    "Evict [{0}:{1}] from handle '{2}'.",
+                Logger.LogDebug(
+                    "Evicting '{0}:{1}' from handle '{2}'.",
                     region,
                     key,
                     handle.Configuration.Name);
@@ -730,12 +744,17 @@ namespace CacheManager.Core
             // this should have been checked during activation already, just to be totally sure...
             if (_cacheHandles.Any(p => p.Configuration.IsBackplaneSource))
             {
-                var handles = new Func<BaseCacheHandle<TCacheValue>[]>(() =>
+                // added includeSource param to get the handles which need to be synced.
+                // in case the backplane source is non-distributed (in-memory), only remotly triggered remove and clear should also
+                // trigger a sync locally. For distribtued caches, we expect that the distributed cache is already the source and in sync
+                // as that's the layer which triggered the event. In this case, only other in-memory handles above the distribtued, would be synced.
+                var handles = new Func<bool, BaseCacheHandle<TCacheValue>[]>((includSource) =>
                 {
                     var handleList = new List<BaseCacheHandle<TCacheValue>>();
                     foreach (var handle in _cacheHandles)
                     {
-                        if (!handle.Configuration.IsBackplaneSource)
+                        if (!handle.Configuration.IsBackplaneSource ||
+                            (includSource && handle.Configuration.IsBackplaneSource && !handle.IsDistributedCache))
                         {
                             handleList.Add(handle);
                         }
@@ -745,12 +764,12 @@ namespace CacheManager.Core
 
                 backplane.Changed += (sender, args) =>
                 {
-                    if (_logTrace)
+                    if (Logger.IsEnabled(LogLevel.Debug))
                     {
-                        Logger.LogTrace("Backplane event: [Changed] of {0} {1}.", args.Key, args.Region);
+                        Logger.LogDebug("Backplane event: [Changed] for '{1}:{0}'.", args.Key, args.Region);
                     }
 
-                    EvictFromHandles(args.Key, args.Region, handles());
+                    EvictFromHandles(args.Key, args.Region, handles(false));
                     switch (args.Action)
                     {
                         case CacheItemChangedEventAction.Add:
@@ -774,7 +793,7 @@ namespace CacheManager.Core
                         Logger.LogTrace("Backplane event: [Remove] of {0} {1}.", args.Key, args.Region);
                     }
 
-                    EvictFromHandles(args.Key, args.Region, handles());
+                    EvictFromHandles(args.Key, args.Region, handles(true));
                     TriggerOnRemove(args.Key, args.Region, CacheActionEventArgOrigin.Remote);
                 };
 
@@ -785,7 +804,7 @@ namespace CacheManager.Core
                         Logger.LogTrace("Backplane event: [Clear].");
                     }
 
-                    ClearHandles(handles());
+                    ClearHandles(handles(true));
                     TriggerOnClear(CacheActionEventArgOrigin.Remote);
                 };
 
@@ -796,7 +815,7 @@ namespace CacheManager.Core
                         Logger.LogTrace("Backplane event: [Clear Region] region: {0}.", args.Region);
                     }
 
-                    ClearRegionHandles(args.Region, handles());
+                    ClearRegionHandles(args.Region, handles(true));
                     TriggerOnClearRegion(args.Region, CacheActionEventArgOrigin.Remote);
                 };
             }

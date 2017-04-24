@@ -8,11 +8,11 @@ namespace AspnetCore.WebApp.Controllers
     [Route("api/[controller]")]
     public class ValuesController : Controller
     {
-        private readonly ICacheManager<string> cache;
+        private readonly ICacheManager<string> _cache;
 
         public ValuesController(ICacheManager<string> valuesCache, ICacheManager<int> intCache, ICacheManager<DateTime> dates)
         {
-            this.cache = valuesCache;
+            _cache = valuesCache;
 
             dates.Add("now", DateTime.UtcNow);
             intCache.Add("count", 1);
@@ -22,7 +22,7 @@ namespace AspnetCore.WebApp.Controllers
         [HttpDelete("{key}")]
         public IActionResult Delete(string key)
         {
-            if (this.cache.Remove(key))
+            if (_cache.Remove(key))
             {
                 return Ok();
             }
@@ -34,7 +34,7 @@ namespace AspnetCore.WebApp.Controllers
         [HttpGet("{key}")]
         public IActionResult Get(string key)
         {
-            var value = this.cache.GetCacheItem(key);
+            var value = _cache.GetCacheItem(key);
             if (value == null)
             {
                 return NotFound();
@@ -47,7 +47,7 @@ namespace AspnetCore.WebApp.Controllers
         [HttpPost("{key}")]
         public IActionResult Post(string key, [FromBody]string value)
         {
-            if (this.cache.Add(key, value))
+            if (_cache.Add(key, value))
             {
                 return Ok();
             }
@@ -59,7 +59,7 @@ namespace AspnetCore.WebApp.Controllers
         [HttpPut("{key}")]
         public IActionResult Put(string key, [FromBody]string value)
         {
-            if (this.cache.AddOrUpdate(key, value, (v) => value) != null)
+            if (_cache.AddOrUpdate(key, value, (v) => value) != null)
             {
                 return Ok();
             }

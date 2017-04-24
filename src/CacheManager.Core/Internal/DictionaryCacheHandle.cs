@@ -35,7 +35,7 @@ namespace CacheManager.Core.Internal
             NotNull(loggerFactory, nameof(loggerFactory));
             Logger = loggerFactory.CreateLogger(this);
             _cache = new ConcurrentDictionary<string, CacheItem<TCacheValue>>();
-            _timer = new Timer(TimerLoop, null, _random.Next(100, ScanInterval), ScanInterval);
+            _timer = new Timer(TimerLoop, null, _random.Next(1000, ScanInterval), ScanInterval);
         }
 
         /// <summary>

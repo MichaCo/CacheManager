@@ -25,13 +25,17 @@ namespace CacheManager.Config.Tests
                     f.AddDebug(LogLevel.Debug);
                 });
 
-                builder.WithRetryTimeout(100);
-                builder.WithMaxRetries(5);
-                builder.WithDictionaryHandle()
+                builder
+                    .WithRetryTimeout(100)
+                    .WithMaxRetries(5);
+
+                builder
+                    .WithDictionaryHandle()
                     .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(20))
                     .DisableStatistics();
 
-                builder.WithRedisCacheHandle("redis", true)
+                builder
+                    .WithRedisCacheHandle("redis", true)
                     .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(60))
                     .DisableStatistics();
 
@@ -45,8 +49,7 @@ namespace CacheManager.Config.Tests
                         .WithConnectionTimeout(5000)
                         .WithEndpoint("127.0.0.1", 6379);
                 });
-
-                //builder.WithGzJsonSerializer();
+                
                 builder.WithBondCompactBinarySerializer();
 
 #if !NETCOREAPP

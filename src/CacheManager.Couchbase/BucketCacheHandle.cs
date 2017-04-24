@@ -57,6 +57,15 @@ namespace CacheManager.Couchbase
             _bucket = CouchbaseConfigurationManager.GetBucket(_configuration, _configurationName, _bucketName);
         }
 
+        /// <inheritdoc />
+        public override bool IsDistributedCache
+        {
+            get
+            {
+                return true;
+            }
+        }
+
         /// <summary>
         /// Gets the number of items the cache handle currently maintains.
         /// </summary>

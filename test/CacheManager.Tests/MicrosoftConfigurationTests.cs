@@ -769,6 +769,7 @@ namespace CacheManager.Tests
                 {"cacheManagers:0:backplane:knownType", "Redis"},
                 {"cacheManagers:0:backplane:channelName", "channelName"},
                 {"cacheManagers:0:backplane:key", key},
+                {"cacheManagers:0:serializer:knownType", "Json"},
                 {"redis:1:connectionString", "127.0.0.1:6379"},
                 {"redis:1:key", key}
             };

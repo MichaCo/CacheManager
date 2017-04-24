@@ -591,18 +591,26 @@ namespace CacheManager.Core
         /// <summary>
         /// Adds a cache dictionary cache handle to the cache manager.
         /// </summary>
+        /// <param name="isBackplaneSource">
+        /// Set this to true if this cache handle should be the source of the backplane.
+        /// <para>This setting will be ignored if no backplane is configured.</para>
+        /// </param>
         /// <returns>The builder part.</returns>
-        public ConfigurationBuilderCacheHandlePart WithDictionaryHandle() =>
-            WithHandle(typeof(DictionaryCacheHandle<>));
+        public ConfigurationBuilderCacheHandlePart WithDictionaryHandle(bool isBackplaneSource = false) =>
+            WithHandle(typeof(DictionaryCacheHandle<>), Guid.NewGuid().ToString("N"), isBackplaneSource);
 
         /// <summary>
         /// Adds a cache dictionary cache handle to the cache manager.
         /// </summary>
         /// <returns>The builder part.</returns>
         /// <param name="handleName">The name of the cache handle.</param>
+        /// <param name="isBackplaneSource">
+        /// Set this to true if this cache handle should be the source of the backplane.
+        /// <para>This setting will be ignored if no backplane is configured.</para>
+        /// </param>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="handleName"/> is null.</exception>
-        public ConfigurationBuilderCacheHandlePart WithDictionaryHandle(string handleName) =>
-            WithHandle(typeof(DictionaryCacheHandle<>), handleName);
+        public ConfigurationBuilderCacheHandlePart WithDictionaryHandle(string handleName, bool isBackplaneSource = false) =>
+            WithHandle(typeof(DictionaryCacheHandle<>), handleName, isBackplaneSource);
 
         /// <summary>
         /// Adds a cache handle with the given <c>Type</c> and name.
@@ -740,6 +748,7 @@ namespace CacheManager.Core
         }
 
 #if !NETSTANDARD
+
         /// <summary>
         /// Configures a <see cref="BinaryCacheSerializer"/> to be used for serialization and deserialization.
         /// </summary>

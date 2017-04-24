@@ -39,6 +39,18 @@ namespace CacheManager.Core.Internal
                 Configuration.EnablePerformanceCounters);
         }
 
+        /// <summary>
+        /// Indicates if this cache handle is a distributed cache.
+        /// </summary>
+        /// <remarks>
+        /// The value will be evaluated by the backplane logic to figure out what to do if remote events are received.
+        /// <para>
+        /// If the cache handle is distributed, a remote remove event for example does not cause another <c>Remove</c> call. 
+        /// For in-memory cache handles which are backplane source though, it would trigger a <c>Remove</c>.
+        /// </para>
+        /// </remarks>
+        public virtual bool IsDistributedCache { get { return false; } }
+
         internal event EventHandler<CacheItemRemovedEventArgs> OnCacheSpecificRemove;
 
         /// <summary>

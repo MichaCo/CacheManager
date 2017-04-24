@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using CacheManager.Core;
 using Microsoft.Extensions.Logging;
 #if NET451
@@ -24,6 +25,7 @@ namespace CacheManager.Examples
         }
 
 #if !NETCOREAPP
+
         private static void MostSimpleCacheManager()
         {
             var config = new ConfigurationBuilder()
@@ -94,6 +96,7 @@ namespace CacheManager.Examples
         }
 
 #if !NETCOREAPP
+
         private static void AppConfigLoadInstalledCacheCfg()
         {
             var cache = CacheFactory.FromConfiguration<object>("myCache");
@@ -115,6 +118,7 @@ namespace CacheManager.Examples
         }
 
 #if !NETCOREAPP
+
         private static void RedisSample()
         {
             var cache = CacheFactory.Build<int>(settings =>
@@ -277,6 +281,59 @@ namespace CacheManager.Examples
             }
 
             Console.WriteLine("Final value: {0}", cache.Get("counter"));
+        }
+
+        private static void MultiCacheEvictionWithoutRedisCacheHandle()
+        {
+            var config = new ConfigurationBuilder("Redis with Redis Backplane")
+                .WithDictionaryHandle(true)
+                    .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(5))
+                .And
+                .WithRedisBackplane("redisConfig")
+                .WithRedisConfiguration("redisConfig", "localhost,allowadmin=true", enableKeyspaceNotifications: true)
+                //.WithMicrosoftLogging(new LoggerFactory().AddConsole(LogLevel.Debug))
+                .Build();
+
+            var cacheA = new BaseCacheManager<string>(config);
+            var cacheB = new BaseCacheManager<string>(config);
+
+            var key = "someKey";
+
+            cacheA.OnRemove += (s, args) =>
+            {
+                Console.WriteLine("A triggered remove: " + args.ToString() + " - key still exists? " + cacheA.Exists(key));
+            };
+            cacheB.OnRemove += (s, args) =>
+            {
+                Console.WriteLine("B triggered remove: " + args.ToString() + " - key still exists? " + cacheB.Exists(key));
+            };
+
+            cacheA.OnRemoveByHandle += (s, args) =>
+            {
+                cacheA.Remove(args.Key);
+                Console.WriteLine("A triggered removeByHandle: " + args.ToString() + " - key still exists? " + cacheA.Exists(key));
+            };
+
+            cacheB.OnRemoveByHandle += (s, args) =>
+            {
+                Console.WriteLine("B triggered removeByHandle: " + args.ToString() + " - key still exists? " + cacheA.Exists(key) + " in A? " + cacheA.Exists(key));
+            };
+
+            cacheA.OnAdd += (s, args) =>
+            {
+                Console.WriteLine("A triggered add: " + args.ToString());
+            };
+
+            cacheB.OnAdd += (s, args) =>
+            {
+                Console.WriteLine("B triggered add: " + args.ToString());
+            };
+
+            Console.WriteLine("Add to A: " + cacheA.Add(key, "some value"));
+            Console.WriteLine("Add to B: " + cacheB.Add(key, "some value"));
+
+            Thread.Sleep(2000);
+            cacheA.Remove(key);
         }
     }
 
