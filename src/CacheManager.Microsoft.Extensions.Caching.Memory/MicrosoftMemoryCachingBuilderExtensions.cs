@@ -13,21 +13,15 @@ namespace CacheManager.Core
         /// Adds a cache handle using <see cref="MemoryCache"/>.
         /// </summary>
         /// <param name="part">The builder part.</param>
-        /// <param name="instanceName">The name to be used for the cache handle instance.</param>
-        /// <returns>The builder part.</returns>
-        /// <exception cref="ArgumentNullException">Thrown if <paramref name="instanceName"/> is null.</exception>
-        public static ConfigurationBuilderCacheHandlePart WithMicrosoftMemoryCacheHandle(
-            this ConfigurationBuilderCachePart part, string instanceName)
-            => WithMicrosoftMemoryCacheHandle(part, instanceName, false, new MemoryCacheOptions());
-
-        /// <summary>
-        /// Adds a cache handle using <see cref="MemoryCache"/>.
-        /// </summary>
-        /// <param name="part">The builder part.</param>
+        /// <param name="isBackplaneSource">Set this to true if this cache handle should be the source of the backplane.
+        /// This setting will be ignored if no backplane is configured.</param>
+        /// <returns>
+        /// The builder part.
+        /// </returns>
         /// <returns>The builder part.</returns>
         public static ConfigurationBuilderCacheHandlePart WithMicrosoftMemoryCacheHandle(
-            this ConfigurationBuilderCachePart part)
-            => WithMicrosoftMemoryCacheHandle(part, Guid.NewGuid().ToString(), false, new MemoryCacheOptions());
+            this ConfigurationBuilderCachePart part, bool isBackplaneSource = false)
+            => WithMicrosoftMemoryCacheHandle(part, Guid.NewGuid().ToString(), isBackplaneSource, new MemoryCacheOptions());
 
         /// <summary>
         /// Adds a cache handle using <see cref="MemoryCache"/>.
@@ -42,7 +36,7 @@ namespace CacheManager.Core
         /// <exception cref="System.ArgumentNullException">If part is null.</exception>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="instanceName"/> is null.</exception>
         public static ConfigurationBuilderCacheHandlePart WithMicrosoftMemoryCacheHandle(
-            this ConfigurationBuilderCachePart part, string instanceName, bool isBackplaneSource)
+            this ConfigurationBuilderCachePart part, string instanceName, bool isBackplaneSource = false)
             => WithMicrosoftMemoryCacheHandle(part, instanceName, isBackplaneSource, new MemoryCacheOptions());
 
         /// <summary>

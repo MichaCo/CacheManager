@@ -24,7 +24,7 @@ namespace CacheManager.Config.Tests
                     f.AddConsole(LogLevel.Warning);
                     f.AddDebug(LogLevel.Debug);
                 });
-
+                
                 builder
                     .WithRetryTimeout(100)
                     .WithMaxRetries(5);
