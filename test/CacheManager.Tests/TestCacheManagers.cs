@@ -360,8 +360,13 @@ namespace CacheManager.Tests
                     {
                         config
                             .WithAllowAdmin()
-                            .WithDatabase(database)
+                            .WithDatabase(database)                            
                             .WithEndpoint(RedisHost, RedisPort);
+
+                        if (!useLua)
+                        {
+                            config.UseCompatibilityMode("2.4");
+                        }
                     })
                     .WithRedisCacheHandle(redisKey, true)
                     .EnableStatistics();
@@ -378,12 +383,7 @@ namespace CacheManager.Tests
             var cache = CacheFactory.FromConfiguration<object>(
                 $"{database}|{sharedRedisConfig}|{serializer}|{useLua}" + Guid.NewGuid().ToString(), 
                 builder.Build());
-
-            foreach (var h in cache.CacheHandles.OfType<RedisCacheHandle<object>>())
-            {
-                h.UseLua = useLua;
-            }
-
+            
             return cache;
         }
 
@@ -401,17 +401,17 @@ namespace CacheManager.Tests
                         config
                             .WithDatabase(database)
                             .WithEndpoint(RedisHost, RedisPort);
+
+                        if (!useLua)
+                        {
+                            config.UseCompatibilityMode("2.4");
+                        }
                     })
                     ////.WithRedisBackplane(redisKey)
                     .WithRedisCacheHandle(redisKey, true)
                     .EnableStatistics()
                 .Build());
-
-            foreach (var h in cache.CacheHandles.OfType<RedisCacheHandle<object>>())
-            {
-                h.UseLua = useLua;
-            }
-
+            
             return cache;
         }
 

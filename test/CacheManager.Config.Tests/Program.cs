@@ -26,7 +26,7 @@ namespace CacheManager.Config.Tests
                 });
                 
                 builder
-                    .WithRetryTimeout(100)
+                    .WithRetryTimeout(500)
                     .WithMaxRetries(5);
 
                 builder
@@ -44,12 +44,17 @@ namespace CacheManager.Config.Tests
                 builder.WithRedisConfiguration("redis", config =>
                 {
                     config
+                        //.UseTwemproxy()
+                        //.UseCompatibilityMode("2.4")
                         .WithAllowAdmin()
                         .WithDatabase(0)
                         .WithConnectionTimeout(5000)
                         .WithEndpoint("127.0.0.1", 6379);
                 });
-                
+
+                //builder.WithRedisConfiguration("redis", "localhost:22121");
+
+
                 builder.WithBondCompactBinarySerializer();
 
 #if !NETCOREAPP

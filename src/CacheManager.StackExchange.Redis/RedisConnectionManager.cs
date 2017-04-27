@@ -24,9 +24,9 @@ namespace CacheManager.Redis
             NotNull(configuration, nameof(configuration));
             NotNull(loggerFactory, nameof(loggerFactory));
 
-            _connectionString = GetConnectionString(configuration);
-
             _configuration = configuration;
+            _connectionString = configuration.ConnectionString;
+
             _logger = loggerFactory.CreateLogger(this);
         }
 
@@ -51,6 +51,18 @@ namespace CacheManager.Redis
         {
             get
             {
+                // new: if strict mode enabled, return the feature set supported by that version.
+                if (_configuration.StrictCompatibilityModeVersion != null)
+                {
+                    return new RedisFeatures(Version.Parse(_configuration.StrictCompatibilityModeVersion));
+                }
+
+                if (_configuration.TwemproxyEnabled)
+                {
+                    // server features are not available, returning a default version...
+                    return new RedisFeatures(Version.Parse("3.0"));
+                }
+
                 var server = Servers.FirstOrDefault(p => p.IsConnected);
                 if (server == null)
                 {
@@ -58,7 +70,6 @@ namespace CacheManager.Redis
                 }
 
                 return server.Features;
-                ////return new RedisFeatures(new Version(2, 4));
             }
         }
 
@@ -154,11 +165,14 @@ namespace CacheManager.Redis
                             _logger.LogInfo(args.Exception, "Connection restored, type: '{0}', failure: '{1}'", args.ConnectionType, args.FailureType);
                         };
 
-                        var endpoints = connection.GetEndPoints();
-                        if (!endpoints.Select(p => connection.GetServer(p))
-                            .Any(p => !p.IsSlave || p.AllowSlaveWrites))
+                        if(!_configuration.TwemproxyEnabled)
                         {
-                            throw new InvalidOperationException("No writeable endpoint found.");
+                            var endpoints = connection.GetEndPoints();
+                            if (!endpoints.Select(p => connection.GetServer(p))
+                                .Any(p => !p.IsSlave || p.AllowSlaveWrites))
+                            {
+                                throw new InvalidOperationException("No writeable endpoint found.");
+                            }
                         }
 
                         connection.PreserveAsyncOrder = false;
@@ -187,40 +201,6 @@ namespace CacheManager.Redis
             }
 
             return Regex.Replace(value, @"password\s*=\s*[^,]*", "password=****", RegexOptions.IgnoreCase);
-        }
-
-        private static string GetConnectionString(RedisConfiguration configuration)
-        {
-            var conString = configuration.ConnectionString;
-
-            if (string.IsNullOrWhiteSpace(configuration.ConnectionString))
-            {
-                var options = CreateConfigurationOptions(configuration);
-                conString = options.ToString();
-            }
-
-            return conString;
-        }
-
-        private static ConfigurationOptions CreateConfigurationOptions(RedisConfiguration configuration)
-        {
-            var configurationOptions = new ConfigurationOptions()
-            {
-                AllowAdmin = configuration.AllowAdmin,
-                ConnectTimeout = configuration.ConnectionTimeout,
-                Password = configuration.Password,
-                Ssl = configuration.IsSsl,
-                SslHost = configuration.SslHost,
-                ConnectRetry = 10,
-                AbortOnConnectFail = false,
-            };
-
-            foreach (var endpoint in configuration.Endpoints)
-            {
-                configurationOptions.EndPoints.Add(endpoint.Host, endpoint.Port);
-            }
-
-            return configurationOptions;
         }
 
         private class LogWriter : StringWriter

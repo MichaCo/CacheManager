@@ -26,6 +26,10 @@ namespace CacheManager.Redis
                 // Should recover via fail over
                 catch (RedisServerException ex)
                 {
+                    if (ex.Message.Contains("unknown command"))
+                    {
+                        throw;
+                    }
                     if (tries >= retries)
                     {
                         logger.LogError(ex, ErrorMessage, retries);
@@ -79,6 +83,11 @@ namespace CacheManager.Redis
 
                     aggregateException.Handle(e =>
                     {
+                        if(e is RedisServerException serverEx && serverEx.Message.Contains("unknown command"))
+                        {
+                            return false;
+                        }
+
                         if (e is RedisConnectionException || e is System.TimeoutException || e is RedisServerException)
                         {
                             logger.LogWarn(e, WarningMessage, tries, retries);

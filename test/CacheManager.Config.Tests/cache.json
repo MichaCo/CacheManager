@@ -2,7 +2,7 @@
   "$schema": "http://cachemanager.michaco.net/schemas/cachemanager.json#",
   "redis": [
     {
-      "key": "redisConnection",
+      "key": "redisConnection",      
       "endpoints": [
         {
           "host": "localhost",

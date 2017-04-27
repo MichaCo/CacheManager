@@ -164,7 +164,9 @@ namespace CacheManager.Redis
                             sslHost: redisOption.SslHost,
                             connectionTimeout: redisOption.ConnectionTimeout == 0 ? 5000 : redisOption.ConnectionTimeout,
                             allowAdmin: redisOption.AllowAdmin,
-                            keyspaceNotificationsEnabled: redisOption.EnableKeyspaceNotifications));
+                            keyspaceNotificationsEnabled: redisOption.EnableKeyspaceNotifications,
+                            strictCompatibilityModeVersion: redisOption.StrictCompatibilityModeVersion,
+                            twemproxyEnabled: redisOption.TwemproxyEnabled));
                 }
                 else
                 {
@@ -173,7 +175,8 @@ namespace CacheManager.Redis
                             key: redisOption.Id,
                             connectionString: redisOption.ConnectionString,
                             database: redisOption.Database, // fixes #114
-                            keyspaceNotificationsEnabled: redisOption.EnableKeyspaceNotifications));
+                            keyspaceNotificationsEnabled: redisOption.EnableKeyspaceNotifications,
+                            strictCompatibilityModeVersion: redisOption.StrictCompatibilityModeVersion));
                 }
             }
         }

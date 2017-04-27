@@ -482,8 +482,11 @@ namespace CacheManager.Tests
 
             RedisConfigurations.LoadConfiguration(fileName, RedisConfigurationSection.DefaultSectionName);
             var cfg = RedisConfigurations.GetConfiguration("redisConnectionString");
-            cfg.ConnectionString.Should().Be("127.0.0.1:6379,allowAdmin=true,ssl=false");
+            cfg.ConnectionString.ToLower().Should().Contain("127.0.0.1:6379");//,allowAdmin = true,ssl = false");
+            cfg.ConnectionString.ToLower().Should().Contain("allowadmin=true");
+            cfg.ConnectionString.ToLower().Should().Contain("ssl=false");
             cfg.Database.Should().Be(131);
+            cfg.StrictCompatibilityModeVersion.Should().Be("2.9");
         }
 
         [Fact]
@@ -516,20 +519,7 @@ namespace CacheManager.Tests
         public async Task Redis_Multiple_PubSub_Change()
         {
             // arrange
-            string fileName = TestConfigurationHelper.GetCfgFileName(@"/Configuration/configuration.valid.allFeatures.config");
             var channelName = Guid.NewGuid().ToString();
-
-            // redis config name must be same for all cache handles, configured via file and via code
-            // otherwise the pub sub channel name is different
-            string cacheName = "redisConfigFromConfig";
-
-            RedisConfigurations.LoadConfiguration(fileName, RedisConfigurationSection.DefaultSectionName);
-
-            var cfg = (CacheManagerConfiguration)ConfigurationBuilder.LoadConfigurationFile(fileName, cacheName);
-            cfg.BackplaneChannelName = channelName;
-
-            var cfgCache = CacheFactory.FromConfiguration<object>(cfg);
-
             var item = new CacheItem<object>(Guid.NewGuid().ToString(), "something");
 
             // act/assert
@@ -559,7 +549,7 @@ namespace CacheManager.Tests
                 },
                 1,
                 TestManagers.CreateRedisAndDicCacheWithBackplane(113, true, channelName, Serializer.Json),
-                cfgCache,
+                TestManagers.CreateRedisAndDicCacheWithBackplane(113, true, channelName, Serializer.Json),
                 TestManagers.CreateRedisCache(113, false, Serializer.Json),
                 TestManagers.CreateRedisAndDicCacheWithBackplane(113, true, channelName, Serializer.Json));
         }
@@ -819,15 +809,14 @@ namespace CacheManager.Tests
 
             // act
             var cfg = ConfigurationBuilder.LoadConfigurationFile(fileName, cacheName);
-            var cache = CacheFactory.FromConfiguration<object>(cfg);
-
-            // assert
-            cache.CacheHandles.Any(p => p.Configuration.IsBackplaneSource).Should().BeTrue();
-
+            
+            // assert            
             redisConfig.Database.Should().Be(113);
             redisConfig.ConnectionTimeout.Should().Be(1200);
             redisConfig.AllowAdmin.Should().BeTrue();
             redisConfig.KeyspaceNotificationsEnabled.Should().BeTrue();
+            redisConfig.TwemproxyEnabled.Should().BeTrue();
+            redisConfig.StrictCompatibilityModeVersion.Should().Be("2.7");
         }
 
         [Fact]
@@ -852,6 +841,8 @@ namespace CacheManager.Tests
             // database is the only option apart from key and connection string which must be set, database will not be set through connection string
             // to define which database should actually be used...
             redisConfig.Database.Should().Be(131);
+            redisConfig.StrictCompatibilityModeVersion.Should().Be("2.9");
+            redisConfig.AllowAdmin.Should().BeTrue();
         }
 
 #if !NO_APP_CONFIG

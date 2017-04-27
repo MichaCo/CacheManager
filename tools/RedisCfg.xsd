@@ -32,7 +32,9 @@
       <xs:attribute name="password" use="optional" type="xs:string" />
       <xs:attribute name="ssl" use="optional" type="xs:string" />
       <xs:attribute name="sslHost" use="optional" type="xs:string" />
-      <xs:attribute name="database" use="optional" type="xs:integer" default="0" />      
+      <xs:attribute name="database" use="optional" type="xs:integer" default="0" />
+      <xs:attribute name="strictCompatibilityModeVersion" use="optional" type="xs:string" />
+      <xs:attribute name="twemproxyEnabled" use="optional" type="xs:boolean" default="false"/>
     </xs:complexType>
   </xs:element>
   <xs:element name="connections">

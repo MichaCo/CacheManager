@@ -4,7 +4,6 @@
   <PropertyGroup>
     <Copyright>Copyright (c) 2017 MichaConrad</Copyright>
     <Authors>MichaConrad</Authors>
-    <LangVersion>6</LangVersion>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
 
     <PackageProjectUrl>http://cachemanager.michaco.net</PackageProjectUrl>

@@ -470,52 +470,90 @@ namespace CacheManager.Tests
         public void CacheFactory_Build_WithRedisConfigurationConnectionString()
         {
             // arrange
-            var connection = "127.0.0.1:8080,allowAdmin=true,name=myName,ssl=true";
+            var name = Guid.NewGuid().ToString();
+            var connection = "127.0.0.1:8080,allowAdmin=true,name=myName";
+            var expected = StackExchange.Redis.ConfigurationOptions.Parse(connection);
 
             // act
             CacheFactory.Build<object>(settings =>
             {
                 settings.WithDictionaryHandle();
-                settings.WithRedisConfiguration("redisWithConnectionString", connection);
+                settings.WithRedisConfiguration(name, connection);
             });
 
-            var config = RedisConfigurations.GetConfiguration("redisWithConnectionString");
+            var config = RedisConfigurations.GetConfiguration(name);
 
             // assert
-            config.ConnectionString.Should().Be(connection);
-            config.Key.Should().Be("redisWithConnectionString");
+            config.ConfigurationOptions.ShouldBeEquivalentTo(expected);
+            config.TwemproxyEnabled.Should().BeFalse();
+            config.AllowAdmin.Should().BeTrue();
+            config.IsSsl.Should().BeFalse();
+            config.Key.Should().Be(name);
         }
+        
+        [Fact]
+        [ReplaceCulture]
+        public void CacheFactory_Build_WithRedisConnectionStringWithProxy()
+        {
+            // arrange
+            var name = Guid.NewGuid().ToString();
+            var connection = "127.0.0.1:8080,name=myName,ssl=true,proxy=Twemproxy";
+            var expected = StackExchange.Redis.ConfigurationOptions.Parse(connection);
+
+            // act
+            CacheFactory.Build<object>(settings =>
+            {
+                settings.WithDictionaryHandle();
+                settings.WithRedisConfiguration(name, connection);
+            });
+
+            var config = RedisConfigurations.GetConfiguration(name);
+
+            // assert
+            config.ConfigurationOptions.ShouldBeEquivalentTo(expected);
+            config.TwemproxyEnabled.Should().BeTrue();
+            config.AllowAdmin.Should().BeFalse();
+            config.IsSsl.Should().BeTrue();
+            config.Key.Should().Be(name);
+        }
+
 
         [Fact]
         [ReplaceCulture]
         public void CacheFactory_Build_WithRedisConfigurationValidateBuilder()
         {
             // arrange act
+            var name = Guid.NewGuid().ToString();
             CacheFactory.Build<object>(settings =>
             {
                 settings.WithDictionaryHandle();
-                settings.WithRedisConfiguration("redisBuildUpConfiguration", config =>
+                settings.WithRedisConfiguration(name, config =>
                 {
-                    config.WithAllowAdmin()
+                    config
+                        .WithAllowAdmin()
+                        .UseCompatibilityMode("2.8")
+                        .UseTwemproxy()
                         .WithConnectionTimeout(221113)
                         .WithDatabase(22)
                         .WithEndpoint("127.0.0.1", 2323)
-                        .WithEndpoint("nohost", 99999)
+                        .WithEndpoint("nohost", 60999)
                         .WithPassword("secret")
                         .WithSsl("mySslHost");
                 });
             });
 
-            var configuration = RedisConfigurations.GetConfiguration("redisBuildUpConfiguration");
+            var configuration = RedisConfigurations.GetConfiguration(name);
 
             // assert
-            configuration.Key.Should().Be("redisBuildUpConfiguration");
+            configuration.Key.Should().Be(name);
             configuration.ConnectionTimeout.Should().Be(221113);
+            configuration.TwemproxyEnabled.Should().BeTrue();
+            configuration.StrictCompatibilityModeVersion.Should().Be("2.8");
             configuration.Database.Should().Be(22);
             configuration.Password.Should().Be("secret");
             configuration.IsSsl.Should().BeTrue();
             configuration.SslHost.Should().Be("mySslHost");
-            configuration.Endpoints.ShouldBeEquivalentTo(new[] { new ServerEndPoint("127.0.0.1", 2323), new ServerEndPoint("nohost", 99999) });
+            configuration.Endpoints.ShouldBeEquivalentTo(new[] { new ServerEndPoint("127.0.0.1", 2323), new ServerEndPoint("nohost", 60999) });
         }
 
         [Fact]

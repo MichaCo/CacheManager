@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using StackExchange.Redis;
 using static CacheManager.Core.Utility.Guard;
 
 namespace CacheManager.Redis
@@ -13,6 +14,9 @@ namespace CacheManager.Redis
     /// </summary>
     public class RedisConfiguration
     {
+        private string _connectionString;
+        private ConfigurationOptions _configurationOptions;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="RedisConfiguration"/> class.
         /// </summary>
@@ -40,6 +44,10 @@ namespace CacheManager.Redis
         /// <c>Clear</c> for example.
         /// </param>
         /// <param name="keyspaceNotificationsEnabled">Enables keyspace notifications to react on eviction/expiration of items.</param>
+        /// <param name="twemproxyEnabled">Enables Twemproxy mode.</param>
+        /// <param name="strictCompatibilityModeVersion">
+        /// Gets or sets a version number to eventually reduce the avaible features accessible by cachemanager.
+        /// </param>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "Using it for configuration data only.")]
         public RedisConfiguration(
             string key,
@@ -50,7 +58,9 @@ namespace CacheManager.Redis
             string sslHost = null,
             int connectionTimeout = 5000,
             bool allowAdmin = false,
-            bool keyspaceNotificationsEnabled = false)
+            bool keyspaceNotificationsEnabled = false,
+            bool twemproxyEnabled = false,
+            string strictCompatibilityModeVersion = null)
         {
             NotNullOrWhiteSpace(key, nameof(key));
             NotNull(endpoints, nameof(endpoints));
@@ -69,6 +79,13 @@ namespace CacheManager.Redis
             ConnectionTimeout = connectionTimeout;
             AllowAdmin = allowAdmin;
             KeyspaceNotificationsEnabled = keyspaceNotificationsEnabled;
+            TwemproxyEnabled = twemproxyEnabled;
+            StrictCompatibilityModeVersion = strictCompatibilityModeVersion;
+
+            _configurationOptions = CreateConfigurationOptions();
+
+            // is used later on as key in the connection lookup, and this object should be consistent no matter which ctor is used
+            ConnectionString = _configurationOptions.ToString();
         }
 
         /// <summary>
@@ -83,17 +100,62 @@ namespace CacheManager.Redis
         /// </param>
         /// <param name="database">The redis database to use.</param>
         /// <param name="keyspaceNotificationsEnabled">Enables keyspace notifications to react on eviction/expiration of items.</param>
+        /// <param name="strictCompatibilityModeVersion">
+        /// Gets or sets a version number to eventually reduce the avaible features accessible by cachemanager.
+        /// </param>
         public RedisConfiguration(
             string key,
             string connectionString,
-            int database,
-            bool keyspaceNotificationsEnabled)
+            int database = 0,
+            bool keyspaceNotificationsEnabled = false,
+            string strictCompatibilityModeVersion = null)
         {
             Key = key;
             ConnectionString = connectionString;
             Database = database;
             KeyspaceNotificationsEnabled = keyspaceNotificationsEnabled;
+            StrictCompatibilityModeVersion = strictCompatibilityModeVersion;
         }
+        
+        private ConfigurationOptions CreateConfigurationOptions()
+        {
+            var configurationOptions = new ConfigurationOptions()
+            {
+                AllowAdmin = AllowAdmin,
+                ConnectTimeout = ConnectionTimeout,
+                Password = Password,
+                Ssl = IsSsl,
+                SslHost = SslHost,
+                ConnectRetry = 10,
+                AbortOnConnectFail = false,
+                Proxy = TwemproxyEnabled ? Proxy.Twemproxy : Proxy.None
+            };
+
+            foreach (var endpoint in Endpoints)
+            {
+                configurationOptions.EndPoints.Add(endpoint.Host, endpoint.Port);
+            }
+
+            return configurationOptions;
+        }
+
+        /// <summary>
+        /// Gets the <see cref="StackExchange.Redis.ConfigurationOptions"/> defined by this configuration.
+        /// </summary>
+        [CLSCompliant(false)]
+        public ConfigurationOptions ConfigurationOptions => _configurationOptions;
+
+        /// <summary>
+        /// Gets or sets a version number to eventually reduce the avaible features accessible by cachemanager.
+        /// E.g. set this to <c>"2.4"</c> to disable LUA support.
+        /// </summary>
+        /// <remarks>
+        /// This can also be used when automatic feature detection is not possible. Which is the
+        /// case for example if TwemProxy is used, because the servers collection. to query the features, is not available/supported.
+        /// CacheManager per default falls back to a version which supports LUA. If you are using a Redis server behind TwemPoxy which
+        /// does not allow LUA, use this property!
+        /// </remarks>
+        public string StrictCompatibilityModeVersion { get; set; }
 
         /// <summary>
         /// Gets or sets the identifier for the redis configuration.
@@ -105,14 +167,28 @@ namespace CacheManager.Redis
         /// The key.
         /// </value>
         public string Key { get; set; }
-
+        
         /// <summary>
         /// Gets or sets the connection string.
         /// </summary>
         /// <value>
         /// The connection string.
         /// </value>
-        public string ConnectionString { get; set; }
+        public string ConnectionString {
+            get => _connectionString;
+            set
+            {
+                _configurationOptions = ConfigurationOptions.Parse(value, true);
+
+                // read some properties back to be able to react on the settings in RedisCacheHandle
+                TwemproxyEnabled = _configurationOptions.Proxy == Proxy.Twemproxy;
+                AllowAdmin = _configurationOptions.AllowAdmin;
+                ConnectionTimeout = _configurationOptions.ConnectTimeout;
+                IsSsl = _configurationOptions.Ssl;
+                SslHost = _configurationOptions.SslHost;
+                _connectionString = _configurationOptions.ToString();
+            }
+        }
 
         /// <summary>
         /// Gets or sets the password to be used to connect to the Redis server.
@@ -182,6 +258,11 @@ namespace CacheManager.Redis
         /// </para>
         /// </summary>
         public bool KeyspaceNotificationsEnabled { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value to indicate if Termproxy is being used.
+        /// </summary>
+        public bool TwemproxyEnabled { get; set; }
     }
 
     /// <summary>

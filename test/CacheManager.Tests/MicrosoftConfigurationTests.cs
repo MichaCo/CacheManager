@@ -1234,6 +1234,8 @@ namespace CacheManager.Tests
                 {"redis:0:password", "password"},
                 {"redis:0:sslHost", "sslHost"},
                 {"redis:0:keyspaceNotificationsEnabled", "TRUE"},
+                {"redis:0:twemproxyEnabled", "true" },
+                {"redis:0:strictCompatibilityModeVersion", "2.5" }
             };
 
             GetConfiguration(data).LoadRedisConfigurations();
@@ -1251,6 +1253,8 @@ namespace CacheManager.Tests
             redisConfig.Password.Should().Be("password");
             redisConfig.SslHost.Should().Be("sslHost");
             redisConfig.KeyspaceNotificationsEnabled.Should().Be(true);
+            redisConfig.StrictCompatibilityModeVersion.Should().Be("2.5");
+            redisConfig.TwemproxyEnabled.Should().BeTrue();
         }
 
         [Fact]
@@ -1259,14 +1263,20 @@ namespace CacheManager.Tests
             var key = Guid.NewGuid().ToString();
             var data = new Dictionary<string, string>
             {
-                {"redis:1:connectionString", "connectionString"},
-                {"redis:1:key", key}
+                {"redis:1:connectionString", "localhost,allowAdmin=true,proxy=Twemproxy"},
+                {"redis:1:key", key},
+                {"redis:1:strictCompatibilityModeVersion", "2.5" },
+                {"redis:1:keyspaceNotificationsEnabled", "TRUE"},
+                {"redis:1:database", "101"},
             };
 
             GetConfiguration(data).LoadRedisConfigurations();
             var redisConfig = RedisConfigurations.GetConfiguration(key);
             redisConfig.Key.Should().Be(key);
-            redisConfig.ConnectionString.Should().Be("connectionString");
+            redisConfig.AllowAdmin.Should().BeTrue();
+            redisConfig.StrictCompatibilityModeVersion.Should().Be("2.5");
+            redisConfig.TwemproxyEnabled.Should().BeTrue();
+            redisConfig.Database.Should().Be(101);
         }
 
         private static IConfigurationRoot GetConfiguration(IDictionary<string, string> data)

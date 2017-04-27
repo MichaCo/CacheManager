@@ -278,6 +278,20 @@
           "type": "string",
           "minLength": 1,
           "description": "The StackExchange.Redis connection string, see https://github.com/StackExchange/StackExchange.Redis/blob/master/Docs/Configuration.md."
+        },
+        "strictCompatibilityModeVersion": {
+          "type": "string",
+          "description": "Set an explicit version to restrict features available to CacheManager. Set this to 2.4 for example to disallow LUA scripting.",
+          "minLength": 1
+        },
+        "twemproxyEnabled": {
+          "type": "boolean",
+          "description": "Set this to true only if you are using Twemproxy."
+        },
+        "database": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "The database to be used on the redis instance."
         }
       }
     },
@@ -294,6 +308,15 @@
           "type": "string",
           "description": "The server password.",
           "minLength": 1
+        },
+        "strictCompatibilityModeVersion": {
+          "type": "string",
+          "description": "Set an explicit version to restrict features available to CacheManager. Set this to 2.4 for example to disallow LUA scripting.",
+          "minLength": 1
+        },
+        "twemproxyEnabled": {
+          "type": "boolean",
+          "description": "Set this to true only if you are using Twemproxy."
         },
         "keyspaceNotificationsEnabled": {
           "type": "boolean",

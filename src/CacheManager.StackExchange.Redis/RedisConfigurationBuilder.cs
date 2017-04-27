@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using static CacheManager.Core.Utility.Guard;
 
 namespace CacheManager.Redis
@@ -18,6 +19,8 @@ namespace CacheManager.Redis
         private string _password = null;
         private string _sslHost = null;
         private bool _enabledKeyspaceNotifications = false;
+        private string _useVersion;
+        private bool _useTwemproxy;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RedisConfigurationBuilder"/> class.
@@ -37,7 +40,18 @@ namespace CacheManager.Redis
         /// </summary>
         /// <returns>The <c>RedisConfiguration</c></returns>
         public RedisConfiguration Build() =>
-            new RedisConfiguration(_key, _endpoints, _database, _password, _isSsl, _sslHost, _connectionTimeout, _allowAdmin, _enabledKeyspaceNotifications);
+            new RedisConfiguration(
+                key: _key,
+                endpoints: _endpoints,
+                database: _database,
+                password: _password,
+                isSsl: _isSsl,
+                sslHost: _sslHost,
+                connectionTimeout: _connectionTimeout,
+                allowAdmin: _allowAdmin,
+                keyspaceNotificationsEnabled: _enabledKeyspaceNotifications,
+                twemproxyEnabled: _useTwemproxy,
+                strictCompatibilityModeVersion: _useVersion);
 
         /// <summary>
         /// Enable the flag to have CacheManager react on keyspace notifications from redis.
@@ -49,6 +63,29 @@ namespace CacheManager.Redis
         public RedisConfigurationBuilder EnableKeyspaceEvents()
         {
             _enabledKeyspaceNotifications = true;
+            return this;
+        }
+
+        /// <summary>
+        /// Can be used to control the available Redis features CacheManager can use. E.g. if set to <c>"2.4"</c>, this would disable all LUA support and would
+        /// force CacheManager to use other APIs
+        /// </summary>
+        /// <param name="version"></param>
+        /// <returns>The builder.</returns>
+        public RedisConfigurationBuilder UseCompatibilityMode(string version)
+        {
+            _useVersion = version;
+            return this;
+        }
+
+        /// <summary>
+        /// Enable this in case you are using Redis behind Twemproxy.
+        /// </summary>
+        /// <returns>The builder.</returns>
+        [CLSCompliant(false)]
+        public RedisConfigurationBuilder UseTwemproxy()
+        {
+            _useTwemproxy = true;
             return this;
         }
 

@@ -261,7 +261,7 @@ namespace CacheManager.Core
                 // If update fails because item doesn't exist AND the current handle is backplane source or the lowest cache handle level,
                 // remove the item from other handles (if exists).
                 // Otherwise, if we do not exit here, calling update on the next handle might succeed and would return a misleading result.
-                Logger.LogWarn($"Update failed on '{region}:{key}' because the region/key did not exist.");
+                Logger.LogInfo($"Update failed on '{region}:{key}' because the region/key did not exist.");
 
                 EvictFromOtherHandles(key, region, handleIndex);
 

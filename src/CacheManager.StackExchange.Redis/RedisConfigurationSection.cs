@@ -14,14 +14,18 @@ namespace CacheManager.Redis
     ///   <connections>
     ///    <connection id="redis1"
     ///                    database="0"
+    ///                    database="113"
+    ///                    strictCompatibilityModeVersion="the redis version, e.g. 2.6, or leave null"
+    ///                    
     ///                    { connectionString="redis0:6379,redis1:6380,keepAlive=180,allowAdmin=true" }
     ///                    OR
     ///                    {
-    ///                    allowAdmin="true|false"
-    ///                    password=""
-    ///                    ssl="true|false"
-    ///                    sslHost="string"
-    ///                    connectionTimeout="ms"
+    ///                       allowAdmin="true|false"
+    ///                       password=""
+    ///                       ssl="true|false"
+    ///                       sslHost="string"
+    ///                       connectionTimeout="ms"
+    ///                       twemproxyEnabled="true|false"
     ///                    }
     ///            >
     ///        <endpoints>
@@ -364,6 +368,40 @@ namespace CacheManager.Redis
             set
             {
                 this["sslHost"] = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether Twemproxy is used or not.
+        /// </summary>
+        /// <value><c>true</c> if Twemproxy is used; otherwise, <c>false</c>.</value>
+        [ConfigurationProperty("twemproxyEnabled", IsRequired = false, DefaultValue = false)]
+        public bool TwemproxyEnabled
+        {
+            get
+            {
+                return (bool)this["twemproxyEnabled"];
+            }
+            set
+            {
+                this["twemproxyEnabled"] = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets a value setting an explicit version compatibility mode.
+        /// </summary>
+        /// <value>The Redis version to use.</value>
+        [ConfigurationProperty("strictCompatibilityModeVersion", IsRequired = false)]
+        public string StrictCompatibilityModeVersion
+        {
+            get
+            {
+                return (string)this["strictCompatibilityModeVersion"];
+            }
+            set
+            {
+                this["strictCompatibilityModeVersion"] = value;
             }
         }
     }

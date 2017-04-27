@@ -72,10 +72,12 @@ end
 return result";
 
         private readonly IDictionary<ScriptType, LoadedLuaScript> _shaScripts = new Dictionary<ScriptType, LoadedLuaScript>();
+        private readonly IDictionary<ScriptType, LuaScript> _luaScripts = new Dictionary<ScriptType, LuaScript>();
         private readonly ICacheManagerConfiguration _managerConfiguration;
         private readonly RedisValueConverter _valueConverter;
         private readonly RedisConnectionManager _connection;
         private bool _isLuaAllowed;
+        private bool _canPreloadScripts = true;
         private RedisConfiguration _redisConfiguration = null;
 
         // flag if scripts are initially loaded to the server
@@ -104,6 +106,9 @@ return result";
             _redisConfiguration = RedisConfigurations.GetConfiguration(configuration.Key);
             _connection = new RedisConnectionManager(_redisConfiguration, loggerFactory);
             _isLuaAllowed = _connection.Features.Scripting;
+
+            // disable preloading right away if twemproxy mode, as this is not supported.
+            _canPreloadScripts = _redisConfiguration.TwemproxyEnabled ? false : true;
 
             if (_redisConfiguration.KeyspaceNotificationsEnabled)
             {
@@ -154,6 +159,12 @@ return result";
         {
             get
             {
+                if (_redisConfiguration.TwemproxyEnabled)
+                {
+                    Logger.LogWarn("'Count' cannot be calculated. Twemproxy mode is enabled which does not support accessing the servers collection.");
+                    return 0;
+                }
+
                 var count = 0;
                 foreach (var server in Servers.Where(p => !p.IsSlave && p.IsConnected))
                 {
@@ -182,20 +193,11 @@ return result";
 #pragma warning restore CS3003 // Type is not CLS-compliant
 
         /// <summary>
-        /// Gets or sets a value indicating whether we can use the lua implementation instead of manual.
-        /// This flag will be set automatically via feature detection based on the Redis server version and should never be set manually except for testing.
+        /// Gets a value indicating whether we can use the lua implementation instead of manual.
+        /// This flag will be set automatically via feature detection based on the Redis server version
+        /// or via <see cref="RedisConfiguration.StrictCompatibilityModeVersion"/> if set to a version which does not support lua scripting.
         /// </summary>
-        public bool UseLua
-        {
-            get
-            {
-                return _isLuaAllowed;
-            }
-            set
-            {
-                _isLuaAllowed = value;
-            }
-        }
+        public bool IsLuaAllowed => _isLuaAllowed;
 
         /// <inheritdoc />
         protected override ILogger Logger { get; }
@@ -205,15 +207,22 @@ return result";
         /// </summary>
         public override void Clear()
         {
-            foreach (var server in Servers.Where(p => !p.IsSlave))
+            try
             {
-                Retry(() =>
+                foreach (var server in Servers.Where(p => !p.IsSlave))
                 {
-                    if (server.IsConnected)
+                    Retry(() =>
                     {
-                        server.FlushDatabase(_redisConfiguration.Database);
-                    }
-                });
+                        if (server.IsConnected)
+                        {
+                            server.FlushDatabase(_redisConfiguration.Database);
+                        }
+                    });
+                }
+            }
+            catch (NotSupportedException ex)
+            {
+                throw new NotSupportedException($"Clear is not available because '{ex.Message}'", ex);
             }
         }
 
@@ -944,8 +953,9 @@ return result";
                 }
             }
 
-            LoadedLuaScript script;
-            if (!_shaScripts.TryGetValue(scriptType, out script))
+            LoadedLuaScript script = null;
+            if (!_luaScripts.TryGetValue(scriptType, out LuaScript luaScript)
+                || (_canPreloadScripts && !_shaScripts.TryGetValue(scriptType, out script)))
             {
                 Logger.LogCritical("Something is wrong with the Lua scripts. Seem to be not loaded.");
                 _scriptsLoaded = false;
@@ -954,7 +964,14 @@ return result";
 
             try
             {
-                return _connection.Database.ScriptEvaluate(script.Hash, new[] { redisKey }, values, flags);
+                if (_canPreloadScripts && script != null)
+                {
+                    return _connection.Database.ScriptEvaluate(script.Hash, new[] { redisKey }, values, flags);
+                }
+                else
+                {
+                    return _connection.Database.ScriptEvaluate(luaScript.ExecutableScript, new[] { redisKey }, values, flags);
+                }
             }
             catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.OrdinalIgnoreCase))
             {
@@ -976,15 +993,31 @@ return result";
                 var addLua = LuaScript.Prepare(_scriptAdd);
                 var updateLua = LuaScript.Prepare(_scriptUpdate);
                 var getLua = LuaScript.Prepare(_scriptGet);
+                _luaScripts.Clear();
+                _luaScripts.Add(ScriptType.Add, addLua);
+                _luaScripts.Add(ScriptType.Put, putLua);
+                _luaScripts.Add(ScriptType.Update, updateLua);
+                _luaScripts.Add(ScriptType.Get, getLua);
 
-                foreach (var server in Servers)
+                // servers feature might be disabled
+                if (_canPreloadScripts)
                 {
-                    if (server.IsConnected)
+                    try
                     {
-                        _shaScripts[ScriptType.Put] = putLua.Load(server);
-                        _shaScripts[ScriptType.Add] = addLua.Load(server);
-                        _shaScripts[ScriptType.Update] = updateLua.Load(server);
-                        _shaScripts[ScriptType.Get] = getLua.Load(server);
+                        foreach (var server in Servers)
+                        {
+                            if (server.IsConnected)
+                            {
+                                _shaScripts[ScriptType.Put] = putLua.Load(server);
+                                _shaScripts[ScriptType.Add] = addLua.Load(server);
+                                _shaScripts[ScriptType.Update] = updateLua.Load(server);
+                                _shaScripts[ScriptType.Get] = getLua.Load(server);
+                            }
+                        }
+                    }
+                    catch (NotSupportedException)
+                    {
+                        _canPreloadScripts = false;
                     }
                 }
             }
