@@ -67,19 +67,24 @@ namespace CacheManager.Core
         /// </param>
         /// <param name="redisClient">The connection multiplexer instance.</param>
         /// <param name="database">The redis database to use for caching.</param>
+        /// <param name="enableKeyspaceNotifications">
+        /// Enables keyspace notifications to react on eviction/expiration of items.
+        /// Make sure that all servers are configured correctly and 'notify-keyspace-events' is at least set to 'Exe', otherwise CacheManager will not retrieve any events.
+        /// See <see href="https://redis.io/topics/notifications#configuration"/> for configuration details.
+        /// </param>
         /// <returns>The configuration builder.</returns>
         /// <exception cref="System.ArgumentNullException">
         /// If <paramref name="configurationKey"/> or <paramref name="redisClient"/> are null.
         /// </exception>
         [CLSCompliant(false)]
-        public static ConfigurationBuilderCachePart WithRedisConfiguration(this ConfigurationBuilderCachePart part, string configurationKey, IConnectionMultiplexer redisClient, int database = 0)
+        public static ConfigurationBuilderCachePart WithRedisConfiguration(this ConfigurationBuilderCachePart part, string configurationKey, IConnectionMultiplexer redisClient, int database = 0, bool enableKeyspaceNotifications = false)
         {
             NotNullOrWhiteSpace(configurationKey, nameof(configurationKey));
 
             NotNull(redisClient, nameof(redisClient));
 
             var connectionString = redisClient.Configuration;
-            part.WithRedisConfiguration(configurationKey, connectionString, database);
+            part.WithRedisConfiguration(configurationKey, connectionString, database, enableKeyspaceNotifications);
 
             RedisConnectionManager.AddConnection(connectionString, redisClient);
 
@@ -130,20 +135,7 @@ namespace CacheManager.Core
 
             return part.WithBackplane(typeof(RedisCacheBackplane), redisConfigurationKey, channelName);
         }
-
-        /// <summary>
-        /// Adds a <see cref="RedisCacheHandle{TCacheValue}"/>.
-        /// This handle requires a redis configuration to be defined with the given <paramref name="redisConfigurationKey"/>.
-        /// </summary>
-        /// <param name="part">The builder instance.</param>
-        /// <param name="redisConfigurationKey">
-        /// The redis configuration key will be used to find a matching redis connection configuration.
-        /// </param>
-        /// <returns>The builder instance.</returns>
-        /// <exception cref="ArgumentNullException">Thrown if <paramref name="redisConfigurationKey"/> is null.</exception>
-        public static ConfigurationBuilderCacheHandlePart WithRedisCacheHandle(this ConfigurationBuilderCachePart part, string redisConfigurationKey) =>
-            WithRedisCacheHandle(part, redisConfigurationKey, true);
-
+        
         /// <summary>
         /// Adds a <see cref="RedisCacheHandle{TCacheValue}"/>.
         /// This handle requires a redis configuration to be defined with the given <paramref name="redisConfigurationKey"/>.
@@ -158,7 +150,7 @@ namespace CacheManager.Core
         /// </param>
         /// <returns>The builder instance.</returns>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="redisConfigurationKey"/> is null.</exception>
-        public static ConfigurationBuilderCacheHandlePart WithRedisCacheHandle(this ConfigurationBuilderCachePart part, string redisConfigurationKey, bool isBackplaneSource)
+        public static ConfigurationBuilderCacheHandlePart WithRedisCacheHandle(this ConfigurationBuilderCachePart part, string redisConfigurationKey, bool isBackplaneSource = true)
         {
             NotNull(part, nameof(part));
 

@@ -4,35 +4,63 @@ using System.Text;
 using CacheManager.Core;
 using CacheManager.Core.Internal;
 using CacheManager.Core.Logging;
-using Couchbase.Configuration.Client;
-using Couchbase.Core;
 using Newtonsoft.Json.Linq;
 using static CacheManager.Core.Utility.Guard;
 
 namespace CacheManager.Couchbase
 {
     /// <summary>
+    /// Definition for what bucket should be used and optionally a bucket password.
+    /// </summary>
+    /// <seealso cref="CacheManager.Core.Internal.BaseCacheHandle{TCacheValue}" />
+    public class BucketCacheHandleAdditionalConfiguration
+    {
+        /// <summary>
+        /// Gets or sets the name of the bucket.
+        /// </summary>
+        /// <value>
+        /// The name of the bucket.
+        /// </value>
+        public string BucketName { get; set; } = CouchbaseConfigurationManager.DefaultBucketName;
+
+        /// <summary>
+        /// Gets or sets the bucket password.
+        /// </summary>
+        /// <value>
+        /// The bucket password.
+        /// </value>
+        public string BucketPassword { get; set; }
+    }
+
+    /// <summary>
     /// Cache handle implementation based on the couchbase .net client.
     /// </summary>
     /// <typeparam name="TCacheValue">The type of the cache value.</typeparam>
     public class BucketCacheHandle<TCacheValue> : BaseCacheHandle<TCacheValue>
     {
-        private readonly IBucket _bucket;
-        private readonly BucketConfiguration _bucketConfiguration;
-        private readonly string _bucketName = "default";
-        private readonly ClientConfiguration _configuration;
-        private readonly string _configurationName = string.Empty;
+        private readonly CouchbaseConfigurationManager _bucketManager;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="BucketCacheHandle{TCacheValue}"/> class.
+        /// Initializes a new instance of the <see cref="BucketCacheHandle{TCacheValue}" /> class.
         /// </summary>
         /// <param name="managerConfiguration">The manager configuration.</param>
         /// <param name="configuration">The cache handle configuration.</param>
         /// <param name="loggerFactory">The logger factory.</param>
-        /// <exception cref="System.InvalidOperationException">
-        /// If <c>configuration.HandleName</c> is not valid.
-        /// </exception>
+        /// <exception cref="System.InvalidOperationException">If <c>configuration.HandleName</c> is not valid.</exception>
         public BucketCacheHandle(ICacheManagerConfiguration managerConfiguration, CacheHandleConfiguration configuration, ILoggerFactory loggerFactory)
+            : this(managerConfiguration, configuration, loggerFactory, new BucketCacheHandleAdditionalConfiguration())
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="BucketCacheHandle{TCacheValue}" /> class.
+        /// </summary>
+        /// <param name="managerConfiguration">The manager configuration.</param>
+        /// <param name="configuration">The cache handle configuration.</param>
+        /// <param name="loggerFactory">The logger factory.</param>
+        /// <param name="additionalSettings">The additional settings.</param>
+        /// <exception cref="System.InvalidOperationException">If <c>configuration.HandleName</c> is not valid.</exception>
+        public BucketCacheHandle(ICacheManagerConfiguration managerConfiguration, CacheHandleConfiguration configuration, ILoggerFactory loggerFactory, BucketCacheHandleAdditionalConfiguration additionalSettings)
             : base(managerConfiguration, configuration)
         {
             NotNull(configuration, nameof(configuration));
@@ -40,31 +68,27 @@ namespace CacheManager.Couchbase
 
             Logger = loggerFactory.CreateLogger(this);
 
-            // we can configure the bucket name by having "<configKey>:<bucketName>" as handle's
-            // name value
-            var nameParts = configuration.Key.Split(new[] { ":" }, StringSplitOptions.RemoveEmptyEntries);
-            Ensure(nameParts.Length > 0, "Handle key is not valid {0}", configuration.Key);
+            if (additionalSettings == null)
+            {
+                additionalSettings = new BucketCacheHandleAdditionalConfiguration();
+            }
 
-            _configurationName = nameParts[0];
+            // we can configure the bucket name by having "<configKey>:<bucketName>" as handle's
+            // this should only be used in 100% by app/web.config based configuration
+            var nameParts = configuration.Key.Split(new[] { ":" }, StringSplitOptions.RemoveEmptyEntries);
+
+            var configurationName = nameParts.Length > 0 ? nameParts[0] : Guid.NewGuid().ToString();
 
             if (nameParts.Length == 2)
             {
-                _bucketName = nameParts[1];
+                additionalSettings.BucketName = nameParts[1];
             }
 
-            _configuration = CouchbaseConfigurationManager.GetConfiguration(_configurationName);
-            _bucketConfiguration = CouchbaseConfigurationManager.GetBucketConfiguration(_configuration, _bucketName);
-            _bucket = CouchbaseConfigurationManager.GetBucket(_configuration, _configurationName, _bucketName);
+            _bucketManager = new CouchbaseConfigurationManager(configurationName, additionalSettings.BucketName, additionalSettings.BucketPassword);
         }
 
         /// <inheritdoc />
-        public override bool IsDistributedCache
-        {
-            get
-            {
-                return true;
-            }
-        }
+        public override bool IsDistributedCache => true;
 
         /// <summary>
         /// Gets the number of items the cache handle currently maintains.
@@ -80,11 +104,14 @@ namespace CacheManager.Couchbase
         /// </summary>
         public override void Clear()
         {
-            // warning: takes ~20seconds to flush the bucket... thats rigged
-            var manager = _bucket.CreateManager(_bucketConfiguration.Username, _bucketConfiguration.Password);
+            // warning: takes ~20seconds to flush the bucket...
+            var manager = _bucketManager.GetManager();
             if (manager != null)
             {
-                manager.Flush();
+                using (manager)
+                {
+                    manager.Flush();
+                }
             }
         }
 
@@ -103,7 +130,7 @@ namespace CacheManager.Couchbase
         public override bool Exists(string key)
         {
             var fullKey = GetKey(key);
-            return _bucket.Exists(fullKey);
+            return _bucketManager.Bucket.Exists(fullKey);
         }
 
         /// <inheritdoc />
@@ -112,7 +139,7 @@ namespace CacheManager.Couchbase
             NotNullOrWhiteSpace(region, nameof(region));
 
             var fullKey = GetKey(key, region);
-            return _bucket.Exists(fullKey);
+            return _bucketManager.Bucket.Exists(fullKey);
         }
 
         /// <summary>
@@ -129,10 +156,10 @@ namespace CacheManager.Couchbase
             var fullKey = GetKey(item.Key, item.Region);
             if (item.ExpirationMode != ExpirationMode.None)
             {
-                return _bucket.Insert(fullKey, item, item.ExpirationTimeout).Success;
+                return _bucketManager.Bucket.Insert(fullKey, item, item.ExpirationTimeout).Success;
             }
 
-            return _bucket.Insert(fullKey, item).Success;
+            return _bucketManager.Bucket.Insert(fullKey, item).Success;
         }
 
         /// <summary>
@@ -166,28 +193,33 @@ namespace CacheManager.Couchbase
         protected override CacheItem<TCacheValue> GetCacheItemInternal(string key, string region)
         {
             var fullkey = GetKey(key, region);
-            var result = _bucket.Get<CacheItem<TCacheValue>>(fullkey);
+            var result = _bucketManager.Bucket.Get<CacheItem<TCacheValue>>(fullkey);
 
-            if (result.Success)
+            if (!result.Success)
             {
-                var cacheItem = result.Value;
-                if (cacheItem.Value is JToken)
-                {
-                    var value = cacheItem.Value as JToken;
-                    cacheItem = cacheItem.WithValue((TCacheValue)value.ToObject(cacheItem.ValueType));
-                }
-
-                // TODO: test sliding
-                // extend sliding expiration
-                if (cacheItem.ExpirationMode == ExpirationMode.Sliding)
-                {
-                    _bucket.Touch(fullkey, cacheItem.ExpirationTimeout);
-                }
-
-                return cacheItem;
+                return null;
             }
 
-            return null;
+            var cacheItem = result.Value;
+            if (cacheItem.Value is JToken)
+            {
+                var value = cacheItem.Value as JToken;
+                cacheItem = cacheItem.WithValue((TCacheValue)value.ToObject(cacheItem.ValueType));
+            }
+
+            if (cacheItem.IsExpired)
+            {
+                return null;
+            }
+            
+            // extend sliding expiration
+            if (cacheItem.ExpirationMode == ExpirationMode.Sliding)
+            {
+                cacheItem.LastAccessedUtc = DateTime.UtcNow;
+                PutInternalPrepared(cacheItem);
+            }
+
+            return cacheItem;
         }
 
         /// <summary>
@@ -200,13 +232,13 @@ namespace CacheManager.Couchbase
             NotNull(item, nameof(item));
 
             var fullKey = GetKey(item.Key, item.Region);
-            if (item.ExpirationMode != ExpirationMode.None)
+            if (item.ExpirationMode == ExpirationMode.Absolute || item.ExpirationMode == ExpirationMode.Sliding)
             {
-                _bucket.Upsert(fullKey, item, item.ExpirationTimeout);
+                _bucketManager.Bucket.Upsert(fullKey, item, item.ExpirationTimeout);
             }
             else
             {
-                _bucket.Upsert(fullKey, item);
+                _bucketManager.Bucket.Upsert(fullKey, item);
             }
         }
 
@@ -230,7 +262,7 @@ namespace CacheManager.Couchbase
         protected override bool RemoveInternal(string key, string region)
         {
             var fullKey = GetKey(key, region);
-            var result = _bucket.Remove(fullKey);
+            var result = _bucketManager.Bucket.Remove(fullKey);
             return result.Success;
         }
 
@@ -245,6 +277,11 @@ namespace CacheManager.Couchbase
 
         private static string GetKey(string key, string region = null)
         {
+            if (string.IsNullOrWhiteSpace(key))
+            {
+                throw new ArgumentNullException(nameof(key));
+            }
+
             var fullKey = key;
 
             if (!string.IsNullOrWhiteSpace(region))

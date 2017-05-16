@@ -100,7 +100,7 @@ namespace CacheManager.Core
                         ////}
 
                         // base cache handle does logging for this
-                        TriggerOnRemoveByHandle(args.Key, args.Region, args.Reason, handleIndex + 1, args.Value);
+                        
                         if (Configuration.UpdateMode == CacheUpdateMode.Up)
                         {
                             if (_logTrace)
@@ -110,6 +110,9 @@ namespace CacheManager.Core
 
                             EvictFromHandlesAbove(args.Key, args.Region, handleIndex);
                         }
+
+                        // moving down below cleanup, optherwise the item could still be in memory
+                        TriggerOnRemoveByHandle(args.Key, args.Region, args.Reason, handleIndex + 1, args.Value);
                     };
 
                     index++;

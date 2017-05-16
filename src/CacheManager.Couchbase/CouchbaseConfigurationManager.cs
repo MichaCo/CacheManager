@@ -1,136 +1,208 @@
-﻿using System.Collections.Generic;
-using System.Configuration;
+﻿using System;
+using System.Linq;
 using Couchbase;
 using Couchbase.Configuration.Client;
-using Couchbase.Configuration.Client.Providers;
 using Couchbase.Core;
 using static CacheManager.Core.Utility.Guard;
+using Couchbase.Management;
+using System.Collections.Concurrent;
+using CacheManager.Core;
+
+#if NET45
+using System.Configuration;
+using Couchbase.Configuration.Client.Providers;
+#endif
 
 namespace CacheManager.Couchbase
 {
     /// <summary>
     /// Manages configurations for the couchbase cache handle.
     /// <para>
-    /// The configurations will be added by the configuration builder or configuration loader and
-    /// then referenced via handle's name.
+    /// As of version 1.0.2, changed the management of <see cref="IBucket"/>s as those instances are already
+    /// managed by the <see cref="IClusterController"/> of the couchbase client libraray. No need to have additional collections of stuff in here.
+    /// </para>
+    /// <para>
+    /// We keep track of added configurations via <see cref="CouchbaseConfigurationBuilderExtensions.WithCouchbaseConfiguration(ConfigurationBuilderCachePart, string, ClientConfiguration)"/>
+    /// and eventually added predefined <see cref="ICluster"/>.
+    /// Referencing still works via configuration key, although, if nothing in particular is defined, the fallback should always at least go to the couchbase default cluster settings.
+    /// </para>
+    /// <para>
+    /// Also new, fallback to <see cref="ClusterHelper"/> which can be used to initialize settings of a cluster statically.
     /// </para>
     /// </summary>
-    public static class CouchbaseConfigurationManager
+    public class CouchbaseConfigurationManager
     {
-        private static Dictionary<string, ClientConfiguration> _configurations = new Dictionary<string, ClientConfiguration>();
-        private static Dictionary<string, IBucket> _buckets = new Dictionary<string, IBucket>();
+        /// <summary>
+        /// The default bucket name
+        /// </summary>
+        public const string DefaultBucketName = "default";
+
+#if NET45
 
         /// <summary>
-        /// Adds the configuration.
+        /// The section name usually used for couchbase in app/web.config.
         /// </summary>
-        /// <param name="name">The name.</param>
-        /// <param name="configuration">The configuration.</param>
-        /// <exception cref="System.ArgumentNullException">If name or configuration are null.</exception>
-        public static void AddConfiguration(string name, ClientConfiguration configuration)
-        {
-            NotNullOrWhiteSpace(name, nameof(name));
-            NotNull(configuration, nameof(configuration));
+        public const string DefaultCouchbaseConfigurationSection = "couchbaseClients/couchbase";
 
-            if (!_configurations.ContainsKey(name))
-            {
-                _configurations.Add(name, configuration);
-            }
+#endif
+
+        private static object _configLock = new object();
+        private static ConcurrentDictionary<string, ClientConfiguration> _configurations = new ConcurrentDictionary<string, ClientConfiguration>();
+        private static ConcurrentDictionary<string, ICluster> _clusters = new ConcurrentDictionary<string, ICluster>();
+        private readonly string _configurationName;
+        private readonly string _bucketName;
+        private readonly string _bucketPassword;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CouchbaseConfigurationManager" /> class.
+        /// </summary>
+        /// <param name="configurationKey">The configuration name.</param>
+        /// <param name="bucketName">The bucket name.</param>
+        /// <param name="bucketPassword">The bucket password.</param>
+        public CouchbaseConfigurationManager(string configurationKey, string bucketName = DefaultBucketName, string bucketPassword = null)
+        {
+            NotNullOrWhiteSpace(configurationKey, nameof(configurationKey));
+            NotNullOrWhiteSpace(bucketName, nameof(bucketName));
+            _configurationName = configurationKey;
+            _bucketName = bucketName;
+            _bucketPassword = bucketPassword;
         }
 
         /// <summary>
-        /// Gets the configuration.
+        /// Gets a bucket for configuration name and bucket name.
         /// </summary>
-        /// <param name="name">The name.</param>
+        /// <value>
+        /// The bucket.
+        /// </value>
+        public IBucket Bucket => GetBucket(_configurationName, _bucketName, _bucketPassword);
+
+        /// <summary>
+        /// Gets a <see cref="IBucketManager" /> instance.
+        /// If username and password have been defined in the bucket's configuration, those will be used to create the manager.
+        /// </summary>
+        /// <returns>The manager instance or null.</returns>
+        public IBucketManager GetManager()
+        {
+            var bucket = Bucket;
+            return string.IsNullOrWhiteSpace(bucket.Configuration.Username) ?
+                bucket.CreateManager() :
+                bucket.CreateManager(bucket.Configuration.Username, bucket.Configuration.Password);
+        }
+
+        /// <summary>
+        /// Adds a already configured <see cref="IBucket"/> to the named collection of buckets.
+        /// This can be referenced by the <see cref="BucketCacheHandle{TCacheValue}"/> via configuration key and <see cref="IBucket.Name"/>.
+        /// </summary>
+        /// <param name="configurationKey">The configuration key.</param>
+        /// <param name="cluster">The bucket.</param>
+        public static void AddCluster(string configurationKey, ICluster cluster)
+        {
+            NotNullOrWhiteSpace(configurationKey, nameof(configurationKey));
+            NotNull(cluster, nameof(cluster));
+
+            // not sure if we even need this, but eventually we have to create a new instance of that bucket
+            _configurations.TryAdd(configurationKey, cluster.Configuration);
+            _clusters.TryAdd(configurationKey, cluster);
+        }
+
+        /// <summary>
+        /// Adds a <see cref="ClientConfiguration"/> for a <paramref name="configurationKey"/>.
+        /// </summary>
+        /// <param name="configurationKey">The name.</param>
+        /// <param name="configuration">The configuration.</param>
+        /// <exception cref="System.ArgumentNullException">If name or configuration are null.</exception>
+        public static void AddConfiguration(string configurationKey, ClientConfiguration configuration)
+        {
+            NotNullOrWhiteSpace(configurationKey, nameof(configurationKey));
+            NotNull(configuration, nameof(configuration));
+            _configurations.TryAdd(configurationKey, configuration);
+        }
+
+        /// <summary>
+        /// Gets a <see cref="ClientConfiguration"/> for the given <paramref name="configurationKeyOrSectionName"/>.
+        /// <para>
+        /// If the configuration is not already present and the target framework supports <c>ConfigurationManager</c>, the method tries to resolve the configuration from the
+        /// section with the given name.
+        /// </para>
+        /// </summary>
+        /// <param name="configurationKeyOrSectionName">The name.</param>
         /// <returns>The configuration.</returns>
         /// <exception cref="System.ArgumentNullException">If name is null.</exception>
         /// <exception cref="System.InvalidOperationException">
         /// If no configuration or section can be found for configuration.
         /// </exception>
-        public static ClientConfiguration GetConfiguration(string name)
+        public static ClientConfiguration GetConfiguration(string configurationKeyOrSectionName)
         {
-            NotNullOrWhiteSpace(name, nameof(name));
+            NotNullOrWhiteSpace(configurationKeyOrSectionName, nameof(configurationKeyOrSectionName));
 
-            if (_configurations.ContainsKey(name))
+            if (_configurations.TryGetValue(configurationKeyOrSectionName, out ClientConfiguration configuration))
             {
-                return _configurations[name];
+                return configuration;
             }
 
-            var section = ConfigurationManager.GetSection(name) as CouchbaseClientSection;
-            EnsureNotNull(section, "No configuration or section found for configuration: {0}.", name);
+#if NET45
+            var section = ConfigurationManager.GetSection(configurationKeyOrSectionName) as CouchbaseClientSection;
 
-            var clientConfiguration = new ClientConfiguration(section);
-            _configurations.Add(name, clientConfiguration);
-            return clientConfiguration;
-        }
-
-        /// <summary>
-        /// Gets the bucket configuration.
-        /// </summary>
-        /// <param name="clientConfiguration">The client configuration.</param>
-        /// <param name="bucketName">Name of the bucket.</param>
-        /// <returns>The configuration for the named bucket.</returns>
-        /// <exception cref="System.InvalidOperationException">No bucket with the name found.</exception>
-        public static BucketConfiguration GetBucketConfiguration(ClientConfiguration clientConfiguration, string bucketName)
-        {
-            NotNull(clientConfiguration, nameof(clientConfiguration));
-            NotNullOrWhiteSpace(bucketName, nameof(bucketName));
-
-            BucketConfiguration configuration;
-            Ensure(
-                clientConfiguration.BucketConfigs.TryGetValue(bucketName, out configuration),
-                "No bucket with bucket name {0} found.",
-                bucketName);
-
-            return configuration;
-        }
-
-        /// <summary>
-        /// Gets a couchbase cluster from configuration.
-        /// </summary>
-        /// <param name="clientConfiguration">The client configuration.</param>
-        /// <returns>The couchbase cluster.</returns>
-        public static Cluster GetCluster(ClientConfiguration clientConfiguration) => new Cluster(clientConfiguration);
-
-        /// <summary>
-        /// Gets a couchbase bucket from configuration.
-        /// </summary>
-        /// <param name="clientConfiguration">The client configuration.</param>
-        /// <param name="configurationName">Name of the configuration.</param>
-        /// <param name="bucketName">Name of the bucket.</param>
-        /// <returns>The couchbase bucket.</returns>
-        /// <exception cref="System.ArgumentNullException">
-        /// If bucketName or clientConfiguration are null.
-        /// </exception>
-        internal static IBucket GetBucket(ClientConfiguration clientConfiguration, string configurationName, string bucketName)
-        {
-            NotNullOrWhiteSpace(bucketName, nameof(bucketName));
-            NotNull(clientConfiguration, nameof(clientConfiguration));
-
-            IBucket bucket;
-
-            var bucketKey = configurationName + "_" + bucketName;
-
-            if (_buckets.ContainsKey(bucketKey))
+            if (section == null)
             {
-                bucket = _buckets[bucketKey];
+                return null;
             }
-            else
+
+            var config = new ClientConfiguration(section);
+            AddConfiguration(configurationKeyOrSectionName, config);
+            return config;
+#else
+
+            return null;
+#endif
+        }
+
+        private static ICluster GetCluster(string configurationKey)
+        {
+            NotNullOrWhiteSpace(configurationKey, nameof(configurationKey));
+
+            if (!_clusters.TryGetValue(configurationKey, out ICluster cluster))
             {
-                // todo: is this correct/needed?
-                var bucketConfig = GetBucketConfiguration(clientConfiguration, bucketName);
-                if (!string.IsNullOrWhiteSpace(bucketConfig.Password))
+                var config = GetConfiguration(configurationKey);
+                if (config != null)
                 {
-                    bucket = GetCluster(clientConfiguration).OpenBucket(bucketName, bucketConfig.Password);
+                    cluster = new Cluster(config);
                 }
                 else
                 {
-                    bucket = GetCluster(clientConfiguration).OpenBucket(bucketName);
+                    // fallback to ClusterHelper as that's also a way ppl can configure this stuff...
+                    try
+                    {
+                        cluster = ClusterHelper.Get();
+                    }
+                    catch (InitializationException)
+                    {
+                        // last fallback has also not been initialized yet
+                        // this will use the development settings on localhost without any auth (might not work and blow up later).
+                        cluster = new Cluster();
+                    }
+
+                    // update our configuration cache just in case
+                    AddConfiguration(configurationKey, cluster.Configuration);
                 }
 
-                _buckets.Add(bucketKey, bucket);
+                _clusters.TryAdd(configurationKey, cluster);
             }
 
-            return bucket;
+            return cluster;
+        }
+
+        private static IBucket GetBucket(string configurationKey, string bucketName, string bucketPassword)
+        {
+            NotNullOrWhiteSpace(bucketName, nameof(bucketName));
+            var cluster = GetCluster(configurationKey);
+            if (cluster == null)
+            {
+                // should probably never occur.
+                throw new InvalidOperationException("Cluster is not configured although we should fall back to ClusterHelper at least.");
+            }
+
+            return string.IsNullOrEmpty(bucketPassword) ? cluster.OpenBucket(bucketName) : cluster.OpenBucket(bucketName, bucketPassword);
         }
     }
 }

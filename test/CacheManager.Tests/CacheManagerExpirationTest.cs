@@ -1112,7 +1112,7 @@ namespace CacheManager.Tests
 
                 var finalResult = getFunc(key);
 
-                finalResult.Should().BeNull("After: " + (Environment.TickCount - start));
+                finalResult.Should().BeNull(key + " after: " + (Environment.TickCount - start));
 
                 return;
             }

@@ -10,6 +10,10 @@ using CacheManager.Redis;
 #if MEMCACHEDENABLED
 using Enyim.Caching.Configuration;
 #endif
+#if COUCHBASEENABLED
+using Couchbase;
+using Couchbase.Configuration.Client;
+#endif
 
 namespace CacheManager.Tests
 {
@@ -52,7 +56,10 @@ namespace CacheManager.Tests
             yield return new object[] { TestManagers.WithMemcachedBondBinary };
 #endif
 #if COUCHBASEENABLED
-            yield return new object[] { TestManagers.WithCouchbaseMemcached };
+            // requires one "default" couchbase bucket without auth or password and one "secret-bucket" with pw: "secret"
+            yield return new object[] { TestManagers.WithCouchbaseDefault };
+            yield return new object[] { TestManagers.WithCouchbaseDefaultViaHelper };
+            yield return new object[] { TestManagers.WithCouchbaseSecret };
 #endif
 #if MOCK_HTTPCONTEXT_ENABLED
             yield return new object[] { TestManagers.WithSystemWebCache };
@@ -300,7 +307,7 @@ namespace CacheManager.Tests
 
 #if COUCHBASEENABLED
 
-        public static ICacheManager<object> WithCouchbaseMemcached
+        public static ICacheManager<object> WithCouchbaseDefault
         {
             get
             {
@@ -333,11 +340,40 @@ namespace CacheManager.Tests
                 {
                     settings
                         .WithCouchbaseConfiguration("couchbase", clientConfiguration)
-                        .WithCouchbaseCacheHandle("couchbase", "default")
+                        .WithCouchbaseCacheHandle("couchbase") // using default bucket without pw or auth
                             .EnableStatistics();
                 });
 
                 return cache;
+            }
+        }
+
+        public static ICacheManager<object> WithCouchbaseDefaultViaHelper
+        {
+            get
+            {
+                ClusterHelper.Initialize();
+
+                var cacheConfig = new ConfigurationBuilder()                    
+                    .WithCouchbaseCacheHandle("somekeywhichdoesntexist") // using default bucket again
+                        .EnableStatistics()
+                    .Build();
+
+                return new BaseCacheManager<object>(cacheConfig);
+            }
+        }
+
+        public static ICacheManager<object> WithCouchbaseSecret
+        {
+            get
+            {
+                var cacheConfig = new ConfigurationBuilder()
+                    .WithCouchbaseConfiguration("cb", new ClientConfiguration())
+                    .WithCouchbaseCacheHandle("cb", "secret-bucket", "secret")
+                        .EnableStatistics()
+                    .Build();
+
+                return new BaseCacheManager<object>(cacheConfig);
             }
         }
 

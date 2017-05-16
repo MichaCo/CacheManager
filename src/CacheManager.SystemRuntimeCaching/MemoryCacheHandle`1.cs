@@ -342,11 +342,7 @@ namespace CacheManager.SystemRuntimeCaching
                 return;
             }
 
-            bool isToken;
-            bool hasRegion;
-            string key;
-            string region;
-            ParseKeyParts(_instanceKeyLength, fullKey, out isToken, out hasRegion, out region, out key);
+            ParseKeyParts(_instanceKeyLength, fullKey, out bool isToken, out bool hasRegion, out string region, out string key);
 
             if (!isToken)
             {

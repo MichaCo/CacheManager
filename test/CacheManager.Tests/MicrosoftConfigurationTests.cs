@@ -411,6 +411,8 @@ namespace CacheManager.Tests
             config.CacheHandleConfigurations[0].HandleType.Should().Be(typeof(Couchbase.BucketCacheHandle<>));
             config.CacheHandleConfigurations[0].Key.Should().Be(key);
             config.CacheHandleConfigurations[0].Name.Should().NotBeNullOrWhiteSpace();  // name is random in this case
+
+            var cache = new BaseCacheManager<int>(config);
         }
 
         [Fact]
@@ -429,6 +431,8 @@ namespace CacheManager.Tests
             config.CacheHandleConfigurations[0].HandleType.Should().Be(typeof(Couchbase.BucketCacheHandle<>));
             config.CacheHandleConfigurations[0].Name.Should().Be("name");
             config.CacheHandleConfigurations[0].Key.Should().Be("name");    // now key gets set to name
+
+            var cache = new BaseCacheManager<int>(config);
         }
 
         [Fact]

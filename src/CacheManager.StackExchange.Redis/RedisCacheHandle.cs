@@ -289,8 +289,7 @@ return result";
                 {
                     tries++;
 
-                    int version;
-                    var item = GetCacheItemAndVersion(key, region, out version);
+                    var item = GetCacheItemAndVersion(key, region, out int version);
 
                     if (item == null)
                     {
@@ -441,8 +440,7 @@ return result";
         /// <returns>The <c>CacheItem</c>.</returns>
         protected override CacheItem<TCacheValue> GetCacheItemInternal(string key, string region)
         {
-            int version;
-            return GetCacheItemAndVersion(key, region, out version);
+            return GetCacheItemAndVersion(key, region, out int version);
         }
 
         private CacheItem<TCacheValue> GetCacheItemAndVersion(string key, string region, out int version)
@@ -696,6 +694,20 @@ return result";
                     // we cannot return the original value here because we don't have it
                     TriggerCacheSpecificRemove(tupple.Item1, tupple.Item2, CacheItemRemovedReason.Evicted, null);
                 });
+
+            ////_connection.Subscriber.Subscribe(
+            ////    $"__keyevent@{_redisConfiguration.Database}__:del",
+            ////    (channel, key) =>
+            ////    {
+            ////        var tupple = ParseKey(key);
+            ////        if (Logger.IsEnabled(LogLevel.Debug))
+            ////        {
+            ////            Logger.LogDebug("Got del event for key '{0}:{1}'", tupple.Item2, tupple.Item1);
+            ////        }
+
+            ////        // we cannot return the original value here because we don't have it
+            ////        TriggerCacheSpecificRemove(tupple.Item1, tupple.Item2, CacheItemRemovedReason.Removed, null);
+            ////    });
         }
 
 #pragma warning restore CSE0003
@@ -771,8 +783,7 @@ return result";
                 return default(TCacheValue);
             }
 
-            var typedConverter = _valueConverter as IRedisValueConverter<TCacheValue>;
-            if (typedConverter != null)
+            if (_valueConverter is IRedisValueConverter<TCacheValue> typedConverter)
             {
                 return typedConverter.FromRedisValue(value, valueType);
             }
@@ -782,8 +793,7 @@ return result";
 
         private RedisValue ToRedisValue(TCacheValue value)
         {
-            var typedConverter = _valueConverter as IRedisValueConverter<TCacheValue>;
-            if (typedConverter != null)
+            if (_valueConverter is IRedisValueConverter<TCacheValue> typedConverter)
             {
                 return typedConverter.ToRedisValue(value);
             }

@@ -64,8 +64,7 @@ namespace CacheManager.Core.Internal
             var key = string.Concat(region, ":");
             foreach (var item in _cache.Where(p => p.Key.StartsWith(key, StringComparison.OrdinalIgnoreCase)))
             {
-                CacheItem<TCacheValue> val = null;
-                _cache.TryRemove(item.Key, out val);
+                _cache.TryRemove(item.Key, out CacheItem<TCacheValue> val);
             }
         }
 
@@ -120,8 +119,7 @@ namespace CacheManager.Core.Internal
         {
             var fullKey = GetKey(key, region);
 
-            CacheItem<TCacheValue> result = null;
-            if (_cache.TryGetValue(fullKey, out result))
+            if (_cache.TryGetValue(fullKey, out CacheItem<TCacheValue> result))
             {
                 if (result.ExpirationMode != ExpirationMode.None && IsExpired(result, DateTime.UtcNow))
                 {
@@ -167,8 +165,7 @@ namespace CacheManager.Core.Internal
         protected override bool RemoveInternal(string key, string region)
         {
             var fullKey = GetKey(key, region);
-            CacheItem<TCacheValue> val = null;
-            return _cache.TryRemove(fullKey, out val);
+            return _cache.TryRemove(fullKey, out CacheItem<TCacheValue> val);
         }
 
         /// <summary>
