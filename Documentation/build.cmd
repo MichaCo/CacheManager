@@ -4,7 +4,7 @@ cd %~dp0
 call GetMsdn.cmd
 
 SETLOCAL
-SET DOCFX_VERSION=2.15.4
+SET DOCFX_VERSION=2.16.7
 SET CACHED_ZIP=%LocalAppData%\DocFx\docfx.%DOCFX_VERSION%.zip
 
 IF EXIST %CACHED_ZIP% goto extract
@@ -26,6 +26,6 @@ IF NOT EXIST \DocFxBin md \DocFxBin
 
 :run
 
-rd /S /Q ..\..\cachemanager.net\website\Documentation
+rd /S /Q ..\..\cachemanager.net\website\docs
 rd /S /Q obj
 DocFxBin\docfx.exe

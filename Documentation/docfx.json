@@ -3,18 +3,14 @@
     {
       "src": [
         {
-          "files": [
-            "**/project.json"
-          ],
           "src": "../src",
-          "exclude": [
-            "**/obj/**",
-			"**/bin/**",
-            "_site/**"
-          ]
+          "files": "**/*.csproj"
         }
       ],
-      "dest": "obj/api"
+      "dest": "obj/api",
+      "properties": {
+        "TargetFramework": "net45"
+      }
     }
   ],
   "build": {
@@ -52,7 +48,7 @@
     "overwrite": [
       {
         "files": [
-          "apispec/**.md"
+          "apispec/*.md"
         ],
         "exclude": [
           "obj/**",
@@ -60,8 +56,16 @@
         ]
       }
     ],
+
+    "globalMetadata": {
+      "_gitContribute": {
+        "branch": "dev",
+        "apiSpecFolder": "Documentation/apispec"
+      }
+    },
+    "postProcessors": [ "ExtractSearchIndex" ],
     "xref": "msdn.4.5.2/content/msdn.4.5.2.zip",
-    "dest": "..\\..\\cachemanager.net\\website\\Documentation",
+    "dest": "..\\..\\cachemanager.net\\website\\Docs",
     "template": [
       "default",
       "template"
