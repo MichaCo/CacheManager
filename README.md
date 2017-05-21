@@ -1,14 +1,3 @@
----
-id: readme
-title: CacheManager Readme
-author: Michael Conrad
-published: 2016-01-01
-lastModified: 2017-05-13
-tags: [CacheManager, Readme]
-description: The project's readme
-fixedOrder: 1000
----
-
 CacheManager is an open source caching abstraction layer for .NET written in C#. It supports various cache providers and implements many advanced features.
 
 The main goal of the CacheManager package is to make developer's life easier to handle even very complex caching scenarios.  
