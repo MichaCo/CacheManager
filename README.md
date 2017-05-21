@@ -1,4 +1,14 @@
-# CacheManager
+---
+id: readme
+title: CacheManager Readme
+author: Michael Conrad
+published: 2016-01-01
+lastModified: 2017-05-13
+tags: [CacheManager, Readme]
+description: The project's readme
+fixedOrder: 1000
+---
+
 CacheManager is an open source caching abstraction layer for .NET written in C#. It supports various cache providers and implements many advanced features.
 
 The main goal of the CacheManager package is to make developer's life easier to handle even very complex caching scenarios.  
@@ -16,12 +26,12 @@ Linux, Mono | -
 
 ## CacheManager Nuget Packages
 
-| Package Name | .Net 4.0  | .Net 4.5  | Minimum .NET Platform Standard version *
+| Package Name | .Net 4.0  | .Net 4.5  | .NET Standard
 |--------------| :-------: | :-------: | :-------: 
 | [CacheManager.Core][Core.nuget] | x | x | 1.2
-| [CacheManager.StackExchange.Redis][Redis.nuget] | x | x | 1.5
+| [CacheManager.StackExchange.Redis][Redis.nuget] | - | x | 1.5
 | [CacheManager.SystemRuntimeCaching][SystemRuntimeCaching.nuget]  | x | x | -
-| [CacheManager.Microsoft.Extensions.Caching.Memory][MSCache.nuget] | - | \>=4.5.1 | 1.3
+| [CacheManager.Microsoft.Extensions.Caching.Memory][MSCache.nuget] | - | x | 1.3
 | [CacheManager.Microsoft.Extensions.Configuration][Configuration.nuget] | - | x | 1.2
 | [CacheManager.Microsoft.Extensions.Logging][Logging.nuget] | - | x | 1.2
 | [CacheManager.Serialization.Bond][Bond.nuget] | x | x | 1.2
@@ -29,9 +39,7 @@ Linux, Mono | -
 | [CacheManager.Serialization.ProtoBuf][ProtoBuf.nuget] | x | x | 1.3
 | [CacheManager.Web][Web.nuget]  | - | x | -
 | [CacheManager.Memcached][Memcached.nuget]  | x | x | -
-| [CacheManager.Couchbase][Couchbase.nuget]  | - | x | -
-
-\* *"Minimum .NET Platform Standard" version means, that at least the listed version per package must be targeted if you want to use it. See the [documentation](https://github.com/dotnet/standard/blob/master/docs/versions.md) for more details of what .NET platform standard means.*
+| [CacheManager.Couchbase][Couchbase.nuget]  | - | x | 1.5
 
 ### Beta Packages
 Beta versions of the CacheManager packages are getting pushed to https://www.myget.org/gallery/cachemanager on each build. 
@@ -43,24 +51,21 @@ To find which check-in created which build, use this [build history](https://ci.
 
 ## Documentation
  
-Documentation can be found within the [articles folder][articles] of the Cache Manager's repository and  hosted on my [website][cmweb]:
+Documentation can be found on [cachemanager.michaco.net][cmweb]:
 
 * [**Getting Started**][gettingstarted]
-Is a very basic introduction of how to install and use Cache Manager
 * [**Configuration**][configuration]
-Explains how to configure Cache Manager via code or configuration file
 * [**Features and Architecture**][featuresarticle]
-A more advanced in depth introduction to all features of Cache Manager
 * [**Update Operations**][updatearticle]
-Explanation of why and when to use the update method instead of `Put` 
 * [**Serialization**][serialization]
-Cache value serialization and configuration options explained in detail.
 * [**Cache Synchronization**][cachesyncarticle]
-Use case for and explanation of the Cache Backplane feature.
 * [**Logging**][logging]
-The logging abstraction and implementations explained
 
-There is also from source generated [html documentation][help] available online.
+Generated [**API documentation**][help] is also available.
+
+## Blog Posts
+
+CacheManager related blog posts can be found on [my website](http://michaco.net/blog?tag=CacheManager)
 
 ## Examples
 * Examples included in the Cache Manager repository
@@ -69,9 +74,9 @@ There is also from source generated [html documentation][help] available online.
 * [**Single Page Todo App with Cache Manager on Azure using Redis**][todosample]
 
 ## Benchmarks
-See [benchmarks page](https://github.com/MichaCo/CacheManager/blob/dev/Benchmarks.md)
+See [benchmarks results](https://github.com/MichaCo/CacheManager/blob/dev/Benchmarks.md) on GitHub.
 
-## Features in Version [1.0.x][releases] 
+## List of Features
 
 * One common interface for handling different caching technologies: `ICache<T>`
 * Configurable by
@@ -123,10 +128,10 @@ This can be used to for example group elements and remove all of them at once.
 OnGet, OnAdd, OnPut, OnRemove, OnClear, OnClearRegion
    * Events also get triggered by the backplane (if enabled) when multiple instances are sharing the same cache.
    * New `OnRemoveByHandle` events triggered by actual expiration or memory pressure eviction by the cache vendor
+   * Events also get triggered through the backplane and via Redis keyspace events (if configured)
 * **System.Web.OutputCache** implementation to use CacheManager as OutputCache provider which makes the OutputCache extremely flexible, for example by using a distributed cache like Redis across many web servers.
 * **Cache clients synchronization** 
     * Implemented with the Redis pub/sub feature
-    * (Other implementations without Redis might be an option for a later version)
 * Supports .Net 4.0, .Net 4.5, and can be used in cross platform projects with the new **.NET Core** runtime
 
 [releases]: https://github.com/MichaCo/CacheManager/releases
@@ -138,25 +143,23 @@ OnGet, OnAdd, OnPut, OnRemove, OnClear, OnClearRegion
 [Memcached.nuget]: https://www.nuget.org/packages/CacheManager.Memcached
 [Web.nuget]: https://www.nuget.org/packages/CacheManager.Web
 [Couchbase.nuget]: https://www.nuget.org/packages/CacheManager.Couchbase
-[mcweb]: http://michaconrad.com
+[mcweb]: http://michaco.net
 [cmweb]:  http://cachemanager.michaco.net
 [articles]: https://github.com/MichaCo/CacheManager/tree/master/Articles
 [help]: http://cachemanager.michaco.net/Documentation/api
-[gettingstarted]: http://cachemanager.michaco.net/Documentation/Index/cachemanager_getting_started
-[configuration]: http://cachemanager.michaco.net/Documentation/Index/cachemanager_configuration
-[featuresarticle]: http://cachemanager.michaco.net/Documentation/Index/cachemanager_architecture
-[updatearticle]: http://cachemanager.michaco.net/Documentation/Index/cachemanager_update
-[cachesyncarticle]: http://cachemanager.michaco.net/Documentation/Index/cachemanager_synchronization
-[logging]: http://cachemanager.michaco.net/Documentation/Index/cachemanager_logging
-[serialization]: http://cachemanager.michaco.net/Documentation/Index/cachemanager_serialization
+[gettingstarted]: http://cachemanager.michaco.net/Documentation/CacheManagerGettingStarted
+[configuration]: http://cachemanager.michaco.net/Documentation/CacheManagerConfiguration
+[featuresarticle]: http://cachemanager.michaco.net/Documentation/CacheManagerArchitecture
+[updatearticle]: http://cachemanager.michaco.net/Documentation/CacheManagerUpdateOperations
+[cachesyncarticle]: http://cachemanager.michaco.net/Documentation/CacheManagerCacheSynchronization
+[logging]: http://cachemanager.michaco.net/Documentation/CacheManagerLogging
+[serialization]: http://cachemanager.michaco.net/Documentation/CacheManagerSerialization
 [program.cs]: https://github.com/MichaCo/CacheManager/blob/master/samples/CacheManager.Examples/Program.cs
 [corewebsample]: https://github.com/MichaCo/CacheManager/tree/dev/samples/AspnetCore.WebApp
-[todosample]: http://cachemanager.michaco.net/Documentation/Index/cachemanager_backed_todo_web_app
+[todosample]: http://michaco.net/blog/SinglePageTodoAppwithCacheManager
 [Json.nuget]: https://www.nuget.org/packages/CacheManager.Serialization.Json
 [Logging.nuget]: https://www.nuget.org/packages/CacheManager.Microsoft.Extensions.Logging
 [Configuration.nuget]: https://www.nuget.org/packages/CacheManager.Microsoft.Extensions.Configuration
 [MSCache.nuget]: https://www.nuget.org/packages/CacheManager.Microsoft.Extensions.Caching.Memory
 [ProtoBuf.nuget]: https://www.nuget.org/packages/CacheManager.Serialization.ProtoBuf
 [Bond.nuget]: https://www.nuget.org/packages/CacheManager.Serialization.Bond
-
-[TOC]
