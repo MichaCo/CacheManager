@@ -73,47 +73,7 @@ namespace CacheManager.Core
             CouchbaseConfigurationManager.AddCluster(configurationKey, cluster);
             return part;
         }
-
-        ///// <summary>
-        ///// Adds a <see cref="BucketCacheHandle{TCacheValue}" /> using the configuration referenced via <paramref name="couchbaseConfigurationKey" />.
-        ///// <para>
-        ///// The cache handle needs configuration specific to Couchbase, see remarks for details.
-        ///// Also, this overload will use the <c>default</c> bucket without password, as no bucket name has been specified.
-        ///// </para>
-        ///// </summary>
-        ///// <param name="part">The builder part.</param>
-        ///// <param name="couchbaseConfigurationKey">The configuration identifier.</param>
-        ///// <param name="isBackplaneSource">Set this to <c>true</c> if this cache handle should be the source of the backplane. This setting will be ignored if no backplane is configured.</param>
-        ///// <returns>
-        ///// The part.
-        ///// </returns>
-        ///// <exception cref="ArgumentNullException">Thrown if handleName or handleType are null.</exception>
-        ///// <remarks>
-        ///// The Couchbase cache handle requires configuration which can be defined via:
-        ///// <list type="bullet"><item>
-        ///// A configuration with a matching <paramref name="couchbaseConfigurationKey" /> being added via <see cref="WithCouchbaseConfiguration(ConfigurationBuilderCachePart, string, ClientConfiguration)" />.
-        ///// </item><item>
-        ///// A cluster with a matching <paramref name="couchbaseConfigurationKey" /> being added via <see cref="WithCouchbaseCluster(ConfigurationBuilderCachePart, string, ICluster)" />.
-        ///// </item><item>
-        ///// A <c>CouchbaseClientSection</c> configured in <c>App/Web.config</c> (only available on full .NET Framework).
-        ///// </item><item>
-        ///// Or, the cluster has been configured via <see cref="ClusterHelper" /> and CacheManager will use the cluster returned by <see cref="ClusterHelper.Get" />.
-        ///// Anyways, this will be the last fallback which, if nothing has been configured at all, will fall back to the default server endpoint on <c>127.0.0.1:8091</c>.
-        ///// </item><para>
-        ///// If your cluster requires authentication, use either the <see cref="ClusterHelper" /> or add a <see cref="ICluster" /> with valid authentication via <c>cluster.Authenticate(...)</c>.
-        ///// </para></list>
-        ///// </remarks>
-        //public static ConfigurationBuilderCacheHandlePart WithCouchbaseCacheHandle(
-        //    this ConfigurationBuilderCachePart part,
-        //    string couchbaseConfigurationKey,
-        //    bool isBackplaneSource = true)
-        //{
-        //    NotNull(part, nameof(part));
-        //    NotNullOrWhiteSpace(couchbaseConfigurationKey, nameof(couchbaseConfigurationKey));
-
-        //    return part.WithHandle(typeof(BucketCacheHandle<>), couchbaseConfigurationKey, isBackplaneSource, new BucketCacheHandleAdditionalConfiguration());
-        //}
-
+        
         /// <summary>
         /// Adds a <see cref="BucketCacheHandle{TCacheValue}" /> using the configuration referenced via <paramref name="couchbaseConfigurationKey" />.
         /// <para>
@@ -131,22 +91,28 @@ namespace CacheManager.Core
         /// <remarks>
         /// The Couchbase cache handle requires configuration which can be defined via:
         /// <list type="bullet"><item>
+        /// <term>
         /// A configuration with a matching <paramref name="couchbaseConfigurationKey" /> being added via <see cref="WithCouchbaseConfiguration(ConfigurationBuilderCachePart, string, ClientConfiguration)" />.
-        /// </item><item>
+        /// </term></item>
+        /// <item><term>
         /// A cluster with a matching <paramref name="couchbaseConfigurationKey" /> being added via <see cref="WithCouchbaseCluster(ConfigurationBuilderCachePart, string, ICluster)" />.
-        /// </item><item>
+        /// </term></item>
+        /// <item><term>
         /// A <c>CouchbaseClientSection</c> configured in <c>App/Web.config</c> (only available on full .NET Framework).
-        /// </item><item>
+        /// </term></item>
+        /// <item><term>
         /// Or, the cluster has been configured via <see cref="ClusterHelper" /> and CacheManager will use the cluster returned by <see cref="ClusterHelper.Get" />.
         /// Anyways, this will be the last fallback which, if nothing has been configured at all, will fall back to the default server endpoint on <c>127.0.0.1:8091</c>.
-        /// </item><para>
+        /// </term></item>
+        /// </list>
+        /// <para>
         /// If your cluster requires authentication, use either the <see cref="ClusterHelper" /> or add a <see cref="ICluster" /> with valid authentication via <c>cluster.Authenticate(...)</c>.
-        /// </para></list>
+        /// </para>
         /// </remarks>
         public static ConfigurationBuilderCacheHandlePart WithCouchbaseCacheHandle(
-            this ConfigurationBuilderCachePart part, 
-            string couchbaseConfigurationKey, 
-            string bucketName = CouchbaseConfigurationManager.DefaultBucketName, 
+            this ConfigurationBuilderCachePart part,
+            string couchbaseConfigurationKey,
+            string bucketName = CouchbaseConfigurationManager.DefaultBucketName,
             bool isBackplaneSource = true)
         {
             NotNull(part, nameof(part));
@@ -176,17 +142,23 @@ namespace CacheManager.Core
         /// <remarks>
         /// The Couchbase cache handle requires configuration which can be defined via:
         /// <list type="bullet"><item>
+        /// <term>
         /// A configuration with a matching <paramref name="couchbaseConfigurationKey" /> being added via <see cref="WithCouchbaseConfiguration(ConfigurationBuilderCachePart, string, ClientConfiguration)" />.
-        /// </item><item>
+        /// </term></item>
+        /// <item><term>
         /// A cluster with a matching <paramref name="couchbaseConfigurationKey" /> being added via <see cref="WithCouchbaseCluster(ConfigurationBuilderCachePart, string, ICluster)" />.
-        /// </item><item>
+        /// </term></item>
+        /// <item><term>
         /// A <c>CouchbaseClientSection</c> configured in <c>App/Web.config</c> (only available on full .NET Framework).
-        /// </item><item>
+        /// </term></item>
+        /// <item><term>
         /// Or, the cluster has been configured via <see cref="ClusterHelper" /> and CacheManager will use the cluster returned by <see cref="ClusterHelper.Get" />.
         /// Anyways, this will be the last fallback which, if nothing has been configured at all, will fall back to the default server endpoint on <c>127.0.0.1:8091</c>.
-        /// </item><para>
+        /// </term></item>
+        /// </list>
+        /// <para>
         /// If your cluster requires authentication, use either the <see cref="ClusterHelper" /> or add a <see cref="ICluster" /> with valid authentication via <c>cluster.Authenticate(...)</c>.
-        /// </para></list>
+        /// </para>
         /// </remarks>
         public static ConfigurationBuilderCacheHandlePart WithCouchbaseCacheHandle(
             this ConfigurationBuilderCachePart part,
