@@ -4,5 +4,5 @@
   "preEnumerateTheories": false,
   "diagnosticMessages": false,
   "longRunningTestSeconds": 5,
-  "maxParallelThreads": 16
+  "maxParallelThreads": 2
 }

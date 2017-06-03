@@ -157,8 +157,12 @@ namespace CacheManager.Tests
                 var cache = new BaseCacheManager<string>(configuration);
                 cache.OnRemoveByHandle += (sender, args) =>
                 {
-                    triggered = true;
-                    resultArgs = args;
+                    if (args.Key.Equals(useKey)
+                        && (useRegion == null || args.Region == useRegion))
+                    {
+                        triggered = true;
+                        resultArgs = args;
+                    }
                 };
 
                 if (useRegion == null)
@@ -584,7 +588,7 @@ namespace CacheManager.Tests
             var cache = new BaseCacheManager<int?>(config);
             cache.OnRemoveByHandle += (s, args) =>
             {
-                if(args.Reason == CacheItemRemovedReason.ExternalDelete
+                if (args.Reason == CacheItemRemovedReason.ExternalDelete
                      && args.Key == key)
                 {
                     onRemoveByHandleValid = true;
