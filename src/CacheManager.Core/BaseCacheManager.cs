@@ -113,6 +113,7 @@ namespace CacheManager.Core
                         
                         if (args.Reason == CacheItemRemovedReason.ExternalDelete)
                         {
+                            handle.Stats.OnRemove(args.Region);
                             TriggerOnRemove(args.Key, args.Region, CacheActionEventArgOrigin.Local);
                         }
 
