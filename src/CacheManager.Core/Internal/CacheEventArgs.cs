@@ -24,12 +24,6 @@ namespace CacheManager.Core.Internal
     /// </summary>
     public enum CacheItemRemovedReason
     {
-        /////// <summary>
-        /////// A <see cref="CacheItem{T}"/> was removed using the <see cref="ICache{TCacheValue}.Remove(string)"/> or
-        /////// <see cref="ICache{TCacheValue}.Remove(string, string)"/> method.
-        /////// </summary>
-        ////Removed = 0,
-
         /// <summary>
         /// A <see cref="CacheItem{T}"/> was removed because it expired.
         /// </summary>
@@ -39,7 +33,16 @@ namespace CacheManager.Core.Internal
         /// A <see cref="CacheItem{T}"/> was removed because the underlying cache decided to remove it.
         /// This can happen if cache-specific memory limits are reached for example.
         /// </summary>
-        Evicted = 1
+        Evicted = 1,
+
+        /// <summary>
+        /// A <see cref="CacheItem{T}"/> was removed manually, without using CacheManager APIs (like using del via redis-cli).
+        /// </summary>
+        /// <remarks>
+        /// This will eventually trigger a <see cref="ICacheManager{TCacheValue}.OnRemoveByHandle"/> for the responsible cache layer and 
+        /// <see cref="ICacheManager{TCacheValue}.OnRemove"/> as the item has been removed.
+        /// </remarks>
+        ExternalDelete = 99
     }
 
     /// <summary>

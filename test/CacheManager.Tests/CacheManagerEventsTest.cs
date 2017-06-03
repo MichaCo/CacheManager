@@ -8,6 +8,7 @@ using CacheManager.Core.Internal;
 using CacheManager.Core.Logging;
 using CacheManager.Core.Utility;
 using FluentAssertions;
+using StackExchange.Redis;
 using Xunit;
 
 namespace CacheManager.Tests
@@ -559,6 +560,107 @@ namespace CacheManager.Tests
                 data.Keys.ShouldAllBeEquivalentTo(Enumerable.Repeat(key1, 4), "we expect 4 hits");
                 data.Regions.ShouldAllBeEquivalentTo(Enumerable.Repeat(region1, 4), "we expect 4 hits");
             }
+        }
+
+        [Fact]
+        [Trait("category", "Redis")]
+        [Trait("category", "Unreliable")]
+        public async Task Events_OnRemoveExternal_Redis_UpHandling()
+        {
+            var client = ConnectionMultiplexer.Connect("localhost");
+
+            var config = new ConfigurationBuilder()
+                .WithDictionaryHandle()
+                .And
+                .WithJsonSerializer()
+                .WithRedisConfiguration("redis", client, enableKeyspaceNotifications: true)
+                .WithRedisCacheHandle("redis")
+                .Build();
+
+            var key = Guid.NewGuid().ToString();
+            var onRemoveByHandleValid = false;
+            var onRemoveValid = false;
+
+            var cache = new BaseCacheManager<int?>(config);
+            cache.OnRemoveByHandle += (s, args) =>
+            {
+                if(args.Reason == CacheItemRemovedReason.ExternalDelete
+                     && args.Key == key)
+                {
+                    onRemoveByHandleValid = true;
+                }
+            };
+
+            cache.OnRemove += (s, args) =>
+            {
+                if (args.Key == key)
+                {
+                    onRemoveValid = true;
+                }
+            };
+
+            cache.Add(key, 1234).Should().BeTrue();
+            var x = cache.Get(key);
+
+            client.GetDatabase(0).KeyDelete(key);
+
+            await Task.Delay(1000);
+
+            onRemoveByHandleValid.Should().BeTrue("onRemoveByHandle Event should have been raised");
+            onRemoveValid.Should().BeTrue("onRemove Event should have been raised");
+
+            cache.CacheHandles.First().Get(key).Should().BeNull();
+        }
+
+        [Fact]
+        [Trait("category", "Redis")]
+        [Trait("category", "Unreliable")]
+        public async Task Events_OnRemoveExternal_Redis_NoneHandling()
+        {
+            var client = ConnectionMultiplexer.Connect("localhost");
+
+            var config = new ConfigurationBuilder()
+                .WithUpdateMode(CacheUpdateMode.None)
+                .WithDictionaryHandle()
+                .And
+                .WithJsonSerializer()
+                .WithRedisConfiguration("redis", client, enableKeyspaceNotifications: true)
+                .WithRedisCacheHandle("redis")
+                .Build();
+
+            var key = Guid.NewGuid().ToString();
+            var onRemoveByHandleValid = false;
+            var onRemoveValid = false;
+
+            var cache = new BaseCacheManager<int?>(config);
+            cache.OnRemoveByHandle += (s, args) =>
+            {
+                if (args.Reason == CacheItemRemovedReason.ExternalDelete
+                     && args.Key == key)
+                {
+                    onRemoveByHandleValid = true;
+                }
+            };
+
+            cache.OnRemove += (s, args) =>
+            {
+                if (args.Key == key)
+                {
+                    onRemoveValid = true;
+                }
+            };
+
+            cache.Add(key, 1234).Should().BeTrue();
+            var x = cache.Get(key);
+
+            client.GetDatabase(0).KeyDelete(key);
+
+            await Task.Delay(1000);
+
+            onRemoveByHandleValid.Should().BeTrue("onRemoveByHandle Event should have been raised");
+            onRemoveValid.Should().BeTrue("onRemove Event should have been raised");
+
+            cache.CacheHandles.First().Get(key).Should().Be(1234);
         }
 
         /// <summary>

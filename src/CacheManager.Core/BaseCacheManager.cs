@@ -86,7 +86,7 @@ namespace CacheManager.Core
                     handle.OnCacheSpecificRemove += (sender, args) =>
                     {
                         // added sync for using backplane with in-memory caches on cache specific removal
-                        // but commented for now, this is not really needed if all instances use the same expiration etc, would just cause dublicated events 
+                        // but commented for now, this is not really needed if all instances use the same expiration etc, would just cause dublicated events
                         ////if (_cacheBackplane != null && handle.Configuration.IsBackplaneSource && !handle.IsDistributedCache)
                         ////{
                         ////    if (string.IsNullOrEmpty(args.Region))
@@ -100,7 +100,7 @@ namespace CacheManager.Core
                         ////}
 
                         // base cache handle does logging for this
-                        
+
                         if (Configuration.UpdateMode == CacheUpdateMode.Up)
                         {
                             if (_logTrace)
@@ -109,6 +109,11 @@ namespace CacheManager.Core
                             }
 
                             EvictFromHandlesAbove(args.Key, args.Region, handleIndex);
+                        }
+                        
+                        if (args.Reason == CacheItemRemovedReason.ExternalDelete)
+                        {
+                            TriggerOnRemove(args.Key, args.Region, CacheActionEventArgOrigin.Local);
                         }
 
                         // moving down below cleanup, optherwise the item could still be in memory
@@ -621,56 +626,27 @@ namespace CacheManager.Core
             if (_logTrace)
             {
                 Logger.LogTrace(
-                    "Start updating handles with [{0}] and update mode '{1}'.",
-                    item,
-                    Configuration.UpdateMode);
+                    "Start updating handles with [{0}].",
+                    item);
             }
 
-            switch (Configuration.UpdateMode)
+            if (foundIndex == 0)
             {
-                case CacheUpdateMode.None:
-                    // do basically nothing
-                    break;
+                return;
+            }
 
-                ////case CacheUpdateMode.Full:
-                ////    // update all cache handles except the one where we found the item
-                ////    for (int handleIndex = 0; handleIndex < this.cacheHandles.Length; handleIndex++)
-                ////    {
-                ////        if (handleIndex != foundIndex)
-                ////        {
-                ////            if (this.logTrace)
-                ////            {
-                ////                this.Logger.LogTrace("Updating handles, added [{0}] to handle '{1}'.", item, this.cacheHandles[handleIndex].Configuration.Name);
-                ////            }
-
-                ////            this.cacheHandles[handleIndex].Add(item);
-                ////        }
-                ////    }
-
-                ////    break;
-
-                case CacheUpdateMode.Up:
-                    // optimizing so we don't even have to iterate
-                    if (foundIndex == 0)
+            // update all cache handles with lower order, up the list
+            for (var handleIndex = 0; handleIndex < _cacheHandles.Length; handleIndex++)
+            {
+                if (handleIndex < foundIndex)
+                {
+                    if (_logTrace)
                     {
-                        break;
+                        Logger.LogTrace("Updating handles, added [{0}] to handle '{1}'.", item, _cacheHandles[handleIndex].Configuration.Name);
                     }
 
-                    // update all cache handles with lower order, up the list
-                    for (var handleIndex = 0; handleIndex < _cacheHandles.Length; handleIndex++)
-                    {
-                        if (handleIndex < foundIndex)
-                        {
-                            if (_logTrace)
-                            {
-                                Logger.LogTrace("Updating handles, added [{0}] to handle '{1}'.", item, _cacheHandles[handleIndex].Configuration.Name);
-                            }
-
-                            _cacheHandles[handleIndex].Add(item);
-                        }
-                    }
-
-                    break;
+                    _cacheHandles[handleIndex].Add(item);
+                }
             }
         }
 

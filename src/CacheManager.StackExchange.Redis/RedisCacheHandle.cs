@@ -695,19 +695,19 @@ return result";
                     TriggerCacheSpecificRemove(tupple.Item1, tupple.Item2, CacheItemRemovedReason.Evicted, null);
                 });
 
-            ////_connection.Subscriber.Subscribe(
-            ////    $"__keyevent@{_redisConfiguration.Database}__:del",
-            ////    (channel, key) =>
-            ////    {
-            ////        var tupple = ParseKey(key);
-            ////        if (Logger.IsEnabled(LogLevel.Debug))
-            ////        {
-            ////            Logger.LogDebug("Got del event for key '{0}:{1}'", tupple.Item2, tupple.Item1);
-            ////        }
+            _connection.Subscriber.Subscribe(
+                $"__keyevent@{_redisConfiguration.Database}__:del",
+                (channel, key) =>
+                {
+                    var tupple = ParseKey(key);
+                    if (Logger.IsEnabled(LogLevel.Debug))
+                    {
+                        Logger.LogDebug("Got del event for key '{0}:{1}'", tupple.Item2, tupple.Item1);
+                    }
 
-            ////        // we cannot return the original value here because we don't have it
-            ////        TriggerCacheSpecificRemove(tupple.Item1, tupple.Item2, CacheItemRemovedReason.Removed, null);
-            ////    });
+                    // we cannot return the original value here because we don't have it
+                    TriggerCacheSpecificRemove(tupple.Item1, tupple.Item2, CacheItemRemovedReason.ExternalDelete, null);
+                });
         }
 
 #pragma warning restore CSE0003
