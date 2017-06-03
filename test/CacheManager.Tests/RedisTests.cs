@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
@@ -101,7 +100,7 @@ namespace CacheManager.Tests
         {
             var key = Guid.NewGuid().ToString();
 
-            await TestBackplaneEvent<CacheActionEventArgs>(
+            await TestBackplaneEventDistributed<CacheActionEventArgs>(
                 CacheEvent.OnAdd,
                 (cacheA) =>
                 {
@@ -174,7 +173,7 @@ namespace CacheManager.Tests
             {
                 ConnectTimeout = 10000,
                 AbortOnConnectFail = false,
-                ConnectRetry = 10                
+                ConnectRetry = 10
             };
             conConfig.EndPoints.Add("localhost:6379");
 
@@ -201,7 +200,7 @@ namespace CacheManager.Tests
             var key = Guid.NewGuid().ToString();
             var region = Guid.NewGuid().ToString();
 
-            await TestBackplaneEvent<CacheActionEventArgs>(
+            await TestBackplaneEventDistributed<CacheActionEventArgs>(
                 CacheEvent.OnAdd,
                 (cacheA) =>
                 {
@@ -223,12 +222,49 @@ namespace CacheManager.Tests
                 });
         }
 
+        /// <summary>
+        /// Testing in memory cache only with backplane through redis (not using Redis as cache at all)
+        /// </summary>
+        /// <returns></returns>
+        [Fact]
+        public async Task Redis_BackplaneEvents_InMemory_AddWithRegion()
+        {
+            var key = Guid.NewGuid().ToString();
+            var region = Guid.NewGuid().ToString();
+
+            await TestBackplaneEventInMemory<CacheActionEventArgs>(
+                CacheEvent.OnAdd,
+                (cacheA, cacheB) =>
+                {
+                    // in memory is not distributed, adding only to CacheA the event triggerd on cache B does trigger but cacheB doesn't have the item.
+                    cacheB.Add(key, key, region);
+                    cacheA.Add(key, key, region);
+                },
+                (cacheA, args) =>
+                {
+                    args.Key.Should().Be(key);
+                    args.Region.Should().Be(region);
+
+                    // cannot test origin as there might be two events triggered, one local one remote
+                    cacheA[key, region].Should().Be(key);
+                },
+                (cacheB, args) =>
+                {
+                    args.Key.Should().Be(key);
+                    args.Region.Should().Be(region);
+
+                    // cannot test origin as there might be two events triggered, one local one remote
+                    cacheB[key, region].Should().Be(key);
+                },
+                expectedRemoteTriggers: 2);
+        }
+
         [Fact]
         public async Task Redis_BackplaneEvents_Put()
         {
             var key = Guid.NewGuid().ToString();
 
-            await TestBackplaneEvent<CacheActionEventArgs>(
+            await TestBackplaneEventDistributed<CacheActionEventArgs>(
                 CacheEvent.OnPut,
                 (cacheA) =>
                 {
@@ -251,13 +287,47 @@ namespace CacheManager.Tests
                 });
         }
 
+        /// <summary>
+        /// Testing in memory cache only with backplane through redis (not using Redis as cache at all)
+        /// </summary>
+        /// <returns></returns>
+        [Fact]
+        public async Task Redis_BackplaneEvents_InMemory_Put()
+        {
+            var key = Guid.NewGuid().ToString();
+
+            await TestBackplaneEventInMemory<CacheActionEventArgs>(
+                CacheEvent.OnPut,
+                (cacheA, cacheB) =>
+                {
+                    // in memory is not distributed, adding only to CacheA the event triggerd on cache B does trigger but cacheB doesn't have the item.
+                    cacheA.Add(key, key);
+                    cacheA.Put(key, "new val");
+                },
+                (cacheA, args) =>
+                {
+                    args.Key.Should().Be(key);
+                    args.Region.Should().BeNull();
+                    args.Origin.Should().Be(CacheActionEventArgOrigin.Local);
+                    cacheA[key].Should().Be("new val");
+                },
+                (cacheB, args) =>
+                {
+                    args.Key.Should().Be(key);
+                    args.Region.Should().BeNull();
+                    args.Origin.Should().Be(CacheActionEventArgOrigin.Remote);
+                    cacheB[key].Should().Be(null);
+                },
+                expectedRemoteTriggers: 1);
+        }
+
         [Fact]
         public async Task Redis_BackplaneEvents_PutWithRegion()
         {
             var key = Guid.NewGuid().ToString();
             var region = Guid.NewGuid().ToString();
 
-            await TestBackplaneEvent<CacheActionEventArgs>(
+            await TestBackplaneEventDistributed<CacheActionEventArgs>(
                 CacheEvent.OnPut,
                 (cacheA) =>
                 {
@@ -285,7 +355,7 @@ namespace CacheManager.Tests
         {
             var key = Guid.NewGuid().ToString();
 
-            await TestBackplaneEvent<CacheActionEventArgs>(
+            await TestBackplaneEventDistributed<CacheActionEventArgs>(
                 CacheEvent.OnRemove,
                 (cacheA) =>
                 {
@@ -314,7 +384,7 @@ namespace CacheManager.Tests
             var key = Guid.NewGuid().ToString();
             var region = Guid.NewGuid().ToString();
 
-            await TestBackplaneEvent<CacheActionEventArgs>(
+            await TestBackplaneEventDistributed<CacheActionEventArgs>(
                 CacheEvent.OnRemove,
                 (cacheA) =>
                 {
@@ -340,13 +410,56 @@ namespace CacheManager.Tests
                 });
         }
 
+        /// <summary>
+        /// Testing in memory cache only with backplane through redis (not using Redis as cache at all)
+        /// This test in particular tests that a second in memory cache gets keys evicted if the same key
+        /// got removed by another cache (both caches connected through the backplane)
+        /// </summary>
+        /// <returns></returns>
+        [Fact]
+        public async Task Redis_BackplaneEvents_InMemory_Remove_WithRegion()
+        {
+            var key = Guid.NewGuid().ToString();
+            var region = Guid.NewGuid().ToString();
+
+            await TestBackplaneEventInMemory<CacheActionEventArgs>(
+                CacheEvent.OnRemove,
+                (cacheA, cacheB) =>
+                {
+                    cacheA.Add(key, key).Should().BeTrue();
+                    cacheA.Add(key, key, region).Should().BeTrue();
+
+                    // adding to cache B, too, as we don't have a distributed cache
+                    cacheB.Add(key, key, region).Should().BeTrue();
+
+                    // remove from A only, should also remove it from B via backplane
+                    cacheA.Remove(key, region).Should().BeTrue();
+                },
+                (cacheA, args) =>
+                {
+                    args.Key.Should().Be(key);
+                    args.Region.Should().Be(region);
+                    args.Origin.Should().Be(CacheActionEventArgOrigin.Local);
+                    cacheA[key].Should().NotBeNull();
+                    cacheA[key, region].Should().BeNull();
+                },
+                (cacheB, args) =>
+                {
+                    args.Key.Should().Be(key);
+                    args.Region.Should().Be(region);
+                    args.Origin.Should().Be(CacheActionEventArgOrigin.Remote);
+                    cacheB[key, region].Should().BeNull();
+                },
+                expectedRemoteTriggers: 1);
+        }
+
         [Fact]
         public async Task Redis_BackplaneEvents_Update()
         {
             var key = Guid.NewGuid().ToString();
             var newValue = "new value";
 
-            await TestBackplaneEvent<CacheActionEventArgs>(
+            await TestBackplaneEventDistributed<CacheActionEventArgs>(
                 CacheEvent.OnUpdate,
                 (cacheA) =>
                 {
@@ -370,13 +483,13 @@ namespace CacheManager.Tests
         }
 
         [Fact]
-        public async Task Redis_BackplaneEvents_UpdateWithgRegion()
+        public async Task Redis_BackplaneEvents_Update_WithgRegion()
         {
             var key = Guid.NewGuid().ToString();
             var region = Guid.NewGuid().ToString();
             var newValue = "new value";
 
-            await TestBackplaneEvent<CacheActionEventArgs>(
+            await TestBackplaneEventDistributed<CacheActionEventArgs>(
                 CacheEvent.OnUpdate,
                 (cacheA) =>
                 {
@@ -399,12 +512,56 @@ namespace CacheManager.Tests
                 });
         }
 
+        /// <summary>
+        /// Testing in memory cache only with backplane through redis (not using Redis as cache at all)
+        /// This test in particular tests on update, add or put, the key in cacheB does not change or get evicted.
+        /// To remove the key in all in memory cache instances, Remove must be used!
+        /// </summary>
+        /// <returns></returns>
+        [Fact]
+        public async Task Redis_BackplaneEvents_InMemory_Update_WithRegion()
+        {
+            var key = Guid.NewGuid().ToString();
+            var region = Guid.NewGuid().ToString();
+            var newValue = "new value";
+
+            await TestBackplaneEventInMemory<CacheActionEventArgs>(
+                CacheEvent.OnUpdate,
+                (cacheA, cacheB) =>
+                {
+                    cacheA.Add(key, key, region);
+
+                    // adding to cache B, too, as we don't have a distributed cache
+                    cacheB.Add(key, key, region).Should().BeTrue();
+
+                    // the update should evict the key from cache B
+                    cacheA.Update(key, region, v => newValue).Should().Be(newValue);
+                },
+                (cacheA, args) =>
+                {
+                    args.Key.Should().Be(key);
+                    args.Region.Should().Be(region);
+                    args.Origin.Should().Be(CacheActionEventArgOrigin.Local);
+                    cacheA[key, region].Should().Be(newValue);
+                },
+                (cacheB, args) =>
+                {
+                    args.Key.Should().Be(key);
+                    args.Region.Should().Be(region);
+                    args.Origin.Should().Be(CacheActionEventArgOrigin.Remote);
+
+                    // important to note, the key in cacheB has never been updated or removed, so it should still be the "old" value!
+                    cacheB[key, region].Should().Be(key);
+                },
+                expectedRemoteTriggers: 1);
+        }
+
         [Fact]
         public async Task Redis_BackplaneEvents_Clear()
         {
             var key = Guid.NewGuid().ToString();
 
-            await TestBackplaneEvent<CacheClearEventArgs>(
+            await TestBackplaneEventDistributed<CacheClearEventArgs>(
                 CacheEvent.OnClear,
                 (cacheA) =>
                 {
@@ -424,12 +581,38 @@ namespace CacheManager.Tests
         }
 
         [Fact]
+        public async Task Redis_BackplaneEvents_InMemory_Clear()
+        {
+            var key = Guid.NewGuid().ToString();
+
+            await TestBackplaneEventInMemory<CacheClearEventArgs>(
+                CacheEvent.OnClear,
+                (cacheA, cacheB) =>
+                {
+                    cacheA.Add(key, key);
+                    cacheB.Add(key, key);
+                    cacheA.Clear();
+                },
+                (cacheA, args) =>
+                {
+                    args.Origin.Should().Be(CacheActionEventArgOrigin.Local);
+                    cacheA.Get(key).Should().BeNull();
+                },
+                (cacheB, args) =>
+                {
+                    args.Origin.Should().Be(CacheActionEventArgOrigin.Remote);
+                    cacheB.Get(key).Should().BeNull();
+                },
+                expectedRemoteTriggers: 1);
+        }
+
+        [Fact]
         public async Task Redis_BackplaneEvents_ClearRegion()
         {
             var key = Guid.NewGuid().ToString();
             var region = Guid.NewGuid().ToString();
 
-            await TestBackplaneEvent<CacheClearRegionEventArgs>(
+            await TestBackplaneEventDistributed<CacheClearRegionEventArgs>(
                 CacheEvent.OnClearRegion,
                 (cacheA) =>
                 {
@@ -449,6 +632,39 @@ namespace CacheManager.Tests
                     cacheB.Get(key).Should().NotBeNull();
                     cacheB.Get(key, region).Should().BeNull();
                 });
+        }
+
+        [Fact]
+        public async Task Redis_BackplaneEvents_InMemory_ClearRegion()
+        {
+            var key = Guid.NewGuid().ToString();
+            var region = Guid.NewGuid().ToString();
+
+            await TestBackplaneEventInMemory<CacheClearRegionEventArgs>(
+                CacheEvent.OnClearRegion,
+                (cacheA, cacheB) =>
+                {
+                    cacheA.Add(key, key);
+                    cacheA.Add(key, key, region);
+
+                    cacheB.Add(key, key);
+                    cacheB.Add(key, key, region);
+
+                    cacheA.ClearRegion(region);
+                },
+                (cacheA, args) =>
+                {
+                    args.Origin.Should().Be(CacheActionEventArgOrigin.Local);
+                    cacheA.Get(key).Should().NotBeNull();
+                    cacheA.Get(key, region).Should().BeNull();
+                },
+                (cacheB, args) =>
+                {
+                    args.Origin.Should().Be(CacheActionEventArgOrigin.Remote);
+                    cacheB.Get(key).Should().NotBeNull();
+                    cacheB.Get(key, region).Should().BeNull();
+                },
+                expectedRemoteTriggers: 1);
         }
 
         [Fact]
@@ -809,8 +1025,8 @@ namespace CacheManager.Tests
 
             // act
             var cfg = ConfigurationBuilder.LoadConfigurationFile(fileName, cacheName);
-            
-            // assert            
+
+            // assert
             redisConfig.Database.Should().Be(113);
             redisConfig.ConnectionTimeout.Should().Be(1200);
             redisConfig.AllowAdmin.Should().BeTrue();
@@ -1010,8 +1226,7 @@ namespace CacheManager.Tests
             }
         }
 
-        private static async Task TestBackplaneEvent<TEventArgs>(
-            CacheEvent cacheEvent,
+        private static Task TestBackplaneEventDistributed<TEventArgs>(CacheEvent cacheEvent,
             Action<ICacheManager<object>> arrange,
             Action<ICacheManager<object>, TEventArgs> assertLocal,
             Action<ICacheManager<object>, TEventArgs> assertRemote)
@@ -1020,6 +1235,34 @@ namespace CacheManager.Tests
             var channelName = Guid.NewGuid().ToString();
             var cacheA = TestManagers.CreateRedisAndDicCacheWithBackplane(1, false, channelName);
             var cacheB = TestManagers.CreateRedisAndDicCacheWithBackplane(1, false, channelName);
+
+            return TestBackplaneEventRunner(cacheA, cacheB, cacheEvent, arrange, assertLocal, assertRemote, 1);
+        }
+
+        private static Task TestBackplaneEventInMemory<TEventArgs>(CacheEvent cacheEvent,
+            Action<ICacheManager<object>, ICacheManager<object>> arrange,
+            Action<ICacheManager<object>, TEventArgs> assertLocal,
+            Action<ICacheManager<object>, TEventArgs> assertRemote,
+            int expectedRemoteTriggers)
+            where TEventArgs : EventArgs
+        {
+            var channelName = Guid.NewGuid().ToString();
+            var cacheA = TestManagers.CreateDicCacheWithBackplane(false, channelName);
+            var cacheB = TestManagers.CreateDicCacheWithBackplane(false, channelName);
+
+            return TestBackplaneEventRunner(cacheA, cacheB, cacheEvent, (a) => arrange(cacheA, cacheB), assertLocal, assertRemote, expectedRemoteTriggers);
+        }
+
+        private static async Task TestBackplaneEventRunner<TEventArgs>(
+            ICacheManager<object> cacheA,
+            ICacheManager<object> cacheB,
+            CacheEvent cacheEvent,
+            Action<ICacheManager<object>> arrange,
+            Action<ICacheManager<object>, TEventArgs> assertLocal,
+            Action<ICacheManager<object>, TEventArgs> assertRemote,
+            int expectedRemoteTriggers)
+            where TEventArgs : EventArgs
+        {
             var eventTriggeredLocal = 0;
             var eventTriggeredRemote = 0;
             Exception lastError = null;
@@ -1160,10 +1403,10 @@ namespace CacheManager.Tests
                 return err?.ToString();
             };
 
-            var triggerResult = await waitForIt(100, () => eventTriggeredRemote == 1);
+            var triggerResult = await waitForIt(100, () => eventTriggeredRemote == expectedRemoteTriggers);
             lastError.Should().BeNull(formatError(lastError));
             triggerResult.Should().BeTrue("Event should get triggered through the backplane.");
-            eventTriggeredLocal.Should().Be(1, "Local cache event should be triggered one time");
+            eventTriggeredLocal.Should().Be(expectedRemoteTriggers, "Local cache event should be triggered one time");
         }
     }
 

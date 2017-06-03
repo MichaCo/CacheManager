@@ -5,7 +5,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 using CacheManager.Core;
-using CacheManager.Redis;
 
 #if MEMCACHEDENABLED
 using Enyim.Caching.Configuration;
@@ -91,7 +90,7 @@ namespace CacheManager.Tests
             ////    .CreateLogger();
         }
 
-        public static ICacheManagerConfiguration BaseConfiguration 
+        public static ICacheManagerConfiguration BaseConfiguration
             => new ConfigurationBuilder()
                     ////.WithMicrosoftLogging(f => f.AddSerilog())
                     .Build();
@@ -354,7 +353,7 @@ namespace CacheManager.Tests
             {
                 ClusterHelper.Initialize();
 
-                var cacheConfig = new ConfigurationBuilder()                    
+                var cacheConfig = new ConfigurationBuilder()
                     .WithCouchbaseCacheHandle("somekeywhichdoesntexist") // using default bucket again
                         .EnableStatistics()
                     .Build();
@@ -396,7 +395,7 @@ namespace CacheManager.Tests
                     {
                         config
                             .WithAllowAdmin()
-                            .WithDatabase(database)                            
+                            .WithDatabase(database)
                             .WithEndpoint(RedisHost, RedisPort);
 
                         if (!useLua)
@@ -417,9 +416,43 @@ namespace CacheManager.Tests
             }
 
             var cache = CacheFactory.FromConfiguration<object>(
-                $"{database}|{sharedRedisConfig}|{serializer}|{useLua}" + Guid.NewGuid().ToString(), 
+                $"{database}|{sharedRedisConfig}|{serializer}|{useLua}" + Guid.NewGuid().ToString(),
                 builder.Build());
-            
+
+            return cache;
+        }
+
+        public static ICacheManager<object> CreateDicCacheWithBackplane(bool sharedRedisConfig = true, string channelName = null)
+        {
+            var redisKey = sharedRedisConfig ? "redisConfig0" : Guid.NewGuid().ToString();
+
+            var builder = BaseConfiguration.Builder;
+
+            builder
+                    .WithDictionaryHandle(isBackplaneSource: true)
+                        .EnableStatistics()
+                    .And
+                    .WithRedisConfiguration(redisKey, config =>
+                    {
+                        config
+                            .WithAllowAdmin()
+                            .WithDatabase(0)
+                            .WithEndpoint(RedisHost, RedisPort);
+                    });
+
+            if (channelName != null)
+            {
+                builder.WithRedisBackplane(redisKey, channelName);
+            }
+            else
+            {
+                builder.WithRedisBackplane(redisKey);
+            }
+
+            var cache = CacheFactory.FromConfiguration<object>(
+                $"{sharedRedisConfig}" + Guid.NewGuid().ToString(),
+                builder.Build());
+
             return cache;
         }
 
@@ -447,7 +480,7 @@ namespace CacheManager.Tests
                     .WithRedisCacheHandle(redisKey, true)
                     .EnableStatistics()
                 .Build());
-            
+
             return cache;
         }
 
@@ -503,7 +536,7 @@ namespace CacheManager.Tests
 
         private static string NewKey() => Guid.NewGuid().ToString();
     }
-    
+
     public enum Serializer
     {
         Binary,
