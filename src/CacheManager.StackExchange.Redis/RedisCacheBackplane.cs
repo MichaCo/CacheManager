@@ -239,7 +239,6 @@ namespace CacheManager.Redis
 
         private void Subscribe()
         {
-            _connection.Subscriber.Unsubscribe(_channelName);
             _connection.Subscriber.Subscribe(
                 _channelName,
                 (channel, msg) =>
