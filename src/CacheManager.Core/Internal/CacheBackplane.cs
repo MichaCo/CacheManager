@@ -19,6 +19,22 @@ namespace CacheManager.Core.Internal
     public abstract class CacheBackplane : IDisposable
     {
         /// <summary>
+        /// Number of messages sent.
+        /// </summary>
+        public static long MessagesSent = 0;
+
+        /// <summary>
+        /// Number of messages received.
+        /// </summary>
+        public static long MessagesReceived = 0;
+
+        /// <summary>
+        /// Number of message chunks sent.
+        /// Messages are sent in chunks to improve performance and decrease network traffic.
+        /// </summary>
+        public static long SentChunks = 0;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="CacheBackplane" /> class.
         /// </summary>
         /// <param name="configuration">The cache manager configuration.</param>

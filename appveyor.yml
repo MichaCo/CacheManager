@@ -1,4 +1,4 @@
-version: 1.0.2-beta-{build}
+version: 1.1.0-beta-{build}
 image: Visual Studio 2017
 configuration: Release
 clone_folder: C:\projects\CacheManager\

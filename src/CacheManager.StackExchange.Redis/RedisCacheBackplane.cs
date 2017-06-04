@@ -177,7 +177,7 @@ namespace CacheManager.Redis
             }
 
             Task.Factory.StartNew(
-                (obj) =>
+                async (obj) =>
                 {
                     if (_sending || _messages == null || _messages.Count == 0)
                     {
@@ -186,7 +186,7 @@ namespace CacheManager.Redis
 
                     _sending = true;
 #if !NET40
-                    Task.Delay(10).Wait();
+                    await Task.Delay(10).ConfigureAwait(false);
 #endif
                     var msgs = string.Empty;
                     lock (_messageLock)
@@ -200,6 +200,7 @@ namespace CacheManager.Redis
                                 _logger.LogDebug("Backplane is sending {0} messages ({1} skipped).", _messages.Count, _skippedMessages);
                             }
 
+                            Interlocked.Add(ref MessagesSent, _messages.Count);
                             _skippedMessages = 0;
                             _messages.Clear();
                         }
@@ -209,6 +210,7 @@ namespace CacheManager.Redis
                             if (msgs.Length > 0)
                             {
                                 Publish(msgs);
+                                Interlocked.Increment(ref SentChunks);
                             }
                         }
                         catch (Exception ex)
@@ -237,6 +239,7 @@ namespace CacheManager.Redis
 
         private void Subscribe()
         {
+            _connection.Subscriber.Unsubscribe(_channelName);
             _connection.Subscriber.Subscribe(
                 _channelName,
                 (channel, msg) =>
@@ -250,6 +253,8 @@ namespace CacheManager.Redis
                         // no messages for this instance
                         return;
                     }
+
+                    Interlocked.Add(ref MessagesReceived, fullMessage.Length);
 
                     if (_logger.IsEnabled(LogLevel.Information))
                     {
