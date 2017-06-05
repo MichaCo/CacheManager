@@ -3,9 +3,10 @@
 
   <PropertyGroup>
     <Copyright>Copyright (c) 2017 MichaConrad</Copyright>
-    <Authors>MichaConrad</Authors>
+    <Authors>MichaConrad</Authors>    
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
 
+    <PackageIconUrl>http://cachemanager.michaco.net/favicon-128.png</PackageIconUrl>
     <PackageProjectUrl>http://cachemanager.michaco.net</PackageProjectUrl>
     <PackageLicenseUrl>https://github.com/MichaCo/CacheManager/blob/master/LICENSE</PackageLicenseUrl>
     <RepositoryType>git</RepositoryType>
