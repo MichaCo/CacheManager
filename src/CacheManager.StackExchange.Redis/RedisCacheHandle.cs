@@ -296,10 +296,8 @@ return result";
                     {
                         return UpdateItemResult.ForItemDidNotExist<TCacheValue>();
                     }
-                    if (item.ExpirationTimeout < MinimumExpirationTimeout)
-                    {
-                        throw new ArgumentException("Timeout lower than one millisecond is not supported.", nameof(item.ExpirationTimeout));
-                    }
+
+                    ValidateExpirationTimeout(item);
 
                     // run update
                     var newValue = updateValue(item.Value);
@@ -357,10 +355,8 @@ return result";
                     {
                         return UpdateItemResult.ForItemDidNotExist<TCacheValue>();
                     }
-                    if (item.ExpirationTimeout < MinimumExpirationTimeout)
-                    {
-                        throw new ArgumentException("Timeout lower than one millisecond is not supported.", nameof(item.ExpirationTimeout));
-                    }
+
+                    ValidateExpirationTimeout(item);
 
                     var oldValue = ToRedisValue(item.Value);
 
@@ -754,6 +750,14 @@ return result";
             return Tuple.Create(key, region);
         }
 
+        private static void ValidateExpirationTimeout(CacheItem<TCacheValue> item)
+        {
+            if ((item.ExpirationMode == ExpirationMode.Absolute || item.ExpirationMode == ExpirationMode.Sliding) && item.ExpirationTimeout < MinimumExpirationTimeout)
+            {
+                throw new ArgumentException("Timeout lower than one millisecond is not supported.", nameof(item.ExpirationTimeout));
+            }
+        }
+
         private string GetKey(string key, string region = null)
         {
             if (string.IsNullOrWhiteSpace(key))
@@ -833,10 +837,7 @@ return result";
 
             var flags = sync ? CommandFlags.None : CommandFlags.FireAndForget;
 
-            if (item.ExpirationTimeout < MinimumExpirationTimeout)
-            {
-                throw new ArgumentException("Timeout lower than one millisecond is not supported.", nameof(item.ExpirationTimeout));
-            }
+            ValidateExpirationTimeout(item);
 
             // ARGV [1]: value, [2]: type, [3]: expirationMode, [4]: expirationTimeout(millis), [5]: created(ticks)
             var parameters = new RedisValue[]
@@ -916,10 +917,7 @@ return result";
                 var fullKey = GetKey(item.Key, item.Region);
                 var value = ToRedisValue(item.Value);
 
-                if (item.ExpirationTimeout < MinimumExpirationTimeout)
-                {
-                    throw new ArgumentException("Timeout lower than one millisecond is not supported.", nameof(item.ExpirationTimeout));
-                }
+                ValidateExpirationTimeout(item);
 
                 var metaValues = new[]
                 {
