@@ -17,6 +17,7 @@ namespace CacheManager.Redis
     [RequiresSerializer]
     public class RedisCacheHandle<TCacheValue> : BaseCacheHandle<TCacheValue>
     {
+        private static readonly TimeSpan MinimumExpirationTimeout = TimeSpan.FromMilliseconds(1);
         private const string Base64Prefix = "base64\0";
         private const string HashFieldCreated = "created";
         private const string HashFieldExpirationMode = "expiration";
@@ -295,6 +296,10 @@ return result";
                     {
                         return UpdateItemResult.ForItemDidNotExist<TCacheValue>();
                     }
+                    if (item.ExpirationTimeout < MinimumExpirationTimeout)
+                    {
+                        throw new ArgumentException("Timeout lower than one millisecond is not supported.", nameof(item.ExpirationTimeout));
+                    }
 
                     // run update
                     var newValue = updateValue(item.Value);
@@ -351,6 +356,10 @@ return result";
                     if (item == null)
                     {
                         return UpdateItemResult.ForItemDidNotExist<TCacheValue>();
+                    }
+                    if (item.ExpirationTimeout < MinimumExpirationTimeout)
+                    {
+                        throw new ArgumentException("Timeout lower than one millisecond is not supported.", nameof(item.ExpirationTimeout));
                     }
 
                     var oldValue = ToRedisValue(item.Value);
@@ -824,6 +833,11 @@ return result";
 
             var flags = sync ? CommandFlags.None : CommandFlags.FireAndForget;
 
+            if (item.ExpirationTimeout < MinimumExpirationTimeout)
+            {
+                throw new ArgumentException("Timeout lower than one millisecond is not supported.", nameof(item.ExpirationTimeout));
+            }
+
             // ARGV [1]: value, [2]: type, [3]: expirationMode, [4]: expirationTimeout(millis), [5]: created(ticks)
             var parameters = new RedisValue[]
             {
@@ -901,6 +915,11 @@ return result";
             {
                 var fullKey = GetKey(item.Key, item.Region);
                 var value = ToRedisValue(item.Value);
+
+                if (item.ExpirationTimeout < MinimumExpirationTimeout)
+                {
+                    throw new ArgumentException("Timeout lower than one millisecond is not supported.", nameof(item.ExpirationTimeout));
+                }
 
                 var metaValues = new[]
                 {

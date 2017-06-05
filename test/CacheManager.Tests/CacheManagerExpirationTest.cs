@@ -881,6 +881,27 @@ namespace CacheManager.Tests
 
         /* General expiration tests */
 
+        /// <summary>
+        /// See issue #159
+        /// </summary>
+        [Fact]
+        [Trait("category", "Redis")]
+        public void Redis_ExpirationTimeoutLimit()
+        {
+            // arrange
+            var timeout = TimeSpan.FromTicks(100);
+            var cache = TestManagers.CreateRedisCache(1);
+            var key = Guid.NewGuid().ToString();
+
+            // act/assert
+            using (cache)
+            {
+                Action act = ()=> cache.Add(new CacheItem<object>(key, key, ExpirationMode.Absolute, timeout));
+
+                act.ShouldThrow<ArgumentException>().WithMessage("*not supported*");
+            }
+        }
+
         // Related to #136
         [Fact]
         public async Task Expiration_ExtendAbsolut_YieldFalseIsExpired()
