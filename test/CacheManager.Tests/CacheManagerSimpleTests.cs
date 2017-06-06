@@ -746,6 +746,8 @@ namespace CacheManager.Tests
                 Action actB = () => cache.GetOrAdd(null, "region", "value");
                 Action actC = () => cache.GetOrAdd(null, (k) => "value");
                 Action actD = () => cache.GetOrAdd(null, "region", (k, r) => "value");
+                Action actE = () => cache.GetOrAdd(null, (k) => new CacheItem<object>(k, "value"));
+                Action actF = () => cache.GetOrAdd(null, "region", (k, r) => new CacheItem<object>(k, "value"));
 
                 // assert
                 actA.ShouldThrow<ArgumentException>()
@@ -758,6 +760,12 @@ namespace CacheManager.Tests
                     .WithMessage("*key*");
 
                 actD.ShouldThrow<ArgumentException>()
+                    .WithMessage("*key*");
+
+                actE.ShouldThrow<ArgumentException>()
+                    .WithMessage("*key*");
+
+                actF.ShouldThrow<ArgumentException>()
                     .WithMessage("*key*");
             }
         }
@@ -775,12 +783,20 @@ namespace CacheManager.Tests
                 object val;
                 Action actC = () => cache.TryGetOrAdd(null, (k) => "value", out val);
                 Action actD = () => cache.TryGetOrAdd(null, "region", (k, r) => "value", out val);
+                Action actE = () => cache.TryGetOrAdd(null, (k) => new CacheItem<object>(k, "value"), out val);
+                Action actF = () => cache.TryGetOrAdd(null, "region", (k, r) => new CacheItem<object>(k, "value"), out val);
 
                 // assert
                 actC.ShouldThrow<ArgumentException>()
                     .WithMessage("*key*");
 
                 actD.ShouldThrow<ArgumentException>()
+                    .WithMessage("*key*");
+
+                actE.ShouldThrow<ArgumentException>()
+                    .WithMessage("*key*");
+
+                actF.ShouldThrow<ArgumentException>()
                     .WithMessage("*key*");
             }
         }
@@ -879,6 +895,7 @@ namespace CacheManager.Tests
             // arrange
             var key = Guid.NewGuid().ToString();
             var keyF = Guid.NewGuid().ToString();
+            var keyG = Guid.NewGuid().ToString();
             var region = Guid.NewGuid().ToString();
             var val = Guid.NewGuid().ToString();
 
@@ -889,12 +906,16 @@ namespace CacheManager.Tests
                 cache.GetOrAdd(key, region, val);
                 cache.GetOrAdd(keyF, (k) => val);
                 cache.GetOrAdd(keyF, region, (k, r) => val);
+                cache.GetOrAdd(keyG, (k) => new CacheItem<object>(keyG, val));
+                cache.GetOrAdd(keyG, region, (k, r) => new CacheItem<object>(keyG, region, val));
 
                 // assert
                 cache[key].Should().Be(val);
                 cache[key, region].Should().Be(val);
                 cache[keyF].Should().Be(val);
                 cache[keyF, region].Should().Be(val);
+                cache[keyG].Should().Be(val);
+                cache[keyG, region].Should().Be(val);
             }
         }
 
@@ -905,24 +926,37 @@ namespace CacheManager.Tests
         {
             // arrange
             var key = Guid.NewGuid().ToString();
+            var key2 = Guid.NewGuid().ToString();
             var val = Guid.NewGuid().ToString();
             var region = Guid.NewGuid().ToString();
             object valueA = null;
             object valueB = null;
+            CacheItem<object> valueC = null;
+            CacheItem<object> valueD = null;
 
             using (cache)
             {
                 // act
-                Func<bool> actA = () => cache.TryGetOrAdd(key, (k) => val, out valueA);
+                Func<bool> actA = () => cache.TryGetOrAdd(key, k => val, out valueA);
                 Func<bool> actB = () => cache.TryGetOrAdd(key, region, (k, r) => val, out valueB);
+                var valC = new CacheItem<object>(key2, val);
+                Func<bool> actC = () => cache.TryGetOrAdd(key2, k => valC, out valueC);
+                var valD = new CacheItem<object>(key2, region, val);
+                Func<bool> actD = () => cache.TryGetOrAdd(key2, region, (k, r) => valD, out valueD);
 
                 // assert
                 actA().Should().BeTrue();
                 actB().Should().BeTrue();
+                actC().Should().BeTrue();
+                actD().Should().BeTrue();
                 valueA.Should().Be(val);
                 valueB.Should().Be(val);
+                valueC.Should().Be(valC);
+                valueD.Should().Be(valD);
                 cache[key].Should().Be(val);
                 cache[key, region].Should().Be(val);
+                cache[key2].Should().Be(val);
+                cache[key2, region].Should().Be(val);
             }
         }
 
@@ -956,11 +990,15 @@ namespace CacheManager.Tests
             {
                 // act
                 object val = null;
+                CacheItem<object> val2 = null;
                 Func<bool> act = () => cache.TryGetOrAdd(key, (k) => null, out val);
+                Func<bool> actB = () => cache.TryGetOrAdd(key, (k) => null, out val2);
 
                 // assert
                 act().Should().BeFalse();
+                actB().Should().BeFalse();
                 val.Should().BeNull();
+                val2.Should().BeNull();
             }
         }
 
@@ -978,7 +1016,7 @@ namespace CacheManager.Tests
                 Action act = () => cache.GetOrAdd(key, (object)null);
 
                 // assert
-                act.ShouldThrow<InvalidOperationException>("added");
+                act.ShouldThrow<ArgumentNullException>("added");
             }
         }
 
@@ -1005,12 +1043,16 @@ namespace CacheManager.Tests
                 // act
                 var result = cache.GetOrAdd(key, val);
                 var resultB = cache.GetOrAdd(key, region, val);
+                var resultC = cache.GetOrAdd(key, (k) => new CacheItem<object>(key, val));
+                var resultD = cache.GetOrAdd(key, region, (k, r) => new CacheItem<object>(key, val));
                 Action act = () => cache.GetOrAdd(keyF, add);
                 Action actB = () => cache.GetOrAdd(keyF, region, addRegion);
 
                 // assert
                 result.Should().Be(val);
                 resultB.Should().Be(val);
+                resultC.Value.Should().Be(val);
+                resultD.Value.Should().Be(val);
                 act.ShouldNotThrow();
                 actB.ShouldNotThrow();
             }
@@ -1031,21 +1073,27 @@ namespace CacheManager.Tests
             Func<string, string, object> addRegion = (k, r) => { throw new InvalidOperationException(); };
             object resultA = null;
             object resultB = null;
+            object resultC = null;
 
             using (cache)
             {
                 cache.Add(key, val);
                 cache.Add(key, val, region);
+                var cacheItem = new CacheItem<object>(key, val);
+                cache.Add(cacheItem);
 
                 // act
                 Func<bool> actA = () => cache.TryGetOrAdd(key, add, out resultA);
                 Func<bool> actB = () => cache.TryGetOrAdd(key, region, addRegion, out resultB);
+                Func<bool> actC = () => cache.TryGetOrAdd(key, region, (k, r) => cacheItem, out resultC);
 
                 // assert
                 actA().Should().BeTrue();
                 actB().Should().BeTrue();
+                actC().Should().BeTrue();
                 resultA.Should().Be(val);
                 resultB.Should().Be(val);
+                resultC.Should().Be(val);
             }
         }
 
