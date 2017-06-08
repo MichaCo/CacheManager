@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
+using System.Text.RegularExpressions;
 using CacheManager.Core.Logging;
 using static CacheManager.Core.Utility.Guard;
 
@@ -404,6 +407,55 @@ namespace CacheManager.Core.Internal
             NotNullOrWhiteSpace(region, nameof(region));
 
             return RemoveInternal(key, region);
+        }
+
+        /// <summary>
+        /// Gets all keys that match the given pattern.
+        /// </summary>
+        /// <param name="pattern">A glob to match against keys.</param>
+        /// <param name="region">The cache region.</param>
+        /// <returns>The matching unique keys in the cache</returns>
+        public virtual IEnumerable<string> Keys(string pattern, string region)
+        {
+            var keys = AllKeys();
+            if (region != null)
+                keys = keys.Where(k => k.StartsWith(region + ":"));
+
+            if (pattern == "*")
+            {
+                return keys;
+            }
+            if (pattern.Contains("*") || pattern.Contains("?"))
+            {
+                var regexPattern = "^" + Regex.Escape(pattern).Replace(@"\*", ".*").Replace(@"\?", ".") + "$";
+                var regex = new Regex(regexPattern);
+                return keys.Where(k => regex.IsMatch(k));
+            }
+
+            return keys.Where(k => k.Contains(pattern));
+        }
+        protected virtual IEnumerable<string> AllKeys()
+        {
+            return new string[0];
+        }
+
+        /// <summary>
+        /// Gets all keys that match the given pattern.
+        /// </summary>
+        /// <param name="pattern">A glob to match against keys.</param>
+        /// <returns>The matching unique keys in the cache</returns>
+        public IEnumerable<string> Keys(string pattern)
+        {
+            return Keys(pattern, null);
+        }
+
+        /// <summary>
+        /// Gets all keys
+        /// </summary>
+        /// <returns>The unique keys in the cache</returns>
+        public IEnumerable<string> Keys()
+        {
+            return Keys(null, null);
         }
 
         /// <summary>

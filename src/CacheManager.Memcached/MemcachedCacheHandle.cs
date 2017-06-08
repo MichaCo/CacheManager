@@ -215,6 +215,14 @@ namespace CacheManager.Memcached
         }
 
         /// <inheritdoc />
+        /// <exception cref="System.NotImplementedException">Not supported in this version.</exception>
+        public override IEnumerable<string> Keys(string pattern, string region)
+        {
+            throw new NotImplementedException();
+        }
+
+
+        /// <inheritdoc />
         public override UpdateItemResult<TCacheValue> Update(string key, Func<TCacheValue, TCacheValue> updateValue, int maxRetries) =>
             Update(key, null, updateValue, maxRetries);
 

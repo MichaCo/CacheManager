@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text.RegularExpressions;
 using System.Web;
 using System.Web.Caching;
 using CacheManager.Core;
@@ -84,6 +87,20 @@ namespace CacheManager.Web
             NotNullOrWhiteSpace(region, nameof(region));
 
             return GetCacheItemInternal(key, region) != null;
+        }
+
+        /// <inheritdoc />
+        protected override IEnumerable<string> AllKeys()
+        {
+            var keys = new List<string>();
+
+            var item = Context.Cache.GetEnumerator();
+            while (item.MoveNext())
+            {
+                keys.Add(item.Key.ToString());
+            }
+
+            return keys;
         }
 
         /// <summary>

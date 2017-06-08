@@ -44,5 +44,16 @@ namespace CacheManager.MicrosoftCachingMemory
                 }
             }
         }
+
+        internal static IEnumerable<string> ListChildren(this MemoryCache cache, object region)
+        {
+            object keys;
+            if (cache.TryGetValue(region, out keys))
+            {
+                var keySet = (HashSet<object>)keys;
+                return keySet.Select(k => k.ToString());
+            }
+            return new string[0];
+        }
     }
 }

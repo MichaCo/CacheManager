@@ -270,6 +270,13 @@ return result";
         }
 
         /// <inheritdoc />
+        public override IEnumerable<string> Keys(string pattern, string region)
+        {
+            var keyPattern = GetKey(pattern, region);
+            return _connection.Servers.First().Keys(_redisConfiguration.Database, keyPattern).Select(k => k.ToString());
+        }
+
+        /// <inheritdoc />
         public override UpdateItemResult<TCacheValue> Update(string key, Func<TCacheValue, TCacheValue> updateValue, int maxRetries)
             => Update(key, null, updateValue, maxRetries);
 

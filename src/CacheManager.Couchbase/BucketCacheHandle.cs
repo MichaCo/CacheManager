@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
 using CacheManager.Core;
@@ -140,6 +141,13 @@ namespace CacheManager.Couchbase
 
             var fullKey = GetKey(key, region);
             return _bucketManager.Bucket.Exists(fullKey);
+        }
+
+        /// <inheritdoc />
+        /// <exception cref="System.NotImplementedException">Not supported in this version.</exception>
+        public override IEnumerable<string> Keys(string pattern, string region)
+        {
+            throw new NotImplementedException();
         }
 
         /// <summary>

@@ -611,6 +611,28 @@ namespace CacheManager.Core
         bool TryUpdate(string key, string region, Func<TCacheValue, TCacheValue> updateValue, int maxRetries, out TCacheValue value);
 
         /// <summary>
+        /// Gets all keys that match the given pattern.
+        /// </summary>
+        /// <param name="pattern">A glob to match against keys.</param>
+        /// <param name="region">The cache region.</param>
+        /// <returns>The unique keys in the cache</returns>
+        IEnumerable<string> Keys(string pattern, string region);
+
+        /// <summary>
+        /// Gets all keys that match the given pattern.
+        /// </summary>
+        /// <param name="pattern">A glob to match against keys.</param>
+        /// <returns>The unique keys in the cache</returns>
+        IEnumerable<string> Keys(string pattern);
+
+        /// <summary>
+        /// Gets all keys
+        /// </summary>
+        /// <returns>The keys in the cache</returns>
+        IEnumerable<string> Keys();
+
+
+        /// <summary>
         /// Explicitly sets the expiration <paramref name="mode"/> and <paramref name="timeout"/> for the
         /// <paramref name="key"/> in all cache layers.
         /// This operation overrides any configured expiration per cache handle for this particular item.

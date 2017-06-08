@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using CacheManager.Core;
@@ -360,6 +361,11 @@ namespace CacheManager.Tests
         {
             this.RemoveCall();
             return true;
+        }
+
+        public override IEnumerable<string> Keys(string pattern, string region)
+        {
+            return new string[0];
         }
     }
 }

@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Globalization;
+using System.Linq;
 using System.Runtime.Caching;
+using System.Text.RegularExpressions;
 using CacheManager.Core;
 using CacheManager.Core.Internal;
 using CacheManager.Core.Logging;
@@ -68,6 +71,12 @@ namespace CacheManager.SystemRuntimeCaching
         /// </summary>
         /// <value>The count.</value>
         public override int Count => (int)_cache.GetCount();
+
+        /// <inheritdoc />
+        protected override IEnumerable<string> AllKeys()
+        {
+            return _cache.Select(c => c.Key);
+        }
 
         /// <inheritdoc />
         protected override ILogger Logger { get; }
