@@ -2,7 +2,6 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading;
 using CacheManager.Core.Logging;
 using static CacheManager.Core.Utility.Guard;
@@ -87,12 +86,13 @@ namespace CacheManager.Core.Internal
         }
 
         /// <inheritdoc />
-        protected override IEnumerable<string> AllKeys(string region)
+        public override IEnumerable<string> Keys(string pattern, string region)
         {
             if (region == null)
                 return _cache.Keys;
             var skip = region.Length + 1;
-            return _cache.Keys.Select(k => k.Substring(skip));
+
+            return _cache.Keys.Select(k => k.Substring(skip)).FilterBy(pattern);
         }
 
         /// <summary>

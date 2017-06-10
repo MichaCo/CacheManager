@@ -90,7 +90,11 @@ namespace CacheManager.Web
         }
 
         /// <inheritdoc />
-        protected override IEnumerable<string> AllKeys(string requestedRegion)
+        public override IEnumerable<string> Keys(string pattern, string requestedRegion)
+        {
+            return GetKeys(pattern, requestedRegion).FilterBy(pattern);
+        }
+        IEnumerable<string> GetKeys(string pattern, string requestedRegion)
         {
             var item = Context.Cache.GetEnumerator();
             while (item.MoveNext())

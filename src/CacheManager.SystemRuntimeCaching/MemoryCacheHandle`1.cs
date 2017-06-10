@@ -73,7 +73,7 @@ namespace CacheManager.SystemRuntimeCaching
         public override int Count => (int)_cache.GetCount();
 
         /// <inheritdoc />
-        protected override IEnumerable<string> AllKeys(string requestedRegion)
+        public override IEnumerable<string> Keys(string pattern, string requestedRegion)
         {
             return _cache.Select(c => 
             {
@@ -86,7 +86,8 @@ namespace CacheManager.SystemRuntimeCaching
                 return new { isToken, hasRegion, region, key };
             })
             .Where(c => c.isToken == false && ((requestedRegion == null && c.hasRegion == false) || (c.hasRegion == true && c.region == requestedRegion)))
-            .Select(c => c.key);
+            .Select(c => c.key)
+            .FilterBy(pattern);
         }
 
         /// <inheritdoc />
