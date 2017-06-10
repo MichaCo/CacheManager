@@ -90,17 +90,35 @@ namespace CacheManager.Web
         }
 
         /// <inheritdoc />
-        protected override IEnumerable<string> AllKeys()
+        protected override IEnumerable<string> AllKeys(string requestedRegion)
         {
-            var keys = new List<string>();
-
             var item = Context.Cache.GetEnumerator();
             while (item.MoveNext())
             {
-                keys.Add(item.Key.ToString());
-            }
+                bool isToken;
+                bool hasRegion;
+                string region;
+                string key;
 
-            return keys;
+                ParseKeyParts(_instanceKeyLength, item.Key as string, out isToken, out hasRegion, out region, out key);
+
+                if (isToken)
+                    continue;
+                if (hasRegion)
+                {
+                    if (requestedRegion == null)
+                        continue;
+                    if (requestedRegion != region)
+                        continue;
+                }
+                else
+                {
+                    if (requestedRegion != null)
+                        continue;
+                }
+
+                yield return key;
+            }
         }
 
         /// <summary>

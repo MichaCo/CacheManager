@@ -87,9 +87,12 @@ namespace CacheManager.Core.Internal
         }
 
         /// <inheritdoc />
-        protected override IEnumerable<string> AllKeys()
+        protected override IEnumerable<string> AllKeys(string region)
         {
-            return _cache.Keys;
+            if (region == null)
+                return _cache.Keys;
+            var skip = region.Length + 1;
+            return _cache.Keys.Select(k => k.Substring(skip));
         }
 
         /// <summary>
