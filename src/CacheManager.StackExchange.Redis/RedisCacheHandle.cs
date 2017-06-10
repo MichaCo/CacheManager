@@ -273,7 +273,12 @@ return result";
         public override IEnumerable<string> Keys(string pattern, string region)
         {
             var keyPattern = GetKey(pattern, region);
-            return _connection.Servers.First().Keys(_redisConfiguration.Database, keyPattern).Select(k => k.ToString());
+
+            // Keys are spread out across the cluster, slaves should contain a complete copy of their master nodes, so ignore them.
+            return _connection
+                .Servers
+                .Where(s => s.IsConnected && !s.IsSlave).
+                SelectMany(s => s.Keys(_redisConfiguration.Database, keyPattern).Select(k => k.ToString()));
         }
 
         /// <inheritdoc />
