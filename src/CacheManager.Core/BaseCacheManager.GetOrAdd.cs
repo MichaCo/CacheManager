@@ -169,7 +169,7 @@ namespace CacheManager.Core
                 // Throw explicit to me more consistent. Otherwise it would throw later eventually...
                 if (item == null)
                 {
-                    throw new InvalidOperationException("The value which should be added must not be null.");
+                    throw new InvalidOperationException("The CacheItem which should be added must not be null.");
                 }
 
                 if (AddInternal(item))
