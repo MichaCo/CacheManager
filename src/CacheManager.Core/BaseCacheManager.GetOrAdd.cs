@@ -58,23 +58,22 @@ namespace CacheManager.Core
             NotNullOrWhiteSpace(key, nameof(key));
             NotNull(valueFactory, nameof(valueFactory));
 
-            CacheItem<TCacheValue> item = default(CacheItem<TCacheValue>);
-            value = default(TCacheValue);
-            Func<string, string, CacheItem<TCacheValue>> cacheItemCreator = (k, r) =>
-            {
-                var outValue = valueFactory(k);
-                if (outValue == null)
+            if (TryGetOrAddInternal(
+                key,
+                null,
+                (k, r) =>
                 {
-                    return null;
-                }
-                return new CacheItem<TCacheValue>(k, outValue);
-            };
-            var returnValue = TryGetOrAddInternal(key, null, cacheItemCreator, out item);
-            if (returnValue)
+                    var newValue = valueFactory(k);
+                    return newValue == null ? null : new CacheItem<TCacheValue>(k, newValue);
+                },
+                out CacheItem<TCacheValue> item))
             {
                 value = item.Value;
+                return true;
             }
-            return returnValue;
+
+            value = default(TCacheValue);
+            return false;
         }
 
         /// <inheritdoc />
@@ -84,23 +83,22 @@ namespace CacheManager.Core
             NotNullOrWhiteSpace(region, nameof(region));
             NotNull(valueFactory, nameof(valueFactory));
 
-            CacheItem<TCacheValue> item = default(CacheItem<TCacheValue>);
-            value = default(TCacheValue);
-            Func<string, string, CacheItem<TCacheValue>> cacheItemCreator = (k, r) =>
-            {
-                var outValue = valueFactory(k, r);
-                if (outValue == null)
+            if (TryGetOrAddInternal(
+                key,
+                region,
+                (k, r) =>
                 {
-                    return null;
-                }
-                return new CacheItem<TCacheValue>(k, r, outValue);
-            };
-            var returnValue = TryGetOrAddInternal(key, region, cacheItemCreator, out item);
-            if (returnValue)
+                    var newValue = valueFactory(k, r);
+                    return newValue == null ? null : new CacheItem<TCacheValue>(k, r, newValue);
+                },
+                out CacheItem<TCacheValue> item))
             {
                 value = item.Value;
+                return true;
             }
-            return returnValue;
+
+            value = default(TCacheValue);
+            return false;
         }
 
         /// <inheritdoc />
