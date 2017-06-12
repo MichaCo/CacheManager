@@ -1009,6 +1009,26 @@ namespace CacheManager.Tests
             }
         }
 
+        /// <summary>
+        /// See #165, version string can be empty is e.g. it comes from app/web.config.
+        /// </summary>
+        [Fact]
+        [Trait("category", "Redis")]
+        public void Redis_StrictMode_EmptyString_DoesnTThrow()
+        {
+            var redisConfigKey = Guid.NewGuid().ToString();
+            var redisConfig = new RedisConfiguration(redisConfigKey, "localhost", strictCompatibilityModeVersion: "");
+            RedisConfigurations.AddConfiguration(redisConfig);
+
+            var cacheConfig = new ConfigurationBuilder()
+                .WithRedisCacheHandle(redisConfigKey)
+                .Build();
+
+            Action act = () => new BaseCacheManager<object>(cacheConfig);
+
+            act.ShouldNotThrow();
+        }
+
 #if !NETCOREAPP
 
         [Fact]

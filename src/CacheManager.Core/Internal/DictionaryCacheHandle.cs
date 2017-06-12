@@ -124,7 +124,7 @@ namespace CacheManager.Core.Internal
                 if (result.ExpirationMode != ExpirationMode.None && IsExpired(result, DateTime.UtcNow))
                 {
                     _cache.TryRemove(fullKey, out result);
-                    TriggerCacheSpecificRemove(key, region, CacheItemRemovedReason.Expired, result.Value);
+                    TriggerCacheSpecificRemove(key, region, CacheItemRemovedReason.Expired, result == null ? default(TCacheValue) : result.Value);
                     return null;
                 }
             }

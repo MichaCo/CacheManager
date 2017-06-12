@@ -52,7 +52,7 @@ namespace CacheManager.Redis
             get
             {
                 // new: if strict mode enabled, return the feature set supported by that version.
-                if (_configuration.StrictCompatibilityModeVersion != null)
+                if (!string.IsNullOrEmpty(_configuration.StrictCompatibilityModeVersion))
                 {
                     return new RedisFeatures(Version.Parse(_configuration.StrictCompatibilityModeVersion));
                 }
@@ -165,7 +165,7 @@ namespace CacheManager.Redis
                             _logger.LogInfo(args.Exception, "Connection restored, type: '{0}', failure: '{1}'", args.ConnectionType, args.FailureType);
                         };
 
-                        if(!_configuration.TwemproxyEnabled)
+                        if (!_configuration.TwemproxyEnabled)
                         {
                             var endpoints = connection.GetEndPoints();
                             if (!endpoints.Select(p => connection.GetServer(p))

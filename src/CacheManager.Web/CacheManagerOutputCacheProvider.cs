@@ -136,6 +136,11 @@ namespace CacheManager.Web
             if (utcExpiry != default(DateTime) && utcExpiry != DateTime.MaxValue)
             {
                 var timeout = TimeSpan.FromTicks(utcExpiry.Ticks - DateTime.UtcNow.Ticks);
+                if (timeout.TotalMilliseconds < 0)
+                {
+                    timeout = TimeSpan.FromSeconds(1);
+                }
+
                 newItem = new CacheItem<object>(key, entry, ExpirationMode.Absolute, timeout);
             }
             else
