@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26430.6
+VisualStudioVersion = 15.0.26430.13
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{58CC885F-40A7-4C82-990D-3F36AAA088A7}"
 EndProject
@@ -90,6 +90,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CacheManager.Events.Tests",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CacheManager.Examples.Configuration", "samples\CacheManager.Examples.Configuration\CacheManager.Examples.Configuration.csproj", "{29E6BC78-BD1E-4E83-AAC6-D3D21DA883AB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OutputCacheExample", "samples\OutputCacheExample\OutputCacheExample.csproj", "{38C26AA8-EA36-4BD3-ADB1-693AA91A11C5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -176,6 +178,10 @@ Global
 		{29E6BC78-BD1E-4E83-AAC6-D3D21DA883AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{29E6BC78-BD1E-4E83-AAC6-D3D21DA883AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{29E6BC78-BD1E-4E83-AAC6-D3D21DA883AB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{38C26AA8-EA36-4BD3-ADB1-693AA91A11C5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{38C26AA8-EA36-4BD3-ADB1-693AA91A11C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{38C26AA8-EA36-4BD3-ADB1-693AA91A11C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{38C26AA8-EA36-4BD3-ADB1-693AA91A11C5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -204,6 +210,7 @@ Global
 		{DB13A410-EAF1-4966-BA56-FC73BAC7CF3D} = {D83D3737-3BD4-4AEE-8C42-CDED9410DB79}
 		{AA4A2053-1ECD-4331-B805-BF8062B04CFC} = {C013E552-43F5-4496-BE29-DB401C3334BB}
 		{29E6BC78-BD1E-4E83-AAC6-D3D21DA883AB} = {C23C189C-3AFC-45D6-8E32-9B5E190BBA20}
+		{38C26AA8-EA36-4BD3-ADB1-693AA91A11C5} = {C23C189C-3AFC-45D6-8E32-9B5E190BBA20}
 	EndGlobalSection
 	GlobalSection(Performance) = preSolution
 		HasPerformanceSessions = true

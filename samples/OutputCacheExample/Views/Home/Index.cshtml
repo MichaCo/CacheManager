@@ -1,0 +1,71 @@
+﻿@{
+    ViewBag.Title = "Home";
+}
+@model OutputCacheExample.Controllers.CacheInfoModel
+<h2>Home</h2>
+<div class="row">
+    <div class="col-md-12">
+        <h4>Description</h4>
+
+        This is a sample page to showcase the usage of CacheManager's <code>OutputCache</code> attribute.
+
+        <ul>
+            <li>
+                The Homepage doesn't get cached via <code>OutputCache</code>
+            </li>
+            <li>
+                Page A has a 2 second TTL
+            </li>
+            <li>
+                Page B has a 10 second TTL
+            </li>
+            <li>
+                Page C has a 30 second TTL
+            </li>
+        </ul>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <h4>Cache Handles:</h4>
+        <p>
+            The following list are the cache handles and cache item counts per handle.
+        </p>
+        <ul>
+            @foreach (var cachename in Model.Layers)
+            {
+                int count = 0;
+                Model.CacheCount.TryGetValue(cachename, out count);
+
+                <li>@cachename (@count)</li>
+            }
+        </ul>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <h4>Cache Statistics:</h4>
+        <p>
+            Statistics per Handle
+        </p>
+        <div>
+            @foreach (var cachename in Model.Layers)
+            {
+                int count = 0;
+                if (Model.Stats.ContainsKey(cachename))
+                {
+                    var stats = Model.Stats[cachename];
+
+                    <span>@cachename:</span>
+                    <ul>
+                        @foreach (var stat in stats)
+                        {
+                            <li>@stat.Key: @stat.Value</li>
+                        }
+                    </ul>
+                }
+            }
+        </div>
+    </div>
+</div>
