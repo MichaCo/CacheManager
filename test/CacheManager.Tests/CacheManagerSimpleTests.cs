@@ -907,7 +907,7 @@ namespace CacheManager.Tests
                 cache.GetOrAdd(keyF, (k) => val);
                 cache.GetOrAdd(keyF, region, (k, r) => val);
                 cache.GetOrAdd(keyG, (k) => new CacheItem<object>(keyG, val));
-                cache.GetOrAdd(keyG, region, (k, r) => new CacheItem<object>(keyG, region, val));
+                cache.GetOrAdd(keyG, region, (k, r) => new CacheItem<object>(keyG, region, val, ExpirationMode.Absolute, TimeSpan.FromMinutes(42)));
 
                 // assert
                 cache[key].Should().Be(val);
@@ -916,6 +916,9 @@ namespace CacheManager.Tests
                 cache[keyF, region].Should().Be(val);
                 cache[keyG].Should().Be(val);
                 cache[keyG, region].Should().Be(val);
+                var item = cache.GetCacheItem(keyG, region);
+                item.ExpirationMode.Should().Be(ExpirationMode.Absolute);
+                item.ExpirationTimeout.Should().Be(TimeSpan.FromMinutes(42));
             }
         }
 
@@ -941,7 +944,7 @@ namespace CacheManager.Tests
                 Func<bool> actB = () => cache.TryGetOrAdd(key, region, (k, r) => val, out valueB);
                 var valC = new CacheItem<object>(key2, val);
                 Func<bool> actC = () => cache.TryGetOrAdd(key2, k => valC, out valueC);
-                var valD = new CacheItem<object>(key2, region, val);
+                var valD = new CacheItem<object>(key2, region, val, ExpirationMode.Absolute, TimeSpan.FromMinutes(42));
                 Func<bool> actD = () => cache.TryGetOrAdd(key2, region, (k, r) => valD, out valueD);
 
                 // assert
@@ -957,6 +960,9 @@ namespace CacheManager.Tests
                 cache[key, region].Should().Be(val);
                 cache[key2].Should().Be(val);
                 cache[key2, region].Should().Be(val);
+                var item = cache.GetCacheItem(key2, region);
+                item.ExpirationMode.Should().Be(ExpirationMode.Absolute);
+                item.ExpirationTimeout.Should().Be(TimeSpan.FromMinutes(42));
             }
         }
 
@@ -1111,33 +1117,93 @@ namespace CacheManager.Tests
 
             using (cache)
             {
-                Func<object> action = () =>
+                Func<CacheItem<object>> action = () =>
                 {
-                    return cache.GetOrAdd(key, (k) =>
+                    var tries = 0;
+                    var created = cache.GetOrAdd(key, (k) =>
                     {
+                        tries++;
                         Interlocked.Increment(ref counter);
 
                         // force collision so that multiple threads try to add... yea thats long, but parallel should be fine
                         Task.Delay(1).Wait();
-                        return counter;
+                        return new CacheItem<object>(k, counter, ExpirationMode.Absolute, TimeSpan.FromMinutes(tries));
                     });
+
+                    cache.Remove(key);
+                    return created;
                 };
 
-                var tasks = new List<Task<object>>();
+                var tasks = new List<Task<CacheItem<object>>>();
                 for (var i = 0; i < runs; i++)
                 {
                     tasks.Add(Task.Run(action));
                 }
 
-                object[] results = await Task.WhenAll(tasks.ToArray());
+                var results = await Task.WhenAll(tasks.ToArray());
 
                 await Task.Delay(0);
 
-                // one of the threads won and added the key
-                var winner = (int)cache[key];
+                // tries inside the factory counts how often the factory is being called, then we use that value as timeout
+                // should be one as the factory should run only once
+                results.Max(p => p.ExpirationTimeout.Minutes).Should().Be(1);
 
-                // all results should be the same because we should add the key only once
-                results.ShouldBeEquivalentTo(Enumerable.Repeat(winner, runs), cache.ToString());
+                // even with retries, the factory should not get invoked more than once per call!
+                counter.Should().BeLessOrEqualTo(runs);
+            }
+        }
+
+        [Theory()]
+        [Trait("category", "Unreliable")]
+        [ClassData(typeof(TestCacheManagers))]
+        public async Task CacheManager_TryGetOrAdd_ForceRace<T>(T cache)
+            where T : ICacheManager<object>
+        {
+            // arrange
+            var key = Guid.NewGuid().ToString();
+            var val = Guid.NewGuid().ToString();
+            var counter = 0;
+            var runs = 6;
+
+            using (cache)
+            {
+                Func<CacheItem<object>> action = () =>
+                {
+                    var tries = 0;
+                    CacheItem<object> result = null;
+                    while (!cache.TryGetOrAdd(
+                        key, (k) =>
+                        {
+                            tries++;
+                            Interlocked.Increment(ref counter);
+
+                            // force collision so that multiple threads try to add... yea thats long, but parallel should be fine
+                            Task.Delay(1).Wait();
+                            return new CacheItem<object>(k, counter, ExpirationMode.Absolute, TimeSpan.FromMinutes(tries));
+                        },
+                        out result))
+                    { }
+
+                    cache.Remove(key);
+                    return result;
+                };
+
+                var tasks = new List<Task<CacheItem<object>>>();
+                for (var i = 0; i < runs; i++)
+                {
+                    tasks.Add(Task.Run(action));
+                }
+
+                var results = await Task.WhenAll(tasks.ToArray());
+
+                await Task.Delay(0);
+
+                // tries inside the factory counts how often the factory is being called, then we use that value as timeout
+                // should be one as the factory should run only once
+                results.Max(p => p.ExpirationTimeout.Minutes).Should().Be(1);
+
+                // even with retries, the factory should not get invoked more than once per call!
+                counter.Should().BeLessOrEqualTo(runs);
             }
         }
 

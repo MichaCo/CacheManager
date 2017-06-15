@@ -122,7 +122,7 @@ namespace CacheManager.Core
 
         private bool TryGetOrAddInternal(string key, string region, Func<string, string, CacheItem<TCacheValue>> valueFactory, out CacheItem<TCacheValue> item)
         {
-            item = default(CacheItem<TCacheValue>);
+            CacheItem<TCacheValue> newItem = null;
             var tries = 0;
             do
             {
@@ -133,15 +133,20 @@ namespace CacheManager.Core
                     return true;
                 }
 
-                item = valueFactory(key, region);
+                // changed logic to invoke the factory only once in case of retries
+                if (newItem == null)
+                {
+                    newItem = valueFactory(key, region);
+                }
 
-                if (item == null)
+                if (newItem == null)
                 {
                     return false;
                 }
 
-                if (AddInternal(item))
+                if (AddInternal(newItem))
                 {
+                    item = newItem;
                     return true;
                 }
             }
@@ -152,6 +157,7 @@ namespace CacheManager.Core
 
         private CacheItem<TCacheValue> GetOrAddInternal(string key, string region, Func<string, string, CacheItem<TCacheValue>> valueFactory)
         {
+            CacheItem<TCacheValue> newItem = null;
             var tries = 0;
             do
             {
@@ -162,17 +168,21 @@ namespace CacheManager.Core
                     return item;
                 }
 
-                item = valueFactory(key, region);
+                // changed logic to invoke the factory only once in case of retries
+                if (newItem == null)
+                {
+                    newItem = valueFactory(key, region);
+                }
 
                 // Throw explicit to me more consistent. Otherwise it would throw later eventually...
-                if (item == null)
+                if (newItem == null)
                 {
                     throw new InvalidOperationException("The CacheItem which should be added must not be null.");
                 }
 
-                if (AddInternal(item))
+                if (AddInternal(newItem))
                 {
-                    return item;
+                    return newItem;
                 }
             }
             while (tries <= Configuration.MaxRetries);
