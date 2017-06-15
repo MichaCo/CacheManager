@@ -123,8 +123,8 @@ namespace CacheManager.Core.Internal
             {
                 if (result.ExpirationMode != ExpirationMode.None && IsExpired(result, DateTime.UtcNow))
                 {
-                    _cache.TryRemove(fullKey, out result);
-                    TriggerCacheSpecificRemove(key, region, CacheItemRemovedReason.Expired, result == null ? default(TCacheValue) : result.Value);
+                    _cache.TryRemove(fullKey, out CacheItem<TCacheValue> removeResult);
+                    TriggerCacheSpecificRemove(key, region, CacheItemRemovedReason.Expired, result.Value);
                     return null;
                 }
             }
