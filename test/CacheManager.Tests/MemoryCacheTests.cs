@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Threading.Tasks;
 using CacheManager.Core;
 using CacheManager.MicrosoftCachingMemory;
 using FluentAssertions;
@@ -181,7 +182,7 @@ namespace CacheManager.Tests
 
             cache.CacheHandles.Count().Should().Be(1);
         }
-        
+
         [Fact]
         [Trait("category", "NotOnMono")]
         public void SysRuntime_CreateDefaultCache()
@@ -216,5 +217,57 @@ namespace CacheManager.Tests
 
         #endregion
 #endif
+
+        [Fact]
+        public void Dictionary_ExpiredRacecondition()
+        {
+            var _cache = CacheFactory.Build(s => s
+                 .WithJsonSerializer()
+                 .WithDictionaryHandle()
+                 .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMilliseconds(10))
+                 .And
+                 .WithDictionaryHandle()
+                 .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMilliseconds(20))
+                 .And
+                 .WithDictionaryHandle()
+                 .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMilliseconds(30))
+                 .And
+                 .WithDictionaryHandle()
+                 .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMilliseconds(40))
+                 .And
+                 .WithDictionaryHandle()
+                 .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMilliseconds(50))
+                 );
+
+            _cache.OnRemoveByHandle += (s, a) =>
+            {
+                Console.Write(a.Level);
+            };
+
+            var exceptions = 0;
+            for (var i = 0; i < 10; i++)
+            {
+                Action act = () =>
+                {
+                    try
+                    {
+                        var val = _cache.Get("some_key");
+                        if (val == null)
+                        {
+                            _cache.Put("some_key", "value");
+                        }
+                    }
+                    catch (NullReferenceException ex)
+                    {
+                        exceptions++;
+                        Console.WriteLine(ex);
+                    }
+                };
+
+                Parallel.Invoke(Enumerable.Repeat(act, 1000).ToArray());
+            }
+
+            Assert.True(exceptions == 0);
+        }
     }
 }

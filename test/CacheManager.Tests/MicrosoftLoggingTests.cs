@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using FluentAssertions;
-using Xunit;
-using Microsoft.Extensions.Logging;
 using CacheManager.Core;
 using CacheManager.Logging;
+using FluentAssertions;
+using Microsoft.Extensions.Logging;
+using Xunit;
 
 namespace CacheManager.Tests
 {
@@ -16,7 +16,7 @@ namespace CacheManager.Tests
         public void AspNetCoreLogging_MinLogLevel_Trace()
         {
             var external = new LoggerFactory();
-            
+
             external.AddConsole(LogLevel.Trace);
 
             var loggerFactory = new MicrosoftLoggerFactoryAdapter(external);
@@ -35,7 +35,7 @@ namespace CacheManager.Tests
         public void AspNetCoreLogging_MinLogLevel_Debug()
         {
             var external = new LoggerFactory();
-            
+
             external.AddConsole(LogLevel.Debug);
 
             var loggerFactory = new MicrosoftLoggerFactoryAdapter(external);
@@ -122,7 +122,7 @@ namespace CacheManager.Tests
         public void AspNetCoreLogging_Builder_InvalidFactory()
         {
             Action act = () => ConfigurationBuilder.BuildConfiguration(
-                s => s.WithMicrosoftLogging((Action<ILoggerFactory>) null));
+                s => s.WithMicrosoftLogging((Action<ILoggerFactory>)null));
 
             act.ShouldThrow<ArgumentNullException>().WithMessage("*factory*");
         }

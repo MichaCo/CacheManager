@@ -1021,6 +1021,7 @@ namespace CacheManager.Tests
             RedisConfigurations.AddConfiguration(redisConfig);
 
             var cacheConfig = new ConfigurationBuilder()
+                .WithJsonSerializer()
                 .WithRedisCacheHandle(redisConfigKey)
                 .Build();
 
