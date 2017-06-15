@@ -882,9 +882,9 @@ return result";
                 if (result.IsNull && when == When.NotExists)
                 {
                     // add failed because element exists already
-                    if (Logger.IsEnabled(LogLevel.Information))
+                    if (Logger.IsEnabled(LogLevel.Debug))
                     {
-                        Logger.LogInfo("DB {0} | Failed to add item [{1}] because it exists.", _connection.Database.Database, item.ToString());
+                        Logger.LogDebug("DB {0} | Failed to add item [{1}] because it exists.", _connection.Database.Database, item.ToString());
                     }
 
                     return false;
