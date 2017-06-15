@@ -110,12 +110,6 @@ namespace CacheManager.Core
 
                             EvictFromHandlesAbove(args.Key, args.Region, handleIndex);
                         }
-                        
-                        if (args.Reason == CacheItemRemovedReason.ExternalDelete)
-                        {
-                            handle.Stats.OnRemove(args.Region);
-                            TriggerOnRemove(args.Key, args.Region, CacheActionEventArgOrigin.Local);
-                        }
 
                         // moving down below cleanup, optherwise the item could still be in memory
                         TriggerOnRemoveByHandle(args.Key, args.Region, args.Reason, handleIndex + 1, args.Value);

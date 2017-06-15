@@ -583,7 +583,6 @@ namespace CacheManager.Tests
 
             var key = Guid.NewGuid().ToString();
             var onRemoveByHandleValid = false;
-            var onRemoveValid = false;
 
             var cache = new BaseCacheManager<int?>(config);
             cache.OnRemoveByHandle += (s, args) =>
@@ -595,14 +594,6 @@ namespace CacheManager.Tests
                 }
             };
 
-            cache.OnRemove += (s, args) =>
-            {
-                if (args.Key == key)
-                {
-                    onRemoveValid = true;
-                }
-            };
-
             cache.Add(key, 1234).Should().BeTrue();
             var x = cache.Get(key);
 
@@ -611,7 +602,6 @@ namespace CacheManager.Tests
             await Task.Delay(1000);
 
             onRemoveByHandleValid.Should().BeTrue("onRemoveByHandle Event should have been raised");
-            onRemoveValid.Should().BeTrue("onRemove Event should have been raised");
 
             cache.CacheHandles.First().Get(key).Should().BeNull();
         }
@@ -634,7 +624,6 @@ namespace CacheManager.Tests
 
             var key = Guid.NewGuid().ToString();
             var onRemoveByHandleValid = false;
-            var onRemoveValid = false;
 
             var cache = new BaseCacheManager<int?>(config);
             cache.OnRemoveByHandle += (s, args) =>
@@ -646,14 +635,6 @@ namespace CacheManager.Tests
                 }
             };
 
-            cache.OnRemove += (s, args) =>
-            {
-                if (args.Key == key)
-                {
-                    onRemoveValid = true;
-                }
-            };
-
             cache.Add(key, 1234).Should().BeTrue();
             var x = cache.Get(key);
 
@@ -662,7 +643,6 @@ namespace CacheManager.Tests
             await Task.Delay(1000);
 
             onRemoveByHandleValid.Should().BeTrue("onRemoveByHandle Event should have been raised");
-            onRemoveValid.Should().BeTrue("onRemove Event should have been raised");
 
             cache.CacheHandles.First().Get(key).Should().Be(1234);
         }
