@@ -1414,7 +1414,7 @@ namespace CacheManager.Tests
         {
             var cache = TestManagers.CreateRedisCache();
 
-            var unique = ":--" + DateTime.Now.ToString("o"); // so tests do not conflict
+            var unique = "--" + DateTime.Now.ToString("o").Replace(":", "."); // so tests do not conflict
 
             cache.Add("key1" + unique, "value 1");
             cache.Add("key2" + unique, "value 2");
@@ -1429,7 +1429,7 @@ namespace CacheManager.Tests
         {
             var cache = TestManagers.CreateRedisCache();
 
-            var unique = ":--" + DateTime.Now.ToString("o").Replace(":", "."); // so tests do not conflict
+            var unique = "--" + DateTime.Now.ToString("o").Replace(":", "."); // so tests do not conflict
 
             cache.Add("key1" + unique, "value 1", "region 1");
             cache.Add("key2" + unique, "value 2", "region 1");
@@ -1444,11 +1444,11 @@ namespace CacheManager.Tests
 
 
         [Fact]
-        public void Redis_Keys_that_match_single_character_pattern()
+        public void Redis_Keys_without_region_that_match_single_character_pattern()
         {
             var cache = TestManagers.CreateRedisCache();
 
-            var unique = ":--" + DateTime.Now.ToString("o"); // so tests do not conflict
+            var unique = "--" + DateTime.Now.ToString("o").Replace(":", "."); // so tests do not conflict
 
             cache.Add("key1" + unique, "value 1");
             cache.Add("key 2" + unique, "value 2");
@@ -1460,11 +1460,11 @@ namespace CacheManager.Tests
             Assert.Equal(new string[] { "key 2" + unique, "key 3" + unique }, keys);
         }
         [Fact]
-        public void Redis_Keys_that_match_multiple_character_pattern()
+        public void Redis_Keys_without_region_that_match_multiple_character_pattern()
         {
             var cache = TestManagers.CreateRedisCache();
 
-            var unique = ":--" + DateTime.Now.ToString("o"); // so tests do not conflict
+            var unique = "--" + DateTime.Now.ToString("o").Replace(":", "."); // so tests do not conflict
 
             cache.Add("key1" + unique, "value 1");
             cache.Add("key 2" + unique, "value 2");
