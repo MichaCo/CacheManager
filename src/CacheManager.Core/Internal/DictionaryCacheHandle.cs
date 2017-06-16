@@ -90,9 +90,10 @@ namespace CacheManager.Core.Internal
         {
             if (region == null)
                 return _cache.Keys;
+
             var skip = region.Length + 1;
 
-            return _cache.Keys.Select(k => k.Substring(skip)).FilterBy(pattern);
+            return _cache.Keys.Where(k => k.StartsWith(region)).Select(k => k.Substring(skip)).FilterBy(pattern);
         }
 
         /// <summary>

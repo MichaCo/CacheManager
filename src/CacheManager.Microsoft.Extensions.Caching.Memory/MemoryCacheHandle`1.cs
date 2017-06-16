@@ -92,7 +92,8 @@ namespace CacheManager.MicrosoftCachingMemory
         /// <inheritdoc />
         public override IEnumerable<string> Keys(string pattern, string region)
         {
-            var keys = _cache.ListChildren(region ?? GetType().Name);
+            var keys = _cache.ListChildren(region ?? GetType().Name)
+                .Select(k => ParseKey(region));
 
             if (pattern == "*")
             {
@@ -202,6 +203,18 @@ namespace CacheManager.MicrosoftCachingMemory
 
             return region + ":" + key;
         }
+        private string ParseKey(string key, string region = null)
+        {
+            NotNullOrWhiteSpace(key, nameof(key));
+
+            if (string.IsNullOrWhiteSpace(region))
+            {
+                return key;
+            }
+
+            return key.Substring(region.Length + 1);
+        }
+
 
         private MemoryCacheEntryOptions GetOptions(CacheItem<TCacheValue> item)
         {

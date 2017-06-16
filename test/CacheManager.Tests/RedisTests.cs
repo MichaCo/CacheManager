@@ -1429,15 +1429,17 @@ namespace CacheManager.Tests
         {
             var cache = TestManagers.CreateRedisCache();
 
-            var unique = ":--" + DateTime.Now.ToString("o"); // so tests do not conflict
+            var unique = ":--" + DateTime.Now.ToString("o").Replace(":", "."); // so tests do not conflict
 
             cache.Add("key1" + unique, "value 1", "region 1");
             cache.Add("key2" + unique, "value 2", "region 1");
-            cache.Add("key2" + unique, "value 2", "region 2");
+            cache.Add("key3" + unique, "value 3", "region 2");
 
-            var keys =  cache.Keys("*", "region 1").Where(k => k.EndsWith(unique)).OrderBy(k => k).ToArray();
+            var region1 = cache.Keys("*", "region 1").Where(k => k.EndsWith(unique)).OrderBy(k => k).ToArray();
+            var region2 = cache.Keys("*", "region 2").Where(k => k.EndsWith(unique)).OrderBy(k => k).ToArray();
 
-            Assert.Equal(new string[] { "key1" + unique, "key2" + unique }, keys);
+            Assert.Equal(new string[] { "key1" + unique, "key2" + unique }, region1);
+            Assert.Equal(new string[] { "key3" + unique }, region2);
         }
 
 

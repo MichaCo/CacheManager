@@ -30,12 +30,6 @@ namespace CacheManager.Core
                 Logger.LogTrace("Keys [{0}:{1}] found {2} keys.", region, pattern, keys.Count);
             }
 
-            if (region != null)
-            {
-                var after = region.Length + 1; // +1 for the :
-                return keys.Select(k => k.Substring(after));
-            }
-
             return keys;
         }
     }
