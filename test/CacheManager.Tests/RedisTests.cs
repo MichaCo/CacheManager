@@ -1412,35 +1412,14 @@ namespace CacheManager.Tests
         [Fact]
         public void Redis_GetAllKeys()
         {
-            var testLogger = new TestLogger();
-            var cfg = ConfigurationBuilder.BuildConfiguration(settings =>
-            {
-                settings
-                    .WithRedisBackplane("redis.config")
-                    .WithLogging(typeof(TestLoggerFactory), testLogger)
-                    .WithJsonSerializer()
-                    .WithRedisCacheHandle("redis.config", true)
-                    .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(5))
-                    .And
-                    .WithRedisConfiguration("redis.config", config =>
-                    {
-                        config
-                            .WithConnectionTimeout(10)
-                            .WithAllowAdmin()
-                            .WithDatabase(7)
-                            .WithPassword("mysupersecret")
-                            .WithSsl()
-                            ;
-                    });
-            });
+            var cache = TestManagers.CreateRedisCache();
 
             var unique = ":--" + DateTime.Now.ToString("o"); // so tests do not conflict
-            var cache = new BaseCacheManager<string>(cfg);
 
             cache.Add("key1" + unique, "value 1");
             cache.Add("key2" + unique, "value 2");
 
-            var keys = new BaseCacheManager<string>(cfg).Keys().Where(k => k.EndsWith(unique)).OrderBy(k => k).ToArray();
+            var keys = cache.Keys().Where(k => k.EndsWith(unique)).OrderBy(k => k).ToArray();
 
             Assert.Equal(new string[] { "key1" + unique, "key2" + unique }, keys);
         }
@@ -1448,35 +1427,15 @@ namespace CacheManager.Tests
         [Fact]
         public void Redis_GetRegionKeys()
         {
-            var testLogger = new TestLogger();
-            var cfg = ConfigurationBuilder.BuildConfiguration(settings =>
-            {
-                settings
-                    .WithRedisBackplane("redis.config")
-                    .WithLogging(typeof(TestLoggerFactory), testLogger)
-                    .WithJsonSerializer()
-                    .WithRedisCacheHandle("redis.config", true)
-                    .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(5))
-                    .And
-                    .WithRedisConfiguration("redis.config", config =>
-                    {
-                        config
-                            .WithConnectionTimeout(10)
-                            .WithAllowAdmin()
-                            .WithDatabase(7)
-                            .WithPassword("mysupersecret")
-                            .WithSsl()
-                            ;
-                    });
-            });
+            var cache = TestManagers.CreateRedisCache();
 
             var unique = ":--" + DateTime.Now.ToString("o"); // so tests do not conflict
-            var cache = new BaseCacheManager<string>(cfg);
+
             cache.Add("key1" + unique, "value 1", "region 1");
             cache.Add("key2" + unique, "value 2", "region 1");
             cache.Add("key2" + unique, "value 2", "region 2");
 
-            var keys = new BaseCacheManager<string>(cfg).Keys("*", "region 1").Where(k => k.EndsWith(unique)).OrderBy(k => k).ToArray();
+            var keys =  cache.Keys("*", "region 1").Where(k => k.EndsWith(unique)).OrderBy(k => k).ToArray();
 
             Assert.Equal(new string[] { "key1" + unique, "key2" + unique }, keys);
         }
@@ -1485,72 +1444,32 @@ namespace CacheManager.Tests
         [Fact]
         public void Redis_Keys_that_match_single_character_pattern()
         {
-            var testLogger = new TestLogger();
-            var cfg = ConfigurationBuilder.BuildConfiguration(settings =>
-            {
-                settings
-                    .WithRedisBackplane("redis.config")
-                    .WithLogging(typeof(TestLoggerFactory), testLogger)
-                    .WithJsonSerializer()
-                    .WithRedisCacheHandle("redis.config", true)
-                    .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(5))
-                    .And
-                    .WithRedisConfiguration("redis.config", config =>
-                    {
-                        config
-                            .WithConnectionTimeout(10)
-                            .WithAllowAdmin()
-                            .WithDatabase(7)
-                            .WithPassword("mysupersecret")
-                            .WithSsl()
-                            ;
-                    });
-            });
+            var cache = TestManagers.CreateRedisCache();
 
             var unique = ":--" + DateTime.Now.ToString("o"); // so tests do not conflict
-            var cache = new BaseCacheManager<string>(cfg);
+
             cache.Add("key1" + unique, "value 1");
             cache.Add("key 2" + unique, "value 2");
             cache.Add("key 3" + unique, "value 3");
             cache.Add("key 10" + unique, "value 3");
 
-            var keys = new BaseCacheManager<string>(cfg).Keys("key ?" + unique).Where(k => k.EndsWith(unique)).OrderBy(k => k).ToArray();
+            var keys = cache.Keys("key ?" + unique).Where(k => k.EndsWith(unique)).OrderBy(k => k).ToArray();
 
             Assert.Equal(new string[] { "key 2" + unique, "key 3" + unique }, keys);
         }
         [Fact]
         public void Redis_Keys_that_match_multiple_character_pattern()
         {
-            var testLogger = new TestLogger();
-            var cfg = ConfigurationBuilder.BuildConfiguration(settings =>
-            {
-                settings
-                    .WithRedisBackplane("redis.config")
-                    .WithLogging(typeof(TestLoggerFactory), testLogger)
-                    .WithJsonSerializer()
-                    .WithRedisCacheHandle("redis.config", true)
-                    .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(5))
-                    .And
-                    .WithRedisConfiguration("redis.config", config =>
-                    {
-                        config
-                            .WithConnectionTimeout(10)
-                            .WithAllowAdmin()
-                            .WithDatabase(7)
-                            .WithPassword("mysupersecret")
-                            .WithSsl()
-                            ;
-                    });
-            });
+            var cache = TestManagers.CreateRedisCache();
 
             var unique = ":--" + DateTime.Now.ToString("o"); // so tests do not conflict
-            var cache = new BaseCacheManager<string>(cfg);
+
             cache.Add("key1" + unique, "value 1");
             cache.Add("key 2" + unique, "value 2");
             cache.Add("key 3" + unique, "value 3");
             cache.Add("key 10" + unique, "value 3");
 
-            var keys = new BaseCacheManager<string>(cfg).Keys("key *").Where(k => k.EndsWith(unique)).OrderBy(k => k).ToArray();
+            var keys = cache.Keys("key *").Where(k => k.EndsWith(unique)).OrderBy(k => k).ToArray();
 
             Assert.Equal(new string[] { "key 10" + unique, "key 2" + unique, "key 3" + unique }, keys);
         }
