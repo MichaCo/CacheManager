@@ -86,6 +86,7 @@ namespace CacheManager.Events.Tests
 
             int.TryParse(NumberOfJobs.Value(), out int concurrentJobs);
 
+            Console.WriteLine($"Displaying event counter for cache(s): {string.Join(", ", handlings.Select(p => p.Cache.Name))}; showing [local][remote] events.");
             try
             {
                 var reportTask = Task.Run(async () =>
@@ -94,7 +95,12 @@ namespace CacheManager.Events.Tests
                     {
                         await Task.Delay(100);
 
-                        spinner.Message = string.Join(" ", GetStatus(handlings));
+                        spinner.Message = "";
+                        foreach (var h in handlings)
+                        {
+                            spinner.Message += h.Cache.Name + " " + string.Join(" ", GetStatus(new[] { h }));
+                        }
+                        //spinner.Message = string.Join(" ", GetStatus(handlings));
 
                         if (source.IsCancellationRequested)
                         {
@@ -137,7 +143,7 @@ namespace CacheManager.Events.Tests
             }
         }
 
-        private static IEnumerable<string> GetStatus<TCacheValue>(EventCounter<TCacheValue>[] handlings)
+        private static IEnumerable<string> GetStatus<TCacheValue>(EventCounter<TCacheValue>[] handlings, bool printEmpty = false)
         {
             foreach (var handling in handlings)
             {
@@ -146,7 +152,10 @@ namespace CacheManager.Events.Tests
 
                 foreach (var kv in status)
                 {
-                    report.Append($"{kv.Key}:{string.Join(":", kv.Value)} ");
+                    if (printEmpty || kv.Value.Any(p => p > 0))
+                    {
+                        report.Append($"{kv.Key}:[{string.Join("][", kv.Value)}] ");
+                    }
                 }
 
                 //Console.WriteLine("Expected: " + report.ToString());

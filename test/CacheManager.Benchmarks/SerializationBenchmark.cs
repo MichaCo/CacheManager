@@ -18,7 +18,6 @@ using Newtonsoft.Json;
 
 namespace CacheManager.Benchmarks
 {
-    [Config(typeof(CacheManagerBenchConfig))]
     public class SerializationBenchmark
     {
         private int _iterations = 1000;
@@ -66,14 +65,14 @@ namespace CacheManager.Benchmarks
 
             _payload = new Queue<CacheItem<TestPoco>>(items);
         }
-        
+
         private void ExecRun(Action<CacheItem<TestPoco>> action)
         {
             var item = _payload.Dequeue();
             action(item);
             _payload.Enqueue(item);
         }
-        
+
         [Benchmark()]
         public void BinarySerializer()
         {

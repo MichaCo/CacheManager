@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<meta charset='utf-8' />
+<title>BackplaneMessageBenchmarkMultiple</title>
+
+<style type="text/css">
+	table { border-collapse: collapse; display: block; width: 100%; overflow: auto; }
+	td, th { padding: 6px 13px; border: 1px solid #ddd; }
+	tr { background-color: #fff; border-top: 1px solid #ccc; }
+	tr:nth-child(even) { background: #f8f8f8; }
+</style>
+</head>
+<body>
+<pre><code>
+BenchmarkDotNet=v0.10.8, OS=Windows 10 Redstone 2 (10.0.15063)
+Processor=Intel Core i7-6700 CPU 3.40GHz (Skylake), ProcessorCount=8
+Frequency=3328125 Hz, Resolution=300.4695 ns, Timer=TSC
+  [Host]     : Clr 4.0.30319.42000, 64bit RyuJIT-v4.7.2098.0
+  Job-VUBPRE : Clr 4.0.30319.42000, 64bit RyuJIT-v4.7.2098.0
+</code></pre>
+<pre><code>Runtime=Clr  LaunchCount=1  TargetCount=10  
+WarmupCount=4  
+</code></pre>
+
+<table>
+<thead><tr><th>   Method</th><th>Mean</th><th>Error</th><th>StdDev</th><th>Median</th><th>Op/s</th><th>Rank</th><th>Gen 0</th><th>Allocated</th>
+</tr>
+</thead><tbody><tr><td>SerializeMany</td><td>5.650 us</td><td>0.1873 us</td><td>0.1239 us</td><td>5.626 us</td><td>177,004.2</td><td>1</td><td>2.3804</td><td>9.78 KB</td>
+</tr><tr><td>DeserializeMany</td><td>7.132 us</td><td>0.3477 us</td><td>0.2300 us</td><td>7.115 us</td><td>140,203.9</td><td>2</td><td>1.7548</td><td>7.22 KB</td>
+</tr></tbody></table>
+</body>
+</html>

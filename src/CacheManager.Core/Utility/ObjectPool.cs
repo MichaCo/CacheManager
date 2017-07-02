@@ -45,7 +45,7 @@ namespace CacheManager.Core.Utility
                 throw new ArgumentNullException(nameof(policy));
             }
 
-            if (maxItems == null || maxItems == 0)
+            if (maxItems == null || maxItems <= 0)
             {
                 maxItems = Environment.ProcessorCount * 2;
             }

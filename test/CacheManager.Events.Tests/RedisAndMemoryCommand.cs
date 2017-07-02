@@ -8,10 +8,53 @@ using StackExchange.Redis;
 
 namespace CacheManager.Events.Tests
 {
+    public class RedisAndMemoryNoMessagingCommand : RedisAndMemoryCommand
+    {
+        public RedisAndMemoryNoMessagingCommand(CommandLineApplication app, ILoggerFactory loggerFactory) : base(app, loggerFactory)
+        {
+        }
+
+        protected override void Configure()
+        {
+            base.Configure();
+
+            _multiplexer = ConnectionMultiplexer.Connect("127.0.0.1,allowAdmin=true");
+            _configuration = new ConfigurationBuilder()
+                .WithMicrosoftLogging(LoggerFactory)
+                .WithMicrosoftMemoryCacheHandle("in-memory")
+                .And
+                .WithJsonSerializer()
+                .WithRedisConfiguration("redisConfig", _multiplexer, enableKeyspaceNotifications: false)
+                .WithRedisCacheHandle("redisConfig")
+                .Build();
+        }
+    }
+
+    public class RedisCommand : RedisAndMemoryCommand
+    {
+        public RedisCommand(CommandLineApplication app, ILoggerFactory loggerFactory) : base(app, loggerFactory)
+        {
+        }
+
+        protected override void Configure()
+        {
+            base.Configure();
+
+            _multiplexer = ConnectionMultiplexer.Connect("127.0.0.1,allowAdmin=true");
+            _configuration = new ConfigurationBuilder()
+                .WithMicrosoftLogging(LoggerFactory)
+                .WithRedisBackplane("redisConfig")
+                .WithJsonSerializer()
+                .WithRedisConfiguration("redisConfig", _multiplexer, enableKeyspaceNotifications: true)
+                .WithRedisCacheHandle("redisConfig")
+                .Build();
+        }
+    }
+
     public class RedisAndMemoryCommand : EventCommand
     {
-        private ICacheManagerConfiguration _configuration;
-        private ConnectionMultiplexer _multiplexer;
+        protected ICacheManagerConfiguration _configuration;
+        protected ConnectionMultiplexer _multiplexer;
 
         public RedisAndMemoryCommand(CommandLineApplication app, ILoggerFactory loggerFactory) : base(app, loggerFactory)
         {
@@ -21,7 +64,7 @@ namespace CacheManager.Events.Tests
         {
             base.Configure();
 
-            _multiplexer = ConnectionMultiplexer.Connect("localhost,allowAdmin=true");
+            _multiplexer = ConnectionMultiplexer.Connect("127.0.0.1,allowAdmin=true");
             _configuration = new ConfigurationBuilder()
                 .WithMicrosoftLogging(LoggerFactory)
                 .WithMicrosoftMemoryCacheHandle("in-memory")
@@ -46,86 +89,13 @@ namespace CacheManager.Events.Tests
                         var rndNumber = rnd.Next(42, 420);
                         var key = Guid.NewGuid().ToString();
 
-                        bool didRemove = false;
-                        bool didUpdate = false;
-                        bool removeTriggeredA = false;
-                        bool updateTriggeredA = false;
-                        bool removeTriggeredB = false;
-                        bool updateTriggeredB = false;
+                        cacheA.Add(key, rndNumber);
 
-                        void OnUpdate(object sender, CacheActionEventArgs args)
-                        {
-                            if (args.Key.Equals(key))
-                            {
-                                if (!didUpdate)
-                                {
-                                    Console.WriteLine("Key has been updated without me calling it");
-                                }
-                                else if (sender.Equals(cacheA))
-                                {
-                                    updateTriggeredA = true;
-                                }
-                                else if (sender.Equals(cacheB))
-                                {
-                                    updateTriggeredB = true;
-                                }
-                            }
-                        }
-
-                        void OnRemove(object sender, CacheActionEventArgs args)
-                        {
-                            if (args.Key.Equals(key))
-                            {
-                                if (!didRemove)
-                                {
-                                    Console.WriteLine("Key has been removed without me removing it");
-                                }
-                                else if (sender.Equals(cacheA))
-                                {
-                                    removeTriggeredA = true;
-                                }
-                                else if (sender.Equals(cacheB))
-                                {
-                                    removeTriggeredB = true;
-                                }
-                            }
-                        }
-
-                        cacheA.OnUpdate += OnUpdate;
-                        cacheA.OnRemove += OnRemove;
-                        cacheB.OnUpdate += OnUpdate;
-                        cacheB.OnRemove += OnRemove;
-
-                        while (!cacheA.Add(key, rndNumber))
-                        {
-                            key = Guid.NewGuid().ToString();
-                        }
-
-                        didUpdate = true;
                         cacheA.TryUpdate(key, (oldVal) => oldVal + 1, out int? newValue);
-                        //while (!updateTriggeredA || !updateTriggeredB)
-                        //{
-                        //    await Task.Delay(1);
-                        //}
 
-                        if (cacheA[key] != cacheB[key] && cacheA[key] != null)
-                        {
-                            // log warn?
-                        }
-
-                        await Task.Delay(0);
-                        didRemove = true;
                         _multiplexer.GetDatabase(0).KeyDelete(key, CommandFlags.HighPriority);
 
-                        //while (!removeTriggeredA || !removeTriggeredB)
-                        //{
-                        //    await Task.Delay(1);
-                        //}
-
-                        cacheA.OnUpdate -= OnUpdate;
-                        cacheA.OnRemove -= OnRemove;
-                        cacheB.OnUpdate -= OnUpdate;
-                        cacheB.OnRemove -= OnRemove;
+                        await Task.Delay(0);
                     });
             }
             catch (Exception ex)

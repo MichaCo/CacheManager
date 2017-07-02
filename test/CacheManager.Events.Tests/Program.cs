@@ -14,7 +14,9 @@ namespace CacheManager.Events.Tests
                   .AddConsole(LogLevel.Warning);
 
             var app = new CommandLineApplication(false);
+            app.Command("redis", (cmdApp) => new RedisCommand(cmdApp, loggerFactory), throwOnUnexpectedArg: true);
             app.Command("redisAndMemory", (cmdApp) => new RedisAndMemoryCommand(cmdApp, loggerFactory), throwOnUnexpectedArg: true);
+            app.Command("redisAndMemoryNoMessages", (cmdApp) => new RedisAndMemoryNoMessagingCommand(cmdApp, loggerFactory), throwOnUnexpectedArg: true);
             app.Command("memoryOnly", (cmdApp) => new MemoryOnlyCommand(cmdApp, loggerFactory), throwOnUnexpectedArg: true);
             app.HelpOption("-h|--help");
             if (args.Length == 0)

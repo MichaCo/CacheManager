@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<meta charset='utf-8' />
+<title>BackplaneMessageBenchmark</title>
+
+<style type="text/css">
+	table { border-collapse: collapse; display: block; width: 100%; overflow: auto; }
+	td, th { padding: 6px 13px; border: 1px solid #ddd; }
+	tr { background-color: #fff; border-top: 1px solid #ccc; }
+	tr:nth-child(even) { background: #f8f8f8; }
+</style>
+</head>
+<body>
+<pre><code>
+BenchmarkDotNet=v0.10.8, OS=Windows 10 Redstone 2 (10.0.15063)
+Processor=Intel Core i7-6700 CPU 3.40GHz (Skylake), ProcessorCount=8
+Frequency=3328125 Hz, Resolution=300.4695 ns, Timer=TSC
+  [Host]     : Clr 4.0.30319.42000, 64bit RyuJIT-v4.7.2098.0
+  Job-VUBPRE : Clr 4.0.30319.42000, 64bit RyuJIT-v4.7.2098.0
+</code></pre>
+<pre><code>Runtime=Clr  LaunchCount=1  TargetCount=10  
+WarmupCount=4  
+</code></pre>
+
+<table>
+<thead><tr><th>           Method</th><th>Mean</th><th>Error</th><th>StdDev</th><th>Median</th><th>  Op/s</th><th>Scaled</th><th>ScaledSD</th><th>Rank</th><th>Gen 0</th><th>Allocated</th>
+</tr>
+</thead><tbody><tr><td>  SerializeChange</td><td>194.57 ns</td><td>11.309 ns</td><td>7.480 ns</td><td>192.86 ns</td><td>5,139,629.5</td><td>1.00</td><td>0.00</td><td>4</td><td>0.1523</td><td>640 B</td>
+</tr><tr><td>DeserializeChange</td><td>241.69 ns</td><td>10.354 ns</td><td>6.848 ns</td><td>238.51 ns</td><td>4,137,485.5</td><td>1.24</td><td>0.06</td><td>5</td><td>0.0875</td><td>368 B</td>
+</tr><tr><td>SerializeChangeRegion</td><td>249.23 ns</td><td>7.700 ns</td><td>4.582 ns</td><td>249.67 ns</td><td>4,012,334.1</td><td>1.28</td><td>0.05</td><td>6</td><td>0.1826</td><td>768 B</td>
+</tr><tr><td>DeserializeChangeRegion</td><td>305.05 ns</td><td>8.953 ns</td><td>5.922 ns</td><td>306.25 ns</td><td>3,278,156.0</td><td>1.57</td><td>0.06</td><td>7</td><td>0.0987</td><td>416 B</td>
+</tr><tr><td>   SerializeClear</td><td>96.21 ns</td><td>4.459 ns</td><td>2.949 ns</td><td>95.74 ns</td><td>10,393,877.9</td><td>0.50</td><td>0.02</td><td>1</td><td>0.1162</td><td>488 B</td>
+</tr><tr><td> DeserializeClear</td><td>158.92 ns</td><td>7.949 ns</td><td>5.258 ns</td><td>159.25 ns</td><td>6,292,374.9</td><td>0.82</td><td>0.04</td><td>2</td><td>0.0741</td><td>312 B</td>
+</tr><tr><td>SerializeClearRegion</td><td>169.66 ns</td><td>7.262 ns</td><td>3.798 ns</td><td>169.60 ns</td><td>5,894,312.1</td><td>0.87</td><td>0.04</td><td>3</td><td>0.1581</td><td>664 B</td>
+</tr><tr><td>DeserializeClearRegion</td><td>240.22 ns</td><td>8.661 ns</td><td>5.154 ns</td><td>240.20 ns</td><td>4,162,849.7</td><td>1.24</td><td>0.05</td><td>5</td><td>0.0892</td><td>376 B</td>
+</tr><tr><td>  SerializeRemove</td><td>255.63 ns</td><td>15.071 ns</td><td>9.968 ns</td><td>258.50 ns</td><td>3,911,924.7</td><td>1.32</td><td>0.07</td><td>6</td><td>0.1826</td><td>768 B</td>
+</tr><tr><td>DeserializeRemove</td><td>300.98 ns</td><td>9.420 ns</td><td>5.606 ns</td><td>299.66 ns</td><td>3,322,483.1</td><td>1.55</td><td>0.06</td><td>7</td><td>0.0987</td><td>416 B</td>
+</tr></tbody></table>
+</body>
+</html>

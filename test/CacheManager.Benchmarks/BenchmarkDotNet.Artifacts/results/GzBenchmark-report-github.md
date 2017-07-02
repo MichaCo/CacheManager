@@ -10,7 +10,8 @@ Platform=X64  LaunchCount=2  TargetCount=15
 WarmupCount=10  
 
 ```
-       Method |      Mean |    StdDev | Scaled | Scaled-StdDev |   Gen 0 | Allocated |
+
+Method |      Mean |    StdDev | Scaled | Scaled-StdDev |   Gen 0 | Allocated |
 ------------- |---------- |---------- |------- |-------------- |-------- |---------- |
         Naive | 1.3792 ms | 0.0211 ms |   1.00 |          0.00 | 29.6875 | 301.06 kB |
        Manuel | 1.3892 ms | 0.0465 ms |   1.01 |          0.04 |  5.4688 | 191.09 kB |

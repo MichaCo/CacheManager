@@ -6,7 +6,6 @@ using BenchmarkDotNet.Attributes;
 
 namespace CacheManager.Benchmarks
 {
-    [Config(typeof(CacheManagerBenchConfig))]
     public class PlainDictionaryUpdateBenchmark
     {
         private const int Threads = 6;
@@ -59,7 +58,7 @@ namespace CacheManager.Benchmarks
 
                 success = _dictionary.TryUpdate("key", updateFactory(value), value);
             } while (!success);
-            
+
             return value;
         }
 

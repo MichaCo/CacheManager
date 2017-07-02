@@ -7,7 +7,6 @@ using Enyim.Caching.Configuration;
 
 namespace CacheManager.Benchmarks
 {
-    [Config(typeof(CacheManagerBenchConfig))]
     public abstract class BaseCacheBenchmark
     {
         private static ICacheManagerConfiguration BaseConfig

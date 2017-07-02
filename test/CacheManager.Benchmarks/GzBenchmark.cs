@@ -9,7 +9,6 @@ using CacheManager.Serialization.Json;
 
 namespace CacheManager.Benchmarks
 {
-    [Config(typeof(CacheManagerBenchConfig))]
     public class GzBenchmark
     {
         private static ArrayPool<byte> _pool = ArrayPool<byte>.Create();

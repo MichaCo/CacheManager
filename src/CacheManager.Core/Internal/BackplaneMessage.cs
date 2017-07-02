@@ -1,5 +1,6 @@
 ﻿using System;
-using System.Globalization;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using static CacheManager.Core.Internal.BackplaneAction;
 using static CacheManager.Core.Utility.Guard;
@@ -9,7 +10,7 @@ namespace CacheManager.Core.Internal
     /// <summary>
     /// Defines the possible actions of the backplane message.
     /// </summary>
-    public enum BackplaneAction
+    public enum BackplaneAction : byte
     {
         /// <summary>
         /// Default value is invalid to ensure we are not getting wrong results.
@@ -41,7 +42,7 @@ namespace CacheManager.Core.Internal
     /// <summary>
     /// The enum defines the actual operation used to change the value in the cache.
     /// </summary>
-    public enum CacheItemChangedEventAction
+    public enum CacheItemChangedEventAction : byte
     {
         /// <summary>
         /// Default value is invalid to ensure we are not getting wrong results.
@@ -69,15 +70,15 @@ namespace CacheManager.Core.Internal
     /// </summary>
     public sealed class BackplaneMessage
     {
-        private BackplaneMessage(string owner, BackplaneAction action)
+        private BackplaneMessage(byte[] owner, BackplaneAction action)
         {
-            NotNullOrWhiteSpace(owner, nameof(owner));
+            NotNull(owner, nameof(owner));
 
             OwnerIdentity = owner;
             Action = action;
         }
 
-        private BackplaneMessage(string owner, BackplaneAction action, string key)
+        private BackplaneMessage(byte[] owner, BackplaneAction action, string key)
             : this(owner, action)
         {
             NotNullOrWhiteSpace(key, nameof(key));
@@ -85,7 +86,7 @@ namespace CacheManager.Core.Internal
             Key = key;
         }
 
-        private BackplaneMessage(string owner, BackplaneAction action, string key, string region)
+        private BackplaneMessage(byte[] owner, BackplaneAction action, string key, string region)
             : this(owner, action, key)
         {
             NotNullOrWhiteSpace(region, nameof(region));
@@ -93,13 +94,13 @@ namespace CacheManager.Core.Internal
             Region = region;
         }
 
-        private BackplaneMessage(string owner, BackplaneAction action, string key, CacheItemChangedEventAction changeAction)
+        private BackplaneMessage(byte[] owner, BackplaneAction action, string key, CacheItemChangedEventAction changeAction)
             : this(owner, action, key)
         {
             ChangeAction = changeAction;
         }
 
-        private BackplaneMessage(string owner, BackplaneAction action, string key, string region, CacheItemChangedEventAction changeAction)
+        private BackplaneMessage(byte[] owner, BackplaneAction action, string key, string region, CacheItemChangedEventAction changeAction)
             : this(owner, action, key, region)
         {
             ChangeAction = changeAction;
@@ -109,110 +110,90 @@ namespace CacheManager.Core.Internal
         /// Gets or sets the action.
         /// </summary>
         /// <value>The action.</value>
-        public BackplaneAction Action { get; set; }
+        public BackplaneAction Action { get; }
 
         /// <summary>
         /// Gets or sets the key.
         /// </summary>
         /// <value>The key.</value>
-        public string Key { get; set; }
+        public string Key { get; }
 
         /// <summary>
         /// Gets or sets the owner identity.
         /// </summary>
         /// <value>The owner identity.</value>
-        public string OwnerIdentity { get; set; }
+        public byte[] OwnerIdentity { get; }
 
         /// <summary>
         /// Gets or sets the region.
         /// </summary>
         /// <value>The region.</value>
-        public string Region { get; set; }
+        public string Region { get; private set; }
 
         /// <summary>
         /// Gets or sets the cache action.
         /// </summary>
-        public CacheItemChangedEventAction ChangeAction { get; set; }
+        public CacheItemChangedEventAction ChangeAction { get; }
 
-        /// <summary>
-        /// Deserializes the <paramref name="message"/>.
-        /// </summary>
-        /// <param name="message">The message.</param>
-        /// <returns>
-        /// The new <see cref="BackplaneMessage" /> instance.
-        /// </returns>
-        /// <exception cref="System.ArgumentException">If <paramref name="message"/> is null.</exception>
-        /// <exception cref="System.InvalidOperationException">If the message is not valid.</exception>
-        public static BackplaneMessage Deserialize(string message)
+        /// <inheritdoc />
+        public override string ToString()
         {
-            NotNullOrWhiteSpace(message, nameof(message));
-
-            var tokens = message.Split(new[] { ":" }, StringSplitOptions.RemoveEmptyEntries);
-
-            if (tokens.Length < 2)
+            switch (Action)
             {
-                throw new InvalidOperationException("Received an invalid message.");
+                case Changed:
+                    return $"{Action} {Region}:{Key} {ChangeAction}";
+
+                case Removed:
+                    return $"{Action} {Region}:{Key}";
+
+                case ClearRegion:
+                    return $"{Action} {Region}";
+
+                case Clear:
+                    return $"{Action}";
             }
 
-            var ident = tokens[0];
-            var action = (BackplaneAction)int.Parse(tokens[1], CultureInfo.InvariantCulture);
+            return string.Empty;
+        }
 
-            if (action == Clear)
+        /// <inheritdoc />
+        public override bool Equals(object obj)
+        {
+            if (obj == null)
             {
-                return new BackplaneMessage(ident, Clear);
-            }
-            else if (action == ClearRegion)
-            {
-                return new BackplaneMessage(ident, ClearRegion) { Region = Decode(tokens[2]) };
-            }
-            else if (action == Removed)
-            {
-                if (tokens.Length < 3)
-                {
-                    throw new InvalidOperationException("Remove message does not contain valid data.");
-                }
-
-                if (tokens.Length == 3)
-                {
-                    return new BackplaneMessage(ident, Removed, Decode(tokens[2]));
-                }
-
-                return new BackplaneMessage(ident, Removed, Decode(tokens[2]), Decode(tokens[3]));
+                return false;
             }
 
-            if (tokens.Length < 4)
+            if (object.ReferenceEquals(obj, this))
             {
-                throw new InvalidOperationException("Change message does not contain valid data.");
+                return true;
             }
 
-            var cacheActionVal = tokens[2];
-            var changeAction = CacheItemChangedEventAction.Invalid;
-            if (cacheActionVal.Equals("Put", StringComparison.OrdinalIgnoreCase))
+            var objCast = obj as BackplaneMessage;
+            if (objCast == null)
             {
-                changeAction = CacheItemChangedEventAction.Put;
+                return false;
             }
 
-            if (cacheActionVal.Equals("Add", StringComparison.OrdinalIgnoreCase))
-            {
-                changeAction = CacheItemChangedEventAction.Add;
-            }
+            return Action == objCast.Action
+                && Key == objCast.Key
+                && ChangeAction == objCast.ChangeAction
+                && Region == objCast.Region;
+        }
 
-            if (cacheActionVal.Equals("Update", StringComparison.OrdinalIgnoreCase))
+        /// <inheritdoc />
+        public override int GetHashCode()
+        {
+            unchecked
             {
-                changeAction = CacheItemChangedEventAction.Update;
-            }
+                var hash = 17;
 
-            if (changeAction == CacheItemChangedEventAction.Invalid)
-            {
-                throw new InvalidOperationException("Received message with invalid change action.");
+                hash = hash * 23 + Action.GetHashCode();
+                hash = hash * 23 + ChangeAction.GetHashCode();
+                hash = hash * 23 + (Region?.GetHashCode() ?? 17);
+                hash = hash * 23 + (Key?.GetHashCode() ?? 17);
+                return hash;
             }
-
-            if (tokens.Length == 4)
-            {
-                return new BackplaneMessage(ident, action, Decode(tokens[3]), changeAction);
-            }
-
-            return new BackplaneMessage(ident, action, Decode(tokens[3]), Decode(tokens[4]), changeAction);
         }
 
         /// <summary>
@@ -222,7 +203,7 @@ namespace CacheManager.Core.Internal
         /// <param name="key">The key.</param>
         /// <param name="changeAction">The cache change action.</param>
         /// <returns>The new <see cref="BackplaneMessage"/> instance.</returns>
-        public static BackplaneMessage ForChanged(string owner, string key, CacheItemChangedEventAction changeAction) =>
+        public static BackplaneMessage ForChanged(byte[] owner, string key, CacheItemChangedEventAction changeAction) =>
             new BackplaneMessage(owner, Changed, key, changeAction);
 
         /// <summary>
@@ -233,7 +214,7 @@ namespace CacheManager.Core.Internal
         /// <param name="region">The region.</param>
         /// <param name="changeAction">The cache change action.</param>
         /// <returns>The new <see cref="BackplaneMessage"/> instance.</returns>
-        public static BackplaneMessage ForChanged(string owner, string key, string region, CacheItemChangedEventAction changeAction) =>
+        public static BackplaneMessage ForChanged(byte[] owner, string key, string region, CacheItemChangedEventAction changeAction) =>
             new BackplaneMessage(owner, Changed, key, region, changeAction);
 
         /// <summary>
@@ -241,7 +222,7 @@ namespace CacheManager.Core.Internal
         /// </summary>
         /// <param name="owner">The owner.</param>
         /// <returns>The new <see cref="BackplaneMessage"/> instance.</returns>
-        public static BackplaneMessage ForClear(string owner) =>
+        public static BackplaneMessage ForClear(byte[] owner) =>
             new BackplaneMessage(owner, Clear);
 
         /// <summary>
@@ -251,7 +232,7 @@ namespace CacheManager.Core.Internal
         /// <param name="region">The region.</param>
         /// <returns>The new <see cref="BackplaneMessage"/> instance.</returns>
         /// <exception cref="System.ArgumentNullException">If region is null.</exception>
-        public static BackplaneMessage ForClearRegion(string owner, string region)
+        public static BackplaneMessage ForClearRegion(byte[] owner, string region)
         {
             NotNullOrWhiteSpace(region, nameof(region));
 
@@ -267,7 +248,7 @@ namespace CacheManager.Core.Internal
         /// <param name="owner">The owner.</param>
         /// <param name="key">The key.</param>
         /// <returns>The new <see cref="BackplaneMessage"/> instance.</returns>
-        public static BackplaneMessage ForRemoved(string owner, string key) =>
+        public static BackplaneMessage ForRemoved(byte[] owner, string key) =>
             new BackplaneMessage(owner, Removed, key);
 
         /// <summary>
@@ -277,48 +258,283 @@ namespace CacheManager.Core.Internal
         /// <param name="key">The key.</param>
         /// <param name="region">The region.</param>
         /// <returns>The new <see cref="BackplaneMessage"/> instance.</returns>
-        public static BackplaneMessage ForRemoved(string owner, string key, string region) =>
+        public static BackplaneMessage ForRemoved(byte[] owner, string key, string region) =>
             new BackplaneMessage(owner, Removed, key, region);
 
         /// <summary>
         /// Serializes this instance.
         /// </summary>
         /// <returns>The string representing this message.</returns>
-        public string Serialize()
+        public static byte[] Serialize(params BackplaneMessage[] messages)
         {
-            var action = (int)Action;
-            if (Action == Clear)
+            NotNullOrEmpty(messages, nameof(messages));
+
+            // calc size
+            var size = 0;
+            for (var i = 0; i < messages.Length; i++)
             {
-                return OwnerIdentity + ":" + action;
+                size += MessageWriter.GetEstimatedSize(messages[i], i != 0);
             }
-            else if (Action == ClearRegion)
+
+            var writer = new MessageWriter(size);
+
+            for (var i = 0; i < messages.Length; i++)
             {
-                return OwnerIdentity + ":" + action + ":" + Encode(Region);
+                SerializeMessage(writer, messages[i], i != 0);
             }
-            else if (Action == Removed)
+
+            return writer.GetBytes();
+        }
+
+        private static void SerializeMessage(MessageWriter writer, BackplaneMessage message, bool skipOwner)
+        {
+            if (!skipOwner)
             {
-                if (string.IsNullOrWhiteSpace(Region))
+                writer.WriteInt(message.OwnerIdentity.Length);
+                writer.WriteBytes(message.OwnerIdentity);
+            }
+
+            writer.WriteByte((byte)message.Action);
+            switch (message.Action)
+            {
+                case Changed:
+                    writer.WriteByte((byte)message.ChangeAction);
+                    if (!string.IsNullOrEmpty(message.Region))
+                    {
+                        writer.WriteByte(2);
+                        writer.WriteString(message.Region);
+                    }
+                    else
+                    {
+                        writer.WriteByte(1);
+                    }
+                    writer.WriteString(message.Key);
+
+                    break;
+
+                case Removed:
+                    if (!string.IsNullOrEmpty(message.Region))
+                    {
+                        writer.WriteByte(2);
+                        writer.WriteString(message.Region);
+                    }
+                    else
+                    {
+                        writer.WriteByte(1);
+                    }
+                    writer.WriteString(message.Key);
+
+                    break;
+
+                case ClearRegion:
+                    writer.WriteString(message.Region);
+                    break;
+
+                case Clear:
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// Deserializes the <paramref name="message"/>.
+        /// </summary>
+        /// <param name="message">The message.</param>
+        /// <param name="skipOwner">If specified, if the first received message has the same owner, all messages will be skipped.</param>
+        /// <returns>
+        /// The new <see cref="BackplaneMessage" /> instance.
+        /// </returns>
+        /// <exception cref="System.ArgumentException">If <paramref name="message"/> is null.</exception>
+        /// <exception cref="System.ArgumentException">If the message is not valid.</exception>
+        public static IEnumerable<BackplaneMessage> Deserialize(byte[] message, byte[] skipOwner = null)
+        {
+            NotNull(message, nameof(message));
+            if (message.Length < 5)
+            {
+                throw new ArgumentException("Invalid message");
+            }
+            var reader = new MessageReader(message);
+
+            var first = DeserializeMessage(reader, null);
+
+            if (skipOwner != null)
+            {
+                if (first.OwnerIdentity.SequenceEqual(skipOwner))
                 {
-                    return OwnerIdentity + ":" + action + ":" + ":" + Encode(Key);
+                    yield break;
+                }
+            }
+
+            yield return first;
+
+            while (reader.HasMore())
+            {
+                yield return DeserializeMessage(reader, first.OwnerIdentity);
+            }
+        }
+
+        private static BackplaneMessage DeserializeMessage(MessageReader reader, byte[] existingOwner)
+        {
+            var owner = existingOwner ?? reader.ReadBytes(reader.ReadInt());
+            var action = (BackplaneAction)reader.ReadByte();
+
+            switch (action)
+            {
+                case Changed:
+                    var changeAction = (CacheItemChangedEventAction)reader.ReadByte();
+                    if (reader.ReadByte() == 2)
+                    {
+                        var r = reader.ReadString();
+                        return ForChanged(owner, reader.ReadString(), r, changeAction);
+                    }
+
+                    return ForChanged(owner, reader.ReadString(), changeAction);
+
+                case Removed:
+                    if (reader.ReadByte() == 2)
+                    {
+                        var r = reader.ReadString();
+                        return ForRemoved(owner, reader.ReadString(), r);
+                    }
+
+                    return ForRemoved(owner, reader.ReadString());
+
+                case ClearRegion:
+                    return ForClearRegion(owner, reader.ReadString());
+
+                case Clear:
+                    return ForClear(owner);
+
+                default:
+                    throw new ArgumentException("Invalid message type");
+            }
+        }
+
+        private class MessageWriter
+        {
+            private static Encoding _encoding = Encoding.UTF8;
+            private readonly byte[] _buffer;
+            private int _position = 0;
+
+            public MessageWriter(int size)
+            {
+                _buffer = new byte[size];
+            }
+
+            public byte[] GetBytes()
+            {
+                var result = new byte[_position];
+                Buffer.BlockCopy(_buffer, 0, result, 0, _position);
+                return result;
+            }
+
+            public void WriteInt(int number)
+            {
+                var bytes = BitConverter.GetBytes(number);
+                WriteBytes(bytes);
+            }
+
+            public void WriteString(string value)
+            {
+                var len = _encoding.GetByteCount(value);
+                WriteInt(len);
+
+                _encoding.GetBytes(value, 0, value.Length, _buffer, _position);
+                _position += len;
+            }
+
+            public void WriteBytes(byte[] bytes)
+            {
+                Buffer.BlockCopy(bytes, 0, _buffer, _position, bytes.Length);
+                _position += bytes.Length;
+            }
+
+            public void WriteByte(byte b)
+            {
+                _buffer[_position] = b;
+                _position++;
+            }
+
+            public static int GetEstimatedSize(BackplaneMessage msg, bool skipOwner)
+            {
+                // this is only a rough size multiplied by two for getting a roughly sized buffer
+                int size = 2; // two enums
+                if (!skipOwner)
+                {
+                    size += msg.OwnerIdentity.Length * 4;
                 }
 
-                return OwnerIdentity + ":" + action + ":" + Encode(Key) + ":" + Encode(Region);
+                size += msg.Key?.Length * 4 ?? 0;
+                size += msg.Region?.Length * 4 ?? 0;
+                return size * 2;
             }
-            else if (string.IsNullOrWhiteSpace(Region))
-            {
-                return OwnerIdentity + ":" + action + ":" + ChangeAction + ":" + Encode(Key);
-            }
-
-            return OwnerIdentity + ":" + action + ":" + ChangeAction + ":" + Encode(Key) + ":" + Encode(Region);
         }
 
-        private static string Decode(string value)
+        private class MessageReader
         {
-            var bytes = Convert.FromBase64String(value);
-            return Encoding.UTF8.GetString(bytes, 0, bytes.Length);
-        }
+            private static Encoding _encoding = Encoding.UTF8;
+            private readonly byte[] _data;
+            private int _position = 0;
 
-        private static string Encode(string value) =>
-            Convert.ToBase64String(Encoding.UTF8.GetBytes(value));
+            public MessageReader(byte[] bytes)
+            {
+                _data = bytes;
+            }
+
+            public bool HasMore()
+            {
+                return _data.Length > _position;
+            }
+
+            public int ReadInt()
+            {
+                var pos = (_position += 4);
+                if (pos > _data.Length)
+                {
+                    throw new IndexOutOfRangeException("Cannot read INT32, no additional bytes available.");
+                }
+
+                return BitConverter.ToInt32(_data, pos - 4);
+            }
+
+            public byte ReadByte()
+            {
+                if (_position >= _data.Length)
+                {
+                    throw new IndexOutOfRangeException("Cannot read byte, no additional bytes available.");
+                }
+
+                return _data[_position++];
+            }
+
+            public byte[] ReadBytes(int length)
+            {
+                var result = new byte[length];
+                var pos = (_position += length);
+                if (pos > _data.Length)
+                {
+                    throw new IndexOutOfRangeException("Cannot read bytes, no additional bytes available.");
+                }
+
+                Buffer.BlockCopy(_data, pos - length, result, 0, length);
+                return result;
+            }
+
+            public string ReadString()
+            {
+                var len = ReadInt();
+                if (len <= 0)
+                {
+                    throw new IndexOutOfRangeException("Invalid length for string");
+                }
+
+                var pos = (_position += len);
+                if (pos > _data.Length)
+                {
+                    throw new IndexOutOfRangeException("Cannot read string, no additional bytes available.");
+                }
+
+                return _encoding.GetString(_data, pos - len, len);
+            }
+        }
     }
 }

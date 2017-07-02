@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Reflection;
+using BenchmarkDotNet.Columns;
 using BenchmarkDotNet.Configs;
 using BenchmarkDotNet.Environments;
 using BenchmarkDotNet.Jobs;
@@ -21,11 +22,40 @@ namespace CacheManager.Benchmarks
     {
         public static void Main(string[] args)
         {
+            //new BackplaneMessageBenchmark().DeserializeChange();
+            new BackplaneMessageBenchmarkMultiple().SerializeMany();
+            new BackplaneMessageBenchmarkMultiple().DeserializeMany();
+
             do
             {
+                var config = ManualConfig.Create(DefaultConfig.Instance)
+                    //.With(exporters: BenchmarkDotNet.Exporters.DefaultExporters.)
+                    .With(BenchmarkDotNet.Analysers.EnvironmentAnalyser.Default)
+                    .With(BenchmarkDotNet.Exporters.MarkdownExporter.GitHub)
+                    .With(BenchmarkDotNet.Diagnosers.MemoryDiagnoser.Default)
+                    .With(StatisticColumn.Mean)
+                    .With(StatisticColumn.Median)
+                    //.With(StatisticColumn.Min)
+                    //.With(StatisticColumn.Max)
+                    .With(StatisticColumn.StdDev)
+                    .With(StatisticColumn.OperationsPerSecond)
+                    .With(BaselineScaledColumn.Scaled)
+                    //.With(BaselineScaledColumn.ScaledStdDev)
+                    .With(RankColumn.Arabic)
+
+                    .With(Job.Clr
+                        .WithTargetCount(10)
+                        .WithWarmupCount(4)
+                        .WithLaunchCount(1));
+
+                //.With(Job.Clr
+                //    .WithTargetCount(10)
+                //    .WithWarmupCount(5)
+                //    .WithLaunchCount(1));
+
                 BenchmarkSwitcher
                     .FromAssembly(typeof(Program).GetTypeInfo().Assembly)
-                    .Run(args);
+                    .Run(args, config);
 
                 Console.WriteLine("done!");
                 Console.WriteLine("Press escape to exit or any key to continue...");

@@ -5,7 +5,6 @@ using CacheManager.Core.Utility;
 
 namespace CacheManager.Benchmarks
 {
-    [Config(typeof(CacheManagerBenchConfig))]
     public class UnixTimestampBenchmark
     {
         [Benchmark(Baseline = true)]
@@ -21,7 +20,7 @@ namespace CacheManager.Benchmarks
         {
             return (long)(DateTime.UtcNow - _date1970).TotalMilliseconds;
         }
-        
+
         [Benchmark()]
         public long ManualCalcOptimized()
         {

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using CacheManager.Core;
@@ -27,13 +28,14 @@ namespace CacheManager.Redis
     public sealed class RedisCacheBackplane : CacheBackplane
     {
         private readonly string _channelName;
-        private readonly string _identifier;
+        private readonly byte[] _identifier;
         private readonly ILogger _logger;
         private readonly RedisConnectionManager _connection;
-        private HashSet<string> _messages = new HashSet<string>();
+        private HashSet<BackplaneMessage> _messages = new HashSet<BackplaneMessage>();
         private object _messageLock = new object();
         private int _skippedMessages = 0;
         private bool _sending = false;
+        private CancellationTokenSource _source = new CancellationTokenSource();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RedisCacheBackplane"/> class.
@@ -48,7 +50,7 @@ namespace CacheManager.Redis
 
             _logger = loggerFactory.CreateLogger(this);
             _channelName = configuration.BackplaneChannelName ?? "CacheManagerBackplane";
-            _identifier = Guid.NewGuid().ToString();
+            _identifier = Encoding.UTF8.GetBytes(Guid.NewGuid().ToString());
 
             var cfg = RedisConfigurations.GetConfiguration(ConfigurationKey);
             _connection = new RedisConnectionManager(
@@ -128,6 +130,7 @@ namespace CacheManager.Redis
             {
                 try
                 {
+                    _source.Cancel();
                     _connection.Subscriber.Unsubscribe(_channelName);
                 }
                 catch
@@ -138,15 +141,13 @@ namespace CacheManager.Redis
             base.Dispose(managed);
         }
 
-        private void Publish(string message)
+        private void Publish(byte[] message)
         {
             _connection.Subscriber.Publish(_channelName, message, CommandFlags.HighPriority);
         }
 
         private void PublishMessage(BackplaneMessage message)
         {
-            var msg = message.Serialize();
-
             lock (_messageLock)
             {
                 if (message.Action == BackplaneAction.Clear)
@@ -155,12 +156,12 @@ namespace CacheManager.Redis
                     _messages.Clear();
                 }
 
-                if (!_messages.Add(msg))
+                if (!_messages.Add(message))
                 {
                     Interlocked.Increment(ref _skippedMessages);
                     if (_logger.IsEnabled(LogLevel.Trace))
                     {
-                        _logger.LogTrace("Skipped duplicate message: {0}.", msg);
+                        _logger.LogTrace("Skipped duplicate message: {0}.", message);
                     }
                 }
 
@@ -188,12 +189,12 @@ namespace CacheManager.Redis
 #if !NET40
                     await Task.Delay(10).ConfigureAwait(false);
 #endif
-                    var msgs = string.Empty;
+                    byte[] msgs = null;
                     lock (_messageLock)
                     {
                         if (_messages != null && _messages.Count > 0)
                         {
-                            msgs = string.Join(",", _messages);
+                            msgs = BackplaneMessage.Serialize(_messages.ToArray());
 
                             if (_logger.IsEnabled(LogLevel.Debug))
                             {
@@ -207,7 +208,7 @@ namespace CacheManager.Redis
 
                         try
                         {
-                            if (msgs.Length > 0)
+                            if (msgs != null)
                             {
                                 Publish(msgs);
                                 Interlocked.Increment(ref SentChunks);
@@ -223,14 +224,14 @@ namespace CacheManager.Redis
 #if NET40
                 },
                 this,
-                CancellationToken.None,
+                _source.Token,
                 TaskCreationOptions.None,
                 TaskScheduler.Default)
                 .ConfigureAwait(false);
 #else
                 },
                 this,
-                CancellationToken.None,
+                _source.Token,
                 TaskCreationOptions.DenyChildAttach,
                 TaskScheduler.Default)
                 .ConfigureAwait(false);
@@ -243,27 +244,25 @@ namespace CacheManager.Redis
                 _channelName,
                 (channel, msg) =>
                 {
-                    var fullMessage = ((string)msg).Split(',')
-                        .Where(s => !s.StartsWith(_identifier, StringComparison.Ordinal))
-                        .ToArray();
+                    var messages = BackplaneMessage.Deserialize(msg, _identifier);
 
-                    if (fullMessage.Length == 0)
+                    if (!messages.Any())
                     {
                         // no messages for this instance
                         return;
                     }
 
-                    Interlocked.Add(ref MessagesReceived, fullMessage.Length);
+                    // now deserialize all of them (lazy enumerable)
+                    var fullMessages = messages.ToArray();
+                    Interlocked.Add(ref MessagesReceived, fullMessages.Length);
 
                     if (_logger.IsEnabled(LogLevel.Information))
                     {
-                        _logger.LogInfo("Backplane got notified with {0} new messages.", fullMessage.Length);
+                        _logger.LogInfo("Backplane got notified with {0} new messages.", fullMessages.Length);
                     }
 
-                    foreach (var messageStr in fullMessage)
+                    foreach (var message in fullMessages)
                     {
-                        var message = BackplaneMessage.Deserialize(messageStr);
-
                         switch (message.Action)
                         {
                             case BackplaneAction.Clear:
