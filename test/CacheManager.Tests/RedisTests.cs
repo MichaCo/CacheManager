@@ -706,6 +706,21 @@ namespace CacheManager.Tests
         }
 
         [Fact]
+        [Trait("category", "NotOnMono")]
+        public void Redis_Configurations_LoadWConnectionString_WithDefaultDb()
+        {
+            string fileName = TestConfigurationHelper.GetCfgFileName(@"/Configuration/configuration.valid.allFeatures.config");
+
+            RedisConfigurations.LoadConfiguration(fileName, RedisConfigurationSection.DefaultSectionName);
+            var cfg = RedisConfigurations.GetConfiguration("redisConnectionStringWithDefaultDb");
+            cfg.ConnectionString.ToLower().Should().Contain("127.0.0.1:6379");
+            cfg.ConnectionString.ToLower().Should().Contain("allowadmin=true");
+            cfg.ConnectionString.ToLower().Should().Contain("ssl=false");
+            cfg.Database.Should().Be(42);
+            cfg.StrictCompatibilityModeVersion.Should().Be("2.9");
+        }
+
+        [Fact]
         public void Redis_Configurations_LoadSection_InvalidSectionName()
         {
             Action act = () => RedisConfigurations.LoadConfiguration((string)null);
@@ -1125,6 +1140,31 @@ namespace CacheManager.Tests
             // assert
             handle.Should().NotBeNull();
             count.ShouldNotThrow();
+        }
+
+        [Fact]
+        [Trait("category", "Redis")]
+        public void Redis_LoadWithRedisBackplane_FromAppConfigConnectionStrings_WithDefaultDb()
+        {
+            // RedisConfigurations should load this from AppSettings from app.config
+            // arrange
+            string cacheName = "redisWithBackplaneAppConfigConnectionStringsWithDefaultDb";
+
+            // act
+            var cfg = ConfigurationBuilder.LoadConfiguration(cacheName);
+            var cache = CacheFactory.FromConfiguration<object>(cfg);
+            var redisConfig = RedisConfigurations.GetConfiguration("redisFromConnectionStringsWithDefaultDb");
+            var handle = cache.CacheHandles.First(p => p.Configuration.IsBackplaneSource) as RedisCacheHandle<object>;
+
+            // test running something on the redis handle, Count should be enough to test the connection
+            Action count = () => { var x = handle.Count; };
+
+            // assert
+            handle.Should().NotBeNull();
+            count.ShouldNotThrow();
+            redisConfig.Database.Should().Be(44);
+            redisConfig.AllowAdmin.Should().BeTrue();
+            redisConfig.ConnectionTimeout.Should().Be(11);
         }
 
 #endif

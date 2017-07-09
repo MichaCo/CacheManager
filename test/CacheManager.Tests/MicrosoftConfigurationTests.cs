@@ -1283,6 +1283,27 @@ namespace CacheManager.Tests
             redisConfig.Database.Should().Be(101);
         }
 
+        [Fact]
+        public void Configuration_Redis_ConnectionString_PrioOnDefaultDatabase()
+        {
+            var key = Guid.NewGuid().ToString();
+            var data = new Dictionary<string, string>
+            {
+                {"redis:1:connectionString", "localhost,allowAdmin=true,proxy=Twemproxy,defaultDatabase=23"},
+                {"redis:1:key", key},
+                {"redis:1:strictCompatibilityModeVersion", "2.5" },
+                {"redis:1:keyspaceNotificationsEnabled", "TRUE"}
+            };
+
+            GetConfiguration(data).LoadRedisConfigurations();
+            var redisConfig = RedisConfigurations.GetConfiguration(key);
+            redisConfig.Key.Should().Be(key);
+            redisConfig.AllowAdmin.Should().BeTrue();
+            redisConfig.StrictCompatibilityModeVersion.Should().Be("2.5");
+            redisConfig.TwemproxyEnabled.Should().BeTrue();
+            redisConfig.Database.Should().Be(23);
+        }
+
         private static IConfigurationRoot GetConfiguration(IDictionary<string, string> data)
         {
             var configurationBuilder = new Microsoft.Extensions.Configuration.ConfigurationBuilder();

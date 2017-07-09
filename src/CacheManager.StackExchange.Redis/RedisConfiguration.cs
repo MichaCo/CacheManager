@@ -111,12 +111,12 @@ namespace CacheManager.Redis
             string strictCompatibilityModeVersion = null)
         {
             Key = key;
-            ConnectionString = connectionString;
             Database = database;
             KeyspaceNotificationsEnabled = keyspaceNotificationsEnabled;
             StrictCompatibilityModeVersion = strictCompatibilityModeVersion;
+            ConnectionString = connectionString;
         }
-        
+
         private ConfigurationOptions CreateConfigurationOptions()
         {
             var configurationOptions = new ConfigurationOptions()
@@ -167,14 +167,15 @@ namespace CacheManager.Redis
         /// The key.
         /// </value>
         public string Key { get; set; }
-        
+
         /// <summary>
         /// Gets or sets the connection string.
         /// </summary>
         /// <value>
         /// The connection string.
         /// </value>
-        public string ConnectionString {
+        public string ConnectionString
+        {
             get => _connectionString;
             set
             {
@@ -186,6 +187,11 @@ namespace CacheManager.Redis
                 ConnectionTimeout = _configurationOptions.ConnectTimeout;
                 IsSsl = _configurationOptions.Ssl;
                 SslHost = _configurationOptions.SslHost;
+
+                // if default database is specified in the connection string, use that one, otherwise use explicit database setting.
+                // fixes #175
+                Database = _configurationOptions.DefaultDatabase ?? Database;
+
                 _connectionString = _configurationOptions.ToString();
             }
         }
