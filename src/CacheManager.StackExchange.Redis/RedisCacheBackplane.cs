@@ -31,6 +31,7 @@ namespace CacheManager.Redis
         private readonly byte[] _identifier;
         private readonly ILogger _logger;
         private readonly RedisConnectionManager _connection;
+        private readonly Timer _timer;
         private HashSet<BackplaneMessage> _messages = new HashSet<BackplaneMessage>();
         private object _messageLock = new object();
         private int _skippedMessages = 0;
@@ -58,6 +59,10 @@ namespace CacheManager.Redis
                 loggerFactory);
 
             RetryHelper.Retry(() => Subscribe(), configuration.RetryTimeout, configuration.MaxRetries, _logger);
+
+            // adding additional timer based send message invoke (shouldn't do anything if there are no messages,
+            // but in really rare race conditions, it might happen messages do not get send if SendMEssages only get invoked through "NotifyXyz"
+            _timer = new Timer(SendMessages, null, 1000, 1000);
         }
 
         /// <summary>
@@ -132,6 +137,7 @@ namespace CacheManager.Redis
                 {
                     _source.Cancel();
                     _connection.Subscriber.Unsubscribe(_channelName);
+                    _timer.Dispose();
                 }
                 catch
                 {
@@ -165,12 +171,12 @@ namespace CacheManager.Redis
                     }
                 }
 
-                SendMessages();
+                SendMessages(null);
             }
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "No other way")]
-        private void SendMessages()
+        private void SendMessages(object state)
         {
             if (_sending || _messages == null || _messages.Count == 0)
             {
