@@ -62,7 +62,7 @@ namespace CacheManager.Redis
 
             // adding additional timer based send message invoke (shouldn't do anything if there are no messages,
             // but in really rare race conditions, it might happen messages do not get send if SendMEssages only get invoked through "NotifyXyz"
-            _timer = new Timer(SendMessages, null, 1000, 1000);
+            _timer = new Timer(SendMessages, true, 1000, 1000);
         }
 
         /// <summary>
@@ -192,6 +192,10 @@ namespace CacheManager.Redis
                     }
 
                     _sending = true;
+                    if (state != null && state is bool boolState && boolState == true)
+                    {
+                        _logger.LogWarn($"Backplane is sending {_messages.Count} messages triggered by timer.");
+                    }
 #if !NET40
                     await Task.Delay(10).ConfigureAwait(false);
 #endif
