@@ -90,6 +90,9 @@ namespace CacheManager.MicrosoftCachingMemory
         }
 
         /// <inheritdoc/>
+        public override bool ImplementsKeys => false;
+
+        /// <inheritdoc/>
         protected override CacheItem<TCacheValue> GetCacheItemInternal(string key)
         {
             return GetCacheItemInternal(key, null);

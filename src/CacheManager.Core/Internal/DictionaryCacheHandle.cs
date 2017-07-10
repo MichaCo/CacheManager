@@ -85,6 +85,7 @@ namespace CacheManager.Core.Internal
             return _cache.ContainsKey(fullKey);
         }
 
+        public override bool ImplementsKeys => true;
         /// <inheritdoc />
         public override IEnumerable<string> FindKeys(string pattern)
         {

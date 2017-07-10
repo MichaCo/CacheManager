@@ -363,9 +363,6 @@ namespace CacheManager.Tests
             return true;
         }
 
-        public override IEnumerable<string> FindKeys(string pattern, string region)
-        {
-            return new string[0];
-        }
+        public override bool ImplementsKeys => false;
     }
 }

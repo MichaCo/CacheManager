@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using CacheManager.Core.Logging;
 using static CacheManager.Core.Utility.Guard;
 
@@ -234,6 +235,38 @@ namespace CacheManager.Core.Internal
         /// <c>true</c> if the key was not already added to the cache, <c>false</c> otherwise.
         /// </returns>
         protected abstract bool AddInternalPrepared(CacheItem<TCacheValue> item);
+
+        /// <summary>
+        /// Gets all keys that match the given pattern.
+        /// </summary>
+        /// <param name="pattern">A glob to match against keys.</param>
+        /// <param name="region">The cache region.</param>
+        /// <returns>The matching unique keys in the cache</returns>
+        public virtual IEnumerable<string> FindKeys(string pattern, string region)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets all keys that match the given pattern.
+        /// </summary>
+        /// <param name="pattern">A glob to match against keys.</param>
+        /// <returns>The matching unique keys in the cache</returns>
+        public virtual IEnumerable<string> FindKeys(string pattern)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets all keys
+        /// </summary>
+        /// <returns>The unique keys in the cache</returns>
+        public virtual IEnumerable<string> GetAllKeys()
+        {
+            throw new NotImplementedException();
+        }
+
+        public abstract bool ImplementsKeys { get; }
 
         /// <summary>
         /// Performs application-defined tasks associated with freeing, releasing, or resetting

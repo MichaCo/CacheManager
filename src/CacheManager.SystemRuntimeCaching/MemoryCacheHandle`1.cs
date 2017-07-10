@@ -72,6 +72,9 @@ namespace CacheManager.SystemRuntimeCaching
         /// <value>The count.</value>
         public override int Count => (int)_cache.GetCount();
 
+        /// <inheritdoc/>
+        public override bool ImplementsKeys => true;
+
         /// <inheritdoc />
         public override IEnumerable<string> FindKeys(string pattern, string requestedRegion)
         {

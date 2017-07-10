@@ -938,10 +938,7 @@ namespace CacheManager.Tests
                 throw new NotImplementedException();
             }
 
-            public override IEnumerable<string> FindKeys(string pattern, string region)
-            {
-                throw new NotImplementedException();
-            }
+            public override bool ImplementsKeys => false;
 
             protected override bool AddInternalPrepared(CacheItem<string> item)
             {

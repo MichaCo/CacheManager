@@ -268,9 +268,26 @@ return result";
             var fullKey = GetKey(key, region);
             return Retry(() => _connection.Database.KeyExists(fullKey));
         }
+        /// <inheritdoc/>
+        public override bool ImplementsKeys => false;
 
         /// <inheritdoc />
+        public override IEnumerable<string> FindKeys(string pattern)
+        {
+            return FindKeysInternal(pattern, null);
+        }
+        /// <inheritdoc />
         public override IEnumerable<string> FindKeys(string pattern, string region)
+        {
+            return FindKeysInternal(pattern, region);
+        }
+        /// <inheritdoc/>
+        public override IEnumerable<string> GetAllKeys()
+        {
+            return FindKeysInternal("*", null);
+        }
+        /// <inheritdoc />
+        private IEnumerable<string> FindKeysInternal(string pattern, string region)
         {
             var keyPattern = GetKey(pattern, region);
 

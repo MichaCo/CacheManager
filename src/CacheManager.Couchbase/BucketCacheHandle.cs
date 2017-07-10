@@ -143,12 +143,8 @@ namespace CacheManager.Couchbase
             return _bucketManager.Bucket.Exists(fullKey);
         }
 
-        /// <inheritdoc />
-        /// <exception cref="System.NotImplementedException">Not supported in this version.</exception>
-        public override IEnumerable<string> FindKeys(string pattern, string region)
-        {
-            throw new NotImplementedException();
-        }
+        /// <inheritdoc/>
+        public override bool ImplementsKeys => false;
 
         /// <summary>
         /// Adds a value to the cache.

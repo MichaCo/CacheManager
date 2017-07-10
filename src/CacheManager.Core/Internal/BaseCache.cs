@@ -409,26 +409,6 @@ namespace CacheManager.Core.Internal
             return RemoveInternal(key, region);
         }
 
-        /// <summary>
-        /// Gets all keys that match the given pattern.
-        /// </summary>
-        /// <param name="pattern">A glob to match against keys.</param>
-        /// <param name="region">The cache region.</param>
-        /// <returns>The matching unique keys in the cache</returns>
-        public abstract IEnumerable<string> FindKeys(string pattern, string region);
-
-        /// <summary>
-        /// Gets all keys that match the given pattern.
-        /// </summary>
-        /// <param name="pattern">A glob to match against keys.</param>
-        /// <returns>The matching unique keys in the cache</returns>
-        public abstract IEnumerable<string> FindKeys(string pattern);
-
-        /// <summary>
-        /// Gets all keys
-        /// </summary>
-        /// <returns>The unique keys in the cache</returns>
-        public abstract IEnumerable<string> GetAllKeys();
 
         /// <summary>
         /// Adds a value to the cache.

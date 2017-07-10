@@ -87,12 +87,19 @@ namespace CacheManager.Web
             return GetCacheItemInternal(key, region) != null;
         }
 
+        /// <inheritdoc/>
+        public override bool ImplementsKeys => false;
+        /// <inheritdoc />
+        public override IEnumerable<string> FindKeys(string pattern)
+        {
+            return FindKeysInternal(pattern, null).FilterBy(pattern);
+        }
         /// <inheritdoc />
         public override IEnumerable<string> FindKeys(string pattern, string requestedRegion)
         {
-            return GetKeys(pattern, requestedRegion).FilterBy(pattern);
+            return FindKeysInternal(pattern, requestedRegion).FilterBy(pattern);
         }
-        IEnumerable<string> GetKeys(string pattern, string requestedRegion)
+        IEnumerable<string> FindKeysInternal(string pattern, string requestedRegion)
         {
             var item = Context.Cache.GetEnumerator();
             while (item.MoveNext())
@@ -115,6 +122,15 @@ namespace CacheManager.Web
                 }
 
                 yield return key;
+            }
+        }
+        /// <inheritdoc />
+        public override IEnumerable<string> GetAllKeys()
+        {
+            var enumerator = Context.Cache.GetEnumerator();
+            while (enumerator.MoveNext())
+            {
+                yield return enumerator.Key as string;
             }
         }
 
