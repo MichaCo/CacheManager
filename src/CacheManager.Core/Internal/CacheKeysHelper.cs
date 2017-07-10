@@ -7,7 +7,7 @@ namespace CacheManager.Core.Internal
     /// <summary>
     /// Helper functions for manipulating keys.
     /// </summary>
-    static public class CacheKeysHelper
+    static internal class CacheKeysHelper
     {
         /// <summary>
         /// Filter a list of keys based on pattern. For handles that already have a list of keys and don't have service side filtering.
@@ -19,26 +19,26 @@ namespace CacheManager.Core.Internal
         {
             switch (MatchType(pattern))
             {
-                case KeyMatchPattern.ALL:
+                case KeyMatchPattern.All:
                     return keys;
-                case KeyMatchPattern.CONTAINS_STRING:
+                case KeyMatchPattern.ContainsString:
                     return keys.Where(k => k.Contains(pattern));
-                case KeyMatchPattern.ENDS_WITH_CHAR:
+                case KeyMatchPattern.EndsWithChar:
                     return keys.Where(k => k.Length == pattern.Length + 1 && k.StartsWith(pattern));
-                case KeyMatchPattern.ENDS_WITH_WILDCARD:
+                case KeyMatchPattern.EndsWithWildCard:
                     return keys.Where(k => k.StartsWith(pattern));
-                case KeyMatchPattern.STARTS_WITH_CHAR:
+                case KeyMatchPattern.StartsWithChar:
                     return keys.Where(k => k.Length == pattern.Length + 1 && k.EndsWith(pattern));
-                case KeyMatchPattern.STARTS_WITH_WILDCARD:
+                case KeyMatchPattern.StartsWithWildcard:
                     return keys.Where(k => k.EndsWith(pattern));
-                case KeyMatchPattern.CONTAINS_SINGLE_CHAR:
+                case KeyMatchPattern.ContainsSingleChar:
                     {
                         var patterns = pattern.Split('?');
                         return keys.Where(k => k.Length == pattern.Length + 1 && k.StartsWith(patterns[0]) && k.EndsWith(patterns[1]));
                     }
-                case KeyMatchPattern.CONTAINS_SINGLE_WILDCARD:
+                case KeyMatchPattern.ContainsSingleWildcard:
                     {
-                        var patterns = pattern.Split('?');
+                        var patterns = pattern.Split('*');
                         return keys.Where(k => k.StartsWith(patterns[0]) && k.EndsWith(patterns[1]));
                     }
                 default:
@@ -53,7 +53,9 @@ namespace CacheManager.Core.Internal
         static KeyMatchPattern MatchType(string pattern)
         {
             if (pattern == "*")
-                return KeyMatchPattern.ALL;
+            {
+                return KeyMatchPattern.All;
+            }
 
             var firstCharMatch = pattern.IndexOf('?');
 
@@ -61,16 +63,21 @@ namespace CacheManager.Core.Internal
             {
                 var firstWildcard = pattern.IndexOf('*');
                 if (firstWildcard == -1)
-                    return KeyMatchPattern.CONTAINS_STRING;
-
+                {
+                    return KeyMatchPattern.ContainsString;
+                }
                 var lastWildcard = pattern.LastIndexOf('*');
                 if (firstWildcard == lastWildcard)
                 {
                     if (firstWildcard == 0)
-                        return KeyMatchPattern.STARTS_WITH_WILDCARD;
+                    {
+                        return KeyMatchPattern.StartsWithWildcard;
+                    }
                     if (firstWildcard == pattern.Length - 1)
-                        return KeyMatchPattern.ENDS_WITH_WILDCARD;
-                    return KeyMatchPattern.CONTAINS_SINGLE_WILDCARD;
+                    {
+                        return KeyMatchPattern.EndsWithWildCard;
+                    }
+                    return KeyMatchPattern.ContainsSingleWildcard;
                 }
             }
             else
@@ -79,37 +86,40 @@ namespace CacheManager.Core.Internal
                 if (firstCharMatch == lastCharMatch)
                 {
                     if (firstCharMatch == 0)
-                        return KeyMatchPattern.STARTS_WITH_CHAR;
+                    {
+                        return KeyMatchPattern.StartsWithChar;
+                    }
                     if (firstCharMatch == pattern.Length - 1)
-                        return KeyMatchPattern.ENDS_WITH_CHAR;
-                    return KeyMatchPattern.CONTAINS_SINGLE_CHAR;
+                    {
+                        return KeyMatchPattern.EndsWithChar;
+                    }
+                    return KeyMatchPattern.ContainsSingleChar;
                 }
 
             }
-            return KeyMatchPattern.REGEX;
+            return KeyMatchPattern.RegEx;
         }
 
-        enum KeyMatchPattern
+        private enum KeyMatchPattern
         {
             /// <summary>Pattern "*"</summary>
-            ALL,
+            All,
             /// <summary>Pattern "*somestring"</summary>
-            STARTS_WITH_WILDCARD,
+            StartsWithWildcard,
             /// <summary>Pattern "somestring*"</summary>
-            ENDS_WITH_WILDCARD,
+            EndsWithWildCard,
             /// <summary>Pattern "some*string"</summary>
-            CONTAINS_SINGLE_WILDCARD,
+            ContainsSingleWildcard,
             /// <summary>Pattern "?somestring"</summary>
-            STARTS_WITH_CHAR,
+            StartsWithChar,
             /// <summary>Pattern "somestring?"</summary>
-            ENDS_WITH_CHAR,
+            EndsWithChar,
             /// <summary>Pattern "*some?string"</summary>
-            CONTAINS_SINGLE_CHAR,
+            ContainsSingleChar,
             /// <summary>Pattern "somestring"</summary>
-            CONTAINS_STRING,
+            ContainsString,
             /// <summary>More complex cases</summary>
-            REGEX,
+            RegEx,
         }
-
     }
 }
