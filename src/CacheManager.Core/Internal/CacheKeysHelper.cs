@@ -24,27 +24,36 @@ namespace CacheManager.Core.Internal
                 case KeyMatchPattern.ContainsString:
                     return keys.Where(k => k.Contains(pattern));
                 case KeyMatchPattern.EndsWithChar:
-                    return keys.Where(k => k.Length == pattern.Length + 1 && k.StartsWith(pattern));
+                    {
+                        return keys.Where(k => k.Length == pattern.Length 
+                                            && k.StartsWith(pattern.TrimEnd('?'), System.StringComparison.Ordinal));
+                    }
                 case KeyMatchPattern.EndsWithWildCard:
-                    return keys.Where(k => k.StartsWith(pattern));
+                    return keys.Where(k => k.StartsWith(pattern.Trim('*'), System.StringComparison.Ordinal));
                 case KeyMatchPattern.StartsWithChar:
-                    return keys.Where(k => k.Length == pattern.Length + 1 && k.EndsWith(pattern));
+                    {
+                        return keys.Where(k => k.Length == pattern.Length 
+                                            && k.EndsWith(pattern.TrimStart('?'), System.StringComparison.Ordinal));
+                    }
                 case KeyMatchPattern.StartsWithWildcard:
-                    return keys.Where(k => k.EndsWith(pattern));
+                    return keys.Where(k => k.EndsWith(pattern.TrimStart('*'), System.StringComparison.Ordinal));
                 case KeyMatchPattern.ContainsSingleChar:
                     {
                         var patterns = pattern.Split('?');
-                        return keys.Where(k => k.Length == pattern.Length + 1 && k.StartsWith(patterns[0]) && k.EndsWith(patterns[1]));
+                        return keys.Where(k => k.Length == pattern.Length 
+                                            && k.StartsWith(patterns[0], System.StringComparison.Ordinal) 
+                                            && k.EndsWith(patterns[1], System.StringComparison.Ordinal));
                     }
                 case KeyMatchPattern.ContainsSingleWildcard:
                     {
                         var patterns = pattern.Split('*');
-                        return keys.Where(k => k.StartsWith(patterns[0]) && k.EndsWith(patterns[1]));
+                        return keys.Where(k => k.StartsWith(patterns[0], System.StringComparison.Ordinal) 
+                                            && k.EndsWith(patterns[1], System.StringComparison.Ordinal));
                     }
                 default:
                     {
                         var regexPattern = "^" + Regex.Escape(pattern).Replace(@"\*", ".*").Replace(@"\?", ".") + "$";
-                        var regex = new Regex(regexPattern);
+                        var regex = new Regex(regexPattern, RegexOptions.CultureInvariant);
                         return keys.Where(k => regex.IsMatch(k));
                     }
             }
