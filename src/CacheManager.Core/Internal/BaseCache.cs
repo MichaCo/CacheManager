@@ -422,19 +422,13 @@ namespace CacheManager.Core.Internal
         /// </summary>
         /// <param name="pattern">A glob to match against keys.</param>
         /// <returns>The matching unique keys in the cache</returns>
-        public IEnumerable<string> FindKeys(string pattern)
-        {
-            return FindKeys(pattern, null);
-        }
+        public abstract IEnumerable<string> FindKeys(string pattern);
 
         /// <summary>
         /// Gets all keys
         /// </summary>
         /// <returns>The unique keys in the cache</returns>
-        public IEnumerable<string> GetAllKeys()
-        {
-            return FindKeys(null, null);
-        }
+        public abstract IEnumerable<string> GetAllKeys();
 
         /// <summary>
         /// Adds a value to the cache.

@@ -89,26 +89,6 @@ namespace CacheManager.MicrosoftCachingMemory
             return _cache.Contains(GetItemKey(key, region));
         }
 
-        /// <inheritdoc />
-        public override IEnumerable<string> FindKeys(string pattern, string region)
-        {
-            var keys = _cache.ListChildren(region ?? GetType().Name)
-                .Select(k => ParseKey(region));
-
-            if (pattern == "*")
-            {
-                return keys;
-            }
-            if (pattern.Contains("*") || pattern.Contains("?"))
-            {
-                var regexPattern = "^" + Regex.Escape(pattern).Replace(@"\*", ".*").Replace(@"\?", ".");
-                var regex = new Regex(regexPattern);
-                return keys.Where(k => regex.IsMatch(k));
-            }
-
-            return keys.Where(k => k.Contains(pattern));
-        }
-
         /// <inheritdoc/>
         protected override CacheItem<TCacheValue> GetCacheItemInternal(string key)
         {

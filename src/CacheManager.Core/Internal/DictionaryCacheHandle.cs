@@ -86,10 +86,27 @@ namespace CacheManager.Core.Internal
         }
 
         /// <inheritdoc />
+        public override IEnumerable<string> FindKeys(string pattern)
+        {
+            return FindKeysInternal(pattern, null);
+        }
+        /// <inheritdoc />
         public override IEnumerable<string> FindKeys(string pattern, string region)
         {
+            return FindKeysInternal(pattern, region);
+        }
+        public override IEnumerable<string> GetAllKeys()
+        {
+            return _cache.Keys;
+        }
+        private IEnumerable<string> FindKeysInternal(string pattern, string region)
+        {
+            NotNull(pattern, nameof(pattern));
+
             if (region == null)
-                return _cache.Keys;
+            {
+                return _cache.Keys.FilterBy(pattern);
+            }
 
             var skip = region.Length + 1;
 
