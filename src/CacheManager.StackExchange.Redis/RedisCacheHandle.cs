@@ -274,10 +274,14 @@ return result";
         {
             var keyPattern = GetKey(pattern, region);
 
-            // GetAllKeys are spread out across the cluster, slaves should contain a complete copy of their master nodes, so ignore them.
-            return _connection
-                .Servers
-                .Where(s => s.IsConnected && !s.IsSlave)
+            IServer[] servers = _connection.Servers.Where(s => s.IsConnected && s.IsSlave).ToArray();
+            if (!servers.Any())
+            {
+                servers = _connection.Servers.ToArray();
+            }
+
+            // GetAllKeys are spread out across the cluster, slaves should contain a complete copy of their master nodes, so prefer them.
+            return servers
                 .SelectMany(s => s.Keys(_redisConfiguration.Database, keyPattern).Select(k => k.ToString()))
                 .Select(k => ParseKey(k).Item1);
         }
