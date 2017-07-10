@@ -77,12 +77,7 @@ namespace CacheManager.SystemRuntimeCaching
         {
             return _cache.Select(c => 
             {
-                bool isToken;
-                bool hasRegion;
-                string region;
-                string key;
-
-                ParseKeyParts(_instanceKeyLength, c.Key, out isToken, out hasRegion, out region, out key);
+                ParseKeyParts(_instanceKeyLength, c.Key, out bool isToken, out bool hasRegion, out string region, out string key);
                 return new { isToken, hasRegion, region, key };
             })
             .Where(c => c.isToken == false && ((requestedRegion == null && c.hasRegion == false) || (c.hasRegion == true && c.region == requestedRegion)))

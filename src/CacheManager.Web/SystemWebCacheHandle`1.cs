@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text.RegularExpressions;
 using System.Web;
 using System.Web.Caching;
 using CacheManager.Core;
@@ -99,12 +97,7 @@ namespace CacheManager.Web
             var item = Context.Cache.GetEnumerator();
             while (item.MoveNext())
             {
-                bool isToken;
-                bool hasRegion;
-                string region;
-                string key;
-
-                ParseKeyParts(_instanceKeyLength, item.Key as string, out isToken, out hasRegion, out region, out key);
+                ParseKeyParts(_instanceKeyLength, item.Key as string, out bool isToken, out bool hasRegion, out string region, out string key);
 
                 if (isToken)
                     continue;
