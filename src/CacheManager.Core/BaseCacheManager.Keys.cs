@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using CacheManager.Core.Internal;
 using CacheManager.Core.Logging;
+using static CacheManager.Core.Utility.Guard;
 
 namespace CacheManager.Core
 {
@@ -31,6 +32,7 @@ namespace CacheManager.Core
         /// <inheritdoc />
         public IEnumerable<string> FindKeys(string pattern, string region)
         {
+            NotNull(region, nameof(region));
             CheckDisposed();
 
             if (_logTrace)
