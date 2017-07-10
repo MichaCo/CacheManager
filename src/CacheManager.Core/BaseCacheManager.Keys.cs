@@ -7,7 +7,7 @@ namespace CacheManager.Core
     public sealed partial class BaseCacheManager<TCacheValue>
     {
         /// <inheritdoc />
-        override public IEnumerable<string> Keys(string pattern, string region)
+        override public IEnumerable<string> FindKeys(string pattern, string region)
         {
             CheckDisposed();
 
@@ -15,19 +15,19 @@ namespace CacheManager.Core
 
             if (_logTrace)
             {
-                Logger.LogTrace("Keys [{0}:{1}] started.", region, pattern);
+                Logger.LogTrace("FindKeys [{0}:{1}] started.", region, pattern);
             }
 
             for (var handleIndex = 0; handleIndex < _cacheHandles.Length; handleIndex++)
             {
                 var handle = _cacheHandles[handleIndex];
-                var handleKeys = handle.Keys(pattern ?? "*", region);
+                var handleKeys = handle.FindKeys(pattern ?? "*", region);
                 keys.UnionWith(handleKeys);
             }
 
             if (_logTrace)
             {
-                Logger.LogTrace("Keys [{0}:{1}] found {2} keys.", region, pattern, keys.Count);
+                Logger.LogTrace("FindKeys [{0}:{1}] found {2} keys.", region, pattern, keys.Count);
             }
 
             return keys;

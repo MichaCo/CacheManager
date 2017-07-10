@@ -216,7 +216,7 @@ namespace CacheManager.Memcached
 
         /// <inheritdoc />
         /// <exception cref="System.NotImplementedException">Not supported in this version.</exception>
-        public override IEnumerable<string> Keys(string pattern, string region)
+        public override IEnumerable<string> FindKeys(string pattern, string region)
         {
             throw new NotImplementedException();
         }

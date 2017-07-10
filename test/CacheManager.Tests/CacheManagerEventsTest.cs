@@ -1242,7 +1242,7 @@ namespace CacheManager.Tests
                 throw new NotImplementedException();
             }
 
-            public override IEnumerable<string> Keys(string pattern, string region)
+            public override IEnumerable<string> FindKeys(string pattern, string region)
             {
                 throw new NotImplementedException();
             }

@@ -73,7 +73,7 @@ namespace CacheManager.SystemRuntimeCaching
         public override int Count => (int)_cache.GetCount();
 
         /// <inheritdoc />
-        public override IEnumerable<string> Keys(string pattern, string requestedRegion)
+        public override IEnumerable<string> FindKeys(string pattern, string requestedRegion)
         {
             return _cache.Select(c => 
             {

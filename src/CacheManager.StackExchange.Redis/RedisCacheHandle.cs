@@ -270,11 +270,11 @@ return result";
         }
 
         /// <inheritdoc />
-        public override IEnumerable<string> Keys(string pattern, string region)
+        public override IEnumerable<string> FindKeys(string pattern, string region)
         {
             var keyPattern = GetKey(pattern, region);
 
-            // Keys are spread out across the cluster, slaves should contain a complete copy of their master nodes, so ignore them.
+            // GetAllKeys are spread out across the cluster, slaves should contain a complete copy of their master nodes, so ignore them.
             return _connection
                 .Servers
                 .Where(s => s.IsConnected && !s.IsSlave)

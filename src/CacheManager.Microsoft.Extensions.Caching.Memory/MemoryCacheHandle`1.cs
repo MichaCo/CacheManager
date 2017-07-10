@@ -90,7 +90,7 @@ namespace CacheManager.MicrosoftCachingMemory
         }
 
         /// <inheritdoc />
-        public override IEnumerable<string> Keys(string pattern, string region)
+        public override IEnumerable<string> FindKeys(string pattern, string region)
         {
             var keys = _cache.ListChildren(region ?? GetType().Name)
                 .Select(k => ParseKey(region));

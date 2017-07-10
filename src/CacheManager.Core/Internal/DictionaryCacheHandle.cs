@@ -86,7 +86,7 @@ namespace CacheManager.Core.Internal
         }
 
         /// <inheritdoc />
-        public override IEnumerable<string> Keys(string pattern, string region)
+        public override IEnumerable<string> FindKeys(string pattern, string region)
         {
             if (region == null)
                 return _cache.Keys;

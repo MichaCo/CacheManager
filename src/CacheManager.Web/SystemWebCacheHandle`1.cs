@@ -90,7 +90,7 @@ namespace CacheManager.Web
         }
 
         /// <inheritdoc />
-        public override IEnumerable<string> Keys(string pattern, string requestedRegion)
+        public override IEnumerable<string> FindKeys(string pattern, string requestedRegion)
         {
             return GetKeys(pattern, requestedRegion).FilterBy(pattern);
         }

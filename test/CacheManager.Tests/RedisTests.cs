@@ -1419,7 +1419,7 @@ namespace CacheManager.Tests
             cache.Add("key1" + unique, "value 1");
             cache.Add("key2" + unique, "value 2");
 
-            var keys = cache.Keys().Where(k => k.EndsWith(unique)).OrderBy(k => k).ToArray();
+            var keys = cache.GetAllKeys().Where(k => k.EndsWith(unique)).OrderBy(k => k).ToArray();
 
             Assert.Equal(new string[] { "key1" + unique, "key2" + unique }, keys);
         }
@@ -1435,8 +1435,8 @@ namespace CacheManager.Tests
             cache.Add("key2" + unique, "value 2", "region 1");
             cache.Add("key3" + unique, "value 3", "region 2");
 
-            var region1 = cache.Keys("*", "region 1").Where(k => k.EndsWith(unique)).OrderBy(k => k).ToArray();
-            var region2 = cache.Keys("*", "region 2").Where(k => k.EndsWith(unique)).OrderBy(k => k).ToArray();
+            var region1 = cache.FindKeys("*", "region 1").Where(k => k.EndsWith(unique)).OrderBy(k => k).ToArray();
+            var region2 = cache.FindKeys("*", "region 2").Where(k => k.EndsWith(unique)).OrderBy(k => k).ToArray();
 
             Assert.Equal(new string[] { "key1" + unique, "key2" + unique }, region1);
             Assert.Equal(new string[] { "key3" + unique }, region2);
@@ -1455,7 +1455,7 @@ namespace CacheManager.Tests
             cache.Add("key 3" + unique, "value 3");
             cache.Add("key 10" + unique, "value 3");
 
-            var keys = cache.Keys("key ?" + unique).Where(k => k.EndsWith(unique)).OrderBy(k => k).ToArray();
+            var keys = cache.FindKeys("key ?" + unique).Where(k => k.EndsWith(unique)).OrderBy(k => k).ToArray();
 
             Assert.Equal(new string[] { "key 2" + unique, "key 3" + unique }, keys);
         }
@@ -1471,7 +1471,7 @@ namespace CacheManager.Tests
             cache.Add("key 3" + unique, "value 3");
             cache.Add("key 10" + unique, "value 3");
 
-            var keys = cache.Keys("key *").Where(k => k.EndsWith(unique)).OrderBy(k => k).ToArray();
+            var keys = cache.FindKeys("key *").Where(k => k.EndsWith(unique)).OrderBy(k => k).ToArray();
 
             Assert.Equal(new string[] { "key 10" + unique, "key 2" + unique, "key 3" + unique }, keys);
         }

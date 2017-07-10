@@ -612,24 +612,28 @@ namespace CacheManager.Core
 
         /// <summary>
         /// Gets all keys that match the given pattern.
+        /// This may be an expensive operation depending on the size of the cache and how the returned enunerable is consumed.
         /// </summary>
         /// <param name="pattern">A glob to match against keys.</param>
         /// <param name="region">The cache region.</param>
         /// <returns>The unique keys in the cache</returns>
-        IEnumerable<string> Keys(string pattern, string region);
+        IEnumerable<string> FindKeys(string pattern, string region);
 
         /// <summary>
         /// Gets all keys that match the given pattern.
+        /// This may be an expensive operation depending on the size of the cache and how the returned enunerable is consumed.
         /// </summary>
         /// <param name="pattern">A glob to match against keys.</param>
         /// <returns>The unique keys in the cache</returns>
-        IEnumerable<string> Keys(string pattern);
+        IEnumerable<string> FindKeys(string pattern);
 
         /// <summary>
-        /// Gets all keys
+        /// Gets all the cache keys.
+        /// Not supported by call implementations.
+        /// This may be an expensive operation depending on the size of the cache and how the returned enunerable is consumed.
         /// </summary>
         /// <returns>The keys in the cache</returns>
-        IEnumerable<string> Keys();
+        IEnumerable<string> GetAllKeys();
 
 
         /// <summary>
