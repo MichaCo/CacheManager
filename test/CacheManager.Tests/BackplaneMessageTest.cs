@@ -608,7 +608,7 @@ namespace CacheManager.Tests
         public void BackplaneMessage_DeserializeInvalidBytes_WrongOwnerLen()
         {
             // arrange
-            var data = new byte[] { 4, 0, 1, 2, 3, 4 };
+            var data = new byte[] { 0, 118, 50, 0, 4, 0, 1, 2, 3, 4 };
 
             Action act = () => BackplaneMessage.Deserialize(data).First();
             act.ShouldThrow<IndexOutOfRangeException>().WithMessage("*Cannot read bytes,*");
@@ -618,7 +618,7 @@ namespace CacheManager.Tests
         public void BackplaneMessage_DeserializeInvalidBytes_NoAction()
         {
             // arrange
-            var data = new byte[] { 4, 0, 0, 0, 1, 2, 3, 4 };
+            var data = new byte[] { 0, 118, 50, 0, 4, 0, 0, 0, 1, 2, 3, 4 };
 
             Action act = () => BackplaneMessage.Deserialize(data).First();
             act.ShouldThrow<IndexOutOfRangeException>().WithMessage("*Cannot read byte,*");
@@ -628,7 +628,7 @@ namespace CacheManager.Tests
         public void BackplaneMessage_DeserializeInvalidBytes_WrongAction()
         {
             // arrange
-            var data = new byte[] { 4, 0, 0, 0, 1, 2, 3, 4, 255 };
+            var data = new byte[] { 0, 118, 50, 0, 4, 0, 0, 0, 1, 2, 3, 4, 255 };
 
             Action act = () => BackplaneMessage.Deserialize(data).First();
             act.ShouldThrow<ArgumentException>().WithMessage("*invalid message type*");
@@ -638,7 +638,7 @@ namespace CacheManager.Tests
         public void BackplaneMessage_DeserializeInvalidBytes_InvalidString()
         {
             // arrange                                      clear region with wrong region string
-            var data = new byte[] { 4, 0, 0, 0, 1, 2, 3, 4, 3, 10, 0, 0, 0, 42 };
+            var data = new byte[] { 0, 118, 50, 0, 4, 0, 0, 0, 1, 2, 3, 4, 3, 10, 0, 0, 0, 42 };
 
             Action act = () => BackplaneMessage.Deserialize(data).First();
             act.ShouldThrow<IndexOutOfRangeException>().WithMessage("*Cannot read string,*");

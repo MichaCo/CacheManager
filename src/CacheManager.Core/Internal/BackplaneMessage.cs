@@ -417,7 +417,14 @@ namespace CacheManager.Core.Internal
 
             public MessageWriter(int size)
             {
-                _buffer = new byte[size];
+                _buffer = new byte[size + 4];
+                _position = 4;
+
+                // header v2
+                _buffer[0] = 0;
+                _buffer[1] = 118;
+                _buffer[2] = 50;
+                _buffer[3] = 0;
             }
 
             public byte[] GetBytes()
@@ -478,6 +485,14 @@ namespace CacheManager.Core.Internal
             public MessageReader(byte[] bytes)
             {
                 _data = bytes;
+                _position = 4;
+
+                // check v2 header
+                if (_data.Length < 4
+                 || _data[0] != 0 || _data[1] != 118 || _data[2] != 50 || _data[3] != 0)
+                {
+                    throw new InvalidOperationException("Invalid v2 backplane message");
+                }
             }
 
             public bool HasMore()
@@ -508,13 +523,14 @@ namespace CacheManager.Core.Internal
 
             public byte[] ReadBytes(int length)
             {
-                var result = new byte[length];
                 var pos = (_position += length);
                 if (pos > _data.Length)
                 {
                     throw new IndexOutOfRangeException("Cannot read bytes, no additional bytes available.");
                 }
 
+                // fix: length check before aloc
+                var result = new byte[length];
                 Buffer.BlockCopy(_data, pos - length, result, 0, length);
                 return result;
             }
