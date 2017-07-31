@@ -474,7 +474,9 @@ return result";
             var createdItem = values[3];
             var valueTypeItem = values[4];
             version = (int)values[5];
-            var usesDefaultExpiration = values[6].HasValue ? (bool)values[6] : true;
+            var usesDefaultExpiration = values[6].HasValue ? (bool)values[6]        // if flag is set, all good...
+                : (expirationModeItem.HasValue && timeoutItem.HasValue) ? false     // if not, but expiration flags have values, use those
+                : true;                                                             // otherwise fall back to use default expiration from config
 
             if (!item.HasValue || !valueTypeItem.HasValue /* partially removed? */
                 || item.IsNullOrEmpty || item.IsNull)
@@ -554,7 +556,9 @@ return result";
                 var timeoutItem = values[2];
                 var createdItem = values[3];
                 var valueTypeItem = values[4];
-                var usesDefaultExpiration = values[5].HasValue ? (bool)values[5] : true;
+                var usesDefaultExpiration = values[5].HasValue ? (bool)values[5]        // if flag is set, all good...
+                    : (expirationModeItem.HasValue && timeoutItem.HasValue) ? false     // if not, but expiration flags have values, use those
+                    : true;                                                             // otherwise fall back to use default expiration from config
 
                 if (!item.HasValue || !valueTypeItem.HasValue /* partially removed? */
                     || item.IsNullOrEmpty || item.IsNull)
