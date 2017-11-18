@@ -15,7 +15,7 @@ namespace CacheManager.Config.Tests
     {
         public static void Main(string[] args)
         {
-            var iterations = 10;
+            var iterations = 100;
             try
             {
                 var builder = new Core.ConfigurationBuilder("myCache");
@@ -24,7 +24,7 @@ namespace CacheManager.Config.Tests
                     f.AddConsole(LogLevel.Warning);
                     f.AddDebug(LogLevel.Debug);
                 });
-                
+
                 builder
                     .WithRetryTimeout(500)
                     .WithMaxRetries(5);
@@ -53,7 +53,6 @@ namespace CacheManager.Config.Tests
                 });
 
                 //builder.WithRedisConfiguration("redis", "localhost:22121");
-
 
                 builder.WithBondCompactBinarySerializer();
 
