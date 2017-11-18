@@ -4,7 +4,7 @@ using static CacheManager.Core.Utility.Guard;
 
 namespace CacheManager.Core
 {
-    public sealed partial class BaseCacheManager<TCacheValue>
+    public partial class BaseCacheManager<TCacheValue>
     {
         /// <inheritdoc />
         public TCacheValue GetOrAdd(string key, TCacheValue value)
