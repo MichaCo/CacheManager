@@ -493,7 +493,8 @@ namespace CacheManager.Core
         /// <seealso cref="ExpirationMode"/>
         public ConfigurationBuilderCacheHandlePart WithExpiration(ExpirationMode expirationMode, TimeSpan timeout)
         {
-            if (expirationMode != ExpirationMode.None && timeout == TimeSpan.Zero)
+            // fixed #192 (was missing check for "Default" mode)
+            if (expirationMode != ExpirationMode.None && expirationMode != ExpirationMode.Default && timeout == TimeSpan.Zero)
             {
                 throw new InvalidOperationException("If expiration mode is not set to 'None', timeout cannot be zero.");
             }
