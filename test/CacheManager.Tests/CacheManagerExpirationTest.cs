@@ -896,7 +896,7 @@ namespace CacheManager.Tests
             // act/assert
             using (cache)
             {
-                Action act = ()=> cache.Add(new CacheItem<object>(key, key, ExpirationMode.Absolute, timeout));
+                Action act = () => cache.Add(new CacheItem<object>(key, key, ExpirationMode.Absolute, timeout));
 
                 act.ShouldThrow<ArgumentException>().WithMessage("*not supported*");
             }
@@ -1028,6 +1028,23 @@ namespace CacheManager.Tests
 
             absolute.ExpirationMode.Should().Be(ExpirationMode.None);
             absolute.ExpirationTimeout.Should().BeCloseTo(default(TimeSpan));
+        }
+
+        /// <summary>
+        /// Issue #192
+        /// </summary>
+        [Fact]
+        public void Configuration_AllowsZeroForDefaultExpiration()
+        {
+            var expirationMode = ExpirationMode.Default;
+            var timeout = TimeSpan.Zero;
+
+            Action act = () => CacheFactory.Build<string>(
+                s => s
+                    .WithDictionaryHandle()
+                    .WithExpiration(expirationMode, timeout));
+
+            act.ShouldNotThrow();
         }
 
 #if !NETCOREAPP

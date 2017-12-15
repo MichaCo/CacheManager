@@ -16,7 +16,7 @@ namespace CacheManager.Core
     /// added. It will keep them in sync according to rules and depending on the configuration.
     /// </summary>
     /// <typeparam name="TCacheValue">The type of the cache value.</typeparam>
-    public sealed partial class BaseCacheManager<TCacheValue> : BaseCache<TCacheValue>, ICacheManager<TCacheValue>, IDisposable
+    public partial class BaseCacheManager<TCacheValue> : BaseCache<TCacheValue>, ICacheManager<TCacheValue>, IDisposable
     {
         private readonly bool _logTrace = false;
         private readonly BaseCacheHandle<TCacheValue>[] _cacheHandles;

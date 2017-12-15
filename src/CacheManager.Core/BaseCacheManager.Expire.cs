@@ -4,7 +4,7 @@ using CacheManager.Core.Logging;
 
 namespace CacheManager.Core
 {
-    public sealed partial class BaseCacheManager<TCacheValue>
+    public partial class BaseCacheManager<TCacheValue>
     {
         /// <inheritdoc />
         public void Expire(string key, ExpirationMode mode, TimeSpan timeout)

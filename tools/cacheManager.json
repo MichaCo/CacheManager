@@ -205,7 +205,7 @@
         },
         "updateMode": {
           "type": "string",
-          "enum": [ "None", "Full", "Up" ],
+          "enum": [ "None", "Up" ],
           "description": "The update mode (default is Up).",
           "default": "Up"
         },
