@@ -8,7 +8,7 @@ namespace CacheManager.Tests
     [ExcludeFromCodeCoverage]
     public static class TestConfigurationHelper
     {
-#if !NETCOREAPP
+#if !NETCOREAPP1
 
         public static string GetCfgFileName(string fileName)
         {
@@ -20,14 +20,3 @@ namespace CacheManager.Tests
 #endif
     }
 }
-
-#if NETCOREAPP && !NETCOREAPP2_0
-namespace System.Diagnostics.CodeAnalysis
-{
-    [Conditional("DEBUG")]
-    [AttributeUsage(AttributeTargets.All, Inherited = false, AllowMultiple = false)]
-    internal sealed class ExcludeFromCodeCoverageAttribute : Attribute
-    {
-    }
-}
-#endif

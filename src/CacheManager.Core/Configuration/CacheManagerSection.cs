@@ -1,6 +1,6 @@
 ﻿namespace CacheManager.Core.Configuration
 {
-#if !NETSTANDARD
+#if !NETSTANDARD1
 
     using System;
     using System.Collections.Generic;

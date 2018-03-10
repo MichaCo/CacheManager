@@ -21,7 +21,7 @@ namespace CacheManager.Tests
     {
         public IEnumerator<object[]> GetEnumerator()
         {
-#if !NETCOREAPP
+#if !NETCOREAPP1
             yield return new object[] { TestManagers.WithOneMemoryCacheHandleSliding };
             yield return new object[] { TestManagers.WithOneMemoryCacheHandle };
             yield return new object[] { TestManagers.WithMemoryAndDictionaryHandles };
@@ -33,7 +33,7 @@ namespace CacheManager.Tests
             yield return new object[] { TestManagers.WithManyDictionaryHandles };
             yield return new object[] { TestManagers.WithOneDicCacheHandle };
 #if REDISENABLED
-#if !NETCOREAPP
+#if !NETCOREAPP1 && !NETCOREAPP2
             yield return new object[] { TestManagers.WithRedisCacheBinary };
 #endif
             yield return new object[] { TestManagers.WithRedisCacheJson };
@@ -46,7 +46,7 @@ namespace CacheManager.Tests
             yield return new object[] { TestManagers.WithDicAndRedisCacheNoLua };
 #endif
 #if MEMCACHEDENABLED
-#if !NETCOREAPP
+#if !NETCOREAPP1 && !NETCOREAPP2
             yield return new object[] { TestManagers.WithMemcachedBinary };
 #endif
             yield return new object[] { TestManagers.WithMemcachedJson };
@@ -250,7 +250,7 @@ namespace CacheManager.Tests
 
 #endif
 
-#if !NETCOREAPP
+#if !NETCOREAPP1
 
         public static ICacheManager<object> WithOneMemoryCacheHandleSliding
             => CacheFactory.FromConfiguration<object>(
@@ -292,7 +292,7 @@ namespace CacheManager.Tests
                 .Build());
 
 #endif
-#if MOCK_HTTPCONTEXT_ENABLED && !NETCOREAPP
+#if MOCK_HTTPCONTEXT_ENABLED
 
         public static ICacheManager<object> WithSystemWebCache
             => CacheFactory.FromConfiguration<object>(

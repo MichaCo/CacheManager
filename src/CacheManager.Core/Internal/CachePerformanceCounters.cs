@@ -1,6 +1,6 @@
 ﻿namespace CacheManager.Core.Internal
 {
-#if !NETSTANDARD
+#if !NETSTANDARD1 && !NETSTANDARD2
     using System;
     using System.Diagnostics;
     using System.Threading;

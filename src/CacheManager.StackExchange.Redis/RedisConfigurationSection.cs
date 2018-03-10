@@ -1,4 +1,4 @@
-﻿#if !NETSTANDARD
+﻿#if !NETSTANDARD1
 using System.Collections.Generic;
 using System.Configuration;
 

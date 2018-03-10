@@ -4,7 +4,7 @@ using System.Globalization;
 using System.Linq;
 using CacheManager.Core.Internal;
 
-#if !NETSTANDARD
+#if !NETSTANDARD1
 using System.Configuration;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
@@ -122,7 +122,7 @@ namespace CacheManager.Core
             return part.Configuration;
         }
 
-#if !NETSTANDARD
+#if !NETSTANDARD1
 
         /// <summary>
         /// Loads a configuration from web.config or app.config.
@@ -748,7 +748,7 @@ namespace CacheManager.Core
             return this;
         }
 
-#if !NETSTANDARD
+#if !NETSTANDARD1 && !NETSTANDARD2
 
         /// <summary>
         /// Configures a <see cref="BinaryCacheSerializer"/> to be used for serialization and deserialization.

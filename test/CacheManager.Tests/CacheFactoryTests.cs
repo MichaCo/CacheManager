@@ -1,4 +1,4 @@
-﻿#if !NETCOREAPP
+﻿#if !NETCOREAPP1
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -166,7 +166,7 @@ namespace CacheManager.Tests
             // arrange
 
             // act
-            Action act = () => CacheFactory.FromConfiguration((Type)null, "c1");
+            Action act = () => CacheFactory.FromConfiguration(null, "c1");
 
             // assert
             act.Should().Throw<ArgumentNullException>()
@@ -180,7 +180,7 @@ namespace CacheManager.Tests
             // arrange
 
             // act
-            Action act = () => CacheFactory.FromConfiguration((Type)null, (CacheManagerConfiguration)null);
+            Action act = () => CacheFactory.FromConfiguration(null, (CacheManagerConfiguration)null);
 
             // assert
             act.Should().Throw<ArgumentNullException>()
@@ -713,6 +713,7 @@ namespace CacheManager.Tests
                     .WithSystemRuntimeCacheHandle());
         }
 
+#if !NETCOREAPP2
         [Fact]
         [ReplaceCulture]
         public void CacheFactory_Build_WithSerializer_SimpleBinary()
@@ -725,6 +726,7 @@ namespace CacheManager.Tests
             cache.Configuration.SerializerType.Should().NotBeNull();
             cache.Configuration.SerializerType.Should().Be(typeof(BinaryCacheSerializer));
         }
+#endif
     }
 }
 #endif

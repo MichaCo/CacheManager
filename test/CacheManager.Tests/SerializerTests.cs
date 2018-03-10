@@ -12,7 +12,7 @@ using Newtonsoft.Json;
 using ProtoBuf;
 using Xunit;
 using CacheManager.Serialization.Bond;
-#if !NETCOREAPP
+#if !NETCOREAPP1
 using System.Runtime.Serialization.Formatters;
 using System.Runtime.Serialization.Formatters.Binary;
 #endif
@@ -22,7 +22,7 @@ namespace CacheManager.Tests
     [ExcludeFromCodeCoverage]
     public class SerializerTests
     {
-#if !NETCOREAPP
+#if !NETCOREAPP1 && !NETCOREAPP2
 
         [Fact]
         public void BinarySerializer_RespectBinarySerializerSettings()
@@ -969,7 +969,7 @@ namespace CacheManager.Tests
             }
         }
 
-#if !NETCOREAPP
+#if !NETCOREAPP1
 
         [Serializable]
 #endif
@@ -1018,7 +1018,7 @@ namespace CacheManager.Tests
             }
         }
 
-#if !NETCOREAPP
+#if !NETCOREAPP1
 
         [Serializable]
 #endif
@@ -1031,7 +1031,7 @@ namespace CacheManager.Tests
             public string StringProperty { get; set; }
         }
 
-#if !NETCOREAPP
+#if !NETCOREAPP1
 
         [Serializable]
 #endif

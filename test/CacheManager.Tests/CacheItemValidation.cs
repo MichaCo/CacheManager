@@ -11,7 +11,7 @@ namespace CacheManager.Tests
     {
         [Fact]
         [Trait("category", "Unreliable")]
-        public void CacheItem_WithAbsoluteExpiration()
+        public void CacheItemValidation_WithAbsoluteExpiration()
         {
             // arrange
             var baseItem = new CacheItem<object>("key", "region", "value", ExpirationMode.Sliding, TimeSpan.FromDays(10));
@@ -27,12 +27,12 @@ namespace CacheManager.Tests
             result.Key.Should().Be(baseItem.Key);
             result.CreatedUtc.Kind.Should().Be(baseItem.CreatedUtc.Kind);
             result.CreatedUtc.Kind.Should().Be(DateTimeKind.Utc);
-            result.CreatedUtc.Should().Be(baseItem.CreatedUtc);
+            result.CreatedUtc.Should().BeCloseTo(baseItem.CreatedUtc);
             result.LastAccessedUtc.Should().Be(baseItem.LastAccessedUtc);
         }
 
         [Fact]
-        public void CacheItem_WithAbsoluteExpiration_Invalid()
+        public void CacheItemValidation_WithAbsoluteExpiration_Invalid()
         {
             // arrange
             var baseItem = new CacheItem<object>("key", "region", "value", ExpirationMode.Sliding, TimeSpan.FromDays(10));
@@ -45,7 +45,7 @@ namespace CacheManager.Tests
         }
 
         [Fact]
-        public void CacheItem_WithAbsoluteExpiration_InvalidB()
+        public void CacheItemValidation_WithAbsoluteExpiration_InvalidB()
         {
             // arrange
             var baseItem = new CacheItem<object>("key", "region", "value", ExpirationMode.Sliding, TimeSpan.FromDays(10));
@@ -59,7 +59,7 @@ namespace CacheManager.Tests
 
 
         [Fact]
-        public void CacheItem_WithSlidingExpiration_Invalid()
+        public void CacheItemValidation_WithSlidingExpiration_Invalid()
         {
             // arrange
             var baseItem = new CacheItem<object>("key", "region", "value", ExpirationMode.Sliding, TimeSpan.FromDays(10));
@@ -72,7 +72,7 @@ namespace CacheManager.Tests
         }
 
         [Fact]
-        public void CacheItem_WithExpiration_Invalid()
+        public void CacheItemValidation_WithExpiration_Invalid()
         {
             // arrange
             // act
@@ -83,7 +83,7 @@ namespace CacheManager.Tests
         }
 
         [Fact]
-        public void CacheItem_WithCreated()
+        public void CacheItemValidation_WithCreated()
         {
             // arrange
             var baseItem = new CacheItem<object>("key", "region", "value", ExpirationMode.Sliding, TimeSpan.FromDays(10));
@@ -103,7 +103,7 @@ namespace CacheManager.Tests
         }
 
         [Fact]
-        public void CacheItem_WithExpiration_None()
+        public void CacheItemValidation_WithExpiration_None()
         {
             // arrange
             var baseItem = new CacheItem<object>("key", "region", "value", ExpirationMode.Sliding, TimeSpan.FromDays(10));
@@ -122,7 +122,7 @@ namespace CacheManager.Tests
         }
 
         [Fact]
-        public void CacheItem_WithExpiration_Sliding()
+        public void CacheItemValidation_WithExpiration_Sliding()
         {
             // arrange
             var baseItem = new CacheItem<object>("key", "region", "value", ExpirationMode.Absolute, TimeSpan.FromDays(10));
@@ -142,7 +142,7 @@ namespace CacheManager.Tests
 
         [Fact]
         [Trait("category", "Unreliable")]
-        public void CacheItem_WithExpiration_Absolute()
+        public void CacheItemValidation_WithExpiration_Absolute()
         {
             // arrange
             var baseItem = new CacheItem<object>("key", "region", "value", ExpirationMode.Sliding, TimeSpan.FromDays(10));
@@ -161,7 +161,7 @@ namespace CacheManager.Tests
         }
 
         [Fact]
-        public void CacheItem_WithNoExpiration()
+        public void CacheItemValidation_WithNoExpiration()
         {
             // arrange
             var baseItem = new CacheItem<object>("key", "region", "value", ExpirationMode.Sliding, TimeSpan.FromDays(10));
@@ -180,7 +180,7 @@ namespace CacheManager.Tests
         }
 
         [Fact]
-        public void CacheItem_WithSlidingExpiration()
+        public void CacheItemValidation_WithSlidingExpiration()
         {
             // arrange
             var baseItem = new CacheItem<object>("key", "region", "value", ExpirationMode.Absolute, TimeSpan.FromDays(10));
@@ -199,7 +199,7 @@ namespace CacheManager.Tests
         }
 
         [Fact]
-        public void CacheItem_WithValue()
+        public void CacheItemValidation_WithValue()
         {
             // arrange
             var baseItem = new CacheItem<object>("key", "region", "value", ExpirationMode.Absolute, TimeSpan.FromDays(10));
@@ -221,7 +221,7 @@ namespace CacheManager.Tests
 
         [Fact]
         [ReplaceCulture]
-        public void CacheItem_Ctor1_EmptyKey()
+        public void CacheItemValidation_Ctor1_EmptyKey()
         {
             // arrange
             var key = string.Empty;
@@ -236,7 +236,7 @@ namespace CacheManager.Tests
 
         [Fact]
         [ReplaceCulture]
-        public void CacheItem_Ctor1_NullKey()
+        public void CacheItemValidation_Ctor1_NullKey()
         {
             // arrange
             string key = null;
@@ -251,7 +251,7 @@ namespace CacheManager.Tests
 
         [Fact]
         [ReplaceCulture]
-        public void CacheItem_Ctor1_WhitespaceKey()
+        public void CacheItemValidation_Ctor1_WhitespaceKey()
         {
             // arrange
             string key = "    ";
@@ -266,7 +266,7 @@ namespace CacheManager.Tests
 
         [Fact]
         [ReplaceCulture]
-        public void CacheItem_Ctor1_NullValue()
+        public void CacheItemValidation_Ctor1_NullValue()
         {
             // arrange
             string key = "key";
@@ -281,7 +281,7 @@ namespace CacheManager.Tests
 
         [Fact]
         [ReplaceCulture]
-        public void CacheItem_Ctor1_ValidateCreatedResult()
+        public void CacheItemValidation_Ctor1_ValidateCreatedResult()
         {
             // arrange
             string key = "key";
@@ -305,7 +305,7 @@ namespace CacheManager.Tests
 
         [Fact]
         [ReplaceCulture]
-        public void CacheItem_Ctor2_EmptyKey()
+        public void CacheItemValidation_Ctor2_EmptyKey()
         {
             // arrange
             var key = string.Empty;
@@ -321,7 +321,7 @@ namespace CacheManager.Tests
 
         [Fact]
         [ReplaceCulture]
-        public void CacheItem_Ctor2_NullKey()
+        public void CacheItemValidation_Ctor2_NullKey()
         {
             // arrange
             string key = null;
@@ -337,7 +337,7 @@ namespace CacheManager.Tests
 
         [Fact]
         [ReplaceCulture]
-        public void CacheItem_Ctor2_WhitespaceKey()
+        public void CacheItemValidation_Ctor2_WhitespaceKey()
         {
             // arrange
             string key = "    ";
@@ -353,7 +353,7 @@ namespace CacheManager.Tests
 
         [Fact]
         [ReplaceCulture]
-        public void CacheItem_Ctor2_NullValue()
+        public void CacheItemValidation_Ctor2_NullValue()
         {
             // arrange
             string key = "key";
@@ -369,7 +369,7 @@ namespace CacheManager.Tests
 
         [Fact]
         [ReplaceCulture]
-        public void CacheItem_Ctor2_EmptyRegion()
+        public void CacheItemValidation_Ctor2_EmptyRegion()
         {
             // arrange
             string key = "key";
@@ -386,7 +386,7 @@ namespace CacheManager.Tests
 
         [Fact]
         [ReplaceCulture]
-        public void CacheItem_Ctor2_NullRegion()
+        public void CacheItemValidation_Ctor2_NullRegion()
         {
             // arrange
             string key = "key";
@@ -403,7 +403,7 @@ namespace CacheManager.Tests
 
         [Fact]
         [ReplaceCulture]
-        public void CacheItem_Ctor2_WhitespaceRegion()
+        public void CacheItemValidation_Ctor2_WhitespaceRegion()
         {
             // arrange
             string key = "key";
@@ -420,7 +420,7 @@ namespace CacheManager.Tests
 
         [Fact]
         [ReplaceCulture]
-        public void CacheItem_Ctor2_ValidateCreatedResult()
+        public void CacheItemValidation_Ctor2_ValidateCreatedResult()
         {
             // arrange
             string key = "key";
@@ -445,7 +445,7 @@ namespace CacheManager.Tests
 
         [Fact]
         [ReplaceCulture]
-        public void CacheItem_Ctor3_EmptyKey()
+        public void CacheItemValidation_Ctor3_EmptyKey()
         {
             // arrange
             var key = string.Empty;
@@ -462,7 +462,7 @@ namespace CacheManager.Tests
 
         [Fact]
         [ReplaceCulture]
-        public void CacheItem_Ctor3_NullKey()
+        public void CacheItemValidation_Ctor3_NullKey()
         {
             // arrange
             string key = null;
@@ -479,7 +479,7 @@ namespace CacheManager.Tests
 
         [Fact]
         [ReplaceCulture]
-        public void CacheItem_Ctor3_WhitespaceKey()
+        public void CacheItemValidation_Ctor3_WhitespaceKey()
         {
             // arrange
             string key = "    ";
@@ -496,7 +496,7 @@ namespace CacheManager.Tests
 
         [Fact]
         [ReplaceCulture]
-        public void CacheItem_Ctor3_NullValue()
+        public void CacheItemValidation_Ctor3_NullValue()
         {
             // arrange
             string key = "key";
@@ -513,7 +513,7 @@ namespace CacheManager.Tests
 
         [Fact]
         [ReplaceCulture]
-        public void CacheItem_Ctor3_ValidateCreatedResult()
+        public void CacheItemValidation_Ctor3_ValidateCreatedResult()
         {
             // arrange
             string key = "key";
@@ -539,7 +539,7 @@ namespace CacheManager.Tests
 
         [Fact]
         [ReplaceCulture]
-        public void CacheItem_Ctor4_EmptyKey()
+        public void CacheItemValidation_Ctor4_EmptyKey()
         {
             // arrange
             var key = string.Empty;
@@ -557,7 +557,7 @@ namespace CacheManager.Tests
 
         [Fact]
         [ReplaceCulture]
-        public void CacheItem_Ctor4_NullKey()
+        public void CacheItemValidation_Ctor4_NullKey()
         {
             // arrange
             string key = null;
@@ -575,7 +575,7 @@ namespace CacheManager.Tests
 
         [Fact]
         [ReplaceCulture]
-        public void CacheItem_Ctor4_WhitespaceKey()
+        public void CacheItemValidation_Ctor4_WhitespaceKey()
         {
             // arrange
             string key = "    ";
@@ -593,7 +593,7 @@ namespace CacheManager.Tests
 
         [Fact]
         [ReplaceCulture]
-        public void CacheItem_Ctor4_NullValue()
+        public void CacheItemValidation_Ctor4_NullValue()
         {
             // arrange
             string key = "key";
@@ -611,7 +611,7 @@ namespace CacheManager.Tests
 
         [Fact]
         [ReplaceCulture]
-        public void CacheItem_Ctor4_EmptyRegion()
+        public void CacheItemValidation_Ctor4_EmptyRegion()
         {
             // arrange
             string key = "key";
@@ -630,7 +630,7 @@ namespace CacheManager.Tests
 
         [Fact]
         [ReplaceCulture]
-        public void CacheItem_Ctor4_NullRegion()
+        public void CacheItemValidation_Ctor4_NullRegion()
         {
             // arrange
             string key = "key";
@@ -649,7 +649,7 @@ namespace CacheManager.Tests
 
         [Fact]
         [ReplaceCulture]
-        public void CacheItem_Ctor4_WhitespaceRegion()
+        public void CacheItemValidation_Ctor4_WhitespaceRegion()
         {
             // arrange
             string key = "key";
@@ -668,7 +668,7 @@ namespace CacheManager.Tests
 
         [Fact]
         [ReplaceCulture]
-        public void CacheItem_Ctor4_ValidateCreatedResult()
+        public void CacheItemValidation_Ctor4_ValidateCreatedResult()
         {
             // arrange
             string key = "key";
@@ -693,7 +693,7 @@ namespace CacheManager.Tests
 
         [Fact]
         [ReplaceCulture]
-        public void CacheItem_Ctor_ExpirationTimeoutDefaults()
+        public void CacheItemValidation_Ctor_ExpirationTimeoutDefaults()
         {
             // arrange
             string key = "key";

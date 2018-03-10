@@ -2096,7 +2096,7 @@ namespace CacheManager.Tests
             }).ToList();
         }
 
-#if !NETCOREAPP
+#if !NETCOREAPP1
 
         [Serializable]
 #endif

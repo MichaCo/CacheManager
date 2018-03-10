@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFrameworks>
-      net452;netcoreapp2.0
+      net452;netcoreapp2.0;netcoreapp1.1
     </TargetFrameworks>
     <Version>1.0.0</Version>
     <AssemblyName>CacheManager.Tests</AssemblyName>
@@ -20,6 +20,16 @@
     <None Include="App.config" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="App.netstandard2.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <DependentUpon>App.config</DependentUpon>
+    </None>
+  </ItemGroup>
+  <Target Name="CopyCustomContent" AfterTargets="AfterBuild" Condition=" '$(TargetFramework)' == 'netcoreapp2.0' ">
+    <Copy SourceFiles="App.netstandard2.config" DestinationFiles="$(OutDir)\testhost.dll.config" />
+  </Target>
+  
   <ItemGroup>
     <ProjectReference Include="..\..\src\CacheManager.Microsoft.Extensions.Caching.Memory\CacheManager.Microsoft.Extensions.Caching.Memory.csproj" />
     <ProjectReference Include="..\..\src\CacheManager.Microsoft.Extensions.Configuration\CacheManager.Microsoft.Extensions.Configuration.csproj" />
@@ -57,7 +67,9 @@
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.0' ">
-    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="2.0.0" />
+    <!-- need v11+ here as older versions re-define FormatterAssemblyStyle -->
+    <PackageReference Include="Newtonsoft.Json" Version="11.0.1" />
+    <ProjectReference Include="..\..\src\CacheManager.SystemRuntimeCaching\CacheManager.SystemRuntimeCaching.csproj" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="2.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="2.0.0" />
     <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="2.0.0" />
@@ -73,12 +85,11 @@
     <DefineConstants>$(DefineConstants);REDISENABLED;MOCK_HTTPCONTEXT_ENABLED;</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp1.1' ">
-    <DefineConstants>$(DefineConstants);REDISENABLED;NETCOREAPP;</DefineConstants>
+    <DefineConstants>$(DefineConstants);REDISENABLED;NETCOREAPP1;</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.0' ">
-    <DefineConstants>$(DefineConstants);REDISENABLED;NETCOREAPP;</DefineConstants>
+    <DefineConstants>$(DefineConstants);REDISENABLED;NETCOREAPP2;</DefineConstants>
   </PropertyGroup>
-
   <!--<PropertyGroup Condition=" '$(TargetFramework)' == 'net452' ">
     <DefineConstants>$(DefineConstants);REDISENABLED;MOCK_HTTPCONTEXT_ENABLED;NO_APP_CONFIG;MEMCACHEDENABLED;COUCHBASEENABLED;</DefineConstants>
   </PropertyGroup>

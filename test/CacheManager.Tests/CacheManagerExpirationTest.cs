@@ -201,7 +201,7 @@ namespace CacheManager.Tests
             }
         }
 
-#if !NETCOREAPP
+#if !NETCOREAPP1
 
         public class SysRuntime
         {
@@ -1047,7 +1047,7 @@ namespace CacheManager.Tests
             act.Should().NotThrow();
         }
 
-#if !NETCOREAPP
+#if !NETCOREAPP1
 
         [Fact]
         public void BaseCacheHandle_ExpirationInherits_Issue_1()
