@@ -89,7 +89,7 @@ namespace CacheManager.Tests
             var data = serializer.Serialize(item);
             var result = serializer.Deserialize(data, item.GetType());
 
-            result.ShouldBeEquivalentTo(item);
+            result.Should().BeEquivalentTo(item);
         }
 
         [Fact]
@@ -104,7 +104,7 @@ namespace CacheManager.Tests
             var data = serializer.SerializeCacheItem(item);
             var result = serializer.DeserializeCacheItem<SerializerPoccoSerializable>(data, pocco.GetType());
 
-            result.ShouldBeEquivalentTo(item);
+            result.Should().BeEquivalentTo(item);
         }
 
         [Fact]
@@ -119,7 +119,7 @@ namespace CacheManager.Tests
             var data = serializer.SerializeCacheItem(item);
             var result = serializer.DeserializeCacheItem<object>(data, pocco.GetType());
 
-            result.ShouldBeEquivalentTo(item);
+            result.Should().BeEquivalentTo(item);
         }
 
         [Fact]
@@ -134,8 +134,8 @@ namespace CacheManager.Tests
             var data = serializer.SerializeCacheItem(item);
             var result = serializer.DeserializeCacheItem<SerializerPoccoSerializable>(data, pocco.GetType());
 
-            result.ShouldBeEquivalentTo(item);
-            pocco.ShouldBeEquivalentTo(item.Value);
+            result.Should().BeEquivalentTo(item);
+            pocco.Should().BeEquivalentTo(item.Value);
         }
 
         [Fact]
@@ -154,7 +154,7 @@ namespace CacheManager.Tests
             var data = serializer.Serialize(items);
             var result = serializer.Deserialize(data, items.GetType());
 
-            result.ShouldBeEquivalentTo(items);
+            result.Should().BeEquivalentTo(items);
         }
 
 #endif
@@ -274,7 +274,7 @@ namespace CacheManager.Tests
             var data = serializer.Serialize(item);
             var result = serializer.Deserialize(data, item.GetType());
 
-            result.ShouldBeEquivalentTo(item);
+            result.Should().BeEquivalentTo(item);
         }
 
         [Fact]
@@ -289,7 +289,7 @@ namespace CacheManager.Tests
             var data = serializer.SerializeCacheItem(item);
             var result = serializer.DeserializeCacheItem<SerializerPoccoSerializable>(data, pocco.GetType());
 
-            result.ShouldBeEquivalentTo(item);
+            result.Should().BeEquivalentTo(item);
         }
 
         [Fact]
@@ -304,7 +304,7 @@ namespace CacheManager.Tests
             var data = serializer.SerializeCacheItem(item);
             var result = serializer.DeserializeCacheItem<object>(data, pocco.GetType());
 
-            result.ShouldBeEquivalentTo(item);
+            result.Should().BeEquivalentTo(item);
         }
 
         [Fact]
@@ -319,8 +319,8 @@ namespace CacheManager.Tests
             var data = serializer.SerializeCacheItem(item);
             var result = serializer.DeserializeCacheItem<SerializerPoccoSerializable>(data, pocco.GetType());
 
-            result.ShouldBeEquivalentTo(item);
-            pocco.ShouldBeEquivalentTo(item.Value);
+            result.Should().BeEquivalentTo(item);
+            pocco.Should().BeEquivalentTo(item.Value);
         }
 
         [Fact]
@@ -339,7 +339,7 @@ namespace CacheManager.Tests
             var data = serializer.Serialize(items);
             var result = serializer.Deserialize(data, items.GetType());
 
-            result.ShouldBeEquivalentTo(items);
+            result.Should().BeEquivalentTo(items);
         }
 
         /* ######### gz json ######### */
@@ -459,7 +459,7 @@ namespace CacheManager.Tests
             var data = serializer.Serialize(item);
             var result = serializer.Deserialize(data, item.GetType());
 
-            result.ShouldBeEquivalentTo(item);
+            result.Should().BeEquivalentTo(item);
         }
 
         [Fact]
@@ -474,7 +474,7 @@ namespace CacheManager.Tests
             var data = serializer.SerializeCacheItem(item);
             var result = serializer.DeserializeCacheItem<SerializerPoccoSerializable>(data, pocco.GetType());
 
-            result.ShouldBeEquivalentTo(item);
+            result.Should().BeEquivalentTo(item);
         }
 
         [Fact]
@@ -489,7 +489,7 @@ namespace CacheManager.Tests
             var data = serializer.SerializeCacheItem(item);
             var result = serializer.DeserializeCacheItem<object>(data, pocco.GetType());
 
-            result.ShouldBeEquivalentTo(item);
+            result.Should().BeEquivalentTo(item);
         }
 
         [Fact]
@@ -504,8 +504,8 @@ namespace CacheManager.Tests
             var data = serializer.SerializeCacheItem(item);
             var result = serializer.DeserializeCacheItem<SerializerPoccoSerializable>(data, pocco.GetType());
 
-            result.ShouldBeEquivalentTo(item);
-            pocco.ShouldBeEquivalentTo(item.Value);
+            result.Should().BeEquivalentTo(item);
+            pocco.Should().BeEquivalentTo(item.Value);
         }
 
         [Fact]
@@ -524,7 +524,7 @@ namespace CacheManager.Tests
             var data = serializer.Serialize(items);
             var result = serializer.Deserialize(data, items.GetType());
 
-            result.ShouldBeEquivalentTo(items);
+            result.Should().BeEquivalentTo(items);
         }
 
         [Theory]
@@ -543,7 +543,7 @@ namespace CacheManager.Tests
 
                 // assert
                 actSet().Should().BeTrue("Should add the key");
-                cache.Get<SerializerPoccoSerializable>(key).ShouldBeEquivalentTo(pocco);
+                cache.Get<SerializerPoccoSerializable>(key).Should().BeEquivalentTo(pocco);
             }
         }
 
@@ -631,7 +631,7 @@ namespace CacheManager.Tests
             var data = serializer.Serialize(item);
             var result = serializer.Deserialize(data, item.GetType());
 
-            result.ShouldBeEquivalentTo(item);
+            result.Should().BeEquivalentTo(item);
         }
 
         [Fact]
@@ -646,7 +646,7 @@ namespace CacheManager.Tests
             var data = serializer.SerializeCacheItem(item);
             var result = serializer.DeserializeCacheItem<SerializerPoccoSerializable>(data, pocco.GetType());
 
-            result.ShouldBeEquivalentTo(item);
+            result.Should().BeEquivalentTo(item);
         }
 
         [Fact]
@@ -661,7 +661,7 @@ namespace CacheManager.Tests
             var data = serializer.SerializeCacheItem(item);
             var result = serializer.DeserializeCacheItem<object>(data, pocco.GetType());
 
-            result.ShouldBeEquivalentTo(item);
+            result.Should().BeEquivalentTo(item);
         }
 
         [Fact]
@@ -676,8 +676,8 @@ namespace CacheManager.Tests
             var data = serializer.SerializeCacheItem(item);
             var result = serializer.DeserializeCacheItem<SerializerPoccoSerializable>(data, pocco.GetType());
 
-            result.ShouldBeEquivalentTo(item);
-            pocco.ShouldBeEquivalentTo(item.Value);
+            result.Should().BeEquivalentTo(item);
+            pocco.Should().BeEquivalentTo(item.Value);
         }
 
         [Fact]
@@ -696,7 +696,7 @@ namespace CacheManager.Tests
             var data = serializer.Serialize(items);
             var result = serializer.Deserialize(data, items.GetType());
 
-            result.ShouldBeEquivalentTo(items);
+            result.Should().BeEquivalentTo(items);
         }
 
         [Fact]
@@ -715,8 +715,8 @@ namespace CacheManager.Tests
                 };
 
                 // assert
-                actSet.ShouldNotThrow();
-                cache.Get<SerializerPoccoSerializable>(key).ShouldBeEquivalentTo(pocco);
+                actSet.Should().NotThrow();
+                cache.Get<SerializerPoccoSerializable>(key).Should().BeEquivalentTo(pocco);
             }
         }
 
@@ -789,7 +789,7 @@ namespace CacheManager.Tests
             var data = serializer.Serialize(item);
             var result = serializer.Deserialize(data, item.GetType());
 
-            result.ShouldBeEquivalentTo(item);
+            result.Should().BeEquivalentTo(item);
         }
 
         [Fact]
@@ -804,7 +804,7 @@ namespace CacheManager.Tests
 
             data.Length.Should().Be(1);
             data[0].Should().Be(0);
-            act.ShouldThrow<Exception>("Bond does not support primitives.");
+            act.Should().Throw<Exception>("Bond does not support primitives.");
         }
 
         [Fact]
@@ -821,7 +821,7 @@ namespace CacheManager.Tests
             var data = serializer.SerializeCacheItem(item);
             var result = serializer.DeserializeCacheItem<SerializerPoccoSerializable>(data, pocco.GetType());
 
-            result.ShouldBeEquivalentTo(item);
+            result.Should().BeEquivalentTo(item);
         }
 
         [Fact]
@@ -838,7 +838,7 @@ namespace CacheManager.Tests
             var data = serializer.SerializeCacheItem(item);
             var result = serializer.DeserializeCacheItem<object>(data, pocco.GetType());
 
-            result.ShouldBeEquivalentTo(item);
+            result.Should().BeEquivalentTo(item);
         }
 
         [Fact]
@@ -853,8 +853,8 @@ namespace CacheManager.Tests
             var data = serializer.SerializeCacheItem(item);
             var result = serializer.DeserializeCacheItem<SerializerPoccoSerializable>(data, pocco.GetType());
 
-            result.ShouldBeEquivalentTo(item);
-            pocco.ShouldBeEquivalentTo(item.Value);
+            result.Should().BeEquivalentTo(item);
+            pocco.Should().BeEquivalentTo(item.Value);
         }
 
         [Fact]
@@ -874,8 +874,8 @@ namespace CacheManager.Tests
                 };
 
                 // assert
-                actSet.ShouldNotThrow();
-                cache.Get<SerializerPoccoSerializable>(key).ShouldBeEquivalentTo(pocco);
+                actSet.Should().NotThrow();
+                cache.Get<SerializerPoccoSerializable>(key).Should().BeEquivalentTo(pocco);
             }
         }
 

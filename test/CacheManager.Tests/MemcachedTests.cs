@@ -427,7 +427,7 @@ namespace CacheManager.Tests
                 Action act = () => cache.Add(Guid.NewGuid().ToString(), "test");
 
                 // assert
-                act.ShouldThrow<InvalidOperationException>("*30 days*");
+                act.Should().Throw<InvalidOperationException>("*30 days*");
             }
         }
     }

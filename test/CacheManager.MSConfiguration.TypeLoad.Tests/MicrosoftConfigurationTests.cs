@@ -18,7 +18,7 @@ namespace CacheManager.MSConfiguration.TypeLoad.Tests
             };
 
             Action act = () => GetConfiguration(data).LoadRedisConfigurations();
-            act.ShouldThrow<InvalidOperationException>("*Redis types could not be loaded*");
+            act.Should().Throw<InvalidOperationException>("*Redis types could not be loaded*");
         }
 
         [Fact]
@@ -33,7 +33,7 @@ namespace CacheManager.MSConfiguration.TypeLoad.Tests
 
             var config = GetConfiguration(data);
             Action action = () => config.GetCacheConfiguration("name");
-            action.ShouldThrow<InvalidOperationException>().WithMessage("*'Redis' could not be loaded*");
+            action.Should().Throw<InvalidOperationException>().WithMessage("*'Redis' could not be loaded*");
         }
 
         [Fact]
@@ -48,7 +48,7 @@ namespace CacheManager.MSConfiguration.TypeLoad.Tests
 
             var config = GetConfiguration(data);
             Action action = () => config.GetCacheConfiguration("name");
-            action.ShouldThrow<InvalidOperationException>().WithMessage("*'Memcached' could not be loaded*");
+            action.Should().Throw<InvalidOperationException>().WithMessage("*'Memcached' could not be loaded*");
         }
 
         [Fact]
@@ -63,7 +63,7 @@ namespace CacheManager.MSConfiguration.TypeLoad.Tests
 
             var config = GetConfiguration(data);
             Action action = () => config.GetCacheConfiguration("name");
-            action.ShouldThrow<InvalidOperationException>().WithMessage("*'Couchbase' could not be loaded*");
+            action.Should().Throw<InvalidOperationException>().WithMessage("*'Couchbase' could not be loaded*");
         }
 
         [Fact]
@@ -78,7 +78,7 @@ namespace CacheManager.MSConfiguration.TypeLoad.Tests
 
             var config = GetConfiguration(data);
             Action action = () => config.GetCacheConfiguration("name");
-            action.ShouldThrow<InvalidOperationException>().WithMessage("*'SystemRuntime' could not be loaded*");
+            action.Should().Throw<InvalidOperationException>().WithMessage("*'SystemRuntime' could not be loaded*");
         }
 
         [Fact]
@@ -93,7 +93,7 @@ namespace CacheManager.MSConfiguration.TypeLoad.Tests
 
             var config = GetConfiguration(data);
             Action action = () => config.GetCacheConfiguration("name");
-            action.ShouldThrow<InvalidOperationException>().WithMessage("*'SystemWeb' could not be loaded*");
+            action.Should().Throw<InvalidOperationException>().WithMessage("*'SystemWeb' could not be loaded*");
         }
 
         [Fact]
@@ -108,7 +108,7 @@ namespace CacheManager.MSConfiguration.TypeLoad.Tests
 
             var config = GetConfiguration(data);
             Action action = () => config.GetCacheConfiguration("name");
-            action.ShouldThrow<InvalidOperationException>().WithMessage("*serializer type 'Json' could not be loaded*");
+            action.Should().Throw<InvalidOperationException>().WithMessage("*serializer type 'Json' could not be loaded*");
         }
 
         [Fact]
@@ -123,7 +123,7 @@ namespace CacheManager.MSConfiguration.TypeLoad.Tests
 
             var config = GetConfiguration(data);
             Action action = () => config.GetCacheConfiguration("name");
-            action.ShouldThrow<InvalidOperationException>().WithMessage("*serializer type 'GzJson' could not be loaded*");
+            action.Should().Throw<InvalidOperationException>().WithMessage("*serializer type 'GzJson' could not be loaded*");
         }
 
         [Fact]
@@ -138,7 +138,7 @@ namespace CacheManager.MSConfiguration.TypeLoad.Tests
 
             var config = GetConfiguration(data);
             Action action = () => config.GetCacheConfiguration("name");
-            action.ShouldThrow<InvalidOperationException>().WithMessage("*serializer type 'Protobuf' could not be loaded*");
+            action.Should().Throw<InvalidOperationException>().WithMessage("*serializer type 'Protobuf' could not be loaded*");
         }
 
         [Fact]
@@ -153,7 +153,7 @@ namespace CacheManager.MSConfiguration.TypeLoad.Tests
 
             var config = GetConfiguration(data);
             Action action = () => config.GetCacheConfiguration("name");
-            action.ShouldThrow<InvalidOperationException>().WithMessage("*serializer type 'BondCompactBinary' could not be loaded*");
+            action.Should().Throw<InvalidOperationException>().WithMessage("*serializer type 'BondCompactBinary' could not be loaded*");
         }
 
         [Fact]
@@ -168,7 +168,7 @@ namespace CacheManager.MSConfiguration.TypeLoad.Tests
 
             var config = GetConfiguration(data);
             Action action = () => config.GetCacheConfiguration("name");
-            action.ShouldThrow<InvalidOperationException>().WithMessage("*serializer type 'BondFastBinary' could not be loaded*");
+            action.Should().Throw<InvalidOperationException>().WithMessage("*serializer type 'BondFastBinary' could not be loaded*");
         }
 
         [Fact]
@@ -183,7 +183,7 @@ namespace CacheManager.MSConfiguration.TypeLoad.Tests
 
             var config = GetConfiguration(data);
             Action action = () => config.GetCacheConfiguration("name");
-            action.ShouldThrow<InvalidOperationException>().WithMessage("*serializer type 'BondSimpleJson' could not be loaded*");
+            action.Should().Throw<InvalidOperationException>().WithMessage("*serializer type 'BondSimpleJson' could not be loaded*");
         }
 
 #if NETCOREAPP
@@ -198,7 +198,7 @@ namespace CacheManager.MSConfiguration.TypeLoad.Tests
             };
 
             Action act = () => GetConfiguration(data).GetCacheConfiguration("name");
-            act.ShouldThrow<PlatformNotSupportedException>().WithMessage("*BinaryCacheSerializer is not available*");
+            act.Should().Throw<PlatformNotSupportedException>().WithMessage("*BinaryCacheSerializer is not available*");
         }
 #endif
 

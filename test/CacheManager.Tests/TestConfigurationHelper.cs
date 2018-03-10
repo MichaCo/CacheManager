@@ -21,7 +21,7 @@ namespace CacheManager.Tests
     }
 }
 
-#if NETCOREAPP
+#if NETCOREAPP && !NETCOREAPP2_0
 namespace System.Diagnostics.CodeAnalysis
 {
     [Conditional("DEBUG")]

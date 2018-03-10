@@ -110,9 +110,9 @@ namespace CacheManager.Tests
 
             // assert
             cache.CacheHandles.Select(p => p.Configuration.EnableStatistics)
-                .ShouldAllBeEquivalentTo(Enumerable.Repeat(true, cache.CacheHandles.Count()));
+                .Should().BeEquivalentTo(Enumerable.Repeat(true, cache.CacheHandles.Count()));
             cache.CacheHandles.Select(p => p.Configuration.EnablePerformanceCounters)
-                .ShouldAllBeEquivalentTo(Enumerable.Repeat(true, cache.CacheHandles.Count()));
+                .Should().BeEquivalentTo(Enumerable.Repeat(true, cache.CacheHandles.Count()));
         }
 
         /// <summary>
@@ -132,9 +132,9 @@ namespace CacheManager.Tests
 
             // assert
             cache.CacheHandles.Select(p => p.Configuration.EnableStatistics)
-                .ShouldAllBeEquivalentTo(Enumerable.Repeat(true, cache.CacheHandles.Count()));
+                .Should().BeEquivalentTo(Enumerable.Repeat(true, cache.CacheHandles.Count()));
             cache.CacheHandles.Select(p => p.Configuration.EnablePerformanceCounters)
-                .ShouldAllBeEquivalentTo(Enumerable.Repeat(false, cache.CacheHandles.Count()));
+                .Should().BeEquivalentTo(Enumerable.Repeat(false, cache.CacheHandles.Count()));
         }
 
         [Fact]
@@ -150,9 +150,9 @@ namespace CacheManager.Tests
 
             // assert
             cache.CacheHandles.Select(p => p.Configuration.EnableStatistics)
-                .ShouldAllBeEquivalentTo(Enumerable.Repeat(false, cache.CacheHandles.Count()));
+                .Should().BeEquivalentTo(Enumerable.Repeat(false, cache.CacheHandles.Count()));
             cache.CacheHandles.Select(p => p.Configuration.EnablePerformanceCounters)
-                .ShouldAllBeEquivalentTo(Enumerable.Repeat(false, cache.CacheHandles.Count()));
+                .Should().BeEquivalentTo(Enumerable.Repeat(false, cache.CacheHandles.Count()));
         }
 
         [Fact]

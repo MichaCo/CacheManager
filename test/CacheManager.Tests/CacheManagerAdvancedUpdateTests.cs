@@ -21,7 +21,7 @@ namespace CacheManager.Tests
                 var key = Guid.NewGuid().ToString();
                 cache.Add(key, "value");
                 Action act = () => cache.Update(key, v => null);
-                act.ShouldThrow<InvalidOperationException>("factory");
+                act.Should().Throw<InvalidOperationException>("factory");
             }
         }
 
@@ -34,7 +34,7 @@ namespace CacheManager.Tests
             Func<UpdateItemResult<object>> act = () => UpdateItemResult.ForSuccess<object>(item, true, 1001);
 
             // assert
-            act().ShouldBeEquivalentTo(new { Value = item, UpdateState = UpdateItemResultState.Success, NumberOfTriesNeeded = 1001, VersionConflictOccurred = true });
+            act().Should().BeEquivalentTo(new { Value = item, UpdateState = UpdateItemResultState.Success, NumberOfTriesNeeded = 1001, VersionConflictOccurred = true });
         }
 
         [Fact]
@@ -45,7 +45,7 @@ namespace CacheManager.Tests
             Func<UpdateItemResult<object>> act = () => UpdateItemResult.ForTooManyRetries<object>(1001);
 
             // assert
-            act().ShouldBeEquivalentTo(new { Value = default(object), UpdateState = UpdateItemResultState.TooManyRetries, NumberOfTriesNeeded = 1001, VersionConflictOccurred = true });
+            act().Should().BeEquivalentTo(new { Value = default(object), UpdateState = UpdateItemResultState.TooManyRetries, NumberOfTriesNeeded = 1001, VersionConflictOccurred = true });
         }
 
         [Fact]
@@ -56,7 +56,7 @@ namespace CacheManager.Tests
             Func<UpdateItemResult<object>> act = () => UpdateItemResult.ForItemDidNotExist<object>();
 
             // assert
-            act().ShouldBeEquivalentTo(new { Value = default(object), UpdateState = UpdateItemResultState.ItemDidNotExist, NumberOfTriesNeeded = 1, VersionConflictOccurred = false });
+            act().Should().BeEquivalentTo(new { Value = default(object), UpdateState = UpdateItemResultState.ItemDidNotExist, NumberOfTriesNeeded = 1, VersionConflictOccurred = false });
         }
 
         [Fact]
@@ -67,7 +67,7 @@ namespace CacheManager.Tests
             Func<UpdateItemResult<object>> act = () => UpdateItemResult.ForFactoryReturnedNull<object>();
 
             // assert
-            act().ShouldBeEquivalentTo(new { Value = default(object), UpdateState = UpdateItemResultState.FactoryReturnedNull, NumberOfTriesNeeded = 1, VersionConflictOccurred = false });
+            act().Should().BeEquivalentTo(new { Value = default(object), UpdateState = UpdateItemResultState.FactoryReturnedNull, NumberOfTriesNeeded = 1, VersionConflictOccurred = false });
         }
 
         [Fact]

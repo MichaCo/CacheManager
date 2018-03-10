@@ -33,7 +33,7 @@ namespace CacheManager.Tests
             // act
             Action act = () => cache.Add(new CacheItem<object>(key, "something", ExpirationMode.Absolute, default(TimeSpan)));
 
-            act.ShouldThrow<ArgumentOutOfRangeException>()
+            act.Should().Throw<ArgumentOutOfRangeException>()
                 .WithMessage("Expiration timeout must be greater than zero*");
         }
 
@@ -42,7 +42,7 @@ namespace CacheManager.Tests
         public void CacheManager_CtorA_NoConfig()
         {
             Action act = () => new BaseCacheManager<object>(null);
-            act.ShouldThrow<ArgumentException>()
+            act.Should().Throw<ArgumentException>()
                     .WithMessage("*Parameter name: configuration");
         }
 
@@ -83,13 +83,13 @@ namespace CacheManager.Tests
                 Action actR = () => cache.Exists("key", null);
 
                 // assert
-                act.ShouldThrow<ArgumentException>(cache.Configuration.ToString())
+                act.Should().Throw<ArgumentException>(cache.Configuration.ToString())
                     .WithMessage("*Parameter name: key", cache.Configuration.ToString());
 
-                actB.ShouldThrow<ArgumentException>(cache.ToString())
+                actB.Should().Throw<ArgumentException>(cache.ToString())
                     .WithMessage("*Parameter name: key", cache.Configuration.ToString());
 
-                actR.ShouldThrow<ArgumentException>(cache.ToString())
+                actR.Should().Throw<ArgumentException>(cache.ToString())
                     .WithMessage("*Parameter name: region", cache.Configuration.ToString());
             }
         }
@@ -182,10 +182,10 @@ namespace CacheManager.Tests
                 Action actR = () => cache.Put(null, null, null);
 
                 // assert
-                act.ShouldThrow<ArgumentException>()
+                act.Should().Throw<ArgumentException>()
                     .WithMessage("*Parameter name: key");
 
-                actR.ShouldThrow<ArgumentException>()
+                actR.Should().Throw<ArgumentException>()
                     .WithMessage("*Parameter name: key");
             }
         }
@@ -204,10 +204,10 @@ namespace CacheManager.Tests
                 Action actR = () => cache.Put("key", null, null);
 
                 // assert
-                act.ShouldThrow<ArgumentException>()
+                act.Should().Throw<ArgumentException>()
                     .WithMessage("*Parameter name: value");
 
-                actR.ShouldThrow<ArgumentException>()
+                actR.Should().Throw<ArgumentException>()
                     .WithMessage("*Parameter name: value");
             }
         }
@@ -225,7 +225,7 @@ namespace CacheManager.Tests
                 Action act = () => cache.Put(null);
 
                 // assert
-                act.ShouldThrow<ArgumentNullException>()
+                act.Should().Throw<ArgumentNullException>()
                     .WithMessage("*Parameter name: item");
             }
         }
@@ -243,7 +243,7 @@ namespace CacheManager.Tests
                 Action act = () => cache.Put("key", "value", null);
 
                 // assert
-                act.ShouldThrow<ArgumentNullException>()
+                act.Should().Throw<ArgumentNullException>()
                     .WithMessage("*Parameter name: region");
             }
         }
@@ -270,8 +270,8 @@ namespace CacheManager.Tests
                 Action actRegion = () => cache.Put(itemRegion);
 
                 // assert
-                act.ShouldNotThrow();
-                actRegion.ShouldNotThrow();
+                act.Should().NotThrow();
+                actRegion.Should().NotThrow();
                 cache.Get(key).Should().Be(value);
                 cache.Get(key, "region").Should().Be(value);
             }
@@ -297,8 +297,8 @@ namespace CacheManager.Tests
                 Action actRegion = () => cache.Put(key, value, "region");
 
                 // assert
-                act.ShouldNotThrow();
-                actRegion.ShouldNotThrow();
+                act.Should().NotThrow();
+                actRegion.Should().NotThrow();
                 cache.Get(key).Should().Be(value);
                 cache.Get(key, "region").Should().Be(value);
             }
@@ -330,28 +330,28 @@ namespace CacheManager.Tests
                 Action actTRU = () => cache.TryUpdate(null, null, null, 33, out val);
 
                 // assert
-                act.ShouldThrow<ArgumentException>()
+                act.Should().Throw<ArgumentException>()
                     .WithMessage("*Parameter name: key*");
 
-                actR.ShouldThrow<ArgumentException>()
+                actR.Should().Throw<ArgumentException>()
                     .WithMessage("*Parameter name: key*");
 
-                actU.ShouldThrow<ArgumentException>()
+                actU.Should().Throw<ArgumentException>()
                     .WithMessage("*Parameter name: key*");
 
-                actRU.ShouldThrow<ArgumentException>()
+                actRU.Should().Throw<ArgumentException>()
                     .WithMessage("*Parameter name: key*");
 
-                actT.ShouldThrow<ArgumentException>()
+                actT.Should().Throw<ArgumentException>()
                     .WithMessage("*Parameter name: key*");
 
-                actTR.ShouldThrow<ArgumentException>()
+                actTR.Should().Throw<ArgumentException>()
                     .WithMessage("*Parameter name: key*");
 
-                actTU.ShouldThrow<ArgumentException>()
+                actTU.Should().Throw<ArgumentException>()
                     .WithMessage("*Parameter name: key*");
 
-                actTRU.ShouldThrow<ArgumentException>()
+                actTRU.Should().Throw<ArgumentException>()
                     .WithMessage("*Parameter name: key*");
             }
         }
@@ -378,28 +378,28 @@ namespace CacheManager.Tests
                 Action actTRU = () => cache.TryUpdate("key", "r", null, 33, out val);
 
                 // assert
-                act.ShouldThrow<ArgumentException>()
+                act.Should().Throw<ArgumentException>()
                     .WithMessage("*Parameter name: updateValue*");
 
-                actR.ShouldThrow<ArgumentException>()
+                actR.Should().Throw<ArgumentException>()
                     .WithMessage("*Parameter name: updateValue*");
 
-                actU.ShouldThrow<ArgumentException>()
+                actU.Should().Throw<ArgumentException>()
                     .WithMessage("*Parameter name: updateValue*");
 
-                actRU.ShouldThrow<ArgumentException>()
+                actRU.Should().Throw<ArgumentException>()
                     .WithMessage("*Parameter name: updateValue*");
 
-                actT.ShouldThrow<ArgumentException>()
+                actT.Should().Throw<ArgumentException>()
                     .WithMessage("*Parameter name: updateValue*");
 
-                actTR.ShouldThrow<ArgumentException>()
+                actTR.Should().Throw<ArgumentException>()
                     .WithMessage("*Parameter name: updateValue*");
 
-                actTU.ShouldThrow<ArgumentException>()
+                actTU.Should().Throw<ArgumentException>()
                     .WithMessage("*Parameter name: updateValue*");
 
-                actTRU.ShouldThrow<ArgumentException>()
+                actTRU.Should().Throw<ArgumentException>()
                     .WithMessage("*Parameter name: updateValue*");
             }
         }
@@ -422,16 +422,16 @@ namespace CacheManager.Tests
                 Action actTRU = () => cache.TryUpdate("key", null, null, 33, out val);
 
                 // assert
-                actR.ShouldThrow<ArgumentException>()
+                actR.Should().Throw<ArgumentException>()
                     .WithMessage("*Parameter name: region*");
 
-                actRU.ShouldThrow<ArgumentException>()
+                actRU.Should().Throw<ArgumentException>()
                     .WithMessage("*Parameter name: region*");
 
-                actTR.ShouldThrow<ArgumentException>()
+                actTR.Should().Throw<ArgumentException>()
                     .WithMessage("*Parameter name: region*");
 
-                actTRU.ShouldThrow<ArgumentException>()
+                actTRU.Should().Throw<ArgumentException>()
                     .WithMessage("*Parameter name: region*");
             }
         }
@@ -454,16 +454,16 @@ namespace CacheManager.Tests
                 Action actTRU = () => cache.TryUpdate("key", "region", a => a, -1, out val);
 
                 // assert
-                act.ShouldThrow<InvalidOperationException>()
+                act.Should().Throw<InvalidOperationException>()
                     .WithMessage("*retries must be greater than*");
 
-                actR.ShouldThrow<InvalidOperationException>()
+                actR.Should().Throw<InvalidOperationException>()
                     .WithMessage("*retries must be greater than*");
 
-                actTU.ShouldThrow<InvalidOperationException>()
+                actTU.Should().Throw<InvalidOperationException>()
                     .WithMessage("*retries must be greater than*");
 
-                actTRU.ShouldThrow<InvalidOperationException>()
+                actTRU.Should().Throw<InvalidOperationException>()
                     .WithMessage("*retries must be greater than*");
             }
         }
@@ -487,8 +487,8 @@ namespace CacheManager.Tests
                 Func<bool> act2R = () => cache.TryUpdate(key, "region", item => item, out value);
 
                 // assert
-                act.ShouldThrow<InvalidOperationException>("*failed*");
-                actR.ShouldThrow<InvalidOperationException>("*failed*");
+                act.Should().Throw<InvalidOperationException>("*failed*");
+                actR.Should().Throw<InvalidOperationException>("*failed*");
                 act2().Should().BeFalse("Item has not been added to the cache");
                 act2R().Should().BeFalse("Item has not been added to the cache");
             }
@@ -521,10 +521,10 @@ namespace CacheManager.Tests
                 Func<bool> actTRU = () => cache.TryUpdate(key, region, (v) => null, 33, out val);
 
                 // assert
-                act.ShouldThrow<InvalidOperationException>().WithMessage("*value factory returned null*");
-                actR.ShouldThrow<InvalidOperationException>().WithMessage("*value factory returned null*");
-                actU.ShouldThrow<InvalidOperationException>().WithMessage("*value factory returned null*");
-                actRU.ShouldThrow<InvalidOperationException>().WithMessage("*value factory returned null*");
+                act.Should().Throw<InvalidOperationException>().WithMessage("*value factory returned null*");
+                actR.Should().Throw<InvalidOperationException>().WithMessage("*value factory returned null*");
+                actU.Should().Throw<InvalidOperationException>().WithMessage("*value factory returned null*");
+                actRU.Should().Throw<InvalidOperationException>().WithMessage("*value factory returned null*");
 
                 actT().Should().BeFalse();
                 actTR().Should().BeFalse();
@@ -587,16 +587,16 @@ namespace CacheManager.Tests
                 Action actRU = () => cache.AddOrUpdate(null, "r", null, null, 33);
 
                 // assert
-                act.ShouldThrow<ArgumentException>()
+                act.Should().Throw<ArgumentException>()
                     .WithMessage("*Parameter name: key*");
 
-                actR.ShouldThrow<ArgumentException>()
+                actR.Should().Throw<ArgumentException>()
                     .WithMessage("*Parameter name: key*");
 
-                actU.ShouldThrow<ArgumentException>()
+                actU.Should().Throw<ArgumentException>()
                     .WithMessage("*Parameter name: key*");
 
-                actRU.ShouldThrow<ArgumentException>()
+                actRU.Should().Throw<ArgumentException>()
                     .WithMessage("*Parameter name: key*");
             }
         }
@@ -619,16 +619,16 @@ namespace CacheManager.Tests
                 Action actIU = () => cache.AddOrUpdate(new CacheItem<object>("k", "v"), null, 1);
 
                 // assert
-                act.ShouldThrow<ArgumentException>()
+                act.Should().Throw<ArgumentException>()
                     .WithMessage("*Parameter name: updateValue*");
 
-                actR.ShouldThrow<ArgumentException>()
+                actR.Should().Throw<ArgumentException>()
                     .WithMessage("*Parameter name: updateValue*");
 
-                actU.ShouldThrow<ArgumentException>()
+                actU.Should().Throw<ArgumentException>()
                     .WithMessage("*Parameter name: updateValue*");
 
-                actRU.ShouldThrow<ArgumentException>()
+                actRU.Should().Throw<ArgumentException>()
                     .WithMessage("*Parameter name: updateValue*");
             }
         }
@@ -647,10 +647,10 @@ namespace CacheManager.Tests
                 Action actRU = () => cache.AddOrUpdate("key", null, "value", a => a, 1);
 
                 // assert
-                actR.ShouldThrow<ArgumentException>()
+                actR.Should().Throw<ArgumentException>()
                     .WithMessage("*Parameter name: region*");
 
-                actRU.ShouldThrow<ArgumentException>()
+                actRU.Should().Throw<ArgumentException>()
                     .WithMessage("*Parameter name: region*");
             }
         }
@@ -670,13 +670,13 @@ namespace CacheManager.Tests
                 Action actIU = () => cache.AddOrUpdate(new CacheItem<object>("k", "v"), (o) => o, -1);
 
                 // assert
-                actU.ShouldThrow<InvalidOperationException>()
+                actU.Should().Throw<InvalidOperationException>()
                     .WithMessage("*retries must be greater than*");
 
-                actRU.ShouldThrow<InvalidOperationException>()
+                actRU.Should().Throw<InvalidOperationException>()
                     .WithMessage("*retries must be greater than*");
 
-                actIU.ShouldThrow<InvalidOperationException>()
+                actIU.Should().Throw<InvalidOperationException>()
                     .WithMessage("*retries must be greater than*");
             }
         }
@@ -750,22 +750,22 @@ namespace CacheManager.Tests
                 Action actF = () => cache.GetOrAdd(null, "region", (k, r) => new CacheItem<object>(k, "value"));
 
                 // assert
-                actA.ShouldThrow<ArgumentException>()
+                actA.Should().Throw<ArgumentException>()
                     .WithMessage("*key*");
 
-                actB.ShouldThrow<ArgumentException>()
+                actB.Should().Throw<ArgumentException>()
                     .WithMessage("*key*");
 
-                actC.ShouldThrow<ArgumentException>()
+                actC.Should().Throw<ArgumentException>()
                     .WithMessage("*key*");
 
-                actD.ShouldThrow<ArgumentException>()
+                actD.Should().Throw<ArgumentException>()
                     .WithMessage("*key*");
 
-                actE.ShouldThrow<ArgumentException>()
+                actE.Should().Throw<ArgumentException>()
                     .WithMessage("*key*");
 
-                actF.ShouldThrow<ArgumentException>()
+                actF.Should().Throw<ArgumentException>()
                     .WithMessage("*key*");
             }
         }
@@ -787,16 +787,16 @@ namespace CacheManager.Tests
                 Action actF = () => cache.TryGetOrAdd(null, "region", (k, r) => new CacheItem<object>(k, "value"), out val);
 
                 // assert
-                actC.ShouldThrow<ArgumentException>()
+                actC.Should().Throw<ArgumentException>()
                     .WithMessage("*key*");
 
-                actD.ShouldThrow<ArgumentException>()
+                actD.Should().Throw<ArgumentException>()
                     .WithMessage("*key*");
 
-                actE.ShouldThrow<ArgumentException>()
+                actE.Should().Throw<ArgumentException>()
                     .WithMessage("*key*");
 
-                actF.ShouldThrow<ArgumentException>()
+                actF.Should().Throw<ArgumentException>()
                     .WithMessage("*key*");
             }
         }
@@ -815,10 +815,10 @@ namespace CacheManager.Tests
                 Action actB = () => cache.GetOrAdd("key", null, (k, r) => "value");
 
                 // assert
-                actA.ShouldThrow<ArgumentException>()
+                actA.Should().Throw<ArgumentException>()
                     .WithMessage("*region*");
 
-                actB.ShouldThrow<ArgumentException>()
+                actB.Should().Throw<ArgumentException>()
                     .WithMessage("*region*");
             }
         }
@@ -837,7 +837,7 @@ namespace CacheManager.Tests
                 Action actB = () => cache.TryGetOrAdd("key", null, (k, r) => "value", out val);
 
                 // assert
-                actB.ShouldThrow<ArgumentException>()
+                actB.Should().Throw<ArgumentException>()
                     .WithMessage("*region*");
             }
         }
@@ -856,10 +856,10 @@ namespace CacheManager.Tests
                 Action actB = () => cache.GetOrAdd("key", "region", null);
 
                 // assert
-                actA.ShouldThrow<ArgumentException>()
+                actA.Should().Throw<ArgumentException>()
                     .WithMessage("*valueFactory*");
 
-                actB.ShouldThrow<ArgumentException>()
+                actB.Should().Throw<ArgumentException>()
                     .WithMessage("*valueFactory*");
             }
         }
@@ -879,10 +879,10 @@ namespace CacheManager.Tests
                 Action actB = () => cache.TryGetOrAdd("key", "region", null, out val);
 
                 // assert
-                actA.ShouldThrow<ArgumentException>()
+                actA.Should().Throw<ArgumentException>()
                     .WithMessage("*valueFactory*");
 
-                actB.ShouldThrow<ArgumentException>()
+                actB.Should().Throw<ArgumentException>()
                     .WithMessage("*valueFactory*");
             }
         }
@@ -980,7 +980,7 @@ namespace CacheManager.Tests
                 Action act = () => cache.GetOrAdd(key, (k) => null);
 
                 // assert
-                act.ShouldThrow<InvalidOperationException>("added");
+                act.Should().Throw<InvalidOperationException>("added");
             }
         }
 
@@ -1022,7 +1022,7 @@ namespace CacheManager.Tests
                 Action act = () => cache.GetOrAdd(key, (object)null);
 
                 // assert
-                act.ShouldThrow<ArgumentNullException>("added");
+                act.Should().Throw<ArgumentNullException>("added");
             }
         }
 
@@ -1059,8 +1059,8 @@ namespace CacheManager.Tests
                 resultB.Should().Be(val);
                 resultC.Value.Should().Be(val);
                 resultD.Value.Should().Be(val);
-                act.ShouldNotThrow();
-                actB.ShouldNotThrow();
+                act.Should().NotThrow();
+                actB.Should().NotThrow();
             }
         }
 
@@ -1226,10 +1226,10 @@ namespace CacheManager.Tests
                 Action actR = () => cache.Add(null, null, null);
 
                 // assert
-                act.ShouldThrow<ArgumentException>()
+                act.Should().Throw<ArgumentException>()
                     .WithMessage("*Parameter name: key");
 
-                actR.ShouldThrow<ArgumentException>()
+                actR.Should().Throw<ArgumentException>()
                     .WithMessage("*Parameter name: key");
             }
         }
@@ -1250,10 +1250,10 @@ namespace CacheManager.Tests
                 Action actR = () => cache.Add("key", null, "region");
 
                 // assert
-                act.ShouldThrow<ArgumentException>()
+                act.Should().Throw<ArgumentException>()
                     .WithMessage("*Parameter name: value");
 
-                actR.ShouldThrow<ArgumentException>()
+                actR.Should().Throw<ArgumentException>()
                     .WithMessage("*Parameter name: value");
             }
         }
@@ -1273,7 +1273,7 @@ namespace CacheManager.Tests
                 Action actR = () => cache.Add("key", "value", null);
 
                 // assert
-                actR.ShouldThrow<ArgumentException>()
+                actR.Should().Throw<ArgumentException>()
                     .WithMessage("*Parameter name: region");
             }
         }
@@ -1292,7 +1292,7 @@ namespace CacheManager.Tests
                 Action act = () => cache.Add(null);
 
                 // assert
-                act.ShouldThrow<ArgumentNullException>()
+                act.Should().Throw<ArgumentNullException>()
                     .WithMessage("*Parameter name: item");
             }
         }
@@ -1317,7 +1317,7 @@ namespace CacheManager.Tests
                 Action act = () => cache.Add(item);
 
                 // assert
-                act.ShouldNotThrow();
+                act.Should().NotThrow();
                 cache.Get(key).Should().Be(value);
             }
         }
@@ -1341,7 +1341,7 @@ namespace CacheManager.Tests
                 Action act = () => cache.Add(key, value);
 
                 // assert
-                act.ShouldNotThrow();
+                act.Should().NotThrow();
                 cache.Get(key).Should().Be(value);
             }
         }
@@ -1365,10 +1365,10 @@ namespace CacheManager.Tests
                 Action actR = () => cache.Get(null, "region");
 
                 // assert
-                act.ShouldThrow<ArgumentNullException>()
+                act.Should().Throw<ArgumentNullException>()
                     .WithMessage("*Parameter name: key");
 
-                actR.ShouldThrow<ArgumentNullException>()
+                actR.Should().Throw<ArgumentNullException>()
                     .WithMessage("*Parameter name: key");
             }
         }
@@ -1387,7 +1387,7 @@ namespace CacheManager.Tests
                 Action act = () => cache.Get("key", null);
 
                 // assert
-                act.ShouldThrow<ArgumentNullException>()
+                act.Should().Throw<ArgumentNullException>()
                     .WithMessage("*Parameter name: region");
             }
         }
@@ -1407,10 +1407,10 @@ namespace CacheManager.Tests
                 Action actR = () => cache.GetCacheItem(null, "region");
 
                 // assert
-                act.ShouldThrow<ArgumentNullException>()
+                act.Should().Throw<ArgumentNullException>()
                     .WithMessage("*Parameter name: key");
 
-                actR.ShouldThrow<ArgumentNullException>()
+                actR.Should().Throw<ArgumentNullException>()
                     .WithMessage("*Parameter name: key");
             }
         }
@@ -1429,7 +1429,7 @@ namespace CacheManager.Tests
                 Action act = () => cache.GetCacheItem("key", null);
 
                 // assert
-                act.ShouldThrow<ArgumentNullException>()
+                act.Should().Throw<ArgumentNullException>()
                     .WithMessage("*Parameter name: region");
             }
         }
@@ -1449,10 +1449,10 @@ namespace CacheManager.Tests
                 Action actR = () => cache.Get<string>(null, "region");
 
                 // assert
-                act.ShouldThrow<ArgumentNullException>()
+                act.Should().Throw<ArgumentNullException>()
                     .WithMessage("*Parameter name: key");
 
-                actR.ShouldThrow<ArgumentNullException>()
+                actR.Should().Throw<ArgumentNullException>()
                     .WithMessage("*Parameter name: key");
             }
         }
@@ -1471,7 +1471,7 @@ namespace CacheManager.Tests
                 Action act = () => cache.Get<string>("key", null);
 
                 // assert
-                act.ShouldThrow<ArgumentNullException>()
+                act.Should().Throw<ArgumentNullException>()
                     .WithMessage("*Parameter name: region");
             }
         }
@@ -1542,7 +1542,7 @@ namespace CacheManager.Tests
                 actAdd().Should().BeTrue("the cache should add the key/value");
                 actGet().Should()
                     .NotBeNull("object was added")
-                    .And.ShouldBeEquivalentTo(new { Key = key, Value = value }, p => p.ExcludingMissingMembers());
+                    .And.Should().BeEquivalentTo(new { Key = key, Value = value }, p => p.ExcludingMissingMembers());
             }
         }
 
@@ -1565,10 +1565,10 @@ namespace CacheManager.Tests
                 Action actR = () => cache.Remove(null, "region");
 
                 // assert
-                act.ShouldThrow<ArgumentException>()
+                act.Should().Throw<ArgumentException>()
                     .WithMessage("*Parameter name: key");
 
-                actR.ShouldThrow<ArgumentException>()
+                actR.Should().Throw<ArgumentException>()
                     .WithMessage("*Parameter name: key");
             }
         }
@@ -1587,7 +1587,7 @@ namespace CacheManager.Tests
                 Action act = () => cache.Remove("key", null);
 
                 // assert
-                act.ShouldThrow<ArgumentException>()
+                act.Should().Throw<ArgumentException>()
                     .WithMessage("*Parameter name: region");
             }
         }
@@ -1608,7 +1608,7 @@ namespace CacheManager.Tests
                 Action act = () => cache.Remove(key);
 
                 // assert
-                act.ShouldThrow<ArgumentException>()
+                act.Should().Throw<ArgumentException>()
                     .WithMessage("*Parameter name: key");
             }
         }
@@ -1629,7 +1629,7 @@ namespace CacheManager.Tests
                 Action act = () => cache.Remove(key);
 
                 // assert
-                act.ShouldThrow<ArgumentException>()
+                act.Should().Throw<ArgumentException>()
                     .WithMessage("*Parameter name: key");
             }
         }
@@ -1701,10 +1701,10 @@ namespace CacheManager.Tests
                 Action actR = () => result = cache[key, "region"];
 
                 // assert
-                act.ShouldThrow<ArgumentNullException>()
+                act.Should().Throw<ArgumentNullException>()
                     .WithMessage("*Parameter name: key");
 
-                actR.ShouldThrow<ArgumentNullException>()
+                actR.Should().Throw<ArgumentNullException>()
                     .WithMessage("*Parameter name: key");
             }
         }
@@ -1724,7 +1724,7 @@ namespace CacheManager.Tests
                 Action act = () => result = cache["key", string.Empty];
 
                 // assert
-                act.ShouldThrow<ArgumentException>()
+                act.Should().Throw<ArgumentException>()
                     .WithMessage("*Parameter name: region");
             }
         }
@@ -1761,7 +1761,7 @@ namespace CacheManager.Tests
             Action act = () => new BaseCacheManager<string>(new CacheManagerConfiguration() { MaxRetries = 1000 });
 
             // assert
-            act.ShouldThrow<InvalidOperationException>().WithMessage("*no cache handles*");
+            act.Should().Throw<InvalidOperationException>().WithMessage("*no cache handles*");
         }
 
         #endregion testing empty handle list
@@ -1817,13 +1817,13 @@ namespace CacheManager.Tests
 
                 // assert
                 ValidateCacheValues(cache, keys, values);
-                strSomething.ShouldBeEquivalentTo(values[0]);
-                someNumber.ShouldBeEquivalentTo(values[1]);
-                someFloating.ShouldBeEquivalentTo(values[2]);
-                someDoubling.ShouldBeEquivalentTo(values[3]);
-                someLonging.ShouldBeEquivalentTo(values[4]);
-                someBooling.ShouldBeEquivalentTo(values[5]);
-                obj.ShouldBeEquivalentTo(values[6]);
+                strSomething.Should().BeEquivalentTo((string)values[0]);
+                someNumber.Should().Be((int)values[1]);
+                someFloating.Should().Be((float)values[2]);
+                someDoubling.Should().Be((double)values[3]);
+                someLonging.Should().Be((long)values[4]);
+                someBooling.Should().Be((bool)values[5]);
+                obj.Should().BeEquivalentTo(values[6]);
                 someObject.Should().Be(null);
             }
         }
@@ -1868,7 +1868,7 @@ namespace CacheManager.Tests
                 };
 
                 // assert
-                actPut.ShouldNotThrow();
+                actPut.Should().NotThrow();
                 ValidateCacheValues(cache, keys, values);
             }
         }
@@ -1891,7 +1891,7 @@ namespace CacheManager.Tests
                 };
 
                 // assert
-                actSet.ShouldNotThrow();
+                actSet.Should().NotThrow();
                 ValidateCacheValues(cache, keys, values);
             }
         }
@@ -1914,7 +1914,7 @@ namespace CacheManager.Tests
                 };
 
                 // assert
-                actSet.ShouldNotThrow();
+                actSet.Should().NotThrow();
                 ValidateCacheValues(cache, keys, values);
             }
         }
@@ -2002,7 +2002,7 @@ namespace CacheManager.Tests
                 };
 
                 // assert
-                actSet.ShouldNotThrow();
+                actSet.Should().NotThrow();
                 ValidateCacheValues(cache, keys, newValues);
             }
         }
