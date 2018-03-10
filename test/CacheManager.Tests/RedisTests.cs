@@ -787,7 +787,7 @@ namespace CacheManager.Tests
 
 #endif
 
-        ////[Fact(Skip = "needs clear")]
+        [Fact(Skip = "needs clear")]
         [Trait("category", "Redis")]
         public async Task Redis_Multiple_PubSub_Clear()
         {

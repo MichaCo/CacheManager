@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Buffers;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -18,6 +19,7 @@ using Newtonsoft.Json;
 
 namespace CacheManager.Benchmarks
 {
+    [ExcludeFromCodeCoverage]
     public class SerializationBenchmark
     {
         private int _iterations = 1000;
@@ -31,7 +33,7 @@ namespace CacheManager.Benchmarks
         private BondSimpleJsonCacheSerializer _bondSimpleJson = new BondSimpleJsonCacheSerializer();
         private readonly Type _pocoType = typeof(TestPoco);
 
-        [Setup]
+        [GlobalSetup]
         public void Setup()
         {
             var rnd = new Random();

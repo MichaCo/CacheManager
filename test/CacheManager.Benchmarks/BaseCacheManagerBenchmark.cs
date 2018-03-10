@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using BenchmarkDotNet.Attributes;
 using CacheManager.Core;
@@ -7,6 +8,7 @@ using Enyim.Caching.Configuration;
 
 namespace CacheManager.Benchmarks
 {
+    [ExcludeFromCodeCoverage]
     public abstract class BaseCacheBenchmark
     {
         private static ICacheManagerConfiguration BaseConfig
@@ -44,7 +46,7 @@ namespace CacheManager.Benchmarks
             new BaseCacheManager<string>(BaseConfig.Builder
                 .WithMemcachedCacheHandle(new MemcachedClient(MemcachedConfig)).Build());
 
-        [Setup]
+        [GlobalSetup]
         public void Setup()
         {
             DictionaryCache.Clear();
@@ -94,6 +96,7 @@ namespace CacheManager.Benchmarks
 
     #region add
 
+    [ExcludeFromCodeCoverage]
     public class AddSingleBenchmark : BaseCacheBenchmark
     {
         private string _key = Guid.NewGuid().ToString();
@@ -107,6 +110,7 @@ namespace CacheManager.Benchmarks
         }
     }
 
+    [ExcludeFromCodeCoverage]
     public class AddWithRegionSingleBenchmark : BaseCacheBenchmark
     {
         private string _key = Guid.NewGuid().ToString();
@@ -124,6 +128,7 @@ namespace CacheManager.Benchmarks
 
     #region put
 
+    [ExcludeFromCodeCoverage]
     public class PutSingleBenchmark : BaseCacheBenchmark
     {
         private string _key = Guid.NewGuid().ToString();
@@ -134,6 +139,7 @@ namespace CacheManager.Benchmarks
         }
     }
 
+    [ExcludeFromCodeCoverage]
     public class PutWithRegionSingleBenchmark : BaseCacheBenchmark
     {
         private string _key = Guid.NewGuid().ToString();
@@ -148,6 +154,7 @@ namespace CacheManager.Benchmarks
 
     #region get
 
+    [ExcludeFromCodeCoverage]
     public class GetSingleBenchmark : BaseCacheBenchmark
     {
         protected string Key = Guid.NewGuid().ToString();
@@ -178,6 +185,7 @@ namespace CacheManager.Benchmarks
         }
     }
 
+    [ExcludeFromCodeCoverage]
     public class GetWithRegionSingleBenchmark : GetSingleBenchmark
     {
         protected override void Excecute(ICacheManager<string> cache)
@@ -194,6 +202,7 @@ namespace CacheManager.Benchmarks
 
     #region update
 
+    [ExcludeFromCodeCoverage]
     public class UpdateSingleBenchmark : GetSingleBenchmark
     {
         protected override void Excecute(ICacheManager<string> cache)

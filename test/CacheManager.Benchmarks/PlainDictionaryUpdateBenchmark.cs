@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
 
 namespace CacheManager.Benchmarks
 {
+    [ExcludeFromCodeCoverage]
     public class PlainDictionaryUpdateBenchmark
     {
         private const int Threads = 6;

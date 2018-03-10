@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Buffers;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -9,13 +10,14 @@ using CacheManager.Serialization.Json;
 
 namespace CacheManager.Benchmarks
 {
+    [ExcludeFromCodeCoverage]
     public class GzBenchmark
     {
         private static ArrayPool<byte> _pool = ArrayPool<byte>.Create();
 
         private byte[] _payload;
 
-        [Setup]
+        [GlobalSetup]
         public void Setup()
         {
             var list = new List<string>();

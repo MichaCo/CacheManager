@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using BenchmarkDotNet.Attributes;
@@ -7,6 +8,7 @@ using CacheManager.Core.Internal;
 
 namespace CacheManager.Benchmarks
 {
+    [ExcludeFromCodeCoverage]
     public class BackplaneMessageBenchmarkMultiple
     {
         private static byte[] _ownderBytes = Encoding.UTF8.GetBytes(Guid.NewGuid().ToString());
@@ -49,6 +51,7 @@ namespace CacheManager.Benchmarks
         }
     }
 
+    [ExcludeFromCodeCoverage]
     public class BackplaneMessageBenchmark
     {
         private static byte[] _ownderBytes = Encoding.UTF8.GetBytes(Guid.NewGuid().ToString());

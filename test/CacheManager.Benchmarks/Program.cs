@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using BenchmarkDotNet.Columns;
@@ -9,6 +10,7 @@ using BenchmarkDotNet.Running;
 
 namespace CacheManager.Benchmarks
 {
+    [ExcludeFromCodeCoverage]
     public class CacheManagerBenchConfig : ManualConfig
     {
         public CacheManagerBenchConfig()
@@ -18,6 +20,7 @@ namespace CacheManager.Benchmarks
         }
     }
 
+    [ExcludeFromCodeCoverage]
     public class Program
     {
         public static void Main(string[] args)
