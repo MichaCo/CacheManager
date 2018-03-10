@@ -23,6 +23,7 @@ Linux, Mono | -
 | [CacheManager.Microsoft.Extensions.Caching.Memory][MSCache.nuget] | - | x | 1.3
 | [CacheManager.Microsoft.Extensions.Configuration][Configuration.nuget] | - | x | 1.2
 | [CacheManager.Microsoft.Extensions.Logging][Logging.nuget] | - | x | 1.2
+| [CacheManager.Serialization.DataContract][DataContract.nuget] | x | x | 1.2
 | [CacheManager.Serialization.Bond][Bond.nuget] | x | x | 1.2
 | [CacheManager.Serialization.Json][Json.nuget] | x | x | 1.2
 | [CacheManager.Serialization.ProtoBuf][ProtoBuf.nuget] | x | x | 1.3
@@ -87,6 +88,7 @@ The following are the currently available serialization options:
 	* **Json** based on the popular Newtonsoft.Json library
 	* **Json** with Gzip compression
     * **Bond** based on Microsoft.Bond supporting all three available variants
+    * **DataContract** based on System.Runtime.Serialization library supporting binary, Json & Json with Gzip compression
 	* **Protocol Buffer** Google's protobuf. The package uses Mark's [protobuf-net](https://github.com/mgravell/protobuf-net) implementation.
 * **Update values with lock or transaction** for distributed caches. 
 The interfaced provides a simple update method which internally ensures you work with the latest version.

@@ -52,6 +52,7 @@
     <ProjectReference Include="..\..\src\CacheManager.SystemRuntimeCaching\CacheManager.SystemRuntimeCaching.csproj" />
     <ProjectReference Include="..\..\src\CacheManager.Web\CacheManager.Web.csproj" />
     <ProjectReference Include="..\..\src\CacheManager.Memcached\CacheManager.Memcached.csproj" />
+    <ProjectReference Include="..\..\src\CacheManager.Serialization.DataContract\CacheManager.Serialization.DataContract.csproj" />
     <Reference Include="System.Web" />
     <Reference Include="System.Configuration" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="1.0.2" />
