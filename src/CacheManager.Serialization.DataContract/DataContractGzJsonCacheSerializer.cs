@@ -14,11 +14,18 @@ namespace CacheManager.Serialization.DataContract
         /// <summary>
         /// Creates instance of <c>DataContractGzJsonCacheSerializer</c>.
         /// </summary>
+        public DataContractGzJsonCacheSerializer() : this(new DataContractJsonSerializerSettings())
+        {
+        }
+
+        /// <summary>
+        /// Creates instance of <c>DataContractGzJsonCacheSerializer</c>.
+        /// </summary>
         /// <param name="serializerSettings">Serializer's settings</param>
         public DataContractGzJsonCacheSerializer(DataContractJsonSerializerSettings serializerSettings = null) : base(serializerSettings)
         {
-
         }
+
         /// <inheritdoc/>
         protected override void WriteObject(XmlObjectSerializer serializer, Stream stream, object graph)
         {
@@ -28,6 +35,7 @@ namespace CacheManager.Serialization.DataContract
                 gzipStream.Flush();
             }
         }
+
         /// <inheritdoc/>
         protected override object ReadObject(XmlObjectSerializer serializer, Stream stream)
         {

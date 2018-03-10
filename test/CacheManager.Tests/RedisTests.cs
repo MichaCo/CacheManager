@@ -779,10 +779,10 @@ namespace CacheManager.Tests
                     value.Should().Be("new value", cache.ToString());
                 },
                 1,
-                TestManagers.CreateRedisAndDicCacheWithBackplane(113, true, channelName, Serializer.Json),
-                TestManagers.CreateRedisAndDicCacheWithBackplane(113, true, channelName, Serializer.Json),
-                TestManagers.CreateRedisCache(113, false, Serializer.Json),
-                TestManagers.CreateRedisAndDicCacheWithBackplane(113, true, channelName, Serializer.Json));
+                TestManagers.CreateRedisAndDicCacheWithBackplane(88, true, channelName, Serializer.Json),
+                TestManagers.CreateRedisAndDicCacheWithBackplane(88, true, channelName, Serializer.Json),
+                TestManagers.CreateRedisCache(88, false, Serializer.Json),
+                TestManagers.CreateRedisAndDicCacheWithBackplane(88, true, channelName, Serializer.Json));
         }
 
 #endif

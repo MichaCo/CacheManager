@@ -12,17 +12,15 @@ using Newtonsoft.Json;
 using ProtoBuf;
 using Xunit;
 using CacheManager.Serialization.Bond;
-#if !NETCOREAPP1
-using System.Runtime.Serialization.Formatters;
-using System.Runtime.Serialization.Formatters.Binary;
-#endif
 using System.Runtime.Serialization.Json;
 using System.Runtime.Serialization;
-using System.CodeDom;
-using System.Collections.ObjectModel;
-using System.Reflection;
-#if NET452
+
+#if !NETCOREAPP1
+
+using System.Runtime.Serialization.Formatters;
+using System.Runtime.Serialization.Formatters.Binary;
 using CacheManager.Serialization.DataContract;
+
 #endif
 
 namespace CacheManager.Tests
@@ -30,6 +28,8 @@ namespace CacheManager.Tests
     [ExcludeFromCodeCoverage]
     public class SerializerTests
     {
+        #region binary serializer
+
 #if !NETCOREAPP1 && !NETCOREAPP2
 
         [Fact]
@@ -166,6 +166,10 @@ namespace CacheManager.Tests
         }
 
 #endif
+
+        #endregion binary serializer
+
+        #region newtonsoft json serializer
 
         [Fact]
         public void JsonSerializer_RespectJsonSerializerSettings()
@@ -350,7 +354,9 @@ namespace CacheManager.Tests
             result.Should().BeEquivalentTo(items);
         }
 
-        /* ######### gz json ######### */
+        #endregion newtonsoft json serializer
+
+        #region newtonsoft json with GZ serializer
 
         [Fact]
         public void GzJsonSerializer_RespectJsonSerializerSettings()
@@ -535,26 +541,101 @@ namespace CacheManager.Tests
             result.Should().BeEquivalentTo(items);
         }
 
-        [Theory]
-        [ClassData(typeof(TestCacheManagers))]
-        public void Serializer_FullAddGet<T>(T cache)
-            where T : ICacheManager<object>
+        #endregion newtonsoft json with GZ serializer
+
+#if !NETCOREAPP1
+
+        #region data contract serializer common
+
+        [Fact]
+        public void DataContractSerializer_RespectSerializerSettings()
         {
-            using (cache)
+            var serializationSettings = new DataContractSerializerSettings()
             {
-                // arrange
-                var key = Guid.NewGuid().ToString();
-                var pocco = SerializerPoccoSerializable.Create();
+                KnownTypes = new[] { typeof(string) }
+            };
 
-                // act
-                Func<bool> actSet = () => cache.Add(key, pocco); 
+            var cache = CacheFactory.Build<string>(
+                p => p
+                    .WithDataContractSerializer(serializationSettings)
+                    .WithHandle(typeof(SerializerTestCacheHandle)));
 
-                // assert
-                actSet().Should().BeTrue("Should add the key");
-                cache.Get<SerializerPoccoSerializable>(key).Should().BeEquivalentTo(pocco);
-            }
+            var handle = cache.CacheHandles.ElementAt(0) as SerializerTestCacheHandle;
+            var serializer = handle.Serializer as DataContractCacheSerializer;
+
+            serializer.SerializerSettings.KnownTypes.Should().BeEquivalentTo(new[] { typeof(string) });
+
+            cache.Configuration.SerializerTypeArguments.Length.Should().Be(1);
         }
-#if NET452
+
+        [Fact]
+        public void DataContractSerializer_Json_RespectSerializerSettings()
+        {
+            var serializationSettings = new DataContractJsonSerializerSettings()
+            {
+                KnownTypes = new[] { typeof(string) }
+            };
+
+            var cache = CacheFactory.Build<string>(
+                p => p
+                    .WithDataContractJsonSerializer(serializationSettings)
+                    .WithHandle(typeof(SerializerTestCacheHandle)));
+
+            var handle = cache.CacheHandles.ElementAt(0) as SerializerTestCacheHandle;
+            var serializer = handle.Serializer as DataContractJsonCacheSerializer;
+
+            serializer.SerializerSettings.KnownTypes.Should().BeEquivalentTo(new[] { typeof(string) });
+
+            cache.Configuration.SerializerTypeArguments.Length.Should().Be(1);
+        }
+
+        [Fact]
+        public void DataContractSerializer_GzJson_RespectSerializerSettings()
+        {
+            var serializationSettings = new DataContractJsonSerializerSettings()
+            {
+                KnownTypes = new[] { typeof(string) }
+            };
+
+            var cache = CacheFactory.Build<string>(
+                p => p
+                    .WithDataContractGzJsonSerializer(serializationSettings)
+                    .WithHandle(typeof(SerializerTestCacheHandle)));
+
+            var handle = cache.CacheHandles.ElementAt(0) as SerializerTestCacheHandle;
+            var serializer = handle.Serializer as DataContractGzJsonCacheSerializer;
+
+            serializer.SerializerSettings.KnownTypes.Should().BeEquivalentTo(new[] { typeof(string) });
+
+            cache.Configuration.SerializerTypeArguments.Length.Should().Be(1);
+        }
+
+        // this test actually failed because the DataContractBinaryCacheSerializer didn't had that ctor for it...
+        [Fact]
+        public void DataContractSerializer_Binary_RespectSerializerSettings()
+        {
+            var serializationSettings = new DataContractSerializerSettings()
+            {
+                KnownTypes = new[] { typeof(string) }
+            };
+
+            var cache = CacheFactory.Build<string>(
+                p => p
+                    .WithDataContractBinarySerializer(serializationSettings)
+                    .WithHandle(typeof(SerializerTestCacheHandle)));
+
+            var handle = cache.CacheHandles.ElementAt(0) as SerializerTestCacheHandle;
+            var serializer = handle.Serializer as DataContractBinaryCacheSerializer;
+
+            serializer.SerializerSettings.KnownTypes.Should().BeEquivalentTo(new[] { typeof(string) });
+
+            cache.Configuration.SerializerTypeArguments.Length.Should().Be(1);
+        }
+
+        #endregion data contract serializer common
+
+        #region data contract serializer
+
         [Theory]
         [InlineData(true)]
         [InlineData(float.MaxValue)]
@@ -639,7 +720,7 @@ namespace CacheManager.Tests
             var data = serializer.Serialize(item);
             var result = serializer.Deserialize(data, item.GetType());
 
-            result.ShouldBeEquivalentTo(item);
+            result.Should().BeEquivalentTo(item);
         }
 
         [Fact]
@@ -654,7 +735,7 @@ namespace CacheManager.Tests
             var data = serializer.SerializeCacheItem(item);
             var result = serializer.DeserializeCacheItem<SerializerPoccoSerializable>(data, pocco.GetType());
 
-            result.ShouldBeEquivalentTo(item);
+            result.Should().BeEquivalentTo(item);
         }
 
         [Fact]
@@ -673,8 +754,18 @@ namespace CacheManager.Tests
             var data = serializer.Serialize(items);
             var result = serializer.Deserialize(data, items.GetType());
 
-            result.ShouldBeEquivalentTo(items);
+            result.Should().BeEquivalentTo(items);
         }
+
+        [Fact]
+        public void DataContractSerializer_FullAddGet()
+        {
+            FullAddGetWithSerializer(Serializer.DataContract);
+        }
+
+        #endregion data contract serializer
+
+        #region data contract serializer binary
 
         [Theory]
         [InlineData(true)]
@@ -760,7 +851,7 @@ namespace CacheManager.Tests
             var data = serializer.Serialize(item);
             var result = serializer.Deserialize(data, item.GetType());
 
-            result.ShouldBeEquivalentTo(item);
+            result.Should().BeEquivalentTo(item);
         }
 
         [Fact]
@@ -775,7 +866,7 @@ namespace CacheManager.Tests
             var data = serializer.SerializeCacheItem(item);
             var result = serializer.DeserializeCacheItem<SerializerPoccoSerializable>(data, pocco.GetType());
 
-            result.ShouldBeEquivalentTo(item);
+            result.Should().BeEquivalentTo(item);
         }
 
         [Fact]
@@ -794,8 +885,18 @@ namespace CacheManager.Tests
             var data = serializer.Serialize(items);
             var result = serializer.Deserialize(data, items.GetType());
 
-            result.ShouldBeEquivalentTo(items);
+            result.Should().BeEquivalentTo(items);
         }
+
+        [Fact]
+        public void DataContractBinarySerializer_FullAddGet()
+        {
+            FullAddGetWithSerializer(Serializer.DataContractBinary);
+        }
+
+        #endregion data contract serializer binary
+
+        #region data contract serializer json
 
         [Theory]
         [InlineData(true)]
@@ -891,14 +992,15 @@ namespace CacheManager.Tests
             var data = serializer.Serialize(item);
             var result = serializer.Deserialize(data, item.GetType());
 
-            result.ShouldBeEquivalentTo(item);
+            result.Should().BeEquivalentTo(item);
         }
-        
+
         [Fact]
         public void DataContractJsonSerializer_CacheItemWithPocco()
         {
             // arrange
-            var serializer = new DataContractJsonCacheSerializer(new DataContractJsonSerializerSettings() {
+            var serializer = new DataContractJsonCacheSerializer(new DataContractJsonSerializerSettings()
+            {
                 //DataContractJsonSerializer serializes DateTime values as Date(1231231313) instead of "2017-11-07T13:09:39.7079187Z".
                 //So, I've changed the format to make the test pass.
                 DateTimeFormat = new DateTimeFormat("O")
@@ -910,7 +1012,7 @@ namespace CacheManager.Tests
             var data = serializer.SerializeCacheItem(item);
             var result = serializer.DeserializeCacheItem<SerializerPoccoSerializable>(data, pocco.GetType());
 
-            result.ShouldBeEquivalentTo(item);
+            result.Should().BeEquivalentTo(item);
         }
 
         [Fact]
@@ -929,8 +1031,18 @@ namespace CacheManager.Tests
             var data = serializer.Serialize(items);
             var result = serializer.Deserialize(data, items.GetType());
 
-            result.ShouldBeEquivalentTo(items);
+            result.Should().BeEquivalentTo(items);
         }
+
+        [Fact]
+        public void DataContractJsonSerializer_FullAddGet()
+        {
+            FullAddGetWithSerializer(Serializer.DataContractJson);
+        }
+
+        #endregion data contract serializer json
+
+        #region data contract serializer gz json
 
         [Theory]
         [InlineData(true)]
@@ -1026,7 +1138,7 @@ namespace CacheManager.Tests
             var data = serializer.Serialize(item);
             var result = serializer.Deserialize(data, item.GetType());
 
-            result.ShouldBeEquivalentTo(item);
+            result.Should().BeEquivalentTo(item);
         }
 
         [Fact]
@@ -1046,7 +1158,7 @@ namespace CacheManager.Tests
             var data = serializer.SerializeCacheItem(item);
             var result = serializer.DeserializeCacheItem<SerializerPoccoSerializable>(data, pocco.GetType());
 
-            result.ShouldBeEquivalentTo(item);
+            result.Should().BeEquivalentTo(item);
         }
 
         [Fact]
@@ -1065,9 +1177,20 @@ namespace CacheManager.Tests
             var data = serializer.Serialize(items);
             var result = serializer.Deserialize(data, items.GetType());
 
-            result.ShouldBeEquivalentTo(items);
+            result.Should().BeEquivalentTo(items);
         }
+
+        [Fact]
+        public void DataContractGzJsonSerializer_FullAddGet()
+        {
+            FullAddGetWithSerializer(Serializer.DataContractGzJson);
+        }
+
+        #endregion data contract serializer gz json
+
 #endif
+
+        #region protobuf serializer
 
         [Theory]
         [InlineData(true)]
@@ -1242,6 +1365,8 @@ namespace CacheManager.Tests
             }
         }
 
+        #endregion protobuf serializer
+
         #region Bond binary serializer
 
         [Theory]
@@ -1402,6 +1527,46 @@ namespace CacheManager.Tests
         }
 
         #endregion Bond binary serializer
+
+        [Theory]
+        [ClassData(typeof(TestCacheManagers))]
+        public void Serializer_FullAddGet<T>(T cache)
+            where T : ICacheManager<object>
+        {
+            using (cache)
+            {
+                // arrange
+                var key = Guid.NewGuid().ToString();
+                var pocco = SerializerPoccoSerializable.Create();
+
+                // act
+                Func<bool> actSet = () => cache.Add(key, pocco);
+
+                // assert
+                actSet().Should().BeTrue("Should add the key");
+                cache.Get<SerializerPoccoSerializable>(key).Should().BeEquivalentTo(pocco);
+            }
+        }
+
+        private void FullAddGetWithSerializer(Serializer serializer)
+        {
+            using (var cache = TestManagers.CreateRedisCache(serializer: serializer))
+            {
+                // arrange
+                var key = Guid.NewGuid().ToString();
+                var pocco = SerializerPoccoSerializable.Create();
+
+                // act
+                Action actSet = () =>
+                {
+                    cache.Add(key, pocco);
+                };
+
+                // assert
+                actSet.Should().NotThrow();
+                cache.Get<SerializerPoccoSerializable>(key).Should().BeEquivalentTo(pocco);
+            }
+        }
 
         private static class DataGenerator
         {

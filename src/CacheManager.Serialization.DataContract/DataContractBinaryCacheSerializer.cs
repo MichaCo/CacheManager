@@ -10,6 +10,21 @@ namespace CacheManager.Serialization.DataContract
     /// </summary>
     public class DataContractBinaryCacheSerializer : DataContractCacheSerializer
     {
+        /// <summary>
+        /// Creates instance of <c>DataContractBinaryCacheSerializer</c>.
+        /// </summary>
+        public DataContractBinaryCacheSerializer() : this(new DataContractSerializerSettings())
+        {
+        }
+
+        /// <summary>
+        /// Creates instance of <c>DataContractBinaryCacheSerializer</c>.
+        /// </summary>
+        /// <param name="serializerSettings">The settings for <c>DataContractSerializer</c>.</param>
+        public DataContractBinaryCacheSerializer(DataContractSerializerSettings serializerSettings = null) : base(serializerSettings)
+        {
+        }
+
         /// <inheritdoc/>
         protected override object ReadObject(XmlObjectSerializer serializer, Stream stream)
         {

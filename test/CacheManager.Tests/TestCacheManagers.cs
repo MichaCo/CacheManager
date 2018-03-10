@@ -36,6 +36,12 @@ namespace CacheManager.Tests
 #if !NETCOREAPP1 && !NETCOREAPP2
             yield return new object[] { TestManagers.WithRedisCacheBinary };
 #endif
+#if !NETCOREAPP1
+            yield return new object[] { TestManagers.WithRedisCacheDataContract };
+            yield return new object[] { TestManagers.WithRedisCacheDataContractBinary };
+            yield return new object[] { TestManagers.WithRedisCacheDataContractGzJson };
+            yield return new object[] { TestManagers.WithRedisCacheDataContractJson };
+#endif
             yield return new object[] { TestManagers.WithRedisCacheJson };
             yield return new object[] { TestManagers.WithRedisCacheGzJson };
             yield return new object[] { TestManagers.WithRedisCacheProto };
@@ -74,8 +80,9 @@ namespace CacheManager.Tests
         private const string RedisHost = "127.0.0.1";
 
         private const int RedisPort = 6379;
-        private const int StartDbCount = 100;
+        private const int StartDbCount = 0;
         private static int _databaseCount = StartDbCount;
+        private const int NumDatabases = 100;
 
         static TestManagers()
         {
@@ -136,7 +143,7 @@ namespace CacheManager.Tests
             get
             {
                 Interlocked.Increment(ref _databaseCount);
-                if (_databaseCount >= 2000)
+                if (_databaseCount >= NumDatabases)
                 {
                     _databaseCount = StartDbCount;
                 }
@@ -150,7 +157,7 @@ namespace CacheManager.Tests
             get
             {
                 Interlocked.Increment(ref _databaseCount);
-                if (_databaseCount >= 2000)
+                if (_databaseCount >= NumDatabases)
                 {
                     _databaseCount = StartDbCount;
                 }
@@ -164,7 +171,7 @@ namespace CacheManager.Tests
             get
             {
                 Interlocked.Increment(ref _databaseCount);
-                if (_databaseCount >= 2000)
+                if (_databaseCount >= NumDatabases)
                 {
                     _databaseCount = StartDbCount;
                 }
@@ -178,7 +185,7 @@ namespace CacheManager.Tests
             get
             {
                 Interlocked.Increment(ref _databaseCount);
-                if (_databaseCount >= 2000)
+                if (_databaseCount >= NumDatabases)
                 {
                     _databaseCount = StartDbCount;
                 }
@@ -192,7 +199,7 @@ namespace CacheManager.Tests
             get
             {
                 Interlocked.Increment(ref _databaseCount);
-                if (_databaseCount >= 2000)
+                if (_databaseCount >= NumDatabases)
                 {
                     _databaseCount = StartDbCount;
                 }
@@ -201,12 +208,72 @@ namespace CacheManager.Tests
             }
         }
 
+#if !NETCOREAPP1
+
+        public static ICacheManager<object> WithRedisCacheDataContract
+        {
+            get
+            {
+                Interlocked.Increment(ref _databaseCount);
+                if (_databaseCount >= NumDatabases)
+                {
+                    _databaseCount = StartDbCount;
+                }
+
+                return CreateRedisCache(database: _databaseCount, sharedRedisConfig: false, serializer: Serializer.DataContract);
+            }
+        }
+
+        public static ICacheManager<object> WithRedisCacheDataContractJson
+        {
+            get
+            {
+                Interlocked.Increment(ref _databaseCount);
+                if (_databaseCount >= NumDatabases)
+                {
+                    _databaseCount = StartDbCount;
+                }
+
+                return CreateRedisCache(database: _databaseCount, sharedRedisConfig: false, serializer: Serializer.DataContractJson);
+            }
+        }
+
+        public static ICacheManager<object> WithRedisCacheDataContractGzJson
+        {
+            get
+            {
+                Interlocked.Increment(ref _databaseCount);
+                if (_databaseCount >= NumDatabases)
+                {
+                    _databaseCount = StartDbCount;
+                }
+
+                return CreateRedisCache(database: _databaseCount, sharedRedisConfig: false, serializer: Serializer.DataContractGzJson);
+            }
+        }
+
+        public static ICacheManager<object> WithRedisCacheDataContractBinary
+        {
+            get
+            {
+                Interlocked.Increment(ref _databaseCount);
+                if (_databaseCount >= NumDatabases)
+                {
+                    _databaseCount = StartDbCount;
+                }
+
+                return CreateRedisCache(database: _databaseCount, sharedRedisConfig: false, serializer: Serializer.DataContractBinary);
+            }
+        }
+
+#endif
+
         public static ICacheManager<object> WithRedisCacheProto
         {
             get
             {
                 Interlocked.Increment(ref _databaseCount);
-                if (_databaseCount >= 2000)
+                if (_databaseCount >= NumDatabases)
                 {
                     _databaseCount = StartDbCount;
                 }
@@ -220,7 +287,7 @@ namespace CacheManager.Tests
             get
             {
                 Interlocked.Increment(ref _databaseCount);
-                if (_databaseCount >= 2000)
+                if (_databaseCount >= NumDatabases)
                 {
                     _databaseCount = StartDbCount;
                 }
@@ -234,7 +301,7 @@ namespace CacheManager.Tests
             get
             {
                 Interlocked.Increment(ref _databaseCount);
-                if (_databaseCount >= 2000)
+                if (_databaseCount >= NumDatabases)
                 {
                     _databaseCount = StartDbCount;
                 }
@@ -543,7 +610,11 @@ namespace CacheManager.Tests
         Json,
         GzJson,
         Proto,
-        BondBinary
+        BondBinary,
+        DataContractJson,
+        DataContractGzJson,
+        DataContractBinary,
+        DataContract
     }
 
     [ExcludeFromCodeCoverage]
@@ -571,6 +642,27 @@ namespace CacheManager.Tests
                 case Serializer.BondBinary:
                     part.WithBondCompactBinarySerializer(2048);
                     break;
+
+#if !NETCOREAPP1
+                case Serializer.DataContract:
+                    part.WithDataContractSerializer();
+                    break;
+
+                case Serializer.DataContractBinary:
+                    part.WithDataContractBinarySerializer();
+                    break;
+
+                case Serializer.DataContractGzJson:
+                    part.WithDataContractGzJsonSerializer();
+                    break;
+
+                case Serializer.DataContractJson:
+                    part.WithDataContractJsonSerializer();
+                    break;
+
+#endif
+                default:
+                    throw new InvalidOperationException("Unknown serializer");
             }
             return part;
         }

@@ -11,6 +11,13 @@ namespace CacheManager.Serialization.DataContract
         /// <summary>
         /// Creates instance of <c>DataContractCacheSerializer</c>.
         /// </summary>
+        public DataContractCacheSerializer() : this(new DataContractSerializerSettings())
+        {
+        }
+
+        /// <summary>
+        /// Creates instance of <c>DataContractCacheSerializer</c>.
+        /// </summary>
         /// <param name="serializerSettings">The settings for <c>DataContractSerializer</c>.</param>
         public DataContractCacheSerializer(DataContractSerializerSettings serializerSettings = null) : base(serializerSettings)
         {
@@ -19,13 +26,13 @@ namespace CacheManager.Serialization.DataContract
         /// <inheritdoc/>
         protected override XmlObjectSerializer GetSerializer(Type target)
         {
-            if (this.SerializerSettings == null)
+            if (SerializerSettings == null)
             {
                 return new DataContractSerializer(target);
             }
             else
             {
-                return new DataContractSerializer(target, this.SerializerSettings);
+                return new DataContractSerializer(target, SerializerSettings);
             }
         }
     }

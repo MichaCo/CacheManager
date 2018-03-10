@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
-using System.Xml;
 
 namespace CacheManager.Serialization.DataContract
 {
@@ -13,21 +12,28 @@ namespace CacheManager.Serialization.DataContract
         /// <summary>
         /// Creates instance of <c>DataContractJsonCacheSerializer</c>.
         /// </summary>
+        public DataContractJsonCacheSerializer() : this(new DataContractJsonSerializerSettings())
+        {
+        }
+
+        /// <summary>
+        /// Creates instance of <c>DataContractJsonCacheSerializer</c>.
+        /// </summary>
         /// <param name="serializerSettings">Serializer's settings</param>
         public DataContractJsonCacheSerializer(DataContractJsonSerializerSettings serializerSettings = null) : base(serializerSettings)
         {
-
         }
+
         /// <inheritdoc/>
         protected override XmlObjectSerializer GetSerializer(Type target)
         {
-            if (this.SerializerSettings == null)
+            if (SerializerSettings == null)
             {
                 return new DataContractJsonSerializer(target);
             }
             else
             {
-                return new DataContractJsonSerializer(target, this.SerializerSettings);
+                return new DataContractJsonSerializer(target, SerializerSettings);
             }
         }
     }

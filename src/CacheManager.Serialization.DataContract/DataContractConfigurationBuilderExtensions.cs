@@ -1,6 +1,6 @@
-﻿using CacheManager.Serialization.DataContract;
-using System.Runtime.Serialization;
+﻿using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
+using CacheManager.Serialization.DataContract;
 using static CacheManager.Core.Utility.Guard;
 
 namespace CacheManager.Core
@@ -58,9 +58,6 @@ namespace CacheManager.Core
         /// <returns>The builder instance.</returns>
         public static ConfigurationBuilderCachePart WithDataContractGzJsonSerializer(this ConfigurationBuilderCachePart part, DataContractJsonSerializerSettings serializerSettings = null)
         {
-#if NET40
-            new System.Runtime.Serialization.Json.DataContractJsonSerializer()
-#endif
             NotNull(part, nameof(part));
 
             if (serializerSettings == null)
