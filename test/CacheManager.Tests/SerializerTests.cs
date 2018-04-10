@@ -14,6 +14,8 @@ using Xunit;
 using CacheManager.Serialization.Bond;
 using System.Runtime.Serialization.Json;
 using System.Runtime.Serialization;
+using CacheManager.Serialization.MessagePack;
+using MessagePack;
 
 #if !NETCOREAPP1
 
@@ -542,6 +544,346 @@ namespace CacheManager.Tests
         }
 
         #endregion newtonsoft json with GZ serializer
+
+        #region messagepack serializer
+
+        [Fact]
+        public void MessagePackSerializer()
+        {
+            var cache = CacheFactory.Build<string>(
+                p => p
+                    .WithMessagePackSerializer()
+                    .WithHandle(typeof(SerializerTestCacheHandle)));
+
+            var handle = cache.CacheHandles.ElementAt(0) as SerializerTestCacheHandle;
+            var serializer = handle.Serializer as MessagePackCacheSerializer;
+
+            cache.Configuration.SerializerTypeArguments.Length.Should().Be(0);
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(float.MaxValue)]
+        [InlineData(int.MaxValue)]
+        [InlineData(long.MaxValue)]
+        [InlineData("some string")]
+        [ReplaceCulture]
+        public void MessagePackSerializer_Primitives<T>(T value)
+        {
+            // arrange
+            var serializer = new MessagePackCacheSerializer();
+
+            // act
+            var data = serializer.Serialize(value);
+            var result = serializer.Deserialize(data, typeof(T));
+
+            result.Should().Be(value);
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(float.MaxValue)]
+        [InlineData(int.MaxValue)]
+        [InlineData(long.MaxValue)]
+        [InlineData("some string")]
+        [ReplaceCulture]
+        public void MessagePackSerializer_CacheItem_Primitives<T>(T value)
+        {
+            // arrange
+            var serializer = new MessagePackCacheSerializer();
+            var item = new CacheItem<T>("key", value);
+
+            // act
+            var data = serializer.SerializeCacheItem(item);
+            var result = serializer.DeserializeCacheItem<T>(data, typeof(T));
+
+            result.Value.Should().Be(value);
+            result.ValueType.Should().Be(item.ValueType);
+            result.CreatedUtc.Should().Be(item.CreatedUtc);
+            result.ExpirationMode.Should().Be(item.ExpirationMode);
+            result.ExpirationTimeout.Should().Be(item.ExpirationTimeout);
+            result.Key.Should().Be(item.Key);
+            result.LastAccessedUtc.Should().Be(item.LastAccessedUtc);
+            result.Region.Should().Be(item.Region);
+        }
+
+        [Theory]
+        [InlineData(long.MaxValue)]
+        [InlineData(true)]
+        [InlineData(float.MaxValue)]
+        [InlineData(int.MaxValue)]
+        [InlineData("some string")]
+        [ReplaceCulture]
+        public void MessagePackSerializer_CacheItemOfObject_Primitives<T>(T value)
+        {
+            // arrange
+            var serializer = new MessagePackCacheSerializer();
+            var item = new CacheItem<object>("key", value);
+
+            // act
+            var data = serializer.SerializeCacheItem(item);
+            var result = serializer.DeserializeCacheItem<object>(data, typeof(T));
+
+            result.Value.Should().Be(value);
+            result.ValueType.Should().Be(item.ValueType);
+            result.CreatedUtc.Should().Be(item.CreatedUtc);
+            result.ExpirationMode.Should().Be(item.ExpirationMode);
+            result.ExpirationTimeout.Should().Be(item.ExpirationTimeout);
+            result.Key.Should().Be(item.Key);
+            result.LastAccessedUtc.Should().Be(item.LastAccessedUtc);
+            result.Region.Should().Be(item.Region);
+        }
+
+        [Fact]
+        public void MessagePackSerializer_Pocco()
+        {
+            // arrange
+            var serializer = new MessagePackCacheSerializer();
+            var item = SerializerPoccoSerializable.Create();
+
+            // act
+            var data = serializer.Serialize(item);
+            var result = serializer.Deserialize(data, item.GetType());
+
+            result.Should().BeEquivalentTo(item);
+        }
+
+        [Fact]
+        public void MessagePackSerializer_CacheItemWithPocco()
+        {
+            // arrange
+            var serializer = new MessagePackCacheSerializer();
+            var pocco = SerializerPoccoSerializable.Create();
+            var item = new CacheItem<SerializerPoccoSerializable>("key", "region", pocco, ExpirationMode.Absolute, TimeSpan.FromDays(1));
+
+            // act
+            var data = serializer.SerializeCacheItem(item);
+            var result = serializer.DeserializeCacheItem<SerializerPoccoSerializable>(data, pocco.GetType());
+
+            result.Should().BeEquivalentTo(item);
+        }
+
+        [Fact]
+        public void MessagePackSerializer_ObjectCacheItemWithPocco()
+        {
+            // arrange
+            var serializer = new MessagePackCacheSerializer();
+            var pocco = SerializerPoccoSerializable.Create();
+            var item = new CacheItem<object>("key", "region", pocco, ExpirationMode.Absolute, TimeSpan.FromDays(1));
+
+            // act
+            var data = serializer.SerializeCacheItem(item);
+            var result = serializer.DeserializeCacheItem<object>(data, pocco.GetType());
+
+            result.Should().BeEquivalentTo(item);
+        }
+
+        [Fact]
+        public void MessagePackSerializer_CacheItemWithDerivedPocco()
+        {
+            // arrange
+            var serializer = new MessagePackCacheSerializer();
+            var pocco = DerivedPocco.CreateDerived();
+            var item = new CacheItem<SerializerPoccoSerializable>("key", "region", pocco, ExpirationMode.Absolute, TimeSpan.FromDays(1));
+
+            // act
+            var data = serializer.SerializeCacheItem(item);
+            var result = serializer.DeserializeCacheItem<SerializerPoccoSerializable>(data, pocco.GetType());
+
+            result.Should().BeEquivalentTo(item);
+            pocco.Should().BeEquivalentTo(item.Value);
+        }
+
+        [Fact]
+        public void MessagePackSerializer_List()
+        {
+            // arrange
+            var serializer = new MessagePackCacheSerializer();
+            var items = new List<SerializerPoccoSerializable>()
+            {
+                SerializerPoccoSerializable.Create(),
+                SerializerPoccoSerializable.Create(),
+                SerializerPoccoSerializable.Create()
+            };
+
+            // act
+            var data = serializer.Serialize(items);
+            var result = serializer.Deserialize(data, items.GetType());
+
+            result.Should().BeEquivalentTo(items);
+        }
+
+        #endregion
+
+        #region messagepack with LZ4 serializer
+
+        [Fact]
+        public void LZ4MessagePackSerializer()
+        {
+            var cache = CacheFactory.Build<string>(
+                p => p
+                    .WithLZ4MessagePackSerializer()
+                    .WithHandle(typeof(SerializerTestCacheHandle)));
+
+            var handle = cache.CacheHandles.ElementAt(0) as SerializerTestCacheHandle;
+            var serializer = handle.Serializer as MessagePackCacheSerializer;
+
+            cache.Configuration.SerializerTypeArguments.Length.Should().Be(0);
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(float.MaxValue)]
+        [InlineData(int.MaxValue)]
+        [InlineData(long.MaxValue)]
+        [InlineData("some string")]
+        [ReplaceCulture]
+        public void LZ4MessagePackSerializer_Primitives<T>(T value)
+        {
+            // arrange
+            var serializer = new LZ4MessagePackCacheSerializer();
+
+            // act
+            var data = serializer.Serialize(value);
+            var result = serializer.Deserialize(data, typeof(T));
+
+            result.Should().Be(value);
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(float.MaxValue)]
+        [InlineData(int.MaxValue)]
+        [InlineData(long.MaxValue)]
+        [InlineData("some string")]
+        [ReplaceCulture]
+        public void LZ4MessagePackSerializer_CacheItem_Primitives<T>(T value)
+        {
+            // arrange
+            var serializer = new LZ4MessagePackCacheSerializer();
+            var item = new CacheItem<T>("key", value);
+
+            // act
+            var data = serializer.SerializeCacheItem(item);
+            var result = serializer.DeserializeCacheItem<T>(data, typeof(T));
+
+            result.Value.Should().Be(value);
+            result.ValueType.Should().Be(item.ValueType);
+            result.CreatedUtc.Should().Be(item.CreatedUtc);
+            result.ExpirationMode.Should().Be(item.ExpirationMode);
+            result.ExpirationTimeout.Should().Be(item.ExpirationTimeout);
+            result.Key.Should().Be(item.Key);
+            result.LastAccessedUtc.Should().Be(item.LastAccessedUtc);
+            result.Region.Should().Be(item.Region);
+        }
+
+        [Theory]
+        [InlineData(long.MaxValue)]
+        [InlineData(true)]
+        [InlineData(float.MaxValue)]
+        [InlineData(int.MaxValue)]
+        [InlineData("some string")]
+        [ReplaceCulture]
+        public void LZ4MessagePackSerializer_CacheItemOfObject_Primitives<T>(T value)
+        {
+            // arrange
+            var serializer = new LZ4MessagePackCacheSerializer();
+            var item = new CacheItem<object>("key", value);
+
+            // act
+            var data = serializer.SerializeCacheItem(item);
+            var result = serializer.DeserializeCacheItem<object>(data, typeof(T));
+
+            result.Value.Should().Be(value);
+            result.ValueType.Should().Be(item.ValueType);
+            result.CreatedUtc.Should().Be(item.CreatedUtc);
+            result.ExpirationMode.Should().Be(item.ExpirationMode);
+            result.ExpirationTimeout.Should().Be(item.ExpirationTimeout);
+            result.Key.Should().Be(item.Key);
+            result.LastAccessedUtc.Should().Be(item.LastAccessedUtc);
+            result.Region.Should().Be(item.Region);
+        }
+
+        [Fact]
+        public void LZ4MessagePackSerializer_Pocco()
+        {
+            // arrange
+            var serializer = new LZ4MessagePackCacheSerializer();
+            var item = SerializerPoccoSerializable.Create();
+
+            // act
+            var data = serializer.Serialize(item);
+            var result = serializer.Deserialize(data, item.GetType());
+
+            result.Should().BeEquivalentTo(item);
+        }
+
+        [Fact]
+        public void LZ4MessagePackSerializer_CacheItemWithPocco()
+        {
+            // arrange
+            var serializer = new LZ4MessagePackCacheSerializer();
+            var pocco = SerializerPoccoSerializable.Create();
+            var item = new CacheItem<SerializerPoccoSerializable>("key", "region", pocco, ExpirationMode.Absolute, TimeSpan.FromDays(1));
+
+            // act
+            var data = serializer.SerializeCacheItem(item);
+            var result = serializer.DeserializeCacheItem<SerializerPoccoSerializable>(data, pocco.GetType());
+
+            result.Should().BeEquivalentTo(item);
+        }
+
+        [Fact]
+        public void LZ4MessagePackSerializer_ObjectCacheItemWithPocco()
+        {
+            // arrange
+            var serializer = new LZ4MessagePackCacheSerializer();
+            var pocco = SerializerPoccoSerializable.Create();
+            var item = new CacheItem<object>("key", "region", pocco, ExpirationMode.Absolute, TimeSpan.FromDays(1));
+
+            // act
+            var data = serializer.SerializeCacheItem(item);
+            var result = serializer.DeserializeCacheItem<object>(data, pocco.GetType());
+
+            result.Should().BeEquivalentTo(item);
+        }
+
+        [Fact]
+        public void LZ4MessagePackSerializer_CacheItemWithDerivedPocco()
+        {
+            // arrange
+            var serializer = new LZ4MessagePackCacheSerializer();
+            var pocco = DerivedPocco.CreateDerived();
+            var item = new CacheItem<SerializerPoccoSerializable>("key", "region", pocco, ExpirationMode.Absolute, TimeSpan.FromDays(1));
+
+            // act
+            var data = serializer.SerializeCacheItem(item);
+            var result = serializer.DeserializeCacheItem<SerializerPoccoSerializable>(data, pocco.GetType());
+
+            result.Should().BeEquivalentTo(item);
+            pocco.Should().BeEquivalentTo(item.Value);
+        }
+
+        [Fact]
+        public void LZ4MessagePackSerializer_List()
+        {
+            // arrange
+            var serializer = new LZ4MessagePackCacheSerializer();
+            var items = new List<SerializerPoccoSerializable>()
+            {
+                SerializerPoccoSerializable.Create(),
+                SerializerPoccoSerializable.Create(),
+                SerializerPoccoSerializable.Create()
+            };
+
+            // act
+            var data = serializer.Serialize(items);
+            var result = serializer.Deserialize(data, items.GetType());
+
+            result.Should().BeEquivalentTo(items);
+        }
+
+        #endregion
 
 #if !NETCOREAPP1
 
@@ -1663,26 +2005,32 @@ namespace CacheManager.Tests
         [ProtoContract]
         [ProtoInclude(20, typeof(DerivedPocco))]
         [Bond.Schema]
+        [MessagePackObject]
         private class SerializerPoccoSerializable
         {
             [ProtoMember(1)]
             [Bond.Id(1)]
+            [Key(0)]
             public string StringProperty { get; set; }
 
             [ProtoMember(2)]
             [Bond.Id(2)]
+            [Key(1)]
             public int IntProperty { get; set; }
 
             [ProtoMember(3)]
             [Bond.Id(3)]
+            [Key(2)]
             public string[] StringArrayProperty { get; set; }
 
             [ProtoMember(4)]
             [Bond.Id(4)]
+            [Key(3)]
             public List<string> StringListProperty { get; set; }
 
             [ProtoMember(5)]
             [Bond.Id(5)]
+            [Key(4)]
             public Dictionary<string, ChildPocco> ChildDictionaryProperty { get; set; }
 
             public static SerializerPoccoSerializable Create()
@@ -1711,10 +2059,12 @@ namespace CacheManager.Tests
 #endif
         [ProtoContract]
         [Bond.Schema]
+        [MessagePackObject]
         private class ChildPocco
         {
             [ProtoMember(1)]
             [Bond.Id(1)]
+            [Key(0)]
             public string StringProperty { get; set; }
         }
 
@@ -1724,10 +2074,12 @@ namespace CacheManager.Tests
 #endif
         [ProtoContract]
         [Bond.Schema]
+        [MessagePackObject]
         private class DerivedPocco : SerializerPoccoSerializable
         {
             [ProtoMember(6)]
             [Bond.Id(6)]
+            [Key(5)]
             public string DerivedStringProperty { get; set; }
 
             public static DerivedPocco CreateDerived()
