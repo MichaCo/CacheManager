@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using CacheManager.Core;
@@ -184,6 +185,28 @@ namespace CacheManager.Tests
             cfg.CacheHandleConfigurations.First().IsBackplaneSource.Should().BeTrue();
 
             cache.CacheHandles.Count().Should().Be(1);
+        }
+
+        [Fact]
+        public void SysRuntime_Extensions_NamedWithCfg()
+        {
+            var expectedCacheOptions = new CacheManager.SystemRuntimeCaching.RuntimeMemoryCacheOptions()
+            {
+                CacheMemoryLimitMegabytes = 13,
+                PhysicalMemoryLimitPercentage = 24,
+                PollingInterval = TimeSpan.FromMinutes(3)
+            };
+
+            using (var act = CacheFactory.Build(_ => _.WithSystemRuntimeCacheHandle("NamedTestWithCfg", expectedCacheOptions)))
+            {
+                // arrange
+                var settings = ((CacheManager.SystemRuntimeCaching.MemoryCacheHandle<object>)act.CacheHandles.ElementAt(0)).CacheSettings;
+
+                // act assert
+                settings["CacheMemoryLimitMegabytes"].Should().Be(expectedCacheOptions.CacheMemoryLimitMegabytes.ToString(CultureInfo.InvariantCulture));
+                settings["PhysicalMemoryLimitPercentage"].Should().Be(expectedCacheOptions.PhysicalMemoryLimitPercentage.ToString(CultureInfo.InvariantCulture));
+                settings["PollingInterval"].Should().Be(expectedCacheOptions.PollingInterval.ToString("c"));
+            }
         }
 
         // disabling for netstandard 2 as it doesn't seem to read the "default" configuration from app.config. Might be an xunit/runner issue as the configuration stuff has been ported
