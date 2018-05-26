@@ -46,7 +46,7 @@ namespace CacheManager.Core.Internal
             var targetType = GetOpenGeneric().MakeGenericType(valueType);
             var item = (ICacheItemConverter)Deserialize(value, targetType);
 
-            return item.ToCacheItem<T>();
+            return item?.ToCacheItem<T>();
         }
 
         private object CreateFromCacheItem<TCacheValue>(CacheItem<TCacheValue> source)

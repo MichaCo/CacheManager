@@ -35,7 +35,7 @@ namespace CacheManager.Core.Internal
             NotNull(configuration, nameof(configuration));
             NotNull(loggerFactory, nameof(loggerFactory));
 
-#if !NETSTANDARD
+#if !NETSTANDARD1 && !NETSTANDARD2
             if (configuration.SerializerType == null)
             {
                 return new BinaryCacheSerializer();
@@ -101,7 +101,7 @@ namespace CacheManager.Core.Internal
                 logger.LogInfo("Creating handle {0} of type {1}.", handleConfiguration.Name, handleConfiguration.HandleType);
                 var handleType = handleConfiguration.HandleType;
                 var requiresSerializer = false;
-#if !NETSTANDARD
+#if !NETSTANDARD1
                 requiresSerializer = handleType.GetCustomAttributes(typeof(RequiresSerializerAttribute), false).Any();
 #else
                 requiresSerializer = handleType.GetTypeInfo().CustomAttributes.Any(p => p.AttributeType == typeof(RequiresSerializerAttribute));
@@ -310,7 +310,7 @@ namespace CacheManager.Core.Internal
                         handle.ToString()));
             }
 
-#if NETSTANDARD
+#if NETSTANDARD1
             var handleInfo = handle.GetTypeInfo();
             if (handleInfo.IsGenericType && !handleInfo.IsGenericTypeDefinition)
 #else
@@ -327,7 +327,7 @@ namespace CacheManager.Core.Internal
 
         private static void CheckImplements<TValid>(Type type)
         {
-#if NETSTANDARD
+#if NETSTANDARD1
             var typeInfo = type.GetTypeInfo();
             var interfaces = typeInfo.ImplementedInterfaces;
 #else
@@ -342,7 +342,7 @@ namespace CacheManager.Core.Internal
 
         private static void CheckExtends<TValid>(Type type)
         {
-#if NETSTANDARD
+#if NETSTANDARD1
             var baseType = type.GetTypeInfo().BaseType;
 #else
             var baseType = type.BaseType;
@@ -354,7 +354,7 @@ namespace CacheManager.Core.Internal
                 {
                     return;
                 }
-#if NETSTANDARD
+#if NETSTANDARD1
                 baseType = type.GetTypeInfo().BaseType;
 #else
                 baseType = type.BaseType;

@@ -238,7 +238,7 @@
             }
         }
 
-#if !NETCOREAPP
+#if !NETCOREAPP1
 
         // exclusive inner class for parallel exec of this long running test
         public class SystemRuntimeSpecific : LongRunningEventTestBase

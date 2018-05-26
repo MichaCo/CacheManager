@@ -29,7 +29,7 @@ namespace CacheManager.Tests
             OnClearRegion
         }
 
-#if NETCOREAPP
+#if NETCOREAPP1 ||NETCOREAPP2
         [Fact]
         public void Redis_WithoutSerializer_ShouldThrow()
         {
@@ -678,7 +678,7 @@ namespace CacheManager.Tests
             act.Should().Throw<InvalidOperationException>().WithMessage("*endpoints*");
         }
 
-#if !NETCOREAPP
+#if !NETCOREAPP1
 #if !NO_APP_CONFIG
 
         [Fact]
@@ -1045,7 +1045,7 @@ namespace CacheManager.Tests
             act.Should().NotThrow();
         }
 
-#if !NETCOREAPP
+#if !NETCOREAPP1
 
         [Fact]
         [Trait("category", "Redis")]
@@ -1471,7 +1471,7 @@ namespace CacheManager.Tests
         }
     }
 
-#if !NETCOREAPP
+#if !NETCOREAPP1
 
     [Serializable]
 #endif

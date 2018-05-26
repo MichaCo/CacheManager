@@ -23,6 +23,10 @@ namespace CacheManager.Core.Internal
     /// Basic abstraction for serializers to work with cache items.
     /// </summary>
     /// <typeparam name="T">The type.</typeparam>
+#if !NETSTANDARD1
+    [Serializable]
+    [System.Runtime.Serialization.DataContract]
+#endif
     public abstract class SerializerCacheItem<T> : ICacheItemConverter
     {
         /// <summary>
@@ -58,48 +62,75 @@ namespace CacheManager.Core.Internal
         /// Gets or sets the created utc date in ticks.
         /// Can be converted from and to <see cref="DateTime"/>.
         /// </summary>
+#if !NETSTANDARD1
+        [System.Runtime.Serialization.DataMember]
+#endif
         public abstract long CreatedUtc { get; set; }
 
         /// <summary>
         /// Gets or sets the expiration mode.
         /// </summary>
+#if !NETSTANDARD1
+        [System.Runtime.Serialization.DataMember]
+#endif
         public abstract ExpirationMode ExpirationMode { get; set; }
 
         /// <summary>
         /// Gets or sets the expiration timeout in milliseconds.
         /// Can be coverted from and to <see cref="TimeSpan"/>.
         /// </summary>
+#if !NETSTANDARD1
+        [System.Runtime.Serialization.DataMember]
+#endif
         public abstract double ExpirationTimeout { get; set; }
 
         /// <summary>
         /// Gets or sets the key.
         /// </summary>
+#if !NETSTANDARD1
+        [System.Runtime.Serialization.DataMember]
+#endif
         public abstract string Key { get; set; }
 
         /// <summary>
         /// Gets or sets the last accessed utc date in ticks.
         /// Can be converted from and to <see cref="DateTime"/>.
         /// </summary>
+#if !NETSTANDARD1
+        [System.Runtime.Serialization.DataMember]
+#endif
         public abstract long LastAccessedUtc { get; set; }
 
         /// <summary>
         /// Gets or sets the region.
         /// </summary>
+#if !NETSTANDARD1
+        [System.Runtime.Serialization.DataMember]
+#endif
         public abstract string Region { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether the default expiration should be used.
         /// </summary>
+#if !NETSTANDARD1
+        [System.Runtime.Serialization.DataMember]
+#endif
         public abstract bool UsesExpirationDefaults { get; set; }
 
         /// <summary>
         /// Gets or sets the value type.
         /// </summary>
+#if !NETSTANDARD1
+        [System.Runtime.Serialization.DataMember]
+#endif
         public abstract string ValueType { get; set; }
 
         /// <summary>
         /// Gets or sets the value.
         /// </summary>
+#if !NETSTANDARD1
+        [System.Runtime.Serialization.DataMember]
+#endif
         public abstract T Value { get; set; }
 
         /// <inheritdoc/>

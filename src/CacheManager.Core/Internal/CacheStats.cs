@@ -26,7 +26,7 @@ namespace CacheManager.Core.Internal
         private readonly ConcurrentDictionary<string, CacheStatsCounter> _counters;
         private readonly bool _isPerformanceCounterEnabled;
         private readonly bool _isStatsEnabled;
-#if !NETSTANDARD
+#if !NETSTANDARD1 && !NETSTANDARD2
         private readonly CachePerformanceCounters<TCacheValue> _performanceCounters;
 #endif
 
@@ -55,7 +55,7 @@ namespace CacheManager.Core.Internal
             _isPerformanceCounterEnabled = enablePerformanceCounters;
             _counters = new ConcurrentDictionary<string, CacheStatsCounter>();
 
-#if !NETSTANDARD
+#if !NETSTANDARD1 && !NETSTANDARD2
             if (_isPerformanceCounterEnabled)
             {
                 _performanceCounters = new CachePerformanceCounters<TCacheValue>(cacheName, handleName, this);
@@ -373,7 +373,7 @@ namespace CacheManager.Core.Internal
         {
             if (disposeManaged)
             {
-#if !NETSTANDARD
+#if !NETSTANDARD1 && !NETSTANDARD2
                 if (_isPerformanceCounterEnabled)
                 {
                     _performanceCounters.Dispose();

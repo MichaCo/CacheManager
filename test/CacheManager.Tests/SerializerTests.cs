@@ -12,9 +12,15 @@ using Newtonsoft.Json;
 using ProtoBuf;
 using Xunit;
 using CacheManager.Serialization.Bond;
-#if !NETCOREAPP
+using System.Runtime.Serialization.Json;
+using System.Runtime.Serialization;
+
+#if !NETCOREAPP1
+
 using System.Runtime.Serialization.Formatters;
 using System.Runtime.Serialization.Formatters.Binary;
+using CacheManager.Serialization.DataContract;
+
 #endif
 
 namespace CacheManager.Tests
@@ -22,7 +28,9 @@ namespace CacheManager.Tests
     [ExcludeFromCodeCoverage]
     public class SerializerTests
     {
-#if !NETCOREAPP
+        #region binary serializer
+
+#if !NETCOREAPP1 && !NETCOREAPP2
 
         [Fact]
         public void BinarySerializer_RespectBinarySerializerSettings()
@@ -158,6 +166,10 @@ namespace CacheManager.Tests
         }
 
 #endif
+
+        #endregion binary serializer
+
+        #region newtonsoft json serializer
 
         [Fact]
         public void JsonSerializer_RespectJsonSerializerSettings()
@@ -342,7 +354,9 @@ namespace CacheManager.Tests
             result.Should().BeEquivalentTo(items);
         }
 
-        /* ######### gz json ######### */
+        #endregion newtonsoft json serializer
+
+        #region newtonsoft json with GZ serializer
 
         [Fact]
         public void GzJsonSerializer_RespectJsonSerializerSettings()
@@ -527,25 +541,656 @@ namespace CacheManager.Tests
             result.Should().BeEquivalentTo(items);
         }
 
-        [Theory]
-        [ClassData(typeof(TestCacheManagers))]
-        public void Serializer_FullAddGet<T>(T cache)
-            where T : ICacheManager<object>
+        #endregion newtonsoft json with GZ serializer
+
+#if !NETCOREAPP1
+
+        #region data contract serializer common
+
+        [Fact]
+        public void DataContractSerializer_RespectSerializerSettings()
         {
-            using (cache)
+            var serializationSettings = new DataContractSerializerSettings()
             {
-                // arrange
-                var key = Guid.NewGuid().ToString();
-                var pocco = SerializerPoccoSerializable.Create();
+                KnownTypes = new[] { typeof(string) }
+            };
 
-                // act
-                Func<bool> actSet = () => cache.Add(key, pocco); 
+            var cache = CacheFactory.Build<string>(
+                p => p
+                    .WithDataContractSerializer(serializationSettings)
+                    .WithHandle(typeof(SerializerTestCacheHandle)));
 
-                // assert
-                actSet().Should().BeTrue("Should add the key");
-                cache.Get<SerializerPoccoSerializable>(key).Should().BeEquivalentTo(pocco);
-            }
+            var handle = cache.CacheHandles.ElementAt(0) as SerializerTestCacheHandle;
+            var serializer = handle.Serializer as DataContractCacheSerializer;
+
+            serializer.SerializerSettings.KnownTypes.Should().BeEquivalentTo(new[] { typeof(string) });
+
+            cache.Configuration.SerializerTypeArguments.Length.Should().Be(1);
         }
+
+        [Fact]
+        public void DataContractSerializer_Json_RespectSerializerSettings()
+        {
+            var serializationSettings = new DataContractJsonSerializerSettings()
+            {
+                KnownTypes = new[] { typeof(string) }
+            };
+
+            var cache = CacheFactory.Build<string>(
+                p => p
+                    .WithDataContractJsonSerializer(serializationSettings)
+                    .WithHandle(typeof(SerializerTestCacheHandle)));
+
+            var handle = cache.CacheHandles.ElementAt(0) as SerializerTestCacheHandle;
+            var serializer = handle.Serializer as DataContractJsonCacheSerializer;
+
+            serializer.SerializerSettings.KnownTypes.Should().BeEquivalentTo(new[] { typeof(string) });
+
+            cache.Configuration.SerializerTypeArguments.Length.Should().Be(1);
+        }
+
+        [Fact]
+        public void DataContractSerializer_GzJson_RespectSerializerSettings()
+        {
+            var serializationSettings = new DataContractJsonSerializerSettings()
+            {
+                KnownTypes = new[] { typeof(string) }
+            };
+
+            var cache = CacheFactory.Build<string>(
+                p => p
+                    .WithDataContractGzJsonSerializer(serializationSettings)
+                    .WithHandle(typeof(SerializerTestCacheHandle)));
+
+            var handle = cache.CacheHandles.ElementAt(0) as SerializerTestCacheHandle;
+            var serializer = handle.Serializer as DataContractGzJsonCacheSerializer;
+
+            serializer.SerializerSettings.KnownTypes.Should().BeEquivalentTo(new[] { typeof(string) });
+
+            cache.Configuration.SerializerTypeArguments.Length.Should().Be(1);
+        }
+
+        // this test actually failed because the DataContractBinaryCacheSerializer didn't had that ctor for it...
+        [Fact]
+        public void DataContractSerializer_Binary_RespectSerializerSettings()
+        {
+            var serializationSettings = new DataContractSerializerSettings()
+            {
+                KnownTypes = new[] { typeof(string) }
+            };
+
+            var cache = CacheFactory.Build<string>(
+                p => p
+                    .WithDataContractBinarySerializer(serializationSettings)
+                    .WithHandle(typeof(SerializerTestCacheHandle)));
+
+            var handle = cache.CacheHandles.ElementAt(0) as SerializerTestCacheHandle;
+            var serializer = handle.Serializer as DataContractBinaryCacheSerializer;
+
+            serializer.SerializerSettings.KnownTypes.Should().BeEquivalentTo(new[] { typeof(string) });
+
+            cache.Configuration.SerializerTypeArguments.Length.Should().Be(1);
+        }
+
+        #endregion data contract serializer common
+
+        #region data contract serializer
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(float.MaxValue)]
+        [InlineData(int.MaxValue)]
+        [InlineData(long.MaxValue)]
+        [InlineData("some string")]
+        [ReplaceCulture]
+        public void DataContractSerializer_Primitives<T>(T value)
+        {
+            // arrange
+            var serializer = new DataContractCacheSerializer();
+
+            // act
+            var data = serializer.Serialize(value);
+            var result = serializer.Deserialize(data, typeof(T));
+
+            result.Should().Be(value);
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(float.MaxValue)]
+        [InlineData(int.MaxValue)]
+        [InlineData(long.MaxValue)]
+        [InlineData("some string")]
+        [ReplaceCulture]
+        public void DataContractSerializer_CacheItem_Primitives<T>(T value)
+        {
+            // arrange
+            var serializer = new DataContractCacheSerializer();
+            var item = new CacheItem<T>("key", value);
+
+            // act
+            var data = serializer.SerializeCacheItem(item);
+            var result = serializer.DeserializeCacheItem<T>(data, typeof(T));
+
+            result.Value.Should().Be(value);
+            result.ValueType.Should().Be(item.ValueType);
+            result.CreatedUtc.Should().Be(item.CreatedUtc);
+            result.ExpirationMode.Should().Be(item.ExpirationMode);
+            result.ExpirationTimeout.Should().Be(item.ExpirationTimeout);
+            result.Key.Should().Be(item.Key);
+            result.LastAccessedUtc.Should().Be(item.LastAccessedUtc);
+            result.Region.Should().Be(item.Region);
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(float.MaxValue)]
+        [InlineData(int.MaxValue)]
+        [InlineData(long.MaxValue)]
+        [InlineData("some string")]
+        [ReplaceCulture]
+        public void DataContractSerializer_CacheItemOfObject_Primitives<T>(T value)
+        {
+            // arrange
+            var serializer = new DataContractCacheSerializer();
+            var item = new CacheItem<object>("key", value);
+
+            // act
+            var data = serializer.SerializeCacheItem(item);
+            var result = serializer.DeserializeCacheItem<object>(data, typeof(T));
+
+            result.Value.Should().Be(value);
+            result.ValueType.Should().Be(item.ValueType);
+            result.CreatedUtc.Should().Be(item.CreatedUtc);
+            result.ExpirationMode.Should().Be(item.ExpirationMode);
+            result.ExpirationTimeout.Should().Be(item.ExpirationTimeout);
+            result.Key.Should().Be(item.Key);
+            result.LastAccessedUtc.Should().Be(item.LastAccessedUtc);
+            result.Region.Should().Be(item.Region);
+        }
+
+        [Fact]
+        public void DataContractSerializer_Pocco()
+        {
+            // arrange
+            var serializer = new DataContractCacheSerializer();
+            var item = SerializerPoccoSerializable.Create();
+
+            // act
+            var data = serializer.Serialize(item);
+            var result = serializer.Deserialize(data, item.GetType());
+
+            result.Should().BeEquivalentTo(item);
+        }
+
+        [Fact]
+        public void DataContractSerializer_CacheItemWithPocco()
+        {
+            // arrange
+            var serializer = new DataContractCacheSerializer();
+            var pocco = SerializerPoccoSerializable.Create();
+            var item = new CacheItem<SerializerPoccoSerializable>("key", "region", pocco, ExpirationMode.Absolute, TimeSpan.FromDays(1));
+
+            // act
+            var data = serializer.SerializeCacheItem(item);
+            var result = serializer.DeserializeCacheItem<SerializerPoccoSerializable>(data, pocco.GetType());
+
+            result.Should().BeEquivalentTo(item);
+        }
+
+        [Fact]
+        public void DataContractSerializer_List()
+        {
+            // arrange
+            var serializer = new DataContractCacheSerializer();
+            var items = new List<SerializerPoccoSerializable>()
+            {
+                SerializerPoccoSerializable.Create(),
+                SerializerPoccoSerializable.Create(),
+                SerializerPoccoSerializable.Create()
+            };
+
+            // act
+            var data = serializer.Serialize(items);
+            var result = serializer.Deserialize(data, items.GetType());
+
+            result.Should().BeEquivalentTo(items);
+        }
+
+        [Fact]
+        public void DataContractSerializer_FullAddGet()
+        {
+            FullAddGetWithSerializer(Serializer.DataContract);
+        }
+
+        #endregion data contract serializer
+
+        #region data contract serializer binary
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(float.MaxValue)]
+        [InlineData(int.MaxValue)]
+        [InlineData(long.MaxValue)]
+        [InlineData("some string")]
+        [ReplaceCulture]
+        public void DataContractBinarySerializer_Primitives<T>(T value)
+        {
+            // arrange
+            var serializer = new DataContractBinaryCacheSerializer();
+
+            // act
+            var data = serializer.Serialize(value);
+            var result = serializer.Deserialize(data, typeof(T));
+
+            result.Should().Be(value);
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(float.MaxValue)]
+        [InlineData(int.MaxValue)]
+        [InlineData(long.MaxValue)]
+        [InlineData("some string")]
+        [ReplaceCulture]
+        public void DataContractBinarySerializer_CacheItem_Primitives<T>(T value)
+        {
+            // arrange
+            var serializer = new DataContractBinaryCacheSerializer();
+            var item = new CacheItem<T>("key", value);
+
+            // act
+            var data = serializer.SerializeCacheItem(item);
+            var result = serializer.DeserializeCacheItem<T>(data, typeof(T));
+
+            result.Value.Should().Be(value);
+            result.ValueType.Should().Be(item.ValueType);
+            result.CreatedUtc.Should().Be(item.CreatedUtc);
+            result.ExpirationMode.Should().Be(item.ExpirationMode);
+            result.ExpirationTimeout.Should().Be(item.ExpirationTimeout);
+            result.Key.Should().Be(item.Key);
+            result.LastAccessedUtc.Should().Be(item.LastAccessedUtc);
+            result.Region.Should().Be(item.Region);
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(float.MaxValue)]
+        [InlineData(int.MaxValue)]
+        [InlineData(long.MaxValue)]
+        [InlineData("some string")]
+        [ReplaceCulture]
+        public void DataContractBinarySerializer_CacheItemOfObject_Primitives<T>(T value)
+        {
+            // arrange
+            var serializer = new DataContractBinaryCacheSerializer();
+            var item = new CacheItem<object>("key", value);
+
+            // act
+            var data = serializer.SerializeCacheItem(item);
+            var result = serializer.DeserializeCacheItem<object>(data, typeof(T));
+
+            result.Value.Should().Be(value);
+            result.ValueType.Should().Be(item.ValueType);
+            result.CreatedUtc.Should().Be(item.CreatedUtc);
+            result.ExpirationMode.Should().Be(item.ExpirationMode);
+            result.ExpirationTimeout.Should().Be(item.ExpirationTimeout);
+            result.Key.Should().Be(item.Key);
+            result.LastAccessedUtc.Should().Be(item.LastAccessedUtc);
+            result.Region.Should().Be(item.Region);
+        }
+
+        [Fact]
+        public void DataContractBinarySerializer_Pocco()
+        {
+            // arrange
+            var serializer = new DataContractBinaryCacheSerializer();
+            var item = SerializerPoccoSerializable.Create();
+
+            // act
+            var data = serializer.Serialize(item);
+            var result = serializer.Deserialize(data, item.GetType());
+
+            result.Should().BeEquivalentTo(item);
+        }
+
+        [Fact]
+        public void DataContractBinarySerializer_CacheItemWithPocco()
+        {
+            // arrange
+            var serializer = new DataContractBinaryCacheSerializer();
+            var pocco = SerializerPoccoSerializable.Create();
+            var item = new CacheItem<SerializerPoccoSerializable>("key", "region", pocco, ExpirationMode.Absolute, TimeSpan.FromDays(1));
+
+            // act
+            var data = serializer.SerializeCacheItem(item);
+            var result = serializer.DeserializeCacheItem<SerializerPoccoSerializable>(data, pocco.GetType());
+
+            result.Should().BeEquivalentTo(item);
+        }
+
+        [Fact]
+        public void DataContractBinarySerializer_List()
+        {
+            // arrange
+            var serializer = new DataContractBinaryCacheSerializer();
+            var items = new List<SerializerPoccoSerializable>()
+            {
+                SerializerPoccoSerializable.Create(),
+                SerializerPoccoSerializable.Create(),
+                SerializerPoccoSerializable.Create()
+            };
+
+            // act
+            var data = serializer.Serialize(items);
+            var result = serializer.Deserialize(data, items.GetType());
+
+            result.Should().BeEquivalentTo(items);
+        }
+
+        [Fact]
+        public void DataContractBinarySerializer_FullAddGet()
+        {
+            FullAddGetWithSerializer(Serializer.DataContractBinary);
+        }
+
+        #endregion data contract serializer binary
+
+        #region data contract serializer json
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(float.MaxValue)]
+        [InlineData(int.MaxValue)]
+        [InlineData(long.MaxValue)]
+        [InlineData("some string")]
+        [ReplaceCulture]
+        public void DataContractJsonSerializer_Primitives<T>(T value)
+        {
+            // arrange
+            var serializer = new DataContractJsonCacheSerializer();
+
+            // act
+            var data = serializer.Serialize(value);
+            var result = serializer.Deserialize(data, typeof(T));
+
+            result.Should().Be(value);
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(float.MaxValue)]
+        [InlineData(int.MaxValue)]
+        [InlineData(long.MaxValue)]
+        [InlineData("some string")]
+        [ReplaceCulture]
+        public void DataContractJsonSerializer_CacheItem_Primitives<T>(T value)
+        {
+            // arrange
+            var serializer = new DataContractJsonCacheSerializer(new DataContractJsonSerializerSettings()
+            {
+                //DataContractJsonSerializer serializes DateTime values as Date(1231231313) instead of "2017-11-07T13:09:39.7079187Z".
+                //So, I've changed the format to make the test pass.
+                DateTimeFormat = new DateTimeFormat("O")
+            });
+            var item = new CacheItem<T>("key", value);
+
+            // act
+            var data = serializer.SerializeCacheItem(item);
+            var result = serializer.DeserializeCacheItem<T>(data, typeof(T));
+
+            result.Value.Should().Be(value);
+            result.ValueType.Should().Be(item.ValueType);
+            result.CreatedUtc.Should().Be(item.CreatedUtc);
+            result.ExpirationMode.Should().Be(item.ExpirationMode);
+            result.ExpirationTimeout.Should().Be(item.ExpirationTimeout);
+            result.Key.Should().Be(item.Key);
+            result.LastAccessedUtc.Should().Be(item.LastAccessedUtc);
+            result.Region.Should().Be(item.Region);
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(float.MaxValue)]
+        [InlineData(int.MaxValue)]
+        [InlineData(long.MaxValue)]
+        [InlineData("some string")]
+        [ReplaceCulture]
+        public void DataContractJsonSerializer_CacheItemOfObject_Primitives<T>(T value)
+        {
+            // arrange
+            var serializer = new DataContractJsonCacheSerializer(new DataContractJsonSerializerSettings()
+            {
+                //DataContractJsonSerializer serializes DateTime values as Date(1231231313) instead of "2017-11-07T13:09:39.7079187Z".
+                //So, I've changed the format to make the test pass.
+                DateTimeFormat = new DateTimeFormat("O")
+            });
+            var item = new CacheItem<object>("key", value);
+
+            // act
+            var data = serializer.SerializeCacheItem(item);
+            var result = serializer.DeserializeCacheItem<object>(data, typeof(T));
+
+            result.Value.Should().Be(value);
+            result.ValueType.Should().Be(item.ValueType);
+            result.CreatedUtc.Should().Be(item.CreatedUtc);
+            result.ExpirationMode.Should().Be(item.ExpirationMode);
+            result.ExpirationTimeout.Should().Be(item.ExpirationTimeout);
+            result.Key.Should().Be(item.Key);
+            result.LastAccessedUtc.Should().Be(item.LastAccessedUtc);
+            result.Region.Should().Be(item.Region);
+        }
+
+        [Fact]
+        public void DataContractJsonSerializer_Pocco()
+        {
+            // arrange
+            var serializer = new DataContractJsonCacheSerializer();
+            var item = SerializerPoccoSerializable.Create();
+
+            // act
+            var data = serializer.Serialize(item);
+            var result = serializer.Deserialize(data, item.GetType());
+
+            result.Should().BeEquivalentTo(item);
+        }
+
+        [Fact]
+        public void DataContractJsonSerializer_CacheItemWithPocco()
+        {
+            // arrange
+            var serializer = new DataContractJsonCacheSerializer(new DataContractJsonSerializerSettings()
+            {
+                //DataContractJsonSerializer serializes DateTime values as Date(1231231313) instead of "2017-11-07T13:09:39.7079187Z".
+                //So, I've changed the format to make the test pass.
+                DateTimeFormat = new DateTimeFormat("O")
+            });
+            var pocco = SerializerPoccoSerializable.Create();
+            var item = new CacheItem<SerializerPoccoSerializable>("key", "region", pocco, ExpirationMode.Absolute, TimeSpan.FromDays(1));
+
+            // act
+            var data = serializer.SerializeCacheItem(item);
+            var result = serializer.DeserializeCacheItem<SerializerPoccoSerializable>(data, pocco.GetType());
+
+            result.Should().BeEquivalentTo(item);
+        }
+
+        [Fact]
+        public void DataContractJsonSerializer_List()
+        {
+            // arrange
+            var serializer = new DataContractJsonCacheSerializer();
+            var items = new List<SerializerPoccoSerializable>()
+            {
+                SerializerPoccoSerializable.Create(),
+                SerializerPoccoSerializable.Create(),
+                SerializerPoccoSerializable.Create()
+            };
+
+            // act
+            var data = serializer.Serialize(items);
+            var result = serializer.Deserialize(data, items.GetType());
+
+            result.Should().BeEquivalentTo(items);
+        }
+
+        [Fact]
+        public void DataContractJsonSerializer_FullAddGet()
+        {
+            FullAddGetWithSerializer(Serializer.DataContractJson);
+        }
+
+        #endregion data contract serializer json
+
+        #region data contract serializer gz json
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(float.MaxValue)]
+        [InlineData(int.MaxValue)]
+        [InlineData(long.MaxValue)]
+        [InlineData("some string")]
+        [ReplaceCulture]
+        public void DataContractGzJsonSerializer_Primitives<T>(T value)
+        {
+            // arrange
+            var serializer = new DataContractGzJsonCacheSerializer();
+
+            // act
+            var data = serializer.Serialize(value);
+            var result = serializer.Deserialize(data, typeof(T));
+
+            result.Should().Be(value);
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(float.MaxValue)]
+        [InlineData(int.MaxValue)]
+        [InlineData(long.MaxValue)]
+        [InlineData("some string")]
+        [ReplaceCulture]
+        public void DataContractGzJsonSerializer_CacheItem_Primitives<T>(T value)
+        {
+            // arrange
+            var serializer = new DataContractGzJsonCacheSerializer(new DataContractJsonSerializerSettings()
+            {
+                //DataContractJsonSerializer serializes DateTime values as Date(1231231313) instead of "2017-11-07T13:09:39.7079187Z".
+                //So, I've changed the format to make the test pass.
+                DateTimeFormat = new DateTimeFormat("O")
+            });
+            var item = new CacheItem<T>("key", value);
+
+            // act
+            var data = serializer.SerializeCacheItem(item);
+            var result = serializer.DeserializeCacheItem<T>(data, typeof(T));
+
+            result.Value.Should().Be(value);
+            result.ValueType.Should().Be(item.ValueType);
+            result.CreatedUtc.Should().Be(item.CreatedUtc);
+            result.ExpirationMode.Should().Be(item.ExpirationMode);
+            result.ExpirationTimeout.Should().Be(item.ExpirationTimeout);
+            result.Key.Should().Be(item.Key);
+            result.LastAccessedUtc.Should().Be(item.LastAccessedUtc);
+            result.Region.Should().Be(item.Region);
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(float.MaxValue)]
+        [InlineData(int.MaxValue)]
+        [InlineData(long.MaxValue)]
+        [InlineData("some string")]
+        [ReplaceCulture]
+        public void DataContractGzJsonSerializer_CacheItemOfObject_Primitives<T>(T value)
+        {
+            // arrange
+            var serializer = new DataContractGzJsonCacheSerializer(new DataContractJsonSerializerSettings()
+            {
+                //DataContractJsonSerializer serializes DateTime values as Date(1231231313) instead of "2017-11-07T13:09:39.7079187Z".
+                //So, I've changed the format to make the test pass.
+                DateTimeFormat = new DateTimeFormat("O")
+            });
+            var item = new CacheItem<object>("key", value);
+
+            // act
+            var data = serializer.SerializeCacheItem(item);
+            var result = serializer.DeserializeCacheItem<object>(data, typeof(T));
+
+            result.Value.Should().Be(value);
+            result.ValueType.Should().Be(item.ValueType);
+            result.CreatedUtc.Should().Be(item.CreatedUtc);
+            result.ExpirationMode.Should().Be(item.ExpirationMode);
+            result.ExpirationTimeout.Should().Be(item.ExpirationTimeout);
+            result.Key.Should().Be(item.Key);
+            result.LastAccessedUtc.Should().Be(item.LastAccessedUtc);
+            result.Region.Should().Be(item.Region);
+        }
+
+        [Fact]
+        public void DataContractGzJsonSerializer_Pocco()
+        {
+            // arrange
+            var serializer = new DataContractGzJsonCacheSerializer();
+            var item = SerializerPoccoSerializable.Create();
+
+            // act
+            var data = serializer.Serialize(item);
+            var result = serializer.Deserialize(data, item.GetType());
+
+            result.Should().BeEquivalentTo(item);
+        }
+
+        [Fact]
+        public void DataContractGzJsonSerializer_CacheItemWithPocco()
+        {
+            // arrange
+            var serializer = new DataContractGzJsonCacheSerializer(new DataContractJsonSerializerSettings()
+            {
+                //DataContractJsonSerializer serializes DateTime values as Date(1231231313) instead of "2017-11-07T13:09:39.7079187Z".
+                //So, I've changed the format to make the test pass.
+                DateTimeFormat = new DateTimeFormat("O")
+            });
+            var pocco = SerializerPoccoSerializable.Create();
+            var item = new CacheItem<SerializerPoccoSerializable>("key", "region", pocco, ExpirationMode.Absolute, TimeSpan.FromDays(1));
+
+            // act
+            var data = serializer.SerializeCacheItem(item);
+            var result = serializer.DeserializeCacheItem<SerializerPoccoSerializable>(data, pocco.GetType());
+
+            result.Should().BeEquivalentTo(item);
+        }
+
+        [Fact]
+        public void DataContractGzJsonSerializer_List()
+        {
+            // arrange
+            var serializer = new DataContractGzJsonCacheSerializer();
+            var items = new List<SerializerPoccoSerializable>()
+            {
+                SerializerPoccoSerializable.Create(),
+                SerializerPoccoSerializable.Create(),
+                SerializerPoccoSerializable.Create()
+            };
+
+            // act
+            var data = serializer.Serialize(items);
+            var result = serializer.Deserialize(data, items.GetType());
+
+            result.Should().BeEquivalentTo(items);
+        }
+
+        [Fact]
+        public void DataContractGzJsonSerializer_FullAddGet()
+        {
+            FullAddGetWithSerializer(Serializer.DataContractGzJson);
+        }
+
+        #endregion data contract serializer gz json
+
+#endif
+
+        #region protobuf serializer
 
         [Theory]
         [InlineData(true)]
@@ -720,6 +1365,8 @@ namespace CacheManager.Tests
             }
         }
 
+        #endregion protobuf serializer
+
         #region Bond binary serializer
 
         [Theory]
@@ -881,6 +1528,46 @@ namespace CacheManager.Tests
 
         #endregion Bond binary serializer
 
+        [Theory]
+        [ClassData(typeof(TestCacheManagers))]
+        public void Serializer_FullAddGet<T>(T cache)
+            where T : ICacheManager<object>
+        {
+            using (cache)
+            {
+                // arrange
+                var key = Guid.NewGuid().ToString();
+                var pocco = SerializerPoccoSerializable.Create();
+
+                // act
+                Func<bool> actSet = () => cache.Add(key, pocco);
+
+                // assert
+                actSet().Should().BeTrue("Should add the key");
+                cache.Get<SerializerPoccoSerializable>(key).Should().BeEquivalentTo(pocco);
+            }
+        }
+
+        private void FullAddGetWithSerializer(Serializer serializer)
+        {
+            using (var cache = TestManagers.CreateRedisCache(serializer: serializer))
+            {
+                // arrange
+                var key = Guid.NewGuid().ToString();
+                var pocco = SerializerPoccoSerializable.Create();
+
+                // act
+                Action actSet = () =>
+                {
+                    cache.Add(key, pocco);
+                };
+
+                // assert
+                actSet.Should().NotThrow();
+                cache.Get<SerializerPoccoSerializable>(key).Should().BeEquivalentTo(pocco);
+            }
+        }
+
         private static class DataGenerator
         {
             private static Random random = new Random();
@@ -969,7 +1656,7 @@ namespace CacheManager.Tests
             }
         }
 
-#if !NETCOREAPP
+#if !NETCOREAPP1
 
         [Serializable]
 #endif
@@ -1018,7 +1705,7 @@ namespace CacheManager.Tests
             }
         }
 
-#if !NETCOREAPP
+#if !NETCOREAPP1
 
         [Serializable]
 #endif
@@ -1031,7 +1718,7 @@ namespace CacheManager.Tests
             public string StringProperty { get; set; }
         }
 
-#if !NETCOREAPP
+#if !NETCOREAPP1
 
         [Serializable]
 #endif

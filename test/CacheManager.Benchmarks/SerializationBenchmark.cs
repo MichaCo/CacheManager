@@ -10,6 +10,7 @@ using CacheManager.Serialization.ProtoBuf;
 
 namespace CacheManager.Benchmarks
 {
+    [ExcludeFromCodeCoverage]
     public class SerializationBenchmark
     {
         private int _iterations = 1000;

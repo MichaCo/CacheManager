@@ -1,4 +1,4 @@
-﻿#if !NETCOREAPP
+﻿#if !NETCOREAPP1
 using System;
 using System.Configuration;
 using System.Diagnostics.CodeAnalysis;

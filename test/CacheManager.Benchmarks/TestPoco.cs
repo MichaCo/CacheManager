@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Newtonsoft.Json;
 using ProtoBuf;
 
 namespace CacheManager.Benchmarks
 {
+    [ExcludeFromCodeCoverage]
     [Serializable]
     [JsonObject]
     [ProtoContract]
@@ -33,6 +35,7 @@ namespace CacheManager.Benchmarks
         public List<TestSubPoco> OList { get; set; }
     }
 
+    [ExcludeFromCodeCoverage]
     [Serializable]
     [ProtoContract]
     [JsonObject]

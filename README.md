@@ -17,18 +17,19 @@ Linux, Mono | -
 
 | Package Name | .Net 4.0  | .Net 4.5  | .NET Standard
 |--------------| :-------: | :-------: | :-------: 
-| [CacheManager.Core][Core.nuget] | x | x | 1.2
-| [CacheManager.StackExchange.Redis][Redis.nuget] | - | x | 1.5
-| [CacheManager.SystemRuntimeCaching][SystemRuntimeCaching.nuget]  | x | x | -
-| [CacheManager.Microsoft.Extensions.Caching.Memory][MSCache.nuget] | - | x | 1.3
-| [CacheManager.Microsoft.Extensions.Configuration][Configuration.nuget] | - | x | 1.2
-| [CacheManager.Microsoft.Extensions.Logging][Logging.nuget] | - | x | 1.2
-| [CacheManager.Serialization.Bond][Bond.nuget] | x | x | 1.2
-| [CacheManager.Serialization.Json][Json.nuget] | x | x | 1.2
-| [CacheManager.Serialization.ProtoBuf][ProtoBuf.nuget] | x | x | 1.3
+| [CacheManager.Core][Core.nuget] | x | x | 1.2, 2.0
+| [CacheManager.StackExchange.Redis][Redis.nuget] | - | x | 1.5, 2.0
+| [CacheManager.SystemRuntimeCaching][SystemRuntimeCaching.nuget]  | x | x | 2.0
+| [CacheManager.Microsoft.Extensions.Caching.Memory][MSCache.nuget] | - | x | 1.3, 2.0
+| [CacheManager.Microsoft.Extensions.Configuration][Configuration.nuget] | - | x | 1.2, 2.0
+| [CacheManager.Microsoft.Extensions.Logging][Logging.nuget] | - | x | 1.2, 2.0
+| [CacheManager.Serialization.DataContract][DataContract.nuget] | x | x | 2.0
+| [CacheManager.Serialization.Bond][Bond.nuget] | x | x | 1.2, 2.0
+| [CacheManager.Serialization.Json][Json.nuget] | x | x | 1.2, 2.0
+| [CacheManager.Serialization.ProtoBuf][ProtoBuf.nuget] | x | x | 1.3, 2.0
 | [CacheManager.Web][Web.nuget]  | - | x | -
 | [CacheManager.Memcached][Memcached.nuget]  | x | x | -
-| [CacheManager.Couchbase][Couchbase.nuget]  | - | x | 1.5
+| [CacheManager.Couchbase][Couchbase.nuget]  | - | x | 1.5, 2.0
 
 ### Beta Packages
 Beta versions of the CacheManager packages are getting pushed to https://www.myget.org/gallery/cachemanager on each build. 
@@ -87,6 +88,7 @@ The following are the currently available serialization options:
 	* **Json** based on the popular Newtonsoft.Json library
 	* **Json** with Gzip compression
     * **Bond** based on Microsoft.Bond supporting all three available variants
+    * **DataContract** based on System.Runtime.Serialization library supporting binary, Json & Json with Gzip compression
 	* **Protocol Buffer** Google's protobuf. The package uses Mark's [protobuf-net](https://github.com/mgravell/protobuf-net) implementation.
 * **Update values with lock or transaction** for distributed caches. 
 The interfaced provides a simple update method which internally ensures you work with the latest version.
@@ -152,3 +154,4 @@ OnGet, OnAdd, OnPut, OnRemove, OnClear, OnClearRegion
 [MSCache.nuget]: https://www.nuget.org/packages/CacheManager.Microsoft.Extensions.Caching.Memory
 [ProtoBuf.nuget]: https://www.nuget.org/packages/CacheManager.Serialization.ProtoBuf
 [Bond.nuget]: https://www.nuget.org/packages/CacheManager.Serialization.Bond
+[DataContract.nuget]: https://www.nuget.org

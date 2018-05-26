@@ -66,7 +66,7 @@ namespace CacheManager.Core
                     var newValue = valueFactory(k);
                     return newValue == null ? null : new CacheItem<TCacheValue>(k, newValue);
                 },
-                out CacheItem<TCacheValue> item))
+                out var item))
             {
                 value = item.Value;
                 return true;
@@ -91,7 +91,7 @@ namespace CacheManager.Core
                     var newValue = valueFactory(k, r);
                     return newValue == null ? null : new CacheItem<TCacheValue>(k, r, newValue);
                 },
-                out CacheItem<TCacheValue> item))
+                out var item))
             {
                 value = item.Value;
                 return true;
