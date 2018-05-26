@@ -28,8 +28,8 @@ namespace CacheManager.Tests
             deserialized.Region.Should().Be(null);
             deserialized.ChangeAction.Should().Be(CacheItemChangedEventAction.Add);
             deserialized.Action.Should().Be(BackplaneAction.Changed);
-            deserialized.OwnerIdentity.ShouldBeEquivalentTo(owner);
-            deserialized.ShouldBeEquivalentTo(msg);
+            deserialized.OwnerIdentity.Should().BeEquivalentTo(owner);
+            deserialized.Should().BeEquivalentTo(msg);
         }
 
         [Fact]
@@ -50,8 +50,8 @@ namespace CacheManager.Tests
             deserialized.Region.Should().Be(region);
             deserialized.ChangeAction.Should().Be(CacheItemChangedEventAction.Add);
             deserialized.Action.Should().Be(BackplaneAction.Changed);
-            deserialized.OwnerIdentity.ShouldBeEquivalentTo(owner);
-            deserialized.ShouldBeEquivalentTo(msg);
+            deserialized.OwnerIdentity.Should().BeEquivalentTo(owner);
+            deserialized.Should().BeEquivalentTo(msg);
         }
 
         [Fact]
@@ -71,8 +71,8 @@ namespace CacheManager.Tests
             deserialized.Region.Should().Be(null);
             deserialized.ChangeAction.Should().Be(CacheItemChangedEventAction.Put);
             deserialized.Action.Should().Be(BackplaneAction.Changed);
-            deserialized.OwnerIdentity.ShouldBeEquivalentTo(owner);
-            deserialized.ShouldBeEquivalentTo(msg);
+            deserialized.OwnerIdentity.Should().BeEquivalentTo(owner);
+            deserialized.Should().BeEquivalentTo(msg);
         }
 
         [Fact]
@@ -93,8 +93,8 @@ namespace CacheManager.Tests
             deserialized.Region.Should().Be(region);
             deserialized.ChangeAction.Should().Be(CacheItemChangedEventAction.Put);
             deserialized.Action.Should().Be(BackplaneAction.Changed);
-            deserialized.OwnerIdentity.ShouldBeEquivalentTo(owner);
-            deserialized.ShouldBeEquivalentTo(msg);
+            deserialized.OwnerIdentity.Should().BeEquivalentTo(owner);
+            deserialized.Should().BeEquivalentTo(msg);
         }
 
         [Fact]
@@ -114,8 +114,8 @@ namespace CacheManager.Tests
             deserialized.Region.Should().Be(null);
             deserialized.ChangeAction.Should().Be(CacheItemChangedEventAction.Update);
             deserialized.Action.Should().Be(BackplaneAction.Changed);
-            deserialized.OwnerIdentity.ShouldBeEquivalentTo(owner);
-            deserialized.ShouldBeEquivalentTo(msg);
+            deserialized.OwnerIdentity.Should().BeEquivalentTo(owner);
+            deserialized.Should().BeEquivalentTo(msg);
         }
 
         [Fact]
@@ -136,8 +136,8 @@ namespace CacheManager.Tests
             deserialized.Region.Should().Be(region);
             deserialized.ChangeAction.Should().Be(CacheItemChangedEventAction.Update);
             deserialized.Action.Should().Be(BackplaneAction.Changed);
-            deserialized.OwnerIdentity.ShouldBeEquivalentTo(owner);
-            deserialized.ShouldBeEquivalentTo(msg);
+            deserialized.OwnerIdentity.Should().BeEquivalentTo(owner);
+            deserialized.Should().BeEquivalentTo(msg);
         }
 
         [Fact]
@@ -157,8 +157,8 @@ namespace CacheManager.Tests
             deserialized.Region.Should().Be(null);
             deserialized.ChangeAction.Should().Be(CacheItemChangedEventAction.Invalid);
             deserialized.Action.Should().Be(BackplaneAction.Removed);
-            deserialized.OwnerIdentity.ShouldBeEquivalentTo(owner);
-            deserialized.ShouldBeEquivalentTo(msg);
+            deserialized.OwnerIdentity.Should().BeEquivalentTo(owner);
+            deserialized.Should().BeEquivalentTo(msg);
         }
 
         [Fact]
@@ -179,8 +179,8 @@ namespace CacheManager.Tests
             deserialized.Region.Should().Be(region);
             deserialized.ChangeAction.Should().Be(CacheItemChangedEventAction.Invalid);
             deserialized.Action.Should().Be(BackplaneAction.Removed);
-            deserialized.OwnerIdentity.ShouldBeEquivalentTo(owner);
-            deserialized.ShouldBeEquivalentTo(msg);
+            deserialized.OwnerIdentity.Should().BeEquivalentTo(owner);
+            deserialized.Should().BeEquivalentTo(msg);
         }
 
         [Fact]
@@ -199,8 +199,8 @@ namespace CacheManager.Tests
             deserialized.Region.Should().Be(null);
             deserialized.ChangeAction.Should().Be(CacheItemChangedEventAction.Invalid);
             deserialized.Action.Should().Be(BackplaneAction.Clear);
-            deserialized.OwnerIdentity.ShouldBeEquivalentTo(owner);
-            deserialized.ShouldBeEquivalentTo(msg);
+            deserialized.OwnerIdentity.Should().BeEquivalentTo(owner);
+            deserialized.Should().BeEquivalentTo(msg);
         }
 
         [Fact]
@@ -221,8 +221,8 @@ namespace CacheManager.Tests
             deserialized.Region.Should().Be(region);
             deserialized.ChangeAction.Should().Be(CacheItemChangedEventAction.Invalid);
             deserialized.Action.Should().Be(BackplaneAction.ClearRegion);
-            deserialized.OwnerIdentity.ShouldBeEquivalentTo(owner);
-            deserialized.ShouldBeEquivalentTo(msg);
+            deserialized.OwnerIdentity.Should().BeEquivalentTo(owner);
+            deserialized.Should().BeEquivalentTo(msg);
         }
 
         [Fact]
@@ -545,7 +545,7 @@ namespace CacheManager.Tests
         }
 
         [Fact]
-        public void BackplaneMessage_Mulitple()
+        public void BackplaneMessage_Multiple()
         {
             // arrange
             var owner = new byte[] { 1, 2, 3, 4 };
@@ -556,11 +556,11 @@ namespace CacheManager.Tests
             var deserialized = BackplaneMessage.Deserialize(serialized).ToArray();
 
             messages.Count.Should().Be(41);
-            deserialized.ShouldAllBeEquivalentTo(messages);
+            deserialized.Should().BeEquivalentTo(messages);
         }
 
         [Fact]
-        public void BackplaneMessage_Mulitple_IgnoreOwner()
+        public void BackplaneMessage_Multiple_IgnoreOwner()
         {
             // arrange
             var owner = new byte[] { 1, 2, 3, 4 };
@@ -581,7 +581,7 @@ namespace CacheManager.Tests
             var region = Guid.NewGuid().ToString();
 
             // test hash compare works too, result hashset should still have 41 messages only!
-            for (var m = 0; m < 10000; m++)
+            for (var m = 0; m < 100; m++)
             {
                 for (var i = 0; i < 10; i++)
                 {
@@ -611,7 +611,7 @@ namespace CacheManager.Tests
             var data = new byte[] { 0, 118, 50, 0, 4, 0, 1, 2, 3, 4 };
 
             Action act = () => BackplaneMessage.Deserialize(data).First();
-            act.ShouldThrow<IndexOutOfRangeException>().WithMessage("*Cannot read bytes,*");
+            act.Should().Throw<IndexOutOfRangeException>().WithMessage("*Cannot read bytes,*");
         }
 
         [Fact]
@@ -621,7 +621,7 @@ namespace CacheManager.Tests
             var data = new byte[] { 0, 118, 50, 0, 4, 0, 0, 0, 1, 2, 3, 4 };
 
             Action act = () => BackplaneMessage.Deserialize(data).First();
-            act.ShouldThrow<IndexOutOfRangeException>().WithMessage("*Cannot read byte,*");
+            act.Should().Throw<IndexOutOfRangeException>().WithMessage("*Cannot read byte,*");
         }
 
         [Fact]
@@ -631,7 +631,7 @@ namespace CacheManager.Tests
             var data = new byte[] { 0, 118, 50, 0, 4, 0, 0, 0, 1, 2, 3, 4, 255 };
 
             Action act = () => BackplaneMessage.Deserialize(data).First();
-            act.ShouldThrow<ArgumentException>().WithMessage("*invalid message type*");
+            act.Should().Throw<ArgumentException>().WithMessage("*invalid message type*");
         }
 
         [Fact]
@@ -641,7 +641,7 @@ namespace CacheManager.Tests
             var data = new byte[] { 0, 118, 50, 0, 4, 0, 0, 0, 1, 2, 3, 4, 3, 10, 0, 0, 0, 42 };
 
             Action act = () => BackplaneMessage.Deserialize(data).First();
-            act.ShouldThrow<IndexOutOfRangeException>().WithMessage("*Cannot read string,*");
+            act.Should().Throw<IndexOutOfRangeException>().WithMessage("*Cannot read string,*");
         }
     }
 }

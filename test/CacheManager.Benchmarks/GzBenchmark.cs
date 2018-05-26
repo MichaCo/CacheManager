@@ -15,7 +15,7 @@ namespace CacheManager.Benchmarks
 
         private byte[] _payload;
 
-        [Setup]
+        [GlobalSetup]
         public void Setup()
         {
             var list = new List<string>();

@@ -71,14 +71,16 @@ namespace CacheManager.Tests
     [ExcludeFromCodeCoverage]
     public static class TestManagers
     {
-        private const string RedisHost = "127.0.0.1";
+        public const string RedisHost = "127.0.0.1";
+        public const int RedisPort = 6379;
 
-        private const int RedisPort = 6379;
-        private const int StartDbCount = 100;
-        private static int _databaseCount = StartDbCount;
+        private const int RedisStartDb = 0;
+        private const int MaxRedisDbs = 100;
+        private static int _databaseCount = 0;
 
         static TestManagers()
         {
+            ThreadPool.SetMinThreads(100, 100);
             ////Log.Logger = new LoggerConfiguration()
             ////    .MinimumLevel.Debug()
             ////    .Enrich.FromLogContext()
@@ -136,9 +138,9 @@ namespace CacheManager.Tests
             get
             {
                 Interlocked.Increment(ref _databaseCount);
-                if (_databaseCount >= 2000)
+                if (_databaseCount >= MaxRedisDbs)
                 {
-                    _databaseCount = StartDbCount;
+                    _databaseCount = RedisStartDb;
                 }
 
                 return CreateRedisCache(_databaseCount, false, Serializer.Binary);
@@ -150,9 +152,9 @@ namespace CacheManager.Tests
             get
             {
                 Interlocked.Increment(ref _databaseCount);
-                if (_databaseCount >= 2000)
+                if (_databaseCount >= MaxRedisDbs)
                 {
-                    _databaseCount = StartDbCount;
+                    _databaseCount = RedisStartDb;
                 }
 
                 return CreateRedisCache(_databaseCount, false, Serializer.BondBinary);
@@ -164,9 +166,9 @@ namespace CacheManager.Tests
             get
             {
                 Interlocked.Increment(ref _databaseCount);
-                if (_databaseCount >= 2000)
+                if (_databaseCount >= MaxRedisDbs)
                 {
-                    _databaseCount = StartDbCount;
+                    _databaseCount = RedisStartDb;
                 }
 
                 return CreateRedisCache(database: _databaseCount, sharedRedisConfig: false, serializer: Serializer.Json);
@@ -178,9 +180,9 @@ namespace CacheManager.Tests
             get
             {
                 Interlocked.Increment(ref _databaseCount);
-                if (_databaseCount >= 2000)
+                if (_databaseCount >= MaxRedisDbs)
                 {
-                    _databaseCount = StartDbCount;
+                    _databaseCount = RedisStartDb;
                 }
 
                 return CreateRedisCache(database: _databaseCount, sharedRedisConfig: false, serializer: Serializer.Json, useLua: false);
@@ -192,9 +194,9 @@ namespace CacheManager.Tests
             get
             {
                 Interlocked.Increment(ref _databaseCount);
-                if (_databaseCount >= 2000)
+                if (_databaseCount >= MaxRedisDbs)
                 {
-                    _databaseCount = StartDbCount;
+                    _databaseCount = RedisStartDb;
                 }
 
                 return CreateRedisCache(_databaseCount, false, Serializer.GzJson);
@@ -206,9 +208,9 @@ namespace CacheManager.Tests
             get
             {
                 Interlocked.Increment(ref _databaseCount);
-                if (_databaseCount >= 2000)
+                if (_databaseCount >= MaxRedisDbs)
                 {
-                    _databaseCount = StartDbCount;
+                    _databaseCount = RedisStartDb;
                 }
 
                 return CreateRedisCache(_databaseCount, false, Serializer.Proto);
@@ -220,9 +222,9 @@ namespace CacheManager.Tests
             get
             {
                 Interlocked.Increment(ref _databaseCount);
-                if (_databaseCount >= 2000)
+                if (_databaseCount >= MaxRedisDbs)
                 {
-                    _databaseCount = StartDbCount;
+                    _databaseCount = RedisStartDb;
                 }
 
                 return CreateRedisAndDicCacheWithBackplane(database: _databaseCount, sharedRedisConfig: false, channelName: Guid.NewGuid().ToString(), useLua: true);
@@ -234,9 +236,9 @@ namespace CacheManager.Tests
             get
             {
                 Interlocked.Increment(ref _databaseCount);
-                if (_databaseCount >= 2000)
+                if (_databaseCount >= MaxRedisDbs)
                 {
-                    _databaseCount = StartDbCount;
+                    _databaseCount = RedisStartDb;
                 }
 
                 return CreateRedisAndDicCacheWithBackplane(database: _databaseCount, sharedRedisConfig: false, channelName: Guid.NewGuid().ToString(), useLua: false);
@@ -380,6 +382,11 @@ namespace CacheManager.Tests
 
         public static ICacheManager<object> CreateRedisAndDicCacheWithBackplane(int database = 0, bool sharedRedisConfig = true, string channelName = null, Serializer serializer = Serializer.Proto, bool useLua = true)
         {
+            if (database > MaxRedisDbs)
+            {
+                throw new ArgumentOutOfRangeException(nameof(database));
+            }
+
             var redisKey = sharedRedisConfig ? "redisConfig" + database : Guid.NewGuid().ToString();
 
             var builder = BaseConfiguration.Builder;
@@ -458,6 +465,11 @@ namespace CacheManager.Tests
 
         public static ICacheManager<object> CreateRedisCache(int database = 0, bool sharedRedisConfig = true, Serializer serializer = Serializer.GzJson, bool useLua = true)
         {
+            if (database > MaxRedisDbs)
+            {
+                throw new ArgumentOutOfRangeException(nameof(database));
+            }
+
             var redisKey = sharedRedisConfig ? "redisConfig" + database : Guid.NewGuid().ToString();
             var cache = CacheFactory.FromConfiguration<object>(
                 $"{database}|{sharedRedisConfig}|{serializer}|{useLua}" + Guid.NewGuid().ToString(),
@@ -486,6 +498,11 @@ namespace CacheManager.Tests
 
         public static ICacheManager<T> CreateRedisCache<T>(int database = 0, bool sharedRedisConfig = true, Serializer serializer = Serializer.GzJson)
         {
+            if (database > MaxRedisDbs)
+            {
+                throw new ArgumentOutOfRangeException(nameof(database));
+            }
+
             var redisKey = sharedRedisConfig ? "redisConfig" + database : Guid.NewGuid().ToString();
             var cache = CacheFactory.FromConfiguration<T>(
                 BaseConfiguration.Builder

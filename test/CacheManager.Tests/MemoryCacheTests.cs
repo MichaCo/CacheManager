@@ -23,7 +23,7 @@ namespace CacheManager.Tests
             var cache = new BaseCacheManager<string>(cfg);
 
             cfg.CacheHandleConfigurations.First()
-                .ConfigurationTypes.First().ShouldBeEquivalentTo(expectedCacheOptions);
+                .ConfigurationTypes.First().Should().BeEquivalentTo(expectedCacheOptions);
             cfg.CacheHandleConfigurations.Count.Should().Be(1);
             cfg.CacheHandleConfigurations.First().Name.Should().NotBeNullOrWhiteSpace();
             cfg.CacheHandleConfigurations.First().IsBackplaneSource.Should().BeFalse();
@@ -40,7 +40,7 @@ namespace CacheManager.Tests
             var cache = new BaseCacheManager<string>(cfg);
 
             cfg.CacheHandleConfigurations.First()
-                .ConfigurationTypes.First().ShouldBeEquivalentTo(expectedCacheOptions);
+                .ConfigurationTypes.First().Should().BeEquivalentTo(expectedCacheOptions);
             cfg.CacheHandleConfigurations.Count.Should().Be(1);
             cfg.CacheHandleConfigurations.First().Name.Should().Be(name);
             cfg.CacheHandleConfigurations.First().IsBackplaneSource.Should().BeFalse();
@@ -57,7 +57,7 @@ namespace CacheManager.Tests
             var cache = new BaseCacheManager<string>(cfg);
 
             cfg.CacheHandleConfigurations.First()
-                .ConfigurationTypes.First().ShouldBeEquivalentTo(expectedCacheOptions);
+                .ConfigurationTypes.First().Should().BeEquivalentTo(expectedCacheOptions);
             cfg.CacheHandleConfigurations.Count.Should().Be(1);
             cfg.CacheHandleConfigurations.First().Name.Should().Be(name);
             cfg.CacheHandleConfigurations.First().IsBackplaneSource.Should().BeTrue();
@@ -79,13 +79,13 @@ namespace CacheManager.Tests
             var cache = new BaseCacheManager<string>(cfg);
 
             cfg.CacheHandleConfigurations.First()
-                .ConfigurationTypes.First().ShouldBeEquivalentTo(expectedCacheOptions);
+                .ConfigurationTypes.First().Should().BeEquivalentTo(expectedCacheOptions);
             cfg.CacheHandleConfigurations.Count.Should().Be(1);
             cfg.CacheHandleConfigurations.First().Name.Should().NotBeNullOrWhiteSpace();
             cfg.CacheHandleConfigurations.First().IsBackplaneSource.Should().BeFalse();
 
             cache.CacheHandles.Count().Should().Be(1);
-            cache.CacheHandles.OfType<MemoryCacheHandle<string>>().First().MemoryCacheOptions.ShouldBeEquivalentTo(expectedCacheOptions);
+            cache.CacheHandles.OfType<MemoryCacheHandle<string>>().First().MemoryCacheOptions.Should().BeEquivalentTo(expectedCacheOptions);
         }
 
         [Fact]
@@ -103,13 +103,13 @@ namespace CacheManager.Tests
             var cache = new BaseCacheManager<string>(cfg);
 
             cfg.CacheHandleConfigurations.First()
-                .ConfigurationTypes.First().ShouldBeEquivalentTo(expectedCacheOptions);
+                .ConfigurationTypes.First().Should().BeEquivalentTo(expectedCacheOptions);
             cfg.CacheHandleConfigurations.Count.Should().Be(1);
             cfg.CacheHandleConfigurations.First().Name.Should().Be(name);
             cfg.CacheHandleConfigurations.First().IsBackplaneSource.Should().BeFalse();
 
             cache.CacheHandles.Count().Should().Be(1);
-            cache.CacheHandles.OfType<MemoryCacheHandle<string>>().First().MemoryCacheOptions.ShouldBeEquivalentTo(expectedCacheOptions);
+            cache.CacheHandles.OfType<MemoryCacheHandle<string>>().First().MemoryCacheOptions.Should().BeEquivalentTo(expectedCacheOptions);
         }
 
         [Fact]
@@ -127,13 +127,13 @@ namespace CacheManager.Tests
             var cache = new BaseCacheManager<string>(cfg);
 
             cfg.CacheHandleConfigurations.First()
-                .ConfigurationTypes.First().ShouldBeEquivalentTo(expectedCacheOptions);
+                .ConfigurationTypes.First().Should().BeEquivalentTo(expectedCacheOptions);
             cfg.CacheHandleConfigurations.Count.Should().Be(1);
             cfg.CacheHandleConfigurations.First().Name.Should().Be(name);
             cfg.CacheHandleConfigurations.First().IsBackplaneSource.Should().BeTrue();
 
             cache.CacheHandles.Count().Should().Be(1);
-            cache.CacheHandles.OfType<MemoryCacheHandle<string>>().First().MemoryCacheOptions.ShouldBeEquivalentTo(expectedCacheOptions);
+            cache.CacheHandles.OfType<MemoryCacheHandle<string>>().First().MemoryCacheOptions.Should().BeEquivalentTo(expectedCacheOptions);
         }
 
         #endregion MS Memory Cache

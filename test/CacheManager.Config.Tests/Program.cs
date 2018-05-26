@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using CacheManager.Core;
 using CacheManager.Redis;
@@ -15,6 +17,8 @@ namespace CacheManager.Config.Tests
     {
         public static void Main(string[] args)
         {
+            ThreadPool.SetMinThreads(100, 100);
+
             var iterations = 100;
             try
             {
@@ -22,12 +26,12 @@ namespace CacheManager.Config.Tests
                 builder.WithMicrosoftLogging(f =>
                 {
                     f.AddConsole(LogLevel.Warning);
-                    f.AddDebug(LogLevel.Debug);
+                    ////f.AddDebug(LogLevel.Debug);
                 });
 
                 builder
                     .WithRetryTimeout(500)
-                    .WithMaxRetries(5);
+                    .WithMaxRetries(3);
 
                 builder
                     .WithDictionaryHandle()
@@ -49,6 +53,7 @@ namespace CacheManager.Config.Tests
                         .WithAllowAdmin()
                         .WithDatabase(0)
                         .WithConnectionTimeout(5000)
+                        .EnableKeyspaceEvents()
                         .WithEndpoint("127.0.0.1", 6379);
                 });
 
@@ -67,15 +72,10 @@ namespace CacheManager.Config.Tests
 
                 for (var i = 0; i < iterations; i++)
                 {
-                    var redisHandle = cacheA.CacheHandles.OfType<RedisCacheHandle<string>>().First();
-                    foreach (var server in redisHandle.Servers)
-                    {
-                        Console.WriteLine($"{server.ToString()}=>{server.EndPoint} connected:{server.IsConnected} isSlave:{server.IsSlave}");
-                    }
-
                     try
                     {
-                        Tests.PutAndMultiGetTest(cacheA);
+                        Tests.PumpData(cacheA).GetAwaiter().GetResult();
+                        break; // specified runtime (todo: rework this anyways)
                     }
                     catch (AggregateException ex)
                     {

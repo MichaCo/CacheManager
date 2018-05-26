@@ -1,21 +1,30 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Threading.Tasks;
-using CacheManager.Core;
-using CacheManager.Core.Internal;
-using CacheManager.Core.Logging;
-using CacheManager.Core.Utility;
-using FluentAssertions;
-using StackExchange.Redis;
-using Xunit;
-
-namespace CacheManager.Tests
+﻿namespace CacheManager.Tests
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
+    using System.Linq;
+    using System.Threading.Tasks;
+    using CacheManager.Core;
+    using CacheManager.Core.Internal;
+    using CacheManager.Core.Logging;
+    using CacheManager.Core.Utility;
+    using FluentAssertions;
+    using StackExchange.Redis;
+    using Xunit;
+    using Xunit.Abstractions;
+    using static TestHelper;
+
     [ExcludeFromCodeCoverage]
     public class CacheManagerEventsTest
     {
+        private readonly ITestOutputHelper _testOutputHelper;
+
+        public CacheManagerEventsTest(ITestOutputHelper testOutputHelper)
+        {
+            _testOutputHelper = testOutputHelper ?? throw new ArgumentNullException(nameof(testOutputHelper));
+        }
+
         [Fact]
         [ReplaceCulture]
         public void Events_CacheActionEventArgsCtor()
@@ -28,7 +37,7 @@ namespace CacheManager.Tests
             Action act = () => new CacheActionEventArgs(key, region);
 
             // assert
-            act.ShouldThrow<ArgumentNullException>()
+            act.Should().Throw<ArgumentNullException>()
                 .WithMessage("*Parameter name: key*");
         }
 
@@ -44,7 +53,7 @@ namespace CacheManager.Tests
             Func<CacheActionEventArgs> act = () => new CacheActionEventArgs(key, region);
 
             // assert
-            act().ShouldBeEquivalentTo(new { Region = (string)null, Key = key, Origin = CacheActionEventArgOrigin.Local });
+            act().Should().BeEquivalentTo(new { Region = (string)null, Key = key, Origin = CacheActionEventArgOrigin.Local });
         }
 
         [Fact]
@@ -59,7 +68,7 @@ namespace CacheManager.Tests
             Action act = () => new CacheItemRemovedEventArgs(key, region, CacheItemRemovedReason.Expired, null);
 
             // assert
-            act.ShouldThrow<ArgumentNullException>()
+            act.Should().Throw<ArgumentNullException>()
                 .WithMessage("*Parameter name: key*");
         }
 
@@ -75,7 +84,7 @@ namespace CacheManager.Tests
             Func<CacheItemRemovedEventArgs> act = () => new CacheItemRemovedEventArgs(key, region, CacheItemRemovedReason.Expired, null, 2);
 
             // assert
-            act().ShouldBeEquivalentTo(new { Region = (string)null, Key = key, Reason = CacheItemRemovedReason.Expired, Level = 2, Value = (object)null });
+            act().Should().BeEquivalentTo(new { Region = (string)null, Key = key, Reason = CacheItemRemovedReason.Expired, Level = 2, Value = (object)null });
         }
 
         [Fact]
@@ -90,7 +99,7 @@ namespace CacheManager.Tests
             Func<CacheItemRemovedEventArgs> act = () => new CacheItemRemovedEventArgs(key, region, CacheItemRemovedReason.Expired, "value", 2);
 
             // assert
-            act().ShouldBeEquivalentTo(new { Region = region, Key = key, Reason = CacheItemRemovedReason.Expired, Level = 2, Value = "value" });
+            act().Should().BeEquivalentTo(new { Region = region, Key = key, Reason = CacheItemRemovedReason.Expired, Level = 2, Value = "value" });
         }
 
         [Fact]
@@ -105,7 +114,7 @@ namespace CacheManager.Tests
             Func<CacheItemRemovedEventArgs> act = () => new CacheItemRemovedEventArgs(key, region, CacheItemRemovedReason.Evicted, "value", 0);
 
             // assert
-            act().ShouldBeEquivalentTo(new { Region = region, Key = key, Reason = CacheItemRemovedReason.Evicted, Level = 0, Value = "value" });
+            act().Should().BeEquivalentTo(new { Region = region, Key = key, Reason = CacheItemRemovedReason.Evicted, Level = 0, Value = "value" });
         }
 
         [Fact]
@@ -115,7 +124,7 @@ namespace CacheManager.Tests
             Action act = () => new CacheClearEventArgs();
 
             // assert
-            act.ShouldNotThrow();
+            act.Should().NotThrow();
         }
 
         [Fact]
@@ -129,7 +138,7 @@ namespace CacheManager.Tests
             Action act = () => new CacheClearRegionEventArgs(region);
 
             // assert
-            act.ShouldThrow<ArgumentNullException>()
+            act.Should().Throw<ArgumentNullException>()
                 .WithMessage("*Parameter name: region*");
         }
 
@@ -144,12 +153,18 @@ namespace CacheManager.Tests
             Func<CacheClearRegionEventArgs> act = () => new CacheClearRegionEventArgs(region);
 
             // assert
-            act().ShouldBeEquivalentTo(new { Region = region, Origin = CacheActionEventArgOrigin.Local });
+            act().Should().BeEquivalentTo(new { Region = region, Origin = CacheActionEventArgOrigin.Local });
         }
 
         public class LongRunningEventTestBase
         {
-            public async Task<CacheItemRemovedEventArgs> RunTest(ICacheManagerConfiguration configuration, string useKey, string useRegion, bool endGetShouldBeNull = true, bool runGetWhileWaiting = true, bool expectValue = true)
+            public async Task<CacheItemRemovedEventArgs> RunTest(
+                ICacheManagerConfiguration configuration,
+                string useKey,
+                string useRegion,
+                bool endGetShouldBeNull = true,
+                bool runGetWhileWaiting = true,
+                bool expectValue = true)
             {
                 var triggered = false;
                 CacheItemRemovedEventArgs resultArgs = null;
@@ -236,8 +251,8 @@ namespace CacheManager.Tests
                     .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1))
                     .Build();
 
-                string useKey = Guid.NewGuid().ToString();
-                string useRegion = "@_@23@_!!";
+                var useKey = Guid.NewGuid().ToString();
+                var useRegion = Guid.NewGuid().ToString();
                 var result = await RunTest(cfg, useKey, useRegion);
 
                 result.Reason.Should().Be(CacheItemRemovedReason.Expired);
@@ -257,7 +272,7 @@ namespace CacheManager.Tests
                     .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1))
                     .Build();
 
-                string useKey = Guid.NewGuid().ToString();
+                var useKey = Guid.NewGuid().ToString();
 
                 var result = await RunTest(cfg, useKey, null, true, false);
 
@@ -280,8 +295,8 @@ namespace CacheManager.Tests
                     .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1))
                     .Build();
 
-                string useKey = Guid.NewGuid().ToString();
-                string useRegion = "@_@23@_!!";
+                var useKey = Guid.NewGuid().ToString();
+                var useRegion = Guid.NewGuid().ToString();
                 var result = await RunTest(cfg, useKey, useRegion, true, true);
 
                 result.Reason.Should().Be(CacheItemRemovedReason.Expired);
@@ -301,7 +316,7 @@ namespace CacheManager.Tests
                     .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1))
                     .Build();
 
-                string useKey = Guid.NewGuid().ToString();
+                var useKey = Guid.NewGuid().ToString();
 
                 var result = await RunTest(cfg, useKey, null, true, false);
 
@@ -323,8 +338,8 @@ namespace CacheManager.Tests
                     .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1))
                     .Build();
 
-                string useKey = Guid.NewGuid().ToString();
-                string useRegion = "@_@23@_!!";
+                var useKey = Guid.NewGuid().ToString();
+                var useRegion = Guid.NewGuid().ToString();
                 var result = await RunTest(cfg, useKey, useRegion);
 
                 result.Reason.Should().Be(CacheItemRemovedReason.Expired);
@@ -344,7 +359,7 @@ namespace CacheManager.Tests
                     .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1))
                     .Build();
 
-                string useKey = Guid.NewGuid().ToString();
+                var useKey = Guid.NewGuid().ToString();
 
                 // we cannot wait for the cache to expire it on its own, it only checks if you actually actively do something...
                 var result = await RunTest(cfg, useKey, null, true, true);
@@ -369,8 +384,8 @@ namespace CacheManager.Tests
                     .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1))
                     .Build();
 
-                string useKey = Guid.NewGuid().ToString();
-                string useRegion = "@_@23@_!!";
+                var useKey = Guid.NewGuid().ToString();
+                var useRegion = Guid.NewGuid().ToString();
                 var result = await RunTest(cfg, useKey, useRegion);
 
                 result.Reason.Should().Be(CacheItemRemovedReason.Expired);
@@ -390,7 +405,7 @@ namespace CacheManager.Tests
                     .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1))
                     .Build();
 
-                string useKey = Guid.NewGuid().ToString();
+                var useKey = Guid.NewGuid().ToString();
 
                 var result = await RunTest(cfg, useKey, null, true, false);
 
@@ -411,14 +426,14 @@ namespace CacheManager.Tests
             public async Task Events_Redis_ExpireTriggers()
             {
                 var cfg = new ConfigurationBuilder()
-                    .WithRedisConfiguration("redis", "localhost, allowAdmin=true", 0, true)
+                    .WithRedisConfiguration("redis", $"{TestManagers.RedisHost}:{TestManagers.RedisPort}, allowAdmin=true", 0, true)
                     .WithJsonSerializer()
                     .WithRedisCacheHandle("redis")
                     .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1))
                     .Build();
 
-                string useKey = Guid.NewGuid().ToString();
-                string useRegion = "@_@23@_!!";
+                var useKey = Guid.NewGuid().ToString();
+                var useRegion = Guid.NewGuid().ToString();
                 var result = await RunTest(cfg, useKey, useRegion, true, true, false);
 
                 result.Reason.Should().Be(CacheItemRemovedReason.Expired);
@@ -435,13 +450,13 @@ namespace CacheManager.Tests
                 var cfg = new ConfigurationBuilder()
                     .WithDictionaryHandle()
                     .And
-                    .WithRedisConfiguration("redis", "localhost, allowAdmin=true", 0, true)
+                    .WithRedisConfiguration("redis", $"{TestManagers.RedisHost}:{TestManagers.RedisPort}, allowAdmin=true", 0, true)
                     .WithJsonSerializer()
                     .WithRedisCacheHandle("redis")
                     .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1))
                     .Build();
 
-                string useKey = Guid.NewGuid().ToString();
+                var useKey = Guid.NewGuid().ToString();
 
                 var result = await RunTest(cfg, useKey, null, true, false, false);
 
@@ -475,7 +490,7 @@ namespace CacheManager.Tests
                 result.Should().Be("something");
                 resultWithRegion.Should().BeNull("the key was not set with a region");
                 data.Calls.Should().Be(1, "we expect only one hit");
-                data.Keys.ShouldAllBeEquivalentTo(new[] { key1 }, "we expect one call");
+                data.Keys.Should().BeEquivalentTo(new[] { key1 }, "we expect one call");
                 data.Regions.Should().BeEmpty();
             }
         }
@@ -503,8 +518,8 @@ namespace CacheManager.Tests
                 resultWithoutRegion.Should().BeNull("the key was not set without a region");
                 result.Should().Be("something");
                 data.Calls.Should().Be(1, "we expect only one hit");
-                data.Keys.ShouldAllBeEquivalentTo(new[] { key1 });
-                data.Regions.ShouldAllBeEquivalentTo(new[] { region1 });
+                data.Keys.Should().BeEquivalentTo(new[] { key1 });
+                data.Regions.Should().BeEquivalentTo(new[] { region1 });
             }
         }
 
@@ -530,8 +545,8 @@ namespace CacheManager.Tests
                 result.Should().BeNull("the key was not set without region");
                 resultWithRegion.Should().BeNull("the key was not set with a region");
                 data.Calls.Should().Be(0, "we expect only one hit");
-                data.Keys.ShouldAllBeEquivalentTo(new string[] { }, "we expect no calls");
-                data.Regions.ShouldAllBeEquivalentTo(new string[] { }, "we expect no calls");
+                data.Keys.Should().BeEquivalentTo(new string[] { }, "we expect no calls");
+                data.Regions.Should().BeEquivalentTo(new string[] { }, "we expect no calls");
             }
         }
 
@@ -561,8 +576,8 @@ namespace CacheManager.Tests
                 // assert
                 result.Should().Be("something");
                 data.Calls.Should().Be(4, "we expect 4 hits");
-                data.Keys.ShouldAllBeEquivalentTo(Enumerable.Repeat(key1, 4), "we expect 4 hits");
-                data.Regions.ShouldAllBeEquivalentTo(Enumerable.Repeat(region1, 4), "we expect 4 hits");
+                data.Keys.Should().BeEquivalentTo(Enumerable.Repeat(key1, 4), "we expect 4 hits");
+                data.Regions.Should().BeEquivalentTo(Enumerable.Repeat(region1, 4), "we expect 4 hits");
             }
         }
 
@@ -581,25 +596,40 @@ namespace CacheManager.Tests
                 .WithRedisCacheHandle("redis")
                 .Build();
 
-            var key = Guid.NewGuid().ToString();
             var onRemoveByHandleValid = false;
 
+            string key = null;
             var cache = new BaseCacheManager<int?>(config);
-            cache.OnRemoveByHandle += (s, args) =>
-            {
-                if (args.Reason == CacheItemRemovedReason.ExternalDelete
-                     && args.Key == key)
+
+            await RetryWithCondition(
+                5,
+                async () =>
                 {
-                    onRemoveByHandleValid = true;
-                }
-            };
+                    key = Guid.NewGuid().ToString();
+                    await WaitUntilCancel((source) =>
+                    {
+                        cache.OnRemoveByHandle += (s, args) =>
+                        {
+                            // check if the direct KeyDelete with 'client' fires the event. This works only with keyspace notifications...
+                            // if triggered, check the reason and validate the key
+                            if (args.Reason == CacheItemRemovedReason.ExternalDelete
+                                 && args.Key == key)
+                            {
+                                // signal triggered for assertion
+                                onRemoveByHandleValid = true;
+                                // cancel the wait helper task...
+                                source.Cancel(false);
+                            }
+                        };
 
-            cache.Add(key, 1234).Should().BeTrue();
-            var x = cache.Get(key);
+                        cache.Add(key, 1234).Should().BeTrue();
 
-            client.GetDatabase(0).KeyDelete(key);
+                        var x = cache.Get(key);
 
-            await Task.Delay(1000);
+                        client.GetDatabase(0).KeyDelete(key);
+                    });
+                },
+                () => onRemoveByHandleValid);
 
             onRemoveByHandleValid.Should().BeTrue("onRemoveByHandle Event should have been raised");
 
@@ -622,25 +652,37 @@ namespace CacheManager.Tests
                 .WithRedisCacheHandle("redis")
                 .Build();
 
-            var key = Guid.NewGuid().ToString();
+            string key = null;
             var onRemoveByHandleValid = false;
 
             var cache = new BaseCacheManager<int?>(config);
-            cache.OnRemoveByHandle += (s, args) =>
-            {
-                if (args.Reason == CacheItemRemovedReason.ExternalDelete
-                     && args.Key == key)
+
+            await RetryWithCondition(
+                5,
+                async () =>
                 {
-                    onRemoveByHandleValid = true;
-                }
-            };
+                    key = Guid.NewGuid().ToString();
+                    _testOutputHelper.WriteLine("Try with " + key);
+                    await WaitUntilCancel((source) =>
+                    {
+                        cache.OnRemoveByHandle += (s, args) =>
+                        {
+                            _testOutputHelper.WriteLine("event received " + args.Key);
+                            if (args.Reason == CacheItemRemovedReason.ExternalDelete
+                                 && args.Key == key)
+                            {
+                                onRemoveByHandleValid = true;
+                                source.Cancel();
+                            }
+                        };
 
-            cache.Add(key, 1234).Should().BeTrue();
-            var x = cache.Get(key);
+                        cache.Add(key, 1234).Should().BeTrue();
+                        var x = cache.Get(key);
 
-            client.GetDatabase(0).KeyDelete(key);
-
-            await Task.Delay(1000);
+                        client.GetDatabase(0).KeyDelete(key);
+                    });
+                },
+                () => onRemoveByHandleValid);
 
             onRemoveByHandleValid.Should().BeTrue("onRemoveByHandle Event should have been raised");
 
@@ -694,12 +736,12 @@ namespace CacheManager.Tests
                 r4.Should().BeTrue($"{key2} {region2}" + cache.ToString());
 
                 data.Calls.Should().Be(8, $"we expect 8 hits for {key1} and {key2} \n-> keys: " + string.Join(", ", data.Keys));
-                data.Keys.ShouldAllBeEquivalentTo(
+                data.Keys.Should().BeEquivalentTo(
                     Enumerable.Repeat(key1, 4).Concat(Enumerable.Repeat(key2, 4)),
                     cfg => cfg.WithStrictOrdering(),
                     "we expect 8 hits");
 
-                data.Regions.ShouldAllBeEquivalentTo(
+                data.Regions.Should().BeEquivalentTo(
                     Enumerable.Repeat(region1, 4).Concat(Enumerable.Repeat(region2, 4)),
                     cfg => cfg.WithStrictOrdering(),
                     "we expect 8 hits");
@@ -751,14 +793,14 @@ namespace CacheManager.Tests
 
                 // 3x true x 3 event handles = 9 calls
                 data.Calls.Should().Be(9, "we expect 9 hits");
-                data.Keys.ShouldAllBeEquivalentTo(
+                data.Keys.Should().BeEquivalentTo(
                     Enumerable.Repeat(key1, 3)
                         .Concat(Enumerable.Repeat(key2, 3))
                         .Concat(Enumerable.Repeat(key1, 3)),
                     cfg => cfg.WithStrictOrdering(),
                     "we expect 9 hits");
 
-                data.Regions.ShouldAllBeEquivalentTo(
+                data.Regions.Should().BeEquivalentTo(
                     Enumerable.Repeat(region1, 3)                      // 3 times region
                         .Concat(Enumerable.Repeat(region2, 3)),       // 3 times region2
                     cfg => cfg.WithStrictOrdering(),
@@ -804,14 +846,14 @@ namespace CacheManager.Tests
 
                 // assert 4x Put calls x 3 event handles = 12 calls
                 data.Calls.Should().Be(12, $"we expect 12 hits for {key1} and {key2} \n-> keys: " + string.Join(", ", data.Keys));
-                data.Keys.ShouldAllBeEquivalentTo(
+                data.Keys.Should().BeEquivalentTo(
                     Enumerable.Repeat(key1, 3)
                         .Concat(Enumerable.Repeat(key2, 3))
                         .Concat(Enumerable.Repeat(key1, 6)),
                     cfg => cfg.WithStrictOrdering(),
                     "we expect 12 hits");
 
-                data.Regions.ShouldAllBeEquivalentTo(
+                data.Regions.Should().BeEquivalentTo(
                     Enumerable.Repeat(region1, 3)                      // 3 times region
                         .Concat(Enumerable.Repeat(region2, 3))        // 3 times region2
                         .Concat(Enumerable.Repeat(region1, 3)),         // 3 times region
@@ -860,12 +902,12 @@ namespace CacheManager.Tests
 
                 // assert 4x Put calls x 3 event handles = 12 calls
                 data.Calls.Should().Be(6, "we expect 6 hits");
-                data.Keys.ShouldAllBeEquivalentTo(
+                data.Keys.Should().BeEquivalentTo(
                     new string[] { key1, key2, key1, key1, key2, key1 },
                     cfg => cfg.WithStrictOrdering(),
                     "we expect 3 adds and 3 updates in exact order");
 
-                data.Regions.ShouldAllBeEquivalentTo(
+                data.Regions.Should().BeEquivalentTo(
                     new string[] { region1, region2, region1, region2, },
                     cfg => cfg.WithStrictOrdering(),
                     "we expect 4 region hits");
@@ -915,7 +957,7 @@ namespace CacheManager.Tests
                 // assert 2x calls x 3 event handles = 6 calls
                 data.Calls.Should().Be(6, $"we expect 6 hits for {key1} and {key2} \n-> keys: " + string.Join(", ", data.Keys));
 
-                data.Regions.ShouldAllBeEquivalentTo(
+                data.Regions.Should().BeEquivalentTo(
                     Enumerable.Repeat(region1, 3)                  // 3 times region
                         .Concat(Enumerable.Repeat(region2, 3)),    // 3 times region2
                     cfg => cfg.WithStrictOrdering(),

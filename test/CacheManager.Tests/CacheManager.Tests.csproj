@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFrameworks>
-      net452;netcoreapp1.1
+      net452;netcoreapp2.0
     </TargetFrameworks>
     <Version>1.0.0</Version>
     <AssemblyName>CacheManager.Tests</AssemblyName>
@@ -35,7 +35,7 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.5.0" />
     <PackageReference Include="xunit" Version="2.3.1" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.3.1" />
-    <PackageReference Include="FluentAssertions" Version="4.19.4" />
+    <PackageReference Include="FluentAssertions" Version="5.3.0" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net452' ">
@@ -46,7 +46,7 @@
     <Reference Include="System.Configuration" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="1.0.2" />
   </ItemGroup>
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp1.1' ">
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.0' ">
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="1.1.2" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="1.1.2" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="1.1.2" />
@@ -62,14 +62,14 @@
   <PropertyGroup Condition=" '$(TargetFramework)' == 'net452' ">
     <DefineConstants>$(DefineConstants);REDISENABLED;MOCK_HTTPCONTEXT_ENABLED;</DefineConstants>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp1.1' ">
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.0' ">
     <DefineConstants>$(DefineConstants);REDISENABLED;NETCOREAPP;</DefineConstants>
   </PropertyGroup>
 
   <!--<PropertyGroup Condition=" '$(TargetFramework)' == 'net452' ">
     <DefineConstants>$(DefineConstants);REDISENABLED;MOCK_HTTPCONTEXT_ENABLED;NO_APP_CONFIG;MEMCACHEDENABLED;COUCHBASEENABLED;</DefineConstants>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp1.1' ">
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.0' ">
     <DefineConstants>$(DefineConstants);REDISENABLED;NETCOREAPP;COUCHBASEENABLED;</DefineConstants>
   </PropertyGroup>-->
 </Project>

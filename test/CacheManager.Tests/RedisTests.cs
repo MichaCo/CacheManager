@@ -40,7 +40,7 @@ namespace CacheManager.Tests
                         .WithRedisCacheHandle("redis-key")) as CacheManagerConfiguration;
 
             Action act = () => new BaseCacheManager<string>(cfg);
-            act.ShouldThrow<InvalidOperationException>().WithMessage("*requires serialization*");
+            act.Should().Throw<InvalidOperationException>().WithMessage("*requires serialization*");
         }
 #endif
 
@@ -675,7 +675,7 @@ namespace CacheManager.Tests
                     "key",
                     c => c.WithAllowAdmin()));
 
-            act.ShouldThrow<InvalidOperationException>().WithMessage("*endpoints*");
+            act.Should().Throw<InvalidOperationException>().WithMessage("*endpoints*");
         }
 
 #if !NETCOREAPP
@@ -725,7 +725,7 @@ namespace CacheManager.Tests
         {
             Action act = () => RedisConfigurations.LoadConfiguration((string)null);
 
-            act.ShouldThrow<ArgumentNullException>().WithMessage("*sectionName*");
+            act.Should().Throw<ArgumentNullException>().WithMessage("*sectionName*");
         }
 
         [Fact]
@@ -733,7 +733,7 @@ namespace CacheManager.Tests
         {
             Action act = () => RedisConfigurations.LoadConfiguration((string)null, "section");
 
-            act.ShouldThrow<ArgumentNullException>().WithMessage("*fileName*");
+            act.Should().Throw<ArgumentNullException>().WithMessage("*fileName*");
         }
 
         [Fact]
@@ -741,7 +741,7 @@ namespace CacheManager.Tests
         {
             Action act = () => RedisConfigurations.LoadConfiguration(Guid.NewGuid().ToString());
 
-            act.ShouldThrow<ArgumentNullException>().WithMessage("*section*");
+            act.Should().Throw<ArgumentNullException>().WithMessage("*section*");
         }
 
         [Fact]
@@ -779,15 +779,15 @@ namespace CacheManager.Tests
                     value.Should().Be("new value", cache.ToString());
                 },
                 1,
-                TestManagers.CreateRedisAndDicCacheWithBackplane(113, true, channelName, Serializer.Json),
-                TestManagers.CreateRedisAndDicCacheWithBackplane(113, true, channelName, Serializer.Json),
-                TestManagers.CreateRedisCache(113, false, Serializer.Json),
-                TestManagers.CreateRedisAndDicCacheWithBackplane(113, true, channelName, Serializer.Json));
+                TestManagers.CreateRedisAndDicCacheWithBackplane(50, true, channelName, Serializer.Json),
+                TestManagers.CreateRedisAndDicCacheWithBackplane(50, true, channelName, Serializer.Json),
+                TestManagers.CreateRedisCache(50, false, Serializer.Json),
+                TestManagers.CreateRedisAndDicCacheWithBackplane(50, true, channelName, Serializer.Json));
         }
 
 #endif
 
-        ////[Fact(Skip = "needs clear")]
+        [Fact(Skip = "needs clear")]
         [Trait("category", "Redis")]
         public async Task Redis_Multiple_PubSub_Clear()
         {
@@ -810,10 +810,10 @@ namespace CacheManager.Tests
                     await Task.Delay(0);
                 },
                 2,
-                TestManagers.CreateRedisAndDicCacheWithBackplane(444, true, channelName),
-                TestManagers.CreateRedisAndDicCacheWithBackplane(444, true, channelName),
-                TestManagers.CreateRedisCache(444),
-                TestManagers.CreateRedisAndDicCacheWithBackplane(444, true, channelName));
+                TestManagers.CreateRedisAndDicCacheWithBackplane(51, true, channelName),
+                TestManagers.CreateRedisAndDicCacheWithBackplane(51, true, channelName),
+                TestManagers.CreateRedisCache(51),
+                TestManagers.CreateRedisAndDicCacheWithBackplane(51, true, channelName));
         }
 
         [Fact]
@@ -910,7 +910,7 @@ namespace CacheManager.Tests
 
             Action act = () => new BaseCacheManager<string>(cfg).Put("key", "value");
 
-            act.ShouldThrow<InvalidOperationException>().WithMessage("*password=***");
+            act.Should().Throw<InvalidOperationException>().WithMessage("*password=***");
 
             testLogger.LogMessages.Any(p => p.Message.ToString().Contains("mysupersecret")).Should().BeFalse();
         }
@@ -922,7 +922,7 @@ namespace CacheManager.Tests
         {
             using (var cache = CacheFactory.Build<RaceConditionTestElement>(settings =>
             {
-                settings.WithMaxRetries(int.MaxValue);
+                settings.WithMaxRetries(1);
                 settings.WithUpdateMode(CacheUpdateMode.Up)
                     .WithJsonSerializer()
                     .WithRedisCacheHandle("default")
@@ -947,7 +947,7 @@ namespace CacheManager.Tests
                 await ThreadTestHelper.RunAsync(
                     async () =>
                     {
-                        for (int i = 0; i < numInnerIterations; i++)
+                        for (var i = 0; i < numInnerIterations; i++)
                         {
                             cache.Update(
                                 key,
@@ -1042,7 +1042,7 @@ namespace CacheManager.Tests
 
             Action act = () => new BaseCacheManager<object>(cacheConfig);
 
-            act.ShouldNotThrow();
+            act.Should().NotThrow();
         }
 
 #if !NETCOREAPP
@@ -1118,7 +1118,7 @@ namespace CacheManager.Tests
 
             // assert
             handle.Should().NotBeNull();
-            count.ShouldNotThrow();
+            count.Should().NotThrow();
         }
 
         [Fact]
@@ -1139,7 +1139,7 @@ namespace CacheManager.Tests
 
             // assert
             handle.Should().NotBeNull();
-            count.ShouldNotThrow();
+            count.Should().NotThrow();
         }
 
         [Fact]
@@ -1161,7 +1161,7 @@ namespace CacheManager.Tests
 
             // assert
             handle.Should().NotBeNull();
-            count.ShouldNotThrow();
+            count.Should().NotThrow();
             redisConfig.Database.Should().Be(44);
             redisConfig.AllowAdmin.Should().BeTrue();
             redisConfig.ConnectionTimeout.Should().Be(11);
@@ -1183,7 +1183,7 @@ namespace CacheManager.Tests
                 var value = new Poco() { Id = 23, Something = "§asdad" };
                 cache.Add(key, value);
                 var result = (Poco)cache.Get(key);
-                value.ShouldBeEquivalentTo(result);
+                value.Should().BeEquivalentTo(result);
             }
         }
 
@@ -1206,7 +1206,7 @@ namespace CacheManager.Tests
                 Func<bool> act = () => cache.TryUpdate(key, region, (o) => newValue, out resultValue);
 
                 act().Should().BeTrue();
-                newValue.ShouldBeEquivalentTo(resultValue);
+                newValue.Should().BeEquivalentTo(resultValue);
             }
         }
 
@@ -1249,7 +1249,7 @@ namespace CacheManager.Tests
 
             cache.Add(key, value);
             var val = cache[key];
-            val.ShouldBeEquivalentTo(value);
+            val.Should().BeEquivalentTo(value);
             val.GetType().Should().Be(value.GetType());
         }
 

@@ -124,7 +124,7 @@ namespace CacheManager.Tests
             Action act = () => ConfigurationBuilder.BuildConfiguration(
                 s => s.WithMicrosoftLogging((Action<ILoggerFactory>)null));
 
-            act.ShouldThrow<ArgumentNullException>().WithMessage("*factory*");
+            act.Should().Throw<ArgumentNullException>().WithMessage("*factory*");
         }
 
         [Fact]
@@ -133,7 +133,7 @@ namespace CacheManager.Tests
             Action act = () => ConfigurationBuilder.BuildConfiguration(
                 s => s.WithMicrosoftLogging((ILoggerFactory)null));
 
-            act.ShouldThrow<ArgumentNullException>().WithMessage("*loggerFactory*");
+            act.Should().Throw<ArgumentNullException>().WithMessage("*loggerFactory*");
         }
 
         [Fact]

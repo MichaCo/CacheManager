@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Threading.Tasks;
 using CacheManager.Core;
 using FluentAssertions;
 using Xunit;
@@ -87,7 +88,7 @@ namespace CacheManager.Tests
         [Theory]
         [ClassData(typeof(TestCacheManagers))]
         [Trait("category", "Unreliable")]
-        public void CacheManager_Region_ClearRegion<T>(T cache)
+        public async Task CacheManager_Region_ClearRegion<T>(T cache)
             where T : ICacheManager<object>
         {
             using (cache)
@@ -97,7 +98,7 @@ namespace CacheManager.Tests
 
                 // act
                 AddRegionData(cache, 20, 17, true, out keys, out regions);
-
+                await Task.Delay(100);
                 try
                 {
                     var clearedRegion = regions.ElementAt((int)Math.Ceiling(regions.Count / 2d));
@@ -273,7 +274,7 @@ namespace CacheManager.Tests
                     var key = sameKey ? sameKeyAllRegions + i : Guid.NewGuid().ToString();
                     var value = "Value in region " + r + ": " + i;
 
-                    if (!cache.Add(key, value, region))
+                    if (!cache.Add(key: key, value: value, region: region))
                     {
                         throw new InvalidOperationException("Adding key " + key + ":" + value + " didn't work. For cache\n" + cache.ToString());
                     }

@@ -51,16 +51,16 @@ namespace CacheManager.Tests
                 var handleCount = cache.CacheHandles.Count();
                 if (handleCount > 1)
                 {
-                    addCalls.Last().Should().Be(1);
-                    addCalls.Take(handleCount - 1).ShouldAllBeEquivalentTo(0);
+                    addCalls.Last().Should().Be(1L);
+                    addCalls.Take(handleCount - 1).Should().AllBeEquivalentTo(0L);
                 }
                 else
                 {
-                    addCalls.ShouldAllBeEquivalentTo(1);
+                    addCalls.Should().AllBeEquivalentTo(1L);
                 }
 
-                items.ShouldAllBeEquivalentTo(
-                    Enumerable.Repeat(0, cache.CacheHandles.Count() - 1).Concat(new[] { 1 }));
+                items.Should().BeEquivalentTo(
+                    Enumerable.Repeat(0L, cache.CacheHandles.Count() - 1).Concat(new[] { 1L }));
             }
         }
 
@@ -84,8 +84,8 @@ namespace CacheManager.Tests
                 cache.Clear();
 
                 // assert all handles should have 2 clear increases.
-                clears.ShouldAllBeEquivalentTo(
-                    Enumerable.Repeat(2, cache.CacheHandles.Count()));
+                clears.Should().BeEquivalentTo(
+                    Enumerable.Repeat(2L, cache.CacheHandles.Count()));
             }
         }
 
@@ -110,8 +110,8 @@ namespace CacheManager.Tests
                 cache.ClearRegion(Guid.NewGuid().ToString());
 
                 // assert all handles should have 2 clearRegion increases.
-                clears.ShouldAllBeEquivalentTo(
-                    Enumerable.Repeat(2, cache.CacheHandles.Count()));
+                clears.Should().BeEquivalentTo(
+                    Enumerable.Repeat(2L, cache.CacheHandles.Count()));
             }
         }
 
@@ -135,8 +135,8 @@ namespace CacheManager.Tests
                 cache.Put(key2, "something", region);
 
                 // assert all handles should have 2 clearRegion increases.
-                puts.ShouldAllBeEquivalentTo(
-                    Enumerable.Repeat(3, cache.CacheHandles.Count()));
+                puts.Should().BeEquivalentTo(
+                    Enumerable.Repeat(3L, cache.CacheHandles.Count()));
             }
         }
 
@@ -161,9 +161,9 @@ namespace CacheManager.Tests
                 cache.Update(key1, v => "somethingelse");
                 cache.Update(key2, v => "somethingelse");
 
-                // assert could be more than 2 adds.ShouldAllBeEquivalentTo( Enumerable.Repeat(0,
-                // cache.CacheHandles.Count)); gets.ShouldAllBeEquivalentTo( Enumerable.Repeat(2,
-                // cache.CacheHandles.Count)); hits.ShouldAllBeEquivalentTo( Enumerable.Repeat(2, cache.CacheHandles.Count));
+                // assert could be more than 2 adds.Should().AllBeEquivalentTo( Enumerable.Repeat(0,
+                // cache.CacheHandles.Count)); gets.Should().AllBeEquivalentTo( Enumerable.Repeat(2,
+                // cache.CacheHandles.Count)); hits.Should().AllBeEquivalentTo( Enumerable.Repeat(2, cache.CacheHandles.Count));
             }
         }
 
@@ -205,7 +205,7 @@ namespace CacheManager.Tests
                 if (adds.Count() > 1)
                 {
                     adds.Last().Should().Be(5);
-                    adds.Take(adds.Count() - 1).ShouldAllBeEquivalentTo(0);
+                    adds.Take(adds.Count() - 1).Should().AllBeEquivalentTo(0);
                 }
                 else
                 {
@@ -244,8 +244,8 @@ namespace CacheManager.Tests
 
             await Task.Delay(20);
             putCounter.Should().Be(threads * iterations);
-            puts.ShouldAllBeEquivalentTo(
-                    Enumerable.Repeat(threads * iterations, cache.CacheHandles.Count()));
+            puts.Should().BeEquivalentTo(
+                    Enumerable.Repeat((long)(threads * iterations), cache.CacheHandles.Count()));
         }
     }
 }

@@ -30,7 +30,7 @@ namespace CacheManager.Tests
         {
             Action act = () => new ConfigurationBuilder((string)null);
 
-            act.ShouldThrow<ArgumentNullException>().WithMessage("*name*");
+            act.Should().Throw<ArgumentNullException>().WithMessage("*name*");
         }
 
         [Fact]
@@ -38,7 +38,7 @@ namespace CacheManager.Tests
         {
             Action act = () => new ConfigurationBuilder((ICacheManagerConfiguration)null);
 
-            act.ShouldThrow<ArgumentNullException>().WithMessage("*forConfiguration*");
+            act.Should().Throw<ArgumentNullException>().WithMessage("*forConfiguration*");
         }
 
         [Fact]
@@ -46,7 +46,7 @@ namespace CacheManager.Tests
         {
             Action act = () => new ConfigurationBuilder(null, null);
 
-            act.ShouldThrow<ArgumentNullException>().WithMessage("*name*");
+            act.Should().Throw<ArgumentNullException>().WithMessage("*name*");
         }
 
         [Fact]
@@ -54,7 +54,7 @@ namespace CacheManager.Tests
         {
             Action act = () => new ConfigurationBuilder("name", null);
 
-            act.ShouldThrow<ArgumentNullException>().WithMessage("*forConfiguration*");
+            act.Should().Throw<ArgumentNullException>().WithMessage("*forConfiguration*");
         }
 
         [Fact]
@@ -97,7 +97,7 @@ namespace CacheManager.Tests
             Action act = () => CacheFactory.FromConfiguration<object>((CacheManagerConfiguration)null);
 
             // assert
-            act.ShouldThrow<ArgumentNullException>()
+            act.Should().Throw<ArgumentNullException>()
                 .WithMessage("*Parameter name: configuration*");
         }
 
@@ -111,7 +111,7 @@ namespace CacheManager.Tests
             Action act = () => CacheFactory.FromConfiguration<object>((string)null);
 
             // assert
-            act.ShouldThrow<ArgumentNullException>()
+            act.Should().Throw<ArgumentNullException>()
                 .WithMessage("*Parameter name: configName*");
         }
 
@@ -126,7 +126,7 @@ namespace CacheManager.Tests
             Action act = () => CacheFactory.FromConfiguration<object>(config);
 
             // assert
-            act.ShouldNotThrow();
+            act.Should().NotThrow();
         }
 
         [Fact]
@@ -158,6 +158,7 @@ namespace CacheManager.Tests
         }
 
 #if !NO_APP_CONFIG
+
         [Fact]
         [ReplaceCulture]
         [Trait("category", "NotOnMono")]
@@ -169,7 +170,7 @@ namespace CacheManager.Tests
             Action act = () => CacheFactory.FromConfiguration((Type)null, "c1");
 
             // assert
-            act.ShouldThrow<ArgumentNullException>()
+            act.Should().Throw<ArgumentNullException>()
                 .WithMessage("*cacheValueType*");
         }
 
@@ -183,7 +184,7 @@ namespace CacheManager.Tests
             Action act = () => CacheFactory.FromConfiguration((Type)null, (CacheManagerConfiguration)null);
 
             // assert
-            act.ShouldThrow<ArgumentNullException>()
+            act.Should().Throw<ArgumentNullException>()
                 .WithMessage("*cacheValueType*");
         }
 
@@ -198,9 +199,10 @@ namespace CacheManager.Tests
             Action act = () => CacheFactory.FromConfiguration((Type)null, "c1", "cacheManager");
 
             // assert
-            act.ShouldThrow<ArgumentNullException>()
+            act.Should().Throw<ArgumentNullException>()
                 .WithMessage("*cacheValueType*");
         }
+
 #endif
 
         [Fact]
@@ -216,7 +218,7 @@ namespace CacheManager.Tests
             });
 
             // assert
-            act.ShouldThrow<ArgumentNullException>()
+            act.Should().Throw<ArgumentNullException>()
                 .WithMessage("*Parameter name: handleName*");
         }
 
@@ -230,7 +232,7 @@ namespace CacheManager.Tests
             Action act = () => CacheFactory.Build(null);
 
             // assert
-            act.ShouldThrow<ArgumentNullException>()
+            act.Should().Throw<ArgumentNullException>()
                 .WithMessage("*Parameter name: settings*");
         }
 
@@ -315,7 +317,7 @@ namespace CacheManager.Tests
             });
 
             // assert
-            act.ShouldThrow<InvalidOperationException>()
+            act.Should().Throw<InvalidOperationException>()
                 .WithMessage("If expiration mode*");
         }
 
@@ -330,7 +332,7 @@ namespace CacheManager.Tests
             });
 
             // assert
-            act.ShouldThrow<InvalidOperationException>()
+            act.Should().Throw<InvalidOperationException>()
                 .WithMessage("Maximum number of retries must be greater*");
         }
 
@@ -345,7 +347,7 @@ namespace CacheManager.Tests
             });
 
             // assert
-            act.ShouldThrow<InvalidOperationException>()
+            act.Should().Throw<InvalidOperationException>()
                 .WithMessage("Retry timeout must be greater*");
         }
 
@@ -367,7 +369,7 @@ namespace CacheManager.Tests
             };
 
             // assert
-            act.ShouldThrow<InvalidOperationException>()
+            act.Should().Throw<InvalidOperationException>()
                 .WithMessage("*At least one cache handle must be*");
         }
 
@@ -384,7 +386,7 @@ namespace CacheManager.Tests
            });
 
             // assert
-            act.ShouldThrow<InvalidOperationException>()
+            act.Should().Throw<InvalidOperationException>()
                 .WithMessage("*Only one cache handle can be *");
         }
 
@@ -401,7 +403,7 @@ namespace CacheManager.Tests
            });
 
             // assert
-            act.ShouldThrow<InvalidOperationException>()
+            act.Should().Throw<InvalidOperationException>()
                 .WithMessage("*No configuration added for configuration name*");
         }
 
@@ -416,7 +418,7 @@ namespace CacheManager.Tests
            });
 
             // assert
-            act.ShouldThrow<ArgumentException>()
+            act.Should().Throw<ArgumentException>()
                 .WithMessage("*Parameter name: configurationKey*");
         }
 
@@ -431,7 +433,7 @@ namespace CacheManager.Tests
            });
 
             // assert
-            act.ShouldThrow<ArgumentException>()
+            act.Should().Throw<ArgumentException>()
                 .WithMessage("*Parameter name: configurationKey*");
         }
 
@@ -446,7 +448,7 @@ namespace CacheManager.Tests
             });
 
             // assert
-            act.ShouldThrow<ArgumentException>()
+            act.Should().Throw<ArgumentException>()
                 .WithMessage("*Parameter name: configurationKey*");
         }
 
@@ -461,7 +463,7 @@ namespace CacheManager.Tests
             });
 
             // assert
-            act.ShouldThrow<ArgumentException>()
+            act.Should().Throw<ArgumentException>()
                 .WithMessage("*Parameter name: host*");
         }
 
@@ -471,7 +473,7 @@ namespace CacheManager.Tests
         {
             // arrange
             var name = Guid.NewGuid().ToString();
-            var connection = "127.0.0.1:8080,allowAdmin=true,name=myName";
+            var connection = "127.0.0.1:8080,allowAdmin=true,name=myName,defaultDatabase=1";
             var expected = StackExchange.Redis.ConfigurationOptions.Parse(connection);
 
             // act
@@ -484,13 +486,14 @@ namespace CacheManager.Tests
             var config = RedisConfigurations.GetConfiguration(name);
 
             // assert
-            config.ConfigurationOptions.ShouldBeEquivalentTo(expected);
+            config.ConfigurationOptions.Should().BeEquivalentTo(expected);
             config.TwemproxyEnabled.Should().BeFalse();
             config.AllowAdmin.Should().BeTrue();
             config.IsSsl.Should().BeFalse();
             config.Key.Should().Be(name);
+            config.Database.Should().Be(1);
         }
-        
+
         [Fact]
         [ReplaceCulture]
         public void CacheFactory_Build_WithRedisConnectionStringWithProxy()
@@ -510,13 +513,12 @@ namespace CacheManager.Tests
             var config = RedisConfigurations.GetConfiguration(name);
 
             // assert
-            config.ConfigurationOptions.ShouldBeEquivalentTo(expected);
+            config.ConfigurationOptions.Should().BeEquivalentTo(expected);
             config.TwemproxyEnabled.Should().BeTrue();
             config.AllowAdmin.Should().BeFalse();
             config.IsSsl.Should().BeTrue();
             config.Key.Should().Be(name);
         }
-
 
         [Fact]
         [ReplaceCulture]
@@ -553,7 +555,7 @@ namespace CacheManager.Tests
             configuration.Password.Should().Be("secret");
             configuration.IsSsl.Should().BeTrue();
             configuration.SslHost.Should().Be("mySslHost");
-            configuration.Endpoints.ShouldBeEquivalentTo(new[] { new ServerEndPoint("127.0.0.1", 2323), new ServerEndPoint("nohost", 60999) });
+            configuration.Endpoints.Should().BeEquivalentTo(new[] { new ServerEndPoint("127.0.0.1", 2323), new ServerEndPoint("nohost", 60999) });
         }
 
         [Fact]
@@ -607,7 +609,7 @@ namespace CacheManager.Tests
             act.CacheHandles.ElementAt(2).Configuration.ExpirationMode.Should().Be(ExpirationMode.Sliding);
             act.CacheHandles.ElementAt(2).Configuration.ExpirationTimeout.Should().Be(new TimeSpan(0, 0, 231));
         }
-        
+
         [Fact]
         [ReplaceCulture]
         [Trait("category", "NotOnMono")]

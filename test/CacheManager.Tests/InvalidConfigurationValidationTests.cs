@@ -24,7 +24,7 @@ namespace CacheManager.Tests
             Action act = () => ConfigurationBuilder.BuildConfiguration(null);
 
             // assert
-            act.ShouldThrow<ArgumentException>()
+            act.Should().Throw<ArgumentException>()
                 .WithMessage("*Parameter name: settings");
         }
 
@@ -39,7 +39,7 @@ namespace CacheManager.Tests
             Action act = () => ConfigurationBuilder.LoadConfiguration(cfgName);
 
             // assert
-            act.ShouldThrow<ArgumentException>()
+            act.Should().Throw<ArgumentException>()
                 .WithMessage("*Parameter name: configName");
         }
 
@@ -54,7 +54,7 @@ namespace CacheManager.Tests
             Action act = () => ConfigurationBuilder.LoadConfiguration(cfgName);
 
             // assert
-            act.ShouldThrow<ArgumentException>()
+            act.Should().Throw<ArgumentException>()
                 .WithMessage("*Parameter name: configName");
         }
 
@@ -71,7 +71,7 @@ namespace CacheManager.Tests
             Action act = () => ConfigurationBuilder.LoadConfiguration(cfgName);
 
             // assert
-            act.ShouldThrow<InvalidOperationException>()
+            act.Should().Throw<InvalidOperationException>()
                 .WithMessage("No cache manager configuration found for name*");
         }
 #endif
@@ -84,7 +84,7 @@ namespace CacheManager.Tests
             Action act = () => ConfigurationBuilder.LoadConfiguration(null, "config");
 
             // assert
-            act.ShouldThrow<ArgumentNullException>()
+            act.Should().Throw<ArgumentNullException>()
                 .WithMessage("*Parameter name: sectionName*");
         }
 
@@ -96,7 +96,7 @@ namespace CacheManager.Tests
             Action act = () => ConfigurationBuilder.LoadConfiguration("cacheManager", string.Empty);
 
             // assert
-            act.ShouldThrow<ArgumentException>()
+            act.Should().Throw<ArgumentException>()
                 .WithMessage("*Parameter name: configName*");
         }
 
@@ -111,7 +111,7 @@ namespace CacheManager.Tests
             Action act = () => ConfigurationBuilder.LoadConfiguration(sectionName, "configName");
 
             // assert
-            act.ShouldThrow<InvalidOperationException>()
+            act.Should().Throw<InvalidOperationException>()
                 .WithMessage("*No section defined with name " + sectionName + ".");
         }
 
@@ -123,7 +123,7 @@ namespace CacheManager.Tests
             Action act = () => ConfigurationBuilder.LoadConfigurationFile(string.Empty, "configName");
 
             // assert
-            act.ShouldThrow<ArgumentException>()
+            act.Should().Throw<ArgumentException>()
                 .WithMessage("*Parameter name: configFileName*");
         }
 
@@ -135,7 +135,7 @@ namespace CacheManager.Tests
             Action act = () => ConfigurationBuilder.LoadConfigurationFile("file", null, "configName");
 
             // assert
-            act.ShouldThrow<ArgumentException>()
+            act.Should().Throw<ArgumentException>()
                 .WithMessage("*Parameter name: sectionName*");
         }
 
@@ -147,7 +147,7 @@ namespace CacheManager.Tests
             Action act = () => ConfigurationBuilder.LoadConfigurationFile("file", "section", null);
 
             // assert
-            act.ShouldThrow<ArgumentException>()
+            act.Should().Throw<ArgumentException>()
                 .WithMessage("*Parameter name: configName*");
         }
 
@@ -162,7 +162,7 @@ namespace CacheManager.Tests
             Action act = () => ConfigurationBuilder.LoadConfigurationFile(fileName, "configName");
 
             // assert
-            act.ShouldThrow<InvalidOperationException>()
+            act.Should().Throw<InvalidOperationException>()
                 .WithMessage("Configuration file not found*");
         }
 
@@ -191,7 +191,7 @@ namespace CacheManager.Tests
             Action act = () => ConfigurationBuilder.LoadConfigurationFile(fileName, "configName");
 
             // assert
-            act.ShouldThrow<InvalidOperationException>()
+            act.Should().Throw<InvalidOperationException>()
                 .WithMessage("No section with name * found in file *");
         }
 
@@ -238,7 +238,7 @@ namespace CacheManager.Tests
             Action act = () => CacheFactory.FromConfiguration<string>(cfg);
 
             // assert
-            act.ShouldThrow<InvalidOperationException>()
+            act.Should().Throw<InvalidOperationException>()
                 .WithMessage("Cache handle type* should not have any generic arguments*");
         }
 
@@ -255,7 +255,7 @@ namespace CacheManager.Tests
             Action act = () => CacheFactory.FromConfiguration<object>(cfg);
 
             // assert
-            act.ShouldThrow<InvalidOperationException>()
+            act.Should().Throw<InvalidOperationException>()
                 .WithMessage("Configured cache handle does not implement*");
         }
 
@@ -285,7 +285,7 @@ namespace CacheManager.Tests
             Action act = () => ConfigurationBuilder.LoadConfigurationFile(fileName, "configName");
 
             // assert
-            act.ShouldThrow<InvalidOperationException>()
+            act.Should().Throw<InvalidOperationException>()
                 .WithMessage("There are no cache handles defined.");
         }
 
@@ -300,7 +300,7 @@ namespace CacheManager.Tests
             Action act = () => ConfigurationBuilder.LoadConfigurationFile(fileName, "c1");
 
             // assert
-            act.ShouldThrow<InvalidOperationException>()
+            act.Should().Throw<InvalidOperationException>()
                 .WithMessage("There are no valid cache handles linked to the cache manager configuration [c1]");
         }
 
@@ -315,7 +315,7 @@ namespace CacheManager.Tests
             Action act = () => ConfigurationBuilder.LoadConfigurationFile(fileName, "c1");
 
             // assert
-            act.ShouldThrow<InvalidOperationException>()
+            act.Should().Throw<InvalidOperationException>()
                 .WithMessage("Referenced cache handle [thisRefIsInvalid] cannot be found in cache handles definition.");
         }
 
@@ -330,7 +330,7 @@ namespace CacheManager.Tests
             Action act = () => ConfigurationBuilder.LoadConfigurationFile(fileName, "c1");
 
             // assert
-            act.ShouldThrow<ConfigurationErrorsException>()
+            act.Should().Throw<ConfigurationErrorsException>()
                 .WithMessage("*defaultExpirationMode*");
         }
 
@@ -345,7 +345,7 @@ namespace CacheManager.Tests
             Action act = () => ConfigurationBuilder.LoadConfigurationFile(fileName, "c1");
 
             // assert
-            act.ShouldThrow<InvalidOperationException>()
+            act.Should().Throw<InvalidOperationException>()
                 .WithMessage("The value of the property 'defaultTimeout' cannot be parsed [20Invalid].");
         }
 
@@ -360,7 +360,7 @@ namespace CacheManager.Tests
             Action act = () => ConfigurationBuilder.LoadConfigurationFile(fileName, "c1");
 
             // assert
-            act.ShouldThrow<InvalidOperationException>()
+            act.Should().Throw<InvalidOperationException>()
                 .WithMessage("*ThisIsInvalid*");
         }
 
@@ -375,7 +375,7 @@ namespace CacheManager.Tests
             Action act = () => ConfigurationBuilder.LoadConfigurationFile(fileName, "c1");
 
             // assert
-            act.ShouldThrow<ConfigurationErrorsException>()
+            act.Should().Throw<ConfigurationErrorsException>()
                 .WithMessage("*enableStatistics*");
         }
 
@@ -390,7 +390,7 @@ namespace CacheManager.Tests
             Action act = () => ConfigurationBuilder.LoadConfigurationFile(fileName, "c1");
 
             // assert
-            act.ShouldThrow<ConfigurationErrorsException>()
+            act.Should().Throw<ConfigurationErrorsException>()
                 .WithMessage("*enablePerformanceCounters*");
         }
 
@@ -405,7 +405,7 @@ namespace CacheManager.Tests
             Action act = () => ConfigurationBuilder.LoadConfigurationFile(fileName, "c1");
 
             // assert
-            act.ShouldThrow<InvalidOperationException>()
+            act.Should().Throw<InvalidOperationException>()
                 .WithMessage("The value of the property 'timeout' cannot be parsed [thisisinvalid].");
         }
 
@@ -420,7 +420,7 @@ namespace CacheManager.Tests
             Action act = () => ConfigurationBuilder.LoadConfigurationFile(fileName, "c1");
 
             // assert
-            act.ShouldThrow<ConfigurationErrorsException>()
+            act.Should().Throw<ConfigurationErrorsException>()
                 .WithMessage("*updateMode*");
         }
 
@@ -435,7 +435,7 @@ namespace CacheManager.Tests
             Action act = () => ConfigurationBuilder.LoadConfigurationFile(fileName, "c1");
 
             // assert
-            act.ShouldThrow<InvalidOperationException>()
+            act.Should().Throw<InvalidOperationException>()
                 .WithMessage("Expiration mode set without a valid timeout specified for handle [h1]");
         }
 
@@ -450,7 +450,7 @@ namespace CacheManager.Tests
             Action act = () => ConfigurationBuilder.LoadConfigurationFile(fileName, "c1");
 
             // assert
-            act.ShouldThrow<InvalidOperationException>()
+            act.Should().Throw<InvalidOperationException>()
                 .WithMessage("Maximum number of retries must be greater than zero.");
         }
 
@@ -465,7 +465,7 @@ namespace CacheManager.Tests
             Action act = () => ConfigurationBuilder.LoadConfigurationFile(fileName, "c1");
 
             // assert
-            act.ShouldThrow<InvalidOperationException>()
+            act.Should().Throw<InvalidOperationException>()
                 .WithMessage("Retry timeout must be greater than or equal to zero.");
         }
 
@@ -480,7 +480,7 @@ namespace CacheManager.Tests
             Action act = () => ConfigurationBuilder.LoadConfigurationFile(fileName, "c1");
 
             // assert
-            act.ShouldThrow<InvalidOperationException>()
+            act.Should().Throw<InvalidOperationException>()
                 .WithMessage("Backplane type cannot be null if backplane name is specified.");
         }
 
@@ -495,7 +495,7 @@ namespace CacheManager.Tests
             Action act = () => ConfigurationBuilder.LoadConfigurationFile(fileName, "c1");
 
             // assert
-            act.ShouldThrow<InvalidOperationException>()
+            act.Should().Throw<InvalidOperationException>()
                 .WithMessage("Backplane name cannot be null if backplane type is specified.");
         }
 
@@ -511,7 +511,7 @@ namespace CacheManager.Tests
             Action act = () => new BaseCacheManager<string>(cfg);
 
             // assert
-            act.ShouldThrow<InvalidOperationException>()
+            act.Should().Throw<InvalidOperationException>()
                 .WithMessage("*does not extend from CacheBackplane*");
         }
 
@@ -526,7 +526,7 @@ namespace CacheManager.Tests
             Action act = () => ConfigurationBuilder.LoadConfigurationFile(fileName, "typeNotFound");
 
             // assert
-            act.ShouldThrow<InvalidOperationException>()
+            act.Should().Throw<InvalidOperationException>()
                 .WithMessage("*Backplane type not found*");
         }
 
@@ -541,7 +541,7 @@ namespace CacheManager.Tests
             Action act = () => CacheFactory.FromConfiguration<object>(ConfigurationBuilder.LoadConfigurationFile(fileName, "c1"));
 
             // assert
-            act.ShouldThrow<InvalidOperationException>()
+            act.Should().Throw<InvalidOperationException>()
                 .WithMessage("*must implement " + nameof(ICacheSerializer) + "*");
         }
 
@@ -556,7 +556,7 @@ namespace CacheManager.Tests
             Action act = () => ConfigurationBuilder.LoadConfigurationFile(fileName, "c2");
 
             // assert
-            act.ShouldThrow<InvalidOperationException>()
+            act.Should().Throw<InvalidOperationException>()
                 .WithMessage("*type not found*");
         }
 

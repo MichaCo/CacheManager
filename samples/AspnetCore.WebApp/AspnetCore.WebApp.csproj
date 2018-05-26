@@ -39,9 +39,4 @@
     <PackageReference Include="Swashbuckle" Version="6.0.0-beta902" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics" Version="1.1.1" />
   </ItemGroup>
-
-  <ItemGroup>
-    <DotNetCliToolReference Include="Microsoft.DotNet.Watcher.Tools" Version="1.0.0" />
-  </ItemGroup>
-
 </Project>

@@ -73,6 +73,95 @@ namespace CacheManager.Config.Tests
                 eventRemoveCount));
         }
 
+        public static async Task PumpData(ICacheManager<string> cache, int runForSeconds = 300)
+        {
+            var source = new CancellationTokenSource(TimeSpan.FromSeconds(runForSeconds));
+            var maxItems = 500000;
+            var numReaders = 10;
+            var puts = 0;
+            var hits = 0;
+            var misses = 0;
+            var putIterations = 0;
+
+            var pumpTask = Task.Factory.StartNew(
+                () =>
+                {
+                    var count = 0;
+                    while (!source.Token.IsCancellationRequested)
+                    {
+                        try
+                        {
+                            count++;
+                            cache.Put("key" + count, Guid.NewGuid().ToString());
+
+                            Interlocked.Increment(ref puts);
+
+                            if (count == maxItems)
+                            {
+                                count = 0;
+                                cache.Clear();
+                                Interlocked.Increment(ref putIterations);
+                            }
+                        }
+                        catch
+                        {
+                            // resuming if some timeouts happen
+                        }
+                    }
+                },
+                source.Token);
+
+            var readers = new List<Task>();
+            for (var i = 0; i < numReaders; i++)
+            {
+                readers.Add(Read());
+            }
+
+            try
+            {
+                await LogProgress();
+                await Task.WhenAll(readers.ToArray());
+            }
+            catch (OperationCanceledException)
+            {
+            }
+
+            async Task LogProgress()
+            {
+                while (!source.Token.IsCancellationRequested)
+                {
+                    await Task.Delay(1000);
+                    Console.WriteLine($"Pumped {puts,-10} keys overall in {putIterations,3} iterations. ({numReaders})Readers got {hits,5} cache hits and {misses,5} misses.");
+                }
+            }
+
+            async Task Read()
+            {
+                var rnd = new Random();
+                while (!source.Token.IsCancellationRequested)
+                {
+                    try
+                    {
+                        var value = cache.Get("key" + rnd.Next(0, maxItems));
+                        if (value == null)
+                        {
+                            Interlocked.Increment(ref misses);
+                        }
+                        else
+                        {
+                            Interlocked.Increment(ref hits);
+                        }
+                    }
+                    catch
+                    {
+                        // resuming if some timeouts happen
+                    }
+
+                    await Task.Delay(100, source.Token);
+                }
+            }
+        }
+
         public static void PutAndMultiGetTest(params ICacheManager<string>[] caches)
         {
             var swatch = Stopwatch.StartNew();
@@ -125,7 +214,7 @@ namespace CacheManager.Config.Tests
                     });
                 }
 
-                Parallel.Invoke(new ParallelOptions() { MaxDegreeOfParallelism = 8 }, actions.ToArray());
+                Parallel.Invoke(new ParallelOptions() { MaxDegreeOfParallelism = 16 }, actions.ToArray());
             }
 
             var elapsed = swatch.ElapsedMilliseconds;

@@ -27,6 +27,7 @@ namespace CacheManager.Redis
     /// </remarks>
     public sealed class RedisCacheBackplane : CacheBackplane
     {
+        private const int HardLimit = 50000;
         private readonly string _channelName;
         private readonly byte[] _identifier;
         private readonly ILogger _logger;
@@ -37,6 +38,7 @@ namespace CacheManager.Redis
         private int _skippedMessages = 0;
         private bool _sending = false;
         private CancellationTokenSource _source = new CancellationTokenSource();
+        private bool loggedLimitWarningOnce = false;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RedisCacheBackplane"/> class.
@@ -162,7 +164,15 @@ namespace CacheManager.Redis
                     _messages.Clear();
                 }
 
-                if (!_messages.Add(message))
+                if (_messages.Count > HardLimit)
+                {
+                    if (!loggedLimitWarningOnce)
+                    {
+                        _logger.LogError("Exceeded hard limit of number of messages pooled to send through the backplane. Skipping new messages...");
+                        loggedLimitWarningOnce = true;
+                    }
+                }
+                else if (!_messages.Add(message))
                 {
                     Interlocked.Increment(ref _skippedMessages);
                     if (_logger.IsEnabled(LogLevel.Trace))
@@ -211,22 +221,26 @@ namespace CacheManager.Redis
                                 _logger.LogDebug("Backplane is sending {0} messages ({1} skipped).", _messages.Count, _skippedMessages);
                             }
 
-                            Interlocked.Add(ref MessagesSent, _messages.Count);
-                            _skippedMessages = 0;
-                            _messages.Clear();
-                        }
-
-                        try
-                        {
-                            if (msgs != null)
+                            try
                             {
-                                Publish(msgs);
-                                Interlocked.Increment(ref SentChunks);
+                                if (msgs != null)
+                                {
+                                    Publish(msgs);
+                                    Interlocked.Increment(ref SentChunks);
+                                    Interlocked.Add(ref MessagesSent, _messages.Count);
+                                    _skippedMessages = 0;
+
+                                    // clearing up only after successfully sending. Basically retrying...
+                                    _messages.Clear();
+
+                                    // reset log limmiter because we just send stuff
+                                    loggedLimitWarningOnce = false;
+                                }
                             }
-                        }
-                        catch (Exception ex)
-                        {
-                            _logger.LogError(ex, "Error occurred sending backplane messages.");
+                            catch (Exception ex)
+                            {
+                                _logger.LogError(ex, "Error occurred sending backplane messages.");
+                            }
                         }
 
                         _sending = false;
