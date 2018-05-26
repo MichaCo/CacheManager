@@ -1,4 +1,4 @@
-﻿#if NETCOREAPP1 && !NETCOREAPP2
+﻿#if NETCOREAPP1
 namespace System.Diagnostics.CodeAnalysis
 {
     [Conditional("DEBUG")]

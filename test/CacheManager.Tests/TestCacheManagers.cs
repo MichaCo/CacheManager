@@ -79,25 +79,9 @@ namespace CacheManager.Tests
     {
         public const string RedisHost = "127.0.0.1";
         public const int RedisPort = 6379;
-
-        private const int RedisPort = 6379;
         private const int StartDbCount = 0;
         private static int _databaseCount = StartDbCount;
         private const int NumDatabases = 100;
-
-        static TestManagers()
-        {
-            ThreadPool.SetMinThreads(100, 100);
-            ////Log.Logger = new LoggerConfiguration()
-            ////    .MinimumLevel.Debug()
-            ////    .Enrich.FromLogContext()
-            ////    .Enrich.WithThreadId()
-            ////    .WriteTo.File(
-            ////        path: $"logs/testlog-{Environment.TickCount}.log",
-            ////        outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} {Scope} [{Level}] {Message}{NewLine}{Exception}",
-            ////        restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Warning)
-            ////    .CreateLogger();
-        }
 
         public static ICacheManagerConfiguration BaseConfiguration
             => new ConfigurationBuilder()

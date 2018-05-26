@@ -29,7 +29,7 @@
   <Target Name="CopyCustomContent" AfterTargets="AfterBuild" Condition=" '$(TargetFramework)' == 'netcoreapp2.0' ">
     <Copy SourceFiles="App.netstandard2.config" DestinationFiles="$(OutDir)\testhost.dll.config" />
   </Target>
-  
+
   <ItemGroup>
     <ProjectReference Include="..\..\src\CacheManager.Microsoft.Extensions.Caching.Memory\CacheManager.Microsoft.Extensions.Caching.Memory.csproj" />
     <ProjectReference Include="..\..\src\CacheManager.Microsoft.Extensions.Configuration\CacheManager.Microsoft.Extensions.Configuration.csproj" />
@@ -56,7 +56,7 @@
     <Reference Include="System.Web" />
     <Reference Include="System.Configuration" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="1.0.2" />
-  </ItemGroup> 
+  </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp1.1' ">
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="1.1.2" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="1.1.2" />
