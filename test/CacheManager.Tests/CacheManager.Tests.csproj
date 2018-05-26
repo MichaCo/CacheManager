@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFrameworks>
-      net452;netcoreapp2.0;netcoreapp1.1
+      net452;<!--netcoreapp2.0;netcoreapp1.1-->
     </TargetFrameworks>
     <Version>1.0.0</Version>
     <AssemblyName>CacheManager.Tests</AssemblyName>
