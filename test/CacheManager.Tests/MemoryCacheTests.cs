@@ -188,7 +188,7 @@ namespace CacheManager.Tests
         }
 
         [Fact]
-        public void SysRuntime_Extensions_NamedWithCfg()
+        public void SysRuntime_Extensions_NamedWithCodeCfg()
         {
             var expectedCacheOptions = new CacheManager.SystemRuntimeCaching.RuntimeMemoryCacheOptions()
             {
@@ -207,6 +207,21 @@ namespace CacheManager.Tests
                 settings["PhysicalMemoryLimitPercentage"].Should().Be(expectedCacheOptions.PhysicalMemoryLimitPercentage.ToString(CultureInfo.InvariantCulture));
                 settings["PollingInterval"].Should().Be(expectedCacheOptions.PollingInterval.ToString("c"));
             }
+        }
+
+        [Fact]
+        public void SysRuntime_Extensions_DefaultWithCodeCfg()
+        {
+            var expectedCacheOptions = new CacheManager.SystemRuntimeCaching.RuntimeMemoryCacheOptions()
+            {
+                CacheMemoryLimitMegabytes = 13,
+                PhysicalMemoryLimitPercentage = 24,
+                PollingInterval = TimeSpan.FromMinutes(3)
+            };
+
+            Action act = () => CacheFactory.Build(_ => _.WithSystemRuntimeCacheHandle("default", expectedCacheOptions));
+
+            act.Should().Throw<InvalidOperationException>().WithMessage("*Default*app/web.config*");
         }
 
         // disabling for netstandard 2 as it doesn't seem to read the "default" configuration from app.config. Might be an xunit/runner issue as the configuration stuff has been ported
@@ -244,6 +259,28 @@ namespace CacheManager.Tests
             }
         }
 
+        [Fact]
+        [Trait("category", "NotOnMono")]
+        public void SysRuntime_CreateNamedCacheOverrideWithCodeCfg()
+        {
+            var expectedCacheOptions = new CacheManager.SystemRuntimeCaching.RuntimeMemoryCacheOptions()
+            {
+                CacheMemoryLimitMegabytes = 11,
+                PhysicalMemoryLimitPercentage = 22,
+                PollingInterval = TimeSpan.FromMinutes(4)
+            };
+
+            using (var act = CacheFactory.Build(_ => _.WithSystemRuntimeCacheHandle("NamedTest", expectedCacheOptions)))
+            {
+                // arrange
+                var settings = ((CacheManager.SystemRuntimeCaching.MemoryCacheHandle<object>)act.CacheHandles.ElementAt(0)).CacheSettings;
+
+                // act assert
+                settings["CacheMemoryLimitMegabytes"].Should().Be(expectedCacheOptions.CacheMemoryLimitMegabytes.ToString(CultureInfo.InvariantCulture));
+                settings["PhysicalMemoryLimitPercentage"].Should().Be(expectedCacheOptions.PhysicalMemoryLimitPercentage.ToString(CultureInfo.InvariantCulture));
+                settings["PollingInterval"].Should().Be(expectedCacheOptions.PollingInterval.ToString("c"));
+            }
+        }
 #endif
 
         #endregion System Runtime Caching

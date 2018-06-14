@@ -54,9 +54,13 @@ namespace CacheManager.SystemRuntimeCaching
             Logger = loggerFactory.CreateLogger(this);
             _cacheName = configuration.Name;
 
-            if (_cacheName.ToUpper(CultureInfo.InvariantCulture).Equals(DefaultName.ToUpper(CultureInfo.InvariantCulture)))
+
+            //if (_cacheName.ToUpper(CultureInfo.InvariantCulture).Equals(DefaultName.ToUpper(CultureInfo.InvariantCulture)))
+            if (DefaultName.Equals(_cacheName, StringComparison.InvariantCultureIgnoreCase))
             {
                 //we can't change default cache configuration by code, can we?
+                Ensure(memoryCacheOptions == null, "MemoryCache Default instance can only be configured through app/web.config.");
+
                 _cache = MemoryCache.Default;
             }
             else
