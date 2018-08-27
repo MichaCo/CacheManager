@@ -15,7 +15,7 @@ namespace CacheManager.Redis
     /// </summary>
     /// <typeparam name="TCacheValue">The type of the cache value.</typeparam>
     [RequiresSerializer]
-    public class RedisCacheHandle<TCacheValue> : BaseCacheHandle<TCacheValue>
+    public partial class RedisCacheHandle<TCacheValue> : BaseCacheHandle<TCacheValue>
     {
         private static readonly TimeSpan MinimumExpirationTimeout = TimeSpan.FromMilliseconds(1);
         private const string Base64Prefix = "base64\0";

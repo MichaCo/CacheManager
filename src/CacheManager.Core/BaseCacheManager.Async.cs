@@ -1,0 +1,196 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Globalization;
+using System.Linq;
+using System.Threading.Tasks;
+using CacheManager.Core.Internal;
+using CacheManager.Core.Logging;
+using static CacheManager.Core.Utility.Guard;
+
+namespace CacheManager.Core
+{
+#if NETSTANDARD2 || NETSTANDARD1
+    public partial class BaseCacheManager<TCacheValue>
+    {
+        /// <inheritdoc />
+        protected internal override async Task<bool> AddInternalAsync(CacheItem<TCacheValue> item)
+        {
+            NotNull(item, nameof(item));
+
+            CheckDisposed();
+            if (_logTrace)
+            {
+                Logger.LogTrace("Add [{0}] started.", item);
+            }
+
+            var handleIndex = _cacheHandles.Length - 1;
+
+            var result = await AddItemToHandleAsync(item, _cacheHandles[handleIndex]);
+
+            // evict from other handles in any case because if it exists, it might be a different version
+            // if not exist, its just a sanity check to invalidate other versions in upper layers.
+            await EvictFromOtherHandlesAsync(item.Key, item.Region, handleIndex);
+
+            if (result)
+            {
+                // update backplane
+                if (_cacheBackplane != null)
+                {
+                    if (string.IsNullOrWhiteSpace(item.Region))
+                    {
+                        _cacheBackplane.NotifyChange(item.Key, CacheItemChangedEventAction.Add);
+                    }
+                    else
+                    {
+                        _cacheBackplane.NotifyChange(item.Key, item.Region, CacheItemChangedEventAction.Add);
+                    }
+
+                    if (_logTrace)
+                    {
+                        Logger.LogTrace("Notified backplane 'change' because [{0}] was added.", item);
+                    }
+                }
+
+                // trigger only once and not per handle and only if the item was added!
+                TriggerOnAdd(item.Key, item.Region);
+            }
+
+            return result;
+        }
+        
+        /// <inheritdoc />
+        protected override Task<bool> RemoveInternalAsync(string key) =>
+            RemoveInternalAsync(key, null);
+        
+        /// <inheritdoc />
+        protected override async Task<bool> RemoveInternalAsync(string key, string region)
+        {
+            CheckDisposed();
+
+            var result = false;
+
+            if (_logTrace)
+            {
+                Logger.LogTrace("Removing [{0}:{1}].", region, key);
+            }
+
+            foreach (var handle in _cacheHandles)
+            {
+                var handleResult = false;
+                if (!string.IsNullOrWhiteSpace(region))
+                {
+                    handleResult = await handle.RemoveAsync(key, region);
+                }
+                else
+                {
+                    handleResult = await handle.RemoveAsync(key);
+                }
+
+                if (handleResult)
+                {
+                    if (_logTrace)
+                    {
+                        Logger.LogTrace(
+                            "Remove [{0}:{1}], successfully removed from handle '{2}'.",
+                            region,
+                            key,
+                            handle.Configuration.Name);
+                    }
+
+                    result = true;
+                    handle.Stats.OnRemove(region);
+                }
+            }
+
+            if (result)
+            {
+                // update backplane
+                if (_cacheBackplane != null)
+                {
+                    if (_logTrace)
+                    {
+                        Logger.LogTrace("Removed [{0}:{1}], notifying backplane [remove].", region, key);
+                    }
+
+                    if (string.IsNullOrWhiteSpace(region))
+                    {
+                        _cacheBackplane.NotifyRemove(key);
+                    }
+                    else
+                    {
+                        _cacheBackplane.NotifyRemove(key, region);
+                    }
+                }
+
+                // trigger only once and not per handle
+                TriggerOnRemove(key, region);
+            }
+
+            return result;
+        }
+
+        
+        private async Task EvictFromOtherHandlesAsync(string key, string region, int excludeIndex)
+        {
+            if (excludeIndex < 0 || excludeIndex >= _cacheHandles.Length)
+            {
+                throw new ArgumentOutOfRangeException(nameof(excludeIndex));
+            }
+
+            if (_logTrace)
+            {
+                Logger.LogTrace("Evict [{0}:{1}] from other handles excluding handle '{2}'.", region, key, excludeIndex);
+            }
+
+            for (var handleIndex = 0; handleIndex < _cacheHandles.Length; handleIndex++)
+            {
+                if (handleIndex != excludeIndex)
+                {
+                    await EvictFromHandleAsync(key, region, _cacheHandles[handleIndex]);
+                }
+            }
+        }
+
+        private async Task EvictFromHandleAsync(string key, string region, BaseCacheHandle<TCacheValue> handle)
+        {
+            if (Logger.IsEnabled(LogLevel.Debug))
+            {
+                Logger.LogDebug(
+                    "Evicting '{0}:{1}' from handle '{2}'.",
+                    region,
+                    key,
+                    handle.Configuration.Name);
+            }
+
+            bool result;
+            if (string.IsNullOrWhiteSpace(region))
+            {
+                result = await handle.RemoveAsync(key);
+            }
+            else
+            {
+                result = await handle.RemoveAsync(key, region);
+            }
+
+            if (result)
+            {
+                handle.Stats.OnRemove(region);
+            }
+        }
+        
+        private static async Task<bool> AddItemToHandleAsync(CacheItem<TCacheValue> item, BaseCacheHandle<TCacheValue> handle)
+        {
+            if (await handle.AddAsync(item))
+            {
+                handle.Stats.OnAdd(item);
+                return true;
+            }
+
+            return false;
+        }
+
+    }
+
+#endif
+}

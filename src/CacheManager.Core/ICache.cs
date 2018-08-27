@@ -20,7 +20,7 @@ namespace CacheManager.Core
     /// </para>
     /// </summary>
     /// <typeparam name="TCacheValue">The type of the cache value.</typeparam>
-    public interface ICache<TCacheValue> : IDisposable
+    public partial interface ICache<TCacheValue> : IDisposable
     {
         /// <summary>
         /// Gets or sets a value for the specified key. The indexer is identical to the

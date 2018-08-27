@@ -11,7 +11,7 @@ namespace CacheManager.Core.Internal
     /// <para>Actually it is not advisable to not use <see cref="BaseCacheHandle{T}"/>.</para>
     /// </summary>
     /// <typeparam name="TCacheValue">The type of the cache value.</typeparam>
-    public abstract class BaseCacheHandle<TCacheValue> : BaseCache<TCacheValue>, IDisposable
+    public abstract partial class BaseCacheHandle<TCacheValue> : BaseCache<TCacheValue>, IDisposable
     {
         private readonly object _updateLock = new object();
 

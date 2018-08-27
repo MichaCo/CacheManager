@@ -14,7 +14,7 @@ namespace CacheManager.Core.Internal
     /// </para>
     /// </summary>
     /// <typeparam name="TCacheValue">The type of the cache value.</typeparam>
-    public abstract class BaseCache<TCacheValue> : IDisposable, ICache<TCacheValue>
+    public abstract partial class BaseCache<TCacheValue> : IDisposable, ICache<TCacheValue>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="BaseCache{TCacheValue}"/> class.
