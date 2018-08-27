@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--<Import Project="..\..\tools\common.props" />-->
+  <PropertyGroup>
+    <Description>CacheManager extension package providing MessagePack serialization for distributed caches. CacheManager is an open source caching abstraction layer for .NET written in C#. It supports various cache providers and implements many advanced features. The Core library contains a MessagePack based serializer implementation which can be used instead of the default binary serializer.</Description>
+    <TargetFrameworks>netstandard1.6;netstandard2.0;net45;net47</TargetFrameworks>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <PackageTags>Caching;Cache;CacheManager;Distributed Cache;StackExchange Redis;Azure AppFabric;Memcached; MessagePack</PackageTags>
+    <Copyright>Copyright (c) 2017 MichaConrad</Copyright>
+    <PackageLicenseUrl>https://github.com/MichaCo/CacheManager/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>http://cachemanager.michaco.net</PackageProjectUrl>
+    <PackageIconUrl>http://cachemanager.michaco.net/favicon-128.png</PackageIconUrl>
+    <RepositoryUrl>https://github.com/MichaCo/CacheManager</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>key.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard1.6|AnyCPU'">
+    <DefineConstants>TRACE;DEBUG;NETSTANDARD1_2</DefineConstants>
+    <OutputPath>bin\Debug\netstandard1.2\</OutputPath>
+    <DocumentationFile>obj\Debug\netstandard1.2\CacheManager.Serialization.MessagePack.xml</DocumentationFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="MessagePack" Version="1.7.3.4" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\src\CacheManager.Core\CacheManager.Core.csproj" />
+  </ItemGroup>
+
+</Project>
