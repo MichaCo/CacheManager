@@ -4,7 +4,7 @@ using static CacheManager.Core.Utility.Guard;
 
 namespace CacheManager.Core.Internal
 {
-#if NETSTANDARD2 || NETSTANDARD1
+#if !NET40
     public partial class BaseCache<TCacheValue>
     {
         /// <summary>

@@ -18,6 +18,9 @@
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="4.4.1" />
     <!-- preview <PackageReference Include="System.Diagnostics.PerformanceCounter" Version="4.5.0-preview1-26216-02" />-->
   </ItemGroup>
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'net40' ">
+    <DefineConstants>$(DefineConstants);NET40</DefineConstants>
+  </PropertyGroup>
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard1.2' ">
     <DefineConstants>$(DefineConstants);NETSTANDARD1</DefineConstants>
   </PropertyGroup>

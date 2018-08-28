@@ -5,7 +5,7 @@ namespace CacheManager.Core
 {
     public partial interface ICache<TCacheValue>
     {
-#if NETSTANDARD2 || NETSTANDARD1
+#if !NET40
 
         /// <summary>
         /// Adds the specified <c>CacheItem</c> to the cache.
