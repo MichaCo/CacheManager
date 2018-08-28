@@ -8,13 +8,7 @@ namespace CacheManager.Core.Internal
 #if !NET40
     public abstract partial class BaseCacheHandle<TCacheValue>
     {
-        /// <summary>
-        /// Adds a value to the cache.
-        /// </summary>
-        /// <param name="item">The <c>CacheItem</c> to be added to the cache.</param>
-        /// <returns>
-        /// <c>true</c> if the key was not already added to the cache, <c>false</c> otherwise.
-        /// </returns>
+        /// <inheritdoc />
         protected internal override Task<bool> AddInternalAsync(CacheItem<TCacheValue> item)
         {
             CheckDisposed();
@@ -35,27 +29,28 @@ namespace CacheManager.Core.Internal
             return Task.FromResult(result);
         }
 
-        /// <summary>
-        /// Removes a value from the cache for the specified key.
-        /// </summary>
-        /// <param name="key">The key being used to identify the item within the cache.</param>
-        /// <returns>
-        /// <c>true</c> if the key was found and removed from the cache, <c>false</c> otherwise.
-        /// </returns>
+        /// <inheritdoc />
+        protected override Task<CacheItem<TCacheValue>> GetCacheItemInternalAsync(string key)
+        {
+            var result = GetCacheItemInternal(key);
+            return Task.FromResult(result);
+        }
+
+        /// <inheritdoc />
+        protected override Task<CacheItem<TCacheValue>> GetCacheItemInternalAsync(string key, string region)
+        {
+            var result = GetCacheItemInternal(key, region);
+            return Task.FromResult(result);
+        }
+        
+        /// <inheritdoc />
         protected override Task<bool> RemoveInternalAsync(string key)
         { 
             var result = RemoveInternal(key);
             return Task.FromResult(result);
         }
 
-        /// <summary>
-        /// Removes a value from the cache for the specified key.
-        /// </summary>
-        /// <param name="key">The key being used to identify the item within the cache.</param>
-        /// <param name="region">The cache region.</param>
-        /// <returns>
-        /// <c>true</c> if the key was found and removed from the cache, <c>false</c> otherwise.
-        /// </returns>
+        /// <inheritdoc />
         protected override Task<bool> RemoveInternalAsync(string key, string region)
         {
             var result = RemoveInternal(key, region);

@@ -60,6 +60,66 @@ namespace CacheManager.Core
         }
         
         /// <inheritdoc />
+        protected override Task<CacheItem<TCacheValue>> GetCacheItemInternalAsync(string key) =>
+            GetCacheItemInternalAsync(key, null);
+        
+        /// <inheritdoc />
+        protected override async Task<CacheItem<TCacheValue>> GetCacheItemInternalAsync(string key, string region)
+        {
+            CheckDisposed();
+
+            CacheItem<TCacheValue> cacheItem = null;
+
+            if (_logTrace)
+            {
+                Logger.LogTrace("Get [{0}:{1}] started.", region, key);
+            }
+
+            for (var handleIndex = 0; handleIndex < _cacheHandles.Length; handleIndex++)
+            {
+                var handle = _cacheHandles[handleIndex];
+                if (string.IsNullOrWhiteSpace(region))
+                {
+                    cacheItem = handle.GetCacheItem(key);
+                }
+                else
+                {
+                    cacheItem = await handle.GetCacheItemAsync(key, region);
+                }
+
+                handle.Stats.OnGet(region);
+
+                if (cacheItem != null)
+                {
+                    if (_logTrace)
+                    {
+                        Logger.LogTrace("Get [{0}:{1}], found in handle[{2}] '{3}'.", region, key, handleIndex, handle.Configuration.Name);
+                    }
+
+                    // update last accessed, might be used for custom sliding implementations
+                    cacheItem.LastAccessedUtc = DateTime.UtcNow;
+
+                    // update other handles if needed
+                    AddToHandles(cacheItem, handleIndex);
+                    handle.Stats.OnHit(region);
+                    TriggerOnGet(key, region);
+                    break;
+                }
+                else
+                {
+                    if (_logTrace)
+                    {
+                        Logger.LogTrace("Get [{0}:{1}], item NOT found in handle[{2}] '{3}'.", region, key, handleIndex, handle.Configuration.Name);
+                    }
+
+                    handle.Stats.OnMiss(region);
+                }
+            }
+
+            return cacheItem;
+        }
+        
+        /// <inheritdoc />
         protected override Task<bool> RemoveInternalAsync(string key) =>
             RemoveInternalAsync(key, null);
         

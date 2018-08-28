@@ -11,7 +11,6 @@ using static CacheManager.Core.Utility.Guard;
 
 namespace CacheManager.Redis
 {
-#if NETSTANDARD2 || NETSTANDARD1
     public partial class RedisCacheHandle<TCacheValue>
     {
         /// <summary>
@@ -28,6 +27,199 @@ namespace CacheManager.Redis
         /// </returns>
         protected override Task<bool> AddInternalPreparedAsync(CacheItem<TCacheValue> item) =>
             RetryAsync(() => SetAsync(item, When.NotExists, true));
+
+        /// <summary>
+        /// Gets a <c>CacheItem</c> for the specified key.
+        /// </summary>
+        /// <param name="key">The key being used to identify the item within the cache.</param>
+        /// <returns>The <c>CacheItem</c>.</returns>
+        protected override Task<CacheItem<TCacheValue>> GetCacheItemInternalAsync(string key)
+            => GetCacheItemInternalAsync(key, null);
+
+        /// <summary>
+        /// Gets a <c>CacheItem</c> for the specified key.
+        /// </summary>
+        /// <param name="key">The key being used to identify the item within the cache.</param>
+        /// <param name="region">The cache region.</param>
+        /// <returns>The <c>CacheItem</c>.</returns>
+        protected override async Task<CacheItem<TCacheValue>> GetCacheItemInternalAsync(string key, string region)
+        {
+            return (await GetCacheItemAndVersionAsync(key, region)).Item1;
+        }
+
+        private async Task<Tuple<CacheItem<TCacheValue>, int>> GetCacheItemAndVersionAsync(string key, string region)
+        {
+            var version = -1;
+            if (!_isLuaAllowed)
+            {
+                return Tuple.Create(
+                    await GetCacheItemInternalNoScriptAsync(key, region),
+                    version);
+            }
+
+            var fullKey = GetKey(key, region);
+
+            var result = await RetryAsync(async () => await EvalAsync(ScriptType.Get, fullKey));
+            if (result == null || result.IsNull)
+            {
+                // something went wrong. HMGET should return at least a null result for each requested field
+                throw new InvalidOperationException("Error retrieving " + fullKey);
+            }
+
+            var values = (RedisValue[])result;
+
+            // the first item stores the value
+            var item = values[0];
+            var expirationModeItem = values[1];
+            var timeoutItem = values[2];
+            var createdItem = values[3];
+            var valueTypeItem = values[4];
+            version = (int)values[5];
+            var usesDefaultExpiration = values[6].HasValue ? (bool)values[6]        // if flag is set, all good...
+                : (expirationModeItem.HasValue && timeoutItem.HasValue) ? false     // if not, but expiration flags have values, use those
+                : true;                                                             // otherwise fall back to use default expiration from config
+
+            if (!item.HasValue || !valueTypeItem.HasValue /* partially removed? */
+                || item.IsNullOrEmpty || item.IsNull)
+            {
+                return null;
+            }
+
+            var expirationMode = ExpirationMode.None;
+            var expirationTimeout = default(TimeSpan);
+
+            // checking if the expiration mode is set on the hash
+            if (expirationModeItem.HasValue && timeoutItem.HasValue)
+            {
+                if (!timeoutItem.IsNullOrEmpty && !expirationModeItem.IsNullOrEmpty)
+                {
+                    expirationMode = (ExpirationMode)(int)expirationModeItem;
+                    expirationTimeout = TimeSpan.FromMilliseconds((long)timeoutItem);
+                }
+                else
+                {
+                    Logger.LogWarn("Expiration mode and timeout are set but are not valid '{0}', '{1}'.", expirationModeItem, timeoutItem);
+                }
+            }
+
+            var value = FromRedisValue(item, (string)valueTypeItem);
+
+            var cacheItem =
+                usesDefaultExpiration ?
+                string.IsNullOrWhiteSpace(region) ?
+                    new CacheItem<TCacheValue>(key, value) :
+                    new CacheItem<TCacheValue>(key, region, value) :
+                string.IsNullOrWhiteSpace(region) ?
+                    new CacheItem<TCacheValue>(key, value, expirationMode, expirationTimeout) :
+                    new CacheItem<TCacheValue>(key, region, value, expirationMode, expirationTimeout);
+
+            if (createdItem.HasValue)
+            {
+                cacheItem = cacheItem.WithCreated(new DateTime((long)createdItem, DateTimeKind.Utc));
+            }
+
+            if (cacheItem.IsExpired)
+            {
+                TriggerCacheSpecificRemove(key, region, CacheItemRemovedReason.Expired, cacheItem.Value);
+
+                return null;
+            }
+
+            return Tuple.Create(cacheItem, version);
+        }
+
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
+#pragma warning disable SA1600
+        
+        protected Task<CacheItem<TCacheValue>> GetCacheItemInternalNoScriptAsync(string key, string region)
+        {
+            return RetryAsync(async () =>
+            {
+                var fullKey = GetKey(key, region);
+
+                // getting both, the value and, if exists, the expiration mode. if that one is set
+                // and it is sliding, we also retrieve the timeout later
+                var values = await _connection.Database.HashGetAsync(
+                    fullKey,
+                    new RedisValue[]
+                    {
+                        HashFieldValue,
+                        HashFieldExpirationMode,
+                        HashFieldExpirationTimeout,
+                        HashFieldCreated,
+                        HashFieldType,
+                        HashFieldUsesDefaultExp
+                    });
+
+                // the first item stores the value
+                var item = values[0];
+                var expirationModeItem = values[1];
+                var timeoutItem = values[2];
+                var createdItem = values[3];
+                var valueTypeItem = values[4];
+                var usesDefaultExpiration = values[5].HasValue ? (bool)values[5]        // if flag is set, all good...
+                    : (expirationModeItem.HasValue && timeoutItem.HasValue) ? false     // if not, but expiration flags have values, use those
+                    : true;                                                             // otherwise fall back to use default expiration from config
+
+                if (!item.HasValue || !valueTypeItem.HasValue /* partially removed? */
+                    || item.IsNullOrEmpty || item.IsNull)
+                {
+                    return null;
+                }
+
+                var expirationMode = ExpirationMode.None;
+                var expirationTimeout = default(TimeSpan);
+
+                // checking if the expiration mode is set on the hash
+                if (expirationModeItem.HasValue && timeoutItem.HasValue)
+                {
+                    // adding sanity check for empty string results. Could happen in rare cases like #74
+                    if (!timeoutItem.IsNullOrEmpty && !expirationModeItem.IsNullOrEmpty)
+                    {
+                        expirationMode = (ExpirationMode)(int)expirationModeItem;
+                        expirationTimeout = TimeSpan.FromMilliseconds((long)timeoutItem);
+                    }
+                    else
+                    {
+                        Logger.LogWarn("Expiration mode and timeout are set but are not valid '{0}', '{1}'.", expirationModeItem, timeoutItem);
+                    }
+                }
+
+                var value = FromRedisValue(item, (string)valueTypeItem);
+
+                var cacheItem =
+                    usesDefaultExpiration ?
+                    string.IsNullOrWhiteSpace(region) ?
+                        new CacheItem<TCacheValue>(key, value) :
+                        new CacheItem<TCacheValue>(key, region, value) :
+                    string.IsNullOrWhiteSpace(region) ?
+                        new CacheItem<TCacheValue>(key, value, expirationMode, expirationTimeout) :
+                        new CacheItem<TCacheValue>(key, region, value, expirationMode, expirationTimeout);
+
+                if (createdItem.HasValue)
+                {
+                    cacheItem = cacheItem.WithCreated(new DateTime((long)createdItem, DateTimeKind.Utc));
+                }
+
+                if (cacheItem.IsExpired)
+                {
+                    TriggerCacheSpecificRemove(key, region, CacheItemRemovedReason.Expired, cacheItem.Value);
+
+                    return null;
+                }
+
+                // update sliding
+                if (expirationMode == ExpirationMode.Sliding && expirationTimeout != default(TimeSpan))
+                {
+                    await _connection.Database.KeyExpireAsync(fullKey, cacheItem.ExpirationTimeout, CommandFlags.FireAndForget);
+                }
+
+                return cacheItem;
+            });
+        }
+
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
+#pragma warning restore SA1600
 
         /// <summary>
         /// Removes a value from the cache for the specified key.
@@ -301,5 +493,4 @@ namespace CacheManager.Redis
                 return true;
             });
     }
-#endif
 }

@@ -33,6 +33,51 @@ namespace CacheManager.Core.Internal
         }
         
         /// <summary>
+        /// Gets the <c>CacheItem</c> for the specified key.
+        /// </summary>
+        /// <param name="key">The key being used to identify the item within the cache.</param>
+        /// <returns>The <c>CacheItem</c>.</returns>
+        /// <exception cref="ArgumentNullException">If the <paramref name="key"/> is null.</exception>
+        public virtual Task<CacheItem<TCacheValue>> GetCacheItemAsync(string key)
+        {
+            NotNullOrWhiteSpace(key, nameof(key));
+
+            return GetCacheItemInternalAsync(key);
+        }
+        
+        /// <summary>
+        /// Gets the <c>CacheItem</c> for the specified key and region.
+        /// </summary>
+        /// <param name="key">The key being used to identify the item within the cache.</param>
+        /// <param name="region">The cache region.</param>
+        /// <returns>The <c>CacheItem</c>.</returns>
+        /// <exception cref="ArgumentNullException">
+        /// If the <paramref name="key"/> or <paramref name="region"/> is null.
+        /// </exception>
+        public virtual Task<CacheItem<TCacheValue>> GetCacheItemAsync(string key, string region)
+        {
+            NotNullOrWhiteSpace(key, nameof(key));
+            NotNullOrWhiteSpace(region, nameof(region));
+
+            return GetCacheItemInternalAsync(key, region);
+        }
+
+        /// <summary>
+        /// Gets a <c>CacheItem</c> for the specified key.
+        /// </summary>
+        /// <param name="key">The key being used to identify the item within the cache.</param>
+        /// <returns>The <c>CacheItem</c>.</returns>
+        protected abstract Task<CacheItem<TCacheValue>> GetCacheItemInternalAsync(string key);
+        
+        /// <summary>
+        /// Gets a <c>CacheItem</c> for the specified key and region.
+        /// </summary>
+        /// <param name="key">The key being used to identify the item within the cache.</param>
+        /// <param name="region">The cache region.</param>
+        /// <returns>The <c>CacheItem</c>.</returns>
+        protected abstract Task<CacheItem<TCacheValue>> GetCacheItemInternalAsync(string key, string region);
+        
+        /// <summary>
         /// Removes a value from the cache for the specified key.
         /// </summary>
         /// <param name="key">The key being used to identify the item within the cache.</param>

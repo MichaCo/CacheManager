@@ -28,6 +28,25 @@ namespace CacheManager.Core
         Task<bool> AddAsync(CacheItem<TCacheValue> item);
 
         /// <summary>
+        /// Gets the <c>CacheItem</c> for the specified key.
+        /// </summary>
+        /// <param name="key">The key being used to identify the item within the cache.</param>
+        /// <returns>The <c>CacheItem</c>.</returns>
+        /// <exception cref="ArgumentNullException">If the <paramref name="key"/> is null.</exception>
+        Task<CacheItem<TCacheValue>> GetCacheItemAsync(string key);
+        
+        /// <summary>
+        /// Gets the <c>CacheItem</c> for the specified key and region.
+        /// </summary>
+        /// <param name="key">The key being used to identify the item within the cache.</param>
+        /// <param name="region">The cache region.</param>
+        /// <returns>The <c>CacheItem</c>.</returns>
+        /// <exception cref="ArgumentNullException">
+        /// If the <paramref name="key"/> or <paramref name="region"/> is null.
+        /// </exception>
+        Task<CacheItem<TCacheValue>> GetCacheItemAsync(string key, string region);
+        
+        /// <summary>
         /// Removes a value from the cache for the specified key.
         /// </summary>
         /// <param name="key">The key being used to identify the item within the cache.</param>
