@@ -14,7 +14,7 @@ namespace CacheManager.Core
     public partial class BaseCacheManager<TCacheValue>
     {
         /// <inheritdoc />
-        protected internal override async Task<bool> AddInternalAsync(CacheItem<TCacheValue> item)
+        protected internal override async ValueTask<bool> AddInternalAsync(CacheItem<TCacheValue> item)
         {
             NotNull(item, nameof(item));
 
@@ -60,11 +60,11 @@ namespace CacheManager.Core
         }
         
         /// <inheritdoc />
-        protected override Task<CacheItem<TCacheValue>> GetCacheItemInternalAsync(string key) =>
+        protected override ValueTask<CacheItem<TCacheValue>> GetCacheItemInternalAsync(string key) =>
             GetCacheItemInternalAsync(key, null);
         
         /// <inheritdoc />
-        protected override async Task<CacheItem<TCacheValue>> GetCacheItemInternalAsync(string key, string region)
+        protected override async ValueTask<CacheItem<TCacheValue>> GetCacheItemInternalAsync(string key, string region)
         {
             CheckDisposed();
 
@@ -120,11 +120,11 @@ namespace CacheManager.Core
         }
         
         /// <inheritdoc />
-        protected override Task<bool> RemoveInternalAsync(string key) =>
+        protected override ValueTask<bool> RemoveInternalAsync(string key) =>
             RemoveInternalAsync(key, null);
         
         /// <inheritdoc />
-        protected override async Task<bool> RemoveInternalAsync(string key, string region)
+        protected override async ValueTask<bool> RemoveInternalAsync(string key, string region)
         {
             CheckDisposed();
 
@@ -191,7 +191,7 @@ namespace CacheManager.Core
         }
 
         
-        private async Task EvictFromOtherHandlesAsync(string key, string region, int excludeIndex)
+        private async ValueTask EvictFromOtherHandlesAsync(string key, string region, int excludeIndex)
         {
             if (excludeIndex < 0 || excludeIndex >= _cacheHandles.Length)
             {
@@ -212,7 +212,7 @@ namespace CacheManager.Core
             }
         }
 
-        private async Task EvictFromHandleAsync(string key, string region, BaseCacheHandle<TCacheValue> handle)
+        private async ValueTask EvictFromHandleAsync(string key, string region, BaseCacheHandle<TCacheValue> handle)
         {
             if (Logger.IsEnabled(LogLevel.Debug))
             {
@@ -239,7 +239,7 @@ namespace CacheManager.Core
             }
         }
         
-        private static async Task<bool> AddItemToHandleAsync(CacheItem<TCacheValue> item, BaseCacheHandle<TCacheValue> handle)
+        private static async ValueTask<bool> AddItemToHandleAsync(CacheItem<TCacheValue> item, BaseCacheHandle<TCacheValue> handle)
         {
             if (await handle.AddAsync(item))
             {

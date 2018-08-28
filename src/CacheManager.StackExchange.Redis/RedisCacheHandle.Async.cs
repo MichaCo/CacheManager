@@ -25,7 +25,7 @@ namespace CacheManager.Redis
         /// <returns>
         /// <c>true</c> if the key was not already added to the cache, <c>false</c> otherwise.
         /// </returns>
-        protected override Task<bool> AddInternalPreparedAsync(CacheItem<TCacheValue> item) =>
+        protected override ValueTask<bool> AddInternalPreparedAsync(CacheItem<TCacheValue> item) =>
             RetryAsync(() => SetAsync(item, When.NotExists, true));
 
         /// <summary>
@@ -33,7 +33,7 @@ namespace CacheManager.Redis
         /// </summary>
         /// <param name="key">The key being used to identify the item within the cache.</param>
         /// <returns>The <c>CacheItem</c>.</returns>
-        protected override Task<CacheItem<TCacheValue>> GetCacheItemInternalAsync(string key)
+        protected override ValueTask<CacheItem<TCacheValue>> GetCacheItemInternalAsync(string key)
             => GetCacheItemInternalAsync(key, null);
 
         /// <summary>
@@ -42,12 +42,12 @@ namespace CacheManager.Redis
         /// <param name="key">The key being used to identify the item within the cache.</param>
         /// <param name="region">The cache region.</param>
         /// <returns>The <c>CacheItem</c>.</returns>
-        protected override async Task<CacheItem<TCacheValue>> GetCacheItemInternalAsync(string key, string region)
+        protected override async ValueTask<CacheItem<TCacheValue>> GetCacheItemInternalAsync(string key, string region)
         {
             return (await GetCacheItemAndVersionAsync(key, region)).Item1;
         }
 
-        private async Task<Tuple<CacheItem<TCacheValue>, int>> GetCacheItemAndVersionAsync(string key, string region)
+        private async ValueTask<Tuple<CacheItem<TCacheValue>, int>> GetCacheItemAndVersionAsync(string key, string region)
         {
             var version = -1;
             if (!_isLuaAllowed)
@@ -131,7 +131,7 @@ namespace CacheManager.Redis
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 #pragma warning disable SA1600
         
-        protected Task<CacheItem<TCacheValue>> GetCacheItemInternalNoScriptAsync(string key, string region)
+        protected ValueTask<CacheItem<TCacheValue>> GetCacheItemInternalNoScriptAsync(string key, string region)
         {
             return RetryAsync(async () =>
             {
@@ -228,7 +228,7 @@ namespace CacheManager.Redis
         /// <returns>
         /// <c>true</c> if the key was found and removed from the cache, <c>false</c> otherwise.
         /// </returns>
-        protected override Task<bool> RemoveInternalAsync(string key) => RemoveInternalAsync(key, null);
+        protected override ValueTask<bool> RemoveInternalAsync(string key) => RemoveInternalAsync(key, null);
 
         /// <summary>
         /// Removes a value from the cache for the specified key.
@@ -238,7 +238,7 @@ namespace CacheManager.Redis
         /// <returns>
         /// <c>true</c> if the key was found and removed from the cache, <c>false</c> otherwise.
         /// </returns>
-        protected override async Task<bool> RemoveInternalAsync(string key, string region)
+        protected override async ValueTask<bool> RemoveInternalAsync(string key, string region)
         {
             return await RetryAsync(async () =>
             {
@@ -257,7 +257,7 @@ namespace CacheManager.Redis
             });
         }
         
-        private async Task<RedisResult> EvalAsync(ScriptType scriptType, RedisKey redisKey, RedisValue[] values = null, CommandFlags flags = CommandFlags.None)
+        private async ValueTask<RedisResult> EvalAsync(ScriptType scriptType, RedisKey redisKey, RedisValue[] values = null, CommandFlags flags = CommandFlags.None)
         {
             if (!_scriptsLoaded)
             {
@@ -301,7 +301,7 @@ namespace CacheManager.Redis
             }
         }
 
-        private async Task<bool> SetAsync(CacheItem<TCacheValue> item, When when, bool sync = false)
+        private async ValueTask<bool> SetAsync(CacheItem<TCacheValue> item, When when, bool sync = false)
         {
             if (!_isLuaAllowed)
             {
@@ -386,7 +386,7 @@ namespace CacheManager.Redis
             }
         }
 
-        private Task<bool> SetNoScriptAsync(CacheItem<TCacheValue> item, When when, bool sync = false)
+        private ValueTask<bool> SetNoScriptAsync(CacheItem<TCacheValue> item, When when, bool sync = false)
         {
             return RetryAsync(async () =>
             {
@@ -483,10 +483,10 @@ namespace CacheManager.Redis
             }
         }
 
-        private Task<T> RetryAsync<T>(Func<Task<T>> retryme) =>
+        private ValueTask<T> RetryAsync<T>(Func<ValueTask<T>> retryme) =>
             RetryHelper.RetryAsync(retryme, _managerConfiguration.RetryTimeout, _managerConfiguration.MaxRetries, Logger);
 
-        private async Task RetryAsync(Func<Task> retryme)
+        private async ValueTask RetryAsync(Func<ValueTask> retryme)
             => await RetryAsync(async () =>
             {
                 await retryme();

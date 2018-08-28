@@ -25,7 +25,7 @@ namespace CacheManager.Core
         /// <exception cref="ArgumentNullException">
         /// If the <paramref name="item"/> or the item's key or value is null.
         /// </exception>
-        Task<bool> AddAsync(CacheItem<TCacheValue> item);
+        ValueTask<bool> AddAsync(CacheItem<TCacheValue> item);
 
         /// <summary>
         /// Gets the <c>CacheItem</c> for the specified key.
@@ -33,7 +33,7 @@ namespace CacheManager.Core
         /// <param name="key">The key being used to identify the item within the cache.</param>
         /// <returns>The <c>CacheItem</c>.</returns>
         /// <exception cref="ArgumentNullException">If the <paramref name="key"/> is null.</exception>
-        Task<CacheItem<TCacheValue>> GetCacheItemAsync(string key);
+        ValueTask<CacheItem<TCacheValue>> GetCacheItemAsync(string key);
         
         /// <summary>
         /// Gets the <c>CacheItem</c> for the specified key and region.
@@ -44,7 +44,7 @@ namespace CacheManager.Core
         /// <exception cref="ArgumentNullException">
         /// If the <paramref name="key"/> or <paramref name="region"/> is null.
         /// </exception>
-        Task<CacheItem<TCacheValue>> GetCacheItemAsync(string key, string region);
+        ValueTask<CacheItem<TCacheValue>> GetCacheItemAsync(string key, string region);
         
         /// <summary>
         /// Removes a value from the cache for the specified key.
@@ -54,7 +54,7 @@ namespace CacheManager.Core
         /// <c>true</c> if the key was found and removed from the cache, <c>false</c> otherwise.
         /// </returns>
         /// <exception cref="ArgumentNullException">If the <paramref name="key"/> is null.</exception>
-        Task<bool> RemoveAsync(string key);
+        ValueTask<bool> RemoveAsync(string key);
 
         /// <summary>
         /// Removes a value from the cache for the specified key and region.
@@ -67,7 +67,7 @@ namespace CacheManager.Core
         /// <exception cref="ArgumentNullException">
         /// If the <paramref name="key"/> or <paramref name="region"/> is null.
         /// </exception>
-        Task<bool> RemoveAsync(string key, string region);
+        ValueTask<bool> RemoveAsync(string key, string region);
 
 #endif
     }

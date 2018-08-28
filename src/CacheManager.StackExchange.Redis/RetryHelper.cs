@@ -124,7 +124,7 @@ namespace CacheManager.Redis
                 logger);
         }
         
-        public static async Task<T> RetryAsync<T>(Func<Task<T>> retryme, int timeOut, int retries, ILogger logger)
+        public static async ValueTask<T> RetryAsync<T>(Func<ValueTask<T>> retryme, int timeOut, int retries, ILogger logger)
         {
             var tries = 0;
             do
@@ -214,7 +214,7 @@ namespace CacheManager.Redis
             return default(T);
         }
 
-        public static async Task RetryAsync(Func<Task> retryme, int timeOut, int retries, ILogger logger)
+        public static async ValueTask RetryAsync(Func<ValueTask> retryme, int timeOut, int retries, ILogger logger)
         {
             await RetryAsync(
                 async () =>
