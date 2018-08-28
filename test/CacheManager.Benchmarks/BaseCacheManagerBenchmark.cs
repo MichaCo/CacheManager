@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
 using CacheManager.Core;
 using Enyim.Caching;
@@ -62,11 +63,23 @@ namespace CacheManager.Benchmarks
         {
             Excecute(DictionaryCache);
         }
+        
+        [Benchmark]
+        public Task DictionaryAsync()
+        {
+            return ExcecuteAsync(DictionaryCache);
+        }
 
         [Benchmark]
         public void Runtime()
         {
             Excecute(RuntimeCache);
+        }
+        
+        [Benchmark]
+        public Task RuntimeAsync()
+        {
+            return ExcecuteAsync(RuntimeCache);
         }
 
         [Benchmark]
@@ -74,11 +87,23 @@ namespace CacheManager.Benchmarks
         {
             Excecute(MsMemoryCache);
         }
+        
+        [Benchmark]
+        public Task MsMemoryAsync()
+        {
+            return ExcecuteAsync(MsMemoryCache);
+        }
 
         [Benchmark]
         public void Redis()
         {
             Excecute(RedisCache);
+        }
+        
+        [Benchmark]
+        public Task RedisAsync()
+        {
+            return ExcecuteAsync(RedisCache);
         }
 
         [Benchmark]
@@ -86,8 +111,19 @@ namespace CacheManager.Benchmarks
         {
             Excecute(MemcachedCache);
         }
+        
+        [Benchmark]
+        public Task MemcachedAsync()
+        {
+            return ExcecuteAsync(MemcachedCache);
+        }
 
         protected abstract void Excecute(ICacheManager<string> cache);
+
+        protected virtual Task ExcecuteAsync(ICacheManager<string> cache)
+        {
+            return Task.CompletedTask;
+        }
 
         protected virtual void SetupBench()
         {
@@ -108,6 +144,15 @@ namespace CacheManager.Benchmarks
                 cache.Remove(_key);
             }
         }
+
+        protected override async Task ExcecuteAsync(ICacheManager<string> cache)
+        {
+            var cacheItem = new CacheItem<string>(_key, "value");
+            if (!await cache.AddAsync(cacheItem))
+            {
+                await cache.RemoveAsync(_key);
+            }
+        }
     }
 
     [ExcludeFromCodeCoverage]
@@ -120,6 +165,15 @@ namespace CacheManager.Benchmarks
             if (!cache.Add(_key, "value", "region"))
             {
                 cache.Remove(_key);
+            }
+        }
+        
+        protected override async Task ExcecuteAsync(ICacheManager<string> cache)
+        {
+            var cacheItem = new CacheItem<string>(_key, "region", "value");
+            if (!await cache.AddAsync(cacheItem))
+            {
+                await cache.RemoveAsync(_key);
             }
         }
     }
@@ -161,8 +215,17 @@ namespace CacheManager.Benchmarks
 
         protected override void Excecute(ICacheManager<string> cache)
         {
-            var val = cache.Get(Key);
-            if (val == null)
+            var val = cache.GetCacheItem(Key);
+            if (val.Value == null)
+            {
+                throw new InvalidOperationException();
+            }
+        }
+        
+        protected override async Task ExcecuteAsync(ICacheManager<string> cache)
+        {
+            var val = await cache.GetCacheItemAsync(Key);
+            if (val.Value == null)
             {
                 throw new InvalidOperationException();
             }
@@ -190,8 +253,17 @@ namespace CacheManager.Benchmarks
     {
         protected override void Excecute(ICacheManager<string> cache)
         {
-            var val = cache.Get(Key, "region");
-            if (val == null)
+            var val = cache.GetCacheItem(Key, "region");
+            if (val.Value == null)
+            {
+                throw new InvalidOperationException();
+            }
+        }
+        
+        protected override async Task ExcecuteAsync(ICacheManager<string> cache)
+        {
+            var val = await cache.GetCacheItemAsync(Key, "region");
+            if (val.Value == null)
             {
                 throw new InvalidOperationException();
             }
