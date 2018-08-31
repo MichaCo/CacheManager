@@ -60,6 +60,112 @@ namespace CacheManager.Core
         }
         
         /// <inheritdoc />
+        public override async ValueTask ClearAsync()
+        {
+            CheckDisposed();
+            if (_logTrace)
+            {
+                Logger.LogTrace("Clear: flushing cache...");
+            }
+
+            foreach (var handle in _cacheHandles)
+            {
+                if (_logTrace)
+                {
+                    Logger.LogTrace("Clear: clearing handle {0}.", handle.Configuration.Name);
+                }
+
+                await handle.ClearAsync();
+                handle.Stats.OnClear();
+            }
+
+            if (_cacheBackplane != null)
+            {
+                if (_logTrace)
+                {
+                    Logger.LogTrace("Clear: notifies backplane.");
+                }
+
+                _cacheBackplane.NotifyClear();
+            }
+
+            TriggerOnClear();
+        }
+
+        /// <inheritdoc />
+        public override async ValueTask ClearRegionAsync(string region)
+        {
+            NotNullOrWhiteSpace(region, nameof(region));
+
+            CheckDisposed();
+            if (_logTrace)
+            {
+                Logger.LogTrace("Clear region: {0}.", region);
+            }
+
+            foreach (var handle in _cacheHandles)
+            {
+                if (_logTrace)
+                {
+                    Logger.LogTrace("Clear region: {0} in handle {1}.", region, handle.Configuration.Name);
+                }
+
+                await handle.ClearRegionAsync(region);
+                handle.Stats.OnClearRegion(region);
+            }
+
+            if (_cacheBackplane != null)
+            {
+                if (_logTrace)
+                {
+                    Logger.LogTrace("Clear region: {0}: notifies backplane [clear region].", region);
+                }
+
+                _cacheBackplane.NotifyClearRegion(region);
+            }
+
+            TriggerOnClearRegion(region);
+        }
+        
+        /// <inheritdoc />
+        public override async ValueTask<bool> ExistsAsync(string key)
+        {
+            foreach (var handle in _cacheHandles)
+            {
+                if (_logTrace)
+                {
+                    Logger.LogTrace("Checking if [{0}] exists on handle '{1}'.", key, handle.Configuration.Name);
+                }
+
+                if (await handle.ExistsAsync(key))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <inheritdoc />
+        public override async ValueTask<bool> ExistsAsync(string key, string region)
+        {
+            foreach (var handle in _cacheHandles)
+            {
+                if (_logTrace)
+                {
+                    Logger.LogTrace("Checking if [{0}:{1}] exists on handle '{2}'.", region, key, handle.Configuration.Name);
+                }
+
+                if (await handle.ExistsAsync(key, region))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+        
+        /// <inheritdoc />
         protected override ValueTask<CacheItem<TCacheValue>> GetCacheItemInternalAsync(string key) =>
             GetCacheItemInternalAsync(key, null);
         
@@ -117,6 +223,64 @@ namespace CacheManager.Core
             }
 
             return cacheItem;
+        }
+        
+        /// <inheritdoc />
+        protected internal override async ValueTask PutInternalAsync(CacheItem<TCacheValue> item)
+        {
+            NotNull(item, nameof(item));
+
+            CheckDisposed();
+            if (_logTrace)
+            {
+                Logger.LogTrace("Put [{0}] started.", item);
+            }
+
+            foreach (var handle in _cacheHandles)
+            {
+                if (handle.Configuration.EnableStatistics)
+                {
+                    // check if it is really a new item otherwise the items count is crap because we
+                    // count it every time, but use only the current handle to retrieve the item,
+                    // otherwise we would trigger gets and find it in another handle maybe
+                    var oldItem = string.IsNullOrWhiteSpace(item.Region) ?
+                        await handle.GetCacheItemAsync(item.Key) :
+                        await handle.GetCacheItemAsync(item.Key, item.Region);
+
+                    handle.Stats.OnPut(item, oldItem == null);
+                }
+
+                if (_logTrace)
+                {
+                    Logger.LogTrace(
+                        "Put [{0}:{1}] successfully to handle '{2}'.",
+                        item.Region,
+                        item.Key,
+                        handle.Configuration.Name);
+                }
+
+                await handle.PutAsync(item);
+            }
+
+            // update backplane
+            if (_cacheBackplane != null)
+            {
+                if (_logTrace)
+                {
+                    Logger.LogTrace("Put [{0}:{1}] was scuccessful. Notifying backplane [change].", item.Region, item.Key);
+                }
+
+                if (string.IsNullOrWhiteSpace(item.Region))
+                {
+                    _cacheBackplane.NotifyChange(item.Key, CacheItemChangedEventAction.Put);
+                }
+                else
+                {
+                    _cacheBackplane.NotifyChange(item.Key, item.Region, CacheItemChangedEventAction.Put);
+                }
+            }
+
+            TriggerOnPut(item.Key, item.Region);
         }
         
         /// <inheritdoc />

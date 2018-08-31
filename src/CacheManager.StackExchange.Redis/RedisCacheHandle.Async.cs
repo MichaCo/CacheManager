@@ -14,6 +14,72 @@ namespace CacheManager.Redis
     public partial class RedisCacheHandle<TCacheValue>
     {
         /// <summary>
+        /// Clears this cache, removing all items in the base cache and all regions.
+        /// </summary>
+        public override async ValueTask ClearAsync()
+        {
+            try
+            {
+                foreach (var server in Servers.Where(p => !p.IsSlave))
+                {
+                    await RetryAsync(async () =>
+                    {
+                        if (server.IsConnected)
+                        {
+                            await server.FlushDatabaseAsync(_redisConfiguration.Database);
+                        }
+                    });
+                }
+            }
+            catch (NotSupportedException ex)
+            {
+                throw new NotSupportedException($"Clear is not available because '{ex.Message}'", ex);
+            }
+        }
+
+        /// <summary>
+        /// Clears the cache region, removing all items from the specified <paramref name="region"/> only.
+        /// </summary>
+        /// <param name="region">The cache region.</param>
+        public override ValueTask ClearRegionAsync(string region)
+        {
+            return RetryAsync(async () =>
+            {
+                // we are storing all keys stored in the region in the hash for key=region
+                var hashKeys = await _connection.Database.HashKeysAsync(region);
+
+                if (hashKeys.Length > 0)
+                {
+                    // lets remove all keys which where in the region
+                    // 01/32/16 changed to remove one by one because on clusters the keys could belong to multiple slots
+                    foreach (var key in hashKeys.Where(p => p.HasValue))
+                    {
+                        await _connection.Database.KeyDeleteAsync(key.ToString(), CommandFlags.FireAndForget);
+                    }
+                }
+
+                // now delete the region
+                await _connection.Database.KeyDeleteAsync(region);
+            });
+        }
+        
+        /// <inheritdoc />
+        public override ValueTask<bool> ExistsAsync(string key)
+        {
+            var fullKey = GetKey(key);
+            return RetryAsync(async () => await _connection.Database.KeyExistsAsync(fullKey));
+        }
+
+        /// <inheritdoc />
+        public override ValueTask<bool> ExistsAsync(string key, string region)
+        {
+            NotNullOrWhiteSpace(region, nameof(region));
+
+            var fullKey = GetKey(key, region);
+            return RetryAsync(async () => await _connection.Database.KeyExistsAsync(fullKey));
+        }
+        
+        /// <summary>
         /// Adds a value to the cache.
         /// <para>
         /// Add call is synced, so might be slower than put which is fire and forget but we want to
@@ -27,7 +93,7 @@ namespace CacheManager.Redis
         /// </returns>
         protected override ValueTask<bool> AddInternalPreparedAsync(CacheItem<TCacheValue> item) =>
             RetryAsync(() => SetAsync(item, When.NotExists, true));
-
+        
         /// <summary>
         /// Gets a <c>CacheItem</c> for the specified key.
         /// </summary>
@@ -220,6 +286,15 @@ namespace CacheManager.Redis
 
 #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 #pragma warning restore SA1600
+
+        /// <inheritdoc />
+        protected override ValueTask PutInternalPreparedAsync(CacheItem<TCacheValue> item)
+        {
+            return RetryAsync(async () =>
+            {
+                await SetAsync(item, When.Always, false);
+            });
+        }
 
         /// <summary>
         /// Removes a value from the cache for the specified key.
