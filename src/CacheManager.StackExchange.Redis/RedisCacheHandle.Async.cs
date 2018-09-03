@@ -336,19 +336,12 @@ namespace CacheManager.Redis
         {
             if (!_scriptsLoaded)
             {
-                lock (_lockObject)
-                {
-                    if (!_scriptsLoaded)
-                    {
-                        LoadScriptsAsync();
-                        _scriptsLoaded = true;
-                    }
-                }
+                await LoadScriptsAsync();
+                _scriptsLoaded = true;
             }
 
             LoadedLuaScript script = null;
-            if (!_luaScripts.TryGetValue(scriptType, out LuaScript luaScript)
-                || (_canPreloadScripts && !_shaScripts.TryGetValue(scriptType, out script)))
+            if (_canPreloadScripts && !_shaScripts.TryGetValue(scriptType, out script))
             {
                 Logger.LogCritical("Something is wrong with the Lua scripts. Seem to be not loaded.");
                 _scriptsLoaded = false;
@@ -363,13 +356,13 @@ namespace CacheManager.Redis
                 }
                 else
                 {
-                    return await _connection.Database.ScriptEvaluateAsync(luaScript.ExecutableScript, new[] {redisKey}, values, flags);
+                    return await _connection.Database.ScriptEvaluateAsync(_luaScripts[scriptType].ExecutableScript, new[] {redisKey}, values, flags);
                 }
             }
             catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.OrdinalIgnoreCase))
             {
                 Logger.LogInfo("Received NOSCRIPT from server. Reloading scripts...");
-                LoadScriptsAsync();
+                await LoadScriptsAsync();
 
                 // retry
                 throw;
@@ -497,10 +490,7 @@ namespace CacheManager.Redis
                     // set the additional fields in case sliding expiration should be used in this
                     // case we have to store the expiration mode and timeout on the hash, too so
                     // that we can extend the expiration period every time we do a get
-                    if (metaValues != null)
-                    {
-                        await _connection.Database.HashSetAsync(fullKey, metaValues, flags);
-                    }
+                    await _connection.Database.HashSetAsync(fullKey, metaValues, flags);
 
                     if (item.ExpirationMode != ExpirationMode.None && item.ExpirationMode != ExpirationMode.Default)
                     {
@@ -516,44 +506,30 @@ namespace CacheManager.Redis
                 return setResult;
             });
         }
-        
-        // TODO: to async
-        private void LoadScriptsAsync()
+
+        private async ValueTask LoadScriptsAsync()
         {
-            lock (_lockObject)
+            Logger.LogInfo("Loading scripts.");
+
+            // servers feature might be disabled
+            if (_canPreloadScripts)
             {
-                Logger.LogInfo("Loading scripts.");
-
-                var putLua = LuaScript.Prepare(_scriptPut);
-                var addLua = LuaScript.Prepare(_scriptAdd);
-                var updateLua = LuaScript.Prepare(_scriptUpdate);
-                var getLua = LuaScript.Prepare(_scriptGet);
-                _luaScripts.Clear();
-                _luaScripts.Add(ScriptType.Add, addLua);
-                _luaScripts.Add(ScriptType.Put, putLua);
-                _luaScripts.Add(ScriptType.Update, updateLua);
-                _luaScripts.Add(ScriptType.Get, getLua);
-
-                // servers feature might be disabled
-                if (_canPreloadScripts)
+                try
                 {
-                    try
+                    foreach (var server in Servers)
                     {
-                        foreach (var server in Servers)
+                        if (server.IsConnected)
                         {
-                            if (server.IsConnected)
-                            {
-                                _shaScripts[ScriptType.Put] = putLua.Load(server);
-                                _shaScripts[ScriptType.Add] = addLua.Load(server);
-                                _shaScripts[ScriptType.Update] = updateLua.Load(server);
-                                _shaScripts[ScriptType.Get] = getLua.Load(server);
-                            }
+                            _shaScripts[ScriptType.Put] = await _luaScripts[ScriptType.Put].LoadAsync(server);
+                            _shaScripts[ScriptType.Add] = await _luaScripts[ScriptType.Add].LoadAsync(server);
+                            _shaScripts[ScriptType.Update] = await _luaScripts[ScriptType.Update].LoadAsync(server);
+                            _shaScripts[ScriptType.Get] = await _luaScripts[ScriptType.Get].LoadAsync(server);
                         }
                     }
-                    catch (NotSupportedException)
-                    {
-                        _canPreloadScripts = false;
-                    }
+                }
+                catch (NotSupportedException)
+                {
+                    _canPreloadScripts = false;
                 }
             }
         }
