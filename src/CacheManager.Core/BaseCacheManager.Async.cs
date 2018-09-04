@@ -186,7 +186,7 @@ namespace CacheManager.Core
                 var handle = _cacheHandles[handleIndex];
                 if (string.IsNullOrWhiteSpace(region))
                 {
-                    cacheItem = handle.GetCacheItem(key);
+                    cacheItem = await handle.GetCacheItemAsync(key);
                 }
                 else
                 {

@@ -148,7 +148,7 @@ namespace CacheManager.Redis
             if (!item.HasValue || !valueTypeItem.HasValue /* partially removed? */
                 || item.IsNullOrEmpty || item.IsNull)
             {
-                return null;
+                return Tuple.Create<CacheItem<TCacheValue>, int>(null, version);
             }
 
             var expirationMode = ExpirationMode.None;
@@ -188,7 +188,7 @@ namespace CacheManager.Redis
             {
                 TriggerCacheSpecificRemove(key, region, CacheItemRemovedReason.Expired, cacheItem.Value);
 
-                return null;
+                return Tuple.Create<CacheItem<TCacheValue>, int>(null, version);
             }
 
             return Tuple.Create(cacheItem, version);
