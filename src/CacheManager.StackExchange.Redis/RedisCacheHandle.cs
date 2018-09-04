@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,7 +16,7 @@ namespace CacheManager.Redis
     /// </summary>
     /// <typeparam name="TCacheValue">The type of the cache value.</typeparam>
     [RequiresSerializer]
-    public class RedisCacheHandle<TCacheValue> : BaseCacheHandle<TCacheValue>
+    public partial class RedisCacheHandle<TCacheValue> : BaseCacheHandle<TCacheValue>
     {
         private static readonly TimeSpan MinimumExpirationTimeout = TimeSpan.FromMilliseconds(1);
         private const string Base64Prefix = "base64\0";
@@ -72,8 +73,16 @@ if (result[2] and result[2] == '2') then
 end
 return result";
 
-        private readonly IDictionary<ScriptType, LoadedLuaScript> _shaScripts = new Dictionary<ScriptType, LoadedLuaScript>();
-        private readonly IDictionary<ScriptType, LuaScript> _luaScripts = new Dictionary<ScriptType, LuaScript>();
+        private readonly ConcurrentDictionary<ScriptType, LoadedLuaScript> _shaScripts = new ConcurrentDictionary<ScriptType, LoadedLuaScript>();
+
+        private readonly IDictionary<ScriptType, LuaScript> _luaScripts = new Dictionary<ScriptType, LuaScript>
+        {
+            {ScriptType.Add, LuaScript.Prepare(_scriptAdd)},
+            {ScriptType.Put, LuaScript.Prepare(_scriptPut)},
+            {ScriptType.Update, LuaScript.Prepare(_scriptUpdate)},
+            {ScriptType.Get, LuaScript.Prepare(_scriptGet)}
+        };
+
         private readonly ICacheManagerConfiguration _managerConfiguration;
         private readonly RedisValueConverter _valueConverter;
         private readonly RedisConnectionManager _connection;
@@ -82,7 +91,7 @@ return result";
         private RedisConfiguration _redisConfiguration = null;
 
         // flag if scripts are initially loaded to the server
-        private bool _scriptsLoaded = false;
+        private volatile bool _scriptsLoaded = false;
 
         private object _lockObject = new object();
 
@@ -985,8 +994,7 @@ return result";
             }
 
             LoadedLuaScript script = null;
-            if (!_luaScripts.TryGetValue(scriptType, out LuaScript luaScript)
-                || (_canPreloadScripts && !_shaScripts.TryGetValue(scriptType, out script)))
+            if (_canPreloadScripts && !_shaScripts.TryGetValue(scriptType, out script))
             {
                 Logger.LogCritical("Something is wrong with the Lua scripts. Seem to be not loaded.");
                 _scriptsLoaded = false;
@@ -1001,7 +1009,7 @@ return result";
                 }
                 else
                 {
-                    return _connection.Database.ScriptEvaluate(luaScript.ExecutableScript, new[] { redisKey }, values, flags);
+                    return _connection.Database.ScriptEvaluate(_luaScripts[scriptType].ExecutableScript, new[] { redisKey }, values, flags);
                 }
             }
             catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.OrdinalIgnoreCase))
@@ -1020,16 +1028,6 @@ return result";
             {
                 Logger.LogInfo("Loading scripts.");
 
-                var putLua = LuaScript.Prepare(_scriptPut);
-                var addLua = LuaScript.Prepare(_scriptAdd);
-                var updateLua = LuaScript.Prepare(_scriptUpdate);
-                var getLua = LuaScript.Prepare(_scriptGet);
-                _luaScripts.Clear();
-                _luaScripts.Add(ScriptType.Add, addLua);
-                _luaScripts.Add(ScriptType.Put, putLua);
-                _luaScripts.Add(ScriptType.Update, updateLua);
-                _luaScripts.Add(ScriptType.Get, getLua);
-
                 // servers feature might be disabled
                 if (_canPreloadScripts)
                 {
@@ -1039,10 +1037,10 @@ return result";
                         {
                             if (server.IsConnected)
                             {
-                                _shaScripts[ScriptType.Put] = putLua.Load(server);
-                                _shaScripts[ScriptType.Add] = addLua.Load(server);
-                                _shaScripts[ScriptType.Update] = updateLua.Load(server);
-                                _shaScripts[ScriptType.Get] = getLua.Load(server);
+                                _shaScripts[ScriptType.Put] = _luaScripts[ScriptType.Put].Load(server);
+                                _shaScripts[ScriptType.Add] = _luaScripts[ScriptType.Add].Load(server);
+                                _shaScripts[ScriptType.Update] = _luaScripts[ScriptType.Update].Load(server);
+                                _shaScripts[ScriptType.Get] = _luaScripts[ScriptType.Get].Load(server);
                             }
                         }
                     }

@@ -173,3 +173,6 @@ $RECYCLE.BIN/
 /.vs
 /Documentation/DocFxBin
 /Documentation/*.zip
+
+# JetBrains Rider
+.idea/
