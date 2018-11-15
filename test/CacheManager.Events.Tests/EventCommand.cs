@@ -7,7 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using CacheManager.Core;
 using CacheManager.Core.Internal;
-using Microsoft.Extensions.CommandLineUtils;
+using McMaster.Extensions.CommandLineUtils;
 using Microsoft.Extensions.Logging;
 
 namespace CacheManager.Events.Tests

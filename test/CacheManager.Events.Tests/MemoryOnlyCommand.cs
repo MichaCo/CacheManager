@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using CacheManager.Core;
 using CacheManager.Core.Internal;
-using Microsoft.Extensions.CommandLineUtils;
+using McMaster.Extensions.CommandLineUtils;
 using Microsoft.Extensions.Logging;
 
 namespace CacheManager.Events.Tests
@@ -90,12 +90,12 @@ namespace CacheManager.Events.Tests
                         cacheA.OnRemove += OnRemove;
                         cacheB.OnUpdate += OnUpdate;
                         cacheB.OnRemove += OnRemove;
-                        
+
                         if (!cacheA.Add(key, rndNumber) || !cacheB.Add(key, rndNumber))
                         {
                             throw new Exception("could not add key");
                         }
-                        
+
                         await Task.Delay(0);
 
                         didUpdate = true;
@@ -121,7 +121,7 @@ namespace CacheManager.Events.Tests
                         {
                             await Task.Delay(5);
                         }
-                        
+
                         if (cacheA[key] != null || cacheB[key] != null)
                         {
                             Console.WriteLine($"value still there");
