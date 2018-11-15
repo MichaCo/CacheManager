@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net46</TargetFramework>
+    <TargetFramework>net461</TargetFramework>
     <AssemblyName>CacheManager.Benchmarks</AssemblyName>
     <OutputType>Exe</OutputType>
     <PackageId>CacheManager.Benchmarks</PackageId>
@@ -18,13 +18,11 @@
     <ProjectReference Include="..\..\src\CacheManager.SystemRuntimeCaching\CacheManager.SystemRuntimeCaching.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="BenchmarkDotNet" Version="0.10.8" />
-    <PackageReference Include="System.Buffers" Version="4.3.0" />
-    <PackageReference Include="Microsoft.Extensions.ObjectPool" Version="1.1.0" />
+    <PackageReference Include="BenchmarkDotNet" Version="0.11.2" />
+    <PackageReference Include="System.Buffers" Version="4.5.0" />
+    <PackageReference Include="Microsoft.Extensions.ObjectPool" Version="2.1.6" />
   </ItemGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net46' ">
-  </ItemGroup>
 </Project>

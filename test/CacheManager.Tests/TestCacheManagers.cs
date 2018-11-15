@@ -21,27 +21,24 @@ namespace CacheManager.Tests
     {
         public IEnumerator<object[]> GetEnumerator()
         {
-#if !NETCOREAPP1
             yield return new object[] { TestManagers.WithOneMemoryCacheHandleSliding };
             yield return new object[] { TestManagers.WithOneMemoryCacheHandle };
             yield return new object[] { TestManagers.WithMemoryAndDictionaryHandles };
             yield return new object[] { TestManagers.WithTwoNamedMemoryCaches };
-#endif
 #if !MSBUILD
             yield return new object[] { TestManagers.WithOneMicrosoftMemoryCacheHandle };
 #endif
             yield return new object[] { TestManagers.WithManyDictionaryHandles };
             yield return new object[] { TestManagers.WithOneDicCacheHandle };
 #if REDISENABLED
-#if !NETCOREAPP1 && !NETCOREAPP2
+#if !NETCOREAPP2
             yield return new object[] { TestManagers.WithRedisCacheBinary };
 #endif
-#if !NETCOREAPP1
             yield return new object[] { TestManagers.WithRedisCacheDataContract };
             yield return new object[] { TestManagers.WithRedisCacheDataContractBinary };
             yield return new object[] { TestManagers.WithRedisCacheDataContractGzJson };
             yield return new object[] { TestManagers.WithRedisCacheDataContractJson };
-#endif
+
             yield return new object[] { TestManagers.WithRedisCacheJson };
             yield return new object[] { TestManagers.WithRedisCacheGzJson };
             yield return new object[] { TestManagers.WithRedisCacheProto };
@@ -52,7 +49,7 @@ namespace CacheManager.Tests
             yield return new object[] { TestManagers.WithDicAndRedisCacheNoLua };
 #endif
 #if MEMCACHEDENABLED
-#if !NETCOREAPP1 && !NETCOREAPP2
+#if !NETCOREAPP2
             yield return new object[] { TestManagers.WithMemcachedBinary };
 #endif
             yield return new object[] { TestManagers.WithMemcachedJson };
@@ -194,8 +191,6 @@ namespace CacheManager.Tests
             }
         }
 
-#if !NETCOREAPP1
-
         public static ICacheManager<object> WithRedisCacheDataContract
         {
             get
@@ -252,8 +247,6 @@ namespace CacheManager.Tests
             }
         }
 
-#endif
-
         public static ICacheManager<object> WithRedisCacheProto
         {
             get
@@ -303,8 +296,6 @@ namespace CacheManager.Tests
 
 #endif
 
-#if !NETCOREAPP1
-
         public static ICacheManager<object> WithOneMemoryCacheHandleSliding
             => CacheFactory.FromConfiguration<object>(
                 BaseConfiguration
@@ -344,7 +335,6 @@ namespace CacheManager.Tests
                             .EnableStatistics()
                 .Build());
 
-#endif
 #if MOCK_HTTPCONTEXT_ENABLED
 
         public static ICacheManager<object> WithSystemWebCache
@@ -644,7 +634,6 @@ namespace CacheManager.Tests
                     part.WithBondCompactBinarySerializer(2048);
                     break;
 
-#if !NETCOREAPP1
                 case Serializer.DataContract:
                     part.WithDataContractSerializer();
                     break;
@@ -661,7 +650,6 @@ namespace CacheManager.Tests
                     part.WithDataContractJsonSerializer();
                     break;
 
-#endif
                 default:
                     throw new InvalidOperationException("Unknown serializer");
             }

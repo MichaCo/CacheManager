@@ -9,19 +9,20 @@ namespace CacheManager.Logging
 {
 #pragma warning disable SA1600
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
+
     public class MicrosoftLoggerFactoryAdapter : Core.Logging.ILoggerFactory, IDisposable
     {
-        private readonly ILoggerFactory _parentFactory;
+        private readonly Lazy<ILoggerFactory> _parentFactory;
 
         public MicrosoftLoggerFactoryAdapter()
         {
-            _parentFactory = new LoggerFactory();
+            _parentFactory = new Lazy<ILoggerFactory>(() => new LoggerFactory());
         }
 
-        public MicrosoftLoggerFactoryAdapter(ILoggerFactory parentFactory)
+        public MicrosoftLoggerFactoryAdapter(Func<ILoggerFactory> parentFactoryFactory)
         {
-            Guard.NotNull(parentFactory, nameof(parentFactory));
-            _parentFactory = parentFactory;
+            Guard.NotNull(parentFactoryFactory, nameof(parentFactoryFactory));
+            _parentFactory = new Lazy<ILoggerFactory>(parentFactoryFactory);
         }
 
         ~MicrosoftLoggerFactoryAdapter()
@@ -32,12 +33,12 @@ namespace CacheManager.Logging
 
         public ILogger CreateLogger(string categoryName)
         {
-            return new MicrosoftLoggerAdapter(_parentFactory.CreateLogger(categoryName));
+            return new MicrosoftLoggerAdapter(_parentFactory.Value.CreateLogger(categoryName));
         }
 
         public ILogger CreateLogger<T>(T instance)
         {
-            return new MicrosoftLoggerAdapter(new Logger<T>(_parentFactory));
+            return new MicrosoftLoggerAdapter(new Logger<T>(_parentFactory.Value));
         }
 
         public void Dispose()
@@ -50,7 +51,10 @@ namespace CacheManager.Logging
         {
             if (disposing)
             {
-                _parentFactory.Dispose();
+                if (_parentFactory.IsValueCreated)
+                {
+                    _parentFactory.Value.Dispose();
+                }
             }
         }
     }
@@ -108,14 +112,19 @@ namespace CacheManager.Logging
             {
                 case LogLevel.Debug:
                     return Microsoft.Extensions.Logging.LogLevel.Debug;
+
                 case LogLevel.Trace:
                     return Microsoft.Extensions.Logging.LogLevel.Trace;
+
                 case LogLevel.Information:
                     return Microsoft.Extensions.Logging.LogLevel.Information;
+
                 case LogLevel.Warning:
                     return Microsoft.Extensions.Logging.LogLevel.Warning;
+
                 case LogLevel.Error:
                     return Microsoft.Extensions.Logging.LogLevel.Error;
+
                 case LogLevel.Critical:
                     return Microsoft.Extensions.Logging.LogLevel.Critical;
             }

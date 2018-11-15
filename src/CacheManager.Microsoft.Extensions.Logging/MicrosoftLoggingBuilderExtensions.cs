@@ -33,7 +33,7 @@ namespace CacheManager.Core
             NotNull(factory, nameof(factory));
             var externalFactory = new LoggerFactory();
             factory(externalFactory);
-            return part.WithLogging(typeof(MicrosoftLoggerFactoryAdapter), externalFactory);
+            return part.WithLogging(typeof(MicrosoftLoggerFactoryAdapter), new Func<ILoggerFactory>(() => externalFactory));
         }
 
         /// <summary>
@@ -46,7 +46,7 @@ namespace CacheManager.Core
         {
             NotNull(part, nameof(part));
             NotNull(loggerFactory, nameof(loggerFactory));
-            return part.WithLogging(typeof(MicrosoftLoggerFactoryAdapter), loggerFactory);
+            return part.WithLogging(typeof(MicrosoftLoggerFactoryAdapter), new Func<ILoggerFactory>(() => loggerFactory));
         }
 
         /// <summary>
@@ -61,18 +61,14 @@ namespace CacheManager.Core
             NotNull(part, nameof(part));
             NotNull(serviceCollection, nameof(serviceCollection));
 
-            var loggerFactory = GetLoggerFactory(serviceCollection);
-            EnsureNotNull(loggerFactory, "No instance of ILoggerFactory found in {0}.", nameof(serviceCollection));
-
-            return WithMicrosoftLogging(part, loggerFactory);
+            return part.WithLogging(typeof(MicrosoftLoggerFactoryAdapter), new Func<ILoggerFactory>(() => GetLoggerFactory(serviceCollection)));
         }
 
         private static ILoggerFactory GetLoggerFactory(IServiceCollection serviceCollection)
         {
-            var loggerFactoryDescriptor = serviceCollection.FirstOrDefault(p => p.ServiceType.Equals(typeof(ILoggerFactory)));
-
-            // relying on singleton here, which should be fine ~~ still hacked
-            return loggerFactoryDescriptor?.ImplementationInstance as ILoggerFactory;
+            var factory = serviceCollection.BuildServiceProvider().GetRequiredService<ILoggerFactory>();
+            EnsureNotNull(factory, "No instance of ILoggerFactory found in {0}.", nameof(serviceCollection));
+            return factory;
         }
     }
 }

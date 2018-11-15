@@ -1,5 +1,4 @@
-﻿#if !NETCOREAPP1
-using System;
+﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using CacheManager.Core;
@@ -716,6 +715,7 @@ namespace CacheManager.Tests
         }
 
 #if !NETCOREAPP2
+
         [Fact]
         [ReplaceCulture]
         public void CacheFactory_Build_WithSerializer_SimpleBinary()
@@ -728,7 +728,7 @@ namespace CacheManager.Tests
             cache.Configuration.SerializerType.Should().NotBeNull();
             cache.Configuration.SerializerType.Should().Be(typeof(BinaryCacheSerializer));
         }
+
 #endif
     }
 }
-#endif

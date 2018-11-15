@@ -20,9 +20,9 @@ Linux, Mono | -
 | [CacheManager.Core][Core.nuget] | 4.5 | 2.0
 | [CacheManager.StackExchange.Redis][Redis.nuget] | 4.6.1 | 2.0
 | [CacheManager.SystemRuntimeCaching][SystemRuntimeCaching.nuget]  | 4.5 | 2.0
-| [CacheManager.Microsoft.Extensions.Caching.Memory][MSCache.nuget]  |  | 2.0
-| [CacheManager.Microsoft.Extensions.Configuration][Configuration.nuget]  |  | 2.0
-| [CacheManager.Microsoft.Extensions.Logging][Logging.nuget]  |  | 2.0
+| [CacheManager.Microsoft.Extensions.Caching.Memory][MSCache.nuget]  | (4.6.1)  | 2.0
+| [CacheManager.Microsoft.Extensions.Configuration][Configuration.nuget]  | 4.6.1 | 2.0
+| [CacheManager.Microsoft.Extensions.Logging][Logging.nuget]  | (4.6.1) | 2.0
 | [CacheManager.Serialization.DataContract][DataContract.nuget] | 4.5 | 2.0
 | [CacheManager.Serialization.Bond][Bond.nuget] | 4.5 | 2.0
 | [CacheManager.Serialization.Json][Json.nuget] | 4.5 | 2.0
@@ -30,6 +30,10 @@ Linux, Mono | -
 | [CacheManager.Web][Web.nuget] | 4.5 | -
 | [CacheManager.Memcached][Memcached.nuget] | 4.5 | -
 | [CacheManager.Couchbase][Couchbase.nuget] | 4.5 | 2.0
+
+
+Supported framework targets changed since CacheManager 2.0. In case you have to target .NET 40 for example, you can still use CacheManager 1.x!
+
 
 ### Beta Packages
 Beta versions of the CacheManager packages are getting pushed to https://www.myget.org/gallery/cachemanager on each build. 

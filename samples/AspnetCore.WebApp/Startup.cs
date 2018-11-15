@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 namespace AspnetCore.WebApp
 {
     using Microsoft.Extensions.Configuration;
+    using Swashbuckle.AspNetCore.Swagger;
 
     public class Startup
     {
@@ -31,7 +32,18 @@ namespace AspnetCore.WebApp
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc();
-            services.AddSwaggerGen();
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1",
+                    new Info
+                    {
+                        Title = "My API - V1",
+                        Version = "v1"
+                    }
+                 );
+            });
+
+            services.AddLogging(c => c.AddConsole().AddDebug().AddConfiguration(Configuration));
 
             // using the new overload which adds a singleton of the configuration to services and the configure method to add logging
             // TODO: still not 100% happy with the logging part
@@ -85,7 +97,10 @@ namespace AspnetCore.WebApp
             app.UseMvc();
 
             app.UseSwagger();
-            app.UseSwaggerUi();
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+            });
         }
     }
 }

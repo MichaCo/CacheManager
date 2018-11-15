@@ -2096,10 +2096,7 @@ namespace CacheManager.Tests
             }).ToList();
         }
 
-#if !NETCOREAPP1
-
         [Serializable]
-#endif
         [ProtoBuf.ProtoContract]
         [Bond.Schema]
         public class ComplexType

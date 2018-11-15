@@ -29,7 +29,7 @@ namespace CacheManager.Tests
             OnClearRegion
         }
 
-#if NETCOREAPP1 ||NETCOREAPP2
+#if NETCOREAPP2
         [Fact]
         public void Redis_WithoutSerializer_ShouldThrow()
         {
@@ -678,7 +678,6 @@ namespace CacheManager.Tests
             act.Should().Throw<InvalidOperationException>().WithMessage("*endpoints*");
         }
 
-#if !NETCOREAPP1
 #if !NO_APP_CONFIG
 
         [Fact]
@@ -784,8 +783,6 @@ namespace CacheManager.Tests
                 TestManagers.CreateRedisCache(50, false, Serializer.Json),
                 TestManagers.CreateRedisAndDicCacheWithBackplane(50, true, channelName, Serializer.Json));
         }
-
-#endif
 
         [Fact(Skip = "needs clear")]
         [Trait("category", "Redis")]
@@ -1045,8 +1042,6 @@ namespace CacheManager.Tests
             act.Should().NotThrow();
         }
 
-#if !NETCOREAPP1
-
         [Fact]
         [Trait("category", "Redis")]
         public void Redis_Valid_CfgFile_LoadWithRedisBackplane()
@@ -1167,7 +1162,6 @@ namespace CacheManager.Tests
             redisConfig.ConnectionTimeout.Should().Be(11);
         }
 
-#endif
 #endif
 
         [Fact]
@@ -1471,10 +1465,7 @@ namespace CacheManager.Tests
         }
     }
 
-#if !NETCOREAPP1
-
     [Serializable]
-#endif
     [ExcludeFromCodeCoverage]
     [Bond.Schema]
     internal class Poco

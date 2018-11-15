@@ -2,26 +2,21 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.Runtime.Serialization.Json;
 using CacheManager.Core;
 using CacheManager.Core.Internal;
 using CacheManager.Core.Logging;
+using CacheManager.Serialization.Bond;
+using CacheManager.Serialization.DataContract;
 using CacheManager.Serialization.Json;
 using CacheManager.Serialization.ProtoBuf;
 using FluentAssertions;
 using Newtonsoft.Json;
 using ProtoBuf;
 using Xunit;
-using CacheManager.Serialization.Bond;
-using System.Runtime.Serialization.Json;
-using System.Runtime.Serialization;
-
-#if !NETCOREAPP1
-
-using System.Runtime.Serialization.Formatters;
-using System.Runtime.Serialization.Formatters.Binary;
-using CacheManager.Serialization.DataContract;
-
-#endif
 
 namespace CacheManager.Tests
 {
@@ -30,7 +25,7 @@ namespace CacheManager.Tests
     {
         #region binary serializer
 
-#if !NETCOREAPP1 && !NETCOREAPP2
+#if !NETCOREAPP2
 
         [Fact]
         public void BinarySerializer_RespectBinarySerializerSettings()
@@ -542,8 +537,6 @@ namespace CacheManager.Tests
         }
 
         #endregion newtonsoft json with GZ serializer
-
-#if !NETCOREAPP1
 
         #region data contract serializer common
 
@@ -1188,8 +1181,6 @@ namespace CacheManager.Tests
 
         #endregion data contract serializer gz json
 
-#endif
-
         #region protobuf serializer
 
         [Theory]
@@ -1656,10 +1647,7 @@ namespace CacheManager.Tests
             }
         }
 
-#if !NETCOREAPP1
-
         [Serializable]
-#endif
         [ProtoContract]
         [ProtoInclude(20, typeof(DerivedPocco))]
         [Bond.Schema]
@@ -1705,10 +1693,7 @@ namespace CacheManager.Tests
             }
         }
 
-#if !NETCOREAPP1
-
         [Serializable]
-#endif
         [ProtoContract]
         [Bond.Schema]
         private class ChildPocco
@@ -1718,10 +1703,7 @@ namespace CacheManager.Tests
             public string StringProperty { get; set; }
         }
 
-#if !NETCOREAPP1
-
         [Serializable]
-#endif
         [ProtoContract]
         [Bond.Schema]
         private class DerivedPocco : SerializerPoccoSerializable

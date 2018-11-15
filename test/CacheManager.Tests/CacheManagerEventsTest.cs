@@ -238,8 +238,6 @@
             }
         }
 
-#if !NETCOREAPP1
-
         // exclusive inner class for parallel exec of this long running test
         public class SystemRuntimeSpecific : LongRunningEventTestBase
         {
@@ -282,7 +280,6 @@
                 result.Region.Should().BeNull();
             }
         }
-#endif
 
         // exclusive inner class for parallel exec of this long running test
         public class DictionarySpecific : LongRunningEventTestBase

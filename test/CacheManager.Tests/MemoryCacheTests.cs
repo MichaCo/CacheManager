@@ -141,8 +141,6 @@ namespace CacheManager.Tests
 
         #endregion MS Memory Cache
 
-#if !NETCOREAPP1
-
         #region System Runtime Caching
 
         [Fact]
@@ -224,8 +222,6 @@ namespace CacheManager.Tests
 #endif
 
         #endregion System Runtime Caching
-
-#endif
 
         [Fact]
         public void Dictionary_ExpiredRacecondition()

@@ -201,8 +201,6 @@
             }
         }
 
-#if !NETCOREAPP1
-
         public class SysRuntime
         {
             [Fact]
@@ -239,8 +237,6 @@
                 }
             }
         }
-
-#endif
 
         public class Redis
         {
@@ -1047,8 +1043,6 @@
             act.Should().NotThrow();
         }
 
-#if !NETCOREAPP1
-
         [Fact]
         public void BaseCacheHandle_ExpirationInherits_Issue_1()
         {
@@ -1071,8 +1065,6 @@
                 handles[1].GetCacheItem(key).ExpirationTimeout.Should().Be(default(TimeSpan));
             }
         }
-
-#endif
 
         private static void ValidateExistsInAllHandles<T>(ICacheManager<T> cache, string key)
         {

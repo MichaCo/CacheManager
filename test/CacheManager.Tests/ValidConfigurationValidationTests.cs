@@ -1,5 +1,4 @@
-﻿#if !NETCOREAPP1
-using System;
+﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using CacheManager.Core;
@@ -189,4 +188,3 @@ namespace CacheManager.Tests
         }
     }
 }
-#endif

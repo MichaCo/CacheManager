@@ -37,24 +37,14 @@ namespace CacheManager.Tests
             this.originalCulture = CultureInfo.CurrentCulture;
             this.originalUICulture = CultureInfo.CurrentUICulture;
 
-#if !NETCOREAPP1
             Thread.CurrentThread.CurrentCulture = this.CurrentCulture;
             Thread.CurrentThread.CurrentUICulture = this.CurrentUICulture;
-#else
-            CultureInfo.CurrentCulture = this.CurrentCulture;
-            CultureInfo.CurrentUICulture = this.CurrentUICulture;
-#endif
         }
 
         public override void After(MethodInfo methodUnderTest)
         {
-#if !NETCOREAPP1
             Thread.CurrentThread.CurrentCulture = this.originalCulture;
             Thread.CurrentThread.CurrentUICulture = this.originalUICulture;
-#else
-            CultureInfo.CurrentCulture = originalCulture;
-            CultureInfo.CurrentUICulture = originalUICulture;
-#endif
         }
     }
 }

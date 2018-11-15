@@ -1,5 +1,4 @@
-﻿#if !NETCOREAPP1
-using System;
+﻿using System;
 using System.Configuration;
 using System.Diagnostics.CodeAnalysis;
 using CacheManager.Core;
@@ -59,6 +58,7 @@ namespace CacheManager.Tests
         }
 
 #if !NO_APP_CONFIG
+
         [Fact]
         [ReplaceCulture]
         [Trait("category", "NotOnMono")]
@@ -74,6 +74,7 @@ namespace CacheManager.Tests
             act.Should().Throw<InvalidOperationException>()
                 .WithMessage("No cache manager configuration found for name*");
         }
+
 #endif
 
         [Fact]
@@ -631,4 +632,3 @@ namespace CacheManager.Tests
         }
     }
 }
-#endif
