@@ -1,11 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Text;
-#if !NOUNSAFE
 using Bond.IO.Unsafe;
-#else
-using Bond.IO.Safe;
-#endif
 using CacheManager.Core.Internal;
 using CacheManager.Core.Utility;
 
@@ -35,7 +31,7 @@ namespace CacheManager.Serialization.Bond
             OutputBufferPool = new ObjectPool<OutputBuffer>(new OutputBufferPoolPolicy(defaultBufferSize));
             StringBuilderPool = new ObjectPool<StringBuilder>(new StringBuilderPoolPolicy(defaultBufferSize));
         }
-        
+
         /// <summary>
         /// Gets a pool handling <see cref="OutputBuffer"/>s.
         /// </summary>

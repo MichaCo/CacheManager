@@ -175,7 +175,6 @@ namespace CacheManager.Redis
                             }
                         }
 
-                        connection.PreserveAsyncOrder = false;
                         _connections.Add(_connectionString, connection);
                     }
                 }

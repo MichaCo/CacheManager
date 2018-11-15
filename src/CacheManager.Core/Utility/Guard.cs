@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
-#if !PORTABLE
 using System.Diagnostics;
-#endif
 
 namespace CacheManager.Core.Utility
 {
@@ -21,9 +19,7 @@ namespace CacheManager.Core.Utility
         /// <param name="parameterName">The parameter name.</param>
         /// <returns>The <paramref name="value"/>, if not <c>null</c>.</returns>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="value"/> is <c>null</c>.</exception>
-#if !PORTABLE
         [DebuggerStepThrough]
-#endif
         public static T NotNull<T>([ValidatedNotNull]T value, string parameterName)
         {
             if (value == null)
@@ -42,9 +38,7 @@ namespace CacheManager.Core.Utility
         /// <returns>The <paramref name="value"/>, if not null or empty.</returns>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="value"/> is <c>null</c>.</exception>
         /// <exception cref="ArgumentException">Thrown if <paramref name="value"/> is empty.</exception>
-#if !PORTABLE
         [DebuggerStepThrough]
-#endif
         public static string NotNullOrEmpty([ValidatedNotNull]string value, string name)
         {
             if (value == null)
@@ -69,9 +63,7 @@ namespace CacheManager.Core.Utility
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="value"/> is <c>null</c>.</exception>
         /// <exception cref="ArgumentException">Thrown if <paramref name="value"/> is empty.</exception>
         /// <typeparam name="T">Type of the collection.</typeparam>
-#if !PORTABLE
         [DebuggerStepThrough]
-#endif
         public static ICollection<T> NotNullOrEmpty<T>([ValidatedNotNull]ICollection<T> value, string name)
         {
             if (value == null)
@@ -96,9 +88,7 @@ namespace CacheManager.Core.Utility
         /// <returns>The <paramref name="value"/> if not null or empty.</returns>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="value"/> is <c>null</c>.</exception>
         /// <exception cref="ArgumentException">Thrown if <paramref name="value"/> is empty.</exception>
-#if !PORTABLE
         [DebuggerStepThrough]
-#endif
         public static string NotNullOrWhiteSpace([ValidatedNotNull]string value, string name)
         {
             NotNullOrEmpty(value, name);
@@ -119,9 +109,7 @@ namespace CacheManager.Core.Utility
         /// and <c>args</c> to create the exception message.</param>
         /// <returns><c>true</c> if the <paramref name="condition"/> is valid.</returns>
         /// <exception cref="InvalidOperationException">Thrown if <paramref name="condition"/> is false.</exception>
-#if !PORTABLE
         [DebuggerStepThrough]
-#endif
         public static bool Ensure(bool condition, string message, params object[] args)
         {
             if (!condition)
@@ -144,9 +132,7 @@ namespace CacheManager.Core.Utility
         /// and <c>args</c> to create the exception message.</param>
         /// <returns>The <paramref name="value"/> if not <c>null</c>.</returns>
         /// <exception cref="InvalidOperationException">Thrown if <paramref name="value"/> is <c>null</c>.</exception>
-#if !PORTABLE
         [DebuggerStepThrough]
-#endif
         public static T EnsureNotNull<T>([ValidatedNotNull]T value, string message, params object[] args)
             where T : class
         {

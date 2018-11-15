@@ -1,5 +1,4 @@
-﻿#if !NETSTANDARD1
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Configuration;
 
 namespace CacheManager.Redis
@@ -16,7 +15,7 @@ namespace CacheManager.Redis
     ///                    database="0"
     ///                    database="113"
     ///                    strictCompatibilityModeVersion="the redis version, e.g. 2.6, or leave null"
-    ///                    
+    ///
     ///                    { connectionString="redis0:6379,redis1:6380,keepAlive=180,allowAdmin=true" }
     ///                    OR
     ///                    {
@@ -406,4 +405,3 @@ namespace CacheManager.Redis
         }
     }
 }
-#endif

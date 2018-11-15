@@ -2,7 +2,7 @@
   <Import Project="..\..\tools\common.props" />
   <PropertyGroup>
     <Description>CacheManager extension package to work with Memcached as a distributed cache. CacheManager is an open source caching abstraction layer for .NET written in C#. It supports various cache providers and implements many advanced features. This package contains the specific Memcached handles.</Description>
-    <TargetFrameworks>net40;net45</TargetFrameworks>
+    <TargetFrameworks>net45</TargetFrameworks>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageTags>Caching;Cache;CacheManager;Distributed Cache;StackExchange Redis;Azure AppFabric;Memcached</PackageTags>
@@ -12,9 +12,6 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="EnyimMemcached" Version="2.16.0" />
-  </ItemGroup>
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net40' ">
-    <Reference Include="System.Configuration" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
     <Reference Include="System.Configuration" />

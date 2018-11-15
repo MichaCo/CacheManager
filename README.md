@@ -15,21 +15,21 @@ Linux, Mono | -
 
 ## CacheManager Nuget Packages
 
-| Package Name | .Net 4.0  | .Net 4.5  | .NET Standard
+| Package Name | FullFramework | .NET Standard
 |--------------| :-------: | :-------: | :-------: 
-| [CacheManager.Core][Core.nuget] | x | x | 1.2, 2.0
-| [CacheManager.StackExchange.Redis][Redis.nuget] | - | x | 1.5, 2.0
-| [CacheManager.SystemRuntimeCaching][SystemRuntimeCaching.nuget]  | x | x | 2.0
-| [CacheManager.Microsoft.Extensions.Caching.Memory][MSCache.nuget] | - | x | 1.3, 2.0
-| [CacheManager.Microsoft.Extensions.Configuration][Configuration.nuget] | - | x | 1.2, 2.0
-| [CacheManager.Microsoft.Extensions.Logging][Logging.nuget] | - | x | 1.2, 2.0
-| [CacheManager.Serialization.DataContract][DataContract.nuget] | x | x | 2.0
-| [CacheManager.Serialization.Bond][Bond.nuget] | x | x | 1.2, 2.0
-| [CacheManager.Serialization.Json][Json.nuget] | x | x | 1.2, 2.0
-| [CacheManager.Serialization.ProtoBuf][ProtoBuf.nuget] | x | x | 1.3, 2.0
-| [CacheManager.Web][Web.nuget]  | - | x | -
-| [CacheManager.Memcached][Memcached.nuget]  | x | x | -
-| [CacheManager.Couchbase][Couchbase.nuget]  | - | x | 1.5, 2.0
+| [CacheManager.Core][Core.nuget] | 4.5 | 2.0
+| [CacheManager.StackExchange.Redis][Redis.nuget] | 4.6.1 | 2.0
+| [CacheManager.SystemRuntimeCaching][SystemRuntimeCaching.nuget]  | 4.5 | 2.0
+| [CacheManager.Microsoft.Extensions.Caching.Memory][MSCache.nuget]  |  | 2.0
+| [CacheManager.Microsoft.Extensions.Configuration][Configuration.nuget]  |  | 2.0
+| [CacheManager.Microsoft.Extensions.Logging][Logging.nuget]  |  | 2.0
+| [CacheManager.Serialization.DataContract][DataContract.nuget] | 4.5 | 2.0
+| [CacheManager.Serialization.Bond][Bond.nuget] | 4.5 | 2.0
+| [CacheManager.Serialization.Json][Json.nuget] | 4.5 | 2.0
+| [CacheManager.Serialization.ProtoBuf][ProtoBuf.nuget] | 4.5 |2.0
+| [CacheManager.Web][Web.nuget] | 4.5 | -
+| [CacheManager.Memcached][Memcached.nuget] | 4.5 | -
+| [CacheManager.Couchbase][Couchbase.nuget] | 4.5 | 2.0
 
 ### Beta Packages
 Beta versions of the CacheManager packages are getting pushed to https://www.myget.org/gallery/cachemanager on each build. 
@@ -123,7 +123,7 @@ OnGet, OnAdd, OnPut, OnRemove, OnClear, OnClearRegion
 * **System.Web.OutputCache** implementation to use CacheManager as OutputCache provider which makes the OutputCache extremely flexible, for example by using a distributed cache like Redis across many web servers.
 * **Cache clients synchronization** 
     * Implemented with the Redis pub/sub feature
-* Supports .Net 4.0, .Net 4.5, and can be used in cross platform projects with the new **.NET Core** runtime
+* Supports .Net 4.5, and can be used in cross platform projects with the new **.NET Core** runtime
 
 [releases]: https://github.com/MichaCo/CacheManager/releases
 [Core.nuget]: https://www.nuget.org/packages/CacheManager.Core

@@ -43,9 +43,7 @@ namespace CacheManager.Core.Utility
         /// Computes a timestamp representing milliseconds since 1970.
         /// </summary>
         /// <returns>The milliseconds.</returns>
-#if !NET40
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
-#endif
         public static long GetUnixTimestampMillis()
         {
             return (DateTime.UtcNow.Ticks - UnixEpochTicks) / TicksPerMillisecond;
@@ -55,9 +53,7 @@ namespace CacheManager.Core.Utility
         /// Computes a timestamp representing ticks since 1970.
         /// </summary>
         /// <returns>The ticks.</returns>
-#if !NET40
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
-#endif
         public static long GetUnixTimestampTicks()
         {
             return DateTime.UtcNow.Ticks - UnixEpochTicks;
@@ -68,9 +64,7 @@ namespace CacheManager.Core.Utility
         /// </summary>
         /// <param name="date">The <see cref="DateTime"/> base.</param>
         /// <returns>The milliseconds since 1970.</returns>
-#if !NET40
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
-#endif
         public static long ToUnixTimestampMillis(DateTime date)
         {
             return (date.Ticks - UnixEpochTicks) / TicksPerMillisecond;

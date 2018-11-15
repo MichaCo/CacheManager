@@ -1,7 +1,5 @@
 ﻿namespace CacheManager.Core.Configuration
 {
-#if !NETSTANDARD1
-
     using System;
     using System.Collections.Generic;
     using System.ComponentModel;
@@ -523,6 +521,4 @@
         /// </returns>
         protected override object GetElementKey(ConfigurationElement element) => ((CacheManagerHandle)element).Name;
     }
-
-#endif
 }

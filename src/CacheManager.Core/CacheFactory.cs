@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Reflection;
-using CacheManager.Core.Configuration;
 using static CacheManager.Core.Utility.Guard;
 
 namespace CacheManager.Core
@@ -205,14 +204,9 @@ namespace CacheManager.Core
         public static object Build(Type cacheValueType, string cacheName, Action<ConfigurationBuilderCachePart> settings)
         {
             NotNull(cacheValueType, nameof(cacheValueType));
-#if !NET40
+
             var factoryType = typeof(CacheFactory).GetTypeInfo();
             var buildMethod = factoryType.GetDeclaredMethods("Build").First(p => p.IsGenericMethod);
-#else
-            var factoryType = typeof(CacheFactory);
-            var buildMethod = factoryType.GetMethods(BindingFlags.Static | BindingFlags.Public)
-                .First(p => p.Name == "Build" && p.IsGenericMethod);
-#endif
             var genericMethod = buildMethod.MakeGenericMethod(cacheValueType);
             return genericMethod.Invoke(null, new object[] { cacheName, settings });
         }
@@ -252,8 +246,6 @@ namespace CacheManager.Core
         /// </exception>
         public static object Build(Type cacheValueType, Action<ConfigurationBuilderCachePart> settings)
             => Build(cacheValueType, Guid.NewGuid().ToString("N"), settings);
-
-#if !NETSTANDARD1
 
         /// <summary>
         /// <para>Instantiates a cache manager from app.config or web.config.</para>
@@ -391,8 +383,6 @@ namespace CacheManager.Core
 
             return CacheFactory.FromConfiguration(cacheValueType, cacheName, cfg);
         }
-
-#endif
 
         /// <summary>
         /// <para>Instantiates a cache manager using the given <paramref name="configuration"/>.</para>

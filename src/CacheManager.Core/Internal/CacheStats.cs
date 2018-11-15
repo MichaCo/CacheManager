@@ -26,9 +26,7 @@ namespace CacheManager.Core.Internal
         private readonly ConcurrentDictionary<string, CacheStatsCounter> _counters;
         private readonly bool _isPerformanceCounterEnabled;
         private readonly bool _isStatsEnabled;
-#if !NETSTANDARD1 && !NETSTANDARD2
         private readonly CachePerformanceCounters<TCacheValue> _performanceCounters;
-#endif
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CacheStats{TCacheValue}"/> class.
@@ -55,12 +53,10 @@ namespace CacheManager.Core.Internal
             _isPerformanceCounterEnabled = enablePerformanceCounters;
             _counters = new ConcurrentDictionary<string, CacheStatsCounter>();
 
-#if !NETSTANDARD1 && !NETSTANDARD2
             if (_isPerformanceCounterEnabled)
             {
                 _performanceCounters = new CachePerformanceCounters<TCacheValue>(cacheName, handleName, this);
             }
-#endif
         }
 
         /// <summary>
@@ -373,12 +369,10 @@ namespace CacheManager.Core.Internal
         {
             if (disposeManaged)
             {
-#if !NETSTANDARD1 && !NETSTANDARD2
                 if (_isPerformanceCounterEnabled)
                 {
                     _performanceCounters.Dispose();
                 }
-#endif
             }
         }
 

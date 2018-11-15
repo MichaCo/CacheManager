@@ -3,11 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using Bond;
-#if !NOUNSAFE
 using Bond.IO.Unsafe;
-#else
-using Bond.IO.Safe;
-#endif
 using Bond.Protocols;
 using CacheManager.Core.Internal;
 

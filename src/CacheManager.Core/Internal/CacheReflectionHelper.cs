@@ -35,12 +35,13 @@ namespace CacheManager.Core.Internal
             NotNull(configuration, nameof(configuration));
             NotNull(loggerFactory, nameof(loggerFactory));
 
-#if !NETSTANDARD1 && !NETSTANDARD2
+#if !NETSTANDARD2
             if (configuration.SerializerType == null)
             {
                 return new BinaryCacheSerializer();
             }
 #endif
+
             if (configuration.SerializerType != null)
             {
                 CheckImplements<ICacheSerializer>(configuration.SerializerType);
@@ -101,11 +102,8 @@ namespace CacheManager.Core.Internal
                 logger.LogInfo("Creating handle {0} of type {1}.", handleConfiguration.Name, handleConfiguration.HandleType);
                 var handleType = handleConfiguration.HandleType;
                 var requiresSerializer = false;
-#if !NETSTANDARD1
-                requiresSerializer = handleType.GetCustomAttributes(typeof(RequiresSerializerAttribute), false).Any();
-#else
+
                 requiresSerializer = handleType.GetTypeInfo().CustomAttributes.Any(p => p.AttributeType == typeof(RequiresSerializerAttribute));
-#endif
 
                 if (requiresSerializer && serializer == null)
                 {
@@ -118,11 +116,9 @@ namespace CacheManager.Core.Internal
 
                 // if the configured type doesn't have a generic type definition ( <T> is not
                 // defined )
-#if NET40
-                if (handleType.IsGenericTypeDefinition)
-#else
+
                 if (handleType.GetTypeInfo().IsGenericTypeDefinition)
-#endif
+
                 {
                     instanceType = handleType.MakeGenericType(new Type[] { typeof(TCacheValue) });
                 }
@@ -171,11 +167,7 @@ namespace CacheManager.Core.Internal
 
         internal static object CreateInstance(Type instanceType, object[] knownInstances)
         {
-#if NET40
-            var constructors = instanceType.GetConstructors();
-#else
             var constructors = instanceType.GetTypeInfo().DeclaredConstructors;
-#endif
 
             constructors = constructors
                 .Where(p => !p.IsStatic && p.IsPublic)
@@ -229,15 +221,10 @@ namespace CacheManager.Core.Internal
 
                 foreach (var param in parameters)
                 {
-#if NET40
-                    var paramValue = instancesCopy
-                        .Where(p => p != null)
-                        .FirstOrDefault(p => param.ParameterType.IsAssignableFrom(p.GetType()));
-#else
                     var paramValue = instancesCopy
                         .Where(p => p != null)
                         .FirstOrDefault(p => param.ParameterType.GetTypeInfo().IsAssignableFrom(p.GetType().GetTypeInfo()));
-#endif
+
                     if (paramValue == null)
                     {
                         lastParamMiss = param;
@@ -276,26 +263,15 @@ namespace CacheManager.Core.Internal
 
         private static IEnumerable<Type> GetGenericBaseTypes(this Type type)
         {
-#if NET40
-            var baseType = type.BaseType;
-            if (baseType == null || !baseType.IsGenericType)
-#else
             var baseType = type.GetTypeInfo().BaseType;
             if (baseType == null || !baseType.GetTypeInfo().IsGenericType)
-#endif
             {
                 return Enumerable.Empty<Type>();
             }
 
-#if NET40
-            var genericBaseType = baseType.IsGenericTypeDefinition ? baseType : baseType.GetGenericTypeDefinition();
-            return Enumerable.Repeat(genericBaseType, 1)
-                .Concat(baseType.GetGenericBaseTypes());
-#else
             var genericBaseType = baseType.GetTypeInfo().IsGenericTypeDefinition ? baseType : baseType.GetGenericTypeDefinition();
             return Enumerable.Repeat(genericBaseType, 1)
                 .Concat(baseType.GetGenericBaseTypes());
-#endif
         }
 
         private static void ValidateCacheHandleGenericTypeArguments(Type handle)
@@ -310,12 +286,7 @@ namespace CacheManager.Core.Internal
                         handle.ToString()));
             }
 
-#if NETSTANDARD1
-            var handleInfo = handle.GetTypeInfo();
-            if (handleInfo.IsGenericType && !handleInfo.IsGenericTypeDefinition)
-#else
             if (handle.IsGenericType && !handle.IsGenericTypeDefinition)
-#endif
             {
                 throw new InvalidOperationException(
                     string.Format(
@@ -327,12 +298,8 @@ namespace CacheManager.Core.Internal
 
         private static void CheckImplements<TValid>(Type type)
         {
-#if NETSTANDARD1
-            var typeInfo = type.GetTypeInfo();
-            var interfaces = typeInfo.ImplementedInterfaces;
-#else
             var interfaces = type.GetInterfaces();
-#endif
+
             Ensure(
                 interfaces.Any(p => p == typeof(TValid)),
                 "Type must implement {0}, but {1} does not.",
@@ -342,11 +309,7 @@ namespace CacheManager.Core.Internal
 
         private static void CheckExtends<TValid>(Type type)
         {
-#if NETSTANDARD1
-            var baseType = type.GetTypeInfo().BaseType;
-#else
             var baseType = type.BaseType;
-#endif
 
             while (baseType != typeof(object))
             {
@@ -354,11 +317,8 @@ namespace CacheManager.Core.Internal
                 {
                     return;
                 }
-#if NETSTANDARD1
-                baseType = type.GetTypeInfo().BaseType;
-#else
+
                 baseType = type.BaseType;
-#endif
             }
 
             throw new InvalidOperationException(

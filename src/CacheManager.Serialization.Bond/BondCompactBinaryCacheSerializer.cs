@@ -1,11 +1,7 @@
 ﻿using System;
 using System.Linq;
 using Bond;
-#if !NOUNSAFE
 using Bond.IO.Unsafe;
-#else
-using Bond.IO.Safe;
-#endif
 using Bond.Protocols;
 using CacheManager.Core.Internal;
 

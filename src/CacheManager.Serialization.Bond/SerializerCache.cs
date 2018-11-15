@@ -2,11 +2,7 @@
 using System.Collections.Concurrent;
 using System.Linq;
 using Bond;
-#if !NOUNSAFE
 using Bond.IO.Unsafe;
-#else
-using Bond.IO.Safe;
-#endif
 
 namespace CacheManager.Serialization.Bond
 {

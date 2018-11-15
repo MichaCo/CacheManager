@@ -1,17 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using CacheManager.Core.Internal;
-
-#if !NETSTANDARD1
 using System.Configuration;
+using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text.RegularExpressions;
 using CacheManager.Core.Configuration;
-#endif
-
+using CacheManager.Core.Internal;
 using static CacheManager.Core.Utility.Guard;
 
 namespace CacheManager.Core
@@ -121,8 +117,6 @@ namespace CacheManager.Core
             part.Configuration.Name = name;
             return part.Configuration;
         }
-
-#if !NETSTANDARD1
 
         /// <summary>
         /// Loads a configuration from web.config or app.config.
@@ -397,8 +391,6 @@ namespace CacheManager.Core
             // last option would be seconds
             return TimeSpan.FromSeconds(timeoutValue);
         }
-
-#endif
     }
 
     /// <summary>
@@ -748,7 +740,7 @@ namespace CacheManager.Core
             return this;
         }
 
-#if !NETSTANDARD1 && !NETSTANDARD2
+#if !NETSTANDARD2
 
         /// <summary>
         /// Configures a <see cref="BinaryCacheSerializer"/> to be used for serialization and deserialization.

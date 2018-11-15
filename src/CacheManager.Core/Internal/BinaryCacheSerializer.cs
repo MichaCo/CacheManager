@@ -1,4 +1,4 @@
-﻿#if !NETSTANDARD1 && !NETSTANDARD2
+﻿#if !NETSTANDARD2
 using System;
 using System.IO;
 using System.Runtime.Serialization.Formatters;
