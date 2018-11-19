@@ -193,6 +193,10 @@ namespace CacheManager.Redis
                 Database = _configurationOptions.DefaultDatabase ?? Database;
 
                 _connectionString = _configurationOptions.ToString();
+                if (string.IsNullOrWhiteSpace(_connectionString))
+                {
+                    throw new ArgumentException("Provided redis connection string seems to be invalid.");
+                }
             }
         }
 
