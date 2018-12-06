@@ -44,7 +44,7 @@ namespace CacheManager.Benchmarks
             new BaseCacheManager<string>(BaseConfig.Builder
                 .WithMemcachedCacheHandle(new MemcachedClient(MemcachedConfig)).Build());
 
-        [Setup]
+        [GlobalSetup]
         public void Setup()
         {
             DictionaryCache.Clear();

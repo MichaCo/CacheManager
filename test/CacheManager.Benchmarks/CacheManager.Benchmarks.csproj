@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net46</TargetFramework>
+    <TargetFramework>net462</TargetFramework>
     <AssemblyName>CacheManager.Benchmarks</AssemblyName>
     <OutputType>Exe</OutputType>
     <PackageId>CacheManager.Benchmarks</PackageId>
@@ -19,12 +19,10 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="BenchmarkDotNet" Version="0.10.8" />
-    <PackageReference Include="System.Buffers" Version="4.3.0" />
+    <PackageReference Include="System.Buffers" Version="4.4.0" />
     <PackageReference Include="Microsoft.Extensions.ObjectPool" Version="1.1.0" />
   </ItemGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net46' ">
-  </ItemGroup>
 </Project>

@@ -3,10 +3,6 @@ using System.Linq;
 using System.Threading;
 using CacheManager.Core;
 using CacheManager.Redis;
-#if !NETCOREAPP
-using Enyim.Caching;
-using Enyim.Caching.Configuration;
-#endif
 using Microsoft.Extensions.Logging;
 
 namespace CacheManager.Config.Tests

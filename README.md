@@ -15,10 +15,12 @@ Linux, Mono | -
 
 ## CacheManager Nuget Packages
 
+> **Important:** The 1.2.x version of CacheManager does only upgrade the .NET Standard support and uses the latest StackExchange.Redis package which comes with some breaking changes (dropped .Signed package).
+
 | Package Name | .Net 4.0  | .Net 4.5  | .NET Standard
 |--------------| :-------: | :-------: | :-------: 
-| [CacheManager.Core][Core.nuget] | x | x | 1.2
-| [CacheManager.StackExchange.Redis][Redis.nuget] | - | x | 1.5
+| [CacheManager.Core][Core.nuget] | x | x | 1.2, 2.0
+| [CacheManager.StackExchange.Redis][Redis.nuget] | - | 4.6.1 | 2.0
 | [CacheManager.SystemRuntimeCaching][SystemRuntimeCaching.nuget]  | x | x | -
 | [CacheManager.Microsoft.Extensions.Caching.Memory][MSCache.nuget] | - | x | 1.3
 | [CacheManager.Microsoft.Extensions.Configuration][Configuration.nuget] | - | x | 1.2

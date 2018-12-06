@@ -31,7 +31,7 @@ namespace CacheManager.Benchmarks
         private BondSimpleJsonCacheSerializer _bondSimpleJson = new BondSimpleJsonCacheSerializer();
         private readonly Type _pocoType = typeof(TestPoco);
 
-        [Setup]
+        [GlobalSetup]
         public void Setup()
         {
             var rnd = new Random();

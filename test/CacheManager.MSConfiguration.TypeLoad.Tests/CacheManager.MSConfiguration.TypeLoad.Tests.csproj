@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Description>CacheManager.MSConfiguration.TypeLoad.Tests Class Library</Description>
     <Authors>Micha</Authors>
-    <TargetFrameworks>net452;netcoreapp1.0</TargetFrameworks>
+    <TargetFrameworks>net462;netcoreapp1.0</TargetFrameworks>
     <AssemblyName>CacheManager.MSConfiguration.TypeLoad.Tests</AssemblyName>
     <PackageId>CacheManager.MSConfiguration.TypeLoad.Tests</PackageId>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
@@ -27,7 +27,7 @@
     <PackageReference Include="FluentAssertions" Version="4.19.4" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net452' ">
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net462' ">
   </ItemGroup>
 
   <ItemGroup>

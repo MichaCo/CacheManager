@@ -2,11 +2,9 @@
 using System.Threading;
 using CacheManager.Core;
 using Microsoft.Extensions.Logging;
-#if NET451
-using Microsoft.Practices.Unity;
-#else
 using Unity;
-#endif
+using Unity.Injection;
+using Unity.Lifetime;
 
 namespace CacheManager.Examples
 {

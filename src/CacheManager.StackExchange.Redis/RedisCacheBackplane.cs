@@ -149,7 +149,7 @@ namespace CacheManager.Redis
 
         private void Publish(byte[] message)
         {
-            _connection.Subscriber.Publish(_channelName, message, CommandFlags.HighPriority);
+            _connection.Subscriber.Publish(_channelName, message, CommandFlags.None);
         }
 
         private void PublishMessage(BackplaneMessage message)

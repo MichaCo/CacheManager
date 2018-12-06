@@ -93,7 +93,7 @@ namespace CacheManager.Events.Tests
 
                         cacheA.TryUpdate(key, (oldVal) => oldVal + 1, out int? newValue);
 
-                        _multiplexer.GetDatabase(0).KeyDelete(key, CommandFlags.HighPriority);
+                        _multiplexer.GetDatabase(0).KeyDelete(key, CommandFlags.None);
 
                         await Task.Delay(0);
                     });
