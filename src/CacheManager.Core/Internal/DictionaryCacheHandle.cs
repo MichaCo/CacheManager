@@ -13,7 +13,7 @@ namespace CacheManager.Core.Internal
     /// <typeparam name="TCacheValue">The type of the cache value.</typeparam>
     public class DictionaryCacheHandle<TCacheValue> : BaseCacheHandle<TCacheValue>
     {
-        private const int ScanInterval = 5000;
+        private const int ScanInterval = 50000;
         private readonly static Random _random = new Random();
         private readonly ConcurrentDictionary<string, CacheItem<TCacheValue>> _cache;
         private readonly Timer _timer;

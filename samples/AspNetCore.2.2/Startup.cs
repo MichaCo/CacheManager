@@ -14,20 +14,15 @@ namespace AspnetCore.WebApp
 
     public class Startup
     {
-        public Startup(IHostingEnvironment env)
+        public Startup(IHostingEnvironment env, IConfiguration configuration)
         {
-            var builder = new ConfigurationBuilder()
-                .SetBasePath(env.ContentRootPath)
-                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
-                // adding cache.json which contains cachemanager configuration(s)
-                .AddJsonFile("cache.json", optional: false)
-                .AddEnvironmentVariables();
-
-            Configuration = builder.Build();
+            HostingEnvironment = env ?? throw new ArgumentNullException(nameof(env));
+            Configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
         }
 
-        public IConfigurationRoot Configuration { get; }
+        public IHostingEnvironment HostingEnvironment { get; }
+
+        public IConfiguration Configuration { get; }
 
         public void ConfigureServices(IServiceCollection services)
         {
@@ -42,8 +37,6 @@ namespace AspnetCore.WebApp
                     }
                  );
             });
-
-            services.AddLogging(c => c.AddConsole().AddDebug().AddConfiguration(Configuration));
 
             // using the new overload which adds a singleton of the configuration to services and the configure method to add logging
             // TODO: still not 100% happy with the logging part
@@ -61,9 +54,6 @@ namespace AspnetCore.WebApp
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
-            // add console logging with the configured log levels from appsettings.json
-            loggerFactory.AddConsole(Configuration.GetSection("Logging"));
-
             // give some error details in debug mode
             if (env.IsDevelopment())
             {
