@@ -194,13 +194,13 @@ namespace Microsoft.Extensions.Configuration
                 catch (FileNotFoundException ex)
                 {
                     throw new InvalidOperationException(
-                        "Redis types could not be loaded. Make sure that you have the CacheManager.Redis.Stackexchange package installed.",
+                        "Redis types could not be loaded. Make sure that you have the CacheManager.Stackexchange.Redis package installed.",
                         ex);
                 }
                 catch (TypeLoadException ex)
                 {
                     throw new InvalidOperationException(
-                        "Redis types could not be loaded. Make sure that you have the CacheManager.Redis.Stackexchange package installed.",
+                        "Redis types could not be loaded. Make sure that you have the CacheManager.Stackexchange.Redis package installed.",
                         ex);
                 }
             }
