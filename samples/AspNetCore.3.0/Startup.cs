@@ -10,40 +10,35 @@ using Microsoft.Extensions.Logging;
 namespace AspnetCore.WebApp
 {
     using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.Hosting;
     using Swashbuckle.AspNetCore.Swagger;
 
     public class Startup
     {
-        public Startup(IHostingEnvironment env)
+        public Startup(IWebHostEnvironment env, IConfiguration configuration)
         {
-            var builder = new ConfigurationBuilder()
-                .SetBasePath(env.ContentRootPath)
-                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
-                // adding cache.json which contains cachemanager configuration(s)
-                .AddJsonFile("cache.json", optional: false)
-                .AddEnvironmentVariables();
-
-            Configuration = builder.Build();
+            HostingEnvironment = env ?? throw new ArgumentNullException(nameof(env));
+            Configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
         }
 
-        public IConfigurationRoot Configuration { get; }
+        public IWebHostEnvironment HostingEnvironment { get; }
+
+        public IConfiguration Configuration { get; }
 
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc();
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1",
-                    new Info
+                    new Microsoft.OpenApi.Models.OpenApiInfo
                     {
                         Title = "My API - V1",
                         Version = "v1"
                     }
                  );
             });
-
-            services.AddLogging(c => c.AddConsole().AddDebug().AddConfiguration(Configuration));
 
             // using the new overload which adds a singleton of the configuration to services and the configure method to add logging
             // TODO: still not 100% happy with the logging part
@@ -59,13 +54,10 @@ namespace AspnetCore.WebApp
             services.AddCacheManager();
         }
 
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app)
         {
-            // add console logging with the configured log levels from appsettings.json
-            loggerFactory.AddConsole(Configuration.GetSection("Logging"));
-
             // give some error details in debug mode
-            if (env.IsDevelopment())
+            if (HostingEnvironment.IsDevelopment())
             {
                 app.Use(async (ctx, next) =>
                 {
@@ -93,8 +85,12 @@ namespace AspnetCore.WebApp
                 }
             });
 
-            //app.UseStaticFiles();
-            app.UseMvc();
+            app.UseStaticFiles();
+            app.UseRouting();
+            app.UseCors();
+            app.UseAuthentication();
+            app.UseAuthorization();
+            app.UseEndpoints(b => b.MapControllers());
 
             app.UseSwagger();
             app.UseSwaggerUI(c =>
