@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Extensions.Caching.Memory;
@@ -24,21 +25,19 @@ namespace CacheManager.MicrosoftCachingMemory
 
         internal static void RegisterChild(this MemoryCache cache, object parentKey, object childKey)
         {
-            object temp;
-            if (cache.TryGetValue(parentKey, out temp))
+            if (cache.TryGetValue(parentKey, out var keys))
             {
-                var set = (HashSet<object>)temp;
-                set.Add(childKey);
+                var keySet = (ConcurrentDictionary<object, bool>)keys;
+                keySet.TryAdd(childKey, true);
             }
         }
 
         internal static void RemoveChilds(this MemoryCache cache, object region)
         {
-            object keys;
-            if (cache.TryGetValue(region, out keys))
+            if (cache.TryGetValue(region, out var keys))
             {
-                var keySet = (HashSet<object>)keys;
-                foreach (var key in keySet)
+                var keySet = (ConcurrentDictionary<object, bool>)keys;
+                foreach (var key in keySet.Keys)
                 {
                     cache.Remove(key);
                 }
