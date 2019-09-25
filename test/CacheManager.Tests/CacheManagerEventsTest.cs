@@ -38,7 +38,7 @@
 
             // assert
             act.Should().Throw<ArgumentNullException>()
-                .WithMessage("*Parameter name: key*");
+                .And.ParamName.Equals("key");
         }
 
         [Fact]
@@ -69,7 +69,7 @@
 
             // assert
             act.Should().Throw<ArgumentNullException>()
-                .WithMessage("*Parameter name: key*");
+                .And.ParamName.Equals("key");
         }
 
         [Fact]
@@ -139,7 +139,7 @@
 
             // assert
             act.Should().Throw<ArgumentNullException>()
-                .WithMessage("*Parameter name: region*");
+                .And.ParamName.Equals("region");
         }
 
         [Fact]

@@ -85,7 +85,7 @@ namespace AspnetCore.WebApp
             {
                 if (ctx.Request.Path.StartsWithSegments("/"))
                 {
-                    ctx.Response.Redirect("/swagger/ui");
+                    ctx.Response.Redirect("/swagger/");
                 }
                 else
                 {

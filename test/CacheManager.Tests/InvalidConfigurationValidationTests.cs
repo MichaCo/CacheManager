@@ -24,7 +24,7 @@ namespace CacheManager.Tests
 
             // assert
             act.Should().Throw<ArgumentException>()
-                .WithMessage("*Parameter name: settings");
+                .And.ParamName.Equals("settings");
         }
 
         [Fact]
@@ -39,7 +39,7 @@ namespace CacheManager.Tests
 
             // assert
             act.Should().Throw<ArgumentException>()
-                .WithMessage("*Parameter name: configName");
+                .And.ParamName.Equals("configName");
         }
 
         [Fact]
@@ -54,7 +54,7 @@ namespace CacheManager.Tests
 
             // assert
             act.Should().Throw<ArgumentException>()
-                .WithMessage("*Parameter name: configName");
+                .And.ParamName.Equals("configName");
         }
 
 #if !NO_APP_CONFIG
@@ -86,7 +86,7 @@ namespace CacheManager.Tests
 
             // assert
             act.Should().Throw<ArgumentNullException>()
-                .WithMessage("*Parameter name: sectionName*");
+                .And.ParamName.Equals("sectionName");
         }
 
         [Fact]
@@ -98,7 +98,7 @@ namespace CacheManager.Tests
 
             // assert
             act.Should().Throw<ArgumentException>()
-                .WithMessage("*Parameter name: configName*");
+                .And.ParamName.Equals("configName");
         }
 
         [Fact]
@@ -125,7 +125,7 @@ namespace CacheManager.Tests
 
             // assert
             act.Should().Throw<ArgumentException>()
-                .WithMessage("*Parameter name: configFileName*");
+                .And.ParamName.Equals("configFileName");
         }
 
         [Fact]
@@ -137,7 +137,7 @@ namespace CacheManager.Tests
 
             // assert
             act.Should().Throw<ArgumentException>()
-                .WithMessage("*Parameter name: sectionName*");
+                .And.ParamName.Equals("sectionName");
         }
 
         [Fact]
@@ -149,7 +149,7 @@ namespace CacheManager.Tests
 
             // assert
             act.Should().Throw<ArgumentException>()
-                .WithMessage("*Parameter name: configName*");
+                .And.ParamName.Equals("configName");
         }
 
         [Fact]

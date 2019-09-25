@@ -724,7 +724,8 @@ namespace CacheManager.Tests
         {
             Action act = () => RedisConfigurations.LoadConfiguration((string)null);
 
-            act.Should().Throw<ArgumentNullException>().WithMessage("*sectionName*");
+            act.Should().Throw<ArgumentNullException>()
+                .And.ParamName.Equals("sectionName");
         }
 
         [Fact]
@@ -732,7 +733,8 @@ namespace CacheManager.Tests
         {
             Action act = () => RedisConfigurations.LoadConfiguration((string)null, "section");
 
-            act.Should().Throw<ArgumentNullException>().WithMessage("*fileName*");
+            act.Should().Throw<ArgumentNullException>()
+                .And.ParamName.Equals("fileName");
         }
 
         [Fact]
@@ -740,7 +742,8 @@ namespace CacheManager.Tests
         {
             Action act = () => RedisConfigurations.LoadConfiguration(Guid.NewGuid().ToString());
 
-            act.Should().Throw<ArgumentNullException>().WithMessage("*section*");
+            act.Should().Throw<ArgumentNullException>()
+                .And.ParamName.Equals("section");
         }
 
         [Fact]

@@ -215,7 +215,7 @@ namespace CacheManager.Tests
 
             var config = GetConfiguration(data);
             Action action = () => config.GetCacheConfiguration("name");
-            action.Should().Throw<InvalidOperationException>().WithMessage("*Failed to convert 'invalid'*");
+            action.Should().Throw<InvalidOperationException>().WithMessage("*Failed to convert*");
         }
 
         [Fact]
@@ -229,7 +229,7 @@ namespace CacheManager.Tests
 
             var config = GetConfiguration(data);
             Action action = () => config.GetCacheConfiguration("name");
-            action.Should().Throw<InvalidOperationException>().WithMessage("*Failed to convert 'invalid'*");
+            action.Should().Throw<InvalidOperationException>().WithMessage("*Failed to convert*");
         }
 
         [Fact]
@@ -243,7 +243,7 @@ namespace CacheManager.Tests
 
             var config = GetConfiguration(data);
             Action action = () => config.GetCacheConfiguration("name");
-            action.Should().Throw<InvalidOperationException>().WithMessage("*Failed to convert 'invalid'*");
+            action.Should().Throw<InvalidOperationException>().WithMessage("*Failed to convert*");
         }
 
         [Fact]
@@ -604,7 +604,7 @@ namespace CacheManager.Tests
             };
 
             Action act = () => GetConfiguration(data).GetCacheConfiguration("cacheName");
-            act.Should().Throw<InvalidOperationException>().WithMessage("*Failed to convert 'invalid'*");
+            act.Should().Throw<InvalidOperationException>().WithMessage("*Failed to convert*");
         }
 
         [Fact]
@@ -619,7 +619,7 @@ namespace CacheManager.Tests
             };
 
             Action act = () => GetConfiguration(data).GetCacheConfiguration("cacheName");
-            act.Should().Throw<InvalidOperationException>().WithMessage("*Failed to convert 'invalid'*");
+            act.Should().Throw<InvalidOperationException>().WithMessage("*Failed to convert*");
         }
 
         [Fact]
@@ -634,7 +634,7 @@ namespace CacheManager.Tests
             };
 
             Action act = () => GetConfiguration(data).GetCacheConfiguration("cacheName");
-            act.Should().Throw<InvalidOperationException>().WithMessage("*Failed to convert 'invalid'*");
+            act.Should().Throw<InvalidOperationException>().WithMessage("*Failed to convert*");
         }
 
         [Fact]
@@ -649,7 +649,7 @@ namespace CacheManager.Tests
             };
 
             Action act = () => GetConfiguration(data).GetCacheConfiguration("cacheName");
-            act.Should().Throw<InvalidOperationException>().WithMessage("*Failed to convert 'invalid'*");
+            act.Should().Throw<InvalidOperationException>().WithMessage("*Failed to convert*");
         }
 
         [Fact]
@@ -664,7 +664,7 @@ namespace CacheManager.Tests
             };
 
             Action act = () => GetConfiguration(data).GetCacheConfiguration("cacheName");
-            act.Should().Throw<InvalidOperationException>().WithMessage("*Failed to convert 'invalid'*");
+            act.Should().Throw<InvalidOperationException>().WithMessage("*Failed to convert*");
         }
 
         [Fact]
@@ -1168,7 +1168,7 @@ namespace CacheManager.Tests
             };
 
             Action act = () => GetConfiguration(data).LoadRedisConfigurations();
-            act.Should().Throw<InvalidOperationException>().WithMessage("*Failed to convert 'invalid'*");
+            act.Should().Throw<InvalidOperationException>().WithMessage("*Failed to convert*");
         }
 
         [Fact]
@@ -1183,7 +1183,7 @@ namespace CacheManager.Tests
             };
 
             Action act = () => GetConfiguration(data).LoadRedisConfigurations();
-            act.Should().Throw<InvalidOperationException>().WithMessage("*Failed to convert 'invalid'*");
+            act.Should().Throw<InvalidOperationException>().WithMessage("*Failed to convert*");
         }
 
         [Fact]
@@ -1198,7 +1198,7 @@ namespace CacheManager.Tests
             };
 
             Action act = () => GetConfiguration(data).LoadRedisConfigurations();
-            act.Should().Throw<InvalidOperationException>().WithMessage("*Failed to convert 'invalid'*");
+            act.Should().Throw<InvalidOperationException>().WithMessage("*Failed to convert*");
         }
 
         [Fact]
@@ -1213,7 +1213,7 @@ namespace CacheManager.Tests
             };
 
             Action act = () => GetConfiguration(data).LoadRedisConfigurations();
-            act.Should().Throw<InvalidOperationException>().WithMessage("*Failed to convert 'invalid'*");
+            act.Should().Throw<InvalidOperationException>().WithMessage("*Failed to convert*");
         }
 
         [Fact]

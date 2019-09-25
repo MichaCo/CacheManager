@@ -43,7 +43,7 @@ namespace CacheManager.Tests
         {
             Action act = () => new BaseCacheManager<object>(null);
             act.Should().Throw<ArgumentException>()
-                    .WithMessage("*Parameter name: configuration");
+                .And.ParamName.Equals("configuration");
         }
 
         [Fact]
@@ -84,13 +84,13 @@ namespace CacheManager.Tests
 
                 // assert
                 act.Should().Throw<ArgumentException>(cache.Configuration.ToString())
-                    .WithMessage("*Parameter name: key", cache.Configuration.ToString());
+                    .And.ParamName.Equals("key");
 
                 actB.Should().Throw<ArgumentException>(cache.ToString())
-                    .WithMessage("*Parameter name: key", cache.Configuration.ToString());
+                    .And.ParamName.Equals("key");
 
                 actR.Should().Throw<ArgumentException>(cache.ToString())
-                    .WithMessage("*Parameter name: region", cache.Configuration.ToString());
+                    .And.ParamName.Equals("region");
             }
         }
 
@@ -183,10 +183,10 @@ namespace CacheManager.Tests
 
                 // assert
                 act.Should().Throw<ArgumentException>()
-                    .WithMessage("*Parameter name: key");
+                    .And.ParamName.Equals("key");
 
                 actR.Should().Throw<ArgumentException>()
-                    .WithMessage("*Parameter name: key");
+                    .And.ParamName.Equals("key");
             }
         }
 
@@ -205,10 +205,10 @@ namespace CacheManager.Tests
 
                 // assert
                 act.Should().Throw<ArgumentException>()
-                    .WithMessage("*Parameter name: value");
+                    .And.ParamName.Equals("value");
 
                 actR.Should().Throw<ArgumentException>()
-                    .WithMessage("*Parameter name: value");
+                    .And.ParamName.Equals("value");
             }
         }
 
@@ -226,7 +226,7 @@ namespace CacheManager.Tests
 
                 // assert
                 act.Should().Throw<ArgumentNullException>()
-                    .WithMessage("*Parameter name: item");
+                    .And.ParamName.Equals("item");
             }
         }
 
@@ -244,7 +244,7 @@ namespace CacheManager.Tests
 
                 // assert
                 act.Should().Throw<ArgumentNullException>()
-                    .WithMessage("*Parameter name: region");
+                    .And.ParamName.Equals("region");
             }
         }
 
@@ -331,28 +331,28 @@ namespace CacheManager.Tests
 
                 // assert
                 act.Should().Throw<ArgumentException>()
-                    .WithMessage("*Parameter name: key*");
+                    .And.ParamName.Equals("key");
 
                 actR.Should().Throw<ArgumentException>()
-                    .WithMessage("*Parameter name: key*");
+                    .And.ParamName.Equals("key");
 
                 actU.Should().Throw<ArgumentException>()
-                    .WithMessage("*Parameter name: key*");
+                    .And.ParamName.Equals("key");
 
                 actRU.Should().Throw<ArgumentException>()
-                    .WithMessage("*Parameter name: key*");
+                    .And.ParamName.Equals("key");
 
                 actT.Should().Throw<ArgumentException>()
-                    .WithMessage("*Parameter name: key*");
+                    .And.ParamName.Equals("key");
 
                 actTR.Should().Throw<ArgumentException>()
-                    .WithMessage("*Parameter name: key*");
+                    .And.ParamName.Equals("key");
 
                 actTU.Should().Throw<ArgumentException>()
-                    .WithMessage("*Parameter name: key*");
+                    .And.ParamName.Equals("key");
 
                 actTRU.Should().Throw<ArgumentException>()
-                    .WithMessage("*Parameter name: key*");
+                    .And.ParamName.Equals("key");
             }
         }
 
@@ -379,28 +379,28 @@ namespace CacheManager.Tests
 
                 // assert
                 act.Should().Throw<ArgumentException>()
-                    .WithMessage("*Parameter name: updateValue*");
+                    .And.ParamName.Equals("updateValue");
 
                 actR.Should().Throw<ArgumentException>()
-                    .WithMessage("*Parameter name: updateValue*");
+                    .And.ParamName.Equals("updateValue");
 
                 actU.Should().Throw<ArgumentException>()
-                    .WithMessage("*Parameter name: updateValue*");
+                    .And.ParamName.Equals("updateValue");
 
                 actRU.Should().Throw<ArgumentException>()
-                    .WithMessage("*Parameter name: updateValue*");
+                    .And.ParamName.Equals("updateValue");
 
                 actT.Should().Throw<ArgumentException>()
-                    .WithMessage("*Parameter name: updateValue*");
+                    .And.ParamName.Equals("updateValue");
 
                 actTR.Should().Throw<ArgumentException>()
-                    .WithMessage("*Parameter name: updateValue*");
+                    .And.ParamName.Equals("updateValue");
 
                 actTU.Should().Throw<ArgumentException>()
-                    .WithMessage("*Parameter name: updateValue*");
+                    .And.ParamName.Equals("updateValue");
 
                 actTRU.Should().Throw<ArgumentException>()
-                    .WithMessage("*Parameter name: updateValue*");
+                    .And.ParamName.Equals("updateValue");
             }
         }
 
@@ -423,16 +423,16 @@ namespace CacheManager.Tests
 
                 // assert
                 actR.Should().Throw<ArgumentException>()
-                    .WithMessage("*Parameter name: region*");
+                    .And.ParamName.Equals("region");
 
                 actRU.Should().Throw<ArgumentException>()
-                    .WithMessage("*Parameter name: region*");
+                    .And.ParamName.Equals("region");
 
                 actTR.Should().Throw<ArgumentException>()
-                    .WithMessage("*Parameter name: region*");
+                    .And.ParamName.Equals("region");
 
                 actTRU.Should().Throw<ArgumentException>()
-                    .WithMessage("*Parameter name: region*");
+                    .And.ParamName.Equals("region");
             }
         }
 
@@ -588,16 +588,16 @@ namespace CacheManager.Tests
 
                 // assert
                 act.Should().Throw<ArgumentException>()
-                    .WithMessage("*Parameter name: key*");
+                    .And.ParamName.Equals("key");
 
                 actR.Should().Throw<ArgumentException>()
-                    .WithMessage("*Parameter name: key*");
+                    .And.ParamName.Equals("key");
 
                 actU.Should().Throw<ArgumentException>()
-                    .WithMessage("*Parameter name: key*");
+                    .And.ParamName.Equals("key");
 
                 actRU.Should().Throw<ArgumentException>()
-                    .WithMessage("*Parameter name: key*");
+                    .And.ParamName.Equals("key");
             }
         }
 
@@ -620,16 +620,16 @@ namespace CacheManager.Tests
 
                 // assert
                 act.Should().Throw<ArgumentException>()
-                    .WithMessage("*Parameter name: updateValue*");
+                    .And.ParamName.Equals("updateValue");
 
                 actR.Should().Throw<ArgumentException>()
-                    .WithMessage("*Parameter name: updateValue*");
+                    .And.ParamName.Equals("updateValue");
 
                 actU.Should().Throw<ArgumentException>()
-                    .WithMessage("*Parameter name: updateValue*");
+                    .And.ParamName.Equals("updateValue");
 
                 actRU.Should().Throw<ArgumentException>()
-                    .WithMessage("*Parameter name: updateValue*");
+                    .And.ParamName.Equals("updateValue");
             }
         }
 
@@ -648,10 +648,10 @@ namespace CacheManager.Tests
 
                 // assert
                 actR.Should().Throw<ArgumentException>()
-                    .WithMessage("*Parameter name: region*");
+                    .And.ParamName.Equals("region");
 
                 actRU.Should().Throw<ArgumentException>()
-                    .WithMessage("*Parameter name: region*");
+                    .And.ParamName.Equals("region");
             }
         }
 
@@ -751,22 +751,22 @@ namespace CacheManager.Tests
 
                 // assert
                 actA.Should().Throw<ArgumentException>()
-                    .WithMessage("*key*");
+                    .And.ParamName.Equals("key");
 
                 actB.Should().Throw<ArgumentException>()
-                    .WithMessage("*key*");
+                    .And.ParamName.Equals("key");
 
                 actC.Should().Throw<ArgumentException>()
-                    .WithMessage("*key*");
+                    .And.ParamName.Equals("key");
 
                 actD.Should().Throw<ArgumentException>()
-                    .WithMessage("*key*");
+                    .And.ParamName.Equals("key");
 
                 actE.Should().Throw<ArgumentException>()
-                    .WithMessage("*key*");
+                    .And.ParamName.Equals("key");
 
                 actF.Should().Throw<ArgumentException>()
-                    .WithMessage("*key*");
+                    .And.ParamName.Equals("key");
             }
         }
 
@@ -788,16 +788,16 @@ namespace CacheManager.Tests
 
                 // assert
                 actC.Should().Throw<ArgumentException>()
-                    .WithMessage("*key*");
+                    .And.ParamName.Equals("key");
 
                 actD.Should().Throw<ArgumentException>()
-                    .WithMessage("*key*");
+                    .And.ParamName.Equals("key");
 
                 actE.Should().Throw<ArgumentException>()
-                    .WithMessage("*key*");
+                    .And.ParamName.Equals("key");
 
                 actF.Should().Throw<ArgumentException>()
-                    .WithMessage("*key*");
+                    .And.ParamName.Equals("key");
             }
         }
 
@@ -816,10 +816,10 @@ namespace CacheManager.Tests
 
                 // assert
                 actA.Should().Throw<ArgumentException>()
-                    .WithMessage("*region*");
+                    .And.ParamName.Equals("region");
 
                 actB.Should().Throw<ArgumentException>()
-                    .WithMessage("*region*");
+                    .And.ParamName.Equals("region");
             }
         }
 
@@ -838,7 +838,7 @@ namespace CacheManager.Tests
 
                 // assert
                 actB.Should().Throw<ArgumentException>()
-                    .WithMessage("*region*");
+                    .And.ParamName.Equals("region");
             }
         }
 
@@ -857,10 +857,10 @@ namespace CacheManager.Tests
 
                 // assert
                 actA.Should().Throw<ArgumentException>()
-                    .WithMessage("*valueFactory*");
+                    .And.ParamName.Equals("valueFactory");
 
                 actB.Should().Throw<ArgumentException>()
-                    .WithMessage("*valueFactory*");
+                    .And.ParamName.Equals("valueFactory");
             }
         }
 
@@ -880,10 +880,10 @@ namespace CacheManager.Tests
 
                 // assert
                 actA.Should().Throw<ArgumentException>()
-                    .WithMessage("*valueFactory*");
+                    .And.ParamName.Equals("valueFactory");
 
                 actB.Should().Throw<ArgumentException>()
-                    .WithMessage("*valueFactory*");
+                    .And.ParamName.Equals("valueFactory");
             }
         }
 
@@ -1227,10 +1227,10 @@ namespace CacheManager.Tests
 
                 // assert
                 act.Should().Throw<ArgumentException>()
-                    .WithMessage("*Parameter name: key");
+                    .And.ParamName.Equals("key");
 
                 actR.Should().Throw<ArgumentException>()
-                    .WithMessage("*Parameter name: key");
+                    .And.ParamName.Equals("key");
             }
         }
 
@@ -1251,10 +1251,10 @@ namespace CacheManager.Tests
 
                 // assert
                 act.Should().Throw<ArgumentException>()
-                    .WithMessage("*Parameter name: value");
+                    .And.ParamName.Equals("value");
 
                 actR.Should().Throw<ArgumentException>()
-                    .WithMessage("*Parameter name: value");
+                    .And.ParamName.Equals("value");
             }
         }
 
@@ -1274,7 +1274,7 @@ namespace CacheManager.Tests
 
                 // assert
                 actR.Should().Throw<ArgumentException>()
-                    .WithMessage("*Parameter name: region");
+                    .And.ParamName.Equals("region");
             }
         }
 
@@ -1293,7 +1293,7 @@ namespace CacheManager.Tests
 
                 // assert
                 act.Should().Throw<ArgumentNullException>()
-                    .WithMessage("*Parameter name: item");
+                    .And.ParamName.Equals("item");
             }
         }
 
@@ -1366,10 +1366,10 @@ namespace CacheManager.Tests
 
                 // assert
                 act.Should().Throw<ArgumentNullException>()
-                    .WithMessage("*Parameter name: key");
+                    .And.ParamName.Equals("key");
 
                 actR.Should().Throw<ArgumentNullException>()
-                    .WithMessage("*Parameter name: key");
+                    .And.ParamName.Equals("key");
             }
         }
 
@@ -1388,7 +1388,7 @@ namespace CacheManager.Tests
 
                 // assert
                 act.Should().Throw<ArgumentNullException>()
-                    .WithMessage("*Parameter name: region");
+                    .And.ParamName.Equals("region");
             }
         }
 
@@ -1408,10 +1408,10 @@ namespace CacheManager.Tests
 
                 // assert
                 act.Should().Throw<ArgumentNullException>()
-                    .WithMessage("*Parameter name: key");
+                    .And.ParamName.Equals("key");
 
                 actR.Should().Throw<ArgumentNullException>()
-                    .WithMessage("*Parameter name: key");
+                    .And.ParamName.Equals("key");
             }
         }
 
@@ -1430,7 +1430,7 @@ namespace CacheManager.Tests
 
                 // assert
                 act.Should().Throw<ArgumentNullException>()
-                    .WithMessage("*Parameter name: region");
+                    .And.ParamName.Equals("region");
             }
         }
 
@@ -1450,10 +1450,10 @@ namespace CacheManager.Tests
 
                 // assert
                 act.Should().Throw<ArgumentNullException>()
-                    .WithMessage("*Parameter name: key");
+                    .And.ParamName.Equals("key");
 
                 actR.Should().Throw<ArgumentNullException>()
-                    .WithMessage("*Parameter name: key");
+                    .And.ParamName.Equals("key");
             }
         }
 
@@ -1472,7 +1472,7 @@ namespace CacheManager.Tests
 
                 // assert
                 act.Should().Throw<ArgumentNullException>()
-                    .WithMessage("*Parameter name: region");
+                    .And.ParamName.Equals("region");
             }
         }
 
@@ -1566,10 +1566,10 @@ namespace CacheManager.Tests
 
                 // assert
                 act.Should().Throw<ArgumentException>()
-                    .WithMessage("*Parameter name: key");
+                    .And.ParamName.Equals("key");
 
                 actR.Should().Throw<ArgumentException>()
-                    .WithMessage("*Parameter name: key");
+                    .And.ParamName.Equals("key");
             }
         }
 
@@ -1588,7 +1588,7 @@ namespace CacheManager.Tests
 
                 // assert
                 act.Should().Throw<ArgumentException>()
-                    .WithMessage("*Parameter name: region");
+                    .And.ParamName.Equals("region");
             }
         }
 
@@ -1609,7 +1609,7 @@ namespace CacheManager.Tests
 
                 // assert
                 act.Should().Throw<ArgumentException>()
-                    .WithMessage("*Parameter name: key");
+                    .And.ParamName.Equals("key");
             }
         }
 
@@ -1630,7 +1630,7 @@ namespace CacheManager.Tests
 
                 // assert
                 act.Should().Throw<ArgumentException>()
-                    .WithMessage("*Parameter name: key");
+                    .And.ParamName.Equals("key");
             }
         }
 
@@ -1702,10 +1702,10 @@ namespace CacheManager.Tests
 
                 // assert
                 act.Should().Throw<ArgumentNullException>()
-                    .WithMessage("*Parameter name: key");
+                    .And.ParamName.Equals("key");
 
                 actR.Should().Throw<ArgumentNullException>()
-                    .WithMessage("*Parameter name: key");
+                    .And.ParamName.Equals("key");
             }
         }
 
@@ -1725,7 +1725,7 @@ namespace CacheManager.Tests
 
                 // assert
                 act.Should().Throw<ArgumentException>()
-                    .WithMessage("*Parameter name: region");
+                    .And.ParamName.Equals("region");
             }
         }
 

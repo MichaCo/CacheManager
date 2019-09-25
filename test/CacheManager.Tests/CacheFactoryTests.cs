@@ -29,7 +29,8 @@ namespace CacheManager.Tests
         {
             Action act = () => new ConfigurationBuilder((string)null);
 
-            act.Should().Throw<ArgumentNullException>().WithMessage("*name*");
+            act.Should().Throw<ArgumentNullException>()
+                .And.ParamName.Equals("name");
         }
 
         [Fact]
@@ -37,7 +38,8 @@ namespace CacheManager.Tests
         {
             Action act = () => new ConfigurationBuilder((ICacheManagerConfiguration)null);
 
-            act.Should().Throw<ArgumentNullException>().WithMessage("*forConfiguration*");
+            act.Should().Throw<ArgumentNullException>()
+                .And.ParamName.Equals("forConfiguration");
         }
 
         [Fact]
@@ -45,7 +47,8 @@ namespace CacheManager.Tests
         {
             Action act = () => new ConfigurationBuilder(null, null);
 
-            act.Should().Throw<ArgumentNullException>().WithMessage("*name*");
+            act.Should().Throw<ArgumentNullException>()
+                .And.ParamName.Equals("name");
         }
 
         [Fact]
@@ -53,7 +56,8 @@ namespace CacheManager.Tests
         {
             Action act = () => new ConfigurationBuilder("name", null);
 
-            act.Should().Throw<ArgumentNullException>().WithMessage("*forConfiguration*");
+            act.Should().Throw<ArgumentNullException>()
+                .And.ParamName.Equals("forConfiguration");
         }
 
         [Fact]
@@ -97,7 +101,7 @@ namespace CacheManager.Tests
 
             // assert
             act.Should().Throw<ArgumentNullException>()
-                .WithMessage("*Parameter name: configuration*");
+                .And.ParamName.Equals("configuration");
         }
 
         [Fact]
@@ -111,7 +115,7 @@ namespace CacheManager.Tests
 
             // assert
             act.Should().Throw<ArgumentNullException>()
-                .WithMessage("*Parameter name: configName*");
+                .And.ParamName.Equals("configName");
         }
 
         [Fact]
@@ -170,7 +174,7 @@ namespace CacheManager.Tests
 
             // assert
             act.Should().Throw<ArgumentNullException>()
-                .WithMessage("*cacheValueType*");
+                .And.ParamName.Equals("cacheValueType");
         }
 
         [Fact]
@@ -184,7 +188,7 @@ namespace CacheManager.Tests
 
             // assert
             act.Should().Throw<ArgumentNullException>()
-                .WithMessage("*cacheValueType*");
+                .And.ParamName.Equals("cacheValueType");
         }
 
         [Fact]
@@ -199,7 +203,7 @@ namespace CacheManager.Tests
 
             // assert
             act.Should().Throw<ArgumentNullException>()
-                .WithMessage("*cacheValueType*");
+                .And.ParamName.Equals("cacheValueType");
         }
 
 #endif
@@ -218,7 +222,7 @@ namespace CacheManager.Tests
 
             // assert
             act.Should().Throw<ArgumentNullException>()
-                .WithMessage("*Parameter name: handleName*");
+                .And.ParamName.Equals("handleName");
         }
 
         [Fact]
@@ -232,7 +236,7 @@ namespace CacheManager.Tests
 
             // assert
             act.Should().Throw<ArgumentNullException>()
-                .WithMessage("*Parameter name: settings*");
+                .And.ParamName.Equals("settings");
         }
 
         [Fact]
@@ -418,7 +422,7 @@ namespace CacheManager.Tests
 
             // assert
             act.Should().Throw<ArgumentException>()
-                .WithMessage("*Parameter name: configurationKey*");
+                .And.ParamName.Equals("configurationKey");
         }
 
         [Fact]
@@ -433,7 +437,7 @@ namespace CacheManager.Tests
 
             // assert
             act.Should().Throw<ArgumentException>()
-                .WithMessage("*Parameter name: configurationKey*");
+                .And.ParamName.Equals("configurationKey");
         }
 
         [Fact]
@@ -448,7 +452,7 @@ namespace CacheManager.Tests
 
             // assert
             act.Should().Throw<ArgumentException>()
-                .WithMessage("*Parameter name: configurationKey*");
+                .And.ParamName.Equals("configurationKey");
         }
 
         [Fact]
@@ -463,7 +467,7 @@ namespace CacheManager.Tests
 
             // assert
             act.Should().Throw<ArgumentException>()
-                .WithMessage("*Parameter name: host*");
+                .And.ParamName.Equals("configurationKey");
         }
 
         [Fact]
