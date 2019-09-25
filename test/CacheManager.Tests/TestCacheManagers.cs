@@ -315,7 +315,7 @@ namespace CacheManager.Tests
                     .Builder
                         .WithSystemRuntimeCacheHandle()
                             .EnableStatistics()
-                        .And.WithSystemRuntimeCacheHandle()
+                        .And.WithSystemRuntimeCacheHandle("LimitedCacheHandle", new SystemRuntimeCaching.RuntimeMemoryCacheOptions() { PhysicalMemoryLimitPercentage = 20, CacheMemoryLimitMegabytes = 200 })
                             .EnableStatistics()
                             .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1000))
                         .And.WithDictionaryHandle()

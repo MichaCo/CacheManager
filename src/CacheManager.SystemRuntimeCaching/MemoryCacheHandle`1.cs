@@ -35,21 +35,37 @@ namespace CacheManager.SystemRuntimeCaching
         /// <param name="configuration">The cache handle configuration.</param>
         /// <param name="loggerFactory">The logger factory.</param>
         public MemoryCacheHandle(ICacheManagerConfiguration managerConfiguration, CacheHandleConfiguration configuration, ILoggerFactory loggerFactory)
+            : this(managerConfiguration, configuration, loggerFactory, null)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MemoryCacheHandle{TCacheValue}"/> class.
+        /// </summary>
+        /// <param name="managerConfiguration">The manager configuration.</param>
+        /// <param name="configuration">The cache handle configuration.</param>
+        /// <param name="loggerFactory">The logger factory.</param>
+        /// <param name="memoryCacheOptions">The vendor specific options.</param>
+        public MemoryCacheHandle(ICacheManagerConfiguration managerConfiguration, CacheHandleConfiguration configuration, ILoggerFactory loggerFactory, RuntimeMemoryCacheOptions memoryCacheOptions)
             : base(managerConfiguration, configuration)
         {
             NotNull(configuration, nameof(configuration));
             NotNull(loggerFactory, nameof(loggerFactory));
-
             Logger = loggerFactory.CreateLogger(this);
             _cacheName = configuration.Name;
 
-            if (_cacheName.ToUpper(CultureInfo.InvariantCulture).Equals(DefaultName.ToUpper(CultureInfo.InvariantCulture)))
+
+            //if (_cacheName.ToUpper(CultureInfo.InvariantCulture).Equals(DefaultName.ToUpper(CultureInfo.InvariantCulture)))
+            if (DefaultName.Equals(_cacheName, StringComparison.InvariantCultureIgnoreCase))
             {
+                //we can't change default cache configuration by code, can we?
+                Ensure(memoryCacheOptions == null, "MemoryCache Default instance can only be configured through app/web.config.");
+
                 _cache = MemoryCache.Default;
             }
             else
             {
-                _cache = new MemoryCache(_cacheName);
+                _cache = new MemoryCache(_cacheName, memoryCacheOptions?.AsNameValueCollection());
             }
 
             _instanceKey = Guid.NewGuid().ToString();
