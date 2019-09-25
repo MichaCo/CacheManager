@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using CacheManager.Core;
 using CacheManager.Core.Internal;
 using CacheManager.Core.Logging;
@@ -227,7 +227,7 @@ namespace CacheManager.MicrosoftCachingMemory
                 SlidingExpiration = TimeSpan.MaxValue,
             };
 
-            _cache.Set(region, new HashSet<object>(), options);
+            _cache.Set(region, new ConcurrentDictionary<object, bool>(), options);
         }
 
         private void ItemRemoved(object key, object value, EvictionReason reason, object state)
