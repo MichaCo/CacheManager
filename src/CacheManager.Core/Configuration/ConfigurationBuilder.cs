@@ -588,9 +588,10 @@ namespace CacheManager.Core
         /// Set this to true if this cache handle should be the source of the backplane.
         /// <para>This setting will be ignored if no backplane is configured.</para>
         /// </param>
+        /// <param name="options">Optional settings for the cache instance.</param>
         /// <returns>The builder part.</returns>
-        public ConfigurationBuilderCacheHandlePart WithDictionaryHandle(bool isBackplaneSource = false) =>
-            WithHandle(typeof(DictionaryCacheHandle<>), Guid.NewGuid().ToString("N"), isBackplaneSource);
+        public ConfigurationBuilderCacheHandlePart WithDictionaryHandle(bool isBackplaneSource = false, DictionaryCacheOptions options = null) =>
+            WithHandle(typeof(DictionaryCacheHandle<>), Guid.NewGuid().ToString("N"), isBackplaneSource, options);
 
         /// <summary>
         /// Adds a cache dictionary cache handle to the cache manager.
@@ -601,9 +602,10 @@ namespace CacheManager.Core
         /// Set this to true if this cache handle should be the source of the backplane.
         /// <para>This setting will be ignored if no backplane is configured.</para>
         /// </param>
+        /// <param name="options">Optional settings for the cache instance.</param>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="handleName"/> is null.</exception>
-        public ConfigurationBuilderCacheHandlePart WithDictionaryHandle(string handleName, bool isBackplaneSource = false) =>
-            WithHandle(typeof(DictionaryCacheHandle<>), handleName, isBackplaneSource);
+        public ConfigurationBuilderCacheHandlePart WithDictionaryHandle(string handleName, bool isBackplaneSource = false, DictionaryCacheOptions options = null) =>
+            WithHandle(typeof(DictionaryCacheHandle<>), handleName, isBackplaneSource, options);
 
         /// <summary>
         /// Adds a cache handle with the given <c>Type</c> and name.
