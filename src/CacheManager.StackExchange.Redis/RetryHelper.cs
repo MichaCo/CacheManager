@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Threading.Tasks;
+using System.Threading;
 using CacheManager.Core.Logging;
 using StackExchange.Redis;
 
@@ -37,11 +37,7 @@ namespace CacheManager.Redis
                     }
 
                     logger.LogWarn(ex, WarningMessage, tries, retries);
-#if NET40
-                    TaskEx.Delay(timeOut).Wait();
-#else
-                    Task.Delay(timeOut).Wait();
-#endif
+                    Thread.Sleep(timeOut);
                 }
                 catch (RedisConnectionException ex)
                 {
@@ -52,11 +48,7 @@ namespace CacheManager.Redis
                     }
 
                     logger.LogWarn(ex, WarningMessage, tries, retries);
-#if NET40
-                    TaskEx.Delay(timeOut).Wait();
-#else
-                    Task.Delay(timeOut).Wait();
-#endif
+                    Thread.Sleep(timeOut);
                 }
                 catch (TimeoutException ex)
                 {
@@ -67,11 +59,7 @@ namespace CacheManager.Redis
                     }
 
                     logger.LogWarn(ex, WarningMessage, tries, retries);
-#if NET40
-                    TaskEx.Delay(timeOut).Wait();
-#else
-                    Task.Delay(timeOut).Wait();
-#endif
+                    Thread.Sleep(timeOut);
                 }
                 catch (AggregateException aggregateException)
                 {
@@ -91,11 +79,7 @@ namespace CacheManager.Redis
                         if (e is RedisConnectionException || e is System.TimeoutException || e is RedisServerException)
                         {
                             logger.LogWarn(e, WarningMessage, tries, retries);
-#if NET40
-                            TaskEx.Delay(timeOut).Wait();
-#else
-                            Task.Delay(timeOut).Wait();
-#endif
+                            Thread.Sleep(timeOut);
 
                             return true;
                         }
