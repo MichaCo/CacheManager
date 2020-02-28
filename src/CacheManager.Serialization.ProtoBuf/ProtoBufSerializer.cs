@@ -1,8 +1,7 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
-using CacheManager.Core;
 using CacheManager.Core.Internal;
+using Microsoft.IO;
 using ProtoBuf;
 
 namespace CacheManager.Serialization.ProtoBuf
@@ -12,7 +11,28 @@ namespace CacheManager.Serialization.ProtoBuf
     /// </summary>
     public class ProtoBufSerializer : CacheSerializer
     {
+        private readonly RecyclableMemoryStreamManager _memoryStreamManager;
         private static readonly Type _openGenericItemType = typeof(ProtoBufCacheItem<>);
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ProtoBufSerializer"/> class.
+        /// </summary>
+        public ProtoBufSerializer()
+            : this (new RecyclableMemoryStreamManager())
+        {
+            
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ProtoBufSerializer"/> class.
+        /// </summary>
+        /// <param name="memoryStreamManager">The memory stream manager to use for the serialization streams</param>
+#pragma warning disable CS3001 // Argument type is not CLS-compliant
+        public ProtoBufSerializer(RecyclableMemoryStreamManager memoryStreamManager)
+#pragma warning restore CS3001 // Argument type is not CLS-compliant
+        {
+            _memoryStreamManager = memoryStreamManager;
+        }
 
         /// <inheritdoc/>
         public override object Deserialize(byte[] data, Type target)
@@ -32,7 +52,7 @@ namespace CacheManager.Serialization.ProtoBuf
         /// <inheritdoc/>
         public override byte[] Serialize<T>(T value)
         {
-            using (var stream = new MemoryStream())
+            using (var stream = _memoryStreamManager.GetStream())
             {
                 // Protobuf returns an empty byte array {} which would be treated as Null value in redis
                 // this is not allowed in cache manager and would cause issues (would look like the item does not exist)
