@@ -8,10 +8,7 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageTags>Caching;Cache;CacheManager;Distributed Cache;Serialization;Protobuf</PackageTags>
     <Version>3.0.0</Version>
-    <PackageReleaseNotes>Use RecyclableMemoryStream to reduce allocations</PackageReleaseNotes>
-    <Copyright>Copyright (c) 2019 MichaConrad</Copyright>
-    <PackageLicenseUrl />
-    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageReleaseNotes>3.0 - Use RecyclableMemoryStream to reduce allocations</PackageReleaseNotes>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\CacheManager.Core\CacheManager.Core.csproj" />

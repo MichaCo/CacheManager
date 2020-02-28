@@ -2,13 +2,14 @@
   <Import Project="version.props" />
 
   <PropertyGroup>
-    <Copyright>Copyright (c) 2017 MichaConrad</Copyright>
+    <Copyright>Copyright (c) 2019 MichaConrad</Copyright>
     <Authors>MichaConrad</Authors>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
 
     <PackageIconUrl>http://cachemanager.michaco.net/favicon-128.png</PackageIconUrl>
     <PackageProjectUrl>http://cachemanager.michaco.net</PackageProjectUrl>
     <PackageLicenseUrl>https://github.com/MichaCo/CacheManager/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/MichaCo/CacheManager</RepositoryUrl>
 
@@ -22,6 +23,14 @@
     <!-- doesn't work yet
     <CodeAnalysisRuleset>$(MSBuildThisFileDirectory)CodeAnalysis.ruleset</CodeAnalysisRuleset>-->
   </PropertyGroup>
+  
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)\..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
+  
   <!--<ItemGroup>
     <AdditionalFiles Include="$(MSBuildThisFileDirectory)stylecop.json" />
   </ItemGroup>
