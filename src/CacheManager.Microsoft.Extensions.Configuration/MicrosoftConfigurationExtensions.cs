@@ -442,10 +442,6 @@ namespace Microsoft.Extensions.Configuration
             var type = serializerSection[ConfigurationType];
 
             managerConfiguration.ShouldCompress = serializerSection.GetValue<bool>(ShouldCompress);
-            if (knownType.ToLowerInvariant() == KnonwSerializerGzJson)
-            {
-                managerConfiguration.ShouldCompress = true;
-            }
 
             if (string.IsNullOrWhiteSpace(knownType) && string.IsNullOrWhiteSpace(type))
             {
@@ -455,6 +451,10 @@ namespace Microsoft.Extensions.Configuration
 
             if (string.IsNullOrWhiteSpace(type))
             {
+                if (knownType.ToLowerInvariant() == KnonwSerializerGzJson)
+                {
+                    managerConfiguration.ShouldCompress = true;
+                }
                 managerConfiguration.SerializerType = GetKnownSerializerType(knownType, serializerSection.Path);
             }
             else
