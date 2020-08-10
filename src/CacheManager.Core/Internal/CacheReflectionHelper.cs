@@ -52,7 +52,8 @@ namespace CacheManager.Core.Internal
                     args = configuration.SerializerTypeArguments.Concat(args).ToArray();
                 }
 
-                return (ICacheSerializer)CreateInstance(configuration.SerializerType, args);
+                var serializer = (ICacheSerializer)CreateInstance(configuration.SerializerType, args);
+                return configuration.ShouldCompress ? new CompressionSerializer(serializer) : serializer;
             }
 
             return null;

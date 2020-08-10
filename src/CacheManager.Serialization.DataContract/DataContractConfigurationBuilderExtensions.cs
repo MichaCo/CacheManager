@@ -1,4 +1,5 @@
-﻿using System.Runtime.Serialization;
+﻿using System;
+using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
 using CacheManager.Serialization.DataContract;
 using static CacheManager.Core.Utility.Guard;
@@ -56,17 +57,19 @@ namespace CacheManager.Core
         /// <param name="part">The configuration part.</param>
         /// <param name="serializerSettings">Settings for the serializer.</param>
         /// <returns>The builder instance.</returns>
+        [Obsolete("Use .WithDataContractJsonSerializer().WithCompression() instead")]
         public static ConfigurationBuilderCachePart WithDataContractGzJsonSerializer(this ConfigurationBuilderCachePart part, DataContractJsonSerializerSettings serializerSettings = null)
         {
             NotNull(part, nameof(part));
 
+            part.WithCompression();
             if (serializerSettings == null)
             {
-                return part.WithSerializer(typeof(DataContractGzJsonCacheSerializer));
+                return part.WithSerializer(typeof(DataContractJsonCacheSerializer));
             }
             else
             {
-                return part.WithSerializer(typeof(DataContractGzJsonCacheSerializer), serializerSettings);
+                return part.WithSerializer(typeof(DataContractJsonCacheSerializer), serializerSettings);
             }
         }
 

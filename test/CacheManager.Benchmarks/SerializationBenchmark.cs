@@ -18,7 +18,7 @@ namespace CacheManager.Benchmarks
         private Queue<CacheItem<TestPoco>> _payload;
         private BinaryCacheSerializer _binary = new BinaryCacheSerializer();
         private JsonCacheSerializer _json = new JsonCacheSerializer();
-        private GzJsonCacheSerializer _jsonGz = new GzJsonCacheSerializer();
+        private CompressionSerializer _jsonWithCompression = new CompressionSerializer(new JsonCacheSerializer());
         private ProtoBufSerializer _proto = new Serialization.ProtoBuf.ProtoBufSerializer();
         private BondCompactBinaryCacheSerializer _bondBinary = new BondCompactBinaryCacheSerializer(18000);
         private BondFastBinaryCacheSerializer _bondFastBinary = new BondFastBinaryCacheSerializer(18000);
@@ -100,8 +100,8 @@ namespace CacheManager.Benchmarks
         {
             ExecRun((item) =>
             {
-                var data = _jsonGz.SerializeCacheItem(item);
-                var result = _jsonGz.DeserializeCacheItem<TestPoco>(data, _pocoType);
+                var data = _jsonWithCompression.SerializeCacheItem(item);
+                var result = _jsonWithCompression.DeserializeCacheItem<TestPoco>(data, _pocoType);
                 if (result == null)
                 {
                     throw new Exception();
