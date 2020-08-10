@@ -600,7 +600,7 @@ namespace CacheManager.Tests
                     .WithHandle(typeof(SerializerTestCacheHandle)));
 
             var handle = cache.CacheHandles.ElementAt(0) as SerializerTestCacheHandle;
-            var serializer = (handle.Serializer as CompressionSerializer).InternalSerializer as DataContractCacheSerializer;
+            var serializer = (handle.Serializer as CompressionSerializer).InternalSerializer as DataContractJsonCacheSerializer;
 
             serializer.SerializerSettings.KnownTypes.Should().BeEquivalentTo(new[] { typeof(string) });
 

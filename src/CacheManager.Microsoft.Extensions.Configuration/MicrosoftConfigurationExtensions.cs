@@ -22,6 +22,7 @@ namespace Microsoft.Extensions.Configuration
         private const string ConfigurationName = "name";
         private const string ConfigurationType = "type";
         private const string ConfigurationKnownType = "knownType";
+        private const string ShouldCompress = "shouldCompress";
         private const string TypeJsonCacheSerializer = "CacheManager.Serialization.Json.JsonCacheSerializer, CacheManager.Serialization.Json";
         private const string TypeProtobufCacheSerializer = "CacheManager.Serialization.ProtoBuf.ProtoBufSerializer, CacheManager.Serialization.ProtoBuf";
         private const string TypeBondCompactBinarySerializer = "CacheManager.Serialization.Bond.BondCompactBinaryCacheSerializer, CacheManager.Serialization.Bond";
@@ -431,7 +432,6 @@ namespace Microsoft.Extensions.Configuration
         private static void GetSerializerConfiguration(CacheManagerConfiguration managerConfiguration, IConfigurationSection configuration)
         {
             var serializerSection = configuration.GetSection(SerializerSection);
-
             if (serializerSection.GetChildren().Count() == 0)
             {
                 // no serializer
@@ -440,6 +440,13 @@ namespace Microsoft.Extensions.Configuration
 
             var knownType = serializerSection[ConfigurationKnownType];
             var type = serializerSection[ConfigurationType];
+
+            managerConfiguration.ShouldCompress = serializerSection.GetValue<bool>(ShouldCompress);
+            if (knownType.ToLowerInvariant() == KnonwSerializerGzJson)
+            {
+                managerConfiguration.ShouldCompress = true;
+            }
+
             if (string.IsNullOrWhiteSpace(knownType) && string.IsNullOrWhiteSpace(type))
             {
                 throw new InvalidOperationException(
