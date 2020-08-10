@@ -23,7 +23,6 @@ namespace Microsoft.Extensions.Configuration
         private const string ConfigurationType = "type";
         private const string ConfigurationKnownType = "knownType";
         private const string TypeJsonCacheSerializer = "CacheManager.Serialization.Json.JsonCacheSerializer, CacheManager.Serialization.Json";
-        private const string TypeGzJsonCacheSerializer = "CacheManager.Serialization.Json.GzJsonCacheSerializer, CacheManager.Serialization.Json";
         private const string TypeProtobufCacheSerializer = "CacheManager.Serialization.ProtoBuf.ProtoBufSerializer, CacheManager.Serialization.ProtoBuf";
         private const string TypeBondCompactBinarySerializer = "CacheManager.Serialization.Bond.BondCompactBinaryCacheSerializer, CacheManager.Serialization.Bond";
         private const string TypeBondFastBinarySerializer = "CacheManager.Serialization.Bond.BondFastBinaryCacheSerializer, CacheManager.Serialization.Bond";
@@ -40,6 +39,9 @@ namespace Microsoft.Extensions.Configuration
         private const string TypeRedisConfigurations = "CacheManager.Redis.RedisConfigurations, CacheManager.StackExchange.Redis";
         private const string KnonwSerializerBinary = "binary";
         private const string KnonwSerializerJson = "json";
+        /// <summary>
+        /// absolete, available for backward compatibility
+        /// </summary>
         private const string KnonwSerializerGzJson = "gzjson";
         private const string KnonwSerializerProto = "protobuf";
         private const string KnonwSerializerBondCompact = "bondcompactbinary";
@@ -438,7 +440,6 @@ namespace Microsoft.Extensions.Configuration
 
             var knownType = serializerSection[ConfigurationKnownType];
             var type = serializerSection[ConfigurationType];
-
             if (string.IsNullOrWhiteSpace(knownType) && string.IsNullOrWhiteSpace(type))
             {
                 throw new InvalidOperationException(
@@ -473,8 +474,9 @@ namespace Microsoft.Extensions.Configuration
                     case KnonwSerializerJson:
                         return Type.GetType(TypeJsonCacheSerializer, true);
 
+                    // KnonwSerializerGzJson is absolete, instead we will create TypeJsonCacheSerializer and add compression wrapper to it
                     case KnonwSerializerGzJson:
-                        return Type.GetType(TypeGzJsonCacheSerializer, true);
+                        return Type.GetType(TypeJsonCacheSerializer, true);
 
                     case KnonwSerializerProto:
                         return Type.GetType(TypeProtobufCacheSerializer, true);

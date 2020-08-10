@@ -94,6 +94,12 @@ namespace CacheManager.Core
         public Type SerializerType { get; set; }
 
         /// <summary>
+        /// Gets or sets if after serializing/before deserializing should compress/decompress the data.
+        /// </summary>
+        /// <value>Should compress.</value>
+        public bool ShouldCompress { get; set; }
+
+        /// <summary>
         /// Gets or sets additional arguments which should be used instantiating the serializer.
         /// </summary>
         /// <value>The list of arguments.</value>

@@ -87,12 +87,12 @@ See [benchmarks results](https://github.com/MichaCo/CacheManager/blob/dev/Benchm
     * **System.Web.Caching** based (included in the Web package)
 * **Serialization** can now be configured.
 Serialization is only needed in distributed caches. If no additional serialization package is installed and configured, Binary serialization will be used (if available)
+After serialization the content can be compressed
 The following are the currently available serialization options:
 	* Binary (build in if the full CLR is being used)
 	* **Json** based on the popular Newtonsoft.Json library
-	* **Json** with Gzip compression
     * **Bond** based on Microsoft.Bond supporting all three available variants
-    * **DataContract** based on System.Runtime.Serialization library supporting binary, Json & Json with Gzip compression
+    * **DataContract** based on System.Runtime.Serialization library supporting binary, Json
 	* **Protocol Buffer** Google's protobuf. The package uses Mark's [protobuf-net](https://github.com/mgravell/protobuf-net) implementation.
 * **Update values with lock or transaction** for distributed caches. 
 The interfaced provides a simple update method which internally ensures you work with the latest version.

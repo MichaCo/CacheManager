@@ -1,50 +1,59 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using CacheManager.Core.Utility;
-using Newtonsoft.Json;
 
-namespace CacheManager.Serialization.Json
+namespace CacheManager.Core.Internal
 {
     /// <summary>
-    /// Implements the <c>ICacheSerializer</c> contract using <c>Newtonsoft.Json</c> and the <see cref="GZipStream "/> loseless compression.
+    /// Wrapper for other serializer to add compression capabilities
     /// </summary>
-    public class GzJsonCacheSerializer : JsonCacheSerializer
+    public class CompressionSerializer : ICacheSerializer
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="GzJsonCacheSerializer"/> class.
+        /// The serializer that we used after decompression and before compression.
         /// </summary>
-        public GzJsonCacheSerializer()
-            : base(new JsonSerializerSettings(), new JsonSerializerSettings())
-        {
-        }
+        public ICacheSerializer InternalSerializer { get; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="GzJsonCacheSerializer"/> class.
-        /// With this overload the settings for de-/serialization can be set independently.
+        /// Initializes a new instance of the <see cref="CompressionSerializer"/> class.
         /// </summary>
-        /// <param name="serializationSettings">The settings which should be used during serialization.</param>
-        /// <param name="deserializationSettings">The settings which should be used during deserialization.</param>
-        public GzJsonCacheSerializer(JsonSerializerSettings serializationSettings, JsonSerializerSettings deserializationSettings)
-            : base(serializationSettings, deserializationSettings)
+        /// <param name="internalSerializer">Serializer that we used after decompression and before compression.</param>
+        public CompressionSerializer(ICacheSerializer internalSerializer)
         {
+            this.InternalSerializer = internalSerializer;
         }
 
         /// <inheritdoc/>
-        public override object Deserialize(byte[] data, Type target)
+        public CacheItem<T> DeserializeCacheItem<T>(byte[] value, Type valueType)
+        {
+            return InternalSerializer.DeserializeCacheItem<T>(value, valueType);
+        }
+
+        /// <inheritdoc/>
+        public byte[] SerializeCacheItem<T>(CacheItem<T> value)
+        {
+            return InternalSerializer.SerializeCacheItem<T>(value);
+        }
+
+        /// <inheritdoc/>
+        public object Deserialize(byte[] data, Type target)
         {
             Guard.NotNull(data, nameof(data));
             var compressedData = Decompression(data);
 
-            return base.Deserialize(compressedData, target);
+            return InternalSerializer.Deserialize(compressedData, target);
         }
 
         /// <inheritdoc/>
-        public override byte[] Serialize<T>(T value)
+        public byte[] Serialize<T>(T value)
         {
             Guard.NotNull(value, nameof(value));
-            var data = base.Serialize<T>(value);
+            var data = InternalSerializer.Serialize<T>(value);
 
             return Compression(data);
         }

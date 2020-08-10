@@ -96,6 +96,12 @@ namespace CacheManager.Core
         int RetryTimeout { get; }
 
         /// <summary>
+        /// Gets or sets if after serializing/before deserializing should compress/decompress the data.
+        /// </summary>
+        /// <value>Should compress.</value>
+        bool ShouldCompress { get; }
+
+        /// <summary>
         /// Gets the factory method for a cache serializer.
         /// </summary>
         /// <value>The serializer activator.</value>

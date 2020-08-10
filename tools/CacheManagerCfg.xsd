@@ -29,6 +29,7 @@
             <xs:attribute name="backplaneType" use="optional" type="xs:string" />
             <xs:attribute name="backplaneName" use="optional" type="xs:string" />
             <xs:attribute name="serializerType" use="optional" type="xs:string" />
+            <xs:attribute name="shouldCompress" use="optional" type="xs:boolean" />
         </xs:complexType>
     </xs:element>
     <xs:element name="handleDef">

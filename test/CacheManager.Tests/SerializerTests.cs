@@ -354,7 +354,7 @@ namespace CacheManager.Tests
         #region newtonsoft json with GZ serializer
 
         [Fact]
-        public void GzJsonSerializer_RespectJsonSerializerSettings()
+        public void WithGzJsonSerializer_RespectJsonSerializerSettings()
         {
             var serializationSettings = new JsonSerializerSettings()
             {
@@ -369,12 +369,14 @@ namespace CacheManager.Tests
             };
 
             var cache = CacheFactory.Build<string>(
+                #pragma warning disable CS0618 // Type or member is obsolete
                 p => p
                     .WithGzJsonSerializer(serializationSettings, deserializationSettings)
+                #pragma warning restore CS0618 // Type or member is obsolete
                     .WithHandle(typeof(SerializerTestCacheHandle)));
 
             var handle = cache.CacheHandles.ElementAt(0) as SerializerTestCacheHandle;
-            var serializer = handle.Serializer as JsonCacheSerializer;
+            var serializer = (handle.Serializer as CompressionSerializer).InternalSerializer as JsonCacheSerializer;
 
             serializer.SerializationSettings.DateFormatHandling.Should().Be(DateFormatHandling.MicrosoftDateFormat);
             serializer.SerializationSettings.FloatFormatHandling.Should().Be(FloatFormatHandling.String);
@@ -391,10 +393,10 @@ namespace CacheManager.Tests
         [InlineData(long.MaxValue)]
         [InlineData("some string")]
         [ReplaceCulture]
-        public void GzJsonSerializer_Primitives<T>(T value)
+        public void JsonSerializerWithCompression_Primitives<T>(T value)
         {
             // arrange
-            var serializer = new GzJsonCacheSerializer();
+            var serializer = new CompressionSerializer(new JsonCacheSerializer());
 
             // act
             var data = serializer.Serialize(value);
@@ -410,10 +412,10 @@ namespace CacheManager.Tests
         [InlineData(long.MaxValue)]
         [InlineData("some string")]
         [ReplaceCulture]
-        public void GzJsonSerializer_CacheItem_Primitives<T>(T value)
+        public void JsonSerializerWithCompression_CacheItem_Primitives<T>(T value)
         {
             // arrange
-            var serializer = new GzJsonCacheSerializer();
+            var serializer = new CompressionSerializer(new JsonCacheSerializer());
             var item = new CacheItem<T>("key", value);
 
             // act
@@ -437,10 +439,10 @@ namespace CacheManager.Tests
         [InlineData(long.MaxValue)]
         [InlineData("some string")]
         [ReplaceCulture]
-        public void GzJsonSerializer_CacheItemOfObject_Primitives<T>(T value)
+        public void JsonSerializerWithCompression_CacheItemOfObject_Primitives<T>(T value)
         {
             // arrange
-            var serializer = new GzJsonCacheSerializer();
+            var serializer = new CompressionSerializer(new JsonCacheSerializer());
             var item = new CacheItem<object>("key", value);
 
             // act
@@ -458,10 +460,10 @@ namespace CacheManager.Tests
         }
 
         [Fact]
-        public void GzJsonSerializer_Pocco()
+        public void JsonSerializerWithCompression_Pocco()
         {
             // arrange
-            var serializer = new GzJsonCacheSerializer();
+            var serializer = new CompressionSerializer(new JsonCacheSerializer());
             var item = SerializerPoccoSerializable.Create();
 
             // act
@@ -472,10 +474,10 @@ namespace CacheManager.Tests
         }
 
         [Fact]
-        public void GzJsonSerializer_CacheItemWithPocco()
+        public void JsonSerializerWithCompression_CacheItemWithPocco()
         {
             // arrange
-            var serializer = new GzJsonCacheSerializer();
+            var serializer = new CompressionSerializer(new JsonCacheSerializer());
             var pocco = SerializerPoccoSerializable.Create();
             var item = new CacheItem<SerializerPoccoSerializable>("key", "region", pocco, ExpirationMode.Absolute, TimeSpan.FromDays(1));
 
@@ -487,10 +489,10 @@ namespace CacheManager.Tests
         }
 
         [Fact]
-        public void GzJsonSerializer_ObjectCacheItemWithPocco()
+        public void JsonSerializerWithCompression_ObjectCacheItemWithPocco()
         {
             // arrange
-            var serializer = new GzJsonCacheSerializer();
+            var serializer = new CompressionSerializer(new JsonCacheSerializer());
             var pocco = SerializerPoccoSerializable.Create();
             var item = new CacheItem<object>("key", "region", pocco, ExpirationMode.Absolute, TimeSpan.FromDays(1));
 
@@ -505,7 +507,7 @@ namespace CacheManager.Tests
         public void GzJsonSerializer_CacheItemWithDerivedPocco()
         {
             // arrange
-            var serializer = new GzJsonCacheSerializer();
+            var serializer = new CompressionSerializer(new JsonCacheSerializer());
             var pocco = DerivedPocco.CreateDerived();
             var item = new CacheItem<SerializerPoccoSerializable>("key", "region", pocco, ExpirationMode.Absolute, TimeSpan.FromDays(1));
 
@@ -518,10 +520,10 @@ namespace CacheManager.Tests
         }
 
         [Fact]
-        public void GzJsonSerializer_List()
+        public void JsonSerializerWithCompression_List()
         {
             // arrange
-            var serializer = new GzJsonCacheSerializer();
+            var serializer = new CompressionSerializer(new JsonCacheSerializer());
             var items = new List<SerializerPoccoSerializable>()
             {
                 SerializerPoccoSerializable.Create(),
@@ -583,7 +585,7 @@ namespace CacheManager.Tests
         }
 
         [Fact]
-        public void DataContractSerializer_GzJson_RespectSerializerSettings()
+        public void DataContractSerializer_WithDataContractGzJsonSerializer_RespectSerializerSettings()
         {
             var serializationSettings = new DataContractJsonSerializerSettings()
             {
@@ -591,12 +593,14 @@ namespace CacheManager.Tests
             };
 
             var cache = CacheFactory.Build<string>(
+            #pragma warning disable CS0618 // Type or member is obsolete
                 p => p
                     .WithDataContractGzJsonSerializer(serializationSettings)
+            #pragma warning restore CS0618 // Type or member is obsolete
                     .WithHandle(typeof(SerializerTestCacheHandle)));
 
             var handle = cache.CacheHandles.ElementAt(0) as SerializerTestCacheHandle;
-            var serializer = handle.Serializer as DataContractGzJsonCacheSerializer;
+            var serializer = (handle.Serializer as CompressionSerializer).InternalSerializer as DataContractCacheSerializer;
 
             serializer.SerializerSettings.KnownTypes.Should().BeEquivalentTo(new[] { typeof(string) });
 
@@ -1047,7 +1051,7 @@ namespace CacheManager.Tests
         public void DataContractGzJsonSerializer_Primitives<T>(T value)
         {
             // arrange
-            var serializer = new DataContractGzJsonCacheSerializer();
+            var serializer = new CompressionSerializer(new DataContractJsonCacheSerializer());
 
             // act
             var data = serializer.Serialize(value);
@@ -1063,15 +1067,15 @@ namespace CacheManager.Tests
         [InlineData(long.MaxValue)]
         [InlineData("some string")]
         [ReplaceCulture]
-        public void DataContractGzJsonSerializer_CacheItem_Primitives<T>(T value)
+        public void DataContractJsonSerializerWithCompressio_CacheItem_Primitives<T>(T value)
         {
             // arrange
-            var serializer = new DataContractGzJsonCacheSerializer(new DataContractJsonSerializerSettings()
+            var serializer = new CompressionSerializer(new DataContractJsonCacheSerializer(new DataContractJsonSerializerSettings()
             {
                 //DataContractJsonSerializer serializes DateTime values as Date(1231231313) instead of "2017-11-07T13:09:39.7079187Z".
                 //So, I've changed the format to make the test pass.
                 DateTimeFormat = new DateTimeFormat("O")
-            });
+            }));
             var item = new CacheItem<T>("key", value);
 
             // act
@@ -1095,15 +1099,15 @@ namespace CacheManager.Tests
         [InlineData(long.MaxValue)]
         [InlineData("some string")]
         [ReplaceCulture]
-        public void DataContractGzJsonSerializer_CacheItemOfObject_Primitives<T>(T value)
+        public void DataContractJsonSerializerWithCompressio_CacheItemOfObject_Primitives<T>(T value)
         {
             // arrange
-            var serializer = new DataContractGzJsonCacheSerializer(new DataContractJsonSerializerSettings()
+            var serializer = new CompressionSerializer(new DataContractJsonCacheSerializer(new DataContractJsonSerializerSettings()
             {
                 //DataContractJsonSerializer serializes DateTime values as Date(1231231313) instead of "2017-11-07T13:09:39.7079187Z".
                 //So, I've changed the format to make the test pass.
                 DateTimeFormat = new DateTimeFormat("O")
-            });
+            }));
             var item = new CacheItem<object>("key", value);
 
             // act
@@ -1121,10 +1125,10 @@ namespace CacheManager.Tests
         }
 
         [Fact]
-        public void DataContractGzJsonSerializer_Pocco()
+        public void DataContractJsonSerializerWithCompressio_Pocco()
         {
             // arrange
-            var serializer = new DataContractGzJsonCacheSerializer();
+            var serializer = new CompressionSerializer(new DataContractJsonCacheSerializer());
             var item = SerializerPoccoSerializable.Create();
 
             // act
@@ -1135,15 +1139,15 @@ namespace CacheManager.Tests
         }
 
         [Fact]
-        public void DataContractGzJsonSerializer_CacheItemWithPocco()
+        public void DataContractJsonSerializerWithCompressio_CacheItemWithPocco()
         {
             // arrange
-            var serializer = new DataContractGzJsonCacheSerializer(new DataContractJsonSerializerSettings()
+            var serializer = new CompressionSerializer(new DataContractJsonCacheSerializer(new DataContractJsonSerializerSettings()
             {
                 //DataContractJsonSerializer serializes DateTime values as Date(1231231313) instead of "2017-11-07T13:09:39.7079187Z".
                 //So, I've changed the format to make the test pass.
                 DateTimeFormat = new DateTimeFormat("O")
-            });
+            }));
             var pocco = SerializerPoccoSerializable.Create();
             var item = new CacheItem<SerializerPoccoSerializable>("key", "region", pocco, ExpirationMode.Absolute, TimeSpan.FromDays(1));
 
@@ -1155,10 +1159,10 @@ namespace CacheManager.Tests
         }
 
         [Fact]
-        public void DataContractGzJsonSerializer_List()
+        public void DataContractJsonSerializerWithCompressio_List()
         {
             // arrange
-            var serializer = new DataContractGzJsonCacheSerializer();
+            var serializer = new CompressionSerializer(new DataContractJsonCacheSerializer());
             var items = new List<SerializerPoccoSerializable>()
             {
                 SerializerPoccoSerializable.Create(),

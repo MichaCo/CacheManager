@@ -76,8 +76,9 @@ namespace CacheManager.Tests
 
             var forCfg = new ConfigurationBuilder("newName", cfg);
             forCfg.WithDictionaryHandle().WithExpiration(ExpirationMode.Absolute, TimeSpan.FromHours(1));
-            forCfg.WithGzJsonSerializer();
+            forCfg.WithJsonSerializer().WithCompression();
 
+            cfg.ShouldCompress.Should().BeTrue();
             cfg.CacheHandleConfigurations.Count.Should().Be(2);
             cfg.Name.Should().Be("newName");
             cfg.CacheHandleConfigurations.First().ExpirationMode.Should().Be(ExpirationMode.Sliding);

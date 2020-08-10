@@ -1009,7 +1009,8 @@ namespace CacheManager.Tests
                 cache.Add("key", "value");
             };
 
-            config.SerializerType.Should().Be(typeof(Serialization.Json.GzJsonCacheSerializer));
+            config.SerializerType.Should().Be(typeof(Serialization.Json.JsonCacheSerializer));
+            config.ShouldCompress.Should().BeTrue();
             act.Should().NotThrow();
         }
 

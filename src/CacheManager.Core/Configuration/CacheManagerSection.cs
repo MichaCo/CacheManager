@@ -319,6 +319,7 @@
         private const string BackplaneNameKey = "backplaneName";
         private const string BackplaneTypeKey = "backplaneType";
         private const string SerializerTypeKey = "serializerType";
+        private const string ShouldCompressKey = "shouldCompress";
         private const string EnablePerformanceCountersKey = "enablePerformanceCounters";
         private const string EnableStatisticsKey = "enableStatistics";
         private const string MaxRetriesKey = "maxRetries";
@@ -382,6 +383,23 @@
             set
             {
                 this[SerializerTypeKey] = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets if should compress after serialization.
+        /// </summary>
+        /// <value>The type of the serializer.</value>
+        [ConfigurationProperty(ShouldCompressKey, IsRequired = false)]
+        public bool ShouldCompress
+        {
+            get
+            {
+                return (bool)this[ShouldCompressKey];
+            }
+            set
+            {
+                this[ShouldCompressKey] = value;
             }
         }
 
