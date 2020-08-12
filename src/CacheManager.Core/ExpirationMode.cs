@@ -7,7 +7,7 @@
     public enum ExpirationMode
     {
         /// <summary>
-        /// Default value for the expircation mode enum.
+        /// Default value for the expiration mode enum.
         /// CacheManager will default to <c>None</c>. The <code>Default</code> entry in the enum is used as separation from the other values
         /// and to make it possible to explicitly set the expiration to <c>None</c>.
         /// </summary>

@@ -16,7 +16,7 @@ namespace CacheManager.Core
         /// Enables logging for the cache manager instance.
         /// Using this extension will create a NEW instance of <c>Microsoft.Extensions.Logging.ILoggerFactory</c>.
         /// <para>
-        /// If you use the standard Micorosft AspNetCore DI, you might want to use the other extensions which make CacheManager use
+        /// If you use the standard Microsoft AspNetCore DI, you might want to use the other extensions which make CacheManager use
         /// the already injected/shared instance of <see cref="Microsoft.Extensions.Logging.ILoggerFactory"/>.
         /// </para>
         /// <para>
@@ -37,7 +37,7 @@ namespace CacheManager.Core
         }
 
         /// <summary>
-        /// Enables logging for the cache manager instance using an existion <c>Microsoft.Extensions.Logging.ILoggerFactory</c> as target.
+        /// Enables logging for the cache manager instance using an existing <c>Microsoft.Extensions.Logging.ILoggerFactory</c> as target.
         /// </summary>
         /// <param name="part">The builder part.</param>
         /// <param name="loggerFactory">The logger factory which should be used.</param>

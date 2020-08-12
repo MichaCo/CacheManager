@@ -393,7 +393,7 @@ namespace CacheManager.Memcached
         /// </remarks>
         /// <param name="mode">The mode.</param>
         /// <param name="item">The item.</param>
-        /// <param name="shouldRetry">Flag indicating if the operation should be retried. Returnd succssess code will be false anyways.</param>
+        /// <param name="shouldRetry">Flag indicating if the operation should be retried. Returned success code will be false anyways.</param>
         /// <returns>The result.</returns>
         protected virtual IStoreOperationResult Store(StoreMode mode, CacheItem<TCacheValue> item, out bool shouldRetry)
         {

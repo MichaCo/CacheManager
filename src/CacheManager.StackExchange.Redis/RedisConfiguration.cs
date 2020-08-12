@@ -101,7 +101,7 @@ namespace CacheManager.Redis
         /// <param name="database">The redis database to use.</param>
         /// <param name="keyspaceNotificationsEnabled">Enables keyspace notifications to react on eviction/expiration of items.</param>
         /// <param name="strictCompatibilityModeVersion">
-        /// Gets or sets a version number to eventually reduce the avaible features accessible by cachemanager.
+        /// Gets or sets a version number to eventually reduce the available features accessible by cachemanager.
         /// </param>
         public RedisConfiguration(
             string key,
@@ -146,7 +146,7 @@ namespace CacheManager.Redis
         public ConfigurationOptions ConfigurationOptions => _configurationOptions;
 
         /// <summary>
-        /// Gets or sets a version number to eventually reduce the avaible features accessible by cachemanager.
+        /// Gets or sets a version number to eventually reduce the available features accessible by cachemanager.
         /// E.g. set this to <c>"2.4"</c> to disable LUA support.
         /// </summary>
         /// <remarks>

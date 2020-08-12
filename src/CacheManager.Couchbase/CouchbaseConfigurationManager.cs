@@ -19,7 +19,7 @@ namespace CacheManager.Couchbase
     /// Manages configurations for the couchbase cache handle.
     /// <para>
     /// As of version 1.0.2, changed the management of <see cref="IBucket"/>s as those instances are already
-    /// managed by the <see cref="IClusterController"/> of the couchbase client libraray. No need to have additional collections of stuff in here.
+    /// managed by the <see cref="IClusterController"/> of the couchbase client library. No need to have additional collections of stuff in here.
     /// </para>
     /// <para>
     /// We keep track of added configurations via <see cref="CouchbaseConfigurationBuilderExtensions.WithCouchbaseConfiguration(ConfigurationBuilderCachePart, string, ClientConfiguration)"/>

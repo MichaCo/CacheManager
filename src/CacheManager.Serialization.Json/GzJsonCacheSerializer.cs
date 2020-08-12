@@ -8,7 +8,7 @@ using Newtonsoft.Json;
 namespace CacheManager.Serialization.Json
 {
     /// <summary>
-    /// Implements the <c>ICacheSerializer</c> contract using <c>Newtonsoft.Json</c> and the <see cref="GZipStream "/> loseless compression.
+    /// Implements the <c>ICacheSerializer</c> contract using <c>Newtonsoft.Json</c> and the <see cref="GZipStream "/> lossless compression.
     /// </summary>
     public class GzJsonCacheSerializer : JsonCacheSerializer
     {

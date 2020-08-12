@@ -198,7 +198,7 @@ namespace CacheManager.Core
             }
 
             // lowest level
-            // todo: maybe check for only run on the backplate if configured (could potentially be not the last one).
+            // todo: maybe check for only run on the backplane if configured (could potentially be not the last one).
             var handleIndex = handles.Length - 1;
             var handle = handles[handleIndex];
 

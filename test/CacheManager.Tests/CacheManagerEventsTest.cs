@@ -940,7 +940,7 @@
                 cache.OnClear += (sender, args) => data.AddCall();                // this should not trigger
                 cache.OnGet += (sender, args) => data.AddCall(args, key1, key2);  // this should not trigger
 
-                // on remove now triggeres per cache handle eventually
+                // on remove now triggers per cache handle eventually
                 cache.OnRemove += (sender, args) => data.AddCall(args, key1, key2);  // this should not trigger
                 cache.Put(key1, "something", region1);
                 cache.Put(key2, "something", region2);
@@ -1089,7 +1089,7 @@
                     level = args.Level;
                 };
 
-                // tests if triggereing the first one really triggers the correct level
+                // tests if triggering the first one really triggers the correct level
                 var handle = cache.CacheHandles.OfType<CustomRemoveEventTestHandle>().First();
                 handle.TestTrigger("key", null, CacheItemRemovedReason.Expired, null);
 
@@ -1114,7 +1114,7 @@
                     level = args.Level;
                 };
 
-                // tests if triggereing the last one really triggers the correct level
+                // tests if triggering the last one really triggers the correct level
                 var handle = cache.CacheHandles.OfType<CustomRemoveEventTestHandle>().Last();
                 handle.TestTrigger("key", null, CacheItemRemovedReason.Expired, null);
 

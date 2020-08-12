@@ -562,7 +562,7 @@
                 }
             }
 
-            // Issue #57 - Verifying diggits will be ignored and stored as proper milliseconds value (integer).
+            // Issue #57 - Verifying digits will be ignored and stored as proper milliseconds value (integer).
             [Theory]
             [ClassData(typeof(TestCacheManagers))]
             public void Expiration_DoesNotBreak_OnVeryPreciseValue<T>(T cache)
