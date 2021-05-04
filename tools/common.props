@@ -8,7 +8,7 @@
 
     <PackageIcon>favicon-128.png</PackageIcon>
     <PackageProjectUrl>http://cachemanager.michaco.net</PackageProjectUrl>
-    <PackageLicenseFile>../LICENSE</PackageLicenseFile>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/MichaCo/CacheManager</RepositoryUrl>
 
