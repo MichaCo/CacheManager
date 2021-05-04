@@ -6,9 +6,9 @@
     <Authors>MichaConrad</Authors>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
 
-    <PackageIconUrl>http://cachemanager.michaco.net/favicon-128.png</PackageIconUrl>
+    <PackageIcon>favicon-128.png</PackageIcon>
     <PackageProjectUrl>http://cachemanager.michaco.net</PackageProjectUrl>
-    <PackageLicenseUrl>https://github.com/MichaCo/CacheManager/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageLicenseFile>https://github.com/MichaCo/CacheManager/blob/master/LICENSE</PackageLicenseFile>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/MichaCo/CacheManager</RepositoryUrl>
 
