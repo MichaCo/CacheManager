@@ -8,7 +8,7 @@
 
     <PackageIcon>favicon-128.png</PackageIcon>
     <PackageProjectUrl>http://cachemanager.michaco.net</PackageProjectUrl>
-    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/MichaCo/CacheManager</RepositoryUrl>
 
@@ -30,4 +30,7 @@
       <PrivateAssets>All</PrivateAssets>
     </PackageReference>
   </ItemGroup>-->
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)favicon-128.png" Pack="true" PackagePath="favicon-128.png"/>
+  </ItemGroup>
 </Project>
