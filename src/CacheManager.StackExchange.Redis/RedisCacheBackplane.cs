@@ -207,7 +207,7 @@ namespace CacheManager.Redis
                         _logger.LogInfo($"Backplane is sending {_messages.Count} messages triggered by timer.");
                     }
 #if !NET40
-                    await Task.Delay(10).ConfigureAwait(false);
+                    await Task.Delay(50).ConfigureAwait(false);
 #endif
                     byte[] msgs = null;
                     lock (_messageLock)

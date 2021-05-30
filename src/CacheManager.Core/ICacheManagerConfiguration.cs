@@ -92,6 +92,10 @@ namespace CacheManager.Core
         /// Gets the number of milliseconds the cache should wait before it will retry an action.
         /// <para>Default is 100.</para>
         /// </summary>
+        /// <remarks>
+        /// This does not have any effect in synchronous context.
+        /// Will be brought back if CacheManager has async overloads.
+        /// </remarks>
         /// <value>The retry timeout.</value>
         int RetryTimeout { get; }
 
