@@ -244,7 +244,6 @@ namespace CacheManager.Core.Internal
         {
             if (disposeManaged)
             {
-                Stats.Dispose();
             }
 
             base.Dispose(disposeManaged);

@@ -138,37 +138,13 @@ namespace CacheManager.Tests
         }
 
         [Fact]
-        public void AspNetCoreLogging_Builder_InvalidFactory()
-        {
-            Action act = () => ConfigurationBuilder.BuildConfiguration(
-                s => s.WithMicrosoftLogging((Action<ILoggerFactory>)null));
-
-            act.Should().Throw<ArgumentNullException>()
-                .And.ParamName.Equals("factory");
-        }
-
-        [Fact]
         public void AspNetCoreLogging_Builder_InvalidLoggerFactory()
         {
             Action act = () => ConfigurationBuilder.BuildConfiguration(
-                s => s.WithMicrosoftLogging((ILoggerFactory)null));
+                s => s.WithMicrosoftLogging(null));
 
             act.Should().Throw<ArgumentNullException>()
                 .And.ParamName.Equals("loggerFactory");
-        }
-
-        [Fact]
-        public void AspNetCoreLogging_Builder_ValidFactory()
-        {
-            var services = new ServiceCollection();
-            var provider = services.AddLogging(b => b.AddConsole().SetMinimumLevel(LogLevel.Critical)).BuildServiceProvider();
-            var external = provider.GetRequiredService<ILoggerFactory>();
-
-            var cfg = ConfigurationBuilder.BuildConfiguration(
-                s => s.WithMicrosoftLogging(services));
-
-            cfg.LoggerFactoryType.Should().NotBeNull();
-            cfg.LoggerFactoryType.Should().Be(typeof(MicrosoftLoggerFactoryAdapter));
         }
 
         [Fact]

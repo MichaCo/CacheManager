@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFrameworks>
-      net461;netcoreapp2.1;netcoreapp2.2;netcoreapp3.0;
+      net461;netcoreapp2.1;netcoreapp3.1;net50
     </TargetFrameworks>
     <Version>1.0.0</Version>
     <AssemblyName>CacheManager.Tests</AssemblyName>
@@ -13,6 +13,10 @@
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <!--<PlatformTarget>x64</PlatformTarget>-->
+  </PropertyGroup>
+  
   <ItemGroup>
     <None Update="app.config;Configuration\*.*;xunit.runner.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -21,20 +25,15 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="testhost.x86.dll.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <DependentUpon>App.config</DependentUpon>
+    </None>
     <None Update="testhost.dll.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <DependentUpon>App.config</DependentUpon>
     </None>
   </ItemGroup>
-  <!--<Target Name="CopyCustomContent" AfterTargets="AfterBuild" Condition=" '$(TargetFramework)' == 'netcoreapp2.1' ">
-    <Copy SourceFiles="App.netstandard2.config" DestinationFiles="$(OutDir)\testhost.dll.config" />
-  </Target>
-  <Target Name="CopyCustomContent" AfterTargets="AfterBuild" Condition=" '$(TargetFramework)' == 'netcoreapp2.2' ">
-    <Copy SourceFiles="App.netstandard2.config" DestinationFiles="$(OutDir)\testhost.dll.config" />
-  </Target>
-  <Target Name="CopyCustomContent" AfterTargets="AfterBuild" Condition=" '$(TargetFramework)' == 'netcoreapp3.0' ">
-    <Copy SourceFiles="App.netstandard2.config" DestinationFiles="$(OutDir)\testhost.dll.config" />
-  </Target>-->
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\CacheManager.Serialization.DataContract\CacheManager.Serialization.DataContract.csproj" />
@@ -53,18 +52,25 @@
     <PackageReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.2' ">
-    <PackageReference Include="Microsoft.AspNetCore.App" />
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp3.1' ">
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="3.1.0" />
+  </ItemGroup>
+  
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net50' ">
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="5.0.0" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp3.0' ">
-    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="3.0.0" />
-  </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.9.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.9.4" />
+    <PackageReference Include="xunit.analyzers" Version="0.10.0" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.3">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="xunit" Version="2.4.1" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.1" />
+
     <PackageReference Include="FluentAssertions" Version="5.4.2" />
   </ItemGroup>
 
@@ -90,18 +96,14 @@
     <DefineConstants>$(DefineConstants);REDISENABLED;MOCK_HTTPCONTEXT_ENABLED;</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.1' ">
-    <DefineConstants>$(DefineConstants);REDISENABLED;NETCOREAPP2;</DefineConstants>
+    <DefineConstants>$(DefineConstants);REDISENABLED;</DefineConstants>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.2' ">
-    <DefineConstants>$(DefineConstants);REDISENABLED;NETCOREAPP2;</DefineConstants>
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp3.1' ">
+    <DefineConstants>$(DefineConstants);REDISENABLED;</DefineConstants>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp3.0' ">
-    <DefineConstants>$(DefineConstants);REDISENABLED;NETCOREAPP2;</DefineConstants>
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'net50' ">
+    <DefineConstants>$(DefineConstants);REDISENABLED;</DefineConstants>
   </PropertyGroup>
-  <!--<PropertyGroup Condition=" '$(TargetFramework)' == 'net452' ">
-    <DefineConstants>$(DefineConstants);REDISENABLED;MOCK_HTTPCONTEXT_ENABLED;NO_APP_CONFIG;MEMCACHEDENABLED;COUCHBASEENABLED;</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp1.1' ">
-    <DefineConstants>$(DefineConstants);REDISENABLED;NETCOREAPP;COUCHBASEENABLED;</DefineConstants>
-  </PropertyGroup>-->
+  <!--MEMCACHEDENABLED-->
+  <!--COUCHBASEENABLED-->
 </Project>

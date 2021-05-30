@@ -35,13 +35,6 @@ namespace CacheManager.Core.Internal
             NotNull(configuration, nameof(configuration));
             NotNull(loggerFactory, nameof(loggerFactory));
 
-#if !NETSTANDARD2
-            if (configuration.SerializerType == null)
-            {
-                return new BinaryCacheSerializer();
-            }
-#endif
-
             if (configuration.SerializerType != null)
             {
                 CheckImplements<ICacheSerializer>(configuration.SerializerType);

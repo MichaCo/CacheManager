@@ -1,7 +1,7 @@
 ﻿using System;
 using CacheManager.Core.Internal;
 
-#if !NETSTANDARD2
+#if !NETSTANDARD2_0
 
 using System.Runtime.Serialization;
 
@@ -16,7 +16,7 @@ namespace CacheManager.Core
     /// information needed by the cache handles and manager.
     /// </summary>
     /// <typeparam name="T">The type of the cache value.</typeparam>
-#if !NETSTANDARD2
+#if !NETSTANDARD2_0
 
     [Serializable]
     public class CacheItem<T> : ISerializable, ICacheItemProperties
@@ -83,7 +83,7 @@ namespace CacheManager.Core
         {
         }
 
-#if !NETSTANDARD2
+#if !NETSTANDARD2_0
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CacheItem{T}"/> class.
@@ -226,7 +226,7 @@ namespace CacheManager.Core
         /// </summary>
         public bool UsesExpirationDefaults { get; } = true;
 
-#if !NETSTANDARD2
+#if !NETSTANDARD2_0
 
         /// <summary>
         /// Populates a <see cref="System.Runtime.Serialization.SerializationInfo"/> with the data

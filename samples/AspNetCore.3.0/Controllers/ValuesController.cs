@@ -13,7 +13,7 @@ namespace AspnetCore.WebApp.Controllers
         public ValuesController(ICacheManager<string> valuesCache, ICacheManager<int?> nullableInts)
         {
             _cache = valuesCache;
-            nullableInts.Add("key", null);
+            nullableInts.Add("key", 1);
         }
 
         // DELETE api/values/key

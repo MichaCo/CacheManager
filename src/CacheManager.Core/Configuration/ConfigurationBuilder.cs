@@ -741,33 +741,6 @@ namespace CacheManager.Core
             return this;
         }
 
-#if !NETSTANDARD2
-
-        /// <summary>
-        /// Configures a <see cref="BinaryCacheSerializer"/> to be used for serialization and deserialization.
-        /// </summary>
-        /// <returns>The builder part.</returns>
-        public ConfigurationBuilderCachePart WithBinarySerializer()
-        {
-            Configuration.SerializerType = typeof(BinaryCacheSerializer);
-            return this;
-        }
-
-        /// <summary>
-        /// Configures a <see cref="BinaryCacheSerializer"/> to be used for serialization and deserialization.
-        /// </summary>
-        /// <param name="serializationFormatter">The <see cref="BinaryFormatter"/> for serialization.</param>
-        /// <param name="deserializationFormatter">The <see cref="BinaryFormatter"/> for deserialization.</param>
-        /// <returns>The builder part.</returns>
-        public ConfigurationBuilderCachePart WithBinarySerializer(BinaryFormatter serializationFormatter, BinaryFormatter deserializationFormatter)
-        {
-            Configuration.SerializerType = typeof(BinaryCacheSerializer);
-            Configuration.SerializerTypeArguments = new object[] { serializationFormatter, deserializationFormatter };
-            return this;
-        }
-
-#endif
-
         /// <summary>
         /// Enables logging by setting the <see cref="Logging.ILoggerFactory"/> for the cache manager instance.
         /// </summary>

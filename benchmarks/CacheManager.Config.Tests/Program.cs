@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading;
 using CacheManager.Core;
 using CacheManager.Redis;
+using Microsoft.Extensions.DependencyInjection;
 #if !NETCOREAPP
 using Enyim.Caching;
 using Enyim.Caching.Configuration;
@@ -22,12 +23,18 @@ namespace CacheManager.Config.Tests
             var iterations = 100;
             try
             {
-                var builder = new Core.ConfigurationBuilder("myCache");
-                builder.WithMicrosoftLogging(f =>
+                var services = new ServiceCollection();
+                services.AddLogging(c =>
                 {
-                    f.AddConsole(LogLevel.Warning);
-                    ////f.AddDebug(LogLevel.Debug);
+                    c.AddSystemdConsole();
+                    c.SetMinimumLevel(LogLevel.Information);
                 });
+
+                var provider = services.BuildServiceProvider();
+                var loggerFactory = provider.GetRequiredService<ILoggerFactory>();
+
+                var builder = new Core.ConfigurationBuilder("myCache");
+                builder.WithMicrosoftLogging(loggerFactory);
 
                 builder
                     .WithRetryTimeout(500)
@@ -60,12 +67,6 @@ namespace CacheManager.Config.Tests
                 //builder.WithRedisConfiguration("redis", "localhost:22121");
 
                 builder.WithBondCompactBinarySerializer();
-
-#if !NETCOREAPP
-                //var memcachedCfg = new MemcachedClientConfiguration();
-                //memcachedCfg.AddServer("localhost", 11211);
-                //builder.WithMemcachedCacheHandle(memcachedCfg);
-#endif
 
                 var cacheA = new BaseCacheManager<string>(builder.Build());
                 cacheA.Clear();

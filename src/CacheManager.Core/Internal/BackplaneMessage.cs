@@ -116,9 +116,7 @@ namespace CacheManager.Core.Internal
         /// Gets or sets the key.
         /// </summary>
         /// <value>The key.</value>
-        public string? Key { get; }
-
-#pragma warning disable CA1819 // Properties should not return arrays
+        public string Key { get; }
 
         /// <summary>
         /// Gets or sets the owner identity.
@@ -126,13 +124,11 @@ namespace CacheManager.Core.Internal
         /// <value>The owner identity.</value>
         public byte[] OwnerIdentity { get; }
 
-#pragma warning restore CA1819 // Properties should not return arrays
-
         /// <summary>
         /// Gets or sets the region.
         /// </summary>
         /// <value>The region.</value>
-        public string? Region { get; private set; }
+        public string Region { get; private set; }
 
         /// <summary>
         /// Gets or sets the cache action.
@@ -303,7 +299,7 @@ namespace CacheManager.Core.Internal
             {
                 case Changed:
                     writer.WriteByte((byte)message.ChangeAction);
-                    if (!IsNullOrEmpty(message.Region))
+                    if (!string.IsNullOrEmpty(message.Region))
                     {
                         writer.WriteByte(2);
                         writer.WriteString(message.Region);
@@ -312,14 +308,12 @@ namespace CacheManager.Core.Internal
                     {
                         writer.WriteByte(1);
                     }
-
-                    EnsureNotNull(message.Key, "Key was expected but was null.");
                     writer.WriteString(message.Key);
 
                     break;
 
                 case Removed:
-                    if (!IsNullOrEmpty(message.Region))
+                    if (!string.IsNullOrEmpty(message.Region))
                     {
                         writer.WriteByte(2);
                         writer.WriteString(message.Region);
@@ -328,14 +322,11 @@ namespace CacheManager.Core.Internal
                     {
                         writer.WriteByte(1);
                     }
-
-                    EnsureNotNull(message.Key, "Key was expected but was null.");
                     writer.WriteString(message.Key);
 
                     break;
 
                 case ClearRegion:
-                    EnsureNotNull(message.Region, "Region was expected but was null.");
                     writer.WriteString(message.Region);
                     break;
 
@@ -354,7 +345,7 @@ namespace CacheManager.Core.Internal
         /// </returns>
         /// <exception cref="System.ArgumentException">If <paramref name="message"/> is null.</exception>
         /// <exception cref="System.ArgumentException">If the message is not valid.</exception>
-        public static IEnumerable<BackplaneMessage> Deserialize(byte[] message, byte[]? skipOwner = null)
+        public static IEnumerable<BackplaneMessage> Deserialize(byte[] message, byte[] skipOwner = null)
         {
             NotNull(message, nameof(message));
             if (message.Length < 5)
@@ -381,7 +372,7 @@ namespace CacheManager.Core.Internal
             }
         }
 
-        private static BackplaneMessage DeserializeMessage(MessageReader reader, byte[]? existingOwner)
+        private static BackplaneMessage DeserializeMessage(MessageReader reader, byte[] existingOwner)
         {
             var owner = existingOwner ?? reader.ReadBytes(reader.ReadInt());
             var action = (BackplaneAction)reader.ReadByte();

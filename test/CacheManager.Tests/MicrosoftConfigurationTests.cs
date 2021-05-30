@@ -374,8 +374,6 @@ namespace CacheManager.Tests
             config.CacheHandleConfigurations[0].Key.Should().Be("name");    // now key gets set to name
         }
 
-#if !NETCOREAPP2
-
         [Fact]
         public void Configuration_CacheHandle_KnownType_CouchbaseNoKey()
         {
@@ -431,22 +429,7 @@ namespace CacheManager.Tests
             var cache = new BaseCacheManager<int>(config);
         }
 
-        [Fact]
-        public void Configuration_CacheHandle_KnownType_MemcachedNoKey()
-        {
-            var data = new Dictionary<string, string>
-            {
-                {"cacheManagers:0:name", "name"},
-                {"cacheManagers:0:handles:0:knownType", "Memcached"},
-            };
-
-            var config = GetConfiguration(data);
-            Action action = () => config.GetCacheConfiguration("name");
-            action.Should().Throw<InvalidOperationException>().WithMessage("*'key' or 'name'*");
-        }
-
 #if MEMCACHEDENABLED
-
         [Fact]
         [Trait("category", "memcached")]
         public void Configuration_CacheHandle_KnownType_Memcached()
@@ -471,6 +454,21 @@ namespace CacheManager.Tests
         }
 
 #endif
+#if NET461
+
+        [Fact]
+        public void Configuration_CacheHandle_KnownType_MemcachedNoKey()
+        {
+            var data = new Dictionary<string, string>
+            {
+                {"cacheManagers:0:name", "name"},
+                {"cacheManagers:0:handles:0:knownType", "Memcached"},
+            };
+
+            var config = GetConfiguration(data);
+            Action action = () => config.GetCacheConfiguration("name");
+            action.Should().Throw<InvalidOperationException>().WithMessage("*'key' or 'name'*");
+        }
 
         [Fact]
         public void Configuration_CacheHandle_KnownType_MemcachedB()
@@ -945,31 +943,6 @@ namespace CacheManager.Tests
             config.SerializerType.Should().Be(typeof(object));
             act.Should().Throw<InvalidOperationException>().WithMessage("*ICacheSerializer*");
         }
-
-#if !NETCOREAPP2
-
-        [Fact]
-        public void Configuration_Serializer_KnownType_Binary()
-        {
-            var data = new Dictionary<string, string>
-            {
-                {"cacheManagers:0:name", "name"},
-                {"cacheManagers:0:handles:0:knownType", "Dictionary"},
-                {"cacheManagers:0:serializer:knownType", "Binary"}
-            };
-
-            var config = GetConfiguration(data).GetCacheConfiguration("name");
-            Action act = () =>
-            {
-                var cache = new BaseCacheManager<string>(config);
-                cache.Add("key", "value");
-            };
-
-            config.SerializerType.Should().Be(typeof(Core.Internal.BinaryCacheSerializer));
-            act.Should().NotThrow();
-        }
-
-#endif
 
         [Fact]
         public void Configuration_Serializer_KnownType_Json()

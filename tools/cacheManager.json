@@ -95,8 +95,8 @@
       "properties": {
         "knownType": {
           "type": "string",
-          "enum": [ "Binary", "Json", "Protobuf", "GzJson", "BondCompactBinary", "BondFastBinary", "BondSimpleJson" ],
-          "description": "Define a known serializer type instead of setting 'serializerType'. The respective library has to be installed. The default 'binary' might not be available on all platforms."
+          "enum": [ "Json", "Protobuf", "GzJson", "BondCompactBinary", "BondFastBinary", "BondSimpleJson" ],
+          "description": "Define a known serializer type instead of setting 'serializerType'. The respective library has to be installed."
         }
       },
       "additionalProperties": false

@@ -2,7 +2,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using CacheManager.Core;
-using CacheManager.Core.Internal;
 using CacheManager.Redis;
 using CacheManager.Serialization.Json;
 using FluentAssertions;
@@ -717,22 +716,5 @@ namespace CacheManager.Tests
                     .WithJsonSerializer(serializationSettings, deserializationSettings)
                     .WithSystemRuntimeCacheHandle());
         }
-
-#if !NETCOREAPP2
-
-        [Fact]
-        [ReplaceCulture]
-        public void CacheFactory_Build_WithSerializer_SimpleBinary()
-        {
-            var cache = CacheFactory.Build(
-                p =>
-                p.WithSerializer(typeof(BinaryCacheSerializer))
-                    .WithSystemRuntimeCacheHandle());
-
-            cache.Configuration.SerializerType.Should().NotBeNull();
-            cache.Configuration.SerializerType.Should().Be(typeof(BinaryCacheSerializer));
-        }
-
-#endif
     }
 }

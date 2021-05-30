@@ -16,7 +16,6 @@ namespace CacheManager.Benchmarks
     {
         private int _iterations = 1000;
         private Queue<CacheItem<TestPoco>> _payload;
-        private BinaryCacheSerializer _binary = new BinaryCacheSerializer();
         private JsonCacheSerializer _json = new JsonCacheSerializer();
         private GzJsonCacheSerializer _jsonGz = new GzJsonCacheSerializer();
         private ProtoBufSerializer _proto = new Serialization.ProtoBuf.ProtoBufSerializer();
@@ -65,20 +64,6 @@ namespace CacheManager.Benchmarks
             var item = _payload.Dequeue();
             action(item);
             _payload.Enqueue(item);
-        }
-
-        [Benchmark()]
-        public void BinarySerializer()
-        {
-            ExecRun((item) =>
-            {
-                var data = _binary.SerializeCacheItem(item);
-                var result = _binary.DeserializeCacheItem<TestPoco>(data, _pocoType);
-                if (result == null)
-                {
-                    throw new Exception();
-                }
-            });
         }
 
         [Benchmark(Baseline = true)]
