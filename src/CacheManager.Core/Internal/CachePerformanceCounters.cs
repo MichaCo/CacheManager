@@ -175,9 +175,12 @@
                         _counterTimer.Dispose();
                     }
 
-                    foreach (var counter in _counters)
+                    if (_counters != null)
                     {
-                        counter.Dispose();
+                        foreach (var counter in _counters)
+                        {
+                            counter.Dispose();
+                        }
                     }
                 }
                 catch
@@ -186,7 +189,7 @@
             }
         }
 
-        private PerformanceCounter GetCounter(CachePerformanceCounterType type) => _counters[(int)type];
+        private PerformanceCounter GetCounter(CachePerformanceCounterType type) => _counters?[(int)type] ?? throw new InvalidOperationException("Counters not initialized");
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "At this point its fine")]
         private void InitializeCounters()

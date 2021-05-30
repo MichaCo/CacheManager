@@ -25,7 +25,6 @@ namespace CacheManager.Core
     {
         private const string Hours = "h";
         private const string Minutes = "m";
-        private const string Seconds = "s";
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ConfigurationBuilder"/> class
@@ -67,7 +66,7 @@ namespace CacheManager.Core
         /// <param name="name">The name of the cache manager.</param>
         /// <param name="forConfiguration">The configuration the builder should be instantiated for.</param>
         public ConfigurationBuilder(string name, ICacheManagerConfiguration forConfiguration)
-            : base((CacheManagerConfiguration)forConfiguration)
+            : base(NotNull((CacheManagerConfiguration)forConfiguration, nameof(forConfiguration)))
         {
             NotNullOrWhiteSpace(name, nameof(name));
             Configuration.Name = name;
@@ -591,7 +590,7 @@ namespace CacheManager.Core
         /// <param name="options">Optional settings for the cache instance.</param>
         /// <returns>The builder part.</returns>
         public ConfigurationBuilderCacheHandlePart WithDictionaryHandle(bool isBackplaneSource = false, DictionaryCacheOptions options = null) =>
-            WithHandle(typeof(DictionaryCacheHandle<>), Guid.NewGuid().ToString("N"), isBackplaneSource, options);
+            WithHandle(typeof(DictionaryCacheHandle<>), Guid.NewGuid().ToString("N", CultureInfo.InvariantCulture), isBackplaneSource, options == null ? new object[0] : new[] { options });
 
         /// <summary>
         /// Adds a cache dictionary cache handle to the cache manager.
@@ -605,7 +604,7 @@ namespace CacheManager.Core
         /// <param name="options">Optional settings for the cache instance.</param>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="handleName"/> is null.</exception>
         public ConfigurationBuilderCacheHandlePart WithDictionaryHandle(string handleName, bool isBackplaneSource = false, DictionaryCacheOptions options = null) =>
-            WithHandle(typeof(DictionaryCacheHandle<>), handleName, isBackplaneSource, options);
+            WithHandle(typeof(DictionaryCacheHandle<>), handleName, isBackplaneSource, options == null ? new object[0] : new[] { options });
 
         /// <summary>
         /// Adds a cache handle with the given <c>Type</c> and name.

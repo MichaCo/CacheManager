@@ -11,7 +11,7 @@ namespace CacheManager.Core.Internal
     /// <para>Actually it is not advisable to not use <see cref="BaseCacheHandle{T}"/>.</para>
     /// </summary>
     /// <typeparam name="TCacheValue">The type of the cache value.</typeparam>
-    public abstract class BaseCacheHandle<TCacheValue> : BaseCache<TCacheValue>, IDisposable
+    public abstract class BaseCacheHandle<TCacheValue> : BaseCache<TCacheValue>
     {
         private readonly object _updateLock = new object();
 
@@ -45,7 +45,7 @@ namespace CacheManager.Core.Internal
         /// <remarks>
         /// The value will be evaluated by the backplane logic to figure out what to do if remote events are received.
         /// <para>
-        /// If the cache handle is distributed, a remote remove event for example does not cause another <c>Remove</c> call. 
+        /// If the cache handle is distributed, a remote remove event for example does not cause another <c>Remove</c> call.
         /// For in-memory cache handles which are backplane source though, it would trigger a <c>Remove</c>.
         /// </para>
         /// </remarks>

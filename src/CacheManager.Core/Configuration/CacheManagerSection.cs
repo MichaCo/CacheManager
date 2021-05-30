@@ -17,7 +17,6 @@
 
         private const string HandlesName = "cacheHandles";
         private const string ManagersName = "managers";
-        private const string RedisName = "redis";
 
         /// <summary>
         /// Gets the cache handle definitions.
@@ -141,7 +140,7 @@
         /// Returns an enumerator that iterates through the collection.
         /// </summary>
         /// <returns>
-        /// A <see cref="T:System.Collections.Generic.IEnumerator`1"/> that can be used to iterate
+        /// A <see cref="System.Collections.Generic.IEnumerator{T}"/> that can be used to iterate
         /// through the collection.
         /// </returns>
         public new IEnumerator<CacheHandleDefinition> GetEnumerator()
@@ -155,21 +154,21 @@
         }
 
         /// <summary>
-        /// When overridden in a derived class, creates a new <see cref="T:System.Configuration.ConfigurationElement"/>.
+        /// When overridden in a derived class, creates a new <see cref="System.Configuration.ConfigurationElement"/>.
         /// </summary>
-        /// <returns>A new <see cref="T:System.Configuration.ConfigurationElement"/>.</returns>
+        /// <returns>A new <see cref="System.Configuration.ConfigurationElement"/>.</returns>
         protected override ConfigurationElement CreateNewElement() => new CacheHandleDefinition();
 
         /// <summary>
         /// Gets the element key for a specified configuration element when overridden in a derived class.
         /// </summary>
         /// <param name="element">
-        /// The <see cref="T:System.Configuration.ConfigurationElement"/> to return the key for.
+        /// The <see cref="System.Configuration.ConfigurationElement"/> to return the key for.
         /// </param>
         /// <returns>
-        /// An <see cref="T:System.Object"/> that acts as the key for the specified <see cref="T:System.Configuration.ConfigurationElement"/>.
+        /// An <see cref="System.Object"/> that acts as the key for the specified <see cref="System.Configuration.ConfigurationElement"/>.
         /// </returns>
-        protected override object GetElementKey(ConfigurationElement element) => ((CacheHandleDefinition)element).Id;
+        protected override object GetElementKey(ConfigurationElement element) => ((CacheHandleDefinition)element)?.Id;
     }
 
     /// <summary>
@@ -181,7 +180,7 @@
         /// Returns an enumerator that iterates through the collection.
         /// </summary>
         /// <returns>
-        /// A <see cref="T:System.Collections.Generic.IEnumerator`1"/> that can be used to iterate
+        /// A <see cref="System.Collections.Generic.IEnumerator{T}"/> that can be used to iterate
         /// through the collection.
         /// </returns>
         public new IEnumerator<CacheManagerHandleCollection> GetEnumerator()
@@ -195,21 +194,21 @@
         }
 
         /// <summary>
-        /// When overridden in a derived class, creates a new <see cref="T:System.Configuration.ConfigurationElement"/>.
+        /// When overridden in a derived class, creates a new <see cref="System.Configuration.ConfigurationElement"/>.
         /// </summary>
-        /// <returns>A new <see cref="T:System.Configuration.ConfigurationElement"/>.</returns>
+        /// <returns>A new <see cref="System.Configuration.ConfigurationElement"/>.</returns>
         protected override ConfigurationElement CreateNewElement() => new CacheManagerHandleCollection();
 
         /// <summary>
         /// Gets the element key for a specified configuration element when overridden in a derived class.
         /// </summary>
         /// <param name="element">
-        /// The <see cref="T:System.Configuration.ConfigurationElement"/> to return the key for.
+        /// The <see cref="System.Configuration.ConfigurationElement"/> to return the key for.
         /// </param>
         /// <returns>
-        /// An <see cref="T:System.Object"/> that acts as the key for the specified <see cref="T:System.Configuration.ConfigurationElement"/>.
+        /// An <see cref="System.Object"/> that acts as the key for the specified <see cref="System.Configuration.ConfigurationElement"/>.
         /// </returns>
-        protected override object GetElementKey(ConfigurationElement element) => ((CacheManagerHandleCollection)element).Name;
+        protected override object GetElementKey(ConfigurationElement element) => ((CacheManagerHandleCollection)element)?.Name;
     }
 
     /// <summary>
@@ -491,7 +490,7 @@
         /// Returns an enumerator that iterates through the collection.
         /// </summary>
         /// <returns>
-        /// A <see cref="T:System.Collections.Generic.IEnumerator`1"/> that can be used to iterate
+        /// A <see cref="System.Collections.Generic.IEnumerator{T}"/> that can be used to iterate
         /// through the collection.
         /// </returns>
         public new IEnumerator<CacheManagerHandle> GetEnumerator()
@@ -505,20 +504,20 @@
         }
 
         /// <summary>
-        /// When overridden in a derived class, creates a new <see cref="T:System.Configuration.ConfigurationElement"/>.
+        /// When overridden in a derived class, creates a new <see cref="System.Configuration.ConfigurationElement"/>.
         /// </summary>
-        /// <returns>A new <see cref="T:System.Configuration.ConfigurationElement"/>.</returns>
+        /// <returns>A new <see cref="System.Configuration.ConfigurationElement"/>.</returns>
         protected override ConfigurationElement CreateNewElement() => new CacheManagerHandle();
 
         /// <summary>
         /// Gets the element key for a specified configuration element when overridden in a derived class.
         /// </summary>
         /// <param name="element">
-        /// The <see cref="T:System.Configuration.ConfigurationElement"/> to return the key for.
+        /// The <see cref="System.Configuration.ConfigurationElement"/> to return the key for.
         /// </param>
         /// <returns>
-        /// An <see cref="T:System.Object"/> that acts as the key for the specified <see cref="T:System.Configuration.ConfigurationElement"/>.
+        /// An <see cref="System.Object"/> that acts as the key for the specified <see cref="System.Configuration.ConfigurationElement"/>.
         /// </returns>
-        protected override object GetElementKey(ConfigurationElement element) => ((CacheManagerHandle)element).Name;
+        protected override object GetElementKey(ConfigurationElement element) => ((CacheManagerHandle)element)?.Name;
     }
 }

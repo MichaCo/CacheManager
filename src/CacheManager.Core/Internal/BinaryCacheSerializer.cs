@@ -1,5 +1,6 @@
 ﻿#if !NETSTANDARD2
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Runtime.Serialization.Formatters;
 using System.Runtime.Serialization.Formatters.Binary;
@@ -70,7 +71,15 @@ namespace CacheManager.Core.Internal
 
         /// <inheritdoc/>
         public CacheItem<T> DeserializeCacheItem<T>(byte[] value, Type valueType)
-            => (CacheItem<T>)Deserialize(value, valueType);
+        {
+            var result = Deserialize(value, valueType);
+            if (result == null)
+            {
+                return null;
+            }
+
+            return (CacheItem<T>)result;
+        }
 
         /// <inheritdoc/>
         public byte[] Serialize<T>(T value)
@@ -89,7 +98,7 @@ namespace CacheManager.Core.Internal
         }
 
         /// <inheritdoc/>
-        public byte[] SerializeCacheItem<T>(CacheItem<T> value)
+        public byte[] SerializeCacheItem<T>(CacheItem<T>? value)
             => Serialize(value);
     }
 }

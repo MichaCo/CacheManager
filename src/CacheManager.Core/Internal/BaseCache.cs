@@ -58,14 +58,8 @@ namespace CacheManager.Core.Internal
         /// <exception cref="ArgumentNullException">If the <paramref name="key"/> is null.</exception>
         public virtual TCacheValue this[string key]
         {
-            get
-            {
-                return Get(key);
-            }
-            set
-            {
-                Put(key, value);
-            }
+            get => Get(key);
+            set => Put(key, value);
         }
 
         /// <summary>
@@ -84,17 +78,10 @@ namespace CacheManager.Core.Internal
         /// <exception cref="ArgumentNullException">
         /// If the <paramref name="key"/> or <paramref name="region"/> is null.
         /// </exception>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1023:IndexersShouldNotBeMultidimensional", Justification = "We need both overloads.")]
         public virtual TCacheValue this[string key, string region]
         {
-            get
-            {
-                return Get(key, region);
-            }
-            set
-            {
-                Put(key, value, region);
-            }
+            get => Get(key, region);
+            set => Put(key, value, region);
         }
 
         /// <summary>
@@ -204,17 +191,16 @@ namespace CacheManager.Core.Internal
         /// <param name="key">The key being used to identify the item within the cache.</param>
         /// <returns>The value being stored in the cache for the given <paramref name="key"/>.</returns>
         /// <exception cref="ArgumentNullException">If the <paramref name="key"/> is null.</exception>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Get", Justification = "Maybe at some point.")]
         public virtual TCacheValue Get(string key)
         {
             var item = GetCacheItem(key);
 
-            if (item != null && item.Key.Equals(key))
+            if (item != null && item.Key.Equals(key, StringComparison.OrdinalIgnoreCase))
             {
                 return item.Value;
             }
 
-            return default(TCacheValue);
+            return default;
         }
 
         /// <summary>
@@ -228,17 +214,19 @@ namespace CacheManager.Core.Internal
         /// <exception cref="ArgumentNullException">
         /// If the <paramref name="key"/> or <paramref name="region"/> is null.
         /// </exception>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Get", Justification = "Maybe at some point.")]
         public virtual TCacheValue Get(string key, string region)
         {
             var item = GetCacheItem(key, region);
 
-            if (item != null && item.Key.Equals(key) && item.Region != null && item.Region.Equals(region))
+            if (item != null
+                && item.Key.Equals(key, StringComparison.OrdinalIgnoreCase)
+                && item.Region != null
+                && item.Region.Equals(region, StringComparison.OrdinalIgnoreCase))
             {
                 return item.Value;
             }
 
-            return default(TCacheValue);
+            return default;
         }
 
         /// <summary>
@@ -251,7 +239,6 @@ namespace CacheManager.Core.Internal
         /// <exception cref="InvalidCastException">
         /// If no explicit cast is defined from <c>TCacheValue</c> to <c>TOut</c>.
         /// </exception>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Get", Justification = "Maybe at some point.")]
         public virtual TOut Get<TOut>(string key)
         {
             object value = Get(key);
@@ -273,7 +260,6 @@ namespace CacheManager.Core.Internal
         /// <exception cref="InvalidCastException">
         /// If no explicit cast is defined from <c>TCacheValue</c> to <c>TOut</c>.
         /// </exception>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Get", Justification = "Maybe at some point.")]
         public virtual TOut Get<TOut>(string key, string region)
         {
             object value = Get(key, region);
@@ -500,7 +486,7 @@ namespace CacheManager.Core.Internal
         {
             if (value == null)
             {
-                return default(TOut);
+                return default;
             }
 
             try

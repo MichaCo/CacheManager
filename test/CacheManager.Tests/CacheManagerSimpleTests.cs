@@ -24,6 +24,19 @@ namespace CacheManager.Tests
         #region general
 
         [Fact]
+        public void CacheManager_NullableTypes_ShouldNotAllowNulls()
+        {
+            var manager = new BaseCacheManager<DateTime?>(ConfigurationBuilder.BuildConfiguration(s => s.WithDictionaryHandle()));
+
+            DateTime? value = new Nullable<DateTime>();
+            Assert.Null(value);
+            Action act = () => manager.Add(Guid.NewGuid().ToString(), value);
+
+            act.Should().Throw<ArgumentNullException>()
+                .And.ParamName.Equals("value");
+        }
+
+        [Fact]
         public void CacheManager_AddCacheItem_WithExpMode_ButWithoutTimeout()
         {
             // arrange

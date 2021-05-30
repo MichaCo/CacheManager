@@ -211,8 +211,7 @@ namespace CacheManager.Core.Internal
             // clear needs a lock, otherwise we might mess up the overall counts
             foreach (var key in _counters.Keys)
             {
-                CacheStatsCounter counter = null;
-                if (_counters.TryGetValue(key, out counter))
+                if (_counters.TryGetValue(key, out var counter))
                 {
                     counter.Set(CacheStatsCounterType.Items, 0L);
                     counter.Increment(CacheStatsCounterType.ClearCalls);
@@ -371,7 +370,7 @@ namespace CacheManager.Core.Internal
             {
                 if (_isPerformanceCounterEnabled)
                 {
-                    _performanceCounters.Dispose();
+                    _performanceCounters?.Dispose();
                 }
             }
         }
@@ -380,8 +379,7 @@ namespace CacheManager.Core.Internal
         {
             NotNullOrWhiteSpace(key, nameof(key));
 
-            CacheStatsCounter counter = null;
-            if (!_counters.TryGetValue(key, out counter))
+            if (!_counters.TryGetValue(key, out var counter))
             {
                 counter = new CacheStatsCounter();
                 if (_counters.TryAdd(key, counter))
@@ -399,7 +397,7 @@ namespace CacheManager.Core.Internal
         {
             yield return GetCounter(_nullRegionKey);
 
-            if (!string.IsNullOrWhiteSpace(region))
+            if (!IsNullOrEmpty(region))
             {
                 var counter = GetCounter(region);
                 if (counter != null)

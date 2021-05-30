@@ -229,14 +229,14 @@ namespace CacheManager.Core
 #if !NETSTANDARD2
 
         /// <summary>
-        /// Populates a <see cref="T:System.Runtime.Serialization.SerializationInfo"/> with the data
+        /// Populates a <see cref="System.Runtime.Serialization.SerializationInfo"/> with the data
         /// needed to serialize the target object.
         /// </summary>
         /// <param name="info">
-        /// The <see cref="T:System.Runtime.Serialization.SerializationInfo"/> to populate with data.
+        /// The <see cref="System.Runtime.Serialization.SerializationInfo"/> to populate with data.
         /// </param>
         /// <param name="context">
-        /// The destination (see <see cref="T:System.Runtime.Serialization.StreamingContext"/>) for
+        /// The destination (see <see cref="System.Runtime.Serialization.StreamingContext"/>) for
         /// this serialization.
         /// </param>
         /// <exception cref="System.ArgumentNullException">If info is null.</exception>
