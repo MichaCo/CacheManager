@@ -99,7 +99,7 @@ namespace CacheManager.Tests
 #endif
 
         [Fact]
-        public void Cfg_Valid_CfgFile_EnabledStatsAndPerformanceCounters()
+        public void Cfg_Valid_CfgFile_EnabledStats()
         {
             // arrange
             string fileName = TestConfigurationHelper.GetCfgFileName(@"/Configuration/configuration.valid.allFeatures.config");
@@ -112,34 +112,10 @@ namespace CacheManager.Tests
             // assert
             cache.CacheHandles.Select(p => p.Configuration.EnableStatistics)
                 .Should().AllBeEquivalentTo(true);
-            cache.CacheHandles.Select(p => p.Configuration.EnablePerformanceCounters)
-                .Should().AllBeEquivalentTo(true);
-        }
-
-        /// <summary>
-        /// Expecting not defined enableStats and enablePerformanceCounters in config. And
-        /// validating the default fall back to stats = true and performanceCounters = false.
-        /// </summary>
-        [Fact]
-        public void Cfg_Valid_CfgFile_EnabledStatsPerformanceCountersDefaults()
-        {
-            // arrange
-            string fileName = TestConfigurationHelper.GetCfgFileName(@"/Configuration/configuration.valid.allFeatures.config");
-            string cacheName = "DefaultSysMemCache";
-
-            // act
-            var cfg = ConfigurationBuilder.LoadConfigurationFile(fileName, cacheName);
-            var cache = CacheFactory.FromConfiguration<object>(cfg);
-
-            // assert
-            cache.CacheHandles.Select(p => p.Configuration.EnableStatistics)
-                .Should().AllBeEquivalentTo(true);
-            cache.CacheHandles.Select(p => p.Configuration.EnablePerformanceCounters)
-                .Should().AllBeEquivalentTo(false);
         }
 
         [Fact]
-        public void Cfg_Valid_CfgFile_DisableStatsAndPerformanceCounters()
+        public void Cfg_Valid_CfgFile_DisableStats()
         {
             // arrange
             string fileName = TestConfigurationHelper.GetCfgFileName(@"/Configuration/configuration.valid.allFeatures.config");
@@ -151,8 +127,6 @@ namespace CacheManager.Tests
 
             // assert
             cache.CacheHandles.Select(p => p.Configuration.EnableStatistics)
-                .Should().AllBeEquivalentTo(false);
-            cache.CacheHandles.Select(p => p.Configuration.EnablePerformanceCounters)
                 .Should().AllBeEquivalentTo(false);
         }
 

@@ -311,7 +311,6 @@ namespace CacheManager.Core
                     ExpirationMode = handleDef.ExpirationMode,
                     ExpirationTimeout = handleDef.ExpirationTimeout,
                     EnableStatistics = managerCfg.EnableStatistics,
-                    EnablePerformanceCounters = managerCfg.EnablePerformanceCounters,
                     IsBackplaneSource = handleItem.IsBackplaneSource
                 };
 
@@ -425,16 +424,6 @@ namespace CacheManager.Core
         }
 
         /// <summary>
-        /// Disables performance counters for this cache handle.
-        /// </summary>
-        /// <returns>The builder part.</returns>
-        public ConfigurationBuilderCacheHandlePart DisablePerformanceCounters()
-        {
-            Configuration.EnablePerformanceCounters = false;
-            return this;
-        }
-
-        /// <summary>
         /// Disables statistic gathering for this cache handle.
         /// <para>This also disables performance counters as statistics are required for the counters.</para>
         /// </summary>
@@ -442,19 +431,6 @@ namespace CacheManager.Core
         public ConfigurationBuilderCacheHandlePart DisableStatistics()
         {
             Configuration.EnableStatistics = false;
-            Configuration.EnablePerformanceCounters = false;
-            return this;
-        }
-
-        /// <summary>
-        /// Enables performance counters for this cache handle.
-        /// <para>This also enables statistics, as this is required for performance counters.</para>
-        /// </summary>
-        /// <returns>The builder part.</returns>
-        public ConfigurationBuilderCacheHandlePart EnablePerformanceCounters()
-        {
-            Configuration.EnablePerformanceCounters = true;
-            Configuration.EnableStatistics = true;
             return this;
         }
 

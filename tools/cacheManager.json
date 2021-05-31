@@ -180,10 +180,6 @@
           "type": "boolean",
           "description": "Determines if the cache handle is the backplane's source. (optional; if no backplane is defined, this can stay empty. If a backplane is defined, at least one handle must be flagged.)"
         },
-        "enablePerformanceCounters": {
-          "type": "boolean",
-          "description": "Defines if windows performance counters should be enabled or not."
-        },
         "enableStatistics": {
           "type": "boolean",
           "description": "Defines if statistics should be captured."

@@ -286,7 +286,6 @@ namespace CacheManager.Tests
                     .Builder
                     .WithSystemRuntimeCacheHandle()
                         .EnableStatistics()
-                        .EnablePerformanceCounters()
                     .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(1000))
                 .Build());
 

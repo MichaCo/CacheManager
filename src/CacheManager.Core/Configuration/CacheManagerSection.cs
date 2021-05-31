@@ -318,7 +318,6 @@
         private const string BackplaneNameKey = "backplaneName";
         private const string BackplaneTypeKey = "backplaneType";
         private const string SerializerTypeKey = "serializerType";
-        private const string EnablePerformanceCountersKey = "enablePerformanceCounters";
         private const string EnableStatisticsKey = "enableStatistics";
         private const string MaxRetriesKey = "maxRetries";
         private const string NameKey = "name";
@@ -381,23 +380,6 @@
             set
             {
                 this[SerializerTypeKey] = value;
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether performance counters should be enabled.
-        /// </summary>
-        /// <value><c>true</c> if performance counters should be enabled; otherwise, <c>false</c>.</value>
-        [ConfigurationProperty(EnablePerformanceCountersKey, IsRequired = false, DefaultValue = false)]
-        public bool EnablePerformanceCounters
-        {
-            get
-            {
-                return (bool)this[EnablePerformanceCountersKey];
-            }
-            set
-            {
-                this[EnablePerformanceCountersKey] = value;
             }
         }
 

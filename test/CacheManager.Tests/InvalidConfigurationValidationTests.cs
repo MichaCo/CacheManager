@@ -382,21 +382,6 @@ namespace CacheManager.Tests
 
         [Fact]
         [ReplaceCulture]
-        public void Cfg_InvalidCfgFile_InvalidEnablePerfCounters()
-        {
-            // arrange
-            string fileName = TestConfigurationHelper.GetCfgFileName(@"/Configuration/configuration.invalid.InvalidEnablePerfCounters.config");
-
-            // act
-            Action act = () => ConfigurationBuilder.LoadConfigurationFile(fileName, "c1");
-
-            // assert
-            act.Should().Throw<ConfigurationErrorsException>()
-                .WithMessage("*enablePerformanceCounters*");
-        }
-
-        [Fact]
-        [ReplaceCulture]
         public void Cfg_InvalidCfgFile_ManagerInvalidTimeout()
         {
             // arrange
@@ -570,7 +555,6 @@ namespace CacheManager.Tests
             {
                 Name = "name",
                 UpdateMode = CacheUpdateMode.Up,
-                EnablePerformanceCounters = true,
                 EnableStatistics = true,
                 MaximumRetries = 10012,
                 RetryTimeout = 234,
@@ -583,7 +567,6 @@ namespace CacheManager.Tests
             col.BackplaneName.Should().Be("backplane");
             col.BackplaneType.Should().Be(typeof(string).AssemblyQualifiedName);
             col.UpdateMode.Should().Be(CacheUpdateMode.Up);
-            col.EnablePerformanceCounters.Should().BeTrue();
             col.EnableStatistics.Should().BeTrue();
             col.MaximumRetries.Should().Be(10012);
             col.RetryTimeout.Should().Be(234);

@@ -36,19 +36,16 @@ namespace CacheManager.Core.Internal
         /// If set to <c>true</c> the stats are enabled. Otherwise any statistics and performance
         /// counters will be disabled.
         /// </param>
-        /// <param name="enablePerformanceCounters">
-        /// This feature has been removed in CacheManager 2.0. Parameter is still here to not break compatibility
-        /// </param>
         /// <exception cref="System.ArgumentNullException">
         /// If cacheName or handleName are null.
         /// </exception>
-        public CacheStats(string cacheName, string handleName, bool enabled = true, bool enablePerformanceCounters = false)
+        public CacheStats(string cacheName, string handleName, bool enabled = true)
         {
             NotNullOrWhiteSpace(cacheName, nameof(cacheName));
             NotNullOrWhiteSpace(handleName, nameof(handleName));
 
             // if performance counters are enabled, stats must be enabled, too.
-            _isStatsEnabled = enablePerformanceCounters ? true : enabled;
+            _isStatsEnabled = enabled;
             _counters = new ConcurrentDictionary<string, CacheStatsCounter>();
         }
 

@@ -159,7 +159,6 @@ namespace CacheManager.Examples
                 {
                     settings.WithUpdateMode(CacheUpdateMode.Up)
                         .WithDictionaryHandle()
-                            .EnablePerformanceCounters()
                             .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(10));
                 });
 
@@ -179,7 +178,6 @@ namespace CacheManager.Examples
                 settings
                     .WithUpdateMode(CacheUpdateMode.Up)
                     .WithDictionaryHandle()
-                        .EnablePerformanceCounters()
                         .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(10));
             });
 

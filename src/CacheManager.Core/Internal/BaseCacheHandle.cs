@@ -35,8 +35,7 @@ namespace CacheManager.Core.Internal
             Stats = new CacheStats<TCacheValue>(
                 managerConfiguration.Name,
                 Configuration.Name,
-                Configuration.EnableStatistics,
-                Configuration.EnablePerformanceCounters);
+                Configuration.EnableStatistics);
         }
 
         /// <summary>

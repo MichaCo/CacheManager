@@ -24,7 +24,6 @@ namespace CacheManager.Tests
                 {"cacheManagers:0:retryTimeout", "123"},
                 {"cacheManagers:0:updateMode", "Up"},
                 {"cacheManagers:0:handles:0:knownType", "Dictionary"},
-                {"cacheManagers:0:handles:0:enablePerformanceCounters", "true"},
                 {"cacheManagers:0:handles:0:enableStatistics", "true"},
                 {"cacheManagers:0:handles:0:expirationMode", "Absolute"},
                 {"cacheManagers:0:handles:0:expirationTimeout", "0:10:0"},
@@ -32,7 +31,6 @@ namespace CacheManager.Tests
                 {"cacheManagers:0:handles:0:name", "handleName"},
                 {"cacheManagers:0:handles:0:key", key},
                 {"cacheManagers:0:handles:1:knownType", "Dictionary"},
-                {"cacheManagers:0:handles:1:enablePerformanceCounters", "false"},
                 {"cacheManagers:0:handles:1:enableStatistics", "false"},
                 {"cacheManagers:0:handles:1:expirationMode", "Sliding"},
                 {"cacheManagers:0:handles:1:expirationTimeout", "0:20:0"},
@@ -567,7 +565,6 @@ namespace CacheManager.Tests
             {
                 {"cacheManagers:0:name", "cacheName"},
                 {"cacheManagers:0:handles:0:knownType", "Dictionary"},
-                {"cacheManagers:0:handles:0:enablePerformanceCounters", "true"},
                 {"cacheManagers:0:handles:0:enableStatistics", "true"},
                 {"cacheManagers:0:handles:0:expirationMode", "Absolute"},
                 {"cacheManagers:0:handles:0:expirationTimeout", "0:10:0"},
@@ -578,7 +575,6 @@ namespace CacheManager.Tests
 
             var config = GetConfiguration(data).GetCacheConfiguration("cacheName");
             config.Name.Should().Be("cacheName");
-            config.CacheHandleConfigurations[0].EnablePerformanceCounters.Should().BeTrue();
             config.CacheHandleConfigurations[0].EnableStatistics.Should().BeTrue();
             config.CacheHandleConfigurations[0].ExpirationMode.Should().Be(ExpirationMode.Absolute);
             config.CacheHandleConfigurations[0].ExpirationTimeout.Should().Be(TimeSpan.FromMinutes(10));
@@ -644,21 +640,6 @@ namespace CacheManager.Tests
                 {"cacheManagers:0:name", "cacheName"},
                 {"cacheManagers:0:handles:0:knownType", "Dictionary"},
                 {"cacheManagers:0:handles:0:enableStatistics", "invalid"}
-            };
-
-            Action act = () => GetConfiguration(data).GetCacheConfiguration("cacheName");
-            act.Should().Throw<InvalidOperationException>().WithMessage("*Failed to convert*");
-        }
-
-        [Fact]
-        [ReplaceCulture]
-        public void Configuration_CacheHandle_InvalidPerCounters()
-        {
-            var data = new Dictionary<string, string>
-            {
-                {"cacheManagers:0:name", "cacheName"},
-                {"cacheManagers:0:handles:0:knownType", "Dictionary"},
-                {"cacheManagers:0:handles:0:enablePerformanceCounters", "invalid"}
             };
 
             Action act = () => GetConfiguration(data).GetCacheConfiguration("cacheName");

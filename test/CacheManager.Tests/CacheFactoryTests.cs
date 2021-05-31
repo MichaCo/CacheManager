@@ -240,41 +240,6 @@ namespace CacheManager.Tests
 
         [Fact]
         [ReplaceCulture]
-        public void CacheFactory_Build_DisablePerfCounters()
-        {
-            // act
-            Func<ICacheManager<string>> act = () => CacheFactory.Build<string>(settings =>
-            {
-                settings.WithUpdateMode(CacheUpdateMode.Up)
-                    .WithDictionaryHandle("h1")
-                    .DisablePerformanceCounters();
-            });
-
-            // assert
-            act().CacheHandles.ElementAt(0).Configuration.EnablePerformanceCounters.Should().BeFalse();
-            act().CacheHandles.ElementAt(0).Configuration.EnableStatistics.Should().BeFalse("this is the default value");
-        }
-
-        [Fact]
-        [ReplaceCulture]
-        public void CacheFactory_Build_EnablePerfCounters()
-        {
-            // act
-            Func<ICacheManager<string>> act = () => CacheFactory.Build<string>(settings =>
-            {
-                settings
-                    .WithDictionaryHandle("h1")
-                    .DisableStatistics() // disable it first
-                    .EnablePerformanceCounters();   // should enable stats
-            });
-
-            // assert
-            act().CacheHandles.ElementAt(0).Configuration.EnablePerformanceCounters.Should().BeTrue();
-            act().CacheHandles.ElementAt(0).Configuration.EnableStatistics.Should().BeTrue("is required for perf counters");
-        }
-
-        [Fact]
-        [ReplaceCulture]
         public void CacheFactory_Build_EnableStats()
         {
             // act
@@ -286,7 +251,6 @@ namespace CacheManager.Tests
             });
 
             // assert
-            act().CacheHandles.ElementAt(0).Configuration.EnablePerformanceCounters.Should().BeFalse("is default");
             act().CacheHandles.ElementAt(0).Configuration.EnableStatistics.Should().BeTrue();
         }
 
@@ -302,7 +266,6 @@ namespace CacheManager.Tests
             });
 
             // assert
-            act().CacheHandles.ElementAt(0).Configuration.EnablePerformanceCounters.Should().BeFalse("is default");
             act().CacheHandles.ElementAt(0).Configuration.EnableStatistics.Should().BeFalse("is default");
         }
 
@@ -579,7 +542,7 @@ namespace CacheManager.Tests
                     .WithUpdateMode(CacheUpdateMode.None)
                     .WithDictionaryHandle("h1")
                         .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromHours(12))
-                        .EnablePerformanceCounters()
+                        .EnableStatistics()
                     .And.WithDictionaryHandle("h2")
                         .WithExpiration(ExpirationMode.None, TimeSpan.Zero)
                         .DisableStatistics()
@@ -594,19 +557,16 @@ namespace CacheManager.Tests
             act.Configuration.MaxRetries.Should().Be(22);
             act.Configuration.RetryTimeout.Should().Be(2223);
             act.CacheHandles.ElementAt(0).Configuration.Name.Should().Be("h1");
-            act.CacheHandles.ElementAt(0).Configuration.EnablePerformanceCounters.Should().BeTrue();
             act.CacheHandles.ElementAt(0).Configuration.EnableStatistics.Should().BeTrue();
             act.CacheHandles.ElementAt(0).Configuration.ExpirationMode.Should().Be(ExpirationMode.Absolute);
             act.CacheHandles.ElementAt(0).Configuration.ExpirationTimeout.Should().Be(new TimeSpan(12, 0, 0));
 
             act.CacheHandles.ElementAt(1).Configuration.Name.Should().Be("h2");
-            act.CacheHandles.ElementAt(1).Configuration.EnablePerformanceCounters.Should().BeFalse();
             act.CacheHandles.ElementAt(1).Configuration.EnableStatistics.Should().BeFalse();
             act.CacheHandles.ElementAt(1).Configuration.ExpirationMode.Should().Be(ExpirationMode.None);
             act.CacheHandles.ElementAt(1).Configuration.ExpirationTimeout.Should().Be(new TimeSpan(0, 0, 0));
 
             act.CacheHandles.ElementAt(2).Configuration.Name.Should().Be("h3");
-            act.CacheHandles.ElementAt(2).Configuration.EnablePerformanceCounters.Should().BeFalse();
             act.CacheHandles.ElementAt(2).Configuration.EnableStatistics.Should().BeTrue();
             act.CacheHandles.ElementAt(2).Configuration.ExpirationMode.Should().Be(ExpirationMode.Sliding);
             act.CacheHandles.ElementAt(2).Configuration.ExpirationTimeout.Should().Be(new TimeSpan(0, 0, 231));
