@@ -23,6 +23,47 @@ namespace CacheManager.Tests
     [ExcludeFromCodeCoverage]
     public class SerializerTests
     {
+
+
+#if NET461
+
+        // Bug #327
+        [Theory]
+        [InlineData(typeof(string), "System.String, System.Private.CoreLib, Version=5.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e")]
+        [InlineData(typeof(int), "System.Int32, System.Private.CoreLib, Version=5.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e")]
+        [InlineData(typeof(Guid), "System.Guid, System.Private.CoreLib, Version=5.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e")]
+        [InlineData(typeof(IList<string>), "System.Collections.Generic.IList`1[[System.String, System.Private.CoreLib, Version=5.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]], System.Private.CoreLib, Version=5.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e")]
+        [InlineData(typeof(Dictionary<string, System.IO.TextWriter>), "System.Collections.Generic.Dictionary`2[[System.String, System.Private.CoreLib, Version=5.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.IO.TextWriter, System.Private.CoreLib, Version=5.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]], System.Private.CoreLib, Version=5.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e")]
+        [InlineData(typeof(Dictionary<DateTime, System.Text.UTF8Encoding>), "System.Collections.Generic.Dictionary`2[[System.DateTime, System.Private.CoreLib, Version=5.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.Text.UTF8Encoding, System.Private.CoreLib, Version=5.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]], System.Private.CoreLib, Version=5.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e")]
+        // There are still types which will not work, like  HashSet, which cannot load without an assembly and is actually in "System.Core" in previous .NET versions...
+        // So this "fix" will only work for some common types...
+        //[InlineData(typeof(HashSet<List<ICollection<string>>>), "System.Collections.Generic.HashSet`1[[System.Collections.Generic.List`1[[System.Collections.Generic.ICollection`1[[System.String, System.Private.CoreLib, Version=5.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]], System.Private.CoreLib, Version=5.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]], System.Private.CoreLib, Version=5.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]], System.Private.CoreLib, Version=5.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e")]
+        public void TypeCache_LoadBadAssembly(Type type, string typeString)
+        {
+            var result = TypeCache.GetType(typeString);
+
+
+            Assert.Equal(type, result);
+        }
+#endif
+
+#if NET5_0
+        [Theory]
+        [InlineData(typeof(string), "System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
+        [InlineData(typeof(int), "System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
+        [InlineData(typeof(Guid), "System.Guid, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
+        [InlineData(typeof(IList<string>), "System.Collections.Generic.IList`1[[System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
+        [InlineData(typeof(Dictionary<string, System.IO.TextWriter>), "System.Collections.Generic.Dictionary`2[[System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089],[System.IO.TextWriter, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
+        [InlineData(typeof(HashSet<List<ICollection<string>>>), "System.Collections.Generic.HashSet`1[[System.Collections.Generic.List`1[[System.Collections.Generic.ICollection`1[[System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]], System.Core, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
+        [InlineData(typeof(Dictionary<DateTime, System.Text.UTF8Encoding>), "System.Collections.Generic.Dictionary`2[[System.DateTime, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089],[System.Text.UTF8Encoding, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
+        public void TypeCache_LoadBadAssembly(Type type, string typeString)
+        {
+            var result = TypeCache.GetType(typeString);
+
+            Assert.Equal(type, result);
+        }
+#endif
+
         #region newtonsoft json serializer
 
         [Fact]
@@ -208,9 +249,9 @@ namespace CacheManager.Tests
             result.Should().BeEquivalentTo(items);
         }
 
-        #endregion newtonsoft json serializer
+#endregion newtonsoft json serializer
 
-        #region newtonsoft json with GZ serializer
+#region newtonsoft json with GZ serializer
 
         [Fact]
         public void GzJsonSerializer_RespectJsonSerializerSettings()
@@ -395,9 +436,9 @@ namespace CacheManager.Tests
             result.Should().BeEquivalentTo(items);
         }
 
-        #endregion newtonsoft json with GZ serializer
+#endregion newtonsoft json with GZ serializer
 
-        #region data contract serializer common
+#region data contract serializer common
 
         [Fact]
         public void DataContractSerializer_RespectSerializerSettings()
@@ -484,9 +525,9 @@ namespace CacheManager.Tests
             cache.Configuration.SerializerTypeArguments.Length.Should().Be(1);
         }
 
-        #endregion data contract serializer common
+#endregion data contract serializer common
 
-        #region data contract serializer
+#region data contract serializer
 
         [Theory]
         [InlineData(true)]
@@ -615,9 +656,9 @@ namespace CacheManager.Tests
             FullAddGetWithSerializer(Serializer.DataContract);
         }
 
-        #endregion data contract serializer
+#endregion data contract serializer
 
-        #region data contract serializer binary
+#region data contract serializer binary
 
         [Theory]
         [InlineData(true)]
@@ -746,9 +787,9 @@ namespace CacheManager.Tests
             FullAddGetWithSerializer(Serializer.DataContractBinary);
         }
 
-        #endregion data contract serializer binary
+#endregion data contract serializer binary
 
-        #region data contract serializer json
+#region data contract serializer json
 
         [Theory]
         [InlineData(true)]
@@ -892,9 +933,9 @@ namespace CacheManager.Tests
             FullAddGetWithSerializer(Serializer.DataContractJson);
         }
 
-        #endregion data contract serializer json
+#endregion data contract serializer json
 
-        #region data contract serializer gz json
+#region data contract serializer gz json
 
         [Theory]
         [InlineData(true)]
@@ -1038,9 +1079,9 @@ namespace CacheManager.Tests
             FullAddGetWithSerializer(Serializer.DataContractGzJson);
         }
 
-        #endregion data contract serializer gz json
+#endregion data contract serializer gz json
 
-        #region protobuf serializer
+#region protobuf serializer
 
         [Theory]
         [InlineData(true)]
@@ -1215,9 +1256,9 @@ namespace CacheManager.Tests
             }
         }
 
-        #endregion protobuf serializer
+#endregion protobuf serializer
 
-        #region Bond binary serializer
+#region Bond binary serializer
 
         [Theory]
         [InlineData(true)]
@@ -1376,7 +1417,7 @@ namespace CacheManager.Tests
             }
         }
 
-        #endregion Bond binary serializer
+#endregion Bond binary serializer
 
         [Theory]
         [ClassData(typeof(TestCacheManagers))]
