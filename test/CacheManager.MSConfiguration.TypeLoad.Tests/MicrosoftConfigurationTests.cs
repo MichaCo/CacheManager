@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using FluentAssertions;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
 namespace CacheManager.MSConfiguration.TypeLoad.Tests
@@ -186,25 +187,9 @@ namespace CacheManager.MSConfiguration.TypeLoad.Tests
             action.Should().Throw<InvalidOperationException>().WithMessage("*serializer type 'BondSimpleJson' could not be loaded*");
         }
 
-#if NETCOREAPP
-        [Fact]
-        public void Configuration_Serializer_BinaryInvalidOnCore()
-        {
-            var data = new Dictionary<string, string>
-            {
-                {"cacheManagers:0:name", "name"},
-                {"cacheManagers:0:handles:0:knownType", "Dictionary"},
-                {"cacheManagers:0:serializer:knownType", "Binary"},
-            };
-
-            Action act = () => GetConfiguration(data).GetCacheConfiguration("name");
-            act.Should().Throw<PlatformNotSupportedException>().WithMessage("*BinaryCacheSerializer is not available*");
-        }
-#endif
-
         private static IConfigurationRoot GetConfiguration(IDictionary<string, string> data)
         {
-            var configurationBuilder = new Microsoft.Extensions.Configuration.ConfigurationBuilder();
+            var configurationBuilder = new ConfigurationBuilder();
             configurationBuilder.AddInMemoryCollection(data);
             return configurationBuilder.Build();
         }

@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading;
 using McMaster.Extensions.CommandLineUtils;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace CacheManager.Events.Tests
@@ -10,8 +11,15 @@ namespace CacheManager.Events.Tests
     {
         private static void Main(string[] args)
         {
-            var loggerFactory = new LoggerFactory()
-                  .AddConsole(LogLevel.Warning);
+            var services = new ServiceCollection();
+            services.AddLogging(c =>
+            {
+                c.AddConsole();
+                c.SetMinimumLevel(LogLevel.Warning);
+            });
+
+            var provider = services.BuildServiceProvider();
+            var loggerFactory = provider.GetRequiredService<ILoggerFactory>();
 
             var app = new CommandLineApplication(false);
             app.Command("redis", (cmdApp) => new RedisCommand(cmdApp, loggerFactory), throwOnUnexpectedArg: true);

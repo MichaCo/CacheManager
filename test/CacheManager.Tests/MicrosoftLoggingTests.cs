@@ -4,6 +4,7 @@ using System.Linq;
 using CacheManager.Core;
 using CacheManager.Logging;
 using FluentAssertions;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Xunit;
 
@@ -12,12 +13,22 @@ namespace CacheManager.Tests
     [ExcludeFromCodeCoverage]
     public class MicrosoftLoggingTests
     {
+        private class TestLoggingBuilder : ILoggingBuilder
+        {
+            public TestLoggingBuilder()
+            {
+                Services = new ServiceCollection();
+            }
+
+            public IServiceCollection Services { get; }
+        }
+
         [Fact]
         public void AspNetCoreLogging_MinLogLevel_Trace()
         {
-            var external = new LoggerFactory();
-
-            external.AddConsole(LogLevel.Trace);
+            var services = new ServiceCollection();
+            var provider = services.AddLogging(b => b.AddConsole().SetMinimumLevel(LogLevel.Trace)).BuildServiceProvider();
+            var external = provider.GetRequiredService<ILoggerFactory>();
 
             var loggerFactory = new MicrosoftLoggerFactoryAdapter(() => external);
             var logger = loggerFactory.CreateLogger("cat");
@@ -34,9 +45,9 @@ namespace CacheManager.Tests
         [Fact]
         public void AspNetCoreLogging_MinLogLevel_Debug()
         {
-            var external = new LoggerFactory();
-
-            external.AddConsole(LogLevel.Debug);
+            var services = new ServiceCollection();
+            var provider = services.AddLogging(b => b.AddConsole().SetMinimumLevel(LogLevel.Debug)).BuildServiceProvider();
+            var external = provider.GetRequiredService<ILoggerFactory>();
 
             var loggerFactory = new MicrosoftLoggerFactoryAdapter(() => external);
             var logger = loggerFactory.CreateLogger("cat");
@@ -53,8 +64,10 @@ namespace CacheManager.Tests
         [Fact]
         public void AspNetCoreLogging_MinLogLevel_Info()
         {
-            var external = new LoggerFactory();
-            external.AddConsole(LogLevel.Information);
+            var services = new ServiceCollection();
+            var provider = services.AddLogging(b => b.AddConsole().SetMinimumLevel(LogLevel.Information)).BuildServiceProvider();
+            var external = provider.GetRequiredService<ILoggerFactory>();
+
             var loggerFactory = new MicrosoftLoggerFactoryAdapter(() => external);
             var logger = loggerFactory.CreateLogger("cat");
 
@@ -70,8 +83,10 @@ namespace CacheManager.Tests
         [Fact]
         public void AspNetCoreLogging_MinLogLevel_Warn()
         {
-            var external = new LoggerFactory();
-            external.AddConsole(LogLevel.Warning);
+            var services = new ServiceCollection();
+            var provider = services.AddLogging(b => b.AddConsole().SetMinimumLevel(LogLevel.Warning)).BuildServiceProvider();
+            var external = provider.GetRequiredService<ILoggerFactory>();
+
             var loggerFactory = new MicrosoftLoggerFactoryAdapter(() => external);
             var logger = loggerFactory.CreateLogger("cat");
 
@@ -87,8 +102,10 @@ namespace CacheManager.Tests
         [Fact]
         public void AspNetCoreLogging_MinLogLevel_Error()
         {
-            var external = new LoggerFactory();
-            external.AddConsole(LogLevel.Error);
+            var services = new ServiceCollection();
+            var provider = services.AddLogging(b => b.AddConsole().SetMinimumLevel(LogLevel.Error)).BuildServiceProvider();
+            var external = provider.GetRequiredService<ILoggerFactory>();
+
             var loggerFactory = new MicrosoftLoggerFactoryAdapter(() => external);
             var logger = loggerFactory.CreateLogger("cat");
 
@@ -104,8 +121,10 @@ namespace CacheManager.Tests
         [Fact]
         public void AspNetCoreLogging_MinLogLevel_Critical()
         {
-            var external = new LoggerFactory();
-            external.AddConsole(LogLevel.Critical);
+            var services = new ServiceCollection();
+            var provider = services.AddLogging(b => b.AddConsole().SetMinimumLevel(LogLevel.Critical)).BuildServiceProvider();
+            var external = provider.GetRequiredService<ILoggerFactory>();
+
             var loggerFactory = new MicrosoftLoggerFactoryAdapter(() => external);
             var logger = loggerFactory.CreateLogger("cat");
 
@@ -119,31 +138,13 @@ namespace CacheManager.Tests
         }
 
         [Fact]
-        public void AspNetCoreLogging_Builder_InvalidFactory()
-        {
-            Action act = () => ConfigurationBuilder.BuildConfiguration(
-                s => s.WithMicrosoftLogging((Action<ILoggerFactory>)null));
-
-            act.Should().Throw<ArgumentNullException>().WithMessage("*factory*");
-        }
-
-        [Fact]
         public void AspNetCoreLogging_Builder_InvalidLoggerFactory()
         {
             Action act = () => ConfigurationBuilder.BuildConfiguration(
-                s => s.WithMicrosoftLogging((ILoggerFactory)null));
+                s => s.WithMicrosoftLogging(null));
 
-            act.Should().Throw<ArgumentNullException>().WithMessage("*loggerFactory*");
-        }
-
-        [Fact]
-        public void AspNetCoreLogging_Builder_ValidFactory()
-        {
-            var cfg = ConfigurationBuilder.BuildConfiguration(
-                s => s.WithMicrosoftLogging(f => f.AddConsole()));
-
-            cfg.LoggerFactoryType.Should().NotBeNull();
-            cfg.LoggerFactoryType.Should().Be(typeof(MicrosoftLoggerFactoryAdapter));
+            act.Should().Throw<ArgumentNullException>()
+                .And.ParamName.Equals("loggerFactory");
         }
 
         [Fact]

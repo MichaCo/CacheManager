@@ -24,7 +24,6 @@ namespace CacheManager.Tests
                 {"cacheManagers:0:retryTimeout", "123"},
                 {"cacheManagers:0:updateMode", "Up"},
                 {"cacheManagers:0:handles:0:knownType", "Dictionary"},
-                {"cacheManagers:0:handles:0:enablePerformanceCounters", "true"},
                 {"cacheManagers:0:handles:0:enableStatistics", "true"},
                 {"cacheManagers:0:handles:0:expirationMode", "Absolute"},
                 {"cacheManagers:0:handles:0:expirationTimeout", "0:10:0"},
@@ -32,7 +31,6 @@ namespace CacheManager.Tests
                 {"cacheManagers:0:handles:0:name", "handleName"},
                 {"cacheManagers:0:handles:0:key", key},
                 {"cacheManagers:0:handles:1:knownType", "Dictionary"},
-                {"cacheManagers:0:handles:1:enablePerformanceCounters", "false"},
                 {"cacheManagers:0:handles:1:enableStatistics", "false"},
                 {"cacheManagers:0:handles:1:expirationMode", "Sliding"},
                 {"cacheManagers:0:handles:1:expirationTimeout", "0:20:0"},
@@ -215,7 +213,7 @@ namespace CacheManager.Tests
 
             var config = GetConfiguration(data);
             Action action = () => config.GetCacheConfiguration("name");
-            action.Should().Throw<InvalidOperationException>().WithMessage("*Failed to convert 'invalid'*");
+            action.Should().Throw<InvalidOperationException>().WithMessage("*Failed to convert*");
         }
 
         [Fact]
@@ -229,7 +227,7 @@ namespace CacheManager.Tests
 
             var config = GetConfiguration(data);
             Action action = () => config.GetCacheConfiguration("name");
-            action.Should().Throw<InvalidOperationException>().WithMessage("*Failed to convert 'invalid'*");
+            action.Should().Throw<InvalidOperationException>().WithMessage("*Failed to convert*");
         }
 
         [Fact]
@@ -243,7 +241,7 @@ namespace CacheManager.Tests
 
             var config = GetConfiguration(data);
             Action action = () => config.GetCacheConfiguration("name");
-            action.Should().Throw<InvalidOperationException>().WithMessage("*Failed to convert 'invalid'*");
+            action.Should().Throw<InvalidOperationException>().WithMessage("*Failed to convert*");
         }
 
         [Fact]
@@ -374,8 +372,6 @@ namespace CacheManager.Tests
             config.CacheHandleConfigurations[0].Key.Should().Be("name");    // now key gets set to name
         }
 
-#if !NETCOREAPP2
-
         [Fact]
         public void Configuration_CacheHandle_KnownType_CouchbaseNoKey()
         {
@@ -431,22 +427,7 @@ namespace CacheManager.Tests
             var cache = new BaseCacheManager<int>(config);
         }
 
-        [Fact]
-        public void Configuration_CacheHandle_KnownType_MemcachedNoKey()
-        {
-            var data = new Dictionary<string, string>
-            {
-                {"cacheManagers:0:name", "name"},
-                {"cacheManagers:0:handles:0:knownType", "Memcached"},
-            };
-
-            var config = GetConfiguration(data);
-            Action action = () => config.GetCacheConfiguration("name");
-            action.Should().Throw<InvalidOperationException>().WithMessage("*'key' or 'name'*");
-        }
-
 #if MEMCACHEDENABLED
-
         [Fact]
         [Trait("category", "memcached")]
         public void Configuration_CacheHandle_KnownType_Memcached()
@@ -471,6 +452,21 @@ namespace CacheManager.Tests
         }
 
 #endif
+#if NET461
+
+        [Fact]
+        public void Configuration_CacheHandle_KnownType_MemcachedNoKey()
+        {
+            var data = new Dictionary<string, string>
+            {
+                {"cacheManagers:0:name", "name"},
+                {"cacheManagers:0:handles:0:knownType", "Memcached"},
+            };
+
+            var config = GetConfiguration(data);
+            Action action = () => config.GetCacheConfiguration("name");
+            action.Should().Throw<InvalidOperationException>().WithMessage("*'key' or 'name'*");
+        }
 
         [Fact]
         public void Configuration_CacheHandle_KnownType_MemcachedB()
@@ -569,7 +565,6 @@ namespace CacheManager.Tests
             {
                 {"cacheManagers:0:name", "cacheName"},
                 {"cacheManagers:0:handles:0:knownType", "Dictionary"},
-                {"cacheManagers:0:handles:0:enablePerformanceCounters", "true"},
                 {"cacheManagers:0:handles:0:enableStatistics", "true"},
                 {"cacheManagers:0:handles:0:expirationMode", "Absolute"},
                 {"cacheManagers:0:handles:0:expirationTimeout", "0:10:0"},
@@ -580,7 +575,6 @@ namespace CacheManager.Tests
 
             var config = GetConfiguration(data).GetCacheConfiguration("cacheName");
             config.Name.Should().Be("cacheName");
-            config.CacheHandleConfigurations[0].EnablePerformanceCounters.Should().BeTrue();
             config.CacheHandleConfigurations[0].EnableStatistics.Should().BeTrue();
             config.CacheHandleConfigurations[0].ExpirationMode.Should().Be(ExpirationMode.Absolute);
             config.CacheHandleConfigurations[0].ExpirationTimeout.Should().Be(TimeSpan.FromMinutes(10));
@@ -604,7 +598,7 @@ namespace CacheManager.Tests
             };
 
             Action act = () => GetConfiguration(data).GetCacheConfiguration("cacheName");
-            act.Should().Throw<InvalidOperationException>().WithMessage("*Failed to convert 'invalid'*");
+            act.Should().Throw<InvalidOperationException>().WithMessage("*Failed to convert*");
         }
 
         [Fact]
@@ -619,7 +613,7 @@ namespace CacheManager.Tests
             };
 
             Action act = () => GetConfiguration(data).GetCacheConfiguration("cacheName");
-            act.Should().Throw<InvalidOperationException>().WithMessage("*Failed to convert 'invalid'*");
+            act.Should().Throw<InvalidOperationException>().WithMessage("*Failed to convert*");
         }
 
         [Fact]
@@ -634,7 +628,7 @@ namespace CacheManager.Tests
             };
 
             Action act = () => GetConfiguration(data).GetCacheConfiguration("cacheName");
-            act.Should().Throw<InvalidOperationException>().WithMessage("*Failed to convert 'invalid'*");
+            act.Should().Throw<InvalidOperationException>().WithMessage("*Failed to convert*");
         }
 
         [Fact]
@@ -649,22 +643,7 @@ namespace CacheManager.Tests
             };
 
             Action act = () => GetConfiguration(data).GetCacheConfiguration("cacheName");
-            act.Should().Throw<InvalidOperationException>().WithMessage("*Failed to convert 'invalid'*");
-        }
-
-        [Fact]
-        [ReplaceCulture]
-        public void Configuration_CacheHandle_InvalidPerCounters()
-        {
-            var data = new Dictionary<string, string>
-            {
-                {"cacheManagers:0:name", "cacheName"},
-                {"cacheManagers:0:handles:0:knownType", "Dictionary"},
-                {"cacheManagers:0:handles:0:enablePerformanceCounters", "invalid"}
-            };
-
-            Action act = () => GetConfiguration(data).GetCacheConfiguration("cacheName");
-            act.Should().Throw<InvalidOperationException>().WithMessage("*Failed to convert 'invalid'*");
+            act.Should().Throw<InvalidOperationException>().WithMessage("*Failed to convert*");
         }
 
         [Fact]
@@ -946,31 +925,6 @@ namespace CacheManager.Tests
             act.Should().Throw<InvalidOperationException>().WithMessage("*ICacheSerializer*");
         }
 
-#if !NETCOREAPP2
-
-        [Fact]
-        public void Configuration_Serializer_KnownType_Binary()
-        {
-            var data = new Dictionary<string, string>
-            {
-                {"cacheManagers:0:name", "name"},
-                {"cacheManagers:0:handles:0:knownType", "Dictionary"},
-                {"cacheManagers:0:serializer:knownType", "Binary"}
-            };
-
-            var config = GetConfiguration(data).GetCacheConfiguration("name");
-            Action act = () =>
-            {
-                var cache = new BaseCacheManager<string>(config);
-                cache.Add("key", "value");
-            };
-
-            config.SerializerType.Should().Be(typeof(Core.Internal.BinaryCacheSerializer));
-            act.Should().NotThrow();
-        }
-
-#endif
-
         [Fact]
         public void Configuration_Serializer_KnownType_Json()
         {
@@ -1168,7 +1122,7 @@ namespace CacheManager.Tests
             };
 
             Action act = () => GetConfiguration(data).LoadRedisConfigurations();
-            act.Should().Throw<InvalidOperationException>().WithMessage("*Failed to convert 'invalid'*");
+            act.Should().Throw<InvalidOperationException>().WithMessage("*Failed to convert*");
         }
 
         [Fact]
@@ -1183,7 +1137,7 @@ namespace CacheManager.Tests
             };
 
             Action act = () => GetConfiguration(data).LoadRedisConfigurations();
-            act.Should().Throw<InvalidOperationException>().WithMessage("*Failed to convert 'invalid'*");
+            act.Should().Throw<InvalidOperationException>().WithMessage("*Failed to convert*");
         }
 
         [Fact]
@@ -1198,7 +1152,7 @@ namespace CacheManager.Tests
             };
 
             Action act = () => GetConfiguration(data).LoadRedisConfigurations();
-            act.Should().Throw<InvalidOperationException>().WithMessage("*Failed to convert 'invalid'*");
+            act.Should().Throw<InvalidOperationException>().WithMessage("*Failed to convert*");
         }
 
         [Fact]
@@ -1213,7 +1167,7 @@ namespace CacheManager.Tests
             };
 
             Action act = () => GetConfiguration(data).LoadRedisConfigurations();
-            act.Should().Throw<InvalidOperationException>().WithMessage("*Failed to convert 'invalid'*");
+            act.Should().Throw<InvalidOperationException>().WithMessage("*Failed to convert*");
         }
 
         [Fact]

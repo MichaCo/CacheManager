@@ -134,7 +134,6 @@ namespace CacheManager.Core.Utility
         /// <exception cref="InvalidOperationException">Thrown if <paramref name="value"/> is <c>null</c>.</exception>
         [DebuggerStepThrough]
         public static T EnsureNotNull<T>([ValidatedNotNull]T value, string message, params object[] args)
-            where T : class
         {
             if (value == null)
             {

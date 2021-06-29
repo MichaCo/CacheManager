@@ -6,6 +6,7 @@ using CacheManager.Core.Internal;
 using CacheManager.Core.Logging;
 using static CacheManager.Core.Utility.Guard;
 
+// TODO: Make this thing obsolete, not tested, outdated.
 namespace CacheManager.Web
 {
     /// <summary>
@@ -27,7 +28,6 @@ namespace CacheManager.Web
         /// <param name="managerConfiguration">The manager configuration.</param>
         /// <param name="configuration">The cache handle configuration.</param>
         /// <param name="loggerFactory">The logger factory.</param>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors", Justification = "For unit testing only, will never cause issues.")]
         public SystemWebCacheHandle(ICacheManagerConfiguration managerConfiguration, CacheHandleConfiguration configuration, ILoggerFactory loggerFactory)
             : base(managerConfiguration, configuration)
         {

@@ -46,16 +46,6 @@ namespace CacheManager.Core
         }
 
         /// <summary>
-        /// Gets or sets a value indicating whether performance counters should be enabled or not.
-        /// <para>
-        /// If enabled, and the initialization of performance counters doesn't work, for example
-        /// because of security reasons. The counters will get disabled silently.
-        /// </para>
-        /// </summary>
-        /// <value><c>true</c> if performance counters should be enable; otherwise, <c>false</c>.</value>
-        public bool EnablePerformanceCounters { get; set; }
-
-        /// <summary>
         /// Gets or sets a value indicating whether statistics should be enabled.
         /// </summary>
         /// <value><c>true</c> if statistics should be enabled; otherwise, <c>false</c>.</value>

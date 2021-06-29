@@ -82,7 +82,7 @@ namespace CacheManager.Core.Internal
                                 // try remove version from the type string and resolve it (should work even for signed assemblies).
                                 try
                                 {
-                                    var withoutVersion = Regex.Replace(type, @", Version=\d+.\d+.\d+.\d+", string.Empty);
+                                    var withoutVersion = Regex.Replace(type, @"(,.?)Version=\d+.\d+.\d+.\d+", string.Empty);
                                     typeResult = Type.GetType(withoutVersion, false);
                                 }
                                 catch
@@ -92,13 +92,12 @@ namespace CacheManager.Core.Internal
 
                             if (typeResult == null)
                             {
-                                // fixing an issue for corlib types if mixing net core clr and full clr calls
+                                // Fixing an issue for corlib types from older full framework vs .NET Core, if deserializing a type serialized with a different framework.
                                 // (e.g. typeof(string) is different for those two, either System.String, System.Private.CoreLib or System.String, mscorlib)
-                                var typeName = type.Split(',').FirstOrDefault();
-
                                 try
                                 {
-                                    typeResult = Type.GetType(typeName, false);
+                                    var allReplaced = Regex.Replace(type, @",(?:[^,]*).?(mscorlib|System.Private.CoreLib).(?:(?!\]|$).)*", string.Empty);
+                                    typeResult = Type.GetType(allReplaced, false);
                                 }
                                 catch
                                 {

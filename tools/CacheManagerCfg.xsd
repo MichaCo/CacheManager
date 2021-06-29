@@ -22,7 +22,6 @@
             </xs:sequence>
             <xs:attribute name="name" use="required" type="xs:string" />
             <xs:attribute name="updateMode" use="optional" type="updateMode" />
-            <xs:attribute name="enablePerformanceCounters" use="optional" type="xs:boolean" />
             <xs:attribute name="enableStatistics" use="optional" type="xs:boolean" />
             <xs:attribute name="maxRetries" use="optional" type="xs:integer" />
             <xs:attribute name="retryTimeout" use="optional" type="xs:integer" />

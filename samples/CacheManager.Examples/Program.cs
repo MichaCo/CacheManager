@@ -52,8 +52,11 @@ namespace CacheManager.Examples
 
         private static void MostSimpleCacheManagerWithLogging()
         {
+            var loggerFactory = new LoggerFactory()
+                .AddConsole();
+
             var config = new ConfigurationBuilder()
-                .WithMicrosoftLogging(l => l.AddConsole(LogLevel.Information))
+                .WithMicrosoftLogging(loggerFactory)
                 .WithSystemRuntimeCacheHandle()
                 .Build();
 
@@ -64,13 +67,16 @@ namespace CacheManager.Examples
 
         private static void EditExistingConfiguration()
         {
+            var loggerFactory = new LoggerFactory()
+                .AddConsole();
+
             var config = new ConfigurationBuilder()
                 .WithSystemRuntimeCacheHandle()
                     .EnableStatistics()
                 .Build();
 
             config = new ConfigurationBuilder(config)
-                .WithMicrosoftLogging(f => f.AddConsole())
+                .WithMicrosoftLogging(loggerFactory)
                 .Build();
         }
 
@@ -78,12 +84,12 @@ namespace CacheManager.Examples
 
         private static void LoggingSample()
         {
+            var loggerFactory = new LoggerFactory()
+                .AddConsole();
+
             var cache = CacheFactory.Build<string>(
                 c =>
-                c.WithMicrosoftLogging(log =>
-                {
-                    log.AddConsole(LogLevel.Trace);
-                })
+                c.WithMicrosoftLogging(loggerFactory)
                 .WithDictionaryHandle()
                 .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(10)));
 
@@ -153,7 +159,6 @@ namespace CacheManager.Examples
                 {
                     settings.WithUpdateMode(CacheUpdateMode.Up)
                         .WithDictionaryHandle()
-                            .EnablePerformanceCounters()
                             .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(10));
                 });
 
@@ -173,7 +178,6 @@ namespace CacheManager.Examples
                 settings
                     .WithUpdateMode(CacheUpdateMode.Up)
                     .WithDictionaryHandle()
-                        .EnablePerformanceCounters()
                         .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(10));
             });
 

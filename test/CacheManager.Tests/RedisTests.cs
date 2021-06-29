@@ -29,7 +29,6 @@ namespace CacheManager.Tests
             OnClearRegion
         }
 
-#if NETCOREAPP2
         [Fact]
         public void Redis_WithoutSerializer_ShouldThrow()
         {
@@ -42,7 +41,6 @@ namespace CacheManager.Tests
             Action act = () => new BaseCacheManager<string>(cfg);
             act.Should().Throw<InvalidOperationException>().WithMessage("*requires serialization*");
         }
-#endif
 
         [Fact]
         [Trait("category", "Redis")]
@@ -195,6 +193,8 @@ namespace CacheManager.Tests
         }
 
         [Fact]
+        [Trait("category", "Redis")]
+        [Trait("category", "Unreliable")]
         public async Task Redis_BackplaneEvents_AddWithRegion()
         {
             var key = Guid.NewGuid().ToString();
@@ -227,6 +227,8 @@ namespace CacheManager.Tests
         /// </summary>
         /// <returns></returns>
         [Fact]
+        [Trait("category", "Redis")]
+        [Trait("category", "Unreliable")]
         public async Task Redis_BackplaneEvents_InMemory_AddWithRegion()
         {
             var key = Guid.NewGuid().ToString();
@@ -260,6 +262,8 @@ namespace CacheManager.Tests
         }
 
         [Fact]
+        [Trait("category", "Redis")]
+        [Trait("category", "Unreliable")]
         public async Task Redis_BackplaneEvents_Put()
         {
             var key = Guid.NewGuid().ToString();
@@ -292,6 +296,8 @@ namespace CacheManager.Tests
         /// </summary>
         /// <returns></returns>
         [Fact]
+        [Trait("category", "Redis")]
+        [Trait("category", "Unreliable")]
         public async Task Redis_BackplaneEvents_InMemory_Put()
         {
             var key = Guid.NewGuid().ToString();
@@ -322,6 +328,8 @@ namespace CacheManager.Tests
         }
 
         [Fact]
+        [Trait("category", "Redis")]
+        [Trait("category", "Unreliable")]
         public async Task Redis_BackplaneEvents_PutWithRegion()
         {
             var key = Guid.NewGuid().ToString();
@@ -351,6 +359,8 @@ namespace CacheManager.Tests
         }
 
         [Fact]
+        [Trait("category", "Redis")]
+        [Trait("category", "Unreliable")]
         public async Task Redis_BackplaneEvents_Remove()
         {
             var key = Guid.NewGuid().ToString();
@@ -379,6 +389,8 @@ namespace CacheManager.Tests
         }
 
         [Fact]
+        [Trait("category", "Redis")]
+        [Trait("category", "Unreliable")]
         public async Task Redis_BackplaneEvents_Remove_WithRegion()
         {
             var key = Guid.NewGuid().ToString();
@@ -417,6 +429,8 @@ namespace CacheManager.Tests
         /// </summary>
         /// <returns></returns>
         [Fact]
+        [Trait("category", "Redis")]
+        [Trait("category", "Unreliable")]
         public async Task Redis_BackplaneEvents_InMemory_Remove_WithRegion()
         {
             var key = Guid.NewGuid().ToString();
@@ -724,7 +738,8 @@ namespace CacheManager.Tests
         {
             Action act = () => RedisConfigurations.LoadConfiguration((string)null);
 
-            act.Should().Throw<ArgumentNullException>().WithMessage("*sectionName*");
+            act.Should().Throw<ArgumentNullException>()
+                .And.ParamName.Equals("sectionName");
         }
 
         [Fact]
@@ -732,7 +747,8 @@ namespace CacheManager.Tests
         {
             Action act = () => RedisConfigurations.LoadConfiguration((string)null, "section");
 
-            act.Should().Throw<ArgumentNullException>().WithMessage("*fileName*");
+            act.Should().Throw<ArgumentNullException>()
+                .And.ParamName.Equals("fileName");
         }
 
         [Fact]
@@ -740,7 +756,8 @@ namespace CacheManager.Tests
         {
             Action act = () => RedisConfigurations.LoadConfiguration(Guid.NewGuid().ToString());
 
-            act.Should().Throw<ArgumentNullException>().WithMessage("*section*");
+            act.Should().Throw<ArgumentNullException>()
+                .And.ParamName.Equals("section");
         }
 
         [Fact]

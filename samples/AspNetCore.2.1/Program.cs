@@ -1,8 +1,9 @@
 ﻿using System;
-using System.IO;
 using System.Linq;
+using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
 
 namespace AspnetCore.WebApp
 {
@@ -10,13 +11,14 @@ namespace AspnetCore.WebApp
     {
         public static void Main(string[] args)
         {
-            var host = new WebHostBuilder()
-                .UseKestrel()
-                .UseContentRoot(Directory.GetCurrentDirectory())
-                .UseIISIntegration()
+            var host = WebHost.CreateDefaultBuilder(args)
                 .UseStartup<Startup>()
+                .ConfigureAppConfiguration((ctx, builder) =>
+                {
+                    builder.AddJsonFile("cache.json", optional: false);
+                })
                 .Build();
-            
+
             host.Run();
         }
     }

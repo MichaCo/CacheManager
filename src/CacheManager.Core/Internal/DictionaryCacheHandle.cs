@@ -8,20 +8,27 @@ using static CacheManager.Core.Utility.Guard;
 namespace CacheManager.Core.Internal
 {
     /// <summary>
+    /// Custom settings for <see cref="DictionaryCacheHandle{TCacheValue}"/>.
+    /// </summary>
+    public class DictionaryCacheOptions
+    {
+        /// <summary>
+        /// Gets or sets the interval at which the cache should scan for expired keys.
+        /// </summary>
+        public TimeSpan ExpirationScanFrequency { get; set; } = TimeSpan.FromMinutes(1);
+    }
+
+    /// <summary>
     /// This handle is for internal use and testing. It does not implement any expiration.
     /// </summary>
     /// <typeparam name="TCacheValue">The type of the cache value.</typeparam>
     public class DictionaryCacheHandle<TCacheValue> : BaseCacheHandle<TCacheValue>
     {
-        private const int ScanInterval = 5000;
         private readonly static Random _random = new Random();
         private readonly ConcurrentDictionary<string, CacheItem<TCacheValue>> _cache;
         private readonly Timer _timer;
-
-        //private long _lastScan = 0L;
         private int _scanRunning;
-
-        //private object _startScanLock = new object();
+        private readonly TimeSpan _scanInterval;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DictionaryCacheHandle{TCacheValue}"/> class.
@@ -30,12 +37,30 @@ namespace CacheManager.Core.Internal
         /// <param name="configuration">The cache handle configuration.</param>
         /// <param name="loggerFactory">The logger factory.</param>
         public DictionaryCacheHandle(ICacheManagerConfiguration managerConfiguration, CacheHandleConfiguration configuration, ILoggerFactory loggerFactory)
+            : this(managerConfiguration, configuration, loggerFactory, options: null)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DictionaryCacheHandle{TCacheValue}"/> class.
+        /// </summary>
+        /// <param name="managerConfiguration">The manager configuration.</param>
+        /// <param name="configuration">The cache handle configuration.</param>
+        /// <param name="loggerFactory">The logger factory.</param>
+        /// <param name="options">Optional settings for this instance.</param>
+        public DictionaryCacheHandle(ICacheManagerConfiguration managerConfiguration, CacheHandleConfiguration configuration, ILoggerFactory loggerFactory, DictionaryCacheOptions options)
             : base(managerConfiguration, configuration)
         {
             NotNull(loggerFactory, nameof(loggerFactory));
             Logger = loggerFactory.CreateLogger(this);
             _cache = new ConcurrentDictionary<string, CacheItem<TCacheValue>>();
-            _timer = new Timer(TimerLoop, null, _random.Next(1000, ScanInterval), ScanInterval);
+
+            options = options ?? new DictionaryCacheOptions();
+            _scanInterval = options.ExpirationScanFrequency;
+
+            var interval = (int)(_scanInterval.TotalMilliseconds < 100 ? 100 : _scanInterval.TotalMilliseconds);
+
+            _timer = new Timer(TimerLoop, null, _random.Next(0, interval), interval);
         }
 
         /// <summary>

@@ -38,7 +38,7 @@
 
             // assert
             act.Should().Throw<ArgumentNullException>()
-                .WithMessage("*Parameter name: key*");
+                .And.ParamName.Equals("key");
         }
 
         [Fact]
@@ -69,7 +69,7 @@
 
             // assert
             act.Should().Throw<ArgumentNullException>()
-                .WithMessage("*Parameter name: key*");
+                .And.ParamName.Equals("key");
         }
 
         [Fact]
@@ -139,7 +139,7 @@
 
             // assert
             act.Should().Throw<ArgumentNullException>()
-                .WithMessage("*Parameter name: region*");
+                .And.ParamName.Equals("region");
         }
 
         [Fact]
@@ -307,9 +307,9 @@
             public async Task Events_Dic_ExpireEvictsAbove()
             {
                 var cfg = new ConfigurationBuilder()
-                    .WithDictionaryHandle()
+                    .WithDictionaryHandle(options: new DictionaryCacheOptions() { ExpirationScanFrequency = TimeSpan.FromMilliseconds(10) })
                     .And
-                    .WithDictionaryHandle()
+                    .WithDictionaryHandle(options: new DictionaryCacheOptions() { ExpirationScanFrequency = TimeSpan.FromMilliseconds(10) })
                     .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1))
                     .Build();
 
@@ -445,7 +445,7 @@
             public async Task Events_Redis_ExpireEvictsAbove()
             {
                 var cfg = new ConfigurationBuilder()
-                    .WithDictionaryHandle()
+                    .WithDictionaryHandle(options: new DictionaryCacheOptions() { ExpirationScanFrequency = TimeSpan.FromMilliseconds(10) })
                     .And
                     .WithRedisConfiguration("redis", $"{TestManagers.RedisHost}:{TestManagers.RedisPort}, allowAdmin=true", 0, true)
                     .WithJsonSerializer()
@@ -586,7 +586,7 @@
             var client = ConnectionMultiplexer.Connect("localhost");
 
             var config = new ConfigurationBuilder()
-                .WithDictionaryHandle()
+                .WithDictionaryHandle(options: new DictionaryCacheOptions() { ExpirationScanFrequency = TimeSpan.FromMilliseconds(10) })
                 .And
                 .WithJsonSerializer()
                 .WithRedisConfiguration("redis", client, enableKeyspaceNotifications: true)
@@ -642,7 +642,7 @@
 
             var config = new ConfigurationBuilder()
                 .WithUpdateMode(CacheUpdateMode.None)
-                .WithDictionaryHandle()
+                .WithDictionaryHandle(options: new DictionaryCacheOptions() { ExpirationScanFrequency = TimeSpan.FromMilliseconds(10) })
                 .And
                 .WithJsonSerializer()
                 .WithRedisConfiguration("redis", client, enableKeyspaceNotifications: true)

@@ -167,7 +167,7 @@ return result";
                 }
 
                 var count = 0;
-                foreach (var server in Servers.Where(p => !p.IsSlave && p.IsConnected))
+                foreach (var server in Servers.Where(p => !p.IsReplica && p.IsConnected))
                 {
                     count += (int)server.DatabaseSize(_redisConfiguration.Database);
                 }
@@ -210,7 +210,7 @@ return result";
         {
             try
             {
-                foreach (var server in Servers.Where(p => !p.IsSlave))
+                foreach (var server in Servers.Where(p => !p.IsReplica))
                 {
                     Retry(() =>
                     {

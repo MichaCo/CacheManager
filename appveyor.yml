@@ -1,6 +1,6 @@
-version: 1.2.0-beta-{build}
+version: 2.0.0-beta-{build}
 skip_tags: true
-image: Visual Studio 2017
+image: Visual Studio 2019
 configuration: Release
 clone_folder: C:\projects\CacheManager\
 init:

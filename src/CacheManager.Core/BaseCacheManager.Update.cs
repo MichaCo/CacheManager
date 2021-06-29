@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Linq;
 using CacheManager.Core.Internal;
 using CacheManager.Core.Logging;
@@ -97,7 +98,8 @@ namespace CacheManager.Core
             while (tries <= maxRetries);
 
             // exceeded max retries, failing the operation... (should not happen in 99,99% of the cases though, better throw?)
-            return default(TCacheValue);
+            throw new InvalidOperationException(
+                string.Format(CultureInfo.InvariantCulture, "Could not add or update the item {0} {1}.", item.Key, item.Region));
         }
 
         /// <inheritdoc />
@@ -144,8 +146,10 @@ namespace CacheManager.Core
             NotNull(updateValue, nameof(updateValue));
             Ensure(maxRetries >= 0, "Maximum number of retries must be greater than or equal to zero.");
 
-            var value = default(TCacheValue);
-            UpdateInternal(_cacheHandles, key, updateValue, maxRetries, true, out value);
+            if (!UpdateInternal(_cacheHandles, key, updateValue, maxRetries, true, out var value))
+            {
+                throw new InvalidOperationException($"Update failed for key '{key}'.");
+            }
 
             return value;
         }
@@ -158,8 +162,10 @@ namespace CacheManager.Core
             NotNull(updateValue, nameof(updateValue));
             Ensure(maxRetries >= 0, "Maximum number of retries must be greater than or equal to zero.");
 
-            var value = default(TCacheValue);
-            UpdateInternal(_cacheHandles, key, region, updateValue, maxRetries, true, out value);
+            if (!UpdateInternal(_cacheHandles, key, region, updateValue, maxRetries, true, out var value))
+            {
+                throw new InvalidOperationException($"Update failed for key '{region}:{key}'.");
+            }
 
             return value;
         }

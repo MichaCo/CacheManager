@@ -31,9 +31,7 @@ namespace CacheManager.Tests
             yield return new object[] { TestManagers.WithManyDictionaryHandles };
             yield return new object[] { TestManagers.WithOneDicCacheHandle };
 #if REDISENABLED
-#if !NETCOREAPP2
-            yield return new object[] { TestManagers.WithRedisCacheBinary };
-#endif
+
             yield return new object[] { TestManagers.WithRedisCacheDataContract };
             yield return new object[] { TestManagers.WithRedisCacheDataContractBinary };
             yield return new object[] { TestManagers.WithRedisCacheDataContractGzJson };
@@ -49,7 +47,7 @@ namespace CacheManager.Tests
             yield return new object[] { TestManagers.WithDicAndRedisCacheNoLua };
 #endif
 #if MEMCACHEDENABLED
-#if !NETCOREAPP2
+#if NET461
             yield return new object[] { TestManagers.WithMemcachedBinary };
 #endif
             yield return new object[] { TestManagers.WithMemcachedJson };
@@ -120,20 +118,6 @@ namespace CacheManager.Tests
                             .EnableStatistics()
                             .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1000))
                     .Build());
-
-        public static ICacheManager<object> WithRedisCacheBinary
-        {
-            get
-            {
-                Interlocked.Increment(ref _databaseCount);
-                if (_databaseCount >= NumDatabases)
-                {
-                    _databaseCount = StartDbCount;
-                }
-
-                return CreateRedisCache(_databaseCount, false, Serializer.Binary);
-            }
-        }
 
         public static ICacheManager<object> WithRedisCacheBondBinary
         {
@@ -302,7 +286,6 @@ namespace CacheManager.Tests
                     .Builder
                     .WithSystemRuntimeCacheHandle()
                         .EnableStatistics()
-                        .EnablePerformanceCounters()
                     .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(1000))
                 .Build());
 
@@ -597,7 +580,6 @@ namespace CacheManager.Tests
 
     public enum Serializer
     {
-        Binary,
         Json,
         GzJson,
         Proto,
@@ -615,9 +597,6 @@ namespace CacheManager.Tests
         {
             switch (serializer)
             {
-                case Serializer.Binary:
-                    break;
-
                 case Serializer.GzJson:
                     part.WithGzJsonSerializer();
                     break;

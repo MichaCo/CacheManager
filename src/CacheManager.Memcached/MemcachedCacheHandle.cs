@@ -336,12 +336,12 @@ namespace CacheManager.Memcached
             {
                 adjusted = 10000;
             }
-
-#if !NET40
-            Task.Delay(adjusted).ConfigureAwait(false).GetAwaiter().GetResult();
-#else
-            Thread.Sleep(adjusted);
-#endif
+// Disabling any async in sync
+////#if !NET40
+////            Task.Delay(adjusted).ConfigureAwait(false).GetAwaiter().GetResult();
+////#else
+////            Thread.Sleep(adjusted);
+////#endif
         }
 
         /// <summary>

@@ -95,8 +95,8 @@
       "properties": {
         "knownType": {
           "type": "string",
-          "enum": [ "Binary", "Json", "Protobuf", "GzJson", "BondCompactBinary", "BondFastBinary", "BondSimpleJson" ],
-          "description": "Define a known serializer type instead of setting 'serializerType'. The respective library has to be installed. The default 'binary' might not be available on all platforms."
+          "enum": [ "Json", "Protobuf", "GzJson", "BondCompactBinary", "BondFastBinary", "BondSimpleJson" ],
+          "description": "Define a known serializer type instead of setting 'serializerType'. The respective library has to be installed."
         }
       },
       "additionalProperties": false
@@ -179,10 +179,6 @@
         "isBackplaneSource": {
           "type": "boolean",
           "description": "Determines if the cache handle is the backplane's source. (optional; if no backplane is defined, this can stay empty. If a backplane is defined, at least one handle must be flagged.)"
-        },
-        "enablePerformanceCounters": {
-          "type": "boolean",
-          "description": "Defines if windows performance counters should be enabled or not."
         },
         "enableStatistics": {
           "type": "boolean",

@@ -223,8 +223,7 @@ namespace CacheManager.Tests
         }
 
         // disabling for netstandard 2 as it doesn't seem to read the "default" configuration from app.config. Might be an xunit/runner issue as the configuration stuff has been ported
-#if !NETCOREAPP2
-
+        // TODO: re-test
         [Fact]
         [Trait("category", "NotOnMono")]
         public void SysRuntime_CreateDefaultCache()
@@ -279,7 +278,6 @@ namespace CacheManager.Tests
                 settings["PollingInterval"].Should().Be(expectedCacheOptions.PollingInterval.ToString("c"));
             }
         }
-#endif
 
         #endregion System Runtime Caching
 

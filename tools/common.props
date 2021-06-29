@@ -2,32 +2,29 @@
   <Import Project="version.props" />
 
   <PropertyGroup>
-    <Copyright>Copyright (c) 2017 MichaConrad</Copyright>
+    <Copyright>Copyright (c) 2021 Michael Conrad</Copyright>
     <Authors>MichaConrad</Authors>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-
-    <PackageIconUrl>http://cachemanager.michaco.net/favicon-128.png</PackageIconUrl>
+    
+    <Product>CacheManager.NET</Product>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    
+    <PackageIcon>icon.png</PackageIcon>
+    
     <PackageProjectUrl>http://cachemanager.michaco.net</PackageProjectUrl>
-    <PackageLicenseUrl>https://github.com/MichaCo/CacheManager/blob/master/LICENSE</PackageLicenseUrl>
+    <WebPage>http://cachemanager.michaco.net</WebPage>
+
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/MichaCo/CacheManager</RepositoryUrl>
-
-    <Product>CacheManager.NET</Product>
 
     <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)key.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
     <PublicSign Condition="'$(OS)' != 'Windows_NT'">true</PublicSign>
+    
     <VersionSuffix Condition="'$(VersionSuffix)'!='' AND '$(BuildNumber)' != ''">$(VersionSuffix)-$(BuildNumber)</VersionSuffix>
-
-    <!-- doesn't work yet
-    <CodeAnalysisRuleset>$(MSBuildThisFileDirectory)CodeAnalysis.ruleset</CodeAnalysisRuleset>-->
   </PropertyGroup>
-  <!--<ItemGroup>
-    <AdditionalFiles Include="$(MSBuildThisFileDirectory)stylecop.json" />
-  </ItemGroup>
+
   <ItemGroup>
-    <PackageReference Include="StyleCop.Analyzers" Version="1.1.0-beta001">
-      <PrivateAssets>All</PrivateAssets>
-    </PackageReference>
-  </ItemGroup>-->
+    <None Include="$(MSBuildThisFileDirectory)icon.png" Pack="true" PackagePath="" />
+  </ItemGroup>
 </Project>

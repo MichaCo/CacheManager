@@ -168,9 +168,10 @@ namespace CacheManager.Redis
 
                         if (!_configuration.TwemproxyEnabled)
                         {
+                            // TODO: re-test what IsReplica can do for us, readonly?
                             var endpoints = connection.GetEndPoints();
                             if (!endpoints.Select(p => connection.GetServer(p))
-                                .Any(p => !p.IsSlave || p.AllowSlaveWrites))
+                                .Any(p => !p.IsReplica))
                             {
                                 throw new InvalidOperationException("No writeable endpoint found.");
                             }

@@ -25,7 +25,6 @@ namespace CacheManager.Core
     {
         private const string Hours = "h";
         private const string Minutes = "m";
-        private const string Seconds = "s";
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ConfigurationBuilder"/> class
@@ -67,7 +66,7 @@ namespace CacheManager.Core
         /// <param name="name">The name of the cache manager.</param>
         /// <param name="forConfiguration">The configuration the builder should be instantiated for.</param>
         public ConfigurationBuilder(string name, ICacheManagerConfiguration forConfiguration)
-            : base((CacheManagerConfiguration)forConfiguration)
+            : base(NotNull((CacheManagerConfiguration)forConfiguration, nameof(forConfiguration)))
         {
             NotNullOrWhiteSpace(name, nameof(name));
             Configuration.Name = name;
@@ -312,7 +311,6 @@ namespace CacheManager.Core
                     ExpirationMode = handleDef.ExpirationMode,
                     ExpirationTimeout = handleDef.ExpirationTimeout,
                     EnableStatistics = managerCfg.EnableStatistics,
-                    EnablePerformanceCounters = managerCfg.EnablePerformanceCounters,
                     IsBackplaneSource = handleItem.IsBackplaneSource
                 };
 
@@ -426,16 +424,6 @@ namespace CacheManager.Core
         }
 
         /// <summary>
-        /// Disables performance counters for this cache handle.
-        /// </summary>
-        /// <returns>The builder part.</returns>
-        public ConfigurationBuilderCacheHandlePart DisablePerformanceCounters()
-        {
-            Configuration.EnablePerformanceCounters = false;
-            return this;
-        }
-
-        /// <summary>
         /// Disables statistic gathering for this cache handle.
         /// <para>This also disables performance counters as statistics are required for the counters.</para>
         /// </summary>
@@ -443,19 +431,6 @@ namespace CacheManager.Core
         public ConfigurationBuilderCacheHandlePart DisableStatistics()
         {
             Configuration.EnableStatistics = false;
-            Configuration.EnablePerformanceCounters = false;
-            return this;
-        }
-
-        /// <summary>
-        /// Enables performance counters for this cache handle.
-        /// <para>This also enables statistics, as this is required for performance counters.</para>
-        /// </summary>
-        /// <returns>The builder part.</returns>
-        public ConfigurationBuilderCacheHandlePart EnablePerformanceCounters()
-        {
-            Configuration.EnablePerformanceCounters = true;
-            Configuration.EnableStatistics = true;
             return this;
         }
 
@@ -588,9 +563,10 @@ namespace CacheManager.Core
         /// Set this to true if this cache handle should be the source of the backplane.
         /// <para>This setting will be ignored if no backplane is configured.</para>
         /// </param>
+        /// <param name="options">Optional settings for the cache instance.</param>
         /// <returns>The builder part.</returns>
-        public ConfigurationBuilderCacheHandlePart WithDictionaryHandle(bool isBackplaneSource = false) =>
-            WithHandle(typeof(DictionaryCacheHandle<>), Guid.NewGuid().ToString("N"), isBackplaneSource);
+        public ConfigurationBuilderCacheHandlePart WithDictionaryHandle(bool isBackplaneSource = false, DictionaryCacheOptions options = null) =>
+            WithHandle(typeof(DictionaryCacheHandle<>), Guid.NewGuid().ToString("N", CultureInfo.InvariantCulture), isBackplaneSource, options == null ? new object[0] : new[] { options });
 
         /// <summary>
         /// Adds a cache dictionary cache handle to the cache manager.
@@ -601,9 +577,10 @@ namespace CacheManager.Core
         /// Set this to true if this cache handle should be the source of the backplane.
         /// <para>This setting will be ignored if no backplane is configured.</para>
         /// </param>
+        /// <param name="options">Optional settings for the cache instance.</param>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="handleName"/> is null.</exception>
-        public ConfigurationBuilderCacheHandlePart WithDictionaryHandle(string handleName, bool isBackplaneSource = false) =>
-            WithHandle(typeof(DictionaryCacheHandle<>), handleName, isBackplaneSource);
+        public ConfigurationBuilderCacheHandlePart WithDictionaryHandle(string handleName, bool isBackplaneSource = false, DictionaryCacheOptions options = null) =>
+            WithHandle(typeof(DictionaryCacheHandle<>), handleName, isBackplaneSource, options == null ? new object[0] : new[] { options });
 
         /// <summary>
         /// Adds a cache handle with the given <c>Type</c> and name.
@@ -739,33 +716,6 @@ namespace CacheManager.Core
             Configuration.SerializerTypeArguments = args;
             return this;
         }
-
-#if !NETSTANDARD2
-
-        /// <summary>
-        /// Configures a <see cref="BinaryCacheSerializer"/> to be used for serialization and deserialization.
-        /// </summary>
-        /// <returns>The builder part.</returns>
-        public ConfigurationBuilderCachePart WithBinarySerializer()
-        {
-            Configuration.SerializerType = typeof(BinaryCacheSerializer);
-            return this;
-        }
-
-        /// <summary>
-        /// Configures a <see cref="BinaryCacheSerializer"/> to be used for serialization and deserialization.
-        /// </summary>
-        /// <param name="serializationFormatter">The <see cref="BinaryFormatter"/> for serialization.</param>
-        /// <param name="deserializationFormatter">The <see cref="BinaryFormatter"/> for deserialization.</param>
-        /// <returns>The builder part.</returns>
-        public ConfigurationBuilderCachePart WithBinarySerializer(BinaryFormatter serializationFormatter, BinaryFormatter deserializationFormatter)
-        {
-            Configuration.SerializerType = typeof(BinaryCacheSerializer);
-            Configuration.SerializerTypeArguments = new object[] { serializationFormatter, deserializationFormatter };
-            return this;
-        }
-
-#endif
 
         /// <summary>
         /// Enables logging by setting the <see cref="Logging.ILoggerFactory"/> for the cache manager instance.

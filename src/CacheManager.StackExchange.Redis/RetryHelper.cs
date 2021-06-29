@@ -37,11 +37,13 @@ namespace CacheManager.Redis
                     }
 
                     logger.LogWarn(ex, WarningMessage, tries, retries);
-#if NET40
-                    TaskEx.Delay(timeOut).Wait();
-#else
-                    Task.Delay(timeOut).Wait();
-#endif
+                    
+                    // Removed all async delay to prevent potential deadlocks
+////#if NET40
+////                    TaskEx.Delay(timeOut).Wait();
+////#else
+////                    Task.Delay(timeOut).Wait();
+////#endif
                 }
                 catch (RedisConnectionException ex)
                 {
@@ -52,11 +54,13 @@ namespace CacheManager.Redis
                     }
 
                     logger.LogWarn(ex, WarningMessage, tries, retries);
-#if NET40
-                    TaskEx.Delay(timeOut).Wait();
-#else
-                    Task.Delay(timeOut).Wait();
-#endif
+                    
+                    // Removed all async delay to prevent potential deadlocks
+////#if NET40
+////                    TaskEx.Delay(timeOut).Wait();
+////#else
+////                    Task.Delay(timeOut).Wait();
+////#endif
                 }
                 catch (TimeoutException ex)
                 {
@@ -67,11 +71,12 @@ namespace CacheManager.Redis
                     }
 
                     logger.LogWarn(ex, WarningMessage, tries, retries);
-#if NET40
-                    TaskEx.Delay(timeOut).Wait();
-#else
-                    Task.Delay(timeOut).Wait();
-#endif
+                    // Removed all async delay to prevent potential deadlocks
+////#if NET40
+////                    TaskEx.Delay(timeOut).Wait();
+////#else
+////                    Task.Delay(timeOut).Wait();
+////#endif
                 }
                 catch (AggregateException aggregateException)
                 {
@@ -91,11 +96,12 @@ namespace CacheManager.Redis
                         if (e is RedisConnectionException || e is System.TimeoutException || e is RedisServerException)
                         {
                             logger.LogWarn(e, WarningMessage, tries, retries);
-#if NET40
-                            TaskEx.Delay(timeOut).Wait();
-#else
-                            Task.Delay(timeOut).Wait();
-#endif
+                            // Removed all async delay to prevent potential deadlocks
+////#if NET40
+////                            TaskEx.Delay(timeOut).Wait();
+////#else
+////                            Task.Delay(timeOut).Wait();
+////#endif
 
                             return true;
                         }

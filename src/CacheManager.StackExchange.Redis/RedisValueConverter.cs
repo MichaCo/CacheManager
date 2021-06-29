@@ -63,9 +63,9 @@ namespace CacheManager.Redis
 
         byte[] IRedisValueConverter<byte[]>.FromRedisValue(RedisValue value, string valueType) => value;
 
-        RedisValue IRedisValueConverter<byte>.ToRedisValue(byte value) => value;
+        RedisValue IRedisValueConverter<byte>.ToRedisValue(byte value) => (int)value;
 
-        byte IRedisValueConverter<byte>.FromRedisValue(RedisValue value, string valueType) => (byte)value;
+        byte IRedisValueConverter<byte>.FromRedisValue(RedisValue value, string valueType) => (byte)(int)value;
 
         RedisValue IRedisValueConverter<string>.ToRedisValue(string value) => value;
 
@@ -83,9 +83,9 @@ namespace CacheManager.Redis
 
         short IRedisValueConverter<short>.FromRedisValue(RedisValue value, string valueType) => (short)value;
 
-        RedisValue IRedisValueConverter<ushort>.ToRedisValue(ushort value) => value;
+        RedisValue IRedisValueConverter<ushort>.ToRedisValue(ushort value) => (int)value;
 
-        ushort IRedisValueConverter<ushort>.FromRedisValue(RedisValue value, string valueType) => (ushort)value;
+        ushort IRedisValueConverter<ushort>.FromRedisValue(RedisValue value, string valueType) => (ushort)(int)value;
 
         RedisValue IRedisValueConverter<float>.ToRedisValue(float value) => (double)value;
 
@@ -109,9 +109,9 @@ namespace CacheManager.Redis
 
         ulong IRedisValueConverter<ulong>.FromRedisValue(RedisValue value, string valueType) => ulong.Parse(value);
 
-        RedisValue IRedisValueConverter<char>.ToRedisValue(char value) => value;
+        RedisValue IRedisValueConverter<char>.ToRedisValue(char value) => (uint)value;
 
-        char IRedisValueConverter<char>.FromRedisValue(RedisValue value, string valueType) => (char)value;
+        char IRedisValueConverter<char>.FromRedisValue(RedisValue value, string valueType) => (char)(uint)value;
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0", Scope = "member", Target = "CacheManager.Redis.RedisValueConverter.#CacheManager.Redis.IRedisValueConverter`1<System.Object>.ToRedisValue(System.Object)", Justification = "For performance reasons we don't do checks at this point. Also, its internally used only.")]
         RedisValue IRedisValueConverter<object>.ToRedisValue(object value)
