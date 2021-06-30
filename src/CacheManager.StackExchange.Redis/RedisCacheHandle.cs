@@ -114,7 +114,7 @@ return result";
             if (_redisConfiguration.KeyspaceNotificationsEnabled)
             {
                 // notify-keyspace-events needs to be set to "Exe" at least! Otherwise we will not receive any events.
-                // this must be configured per server and should probably not be done automagically as this needs admin rights!
+                // this must be configured per server and should probably not be done automatically as this needs admin rights!
                 // Let's try to check at least if those settings are configured (the check also works only if useAdmin is set to true though).
                 try
                 {
@@ -936,7 +936,7 @@ return result";
 
                 var setResult = _connection.Database.HashSet(fullKey, HashFieldValue, value, when, flags);
 
-                // setResult from fire and forget is alwys false, so we have to assume it works...
+                // setResult from fire and forget is always false, so we have to assume it works...
                 setResult = flags == CommandFlags.FireAndForget ? true : setResult;
 
                 if (setResult)

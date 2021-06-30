@@ -13,7 +13,7 @@ namespace CacheManager.Core.Internal
     {
         /// <summary>
         /// Converts the current instance to a <see cref="CacheItem{T}"/>.
-        /// The returned item must return the orignial created and last accessed date!
+        /// The returned item must return the original created and last accessed date!
         /// </summary>
         /// <typeparam name="TTarget">The type.</typeparam>
         /// <returns>The cache item.</returns>
@@ -73,7 +73,7 @@ namespace CacheManager.Core.Internal
 
         /// <summary>
         /// Gets or sets the expiration timeout in milliseconds.
-        /// Can be coverted from and to <see cref="TimeSpan"/>.
+        /// Can be converted from and to <see cref="TimeSpan"/>.
         /// </summary>
         [DataMember]
         public abstract double ExpirationTimeout { get; set; }

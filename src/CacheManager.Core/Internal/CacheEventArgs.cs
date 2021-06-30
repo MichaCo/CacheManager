@@ -132,7 +132,7 @@ namespace CacheManager.Core.Internal
         /// </summary>
         /// <param name="key">The key.</param>
         /// <param name="region">The region.</param>
-        /// <param name="origin">The origin the event ocured. If remote, the event got triggered by the backplane and was not actually excecuted locally.</param>
+        /// <param name="origin">The origin the event occured. If remote, the event got triggered by the backplane and was not actually executed locally.</param>
         /// <exception cref="System.ArgumentNullException">If key is null.</exception>
         public CacheActionEventArgs(string key, string region, CacheActionEventArgOrigin origin)
             : this(key, region)
@@ -153,7 +153,7 @@ namespace CacheManager.Core.Internal
         public string Region { get; }
 
         /// <summary>
-        /// Gets the event origin indicating if the event was triggered by a local action or remotly, through the backplane.
+        /// Gets the event origin indicating if the event was triggered by a local action or remotely, through the backplane.
         /// </summary>
         public CacheActionEventArgOrigin Origin { get; } = CacheActionEventArgOrigin.Local;
 
@@ -172,14 +172,14 @@ namespace CacheManager.Core.Internal
         /// <summary>
         /// Initializes a new instance of the <see cref="CacheClearEventArgs"/> class.
         /// </summary>
-        /// <param name="origin">The origin the event ocured. If remote, the event got triggered by the backplane and was not actually excecuted locally.</param>
+        /// <param name="origin">The origin the event occured. If remote, the event got triggered by the backplane and was not actually executed locally.</param>
         public CacheClearEventArgs(CacheActionEventArgOrigin origin = CacheActionEventArgOrigin.Local)
         {
             Origin = origin;
         }
 
         /// <summary>
-        /// Gets the event origin indicating if the event was triggered by a local action or remotly, through the backplane.
+        /// Gets the event origin indicating if the event was triggered by a local action or remotely, through the backplane.
         /// </summary>
         public CacheActionEventArgOrigin Origin { get; }
 
@@ -199,7 +199,7 @@ namespace CacheManager.Core.Internal
         /// Initializes a new instance of the <see cref="CacheClearRegionEventArgs"/> class.
         /// </summary>
         /// <param name="region">The region.</param>
-        /// <param name="origin">The origin the event ocured. If remote, the event got triggered by the backplane and was not actually excecuted locally.</param>
+        /// <param name="origin">The origin the event occured. If remote, the event got triggered by the backplane and was not actually excecuted locally.</param>
         /// <exception cref="System.ArgumentNullException">If region is null.</exception>
         public CacheClearRegionEventArgs(string region, CacheActionEventArgOrigin origin = CacheActionEventArgOrigin.Local)
         {
@@ -216,7 +216,7 @@ namespace CacheManager.Core.Internal
         public string Region { get; }
 
         /// <summary>
-        /// Gets the event origin indicating if the event was triggered by a local action or remotly, through the backplane.
+        /// Gets the event origin indicating if the event was triggered by a local action or remotely, through the backplane.
         /// </summary>
         public CacheActionEventArgOrigin Origin { get; }
 

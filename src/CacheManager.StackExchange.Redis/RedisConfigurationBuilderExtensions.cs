@@ -15,7 +15,7 @@ namespace CacheManager.Core
         /// </summary>
         /// <param name="part">The builder instance.</param>
         /// <param name="configurationKey">
-        /// The configuration key which can be used to refernce this configuration by a redis cache handle or backplane.
+        /// The configuration key which can be used to reference this configuration by a redis cache handle or backplane.
         /// </param>
         /// <param name="configuration">The redis configuration object.</param>
         /// <returns>The configuration builder.</returns>
@@ -35,7 +35,7 @@ namespace CacheManager.Core
         /// </summary>
         /// <param name="part">The builder instance.</param>
         /// <param name="configurationKey">
-        /// The configuration key which can be used to refernce this configuration by a redis cache handle or backplane.
+        /// The configuration key which can be used to reference this configuration by a redis cache handle or backplane.
         /// </param>
         /// <param name="connectionString">The redis connection string.</param>
         /// <param name="database">The redis database to be used.</param>
@@ -63,7 +63,7 @@ namespace CacheManager.Core
         /// </summary>
         /// <param name="part">The builder instance.</param>
         /// <param name="configurationKey">
-        /// The configuration key which can be used to refernce this configuration by a redis cache handle or backplane.
+        /// The configuration key which can be used to reference this configuration by a redis cache handle or backplane.
         /// </param>
         /// <param name="redisClient">The connection multiplexer instance.</param>
         /// <param name="database">The redis database to use for caching.</param>

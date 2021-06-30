@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace CacheManager.Core
 {
     /// <summary>
-    /// The writable configuration contract used primarrily internal only
+    /// The writable configuration contract used primarily internal only
     /// </summary>
     public interface ICacheManagerConfiguration : IReadOnlyCacheManagerConfiguration
     {

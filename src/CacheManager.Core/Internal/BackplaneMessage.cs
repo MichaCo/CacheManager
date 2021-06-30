@@ -529,7 +529,7 @@ namespace CacheManager.Core.Internal
                     throw new IndexOutOfRangeException("Cannot read bytes, no additional bytes available.");
                 }
 
-                // fix: length check before aloc
+                // fix: length check before alloc
                 var result = new byte[length];
                 Buffer.BlockCopy(_data, pos - length, result, 0, length);
                 return result;

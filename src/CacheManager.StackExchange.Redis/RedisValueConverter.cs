@@ -103,8 +103,8 @@ namespace CacheManager.Redis
 
         long IRedisValueConverter<long>.FromRedisValue(RedisValue value, string valueType) => (long)value;
 
-        // ulong can exceed the supported lenght of storing integers (which is signed 64bit integer)
-        // also, even if we do not exceed long.MaxValue, the SA client stores it as double for no aparent reason => cast to long fixes it.
+        // ulong can exceed the supported length of storing integers (which is signed 64bit integer)
+        // also, even if we do not exceed long.MaxValue, the SA client stores it as double for no apparent reason => cast to long fixes it.
         RedisValue IRedisValueConverter<ulong>.ToRedisValue(ulong value) => value > long.MaxValue ? (RedisValue)value.ToString() : checked((long)value);
 
         ulong IRedisValueConverter<ulong>.FromRedisValue(RedisValue value, string valueType) => ulong.Parse(value);

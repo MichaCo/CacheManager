@@ -495,7 +495,7 @@ namespace CacheManager.Core.Internal
         /// </summary>
         /// <typeparam name="TOut">The type.</typeparam>
         /// <param name="value">The value.</param>
-        /// <returns>The casted value.</returns>
+        /// <returns>The cast value.</returns>
         protected static TOut GetCasted<TOut>(object value)
         {
             if (value == null)

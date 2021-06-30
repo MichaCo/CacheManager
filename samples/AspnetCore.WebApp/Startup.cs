@@ -49,13 +49,13 @@ namespace AspnetCore.WebApp
             // TODO: still not 100% happy with the logging part
             services.AddCacheManagerConfiguration(Configuration, cfg => cfg.WithMicrosoftLogging(services));
 
-            // uses a refined configurastion (this will not log, as we added the MS Logger only to the configuration above
+            // uses a refined configuration (this will not log, as we added the MS Logger only to the configuration above
             services.AddCacheManager<int>(Configuration, configure: builder => builder.WithJsonSerializer());
 
             // creates a completely new configuration for this instance (also not logging)
             services.AddCacheManager<DateTime>(inline => inline.WithDictionaryHandle());
 
-            // any other type will be this. Configurastion used will be the one defined by AddCacheManagerConfiguration earlier.
+            // any other type will be this. Configuration used will be the one defined by AddCacheManagerConfiguration earlier.
             services.AddCacheManager();
         }
 

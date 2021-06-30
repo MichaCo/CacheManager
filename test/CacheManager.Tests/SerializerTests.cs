@@ -1403,7 +1403,7 @@ namespace CacheManager.Tests
             // act
             var data = serializer.SerializeCacheItem(item);
 
-            // not using the type defined, expecting the serializer object to store the actualy value type correctly...
+            // not using the type defined, expecting the serializer object to store the actual value type correctly...
             var result = serializer.DeserializeCacheItem<object>(data, typeof(T));
 
             result.Value.Should().Be(value);

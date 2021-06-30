@@ -86,7 +86,7 @@ namespace CacheManager.Core
                     handle.OnCacheSpecificRemove += (sender, args) =>
                     {
                         // added sync for using backplane with in-memory caches on cache specific removal
-                        // but commented for now, this is not really needed if all instances use the same expiration etc, would just cause dublicated events
+                        // but commented for now, this is not really needed if all instances use the same expiration etc, would just cause duplicated events
                         ////if (_cacheBackplane != null && handle.Configuration.IsBackplaneSource && !handle.IsDistributedCache)
                         ////{
                         ////    if (string.IsNullOrEmpty(args.Region))
@@ -111,7 +111,7 @@ namespace CacheManager.Core
                             EvictFromHandlesAbove(args.Key, args.Region, handleIndex);
                         }
 
-                        // moving down below cleanup, optherwise the item could still be in memory
+                        // moving down below cleanup, otherwise the item could still be in memory
                         TriggerOnRemoveByHandle(args.Key, args.Region, args.Reason, handleIndex + 1, args.Value);
                     };
 
@@ -719,16 +719,16 @@ namespace CacheManager.Core
             if (_cacheHandles.Any(p => p.Configuration.IsBackplaneSource))
             {
                 // added includeSource param to get the handles which need to be synced.
-                // in case the backplane source is non-distributed (in-memory), only remotly triggered remove and clear should also
-                // trigger a sync locally. For distribtued caches, we expect that the distributed cache is already the source and in sync
-                // as that's the layer which triggered the event. In this case, only other in-memory handles above the distribtued, would be synced.
-                var handles = new Func<bool, BaseCacheHandle<TCacheValue>[]>((includSource) =>
+                // in case the backplane source is non-distributed (in-memory), only remotely triggered remove and clear should also
+                // trigger a sync locally. For distributed caches, we expect that the distributed cache is already the source and in sync
+                // as that's the layer which triggered the event. In this case, only other in-memory handles above the distributed, would be synced.
+                var handles = new Func<bool, BaseCacheHandle<TCacheValue>[]>((includeSource) =>
                 {
                     var handleList = new List<BaseCacheHandle<TCacheValue>>();
                     foreach (var handle in _cacheHandles)
                     {
                         if (!handle.Configuration.IsBackplaneSource ||
-                            (includSource && handle.Configuration.IsBackplaneSource && !handle.IsDistributedCache))
+                            (includeSource && handle.Configuration.IsBackplaneSource && !handle.IsDistributedCache))
                         {
                             handleList.Add(handle);
                         }
