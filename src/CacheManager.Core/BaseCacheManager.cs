@@ -127,7 +127,9 @@ namespace CacheManager.Core
             catch (Exception ex)
             {
                 Logger.LogError(ex, "Error occurred while creating the cache manager.");
-                throw ex.InnerException ?? ex;
+                throw new ApplicationException(
+                    "Error occurred while creating the cache manager.",
+                    ex.InnerException ?? ex);
             }
         }
 
