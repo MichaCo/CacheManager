@@ -5,6 +5,7 @@ using System.Globalization;
 using System.Linq;
 using CacheManager.Core.Internal;
 using CacheManager.Core.Logging;
+using CacheManager.Core.Utility;
 using static CacheManager.Core.Utility.Guard;
 
 namespace CacheManager.Core
@@ -127,7 +128,7 @@ namespace CacheManager.Core
             catch (Exception ex)
             {
                 Logger.LogError(ex, "Error occurred while creating the cache manager.");
-                throw ex.InnerException ?? ex;
+                Throw.Rethrow(ex.InnerException ?? ex);
             }
         }
 
