@@ -7,11 +7,14 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageTags>Caching;Cache;CacheManager;Distributed Cache;Serialization;Protobuf</PackageTags>
+    <Version>3.0.0</Version>
+    <PackageReleaseNotes>3.0 - Use RecyclableMemoryStream to reduce allocations</PackageReleaseNotes>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\CacheManager.Core\CacheManager.Core.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Microsoft.IO.RecyclableMemoryStream" Version="1.2.2" />
     <PackageReference Include="protobuf-net" Version="2.4.0" />
   </ItemGroup>
 </Project>
