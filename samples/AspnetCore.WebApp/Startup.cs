@@ -14,16 +14,17 @@ namespace AspnetCore.WebApp
 
     public class Startup
     {
-        public Startup(IHostingEnvironment env)
+        public Startup(IConfiguration configuration)
         {
-            var builder = new ConfigurationBuilder()
-                .SetBasePath(env.ContentRootPath)
-                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
-                // adding cache.json which contains cachemanager configuration(s)
-                .AddJsonFile("cache.json", optional: false)
-                .AddEnvironmentVariables();
+            var builder = new ConfigurationBuilder().AddConfiguration(configuration);
+            
+            /* Add Default configurations */
+            builder.AddConfiguration(configuration);
 
+            /* Add Custom configurations */
+            // adding cache.json which contains cachemanager configuration(s)
+            builder.AddJsonFile("cache.json"); 
+            
             Configuration = builder.Build();
         }
 
