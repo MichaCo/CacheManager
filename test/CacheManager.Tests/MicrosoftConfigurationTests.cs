@@ -1009,7 +1009,31 @@ namespace CacheManager.Tests
                 cache.Add("key", "value");
             };
 
-            config.SerializerType.Should().Be(typeof(Serialization.Json.GzJsonCacheSerializer));
+            config.SerializerType.Should().Be(typeof(Serialization.Json.JsonCacheSerializer));
+            config.ShouldCompress.Should().BeTrue();
+            act.Should().NotThrow();
+        }
+
+        [Fact]
+        public void Configuration_Serializer_KnownType_JsonWithCompression()
+        {
+            var data = new Dictionary<string, string>
+            {
+                {"cacheManagers:0:name", "name"},
+                {"cacheManagers:0:handles:0:knownType", "Dictionary"},
+                {"cacheManagers:0:serializer:knownType", "json"},
+                {"cacheManagers:0:serializer:shouldCompress", "true"}
+            };
+
+            var config = GetConfiguration(data).GetCacheConfiguration("name");
+            Action act = () =>
+            {
+                var cache = new BaseCacheManager<string>(config);
+                cache.Add("key", "value");
+            };
+
+            config.SerializerType.Should().Be(typeof(Serialization.Json.JsonCacheSerializer));
+            config.ShouldCompress.Should().BeTrue();
             act.Should().NotThrow();
         }
 

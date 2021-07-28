@@ -619,7 +619,7 @@ namespace CacheManager.Tests
                     break;
 
                 case Serializer.GzJson:
-                    part.WithGzJsonSerializer();
+                    part.WithJsonSerializer().WithCompression();
                     break;
 
                 case Serializer.Json:
@@ -643,7 +643,7 @@ namespace CacheManager.Tests
                     break;
 
                 case Serializer.DataContractGzJson:
-                    part.WithDataContractGzJsonSerializer();
+                    part.WithDataContractSerializer().WithCompression();
                     break;
 
                 case Serializer.DataContractJson:

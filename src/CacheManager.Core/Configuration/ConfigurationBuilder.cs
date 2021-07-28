@@ -286,6 +286,8 @@ namespace CacheManager.Core
                 cfg.BackplaneConfigurationKey = managerCfg.BackplaneName;
             }
 
+            cfg.ShouldCompress = managerCfg.ShouldCompress;
+
             // build serializer if set
             if (!string.IsNullOrWhiteSpace(managerCfg.SerializerType))
             {
@@ -709,6 +711,15 @@ namespace CacheManager.Core
             Ensure(timeoutMillis >= 0, "Retry timeout must be greater than or equal to zero.");
 
             Configuration.RetryTimeout = timeoutMillis;
+            return this;
+        }
+
+        /// <summary>
+        /// Adds compression after serialization
+        /// </summary>
+        public ConfigurationBuilderCachePart WithCompression()
+        {
+            Configuration.ShouldCompress = true;
             return this;
         }
 

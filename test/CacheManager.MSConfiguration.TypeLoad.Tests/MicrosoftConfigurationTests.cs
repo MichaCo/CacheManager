@@ -112,21 +112,6 @@ namespace CacheManager.MSConfiguration.TypeLoad.Tests
         }
 
         [Fact]
-        public void Configuration_Serializer_GzJson_NotReferenced()
-        {
-            var data = new Dictionary<string, string>
-            {
-                {"cacheManagers:0:name", "name"},
-                {"cacheManagers:0:handles:0:knownType", "Dictionary"},
-                {"cacheManagers:0:serializer:knownType", "GzJson"}
-            };
-
-            var config = GetConfiguration(data);
-            Action action = () => config.GetCacheConfiguration("name");
-            action.Should().Throw<InvalidOperationException>().WithMessage("*serializer type 'GzJson' could not be loaded*");
-        }
-
-        [Fact]
         public void Configuration_Serializer_Protobuf_NotReferenced()
         {
             var data = new Dictionary<string, string>
