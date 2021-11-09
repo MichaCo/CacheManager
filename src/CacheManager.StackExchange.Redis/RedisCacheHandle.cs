@@ -257,7 +257,7 @@ return result";
         public override bool Exists(string key)
         {
             var fullKey = GetKey(key);
-            return Retry(() => _connection.Database.KeyExists(fullKey));
+            return Retry(() => _connection.Database.KeyExists(fullKey, CommandFlags.PreferSlave));
         }
 
         /// <inheritdoc />
@@ -266,7 +266,7 @@ return result";
             NotNullOrWhiteSpace(region, nameof(region));
 
             var fullKey = GetKey(key, region);
-            return Retry(() => _connection.Database.KeyExists(fullKey));
+            return Retry(() => _connection.Database.KeyExists(fullKey, CommandFlags.PreferSlave));
         }
 
         /// <inheritdoc />
@@ -458,7 +458,7 @@ return result";
 
             var fullKey = GetKey(key, region);
 
-            var result = Retry(() => Eval(ScriptType.Get, fullKey));
+            var result = Retry(() => Eval(ScriptType.Get, fullKey, flags: CommandFlags.PreferSlave));
             if (result == null || result.IsNull)
             {
                 // something went wrong. HMGET should return at least a null result for each requested field
@@ -548,7 +548,7 @@ return result";
                         HashFieldCreated,
                         HashFieldType,
                         HashFieldUsesDefaultExp
-                    });
+                    }, CommandFlags.PreferSlave);
 
                 // the first item stores the value
                 var item = values[0];
