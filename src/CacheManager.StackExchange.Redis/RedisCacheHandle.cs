@@ -458,7 +458,7 @@ return result";
 
             var fullKey = GetKey(key, region);
 
-            var result = Retry(() => Eval(ScriptType.Get, fullKey, flags: CommandFlags.PreferSlave));
+            var result = Retry(() => Eval(ScriptType.Get, fullKey));
             if (result == null || result.IsNull)
             {
                 // something went wrong. HMGET should return at least a null result for each requested field
