@@ -167,7 +167,7 @@ return result";
                 }
 
                 var count = 0;
-                foreach (var server in Servers.Where(p => !p.IsSlave && p.IsConnected))
+                foreach (var server in Servers.Where(p => !p.IsReplica && p.IsConnected))
                 {
                     count += (int)server.DatabaseSize(_redisConfiguration.Database);
                 }
@@ -210,7 +210,7 @@ return result";
         {
             try
             {
-                foreach (var server in Servers.Where(p => !p.IsSlave))
+                foreach (var server in Servers.Where(p => !p.IsReplica))
                 {
                     Retry(() =>
                     {
@@ -257,7 +257,7 @@ return result";
         public override bool Exists(string key)
         {
             var fullKey = GetKey(key);
-            return Retry(() => _connection.Database.KeyExists(fullKey, CommandFlags.PreferSlave));
+            return Retry(() => _connection.Database.KeyExists(fullKey, CommandFlags.PreferReplica));
         }
 
         /// <inheritdoc />
@@ -266,7 +266,7 @@ return result";
             NotNullOrWhiteSpace(region, nameof(region));
 
             var fullKey = GetKey(key, region);
-            return Retry(() => _connection.Database.KeyExists(fullKey, CommandFlags.PreferSlave));
+            return Retry(() => _connection.Database.KeyExists(fullKey, CommandFlags.PreferReplica));
         }
 
         /// <inheritdoc />
@@ -459,6 +459,7 @@ return result";
             var fullKey = GetKey(key, region);
 
             var result = Retry(() => Eval(ScriptType.Get, fullKey));
+            
             if (result == null || result.IsNull)
             {
                 // something went wrong. HMGET should return at least a null result for each requested field
@@ -548,7 +549,7 @@ return result";
                         HashFieldCreated,
                         HashFieldType,
                         HashFieldUsesDefaultExp
-                    }, CommandFlags.PreferSlave);
+                    }, CommandFlags.PreferReplica);
 
                 // the first item stores the value
                 var item = values[0];
