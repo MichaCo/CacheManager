@@ -170,7 +170,7 @@ namespace CacheManager.Redis
                         {
                             var endpoints = connection.GetEndPoints();
                             if (!endpoints.Select(p => connection.GetServer(p))
-                                .Any(p => !p.IsSlave || p.AllowSlaveWrites))
+                                .Any(p => !p.IsReplica || p.AllowReplicaWrites))
                             {
                                 throw new InvalidOperationException("No writeable endpoint found.");
                             }
