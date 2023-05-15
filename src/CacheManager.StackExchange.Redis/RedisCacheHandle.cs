@@ -29,7 +29,7 @@ namespace CacheManager.Redis
 
         private static readonly string _scriptAdd = $@"
 if redis.call('HSETNX', KEYS[1], '{HashFieldValue}', ARGV[1]) == 1 then
-    local result=redis.call('HMSET', KEYS[1], '{HashFieldType}', ARGV[2], '{HashFieldExpirationMode}', ARGV[3], '{HashFieldExpirationTimeout}', ARGV[4], '{HashFieldCreated}', ARGV[5], '{HashFieldVersion}', 1, '{HashFieldUsesDefaultExp}', ARGV[6])
+    local result=redis.call('HSET', KEYS[1], '{HashFieldType}', ARGV[2], '{HashFieldExpirationMode}', ARGV[3], '{HashFieldExpirationTimeout}', ARGV[4], '{HashFieldCreated}', ARGV[5], '{HashFieldVersion}', 1, '{HashFieldUsesDefaultExp}', ARGV[6])
     if ARGV[3] > '1' and ARGV[4] ~= '0' then
         redis.call('PEXPIRE', KEYS[1], ARGV[4])
     else
@@ -41,7 +41,7 @@ else
 end";
 
         private static readonly string _scriptPut = $@"
-local result=redis.call('HMSET', KEYS[1], '{HashFieldValue}', ARGV[1], '{HashFieldType}', ARGV[2], '{HashFieldExpirationMode}', ARGV[3], '{HashFieldExpirationTimeout}', ARGV[4], '{HashFieldCreated}', ARGV[5], '{HashFieldUsesDefaultExp}', ARGV[6])
+local result=redis.call('HSET', KEYS[1], '{HashFieldValue}', ARGV[1], '{HashFieldType}', ARGV[2], '{HashFieldExpirationMode}', ARGV[3], '{HashFieldExpirationTimeout}', ARGV[4], '{HashFieldCreated}', ARGV[5], '{HashFieldUsesDefaultExp}', ARGV[6])
 redis.call('HINCRBY', KEYS[1], '{HashFieldVersion}', 1)
 if ARGV[3] > '1' and ARGV[4] ~= '0' then
     redis.call('PEXPIRE', KEYS[1], ARGV[4])
@@ -634,7 +634,7 @@ return result";
         /// </summary>
         /// <param name="item">The <c>CacheItem</c> to be added to the cache.</param>
         protected override void PutInternalPrepared(CacheItem<TCacheValue> item) =>
-            Retry(() => Set(item, When.Always, false));
+            Retry(() => Set(item, When.Always, true));
 
         /// <summary>
         /// Removes a value from the cache for the specified key.
@@ -896,7 +896,7 @@ return result";
 
                 var resultValue = (RedisValue)result;
 
-                if (resultValue.HasValue && resultValue.ToString().Equals("OK", StringComparison.OrdinalIgnoreCase))
+                if (resultValue.HasValue && resultValue.IsInteger)
                 {
                     // Added successfully:
                     if (!string.IsNullOrWhiteSpace(item.Region))
