@@ -1,6 +1,5 @@
 ﻿using System;
-using System.Threading.Tasks;
-using CacheManager.Core.Logging;
+using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
 
 namespace CacheManager.Redis
@@ -36,14 +35,7 @@ namespace CacheManager.Redis
                         throw;
                     }
 
-                    logger.LogWarn(ex, WarningMessage, tries, retries);
-                    
-                    // Removed all async delay to prevent potential deadlocks
-////#if NET40
-////                    TaskEx.Delay(timeOut).Wait();
-////#else
-////                    Task.Delay(timeOut).Wait();
-////#endif
+                    logger.LogWarning(ex, WarningMessage, tries, retries);
                 }
                 catch (RedisConnectionException ex)
                 {
@@ -53,14 +45,7 @@ namespace CacheManager.Redis
                         throw;
                     }
 
-                    logger.LogWarn(ex, WarningMessage, tries, retries);
-                    
-                    // Removed all async delay to prevent potential deadlocks
-////#if NET40
-////                    TaskEx.Delay(timeOut).Wait();
-////#else
-////                    Task.Delay(timeOut).Wait();
-////#endif
+                    logger.LogWarning(ex, WarningMessage, tries, retries);
                 }
                 catch (TimeoutException ex)
                 {
@@ -70,13 +55,7 @@ namespace CacheManager.Redis
                         throw;
                     }
 
-                    logger.LogWarn(ex, WarningMessage, tries, retries);
-                    // Removed all async delay to prevent potential deadlocks
-////#if NET40
-////                    TaskEx.Delay(timeOut).Wait();
-////#else
-////                    Task.Delay(timeOut).Wait();
-////#endif
+                    logger.LogWarning(ex, WarningMessage, tries, retries);
                 }
                 catch (AggregateException aggregateException)
                 {
@@ -95,18 +74,12 @@ namespace CacheManager.Redis
 
                         if (e is RedisConnectionException || e is System.TimeoutException || e is RedisServerException)
                         {
-                            logger.LogWarn(e, WarningMessage, tries, retries);
-                            // Removed all async delay to prevent potential deadlocks
-////#if NET40
-////                            TaskEx.Delay(timeOut).Wait();
-////#else
-////                            Task.Delay(timeOut).Wait();
-////#endif
+                            logger.LogWarning(e, WarningMessage, tries, retries);
 
                             return true;
                         }
 
-                        logger.LogCritical("Unhandled exception occurred.", aggregateException);
+                        logger.LogCritical(aggregateException, "Unhandled exception occurred.");
                         return false;
                     });
                 }

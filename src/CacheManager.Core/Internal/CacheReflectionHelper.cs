@@ -3,32 +3,32 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
-using CacheManager.Core.Logging;
+using Microsoft.Extensions.Logging;
 using static CacheManager.Core.Utility.Guard;
 
 namespace CacheManager.Core.Internal
 {
     internal static class CacheReflectionHelper
     {
-        internal static ILoggerFactory CreateLoggerFactory(ICacheManagerConfiguration configuration)
-        {
-            NotNull(configuration, nameof(configuration));
+        ////internal static ILoggerFactory CreateLoggerFactory(ICacheManagerConfiguration configuration)
+        ////{
+        ////    NotNull(configuration, nameof(configuration));
 
-            if (configuration.LoggerFactoryType == null)
-            {
-                return new NullLoggerFactory();
-            }
+        ////    if (configuration.LoggerFactoryType == null)
+        ////    {
+        ////        return new NullLoggerFactory();
+        ////    }
 
-            CheckImplements<ILoggerFactory>(configuration.LoggerFactoryType);
+        ////    CheckImplements<ILoggerFactory>(configuration.LoggerFactoryType);
 
-            var args = new object[] { configuration };
-            if (configuration.LoggerFactoryTypeArguments != null)
-            {
-                args = configuration.LoggerFactoryTypeArguments.Concat(args).ToArray();
-            }
+        ////    var args = new object[] { configuration };
+        ////    if (configuration.LoggerFactoryTypeArguments != null)
+        ////    {
+        ////        args = configuration.LoggerFactoryTypeArguments.Concat(args).ToArray();
+        ////    }
 
-            return (ILoggerFactory)CreateInstance(configuration.LoggerFactoryType, args);
-        }
+        ////    return (ILoggerFactory)CreateInstance(configuration.LoggerFactoryType, args);
+        ////}
 
         internal static ICacheSerializer CreateSerializer(ICacheManagerConfiguration configuration, ILoggerFactory loggerFactory)
         {
@@ -92,7 +92,7 @@ namespace CacheManager.Core.Internal
 
             foreach (var handleConfiguration in managerConfiguration.CacheHandleConfigurations)
             {
-                logger.LogInfo("Creating handle {0} of type {1}.", handleConfiguration.Name, handleConfiguration.HandleType);
+                logger.LogInformation("Creating handle {0} of type {1}.", handleConfiguration.Name, handleConfiguration.HandleType);
                 var handleType = handleConfiguration.HandleType;
                 var requiresSerializer = false;
 

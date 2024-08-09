@@ -1,4 +1,5 @@
-﻿using CacheManager.Serialization.ProtoBuf;
+﻿using System;
+using CacheManager.Serialization.ProtoBuf;
 
 namespace CacheManager.Core
 {
@@ -14,7 +15,10 @@ namespace CacheManager.Core
         /// <returns>The builder instance.</returns>
         public static ConfigurationBuilderCachePart WithProtoBufSerializer(this ConfigurationBuilderCachePart part)
         {
-            Utility.Guard.NotNull(part, nameof(part));
+            if (part is null)
+            {
+                throw new ArgumentNullException(nameof(part));
+            }
 
             return part.WithSerializer(typeof(ProtoBufSerializer));
         }

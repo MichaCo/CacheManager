@@ -2,14 +2,24 @@
   <Import Project="..\..\tools\common.props" />
   <PropertyGroup>
     <Description>CacheManager is an open source caching abstraction layer for .NET written in C#. It supports various cache providers and implements many advanced features. The Core library contains all base interfaces and tools. You should install at least one other CacheManager package to get cache handle implementations.</Description>
-    <TargetFrameworks>net45;netstandard2.0;netstandard2.1;net50</TargetFrameworks>
+    <TargetFrameworks>net472;netstandard2.0;netstandard2.1;net80</TargetFrameworks>
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
-    <PackageTags>Caching;Cache;CacheManager;Distributed Cache;StackExchange Redis;Memcached</PackageTags>
+    <PackageTags>Caching;Cache;CacheManager;Distributed Cache;Redis;</PackageTags>
   </PropertyGroup>
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="CacheManager.Tests" Key="002400000480000094000000060200000024000052534131000400000100010051a13aa6dd4e78f62051f0d2608ba1e1e50f7038dad1e72f6a2233ec77ec58d49eec5ba13b0f7508d11fbbcd79ee39b0322b58873962771396ec08096f5d4bd2d1622ed9cad79016c154397390336a4a5a619aeec126f8d54b9ea884c510267d1d413ab5afc3c1aea86c199e57ecb23bd39458528328d2de90050e11d4649ec3"/>
+    <InternalsVisibleTo Include="CacheManager.StackExchange.Redis" Key="002400000480000094000000060200000024000052534131000400000100010051a13aa6dd4e78f62051f0d2608ba1e1e50f7038dad1e72f6a2233ec77ec58d49eec5ba13b0f7508d11fbbcd79ee39b0322b58873962771396ec08096f5d4bd2d1622ed9cad79016c154397390336a4a5a619aeec126f8d54b9ea884c510267d1d413ab5afc3c1aea86c199e57ecb23bd39458528328d2de90050e11d4649ec3"/>
+    <InternalsVisibleTo Include="CacheManager.Microsoft.Extensions.Configuration" Key="002400000480000094000000060200000024000052534131000400000100010051a13aa6dd4e78f62051f0d2608ba1e1e50f7038dad1e72f6a2233ec77ec58d49eec5ba13b0f7508d11fbbcd79ee39b0322b58873962771396ec08096f5d4bd2d1622ed9cad79016c154397390336a4a5a619aeec126f8d54b9ea884c510267d1d413ab5afc3c1aea86c199e57ecb23bd39458528328d2de90050e11d4649ec3"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.0" />
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net472' ">
     <Reference Include="System.Configuration" />
   </ItemGroup>
-  <ItemGroup Condition=" '$(TargetFramework)' != 'net45' ">
-    <PackageReference Include="System.Configuration.ConfigurationManager" Version="5.0.0" />
+  <ItemGroup Condition=" '$(TargetFramework)' != 'net472' ">
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="6.0.0" />
   </ItemGroup>
 </Project>

@@ -20,7 +20,7 @@ namespace CacheManager.Tests
         public void MsMemory_Extensions_Simple()
         {
             var expectedCacheOptions = new MemoryCacheOptions();
-            var cfg = new ConfigurationBuilder().WithMicrosoftMemoryCacheHandle().Build();
+            var cfg = new CacheConfigurationBuilder().WithMicrosoftMemoryCacheHandle().Build();
             var cache = new BaseCacheManager<string>(cfg);
 
             // disabling cfg check as they seem to alter the configuration internally after adding it... internal ms bs implementation
@@ -38,7 +38,7 @@ namespace CacheManager.Tests
         {
             string name = "some instance name";
             var expectedCacheOptions = new MemoryCacheOptions();
-            var cfg = new ConfigurationBuilder().WithMicrosoftMemoryCacheHandle(name).Build();
+            var cfg = new CacheConfigurationBuilder().WithMicrosoftMemoryCacheHandle(name).Build();
             var cache = new BaseCacheManager<string>(cfg);
 
             // disabling cfg check as they seem to alter the configuration internally after adding it... internal ms bs implementation
@@ -56,7 +56,7 @@ namespace CacheManager.Tests
         {
             string name = "some instance name";
             var expectedCacheOptions = new MemoryCacheOptions();
-            var cfg = new ConfigurationBuilder().WithMicrosoftMemoryCacheHandle(name, true).Build();
+            var cfg = new CacheConfigurationBuilder().WithMicrosoftMemoryCacheHandle(name, true).Build();
             var cache = new BaseCacheManager<string>(cfg);
 
             // disabling cfg check as they seem to alter the configuration internally after adding it... internal ms bs implementation
@@ -79,7 +79,7 @@ namespace CacheManager.Tests
                 ExpirationScanFrequency = TimeSpan.FromSeconds(20)
             };
 
-            var cfg = new ConfigurationBuilder().WithMicrosoftMemoryCacheHandle(expectedCacheOptions).Build();
+            var cfg = new CacheConfigurationBuilder().WithMicrosoftMemoryCacheHandle(expectedCacheOptions).Build();
             var cache = new BaseCacheManager<string>(cfg);
 
             cfg.CacheHandleConfigurations.First()
@@ -103,7 +103,7 @@ namespace CacheManager.Tests
                 ExpirationScanFrequency = TimeSpan.FromSeconds(20)
             };
 
-            var cfg = new ConfigurationBuilder().WithMicrosoftMemoryCacheHandle(name, expectedCacheOptions).Build();
+            var cfg = new CacheConfigurationBuilder().WithMicrosoftMemoryCacheHandle(name, expectedCacheOptions).Build();
             var cache = new BaseCacheManager<string>(cfg);
 
             cfg.CacheHandleConfigurations.First()
@@ -127,7 +127,7 @@ namespace CacheManager.Tests
                 ExpirationScanFrequency = TimeSpan.FromSeconds(20)
             };
 
-            var cfg = new ConfigurationBuilder().WithMicrosoftMemoryCacheHandle(name, true, expectedCacheOptions).Build();
+            var cfg = new CacheConfigurationBuilder().WithMicrosoftMemoryCacheHandle(name, true, expectedCacheOptions).Build();
             var cache = new BaseCacheManager<string>(cfg);
 
             cfg.CacheHandleConfigurations.First()
@@ -147,7 +147,7 @@ namespace CacheManager.Tests
         [Fact]
         public void SysRuntime_Extensions_Simple()
         {
-            var cfg = new ConfigurationBuilder().WithSystemRuntimeCacheHandle().Build();
+            var cfg = new CacheConfigurationBuilder().WithSystemRuntimeCacheHandle().Build();
             var cache = new BaseCacheManager<string>(cfg);
 
             cfg.CacheHandleConfigurations.Count.Should().Be(1);
@@ -161,7 +161,7 @@ namespace CacheManager.Tests
         public void SysRuntime_Extensions_Named()
         {
             string name = "instanceName";
-            var cfg = new ConfigurationBuilder().WithSystemRuntimeCacheHandle(name).Build();
+            var cfg = new CacheConfigurationBuilder().WithSystemRuntimeCacheHandle(name).Build();
             var cache = new BaseCacheManager<string>(cfg);
 
             cfg.CacheHandleConfigurations.Count.Should().Be(1);
@@ -175,7 +175,7 @@ namespace CacheManager.Tests
         public void SysRuntime_Extensions_NamedB()
         {
             string name = "instanceName";
-            var cfg = new ConfigurationBuilder().WithSystemRuntimeCacheHandle(name, true).Build();
+            var cfg = new CacheConfigurationBuilder().WithSystemRuntimeCacheHandle(name, true).Build();
             var cache = new BaseCacheManager<string>(cfg);
 
             cfg.CacheHandleConfigurations.Count.Should().Be(1);

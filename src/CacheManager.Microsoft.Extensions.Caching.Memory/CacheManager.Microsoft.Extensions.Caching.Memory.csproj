@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Description>CacheManager is an open source caching abstraction layer for .NET written in C#. It supports various cache providers and implements many advanced features. This package contains the specific cache handle for Microsoft.Extensions.Caching.Memory.</Description>
     <Authors>MichaConrad;AuroraDysis</Authors>
-    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net8.0</TargetFrameworks>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageTags>Caching;Cache;CacheManager;MemoryCache</PackageTags>
@@ -12,6 +12,9 @@
     <ProjectReference Include="..\CacheManager.Core\CacheManager.Core.csproj" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
-    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="2.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="6.0.0" />
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' != 'netstandard2.0' ">
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="8.0.0" />
   </ItemGroup>
 </Project>

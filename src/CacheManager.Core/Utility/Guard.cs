@@ -8,7 +8,7 @@ namespace CacheManager.Core.Utility
     /// <summary>
     /// Utility class to do <c>null</c> and other checks.
     /// </summary>
-    public static class Guard
+    internal static class Guard
     {
         /// <summary>
         /// Validates that <paramref name="value"/> is not <c>null</c> and otherwise throws an exception.

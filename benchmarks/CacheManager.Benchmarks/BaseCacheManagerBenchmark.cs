@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using BenchmarkDotNet.Attributes;
 using CacheManager.Core;
-using Enyim.Caching;
-using Enyim.Caching.Configuration;
 
 namespace CacheManager.Benchmarks
 {
@@ -12,22 +9,13 @@ namespace CacheManager.Benchmarks
     public abstract class BaseCacheBenchmark
     {
         private static ICacheManagerConfiguration BaseConfig
-            => new ConfigurationBuilder()
+            => new CacheConfigurationBuilder()
             .WithMaxRetries(10)
             .WithRetryTimeout(500)
             .WithJsonSerializer()
             .WithUpdateMode(CacheUpdateMode.Up)
             .Build();
 
-        private static IMemcachedClientConfiguration MemcachedConfig
-        {
-            get
-            {
-                var cfg = new MemcachedClientConfiguration();
-                cfg.AddServer("localhost", 11211);
-                return cfg;
-            }
-        }
 
         protected ICacheManager<string> DictionaryCache = new BaseCacheManager<string>(BaseConfig.Builder.WithDictionaryHandle().Build());
 
@@ -42,10 +30,6 @@ namespace CacheManager.Benchmarks
 
         protected ICacheManager<string> MsMemoryCache = new BaseCacheManager<string>(BaseConfig.Builder.WithMicrosoftMemoryCacheHandle().Build());
 
-        protected ICacheManager<string> MemcachedCache =
-            new BaseCacheManager<string>(BaseConfig.Builder
-                .WithMemcachedCacheHandle(new MemcachedClient(MemcachedConfig)).Build());
-
         [GlobalSetup]
         public void Setup()
         {
@@ -53,7 +37,6 @@ namespace CacheManager.Benchmarks
             RuntimeCache.Clear();
             RedisCache.Clear();
             MsMemoryCache.Clear();
-            MemcachedCache.Clear();
             SetupBench();
         }
 
@@ -79,12 +62,6 @@ namespace CacheManager.Benchmarks
         public void Redis()
         {
             Excecute(RedisCache);
-        }
-
-        [Benchmark]
-        public void Memcached()
-        {
-            Excecute(MemcachedCache);
         }
 
         protected abstract void Excecute(ICacheManager<string> cache);
@@ -178,8 +155,6 @@ namespace CacheManager.Benchmarks
             RuntimeCache.Add(Key, Key, "region");
             MsMemoryCache.Add(Key, Key);
             MsMemoryCache.Add(Key, Key, "region");
-            MemcachedCache.Add(Key, Key);
-            MemcachedCache.Add(Key, Key, "region");
             RedisCache.Add(Key, Key);
             RedisCache.Add(Key, Key, "region");
         }

@@ -2,9 +2,8 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using CacheManager.Core;
-using CacheManager.Core.Logging;
 using FluentAssertions;
+using Microsoft.Extensions.Logging;
 using Xunit;
 
 namespace CacheManager.Tests
@@ -220,7 +219,7 @@ namespace CacheManager.Tests
         {
             var logger = new TestLogger();
 
-            logger.LogInfo("some message.");
+            logger.LogInformation("some message.");
 
             logger.Last.EventId.Should().Be(0);
             logger.Last.Exception.Should().BeNull();
@@ -233,7 +232,7 @@ namespace CacheManager.Tests
         {
             var logger = new TestLogger();
 
-            logger.LogInfo("message {0} {1}.", "a", "b");
+            logger.LogInformation("message {0} {1}.", "a", "b");
 
             logger.Last.EventId.Should().Be(0);
             logger.Last.Exception.Should().BeNull();
@@ -246,7 +245,7 @@ namespace CacheManager.Tests
         {
             var logger = new TestLogger();
 
-            logger.LogInfo(11, "message {0} {1}.", "a", "b");
+            logger.LogInformation(11, "message {0} {1}.", "a", "b");
 
             logger.Last.EventId.Should().Be(11);
             logger.Last.Exception.Should().BeNull();
@@ -259,7 +258,7 @@ namespace CacheManager.Tests
         {
             var logger = new TestLogger();
 
-            logger.LogInfo(new InvalidCastException(), "message {0} {1}.", "a", "b");
+            logger.LogInformation(new InvalidCastException(), "message {0} {1}.", "a", "b");
 
             logger.Last.EventId.Should().Be(0);
             logger.Last.Exception.Should().BeOfType<InvalidCastException>();
@@ -272,7 +271,7 @@ namespace CacheManager.Tests
         {
             var logger = new TestLogger();
 
-            logger.LogInfo(33, new InvalidCastException(), "message {0} {1}.", "a", "b");
+            logger.LogInformation(33, new InvalidCastException(), "message {0} {1}.", "a", "b");
 
             logger.Last.EventId.Should().Be(33);
             logger.Last.Exception.Should().BeOfType<InvalidCastException>();
@@ -354,7 +353,7 @@ namespace CacheManager.Tests
         {
             var logger = new TestLogger();
 
-            logger.LogWarn("some message.");
+            logger.LogWarning("some message.");
 
             logger.Last.EventId.Should().Be(0);
             logger.Last.Exception.Should().BeNull();
@@ -367,7 +366,7 @@ namespace CacheManager.Tests
         {
             var logger = new TestLogger();
 
-            logger.LogWarn("message {0} {1}.", "a", "b");
+            logger.LogWarning("message {0} {1}.", "a", "b");
 
             logger.Last.EventId.Should().Be(0);
             logger.Last.Exception.Should().BeNull();
@@ -380,7 +379,7 @@ namespace CacheManager.Tests
         {
             var logger = new TestLogger();
 
-            logger.LogWarn(11, "message {0} {1}.", "a", "b");
+            logger.LogWarning(11, "message {0} {1}.", "a", "b");
 
             logger.Last.EventId.Should().Be(11);
             logger.Last.Exception.Should().BeNull();
@@ -393,7 +392,7 @@ namespace CacheManager.Tests
         {
             var logger = new TestLogger();
 
-            logger.LogWarn(new InvalidCastException(), "message {0} {1}.", "a", "b");
+            logger.LogWarning(new InvalidCastException(), "message {0} {1}.", "a", "b");
 
             logger.Last.EventId.Should().Be(0);
             logger.Last.Exception.Should().BeOfType<InvalidCastException>();
@@ -406,7 +405,7 @@ namespace CacheManager.Tests
         {
             var logger = new TestLogger();
 
-            logger.LogWarn(33, new InvalidCastException(), "message {0} {1}.", "a", "b");
+            logger.LogWarning(33, new InvalidCastException(), "message {0} {1}.", "a", "b");
 
             logger.Last.EventId.Should().Be(33);
             logger.Last.Exception.Should().BeOfType<InvalidCastException>();
@@ -414,24 +413,24 @@ namespace CacheManager.Tests
             logger.Last.Message.ToString().Should().Be("message a b.");
         }
 
-        [Fact]
-        public void Logging_Builder_ValidFactory()
-        {
-            var cfg = ConfigurationBuilder.BuildConfiguration(
-                s => s.WithLogging(typeof(NullLoggerFactory)));
+        //[Fact]
+        //public void Logging_Builder_ValidFactory()
+        //{
+        //    var cfg = ConfigurationBuilder.BuildConfiguration(
+        //        s => s.WithLogging(typeof(NullLoggerFactory)));
 
-            cfg.LoggerFactoryType.Should().NotBeNull();
-            cfg.LoggerFactoryType.Should().Be(typeof(NullLoggerFactory));
-        }
+        //    cfg.LoggerFactoryType.Should().NotBeNull();
+        //    cfg.LoggerFactoryType.Should().Be(typeof(NullLoggerFactory));
+        //}
 
-        [Fact]
-        public void Logging_TypedLogger()
-        {
-            var cfg = ConfigurationBuilder.BuildConfiguration(
-                s => s.WithLogging(typeof(NullLoggerFactory)));
+        //[Fact]
+        //public void Logging_TypedLogger()
+        //{
+        //    var cfg = ConfigurationBuilder.BuildConfiguration(
+        //        s => s.WithLogging(typeof(NullLoggerFactory)));
 
-            cfg.LoggerFactoryType.Should().NotBeNull();
-        }
+        //    cfg.LoggerFactoryType.Should().NotBeNull();
+        //}
     }
 
     [ExcludeFromCodeCoverage]
@@ -444,6 +443,10 @@ namespace CacheManager.Tests
             this.useLogger = useLogger;
         }
 
+        public void AddProvider(ILoggerProvider provider)
+        {
+        }
+
         public ILogger CreateLogger(string categoryName)
         {
             return this.useLogger;
@@ -453,10 +456,12 @@ namespace CacheManager.Tests
         {
             return this.useLogger;
         }
+
+        public void Dispose() => throw new NotImplementedException();
     }
 
     [ExcludeFromCodeCoverage]
-    public class TestLogger : ILogger
+    public class TestLogger : ILogger<TestLogger>
     {
         public TestLogger()
         {
@@ -467,10 +472,7 @@ namespace CacheManager.Tests
 
         public LogMessage Last => this.LogMessages.Last();
 
-        public IDisposable BeginScope(object state)
-        {
-            throw new NotImplementedException();
-        }
+        public IDisposable BeginScope<TState>(TState state) => null;
 
         public bool IsEnabled(LogLevel logLevel)
         {
@@ -481,6 +483,8 @@ namespace CacheManager.Tests
         {
             this.LogMessages.Add(new LogMessage(logLevel, eventId, message, exception));
         }
+
+        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter) => throw new NotImplementedException();
     }
 
     [ExcludeFromCodeCoverage]

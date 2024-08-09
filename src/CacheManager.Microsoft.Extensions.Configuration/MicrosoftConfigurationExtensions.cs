@@ -31,10 +31,7 @@ namespace Microsoft.Extensions.Configuration
         private const string TypeMicrosoftLoggerFactory = "CacheManager.Logging.MicrosoftLoggerFactoryAdapter, CacheManager.Microsoft.Extensions.Logging";
         private const string TypeRedisBackplane = "CacheManager.Redis.RedisCacheBackplane, CacheManager.StackExchange.Redis";
         private const string TypeSystemRuntimeHandle = "CacheManager.SystemRuntimeCaching.MemoryCacheHandle`1, CacheManager.SystemRuntimeCaching";
-        private const string TypeSystemWebHandle = "CacheManager.Web.SystemWebCacheHandle`1, CacheManager.Web";
         private const string TypeRedisHandle = "CacheManager.Redis.RedisCacheHandle`1, CacheManager.StackExchange.Redis";
-        private const string TypeCouchbaseHandle = "CacheManager.Couchbase.BucketCacheHandle`1, CacheManager.Couchbase";
-        private const string TypeMemcachedHandle = "CacheManager.Memcached.MemcachedCacheHandle`1, CacheManager.Memcached";
         private const string TypeMsExtensionMemoryCacheHandle = "CacheManager.MicrosoftCachingMemory.MemoryCacheHandle`1, CacheManager.Microsoft.Extensions.Caching.Memory";
         private const string TypeRedisConfiguration = "CacheManager.Redis.RedisConfiguration, CacheManager.StackExchange.Redis";
         private const string TypeRedisConfigurations = "CacheManager.Redis.RedisConfigurations, CacheManager.StackExchange.Redis";
@@ -296,23 +293,12 @@ namespace Microsoft.Extensions.Configuration
                     case "dictionary":
                         return typeof(DictionaryCacheHandle<>);
 
-                    case "systemweb":
-                        return Type.GetType(TypeSystemWebHandle, true);
-
                     case "msmemory":
                         return Type.GetType(TypeMsExtensionMemoryCacheHandle, true);
 
                     case "redis":
                         keyRequired = true;
                         return Type.GetType(TypeRedisHandle, true);
-
-                    case "couchbase":
-                        keyRequired = true;
-                        return Type.GetType(TypeCouchbaseHandle, true);
-
-                    case "memcached":
-                        keyRequired = true;
-                        return Type.GetType(TypeMemcachedHandle, true);
                 }
             }
             catch (FileNotFoundException ex)

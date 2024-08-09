@@ -1,7 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
-using CacheManager.Core;
 using CacheManager.Core.Internal;
 using ProtoBuf;
 

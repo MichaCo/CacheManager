@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Globalization;
-using System.Linq;
 using CacheManager.Core.Internal;
-using CacheManager.Core.Logging;
+using Microsoft.Extensions.Logging;
 using static CacheManager.Core.Utility.Guard;
 
 namespace CacheManager.Core
@@ -241,7 +240,7 @@ namespace CacheManager.Core
             }
             else if (result.UpdateState == UpdateItemResultState.FactoryReturnedNull)
             {
-                Logger.LogWarn($"Update failed on '{region}:{key}' because value factory returned null.");
+                Logger.LogWarning($"Update failed on '{region}:{key}' because value factory returned null.");
 
                 if (throwOnFailure)
                 {
@@ -253,7 +252,7 @@ namespace CacheManager.Core
                 // if we had too many retries, this basically indicates an
                 // invalid state of the cache: The item is there, but we couldn't update it and
                 // it most likely has a different version
-                Logger.LogWarn($"Update failed on '{region}:{key}' because of too many retries.");
+                Logger.LogWarning($"Update failed on '{region}:{key}' because of too many retries.");
 
                 EvictFromOtherHandles(key, region, handleIndex);
 
@@ -267,7 +266,7 @@ namespace CacheManager.Core
                 // If update fails because item doesn't exist AND the current handle is backplane source or the lowest cache handle level,
                 // remove the item from other handles (if exists).
                 // Otherwise, if we do not exit here, calling update on the next handle might succeed and would return a misleading result.
-                Logger.LogInfo($"Update failed on '{region}:{key}' because the region/key did not exist.");
+                Logger.LogInformation($"Update failed on '{region}:{key}' because the region/key did not exist.");
 
                 EvictFromOtherHandles(key, region, handleIndex);
 

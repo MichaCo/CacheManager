@@ -17,11 +17,11 @@ namespace CacheManager.Core
         }
 
         /// <summary>
-        /// Gets a <see cref="ConfigurationBuilder"/> for the current <see cref="CacheManagerConfiguration"/> instance
+        /// Gets a <see cref="CacheConfigurationBuilder"/> for the current <see cref="CacheManagerConfiguration"/> instance
         /// to manipulate the configuration fluently.
         /// </summary>
-        /// <returns>The <see cref="ConfigurationBuilder"/>.</returns>
-        public ConfigurationBuilder Builder => new ConfigurationBuilder(this);
+        /// <returns>The <see cref="CacheConfigurationBuilder"/>.</returns>
+        public CacheConfigurationBuilder Builder => new CacheConfigurationBuilder(this);
 
         /// <summary>
         /// Gets or sets the name of the cache.

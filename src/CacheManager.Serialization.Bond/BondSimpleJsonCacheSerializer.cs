@@ -37,7 +37,7 @@ namespace CacheManager.Serialization.Bond
         public override byte[] Serialize<T>(T value)
         {
             var serializer = _cache.GetSerializer(value.GetType());
-            var buffer = StringBuilderPool.Lease();
+            var buffer = StringBuilderPool.Get();
 
             using (var stringWriter = new StringWriter(buffer))
             {

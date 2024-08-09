@@ -2,7 +2,7 @@
 cd %~dp0
 
 SETLOCAL
-SET NUGET_VERSION=latest
+SET NUGET_VERSION=v6.10.1
 SET CACHED_NUGET=%LocalAppData%\NuGet\nuget.%NUGET_VERSION%.exe
 
 IF EXIST %CACHED_NUGET% goto copynuget

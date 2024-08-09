@@ -7,9 +7,10 @@
     using System.Threading.Tasks;
     using CacheManager.Core;
     using CacheManager.Core.Internal;
-    using CacheManager.Core.Logging;
+    
     using CacheManager.Core.Utility;
     using FluentAssertions;
+    using Microsoft.Extensions.Logging;
     using StackExchange.Redis;
     using Xunit;
     using Xunit.Abstractions;
@@ -244,7 +245,7 @@
             [Fact]
             public async Task Events_SysRuntime_ExpireTriggers()
             {
-                var cfg = new ConfigurationBuilder()
+                var cfg = new CacheConfigurationBuilder()
                     .WithSystemRuntimeCacheHandle()
                     .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1))
                     .Build();
@@ -263,7 +264,7 @@
             [Trait("category", "Unreliable")]
             public async Task Events_SysRuntime_ExpireEvictsAbove()
             {
-                var cfg = new ConfigurationBuilder()
+                var cfg = new CacheConfigurationBuilder()
                     .WithDictionaryHandle()
                     .And
                     .WithSystemRuntimeCacheHandle()
@@ -287,7 +288,7 @@
             [Fact]
             public async Task Events_Dic_ExpireTriggers()
             {
-                var cfg = new ConfigurationBuilder()
+                var cfg = new CacheConfigurationBuilder()
                     .WithDictionaryHandle()
                     .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1))
                     .Build();
@@ -306,7 +307,7 @@
             [Trait("category", "Unreliable")]
             public async Task Events_Dic_ExpireEvictsAbove()
             {
-                var cfg = new ConfigurationBuilder()
+                var cfg = new CacheConfigurationBuilder()
                     .WithDictionaryHandle(options: new DictionaryCacheOptions() { ExpirationScanFrequency = TimeSpan.FromMilliseconds(10) })
                     .And
                     .WithDictionaryHandle(options: new DictionaryCacheOptions() { ExpirationScanFrequency = TimeSpan.FromMilliseconds(10) })
@@ -330,7 +331,7 @@
             [Fact]
             public async Task Events_MsMemory_ExpireTriggers()
             {
-                var cfg = new ConfigurationBuilder()
+                var cfg = new CacheConfigurationBuilder()
                     .WithMicrosoftMemoryCacheHandle()
                     .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1))
                     .Build();
@@ -349,7 +350,7 @@
             [Trait("category", "Unreliable")]
             public async Task Events_MsMemory_ExpireEvictsAbove()
             {
-                var cfg = new ConfigurationBuilder()
+                var cfg = new CacheConfigurationBuilder()
                     .WithDictionaryHandle()
                     .And
                     .WithMicrosoftMemoryCacheHandle()
@@ -368,52 +369,6 @@
             }
         }
 
-#if MOCK_HTTPCONTEXT_ENABLED
-
-        // exclusive inner class for parallel exec of this long running test
-        public class WebCacheSpecific : LongRunningEventTestBase
-        {
-            [Fact]
-            public async Task Events_WebCache_ExpireTriggers()
-            {
-                var cfg = new ConfigurationBuilder()
-                    .WithHandle(typeof(SystemWebCacheHandleWrapper<>))
-                    .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1))
-                    .Build();
-
-                var useKey = Guid.NewGuid().ToString();
-                var useRegion = Guid.NewGuid().ToString();
-                var result = await RunTest(cfg, useKey, useRegion);
-
-                result.Reason.Should().Be(CacheItemRemovedReason.Expired);
-                result.Level.Should().Be(1);
-                result.Key.Should().Be(useKey);
-                result.Region.Should().Be(useRegion);
-            }
-
-            [Fact]
-            [Trait("category", "Unreliable")]
-            public async Task Events_WebCache_ExpireEvictsAbove()
-            {
-                var cfg = new ConfigurationBuilder()
-                    .WithDictionaryHandle()
-                    .And
-                    .WithHandle(typeof(SystemWebCacheHandleWrapper<>))
-                    .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1))
-                    .Build();
-
-                var useKey = Guid.NewGuid().ToString();
-
-                var result = await RunTest(cfg, useKey, null, true, false);
-
-                result.Reason.Should().Be(CacheItemRemovedReason.Expired);
-                result.Level.Should().Be(2);
-                result.Key.Should().Be(useKey);
-                result.Region.Should().BeNull();
-            }
-        }
-#endif
-
         // exclusive inner class for parallel exec of this long running test
         public class RedisSpecific : LongRunningEventTestBase
         {
@@ -422,7 +377,7 @@
             [Trait("category", "Unreliable")]
             public async Task Events_Redis_ExpireTriggers()
             {
-                var cfg = new ConfigurationBuilder()
+                var cfg = new CacheConfigurationBuilder()
                     .WithRedisConfiguration("redis", $"{TestManagers.RedisHost}:{TestManagers.RedisPort}, allowAdmin=true", 0, true)
                     .WithJsonSerializer()
                     .WithRedisCacheHandle("redis")
@@ -444,7 +399,7 @@
             [Trait("category", "Unreliable")]
             public async Task Events_Redis_ExpireEvictsAbove()
             {
-                var cfg = new ConfigurationBuilder()
+                var cfg = new CacheConfigurationBuilder()
                     .WithDictionaryHandle(options: new DictionaryCacheOptions() { ExpirationScanFrequency = TimeSpan.FromMilliseconds(10) })
                     .And
                     .WithRedisConfiguration("redis", $"{TestManagers.RedisHost}:{TestManagers.RedisPort}, allowAdmin=true", 0, true)
@@ -585,7 +540,7 @@
         {
             var client = ConnectionMultiplexer.Connect("localhost");
 
-            var config = new ConfigurationBuilder()
+            var config = new CacheConfigurationBuilder()
                 .WithDictionaryHandle(options: new DictionaryCacheOptions() { ExpirationScanFrequency = TimeSpan.FromMilliseconds(10) })
                 .And
                 .WithJsonSerializer()
@@ -640,7 +595,7 @@
         {
             var client = ConnectionMultiplexer.Connect("localhost");
 
-            var config = new ConfigurationBuilder()
+            var config = new CacheConfigurationBuilder()
                 .WithUpdateMode(CacheUpdateMode.None)
                 .WithDictionaryHandle(options: new DictionaryCacheOptions() { ExpirationScanFrequency = TimeSpan.FromMilliseconds(10) })
                 .And
@@ -1185,9 +1140,10 @@
 
         private class CustomRemoveEventTestHandle : BaseCacheHandle<string>
         {
-            public CustomRemoveEventTestHandle(ICacheManagerConfiguration managerConfiguration, CacheHandleConfiguration configuration)
+            public CustomRemoveEventTestHandle(ICacheManagerConfiguration managerConfiguration, CacheHandleConfiguration configuration, ILoggerFactory loggerFactory)
                 : base(managerConfiguration, configuration)
             {
+                this.Logger = loggerFactory.CreateLogger(this.GetType());
             }
 
             public void TestTrigger(string key, string region, CacheItemRemovedReason reason, object value)
@@ -1203,13 +1159,7 @@
                 }
             }
 
-            protected override ILogger Logger
-            {
-                get
-                {
-                    return new NullLogger();
-                }
-            }
+            protected override ILogger Logger { get; }
 
             public override void Clear()
             {

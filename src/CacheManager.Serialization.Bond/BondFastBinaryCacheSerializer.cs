@@ -35,7 +35,7 @@ namespace CacheManager.Serialization.Bond
         public override byte[] Serialize<T>(T value)
         {
             var serializer = _cache.GetSerializer(value.GetType());
-            var buffer = OutputBufferPool.Lease();
+            var buffer = OutputBufferPool.Get();
             var writer = _cache.CreateWriter(buffer);
 
             serializer.Serialize(value, writer);

@@ -19,8 +19,7 @@ namespace CacheManager.Events.Tests
         {
             base.Configure();
 
-            _configuration = new ConfigurationBuilder()
-                .WithMicrosoftLogging(LoggerFactory)
+            _configuration = new CacheConfigurationBuilder()
                 .WithDictionaryHandle("in-memory", isBackplaneSource: true)
                 .And
                 .WithRedisBackplane("redisConfig")

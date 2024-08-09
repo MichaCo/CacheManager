@@ -8,12 +8,13 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Runtime.Serialization.Json;
 using CacheManager.Core;
 using CacheManager.Core.Internal;
-using CacheManager.Core.Logging;
+
 using CacheManager.Serialization.Bond;
 using CacheManager.Serialization.DataContract;
 using CacheManager.Serialization.Json;
 using CacheManager.Serialization.ProtoBuf;
 using FluentAssertions;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using ProtoBuf;
 using Xunit;
@@ -1488,13 +1489,7 @@ namespace CacheManager.Tests
                 }
             }
 
-            protected override ILogger Logger
-            {
-                get
-                {
-                    throw new NotImplementedException();
-                }
-            }
+            protected override ILogger Logger { get; }
 
             public override void Clear()
             {

@@ -6,7 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using CacheManager.Core;
 using CacheManager.Core.Internal;
-using CacheManager.Core.Logging;
+using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
 using static CacheManager.Core.Utility.Guard;
 
@@ -28,7 +28,7 @@ namespace CacheManager.Redis
     public sealed class RedisCacheBackplane : CacheBackplane
     {
         private const int HardLimit = 50000;
-        private readonly string _channelName;
+        private readonly RedisChannel _channel;
         private readonly byte[] _identifier;
         private readonly ILogger _logger;
         private readonly RedisConnectionManager _connection;
@@ -51,8 +51,8 @@ namespace CacheManager.Redis
             NotNull(configuration, nameof(configuration));
             NotNull(loggerFactory, nameof(loggerFactory));
 
-            _logger = loggerFactory.CreateLogger(this);
-            _channelName = configuration.BackplaneChannelName ?? "CacheManagerBackplane";
+            _logger = loggerFactory.CreateLogger(this.GetType());
+            _channel = RedisChannel.Literal(configuration.BackplaneChannelName ?? "CacheManagerBackplane");
             _identifier = Encoding.UTF8.GetBytes(Guid.NewGuid().ToString());
 
             var cfg = RedisConfigurations.GetConfiguration(ConfigurationKey);
@@ -138,7 +138,7 @@ namespace CacheManager.Redis
                 try
                 {
                     _source.Cancel();
-                    _connection.Subscriber.Unsubscribe(_channelName);
+                    _connection.Subscriber.Unsubscribe(_channel);
                     _timer.Dispose();
                 }
                 catch
@@ -151,7 +151,7 @@ namespace CacheManager.Redis
 
         private void Publish(byte[] message)
         {
-            _connection.Subscriber.Publish(_channelName, message);
+            _connection.Subscriber.Publish(_channel, message);
         }
 
         private void PublishMessage(BackplaneMessage message)
@@ -204,11 +204,10 @@ namespace CacheManager.Redis
                     _sending = true;
                     if (state != null && state is bool boolState && boolState == true)
                     {
-                        _logger.LogInfo($"Backplane is sending {_messages.Count} messages triggered by timer.");
+                        _logger.LogInformation($"Backplane is sending {_messages.Count} messages triggered by timer.");
                     }
-#if !NET40
+
                     await Task.Delay(50).ConfigureAwait(false);
-#endif
                     byte[] msgs = null;
                     lock (_messageLock)
                     {
@@ -245,27 +244,18 @@ namespace CacheManager.Redis
 
                         _sending = false;
                     }
-#if NET40
-                },
-                this,
-                _source.Token,
-                TaskCreationOptions.None,
-                TaskScheduler.Default)
-                .ConfigureAwait(false);
-#else
                 },
                 this,
                 _source.Token,
                 TaskCreationOptions.DenyChildAttach,
                 TaskScheduler.Default)
                 .ConfigureAwait(false);
-#endif
         }
 
         private void Subscribe()
         {
             _connection.Subscriber.Subscribe(
-                _channelName,
+                _channel,
                 (channel, msg) =>
                 {
                     try
@@ -284,7 +274,7 @@ namespace CacheManager.Redis
 
                         if (_logger.IsEnabled(LogLevel.Information))
                         {
-                            _logger.LogInfo("Backplane got notified with {0} new messages.", fullMessages.Length);
+                            _logger.LogInformation("Backplane got notified with {0} new messages.", fullMessages.Length);
                         }
 
                         foreach (var message in fullMessages)
@@ -325,7 +315,7 @@ namespace CacheManager.Redis
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogWarn(ex, "Error reading backplane message(s)");
+                        _logger.LogWarning(ex, "Error reading backplane message(s)");
                     }
                 },
                 CommandFlags.FireAndForget);

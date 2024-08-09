@@ -4,8 +4,7 @@ using System.Globalization;
 using System.Runtime.Caching;
 using CacheManager.Core;
 using CacheManager.Core.Internal;
-using CacheManager.Core.Logging;
-using static CacheManager.Core.Utility.Guard;
+using Microsoft.Extensions.Logging;
 
 namespace CacheManager.SystemRuntimeCaching
 {
@@ -49,18 +48,23 @@ namespace CacheManager.SystemRuntimeCaching
         public MemoryCacheHandle(ICacheManagerConfiguration managerConfiguration, CacheHandleConfiguration configuration, ILoggerFactory loggerFactory, RuntimeMemoryCacheOptions memoryCacheOptions)
             : base(managerConfiguration, configuration)
         {
-            NotNull(configuration, nameof(configuration));
-            NotNull(loggerFactory, nameof(loggerFactory));
-            Logger = loggerFactory.CreateLogger(this);
+            if (configuration is null)
+            {
+                throw new ArgumentNullException(nameof(configuration));
+            }
+
+            if (loggerFactory is null)
+            {
+                throw new ArgumentNullException(nameof(loggerFactory));
+            }
+
+            Logger = loggerFactory.CreateLogger(this.GetType());
             _cacheName = configuration.Name;
 
 
             //if (_cacheName.ToUpper(CultureInfo.InvariantCulture).Equals(DefaultName.ToUpper(CultureInfo.InvariantCulture)))
             if (DefaultName.Equals(_cacheName, StringComparison.InvariantCultureIgnoreCase))
             {
-                //we can't change default cache configuration by code, can we?
-                Ensure(memoryCacheOptions == null, "MemoryCache Default instance can only be configured through app/web.config.");
-
                 _cache = MemoryCache.Default;
             }
             else
@@ -113,7 +117,11 @@ namespace CacheManager.SystemRuntimeCaching
         /// <inheritdoc />
         public override bool Exists(string key, string region)
         {
-            NotNullOrWhiteSpace(region, nameof(region));
+            if (string.IsNullOrWhiteSpace(region))
+            {
+                throw new ArgumentException($"'{nameof(region)}' cannot be null or whitespace.", nameof(region));
+            }
+
             var fullKey = GetItemKey(key, region);
             return _cache.Contains(fullKey);
         }
@@ -317,7 +325,10 @@ namespace CacheManager.SystemRuntimeCaching
 
         private string GetItemKey(string key, string region = null)
         {
-            NotNullOrWhiteSpace(key, nameof(key));
+            if (string.IsNullOrWhiteSpace(key))
+            {
+                throw new ArgumentException($"'{nameof(key)}' cannot be null or whitespace.", nameof(key));
+            }
 
             if (string.IsNullOrWhiteSpace(region))
             {

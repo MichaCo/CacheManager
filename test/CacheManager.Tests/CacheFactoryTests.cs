@@ -16,7 +16,7 @@ namespace CacheManager.Tests
         [Fact]
         public void ConfigurationBuilder_EmptyCtor()
         {
-            var builder = new ConfigurationBuilder();
+            var builder = new CacheConfigurationBuilder();
             var cfg = builder.Build();
 
             cfg.Should().NotBeNull();
@@ -26,7 +26,7 @@ namespace CacheManager.Tests
         [Fact]
         public void ConfigurationBuilder_NamedCtorNull()
         {
-            Action act = () => new ConfigurationBuilder((string)null);
+            Action act = () => new CacheConfigurationBuilder((string)null);
 
             act.Should().Throw<ArgumentNullException>()
                 .And.ParamName.Equals("name");
@@ -35,7 +35,7 @@ namespace CacheManager.Tests
         [Fact]
         public void ConfigurationBuilder_ForConfigCtorNull()
         {
-            Action act = () => new ConfigurationBuilder((ICacheManagerConfiguration)null);
+            Action act = () => new CacheConfigurationBuilder((ICacheManagerConfiguration)null);
 
             act.Should().Throw<ArgumentNullException>()
                 .And.ParamName.Equals("forConfiguration");
@@ -44,7 +44,7 @@ namespace CacheManager.Tests
         [Fact]
         public void ConfigurationBuilder_NamedForConfigCtorNull()
         {
-            Action act = () => new ConfigurationBuilder(null, null);
+            Action act = () => new CacheConfigurationBuilder(null, null);
 
             act.Should().Throw<ArgumentNullException>()
                 .And.ParamName.Equals("name");
@@ -53,7 +53,7 @@ namespace CacheManager.Tests
         [Fact]
         public void ConfigurationBuilder_NamedForConfigCtorNullB()
         {
-            Action act = () => new ConfigurationBuilder("name", null);
+            Action act = () => new CacheConfigurationBuilder("name", null);
 
             act.Should().Throw<ArgumentNullException>()
                 .And.ParamName.Equals("forConfiguration");
@@ -62,7 +62,7 @@ namespace CacheManager.Tests
         [Fact]
         public void ConfigurationBuilder_EmptyCtorAdd()
         {
-            var builder = new ConfigurationBuilder();
+            var builder = new CacheConfigurationBuilder();
             builder.WithDictionaryHandle();
             var cfg = builder.Build();
 
@@ -72,12 +72,12 @@ namespace CacheManager.Tests
         [Fact]
         public void ConfigurationBuilder_ForConfiguration()
         {
-            var builder = new ConfigurationBuilder("name");
+            var builder = new CacheConfigurationBuilder("name");
             builder.WithDictionaryHandle().WithExpiration(ExpirationMode.Sliding, TimeSpan.FromMinutes(10));
             builder.WithJsonSerializer();
             var cfg = builder.Build();
 
-            var forCfg = new ConfigurationBuilder("newName", cfg);
+            var forCfg = new CacheConfigurationBuilder("newName", cfg);
             forCfg.WithDictionaryHandle().WithExpiration(ExpirationMode.Absolute, TimeSpan.FromHours(1));
             forCfg.WithGzJsonSerializer();
 
@@ -122,7 +122,7 @@ namespace CacheManager.Tests
         public void CacheFactory_FromConfig_TestInit_A()
         {
             // arrange
-            var config = ConfigurationBuilder.BuildConfiguration(s => s.WithDictionaryHandle());
+            var config = CacheConfigurationBuilder.BuildConfiguration(s => s.WithDictionaryHandle());
 
             // act
             Action act = () => CacheFactory.FromConfiguration<object>(config);
@@ -136,7 +136,7 @@ namespace CacheManager.Tests
         public void CacheFactory_FromConfig_TestInit_B()
         {
             // arrange
-            var config = ConfigurationBuilder.BuildConfiguration(s => s.WithDictionaryHandle());
+            var config = CacheConfigurationBuilder.BuildConfiguration(s => s.WithDictionaryHandle());
 
             // act
             var cache = CacheFactory.FromConfiguration<object>("custom name", config);
@@ -150,7 +150,7 @@ namespace CacheManager.Tests
         public void CacheFactory_FromConfig_TestInit_C()
         {
             // arrange
-            var config = ConfigurationBuilder.BuildConfiguration(s => s.WithDictionaryHandle());
+            var config = CacheConfigurationBuilder.BuildConfiguration(s => s.WithDictionaryHandle());
 
             // act
             var cache = CacheFactory.FromConfiguration(typeof(object), "custom name", config) as ICacheManager<object>;
@@ -626,7 +626,7 @@ namespace CacheManager.Tests
         {
             var cache = CacheFactory.FromConfiguration(
                 typeof(string),
-                ConfigurationBuilder.BuildConfiguration(cfg => cfg.WithSystemRuntimeCacheHandle())) as ICacheManager<string>;
+                CacheConfigurationBuilder.BuildConfiguration(cfg => cfg.WithSystemRuntimeCacheHandle())) as ICacheManager<string>;
 
             cache.Should().NotBeNull();
             cache.CacheHandles.Count().Should().Be(1);

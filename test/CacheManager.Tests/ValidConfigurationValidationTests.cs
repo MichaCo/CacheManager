@@ -20,7 +20,7 @@ namespace CacheManager.Tests
             string cacheName = "C1";
 
             // act
-            var cfg = ConfigurationBuilder.LoadConfigurationFile(fileName, cacheName);
+            var cfg = CacheConfigurationBuilder.LoadConfigurationFile(fileName, cacheName);
             var cache = CacheFactory.FromConfiguration<object>(cfg);
 
             // assert
@@ -39,7 +39,7 @@ namespace CacheManager.Tests
             string cacheName = "C1";
 
             // act
-            var cfg = ConfigurationBuilder.LoadConfigurationFile(fileName, cacheName);
+            var cfg = CacheConfigurationBuilder.LoadConfigurationFile(fileName, cacheName);
             var cache = CacheFactory.FromConfiguration<object>(cfg);
 
             // assert
@@ -58,7 +58,7 @@ namespace CacheManager.Tests
             string cacheName = "ExpirationVariances";
 
             // act
-            var cfg = ConfigurationBuilder.LoadConfigurationFile(fileName, cacheName);
+            var cfg = CacheConfigurationBuilder.LoadConfigurationFile(fileName, cacheName);
             var cache = CacheFactory.FromConfiguration<object>(cfg);
 
             // assert
@@ -81,7 +81,7 @@ namespace CacheManager.Tests
             string cacheName = "DefaultSysMemCache";
 
             // act
-            var cfg = ConfigurationBuilder.LoadConfigurationFile(fileName, cacheName);
+            var cfg = CacheConfigurationBuilder.LoadConfigurationFile(fileName, cacheName);
             var cache = CacheFactory.FromConfiguration<object>(cfg);
 
             var memHandle = cache.CacheHandles.ElementAt(0) as MemoryCacheHandle<object>;
@@ -106,7 +106,7 @@ namespace CacheManager.Tests
             string cacheName = "ExpirationVariances";
 
             // act
-            var cfg = ConfigurationBuilder.LoadConfigurationFile(fileName, cacheName);
+            var cfg = CacheConfigurationBuilder.LoadConfigurationFile(fileName, cacheName);
             var cache = CacheFactory.FromConfiguration<object>(cfg);
 
             // assert
@@ -122,7 +122,7 @@ namespace CacheManager.Tests
             string cacheName = "c3";
 
             // act
-            var cfg = ConfigurationBuilder.LoadConfigurationFile(fileName, cacheName);
+            var cfg = CacheConfigurationBuilder.LoadConfigurationFile(fileName, cacheName);
             var cache = CacheFactory.FromConfiguration<object>(cfg);
 
             // assert
@@ -139,7 +139,7 @@ namespace CacheManager.Tests
             string cacheName = "onlyDefaultsCache";
 
             // act
-            var cfg = ConfigurationBuilder.LoadConfigurationFile(fileName, cacheName);
+            var cfg = CacheConfigurationBuilder.LoadConfigurationFile(fileName, cacheName);
             var cache = CacheFactory.FromConfiguration<string>(cfg);
 
             // assert

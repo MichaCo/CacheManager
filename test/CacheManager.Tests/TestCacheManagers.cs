@@ -2,17 +2,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using System.Threading;
 using CacheManager.Core;
-
-#if MEMCACHEDENABLED
-using Enyim.Caching.Configuration;
-#endif
-#if COUCHBASEENABLED
-using Couchbase;
-using Couchbase.Configuration.Client;
-#endif
 
 namespace CacheManager.Tests
 {
@@ -46,24 +37,6 @@ namespace CacheManager.Tests
             yield return new object[] { TestManagers.WithRedisCacheJsonNoLua };
             yield return new object[] { TestManagers.WithDicAndRedisCacheNoLua };
 #endif
-#if MEMCACHEDENABLED
-#if NET461
-            yield return new object[] { TestManagers.WithMemcachedBinary };
-#endif
-            yield return new object[] { TestManagers.WithMemcachedJson };
-            //yield return new object[] { TestManagers.WithMemcachedGzJson };
-            //yield return new object[] { TestManagers.WithMemcachedProto };
-            yield return new object[] { TestManagers.WithMemcachedBondBinary };
-#endif
-#if COUCHBASEENABLED
-            // requires one "default" couchbase bucket without auth or password and one "secret-bucket" with pw: "secret"
-            yield return new object[] { TestManagers.WithCouchbaseDefault };
-            yield return new object[] { TestManagers.WithCouchbaseDefaultViaHelper };
-            yield return new object[] { TestManagers.WithCouchbaseSecret };
-#endif
-#if MOCK_HTTPCONTEXT_ENABLED
-            yield return new object[] { TestManagers.WithSystemWebCache };
-#endif
         }
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
@@ -79,7 +52,7 @@ namespace CacheManager.Tests
         private const int NumDatabases = 100;
 
         public static ICacheManagerConfiguration BaseConfiguration
-            => new ConfigurationBuilder()
+            => new CacheConfigurationBuilder()
                     ////.WithMicrosoftLogging(f => f.AddSerilog())
                     .Build();
 
@@ -318,92 +291,6 @@ namespace CacheManager.Tests
                             .EnableStatistics()
                 .Build());
 
-#if MOCK_HTTPCONTEXT_ENABLED
-
-        public static ICacheManager<object> WithSystemWebCache
-            => CacheFactory.FromConfiguration<object>(
-                BaseConfiguration
-                    .Builder
-                    .WithHandle(typeof(SystemWebCacheHandleWrapper<>))
-                        .EnableStatistics()
-                    .Build());
-
-#endif
-
-#if COUCHBASEENABLED
-
-        public static ICacheManager<object> WithCouchbaseDefault
-        {
-            get
-            {
-                var clientConfiguration = new ClientConfiguration()
-                {
-                    Servers = new List<Uri>()
-                    {
-                        new Uri("http://127.0.0.1:8091/pools")
-                    },
-                    UseSsl = false,
-                    BucketConfigs = new Dictionary<string, BucketConfiguration>
-                    {
-                        {
-                            "default",
-                            new BucketConfiguration
-                            {
-                                BucketName = "default",
-                                UseSsl = false,
-                                PoolConfiguration = new PoolConfiguration
-                                {
-                                    MaxSize = 10,
-                                    MinSize = 5
-                                }
-                            }
-                        }
-                    }
-                };
-
-                var cache = CacheFactory.Build(settings =>
-                {
-                    settings
-                        .WithCouchbaseConfiguration("couchbase", clientConfiguration)
-                        .WithCouchbaseCacheHandle("couchbase") // using default bucket without pw or auth
-                            .EnableStatistics();
-                });
-
-                return cache;
-            }
-        }
-
-        public static ICacheManager<object> WithCouchbaseDefaultViaHelper
-        {
-            get
-            {
-                ClusterHelper.Initialize();
-
-                var cacheConfig = new ConfigurationBuilder()
-                    .WithCouchbaseCacheHandle("somekeywhichdoesntexist") // using default bucket again
-                        .EnableStatistics()
-                    .Build();
-
-                return new BaseCacheManager<object>(cacheConfig);
-            }
-        }
-
-        public static ICacheManager<object> WithCouchbaseSecret
-        {
-            get
-            {
-                var cacheConfig = new ConfigurationBuilder()
-                    .WithCouchbaseConfiguration("cb", new ClientConfiguration())
-                    .WithCouchbaseCacheHandle("cb", "secret-bucket", "secret")
-                        .EnableStatistics()
-                    .Build();
-
-                return new BaseCacheManager<object>(cacheConfig);
-            }
-        }
-
-#endif
-
         public static ICacheManager<object> CreateRedisAndDicCacheWithBackplane(int database = 0, bool sharedRedisConfig = true, string channelName = null, Serializer serializer = Serializer.Proto, bool useLua = true)
         {
             if (database > NumDatabases)
@@ -546,34 +433,6 @@ namespace CacheManager.Tests
 
             return cache;
         }
-
-#if MEMCACHEDENABLED
-
-        public static ICacheManager<object> WithMemcachedBinary => CreateMemcachedCache<object>(Serializer.Binary);
-
-        public static ICacheManager<object> WithMemcachedJson => CreateMemcachedCache<object>(Serializer.Json);
-
-        public static ICacheManager<object> WithMemcachedGzJson => CreateMemcachedCache<object>(Serializer.GzJson);
-
-        public static ICacheManager<object> WithMemcachedProto => CreateMemcachedCache<object>(Serializer.Proto);
-
-        public static ICacheManager<object> WithMemcachedBondBinary => CreateMemcachedCache<object>(Serializer.BondBinary);
-
-        public static ICacheManager<T> CreateMemcachedCache<T>(Serializer serializer = Serializer.Json)
-        {
-            var memConfig = new MemcachedClientConfiguration();
-            memConfig.AddServer("localhost", 11211);
-            return CacheFactory.FromConfiguration<T>(
-                BaseConfiguration.Builder
-                    .WithUpdateMode(CacheUpdateMode.Up)
-                    .TestSerializer(serializer)
-                    .WithMemcachedCacheHandle(memConfig)
-                        .EnableStatistics()
-                        .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1000))
-                .Build());
-        }
-
-#endif
 
         private static string NewKey() => Guid.NewGuid().ToString();
     }

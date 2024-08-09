@@ -1,27 +1,25 @@
-﻿using System;
-using System.Linq;
-using CacheManager.Core;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-
-namespace AspnetCore.WebApp
+﻿namespace AspnetCore.WebApp
 {
+    using System;
+    using CacheManager.Core;
+    using Microsoft.AspNetCore.Builder;
+    using Microsoft.AspNetCore.Hosting;
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Configuration;
-    using Swashbuckle.AspNetCore.Swagger;
+    using Microsoft.Extensions.Hosting;
 
     public class Startup
     {
-        public Startup(IHostingEnvironment env, IConfiguration configuration, ILoggerFactory loggerFactory)
+        public Startup(IWebHostEnvironment env, IConfiguration configuration, ILoggerFactory loggerFactory)
         {
             HostingEnvironment = env ?? throw new ArgumentNullException(nameof(env));
             Configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
             LoggerFactory = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
         }
 
-        public IHostingEnvironment HostingEnvironment { get; }
+        public IWebHostEnvironment HostingEnvironment { get; }
 
         public IConfiguration Configuration { get; }
 
@@ -30,10 +28,11 @@ namespace AspnetCore.WebApp
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc();
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1",
-                    new Info
+                    new Microsoft.OpenApi.Models.OpenApiInfo
                     {
                         Title = "My API - V1",
                         Version = "v1"
@@ -41,12 +40,11 @@ namespace AspnetCore.WebApp
                  );
             });
 
-            // using the new overload which adds a singleton of the configuration to services and the configure method to add logging
-            // TODO: still not 100% happy with the logging part
-            services.AddCacheManagerConfiguration(Configuration, cfg => cfg.WithMicrosoftLogging(LoggerFactory));
-
             // uses a refined configuration (this will not log, as we added the MS Logger only to the configuration above
-            services.AddCacheManager<int>(Configuration, configure: builder => builder.WithJsonSerializer());
+            services.AddCacheManagerConfiguration(Configuration, configure: builder => builder
+                .WithJsonSerializer()
+                .WithRedisConfiguration("redis", c => c.WithEndpoint("localhost", 6379))
+                .WithRedisCacheHandle("redis"));
 
             // creates a completely new configuration for this instance (also not logging)
             services.AddCacheManager<DateTime>(inline => inline.WithDictionaryHandle());
@@ -55,13 +53,10 @@ namespace AspnetCore.WebApp
             services.AddCacheManager();
         }
 
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app)
         {
-            // add console logging with the configured log levels from appsettings.json
-            loggerFactory.AddConsole(Configuration.GetSection("Logging"));
-
             // give some error details in debug mode
-            if (env.IsDevelopment())
+            if (HostingEnvironment.IsDevelopment())
             {
                 app.Use(async (ctx, next) =>
                 {
@@ -89,8 +84,12 @@ namespace AspnetCore.WebApp
                 }
             });
 
-            //app.UseStaticFiles();
-            app.UseMvc();
+            app.UseStaticFiles();
+            app.UseRouting();
+            app.UseCors();
+            app.UseAuthentication();
+            app.UseAuthorization();
+            app.UseEndpoints(b => b.MapControllers());
 
             app.UseSwagger();
             app.UseSwaggerUI(c =>

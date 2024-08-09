@@ -2,7 +2,7 @@
 using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading;
-using CacheManager.Core.Logging;
+using Microsoft.Extensions.Logging;
 using static CacheManager.Core.Utility.Guard;
 
 namespace CacheManager.Core.Internal
@@ -52,7 +52,7 @@ namespace CacheManager.Core.Internal
             : base(managerConfiguration, configuration)
         {
             NotNull(loggerFactory, nameof(loggerFactory));
-            Logger = loggerFactory.CreateLogger(this);
+            Logger = loggerFactory.CreateLogger(this.GetType());
             _cache = new ConcurrentDictionary<string, CacheItem<TCacheValue>>();
 
             options = options ?? new DictionaryCacheOptions();
@@ -278,7 +278,7 @@ namespace CacheManager.Core.Internal
 
             if (removed > 0 && Logger.IsEnabled(LogLevel.Information))
             {
-                Logger.LogInfo("'{0}' removed '{1}' expired items during eviction run.", Configuration.Name, removed);
+                Logger.LogInformation("'{0}' removed '{1}' expired items during eviction run.", Configuration.Name, removed);
             }
 
             return removed;

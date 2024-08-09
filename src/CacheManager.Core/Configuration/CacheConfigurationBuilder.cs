@@ -4,7 +4,6 @@ using System.Configuration;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Text.RegularExpressions;
 using CacheManager.Core.Configuration;
 using CacheManager.Core.Internal;
@@ -21,26 +20,26 @@ namespace CacheManager.Core
     /// </para>
     /// </summary>
     /// <see cref="CacheFactory"/>
-    public class ConfigurationBuilder : ConfigurationBuilderCachePart
+    public class CacheConfigurationBuilder : ConfigurationBuilderCachePart
     {
         private const string Hours = "h";
         private const string Minutes = "m";
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ConfigurationBuilder"/> class
+        /// Initializes a new instance of the <see cref="CacheConfigurationBuilder"/> class
         /// which provides fluent configuration methods.
         /// </summary>
-        public ConfigurationBuilder()
+        public CacheConfigurationBuilder()
             : base()
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ConfigurationBuilder"/> class
+        /// Initializes a new instance of the <see cref="CacheConfigurationBuilder"/> class
         /// which provides fluent configuration methods.
         /// </summary>
         /// <param name="name">The name of the cache manager.</param>
-        public ConfigurationBuilder(string name)
+        public CacheConfigurationBuilder(string name)
             : base()
         {
             NotNullOrWhiteSpace(name, nameof(name));
@@ -48,24 +47,24 @@ namespace CacheManager.Core
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ConfigurationBuilder"/> class
+        /// Initializes a new instance of the <see cref="CacheConfigurationBuilder"/> class
         /// which provides fluent configuration methods.
         /// Creates a builder which allows to modify the existing <paramref name="forConfiguration"/>.
         /// </summary>
         /// <param name="forConfiguration">The configuration the builder should be instantiated for.</param>
-        public ConfigurationBuilder(ICacheManagerConfiguration forConfiguration)
+        public CacheConfigurationBuilder(ICacheManagerConfiguration forConfiguration)
             : base((CacheManagerConfiguration)forConfiguration)
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ConfigurationBuilder"/> class
+        /// Initializes a new instance of the <see cref="CacheConfigurationBuilder"/> class
         /// which provides fluent configuration methods.
         /// Creates a builder which allows to modify the existing <paramref name="forConfiguration"/>.
         /// </summary>
         /// <param name="name">The name of the cache manager.</param>
         /// <param name="forConfiguration">The configuration the builder should be instantiated for.</param>
-        public ConfigurationBuilder(string name, ICacheManagerConfiguration forConfiguration)
+        public CacheConfigurationBuilder(string name, ICacheManagerConfiguration forConfiguration)
             : base(NotNull((CacheManagerConfiguration)forConfiguration, nameof(forConfiguration)))
         {
             NotNullOrWhiteSpace(name, nameof(name));
@@ -88,7 +87,7 @@ namespace CacheManager.Core
         {
             NotNull(settings, nameof(settings));
 
-            var part = new ConfigurationBuilder();
+            var part = new CacheConfigurationBuilder();
             settings(part);
             return part.Configuration;
         }
@@ -111,7 +110,7 @@ namespace CacheManager.Core
             NotNullOrWhiteSpace(name, nameof(name));
             NotNull(settings, nameof(settings));
 
-            var part = new ConfigurationBuilder();
+            var part = new CacheConfigurationBuilder();
             settings(part);
             part.Configuration.Name = name;
             return part.Configuration;
@@ -717,20 +716,20 @@ namespace CacheManager.Core
             return this;
         }
 
-        /// <summary>
-        /// Enables logging by setting the <see cref="Logging.ILoggerFactory"/> for the cache manager instance.
-        /// </summary>
-        /// <param name="loggerFactoryType">The type of the logger factory.</param>
-        /// <param name="args">Additional arguments the type might need to get initialized.</param>
-        /// <returns>The builder part.</returns>
-        public ConfigurationBuilderCachePart WithLogging(Type loggerFactoryType, params object[] args)
-        {
-            NotNull(loggerFactoryType, nameof(loggerFactoryType));
+        /////// <summary>
+        /////// Enables logging by setting the <see cref="Logging.ILoggerFactory"/> for the cache manager instance.
+        /////// </summary>
+        /////// <param name="loggerFactoryType">The type of the logger factory.</param>
+        /////// <param name="args">Additional arguments the type might need to get initialized.</param>
+        /////// <returns>The builder part.</returns>
+        ////public ConfigurationBuilderCachePart WithLogging(Type loggerFactoryType, params object[] args)
+        ////{
+        ////    NotNull(loggerFactoryType, nameof(loggerFactoryType));
 
-            Configuration.LoggerFactoryType = loggerFactoryType;
-            Configuration.LoggerFactoryTypeArguments = args;
-            return this;
-        }
+        ////    Configuration.LoggerFactoryType = loggerFactoryType;
+        ////    Configuration.LoggerFactoryTypeArguments = args;
+        ////    return this;
+        ////}
 
         /// <summary>
         /// Hands back the new <see cref="CacheManagerConfiguration"/> instance.

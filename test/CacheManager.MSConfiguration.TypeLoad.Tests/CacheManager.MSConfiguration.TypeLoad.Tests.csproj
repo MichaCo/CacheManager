@@ -2,8 +2,7 @@
 
   <PropertyGroup>
     <Description>CacheManager.MSConfiguration.TypeLoad.Tests Class Library</Description>
-    <Authors>Micha</Authors>
-    <TargetFrameworks>netcoreapp5.0;netcoreapp3.1;netcoreapp2.1</TargetFrameworks>
+    <TargetFrameworks>net8.0</TargetFrameworks>
     <AssemblyName>CacheManager.MSConfiguration.TypeLoad.Tests</AssemblyName>
     <PackageId>CacheManager.MSConfiguration.TypeLoad.Tests</PackageId>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
@@ -30,16 +29,8 @@
     <PackageReference Include="FluentAssertions" Version="5.4.2" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp5.0' ">
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration" Version="5.0.0" />
-  </ItemGroup>
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp3.1' ">
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.1.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration" Version="3.1.0" />
-  </ItemGroup>
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.1' ">
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.1.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration" Version="2.1.0" />
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net8.0' ">
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
   </ItemGroup>
 </Project>

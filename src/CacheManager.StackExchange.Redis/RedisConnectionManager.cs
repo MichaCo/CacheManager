@@ -4,7 +4,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-using CacheManager.Core.Logging;
+using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
 using static CacheManager.Core.Utility.Guard;
 
@@ -18,6 +18,7 @@ namespace CacheManager.Redis
         private readonly ILogger _logger;
         private readonly string _connectionString;
         private readonly RedisConfiguration _configuration;
+        private readonly ILoggerFactory _loggerFactory;
 
         public RedisConnectionManager(RedisConfiguration configuration, ILoggerFactory loggerFactory)
         {
@@ -26,9 +27,10 @@ namespace CacheManager.Redis
             NotNullOrWhiteSpace(configuration.ConnectionString, nameof(RedisConfiguration.ConnectionString));
 
             _configuration = configuration;
+            _loggerFactory = loggerFactory;
             _connectionString = configuration.ConnectionString;
 
-            _logger = loggerFactory.CreateLogger(this);
+            _logger = loggerFactory.CreateLogger(this.GetType());
         }
 
         public IEnumerable<IServer> Servers
@@ -150,10 +152,10 @@ namespace CacheManager.Redis
                     {
                         if (_logger.IsEnabled(LogLevel.Information))
                         {
-                            _logger.LogInfo("Trying to connect with the following configuration: '{0}'", RemoveCredentials(_connectionString));
+                            _logger.LogInformation("Trying to connect with the following configuration: '{0}'", RemoveCredentials(_connectionString));
                         }
 
-                        connection = ConnectionMultiplexer.Connect(_connectionString, new LogWriter(_logger));
+                        connection = ConnectionMultiplexer.Connect(_connectionString, o => o.LoggerFactory = _loggerFactory);
 
                         if (!connection.IsConnected)
                         {
@@ -163,7 +165,7 @@ namespace CacheManager.Redis
 
                         connection.ConnectionRestored += (sender, args) =>
                         {
-                            _logger.LogInfo(args.Exception, "Connection restored, type: '{0}', failure: '{1}'", args.ConnectionType, args.FailureType);
+                            _logger.LogInformation(args.Exception, "Connection restored, type: '{0}', failure: '{1}'", args.ConnectionType, args.FailureType);
                         };
 
                         if (!_configuration.TwemproxyEnabled)
@@ -202,31 +204,6 @@ namespace CacheManager.Redis
             }
 
             return Regex.Replace(value, @"password\s*=\s*[^,]*", "password=****", RegexOptions.IgnoreCase);
-        }
-
-        private class LogWriter : StringWriter
-        {
-            private readonly ILogger _logger;
-
-            public LogWriter(ILogger logger)
-            {
-                _logger = logger;
-            }
-
-            public override void Write(char value)
-            {
-            }
-
-            public override void Write(string value)
-            {
-                _logger.LogDebug(value);
-            }
-
-            public override void Write(char[] buffer, int index, int count)
-            {
-                var logValue = new string(buffer, index, count);
-                _logger.LogDebug(RemoveCredentials(logValue));
-            }
         }
     }
 }

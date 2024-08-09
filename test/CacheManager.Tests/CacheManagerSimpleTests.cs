@@ -26,7 +26,7 @@ namespace CacheManager.Tests
         [Fact]
         public void CacheManager_NullableTypes_ShouldNotAllowNulls()
         {
-            var manager = new BaseCacheManager<DateTime?>(ConfigurationBuilder.BuildConfiguration(s => s.WithDictionaryHandle()));
+            var manager = new BaseCacheManager<DateTime?>(CacheConfigurationBuilder.BuildConfiguration(s => s.WithDictionaryHandle()));
 
             DateTime? value = new Nullable<DateTime>();
             Assert.Null(value);
@@ -64,7 +64,7 @@ namespace CacheManager.Tests
         public void CacheManager_CtorA_ConfigNoName()
         {
             // name should be set from config and default is a Guid
-            var manager = new BaseCacheManager<object>(ConfigurationBuilder.BuildConfiguration(s => s.WithDictionaryHandle()));
+            var manager = new BaseCacheManager<object>(CacheConfigurationBuilder.BuildConfiguration(s => s.WithDictionaryHandle()));
             manager.Name.Should().NotBeNullOrWhiteSpace();
         }
 
@@ -74,7 +74,7 @@ namespace CacheManager.Tests
         {
             // name should be implicitly set
             var manager = new BaseCacheManager<object>(
-                ConfigurationBuilder.BuildConfiguration("newName", s => s.WithDictionaryHandle()));
+                CacheConfigurationBuilder.BuildConfiguration("newName", s => s.WithDictionaryHandle()));
 
             manager.Name.Should().Be("newName");
         }

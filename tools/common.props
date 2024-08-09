@@ -2,20 +2,23 @@
   <Import Project="version.props" />
 
   <PropertyGroup>
-    <Copyright>Copyright (c) 2021 Michael Conrad</Copyright>
-    <Authors>MichaConrad</Authors>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    
+    <Copyright>Copyright (c) 2024 Michael Conrad</Copyright>
+    <Authors>MichaConrad</Authors>    
     <Product>CacheManager.NET</Product>
-    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     
     <PackageIcon>icon.png</PackageIcon>
-    
-    <PackageProjectUrl>http://cachemanager.michaco.net</PackageProjectUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageProjectUrl>https://cachemanager.michaco.net</PackageProjectUrl>
     <WebPage>http://cachemanager.michaco.net</WebPage>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <EnablePackageValidation>true</EnablePackageValidation>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
 
-    <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://github.com/MichaCo/CacheManager</RepositoryUrl>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <DebugType>portable</DebugType>
 
     <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)key.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
@@ -26,5 +29,6 @@
 
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)icon.png" Pack="true" PackagePath="" />
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 </Project>

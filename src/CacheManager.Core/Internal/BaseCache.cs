@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Globalization;
-using CacheManager.Core.Logging;
+using Microsoft.Extensions.Logging;
 using static CacheManager.Core.Utility.Guard;
 
 namespace CacheManager.Core.Internal

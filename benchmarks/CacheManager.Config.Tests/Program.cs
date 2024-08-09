@@ -6,10 +6,6 @@ using System.Threading;
 using CacheManager.Core;
 using CacheManager.Redis;
 using Microsoft.Extensions.DependencyInjection;
-#if !NETCOREAPP
-using Enyim.Caching;
-using Enyim.Caching.Configuration;
-#endif
 using Microsoft.Extensions.Logging;
 
 namespace CacheManager.Config.Tests
@@ -24,6 +20,8 @@ namespace CacheManager.Config.Tests
             try
             {
                 var services = new ServiceCollection();
+                
+
                 services.AddLogging(c =>
                 {
                     c.AddSystemdConsole();
@@ -33,8 +31,7 @@ namespace CacheManager.Config.Tests
                 var provider = services.BuildServiceProvider();
                 var loggerFactory = provider.GetRequiredService<ILoggerFactory>();
 
-                var builder = new Core.ConfigurationBuilder("myCache");
-                builder.WithMicrosoftLogging(loggerFactory);
+                var builder = new Core.CacheConfigurationBuilder("myCache");
 
                 builder
                     .WithRetryTimeout(500)

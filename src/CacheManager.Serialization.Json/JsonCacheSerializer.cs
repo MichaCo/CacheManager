@@ -1,10 +1,9 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
 using System.Text;
 using CacheManager.Core;
 using CacheManager.Core.Internal;
-using CacheManager.Core.Utility;
+using Microsoft.Extensions.ObjectPool;
 using Newtonsoft.Json;
 
 namespace CacheManager.Serialization.Json
@@ -35,12 +34,19 @@ namespace CacheManager.Serialization.Json
         /// <param name="deserializationSettings">The settings which should be used during deserialization.</param>
         public JsonCacheSerializer(JsonSerializerSettings serializationSettings, JsonSerializerSettings deserializationSettings)
         {
-            Guard.NotNull(serializationSettings, nameof(serializationSettings));
-            Guard.NotNull(deserializationSettings, nameof(deserializationSettings));
+            if (serializationSettings is null)
+            {
+                throw new ArgumentNullException(nameof(serializationSettings));
+            }
+
+            if (deserializationSettings is null)
+            {
+                throw new ArgumentNullException(nameof(deserializationSettings));
+            }
 
             _serializer = JsonSerializer.Create(serializationSettings);
             _deserializer = JsonSerializer.Create(deserializationSettings);
-            _stringBuilderPool = new ObjectPool<StringBuilder>(new StringBuilderPoolPolicy(100));
+            _stringBuilderPool = new DefaultObjectPool<StringBuilder>(new StringBuilderPooledObjectPolicy());
             SerializationSettings = serializationSettings;
             DeserializationSettings = deserializationSettings;
         }
@@ -73,7 +79,12 @@ namespace CacheManager.Serialization.Json
         /// <inheritdoc/>
         public override byte[] Serialize<T>(T value)
         {
-            var buffer = _stringBuilderPool.Lease();
+            if (value == null)
+            {
+                throw new ArgumentNullException(nameof(value));
+            }
+
+            var buffer = _stringBuilderPool.Get();
 
             using (var stringWriter = new JsonTextWriter(new StringWriter(buffer)))
             {
@@ -95,32 +106,6 @@ namespace CacheManager.Serialization.Json
         protected override object CreateNewItem<TCacheValue>(ICacheItemProperties properties, object value)
         {
             return new JsonCacheItem<TCacheValue>(properties, value);
-        }
-
-        private class StringBuilderPoolPolicy : IObjectPoolPolicy<StringBuilder>
-        {
-            private readonly int _defaultBufferSize;
-
-            public StringBuilderPoolPolicy(int defaultBufferSize)
-            {
-                _defaultBufferSize = defaultBufferSize;
-            }
-
-            public StringBuilder CreateNew()
-            {
-                return new StringBuilder(_defaultBufferSize);
-            }
-
-            public bool Return(StringBuilder value)
-            {
-                ////if (value.Data.Count > _defaultBufferSize * 1000)
-                ////{
-                ////    return false;
-                ////}
-
-                value.Clear();
-                return true;
-            }
         }
     }
 }

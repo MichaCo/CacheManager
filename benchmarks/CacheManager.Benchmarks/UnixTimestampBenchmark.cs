@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using BenchmarkDotNet.Attributes;
-using CacheManager.Core.Utility;
 
 namespace CacheManager.Benchmarks
 {
@@ -21,12 +19,6 @@ namespace CacheManager.Benchmarks
         public long ManualCalcNaive()
         {
             return (long)(DateTime.UtcNow - _date1970).TotalMilliseconds;
-        }
-
-        [Benchmark()]
-        public long ManualCalcOptimized()
-        {
-            return Clock.GetUnixTimestampMillis();
         }
     }
 }

@@ -129,7 +129,7 @@
       "properties": {
         "knownType": {
           "type": "string",
-          "enum": [ "Redis", "Couchbase", "Memcached" ],
+          "enum": [ "Redis" ],
           "description": "Shortcut to the known cache handle types. This requires the corresponding packages are installed."
         },
         "key": {

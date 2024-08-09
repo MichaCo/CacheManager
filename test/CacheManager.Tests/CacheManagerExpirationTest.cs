@@ -21,13 +21,6 @@
             {
                 using (cache)
                 {
-#if MOCK_HTTPCONTEXT_ENABLED
-                    if (cache.CacheHandles.OfType<SystemWebCacheHandleWrapper<object>>().Any())
-                    {
-                        // system.web caching doesn't support short sliding expiration. must be higher than 2000ms for some strange reason...
-                        return;
-                    }
-#endif
                     var timeout = 100;
                     await TestSlidingExpiration(
                         timeout,
@@ -45,13 +38,6 @@
                 // see #50, update doesn't copy custom expire settings per item
                 using (cache)
                 {
-#if MOCK_HTTPCONTEXT_ENABLED
-                    if (cache.CacheHandles.OfType<SystemWebCacheHandleWrapper<object>>().Any())
-                    {
-                        // system.web caching doesn't support short sliding expiration. must be higher than 2000ms for some strange reason...
-                        return;
-                    }
-#endif
                     var timeout = 100;
                     try
                     {
@@ -114,55 +100,6 @@
                 }
             }
         }
-#if MEMCACHEDENABLED
-
-        public class Memcached
-        {
-            [Fact]
-            [Trait("category", "Memcached")]
-            [Trait("category", "Unreliable")]
-            public async Task Memcached_Absolute_DoesExpire()
-            {
-                var timeout = 100;
-                var cache = CacheFactory.Build(settings =>
-                {
-                    settings
-                        .WithMemcachedCacheHandle(MemcachedTests.Configuration)
-                        .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMilliseconds(timeout));
-                });
-
-                using (cache)
-                {
-                    await TestAbsoluteExpiration(
-                        timeout,
-                        (key) => cache.Add(key, "value"),
-                        (key) => cache.Get(key));
-                }
-            }
-
-            [Fact]
-            [Trait("category", "Memcached")]
-            [Trait("category", "Unreliable")]
-            public async Task Memcached_Sliding_DoesExpire()
-            {
-                var timeout = 100;
-                var cache = CacheFactory.Build(settings =>
-                {
-                    settings
-                        .WithMemcachedCacheHandle(MemcachedTests.Configuration)
-                        .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromMilliseconds(timeout));
-                });
-
-                using (cache)
-                {
-                    await TestSlidingExpiration(
-                        timeout,
-                        (key) => cache.Add(key, "value"),
-                        (key) => cache.Get(key));
-                }
-            }
-        }
-#endif
 
         public class MsMemory
         {

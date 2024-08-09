@@ -19,8 +19,7 @@ namespace CacheManager.Events.Tests
             base.Configure();
 
             _multiplexer = ConnectionMultiplexer.Connect("127.0.0.1,allowAdmin=true");
-            _configuration = new ConfigurationBuilder()
-                .WithMicrosoftLogging(LoggerFactory)
+            _configuration = new CacheConfigurationBuilder()
                 .WithMicrosoftMemoryCacheHandle("in-memory")
                 .And
                 .WithJsonSerializer()
@@ -41,8 +40,7 @@ namespace CacheManager.Events.Tests
             base.Configure();
 
             _multiplexer = ConnectionMultiplexer.Connect("127.0.0.1,allowAdmin=true");
-            _configuration = new ConfigurationBuilder()
-                .WithMicrosoftLogging(LoggerFactory)
+            _configuration = new CacheConfigurationBuilder()
                 .WithRedisBackplane("redisConfig")
                 .WithJsonSerializer()
                 .WithRedisConfiguration("redisConfig", _multiplexer, enableKeyspaceNotifications: true)
@@ -65,8 +63,7 @@ namespace CacheManager.Events.Tests
             base.Configure();
 
             _multiplexer = ConnectionMultiplexer.Connect("127.0.0.1,allowAdmin=true");
-            _configuration = new ConfigurationBuilder()
-                .WithMicrosoftLogging(LoggerFactory)
+            _configuration = new CacheConfigurationBuilder()
                 .WithMicrosoftMemoryCacheHandle("in-memory")
                 .And
                 .WithRedisBackplane("redisConfig")

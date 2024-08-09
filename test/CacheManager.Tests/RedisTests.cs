@@ -32,7 +32,7 @@ namespace CacheManager.Tests
         [Fact]
         public void Redis_WithoutSerializer_ShouldThrow()
         {
-            var cfg = ConfigurationBuilder.BuildConfiguration(
+            var cfg = CacheConfigurationBuilder.BuildConfiguration(
                 settings =>
                     settings
                         .WithRedisConfiguration("redis-key", "localhost")
@@ -177,7 +177,7 @@ namespace CacheManager.Tests
 
             var multiplexer = ConnectionMultiplexer.Connect(conConfig);
 
-            var cfg = ConfigurationBuilder.BuildConfiguration(
+            var cfg = CacheConfigurationBuilder.BuildConfiguration(
                 s => s
                     .WithJsonSerializer()
                     .WithRedisConfiguration("redisKey", multiplexer)
@@ -684,7 +684,7 @@ namespace CacheManager.Tests
         [Fact]
         public void Redis_Configuration_NoEndpoint()
         {
-            Action act = () => ConfigurationBuilder.BuildConfiguration(
+            Action act = () => CacheConfigurationBuilder.BuildConfiguration(
                 s => s.WithRedisConfiguration(
                     "key",
                     c => c.WithAllowAdmin()));
@@ -902,11 +902,10 @@ namespace CacheManager.Tests
         public void Redis_Verify_NoCredentialsLoggedOrThrown()
         {
             var testLogger = new TestLogger();
-            var cfg = ConfigurationBuilder.BuildConfiguration(settings =>
+            var cfg = CacheConfigurationBuilder.BuildConfiguration(settings =>
             {
                 settings
                     .WithRedisBackplane("redis.config")
-                    .WithLogging(typeof(TestLoggerFactory), testLogger)
                     .WithJsonSerializer()
                     .WithRedisCacheHandle("redis.config", true)
                     .And
@@ -1049,7 +1048,7 @@ namespace CacheManager.Tests
             var redisConfig = new RedisConfiguration(redisConfigKey, "localhost", strictCompatibilityModeVersion: "");
             RedisConfigurations.AddConfiguration(redisConfig);
 
-            var cacheConfig = new ConfigurationBuilder()
+            var cacheConfig = new CacheConfigurationBuilder()
                 .WithJsonSerializer()
                 .WithRedisCacheHandle(redisConfigKey)
                 .Build();
@@ -1072,7 +1071,7 @@ namespace CacheManager.Tests
             var redisConfig = RedisConfigurations.GetConfiguration("redisFromCfgConfigurationId");
 
             // act
-            var cfg = ConfigurationBuilder.LoadConfigurationFile(fileName, cacheName);
+            var cfg = CacheConfigurationBuilder.LoadConfigurationFile(fileName, cacheName);
 
             // assert
             redisConfig.Database.Should().Be(113);
@@ -1096,7 +1095,7 @@ namespace CacheManager.Tests
             var redisConfig = RedisConfigurations.GetConfiguration("redisConnectionString");
 
             // act
-            var cfg = ConfigurationBuilder.LoadConfigurationFile(fileName, cacheName);
+            var cfg = CacheConfigurationBuilder.LoadConfigurationFile(fileName, cacheName);
             var cache = CacheFactory.FromConfiguration<object>(cfg);
 
             // assert
@@ -1121,7 +1120,7 @@ namespace CacheManager.Tests
             string cacheName = "redisWithBackplaneAppConfig";
 
             // act
-            var cfg = ConfigurationBuilder.LoadConfiguration(cacheName);
+            var cfg = CacheConfigurationBuilder.LoadConfiguration(cacheName);
             var cache = CacheFactory.FromConfiguration<object>(cfg);
             var handle = cache.CacheHandles.First(p => p.Configuration.IsBackplaneSource) as RedisCacheHandle<object>;
 
@@ -1142,7 +1141,7 @@ namespace CacheManager.Tests
             string cacheName = "redisWithBackplaneAppConfigConnectionStrings";
 
             // act
-            var cfg = ConfigurationBuilder.LoadConfiguration(cacheName);
+            var cfg = CacheConfigurationBuilder.LoadConfiguration(cacheName);
             var cache = CacheFactory.FromConfiguration<object>(cfg);
             var handle = cache.CacheHandles.First(p => p.Configuration.IsBackplaneSource) as RedisCacheHandle<object>;
 
@@ -1163,7 +1162,7 @@ namespace CacheManager.Tests
             string cacheName = "redisWithBackplaneAppConfigConnectionStringsWithDefaultDb";
 
             // act
-            var cfg = ConfigurationBuilder.LoadConfiguration(cacheName);
+            var cfg = CacheConfigurationBuilder.LoadConfiguration(cacheName);
             var cache = CacheFactory.FromConfiguration<object>(cfg);
             var redisConfig = RedisConfigurations.GetConfiguration("redisFromConnectionStringsWithDefaultDb");
             var handle = cache.CacheHandles.First(p => p.Configuration.IsBackplaneSource) as RedisCacheHandle<object>;

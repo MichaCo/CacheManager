@@ -2,9 +2,7 @@
 using System.Threading;
 using CacheManager.Core;
 using Microsoft.Extensions.Logging;
-using Unity;
-using Unity.Injection;
-using Unity.Lifetime;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace CacheManager.Examples
 {
@@ -13,8 +11,7 @@ namespace CacheManager.Examples
         private static void Main()
         {
             EventsExample();
-            UnityInjectionExample();
-            UnityInjectionExample_Advanced();
+            MostSimpleCacheManagerWithLogging();
             SimpleCustomBuildConfigurationUsingConfigBuilder();
             SimpleCustomBuildConfigurationUsingFactory();
             UpdateTest();
@@ -22,11 +19,9 @@ namespace CacheManager.Examples
             LoggingSample();
         }
 
-#if !NETCOREAPP
-
         private static void MostSimpleCacheManager()
         {
-            var config = new ConfigurationBuilder()
+            var config = new CacheConfigurationBuilder()
                 .WithSystemRuntimeCacheHandle()
                 .Build();
 
@@ -52,46 +47,48 @@ namespace CacheManager.Examples
 
         private static void MostSimpleCacheManagerWithLogging()
         {
-            var loggerFactory = new LoggerFactory()
-                .AddConsole();
+            var services = new ServiceCollection();
+            services.AddLogging(c => c.AddConsole().SetMinimumLevel(LogLevel.Trace));
+            var loggerFactory = services.BuildServiceProvider().GetService<ILoggerFactory>();
 
-            var config = new ConfigurationBuilder()
-                .WithMicrosoftLogging(loggerFactory)
+            var config = new CacheConfigurationBuilder()
                 .WithSystemRuntimeCacheHandle()
                 .Build();
 
-            var cache = new BaseCacheManager<string>(config);
+            ICacheManager<string> cache = new BaseCacheManager<string>(config, loggerFactory);
+            cache.Add("test", "test");
+            cache.Exists("test no");
+            cache.Remove("test");
+
             // or
-            var cache2 = CacheFactory.FromConfiguration<string>(config);
+            cache = CacheFactory.FromConfiguration<string>(config, loggerFactory);
+
+            cache.Add("test", "test");
+            cache.Exists("test no");
+            cache.Remove("test");
         }
 
         private static void EditExistingConfiguration()
         {
-            var loggerFactory = new LoggerFactory()
-                .AddConsole();
-
-            var config = new ConfigurationBuilder()
+            var config = new CacheConfigurationBuilder()
                 .WithSystemRuntimeCacheHandle()
                     .EnableStatistics()
                 .Build();
 
-            config = new ConfigurationBuilder(config)
-                .WithMicrosoftLogging(loggerFactory)
+            config = new CacheConfigurationBuilder(config)
                 .Build();
         }
 
-#endif
-
         private static void LoggingSample()
         {
-            var loggerFactory = new LoggerFactory()
-                .AddConsole();
+            var services = new ServiceCollection();
+            services.AddLogging(c => c.AddConsole().SetMinimumLevel(LogLevel.Trace));
+            var loggerFactory = services.BuildServiceProvider().GetService<ILoggerFactory>();
 
             var cache = CacheFactory.Build<string>(
-                c =>
-                c.WithMicrosoftLogging(loggerFactory)
-                .WithDictionaryHandle()
-                .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(10)));
+                c => c.WithDictionaryHandle()
+                    .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(10)), 
+                loggerFactory);
 
             cache.AddOrUpdate("myKey", "someregion", "value", _ => "new value");
             cache.AddOrUpdate("myKey", "someregion", "value", _ => "new value");
@@ -99,19 +96,23 @@ namespace CacheManager.Examples
             var val = cache.Get("myKey", "someregion");
         }
 
-#if !NETCOREAPP
-
         private static void AppConfigLoadInstalledCacheCfg()
         {
-            var cache = CacheFactory.FromConfiguration<object>("myCache");
+            var services = new ServiceCollection();
+            services.AddLogging(c => c.AddConsole());
+            var loggerFactory = services.BuildServiceProvider().GetService<ILoggerFactory>();
+
+            var cache = CacheFactory.FromConfiguration<object>("myCache", loggerFactory);
             cache.Add("key", "value");
         }
 
-#endif
-
         private static void EventsExample()
         {
-            var cache = CacheFactory.Build<string>(s => s.WithDictionaryHandle());
+            var services = new ServiceCollection();
+            services.AddLogging(c => c.AddConsole());
+            var loggerFactory = services.BuildServiceProvider().GetService<ILoggerFactory>();
+
+            var cache = CacheFactory.Build<string>(s => s.WithDictionaryHandle(), loggerFactory);
             cache.OnAdd += (sender, args) => Console.WriteLine("Added " + args.Key);
             cache.OnGet += (sender, args) => Console.WriteLine("Got " + args.Key);
             cache.OnRemove += (sender, args) => Console.WriteLine("Removed " + args.Key);
@@ -121,10 +122,12 @@ namespace CacheManager.Examples
             cache.Remove("key");
         }
 
-#if !NETCOREAPP
-
         private static void RedisSample()
         {
+            var services = new ServiceCollection();
+            services.AddLogging(c => c.AddConsole());
+            var loggerFactory = services.BuildServiceProvider().GetService<ILoggerFactory>();
+
             var cache = CacheFactory.Build<int>(settings =>
             {
                 settings
@@ -140,7 +143,8 @@ namespace CacheManager.Examples
                     .WithRetryTimeout(100)
                     .WithRedisBackplane("redis")
                     .WithRedisCacheHandle("redis", true);
-            });
+            },
+            loggerFactory);
 
             cache.Add("test", 123456);
 
@@ -149,13 +153,11 @@ namespace CacheManager.Examples
             var result = cache.Get("test");
         }
 
-#endif
-
         private static void SimpleCustomBuildConfigurationUsingConfigBuilder()
         {
             // this is using the CacheManager.Core.Configuration.ConfigurationBuilder to build a
             // custom config you can do the same with the CacheFactory
-            var cfg = ConfigurationBuilder.BuildConfiguration(settings =>
+            var cfg = CacheConfigurationBuilder.BuildConfiguration(settings =>
                 {
                     settings.WithUpdateMode(CacheUpdateMode.Up)
                         .WithDictionaryHandle()
@@ -182,55 +184,6 @@ namespace CacheManager.Examples
             });
 
             cache.Add("key", "value");
-        }
-
-        private static void UnityInjectionExample()
-        {
-            var container = new UnityContainer();
-            container.RegisterType<ICacheManager<object>>(
-                new ContainerControlledLifetimeManager(),
-                new InjectionFactory((c) => CacheFactory.Build(s => s.WithDictionaryHandle())));
-
-            container.RegisterType<UnityInjectionExampleTarget>();
-
-            // resolving the test target object should also resolve the cache instance
-            var target = container.Resolve<UnityInjectionExampleTarget>();
-            target.PutSomethingIntoTheCache();
-
-            // our cache manager instance should still be there so should the object we added in the
-            // previous step.
-            var checkTarget = container.Resolve<UnityInjectionExampleTarget>();
-            checkTarget.GetSomething();
-        }
-
-        private static void UnityInjectionExample_Advanced()
-        {
-            var container = new UnityContainer();
-            container.RegisterType(
-                typeof(ICacheManager<>),
-                new ContainerControlledLifetimeManager(),
-                new InjectionFactory(
-                    (c, t, n) => CacheFactory.FromConfiguration(
-                        t.GetGenericArguments()[0],
-                        ConfigurationBuilder.BuildConfiguration(cfg => cfg.WithDictionaryHandle()))));
-
-            var stringCache = container.Resolve<ICacheManager<string>>();
-
-            // testing if we create a singleton instance per type, every Resolve of the same type should return the same instance!
-            var stringCacheB = container.Resolve<ICacheManager<string>>();
-            stringCache.Put("key", "something");
-
-            var intCache = container.Resolve<ICacheManager<int>>();
-            var intCacheB = container.Resolve<ICacheManager<int>>();
-            intCache.Put("key", 22);
-
-            var boolCache = container.Resolve<ICacheManager<bool>>();
-            var boolCacheB = container.Resolve<ICacheManager<bool>>();
-            boolCache.Put("key", false);
-
-            Console.WriteLine("Value type is: " + stringCache.GetType().GetGenericArguments()[0].Name + " test value: " + stringCacheB["key"]);
-            Console.WriteLine("Value type is: " + intCache.GetType().GetGenericArguments()[0].Name + " test value: " + intCacheB["key"]);
-            Console.WriteLine("Value type is: " + boolCache.GetType().GetGenericArguments()[0].Name + " test value: " + boolCacheB["key"]);
         }
 
         private static void UpdateTest()
@@ -287,7 +240,7 @@ namespace CacheManager.Examples
 
         private static void MultiCacheEvictionWithoutRedisCacheHandle()
         {
-            var config = new ConfigurationBuilder("Redis with Redis Backplane")
+            var config = new CacheConfigurationBuilder("Redis with Redis Backplane")
                 .WithDictionaryHandle(true)
                     .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(5))
                 .And
@@ -336,31 +289,6 @@ namespace CacheManager.Examples
 
             Thread.Sleep(2000);
             cacheA.Remove(key);
-        }
-    }
-
-    public class UnityInjectionExampleTarget
-    {
-        private ICacheManager<object> _cache;
-
-        public UnityInjectionExampleTarget(ICacheManager<object> cache)
-        {
-            _cache = cache ?? throw new ArgumentNullException(nameof(cache));
-        }
-
-        public void GetSomething()
-        {
-            var value = _cache.Get("myKey");
-            var x = value;
-            if (value == null)
-            {
-                throw new InvalidOperationException();
-            }
-        }
-
-        public void PutSomethingIntoTheCache()
-        {
-            _cache.Put("myKey", "something");
         }
     }
 }

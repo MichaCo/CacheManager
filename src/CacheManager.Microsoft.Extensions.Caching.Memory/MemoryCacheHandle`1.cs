@@ -2,9 +2,8 @@
 using System.Collections.Concurrent;
 using CacheManager.Core;
 using CacheManager.Core.Internal;
-using CacheManager.Core.Logging;
 using Microsoft.Extensions.Caching.Memory;
-using static CacheManager.Core.Utility.Guard;
+using Microsoft.Extensions.Logging;
 
 namespace CacheManager.MicrosoftCachingMemory
 {
@@ -43,10 +42,17 @@ namespace CacheManager.MicrosoftCachingMemory
         public MemoryCacheHandle(ICacheManagerConfiguration managerConfiguration, CacheHandleConfiguration configuration, ILoggerFactory loggerFactory, MemoryCacheOptions memoryCacheOptions)
             : base(managerConfiguration, configuration)
         {
-            NotNull(configuration, nameof(configuration));
-            NotNull(loggerFactory, nameof(loggerFactory));
+            if (configuration is null)
+            {
+                throw new ArgumentNullException(nameof(configuration));
+            }
 
-            Logger = loggerFactory.CreateLogger(this);
+            if (loggerFactory is null)
+            {
+                throw new ArgumentNullException(nameof(loggerFactory));
+            }
+
+            Logger = loggerFactory.CreateLogger(this.GetType());
             _cacheName = configuration.Name;
             MemoryCacheOptions = memoryCacheOptions ?? new MemoryCacheOptions();
             _cache = new MemoryCache(MemoryCacheOptions);
@@ -82,7 +88,10 @@ namespace CacheManager.MicrosoftCachingMemory
         /// <inheritdoc />
         public override bool Exists(string key, string region)
         {
-            NotNullOrWhiteSpace(region, nameof(region));
+            if (string.IsNullOrWhiteSpace(region))
+            {
+                throw new ArgumentException($"'{nameof(region)}' cannot be null or whitespace.", nameof(region));
+            }
 
             return _cache.Contains(GetItemKey(key, region));
         }
@@ -178,7 +187,10 @@ namespace CacheManager.MicrosoftCachingMemory
 
         private string GetItemKey(string key, string region = null)
         {
-            NotNullOrWhiteSpace(key, nameof(key));
+            if (string.IsNullOrWhiteSpace(key))
+            {
+                throw new ArgumentException($"'{nameof(key)}' cannot be null or whitespace.", nameof(key));
+            }
 
             if (string.IsNullOrWhiteSpace(region))
             {
