@@ -4,7 +4,7 @@
     <Description>CacheManager is an open source caching abstraction layer for .NET written in C#. It supports various cache providers and implements many advanced features.</Description>
     <VersionPrefix>2.0.0</VersionPrefix>
     <Authors>MichaConrad</Authors>
-    <TargetFrameworks>net8.0</TargetFrameworks>
+    <TargetFramework>net8.0</TargetFramework>
     <AssemblyName>CacheManager.Config.Tests</AssemblyName>
     <OutputType>Exe</OutputType>
     <AssemblyOriginatorKeyFile>../../tools/key.snk</AssemblyOriginatorKeyFile>

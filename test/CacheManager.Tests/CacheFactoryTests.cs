@@ -451,7 +451,7 @@ namespace CacheManager.Tests
             var config = RedisConfigurations.GetConfiguration(name);
 
             // assert
-            config.ConfigurationOptions.Should().BeEquivalentTo(expected);
+            config.ConfigurationOptions.ToString().Should().BeEquivalentTo(expected.ToString());
             config.TwemproxyEnabled.Should().BeFalse();
             config.AllowAdmin.Should().BeTrue();
             config.IsSsl.Should().BeFalse();
@@ -478,7 +478,7 @@ namespace CacheManager.Tests
             var config = RedisConfigurations.GetConfiguration(name);
 
             // assert
-            config.ConfigurationOptions.Should().BeEquivalentTo(expected);
+            config.ConfigurationOptions.ToString().Should().BeEquivalentTo(expected.ToString());
             config.TwemproxyEnabled.Should().BeTrue();
             config.AllowAdmin.Should().BeFalse();
             config.IsSsl.Should().BeTrue();

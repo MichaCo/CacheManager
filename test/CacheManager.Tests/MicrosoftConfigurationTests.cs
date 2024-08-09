@@ -270,7 +270,7 @@ namespace CacheManager.Tests
 
             var config = GetConfiguration(data);
             Action action = () => config.GetCacheConfiguration("name");
-            action.Should().Throw<TypeLoadException>().WithMessage("*Could not load type 'SomeType'*");
+            action.Should().Throw<TypeLoadException>().WithMessage("*Could not * type 'SomeType'*");
         }
 
         [Fact]

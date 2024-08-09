@@ -48,7 +48,7 @@ namespace CacheManager.Tests
         public void Redis_Extensions_WithClient()
         {
             var configKey = Guid.NewGuid().ToString();
-            var client = ConnectionMultiplexer.Connect("localhost");
+            var client = ConnectionMultiplexer.Connect("localhost:6379");
             var cache = CacheFactory.Build<string>(
                 s => s
                     .WithJsonSerializer()
@@ -73,7 +73,7 @@ namespace CacheManager.Tests
         public void Redis_Extensions_WithClientWithDb()
         {
             var configKey = Guid.NewGuid().ToString();
-            var client = ConnectionMultiplexer.Connect("localhost");
+            var client = ConnectionMultiplexer.Connect("localhost:6379");
             var cache = CacheFactory.Build<string>(
                 s => s
                     .WithJsonSerializer()

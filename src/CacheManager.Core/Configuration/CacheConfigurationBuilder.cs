@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using CacheManager.Core.Configuration;
 using CacheManager.Core.Internal;
+using Microsoft.Extensions.Logging;
 using static CacheManager.Core.Utility.Guard;
 
 namespace CacheManager.Core
@@ -75,7 +76,7 @@ namespace CacheManager.Core
         /// Builds a <see cref="CacheManagerConfiguration"/> which can be used to create a new cache
         /// manager instance.
         /// <para>
-        /// Pass the configuration to <see cref="CacheFactory.FromConfiguration{TCacheValue}(ICacheManagerConfiguration)"/>
+        /// Pass the configuration to <see cref="CacheFactory.FromConfiguration{TCacheValue}(ICacheManagerConfiguration,ILoggerFactory)"/>
         /// to create a valid cache manager.
         /// </para>
         /// </summary>
@@ -96,7 +97,7 @@ namespace CacheManager.Core
         /// Builds a <see cref="CacheManagerConfiguration"/> which can be used to create a new cache
         /// manager instance.
         /// <para>
-        /// Pass the configuration to <see cref="CacheFactory.FromConfiguration{TCacheValue}(ICacheManagerConfiguration)"/>
+        /// Pass the configuration to <see cref="CacheFactory.FromConfiguration{TCacheValue}(ICacheManagerConfiguration,ILoggerFactory)"/>
         /// to create a valid cache manager.
         /// </para>
         /// </summary>
