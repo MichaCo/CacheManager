@@ -8,11 +8,11 @@ namespace CacheManager.Core
     public partial class BaseCacheManager<TCacheValue>
     {
         /// <inheritdoc />
-        public void Expire(string key, ExpirationMode mode, TimeSpan timeout)
+        public virtual void Expire(string key, ExpirationMode mode, TimeSpan timeout)
             => ExpireInternal(key, null, mode, timeout);
 
         /// <inheritdoc />
-        public void Expire(string key, string region, ExpirationMode mode, TimeSpan timeout)
+        public virtual void Expire(string key, string region, ExpirationMode mode, TimeSpan timeout)
             => ExpireInternal(key, region, mode, timeout);
 
         private void ExpireInternal(string key, string region, ExpirationMode mode, TimeSpan timeout)
@@ -57,7 +57,7 @@ namespace CacheManager.Core
         }
 
         /// <inheritdoc />
-        public void Expire(string key, DateTimeOffset absoluteExpiration)
+        public virtual void Expire(string key, DateTimeOffset absoluteExpiration)
         {
             var timeout = absoluteExpiration.UtcDateTime - DateTime.UtcNow;
             if (timeout <= TimeSpan.Zero)
@@ -69,7 +69,7 @@ namespace CacheManager.Core
         }
 
         /// <inheritdoc />
-        public void Expire(string key, string region, DateTimeOffset absoluteExpiration)
+        public virtual void Expire(string key, string region, DateTimeOffset absoluteExpiration)
         {
             var timeout = absoluteExpiration.UtcDateTime - DateTime.UtcNow;
             if (timeout <= TimeSpan.Zero)
@@ -81,7 +81,7 @@ namespace CacheManager.Core
         }
 
         /// <inheritdoc />
-        public void Expire(string key, TimeSpan slidingExpiration)
+        public virtual void Expire(string key, TimeSpan slidingExpiration)
         {
             if (slidingExpiration <= TimeSpan.Zero)
             {
@@ -92,7 +92,7 @@ namespace CacheManager.Core
         }
 
         /// <inheritdoc />
-        public void Expire(string key, string region, TimeSpan slidingExpiration)
+        public virtual void Expire(string key, string region, TimeSpan slidingExpiration)
         {
             if (slidingExpiration <= TimeSpan.Zero)
             {
@@ -103,13 +103,13 @@ namespace CacheManager.Core
         }
 
         /// <inheritdoc />
-        public void RemoveExpiration(string key)
+        public virtual void RemoveExpiration(string key)
         {
             Expire(key, ExpirationMode.None, default(TimeSpan));
         }
 
         /// <inheritdoc />
-        public void RemoveExpiration(string key, string region)
+        public virtual void RemoveExpiration(string key, string region)
         {
             Expire(key, region, ExpirationMode.None, default(TimeSpan));
         }

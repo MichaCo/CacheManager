@@ -7,15 +7,15 @@ namespace CacheManager.Core
     public partial class BaseCacheManager<TCacheValue>
     {
         /// <inheritdoc />
-        public TCacheValue GetOrAdd(string key, TCacheValue value)
+        public virtual TCacheValue GetOrAdd(string key, TCacheValue value)
             => GetOrAdd(key, (k) => value);
 
         /// <inheritdoc />
-        public TCacheValue GetOrAdd(string key, string region, TCacheValue value)
+        public virtual TCacheValue GetOrAdd(string key, string region, TCacheValue value)
             => GetOrAdd(key, region, (k, r) => value);
 
         /// <inheritdoc />
-        public TCacheValue GetOrAdd(string key, Func<string, TCacheValue> valueFactory)
+        public virtual TCacheValue GetOrAdd(string key, Func<string, TCacheValue> valueFactory)
         {
             NotNullOrWhiteSpace(key, nameof(key));
             NotNull(valueFactory, nameof(valueFactory));
@@ -24,7 +24,7 @@ namespace CacheManager.Core
         }
 
         /// <inheritdoc />
-        public TCacheValue GetOrAdd(string key, string region, Func<string, string, TCacheValue> valueFactory)
+        public virtual TCacheValue GetOrAdd(string key, string region, Func<string, string, TCacheValue> valueFactory)
         {
             NotNullOrWhiteSpace(key, nameof(key));
             NotNullOrWhiteSpace(region, nameof(region));
@@ -34,7 +34,7 @@ namespace CacheManager.Core
         }
 
         /// <inheritdoc />
-        public CacheItem<TCacheValue> GetOrAdd(string key, Func<string, CacheItem<TCacheValue>> valueFactory)
+        public virtual CacheItem<TCacheValue> GetOrAdd(string key, Func<string, CacheItem<TCacheValue>> valueFactory)
         {
             NotNullOrWhiteSpace(key, nameof(key));
             NotNull(valueFactory, nameof(valueFactory));
@@ -43,7 +43,7 @@ namespace CacheManager.Core
         }
 
         /// <inheritdoc />
-        public CacheItem<TCacheValue> GetOrAdd(string key, string region, Func<string, string, CacheItem<TCacheValue>> valueFactory)
+        public virtual CacheItem<TCacheValue> GetOrAdd(string key, string region, Func<string, string, CacheItem<TCacheValue>> valueFactory)
         {
             NotNullOrWhiteSpace(key, nameof(key));
             NotNullOrWhiteSpace(region, nameof(region));
@@ -53,7 +53,7 @@ namespace CacheManager.Core
         }
 
         /// <inheritdoc />
-        public bool TryGetOrAdd(string key, Func<string, TCacheValue> valueFactory, out TCacheValue value)
+        public virtual bool TryGetOrAdd(string key, Func<string, TCacheValue> valueFactory, out TCacheValue value)
         {
             NotNullOrWhiteSpace(key, nameof(key));
             NotNull(valueFactory, nameof(valueFactory));
@@ -77,7 +77,7 @@ namespace CacheManager.Core
         }
 
         /// <inheritdoc />
-        public bool TryGetOrAdd(string key, string region, Func<string, string, TCacheValue> valueFactory, out TCacheValue value)
+        public virtual bool TryGetOrAdd(string key, string region, Func<string, string, TCacheValue> valueFactory, out TCacheValue value)
         {
             NotNullOrWhiteSpace(key, nameof(key));
             NotNullOrWhiteSpace(region, nameof(region));
@@ -102,7 +102,7 @@ namespace CacheManager.Core
         }
 
         /// <inheritdoc />
-        public bool TryGetOrAdd(string key, Func<string, CacheItem<TCacheValue>> valueFactory, out CacheItem<TCacheValue> item)
+        public virtual bool TryGetOrAdd(string key, Func<string, CacheItem<TCacheValue>> valueFactory, out CacheItem<TCacheValue> item)
         {
             NotNullOrWhiteSpace(key, nameof(key));
             NotNull(valueFactory, nameof(valueFactory));
@@ -111,7 +111,7 @@ namespace CacheManager.Core
         }
 
         /// <inheritdoc />
-        public bool TryGetOrAdd(string key, string region, Func<string, string, CacheItem<TCacheValue>> valueFactory, out CacheItem<TCacheValue> item)
+        public virtual bool TryGetOrAdd(string key, string region, Func<string, string, CacheItem<TCacheValue>> valueFactory, out CacheItem<TCacheValue> item)
         {
             NotNullOrWhiteSpace(key, nameof(key));
             NotNullOrWhiteSpace(region, nameof(region));
