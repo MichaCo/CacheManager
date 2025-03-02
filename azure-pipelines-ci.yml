@@ -22,29 +22,8 @@ variables:
     versionSuffix: ''
 
 jobs:
-- job: 'Linux'
-  displayName: 'Build on Ubuntu'
-  pool: 
-    vmImage: 'ubuntu-latest'
-  steps:
-  - task: DotNetCoreCLI@2
-    inputs:
-      command: 'build'
-      projects: |
-        DnsClientDotNet.sln
-      arguments: '-c Release'
-    name: 'Build'
-    displayName: 'dotnet build'
-  - task: DotNetCoreCLI@2
-    displayName: "dotnet test"
-    inputs:
-      command: 'test'
-      projects: 'test/**/*.csproj'
-      publishTestResults: true      
-      arguments: '-c Release --no-build --no-restore -f net8.0'
-
 - job: Windows
-  displayName: 'Build & Test on Windows'
+  displayName: 'Build & Test'
   pool:
     vmImage: 'windows-latest'
 
@@ -54,7 +33,7 @@ jobs:
     inputs:
       command: 'build'
       projects: |
-        DnsClientDotNet.sln
+        CacheManager.sln
       arguments: '-c Release'
     name: 'Build'    
   - task: DotNetCoreCLI@2
