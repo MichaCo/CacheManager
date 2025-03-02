@@ -930,7 +930,7 @@ return result";
 
                 var setResult = _connection.Database.HashSet(fullKey, HashFieldValue, value, when, flags);
 
-                // setResult from fire and forget is alwys false, so we have to assume it works...
+                // setResult from fire and forget is always false, so we have to assume it works...
                 setResult = flags == CommandFlags.FireAndForget ? true : setResult;
 
                 if (setResult)

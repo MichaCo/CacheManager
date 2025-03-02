@@ -240,7 +240,7 @@ namespace CacheManager.Tests
                 CacheEvent.OnAdd,
                 (cacheA, cacheB) =>
                 {
-                    // in memory is not distributed, adding only to CacheA the event triggerd on cache B does trigger but cacheB doesn't have the item.
+                    // in memory is not distributed, adding only to CacheA the event triggered on cache B does trigger but cacheB doesn't have the item.
                     cacheB.Add(key, key, region);
                     cacheA.Add(key, key, region);
                 },
@@ -308,7 +308,7 @@ namespace CacheManager.Tests
                 CacheEvent.OnPut,
                 (cacheA, cacheB) =>
                 {
-                    // in memory is not distributed, adding only to CacheA the event triggerd on cache B does trigger but cacheB doesn't have the item.
+                    // in memory is not distributed, adding only to CacheA the event triggered on cache B does trigger but cacheB doesn't have the item.
                     cacheA.Add(key, key);
                     cacheA.Put(key, "new val");
                 },
@@ -1068,7 +1068,7 @@ namespace CacheManager.Tests
             string fileName = TestConfigurationHelper.GetCfgFileName(@"/Configuration/configuration.valid.allFeatures.config");
             string cacheName = "redisConfigFromConfig";
 
-            // have to load the configuration manually because the file is not avialbale to the default ConfigurtaionManager
+            // have to load the configuration manually because the file is not available to the default ConfigurtaionManager
             RedisConfigurations.LoadConfiguration(fileName, RedisConfigurationSection.DefaultSectionName);
             var redisConfig = RedisConfigurations.GetConfiguration("redisFromCfgConfigurationId");
 
@@ -1092,7 +1092,7 @@ namespace CacheManager.Tests
             string fileName = TestConfigurationHelper.GetCfgFileName(@"/Configuration/configuration.valid.allFeatures.config");
             string cacheName = "redisConfigFromConnectionString";
 
-            // have to load the configuration manually because the file is not avialbale to the default ConfigurtaionManager
+            // have to load the configuration manually because the file is not available to the default ConfigurtaionManager
             RedisConfigurations.LoadConfiguration(fileName, RedisConfigurationSection.DefaultSectionName);
             var redisConfig = RedisConfigurations.GetConfiguration("redisConnectionString");
 

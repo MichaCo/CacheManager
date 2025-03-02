@@ -7,7 +7,7 @@ namespace CacheManager.Serialization.DataContract
 {
     /// <summary>
     /// The data contract cache item will be used to serialize a <see cref="CacheItem{T}"/>.
-    /// A <see cref="CacheItem{T}"/> cannot be derserialized by DataContractSerializer because of the private setters.
+    /// A <see cref="CacheItem{T}"/> cannot be deserialized by DataContractSerializer because of the private setters.
     /// </summary>
     [DataContract]
     internal class DataContractCacheItem<T> : SerializerCacheItem<T>
