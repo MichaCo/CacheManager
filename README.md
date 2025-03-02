@@ -8,34 +8,40 @@ The developer can opt-in to those features only if needed.
 
 ## Build Status
 
-Build Server | Status
+Branch | Status
 --- | :---:
-Windows, MSBuild | [![Build status](https://ci.appveyor.com/api/projects/status/mv4u7eg5vq6ty5s4?svg=true)](https://ci.appveyor.com/project/MichaCo/cachemanager-ak9g3)
-Linux, Mono | -
+Dev | [![Build Status](https://dev.azure.com/michaco/CacheManager/_apis/build/status%2FMichaCo.CacheManager?branchName=dev)](https://dev.azure.com/michaco/CacheManager/_build/latest?definitionId=3&branchName=dev)
+Master | [![Build Status](https://dev.azure.com/michaco/CacheManager/_apis/build/status%2FMichaCo.CacheManager?branchName=master)](https://dev.azure.com/michaco/CacheManager/_build/latest?definitionId=3&branchName=master)
 
 ## CacheManager Nuget Packages
 
-| Package Name | FullFramework | .NET Standard |
+| Package Name | FullFramework | .NET Standard | net8.0
 | -------------- | :-------: | :-------: | 
-| [CacheManager.Core][Core.nuget] | 4.5 | 2.0 |
-| [CacheManager.StackExchange.Redis][Redis.nuget] | 4.6.1 | 2.0 |
-| [CacheManager.SystemRuntimeCaching][SystemRuntimeCaching.nuget]  | 4.5 | 2.0 |
-| [CacheManager.Microsoft.Extensions.Caching.Memory][MSCache.nuget]  | (4.6.1) | 2.0 |
-| [CacheManager.Microsoft.Extensions.Configuration][Configuration.nuget]  | 4.6.1 | 2.0 |
-| [CacheManager.Microsoft.Extensions.Logging][Logging.nuget]  | (4.6.1) | 2.0 |
-| [CacheManager.Serialization.DataContract][DataContract.nuget] | 4.5 | 2.0 |
-| [CacheManager.Serialization.Bond][Bond.nuget] | 4.5 | 2.0 |
-| [CacheManager.Serialization.Json][Json.nuget] | 4.5 | 2.0 |
-| [CacheManager.Serialization.ProtoBuf][ProtoBuf.nuget] | 4.5 | 2.0 |
-| [CacheManager.Web][Web.nuget] | 4.5 | - |
-| [CacheManager.Memcached][Memcached.nuget] | 4.5 | - |
-| [CacheManager.Couchbase][Couchbase.nuget] | 4.5 | 2.0 |
+| [CacheManager.Core][Core.nuget] | 4.7.2 | 2.0 | net8.0 |
+| [CacheManager.Microsoft.Extensions.Caching.Memory][MSCache.nuget]  | - | 2.0 | net8.0 |
+| [CacheManager.Microsoft.Extensions.Configuration][Configuration.nuget]  | - | 2.0 | net8.0 |
+| [CacheManager.Serialization.Bond][Bond.nuget]  | - | 2.0 | net8.0 |
+| [CacheManager.Serialization.DataContract][DataContract.nuget]  | - | 2.0 | net8.0 |
+| [CacheManager.Serialization.Json][Json.nuget]  | - | 2.0 | net8.0 |
+| [CacheManager.Serialization.ProtoBuf][ProtoBuf.nuget]  | - | 2.0 | net8.0 |
+| [CacheManager.StackExchange.Redis][Redis.nuget] | 4.7.2 | 2.0 | net8.0 |
+| [CacheManager.SystemRuntimeCaching][SystemRuntimeCaching.nuget]  | 4.7.2 | 2.0 | net8.0 |
 
+## Version 2.0 Breaking Changes
 
-Supported framework targets changed since CacheManager 2.0. In case you have to target .NET 40 for example, you can still use CacheManager 1.x!
+* CacheManager.Microsoft.Extensions.Logging is not a separated package anymore. Logging is now part of the Core package.
+* CacheManager.Memcached is not supported anymore
+* CacheManager.Couchbase is not supported anymore
+* CacheManager.Web is not supported anymore
 
+### Testing with Microsoft.Garnet
 
-### Beta Packages
+For testing and benchmarking, this project is now using Microsoft.Garnet, which allows to create a Redis server which runs in process and is easy to setup.
+This has some limitations though and before you use Microsoft.Garnet in production, be aware that for example key space notifications are not supported yet.
+
+See https://github.com/microsoft/garnet for details.
+
+## Beta Packages
 Beta versions of the CacheManager packages are getting pushed to https://www.myget.org/gallery/cachemanager on each build. 
 Add the following feed, if you want to play with the not yet released bits: 
 
