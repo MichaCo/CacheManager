@@ -41,11 +41,11 @@ internal class Program
         
         using var server = StartServer(loggerFactory);
 
-        var app = new CommandLineApplication(false);
-        app.Command("redis", (cmdApp) => new RedisCommand(cmdApp, loggerFactory), throwOnUnexpectedArg: true);
-        app.Command("redisAndMemory", (cmdApp) => new RedisAndMemoryCommand(cmdApp, loggerFactory), throwOnUnexpectedArg: true);
-        app.Command("redisAndMemoryNoMessages", (cmdApp) => new RedisAndMemoryNoMessagingCommand(cmdApp, loggerFactory), throwOnUnexpectedArg: true);
-        app.Command("memoryOnly", (cmdApp) => new MemoryOnlyCommand(cmdApp, loggerFactory), throwOnUnexpectedArg: true);
+        var app = new CommandLineApplication();
+        app.Command("redis", (cmdApp) => new RedisCommand(cmdApp, loggerFactory));
+        app.Command("redisAndMemory", (cmdApp) => new RedisAndMemoryCommand(cmdApp, loggerFactory));
+        app.Command("redisAndMemoryNoMessages", (cmdApp) => new RedisAndMemoryNoMessagingCommand(cmdApp, loggerFactory));
+        app.Command("memoryOnly", (cmdApp) => new MemoryOnlyCommand(cmdApp, loggerFactory));
         app.HelpOption("-h|--help");
         if (args.Length == 0)
         {
