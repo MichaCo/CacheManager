@@ -6,6 +6,8 @@ namespace CacheManager.Core
 {
     public partial class BaseCacheManager<TCacheValue>
     {
+        private readonly object _tryAddLock = new object();
+
         /// <inheritdoc />
         public virtual TCacheValue GetOrAdd(string key, TCacheValue value)
             => GetOrAdd(key, (k) => value);
@@ -34,7 +36,7 @@ namespace CacheManager.Core
         }
 
         /// <inheritdoc />
-        public virtual CacheItem<TCacheValue> GetOrAdd(string key, Func<string, CacheItem<TCacheValue>> valueFactory)
+        public virtual CacheItem<TCacheValue> GetOrAddCacheItem(string key, Func<string, CacheItem<TCacheValue>> valueFactory)
         {
             NotNullOrWhiteSpace(key, nameof(key));
             NotNull(valueFactory, nameof(valueFactory));
@@ -43,7 +45,7 @@ namespace CacheManager.Core
         }
 
         /// <inheritdoc />
-        public virtual CacheItem<TCacheValue> GetOrAdd(string key, string region, Func<string, string, CacheItem<TCacheValue>> valueFactory)
+        public virtual CacheItem<TCacheValue> GetOrAddCacheItem(string key, string region, Func<string, string, CacheItem<TCacheValue>> valueFactory)
         {
             NotNullOrWhiteSpace(key, nameof(key));
             NotNullOrWhiteSpace(region, nameof(region));
@@ -102,7 +104,7 @@ namespace CacheManager.Core
         }
 
         /// <inheritdoc />
-        public virtual bool TryGetOrAdd(string key, Func<string, CacheItem<TCacheValue>> valueFactory, out CacheItem<TCacheValue> item)
+        public virtual bool TryGetOrAddCacheItem(string key, Func<string, CacheItem<TCacheValue>> valueFactory, out CacheItem<TCacheValue> item)
         {
             NotNullOrWhiteSpace(key, nameof(key));
             NotNull(valueFactory, nameof(valueFactory));
@@ -111,7 +113,7 @@ namespace CacheManager.Core
         }
 
         /// <inheritdoc />
-        public virtual bool TryGetOrAdd(string key, string region, Func<string, string, CacheItem<TCacheValue>> valueFactory, out CacheItem<TCacheValue> item)
+        public virtual bool TryGetOrAddCacheItem(string key, string region, Func<string, string, CacheItem<TCacheValue>> valueFactory, out CacheItem<TCacheValue> item)
         {
             NotNullOrWhiteSpace(key, nameof(key));
             NotNullOrWhiteSpace(region, nameof(region));
@@ -119,8 +121,6 @@ namespace CacheManager.Core
 
             return TryGetOrAddInternal(key, region, valueFactory, out item);
         }
-
-        private readonly object _tryAddLock = new object();
 
         private bool TryGetOrAddInternal(string key, string region, Func<string, string, CacheItem<TCacheValue>> valueFactory, out CacheItem<TCacheValue> item)
         {
