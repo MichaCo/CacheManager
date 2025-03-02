@@ -535,7 +535,10 @@ namespace CacheManager.Core
                 }
             }
 
-            if (result)
+            // See #311, send remove events anyways if the backlane is configured but no distributed cache is used.
+            var inProcOnly = _cacheHandles.Any(p => !p.IsDistributedCache);
+
+            if (result || inProcOnly)
             {
                 // update backplane
                 if (_cacheBackplane != null)
@@ -555,8 +558,11 @@ namespace CacheManager.Core
                     }
                 }
 
-                // trigger only once and not per handle
-                TriggerOnRemove(key, region);
+                if (result)
+                {
+                    // trigger only once and not per handle
+                    TriggerOnRemove(key, region);
+                }
             }
 
             return result;
