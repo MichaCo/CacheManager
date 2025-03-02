@@ -42,7 +42,7 @@ jobs:
       command: 'test'
       projects: 'test/**/*.csproj'
       publishTestResults: true      
-      arguments: '-c Release --no-build --no-restore --collect "Code coverage" --settings:.runsettings'
+      arguments: '-c Release --no-build --no-restore --collect "Code coverage"'
   - script: 'dotnet pack src\DnsClient\DnsClient.csproj -c Release --no-build --no-restore --version-suffix "$(versionSuffix)" -v normal -o $(Build.ArtifactStagingDirectory)'
     name: 'PackBeta'
     displayName: 'dotnet pack'
