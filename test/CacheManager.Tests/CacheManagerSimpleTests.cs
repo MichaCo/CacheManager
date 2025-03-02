@@ -745,6 +745,33 @@ namespace CacheManager.Tests
 
         #region get or add
 
+        // validates #268
+        [Fact]
+        public void CacheManager_GetOrAdd_Concurrent_SameKey()
+        {
+            var rnd = new Random();
+            var cache = CacheFactory.Build<object>(settings => settings
+                .WithMicrosoftMemoryCacheHandle());
+
+            CacheItem<object> GenerateValue(string key)
+            {
+                Thread.Sleep(400);
+                return new CacheItem<object>(key, $"{rnd.Next()} {DateTime.Now.ToLongTimeString()} : HALLO WORLD FOR " + key);
+            }
+
+            object v1 = null;
+            object v2 = null;
+
+            const string sameKey = "Test 1 ";
+
+            Parallel.Invoke(
+                () => { v1 = cache.GetOrAddCacheItem(sameKey, GenerateValue).Value; },
+                () => { v2 = cache.GetOrAddCacheItem(sameKey, GenerateValue).Value; }
+            );
+
+            Assert.True(v1 == v2); // FAILS
+        }
+
         [Fact]
         [ReplaceCulture]
         public void CacheManager_GetOrAdd_InvalidKey()
@@ -759,8 +786,8 @@ namespace CacheManager.Tests
                 Action actB = () => cache.GetOrAdd(null, "region", "value");
                 Action actC = () => cache.GetOrAdd(null, (k) => "value");
                 Action actD = () => cache.GetOrAdd(null, "region", (k, r) => "value");
-                Action actE = () => cache.GetOrAdd(null, (k) => new CacheItem<object>(k, "value"));
-                Action actF = () => cache.GetOrAdd(null, "region", (k, r) => new CacheItem<object>(k, "value"));
+                Action actE = () => cache.GetOrAddCacheItem(null, (k) => new CacheItem<object>(k, "value"));
+                Action actF = () => cache.GetOrAddCacheItem(null, "region", (k, r) => new CacheItem<object>(k, "value"));
 
                 // assert
                 actA.Should().Throw<ArgumentException>()
@@ -865,8 +892,8 @@ namespace CacheManager.Tests
             }))
             {
                 // arrange act
-                Action actA = () => cache.GetOrAdd("key", null);
-                Action actB = () => cache.GetOrAdd("key", "region", null);
+                Action actA = () => cache.GetOrAddCacheItem("key", null);
+                Action actB = () => cache.GetOrAddCacheItem("key", "region", null);
 
                 // assert
                 actA.Should().Throw<ArgumentException>()
@@ -919,8 +946,8 @@ namespace CacheManager.Tests
                 cache.GetOrAdd(key, region, val);
                 cache.GetOrAdd(keyF, (k) => val);
                 cache.GetOrAdd(keyF, region, (k, r) => val);
-                cache.GetOrAdd(keyG, (k) => new CacheItem<object>(keyG, val));
-                cache.GetOrAdd(keyG, region, (k, r) => new CacheItem<object>(keyG, region, val, ExpirationMode.Absolute, TimeSpan.FromMinutes(42)));
+                cache.GetOrAddCacheItem(keyG, (k) => new CacheItem<object>(keyG, val));
+                cache.GetOrAddCacheItem(keyG, region, (k, r) => new CacheItem<object>(keyG, region, val, ExpirationMode.Absolute, TimeSpan.FromMinutes(42)));
 
                 // assert
                 cache[key].Should().Be(val);
@@ -956,9 +983,9 @@ namespace CacheManager.Tests
                 Func<bool> actA = () => cache.TryGetOrAdd(key, k => val, out valueA);
                 Func<bool> actB = () => cache.TryGetOrAdd(key, region, (k, r) => val, out valueB);
                 var valC = new CacheItem<object>(key2, val);
-                Func<bool> actC = () => cache.TryGetOrAdd(key2, k => valC, out valueC);
+                Func<bool> actC = () => cache.TryGetOrAddCacheItem(key2, k => valC, out valueC);
                 var valD = new CacheItem<object>(key2, region, val, ExpirationMode.Absolute, TimeSpan.FromMinutes(42));
-                Func<bool> actD = () => cache.TryGetOrAdd(key2, region, (k, r) => valD, out valueD);
+                Func<bool> actD = () => cache.TryGetOrAddCacheItem(key2, region, (k, r) => valD, out valueD);
 
                 // assert
                 actA().Should().BeTrue();
@@ -990,7 +1017,7 @@ namespace CacheManager.Tests
             using (cache)
             {
                 // act
-                Action act = () => cache.GetOrAdd(key, (k) => null);
+                Action act = () => cache.GetOrAddCacheItem(key, (k) => null);
 
                 // assert
                 act.Should().Throw<InvalidOperationException>("added");
@@ -1011,7 +1038,7 @@ namespace CacheManager.Tests
                 object val = null;
                 CacheItem<object> val2 = null;
                 Func<bool> act = () => cache.TryGetOrAdd(key, (k) => null, out val);
-                Func<bool> actB = () => cache.TryGetOrAdd(key, (k) => null, out val2);
+                Func<bool> actB = () => cache.TryGetOrAddCacheItem(key, (k) => null, out val2);
 
                 // assert
                 act().Should().BeFalse();
@@ -1062,8 +1089,8 @@ namespace CacheManager.Tests
                 // act
                 var result = cache.GetOrAdd(key, val);
                 var resultB = cache.GetOrAdd(key, region, val);
-                var resultC = cache.GetOrAdd(key, (k) => new CacheItem<object>(key, val));
-                var resultD = cache.GetOrAdd(key, region, (k, r) => new CacheItem<object>(key, val));
+                var resultC = cache.GetOrAddCacheItem(key, (k) => new CacheItem<object>(key, val));
+                var resultD = cache.GetOrAddCacheItem(key, region, (k, r) => new CacheItem<object>(key, val));
                 Action act = () => cache.GetOrAdd(keyF, add);
                 Action actB = () => cache.GetOrAdd(keyF, region, addRegion);
 
@@ -1133,7 +1160,7 @@ namespace CacheManager.Tests
                 Func<CacheItem<object>> action = () =>
                 {
                     var tries = 0;
-                    var created = cache.GetOrAdd(key, (k) =>
+                    var created = cache.GetOrAddCacheItem(key, (k) =>
                     {
                         tries++;
                         Interlocked.Increment(ref counter);
@@ -1184,7 +1211,7 @@ namespace CacheManager.Tests
                 {
                     var tries = 0;
                     CacheItem<object> result = null;
-                    while (!cache.TryGetOrAdd(
+                    while (!cache.TryGetOrAddCacheItem(
                         key, (k) =>
                         {
                             tries++;

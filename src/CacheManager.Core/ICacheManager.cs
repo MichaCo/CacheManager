@@ -347,7 +347,7 @@ namespace CacheManager.Core
         /// <exception cref="ArgumentException">
         /// If either <paramref name="key"/> or <paramref name="valueFactory"/> is null.
         /// </exception>
-        CacheItem<TCacheValue> GetOrAdd(string key, Func<string, CacheItem<TCacheValue>> valueFactory);
+        CacheItem<TCacheValue> GetOrAddCacheItem(string key, Func<string, CacheItem<TCacheValue>> valueFactory);
 
         /// <summary>
         /// Returns an existing item or adds the item to the cache if it does not exist.
@@ -360,7 +360,7 @@ namespace CacheManager.Core
         /// <exception cref="ArgumentException">
         /// If either <paramref name="key"/> or <paramref name="valueFactory"/> is null.
         /// </exception>
-        CacheItem<TCacheValue> GetOrAdd(string key, string region, Func<string, string, CacheItem<TCacheValue>> valueFactory);
+        CacheItem<TCacheValue> GetOrAddCacheItem(string key, string region, Func<string, string, CacheItem<TCacheValue>> valueFactory);
 
         /// <summary>
         /// Tries to either retrieve an existing item or add the item to the cache if it does not exist.
@@ -399,7 +399,7 @@ namespace CacheManager.Core
         /// <exception cref="ArgumentException">
         /// If either <paramref name="key"/> or <paramref name="valueFactory"/> is null.
         /// </exception>
-        bool TryGetOrAdd(string key, Func<string, CacheItem<TCacheValue>> valueFactory, out CacheItem<TCacheValue> item);
+        bool TryGetOrAddCacheItem(string key, Func<string, CacheItem<TCacheValue>> valueFactory, out CacheItem<TCacheValue> item);
 
         /// <summary>
         /// Tries to either retrieve an existing item or add the item to the cache if it does not exist.
@@ -412,7 +412,7 @@ namespace CacheManager.Core
         /// <exception cref="ArgumentException">
         /// If either <paramref name="key"/> or <paramref name="valueFactory"/> is null.
         /// </exception>
-        bool TryGetOrAdd(string key, string region, Func<string, string, CacheItem<TCacheValue>> valueFactory, out CacheItem<TCacheValue> item);
+        bool TryGetOrAddCacheItem(string key, string region, Func<string, string, CacheItem<TCacheValue>> valueFactory, out CacheItem<TCacheValue> item);
 
         /// <summary>
         /// Updates an existing key in the cache.

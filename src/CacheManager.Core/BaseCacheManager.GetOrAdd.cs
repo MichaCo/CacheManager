@@ -6,16 +6,18 @@ namespace CacheManager.Core
 {
     public partial class BaseCacheManager<TCacheValue>
     {
+        private readonly object _tryAddLock = new object();
+
         /// <inheritdoc />
-        public TCacheValue GetOrAdd(string key, TCacheValue value)
+        public virtual TCacheValue GetOrAdd(string key, TCacheValue value)
             => GetOrAdd(key, (k) => value);
 
         /// <inheritdoc />
-        public TCacheValue GetOrAdd(string key, string region, TCacheValue value)
+        public virtual TCacheValue GetOrAdd(string key, string region, TCacheValue value)
             => GetOrAdd(key, region, (k, r) => value);
 
         /// <inheritdoc />
-        public TCacheValue GetOrAdd(string key, Func<string, TCacheValue> valueFactory)
+        public virtual TCacheValue GetOrAdd(string key, Func<string, TCacheValue> valueFactory)
         {
             NotNullOrWhiteSpace(key, nameof(key));
             NotNull(valueFactory, nameof(valueFactory));
@@ -24,7 +26,7 @@ namespace CacheManager.Core
         }
 
         /// <inheritdoc />
-        public TCacheValue GetOrAdd(string key, string region, Func<string, string, TCacheValue> valueFactory)
+        public virtual TCacheValue GetOrAdd(string key, string region, Func<string, string, TCacheValue> valueFactory)
         {
             NotNullOrWhiteSpace(key, nameof(key));
             NotNullOrWhiteSpace(region, nameof(region));
@@ -34,7 +36,7 @@ namespace CacheManager.Core
         }
 
         /// <inheritdoc />
-        public CacheItem<TCacheValue> GetOrAdd(string key, Func<string, CacheItem<TCacheValue>> valueFactory)
+        public virtual CacheItem<TCacheValue> GetOrAddCacheItem(string key, Func<string, CacheItem<TCacheValue>> valueFactory)
         {
             NotNullOrWhiteSpace(key, nameof(key));
             NotNull(valueFactory, nameof(valueFactory));
@@ -43,7 +45,7 @@ namespace CacheManager.Core
         }
 
         /// <inheritdoc />
-        public CacheItem<TCacheValue> GetOrAdd(string key, string region, Func<string, string, CacheItem<TCacheValue>> valueFactory)
+        public virtual CacheItem<TCacheValue> GetOrAddCacheItem(string key, string region, Func<string, string, CacheItem<TCacheValue>> valueFactory)
         {
             NotNullOrWhiteSpace(key, nameof(key));
             NotNullOrWhiteSpace(region, nameof(region));
@@ -53,7 +55,7 @@ namespace CacheManager.Core
         }
 
         /// <inheritdoc />
-        public bool TryGetOrAdd(string key, Func<string, TCacheValue> valueFactory, out TCacheValue value)
+        public virtual bool TryGetOrAdd(string key, Func<string, TCacheValue> valueFactory, out TCacheValue value)
         {
             NotNullOrWhiteSpace(key, nameof(key));
             NotNull(valueFactory, nameof(valueFactory));
@@ -77,7 +79,7 @@ namespace CacheManager.Core
         }
 
         /// <inheritdoc />
-        public bool TryGetOrAdd(string key, string region, Func<string, string, TCacheValue> valueFactory, out TCacheValue value)
+        public virtual bool TryGetOrAdd(string key, string region, Func<string, string, TCacheValue> valueFactory, out TCacheValue value)
         {
             NotNullOrWhiteSpace(key, nameof(key));
             NotNullOrWhiteSpace(region, nameof(region));
@@ -102,7 +104,7 @@ namespace CacheManager.Core
         }
 
         /// <inheritdoc />
-        public bool TryGetOrAdd(string key, Func<string, CacheItem<TCacheValue>> valueFactory, out CacheItem<TCacheValue> item)
+        public virtual bool TryGetOrAddCacheItem(string key, Func<string, CacheItem<TCacheValue>> valueFactory, out CacheItem<TCacheValue> item)
         {
             NotNullOrWhiteSpace(key, nameof(key));
             NotNull(valueFactory, nameof(valueFactory));
@@ -111,7 +113,7 @@ namespace CacheManager.Core
         }
 
         /// <inheritdoc />
-        public bool TryGetOrAdd(string key, string region, Func<string, string, CacheItem<TCacheValue>> valueFactory, out CacheItem<TCacheValue> item)
+        public virtual bool TryGetOrAddCacheItem(string key, string region, Func<string, string, CacheItem<TCacheValue>> valueFactory, out CacheItem<TCacheValue> item)
         {
             NotNullOrWhiteSpace(key, nameof(key));
             NotNullOrWhiteSpace(region, nameof(region));
@@ -133,21 +135,24 @@ namespace CacheManager.Core
                     return true;
                 }
 
-                // changed logic to invoke the factory only once in case of retries
-                if (newItem == null)
+                lock (_tryAddLock)
                 {
-                    newItem = valueFactory(key, region);
-                }
+                    // changed logic to invoke the factory only once in case of retries
+                    if (newItem == null)
+                    {
+                        newItem = valueFactory(key, region);
+                    }
 
-                if (newItem == null)
-                {
-                    return false;
-                }
+                    if (newItem == null)
+                    {
+                        return false;
+                    }
 
-                if (AddInternal(newItem))
-                {
-                    item = newItem;
-                    return true;
+                    if (AddInternal(newItem))
+                    {
+                        item = newItem;
+                        return true;
+                    }
                 }
             }
             while (tries <= Configuration.MaxRetries);
@@ -168,21 +173,24 @@ namespace CacheManager.Core
                     return item;
                 }
 
-                // changed logic to invoke the factory only once in case of retries
-                if (newItem == null)
+                lock (_tryAddLock)
                 {
-                    newItem = valueFactory(key, region);
-                }
+                    // changed logic to invoke the factory only once in case of retries
+                    if (newItem == null)
+                    {
+                        newItem = valueFactory(key, region);
+                    }
 
-                // Throw explicit to me more consistent. Otherwise it would throw later eventually...
-                if (newItem == null)
-                {
-                    throw new InvalidOperationException("The CacheItem which should be added must not be null.");
-                }
+                    // Throw explicit to me more consistent. Otherwise it would throw later eventually...
+                    if (newItem == null)
+                    {
+                        throw new InvalidOperationException("The CacheItem which should be added must not be null.");
+                    }
 
-                if (AddInternal(newItem))
-                {
-                    return newItem;
+                    if (AddInternal(newItem))
+                    {
+                        return newItem;
+                    }
                 }
             }
             while (tries <= Configuration.MaxRetries);

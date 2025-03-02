@@ -33,6 +33,7 @@ Master | [![Build Status](https://dev.azure.com/michaco/CacheManager/_apis/build
 * CacheManager.Memcached is not supported anymore
 * CacheManager.Couchbase is not supported anymore
 * CacheManager.Web is not supported anymore
+* PerformanceCounters are not available for now
 
 ### Testing with Microsoft.Garnet
 
@@ -88,9 +89,6 @@ See [benchmarks results](https://github.com/MichaCo/CacheManager/blob/dev/Benchm
     * **MemoryCache** (System.Runtime.Caching)
 	* **MemoryCache** based on Microsoft.Extensions.Caching.Memory
     * **Redis** using [StackExchange.Redis](https://github.com/StackExchange/StackExchange.Redis)
-    * **Memcached** using [Enyim.Memcached](https://github.com/enyim/EnyimMemcached)
-    * **Couchbase** using [Couchbase.Net.Client v2](https://github.com/couchbase/couchbase-net-client)
-    * **System.Web.Caching** based (included in the Web package)
 * **Serialization** can now be configured.
 Serialization is only needed in distributed caches. If no additional serialization package is installed and configured, Binary serialization will be used (if available)
 The following are the currently available serialization options:
@@ -103,10 +101,7 @@ The following are the currently available serialization options:
 * **Update values with lock or transaction** for distributed caches. 
 The interfaced provides a simple update method which internally ensures you work with the latest version.
 And CacheManager handles version conflicts for you.
-* **Logging** CacheManager comes with an extensible logging API.
-    * All standard cache operations are logged
-    * Based on log levels more or less information will be logged (try Trace and Debug)
-    * Current concrete implementation is based on the ASP.NET Core logging. Other implementation of CacheManager's ILoggerFactory might follow.
+* **Logging** using Microsoft.Extensions.Logging.
 * **Strongly typed** cache interface.
 * **Multiple layers**
 By having multiple cache handles managed by CacheManager, you can easily implement layered caches. For example, an in process cache in front of your distributed cache, to make read access faster.
@@ -124,16 +119,13 @@ The following are the supported expiration modes:
 * **Cache Regions**: Even if some cache systems do not support or implement cache regions, the CacheManager implements the mechanism.
 This can be used to for example group elements and remove all of them at once.
 * **Statistics**: Counters for all kind of cache actions.
-* **Performance Counters**: To be able to inspect certain numbers with `perfmon`, CacheManager supports performance counters per instance of the manager and per cache handle.
 * **Event System**: CacheManager triggers events for common cache actions:
 OnGet, OnAdd, OnPut, OnRemove, OnClear, OnClearRegion
    * Events also get triggered by the backplane (if enabled) when multiple instances are sharing the same cache.
    * New `OnRemoveByHandle` events triggered by actual expiration or memory pressure eviction by the cache vendor
    * Events also get triggered through the backplane and via Redis keyspace events (if configured)
-* **System.Web.OutputCache** implementation to use CacheManager as OutputCache provider which makes the OutputCache extremely flexible, for example by using a distributed cache like Redis across many web servers.
 * **Cache clients synchronization** 
     * Implemented with the Redis pub/sub feature
-* Supports .Net 4.5, and can be used in cross platform projects with the new **.NET Core** runtime
 
 [releases]: https://github.com/MichaCo/CacheManager/releases
 [Core.nuget]: https://www.nuget.org/packages/CacheManager.Core
