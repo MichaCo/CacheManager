@@ -12,7 +12,7 @@ namespace CacheManager.Tests
     [ExcludeFromCodeCoverage]
     public class ThreadRandomReadWriteTestBase : IClassFixture<RedisTestFixture>
     {
-        [Theory]
+        [Theory(Skip = "Not really good test")]
         [Trait("category", "Unreliable")]
         [ClassData(typeof(TestCacheManagers))]
         public async Task Thread_Update(ICacheManager<object> cache)

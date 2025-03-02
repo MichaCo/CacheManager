@@ -22,7 +22,6 @@ namespace CacheManager.Tests
 
         public static GarnetServer StartServer(ILoggerFactory loggerFactory = null)
         {
-            Console.WriteLine("Starting server...");
             var server = new GarnetServer(new GarnetServerOptions()
             {
                 EnableLua = true,
@@ -53,7 +52,8 @@ namespace CacheManager.Tests
         public void Dispose()
         {
             var current = Interlocked.Decrement(ref InstanceCount);
-            Console.WriteLine($"Disposing... {current}");
+
+            // Console.WriteLine($"Disposing... {current}");
             if (current == 0)
             {
                 server.Value.Dispose();

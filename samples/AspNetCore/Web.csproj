@@ -6,6 +6,7 @@
     <AssemblyName>AspnetCore.WebApp</AssemblyName>
     <OutputType>Exe</OutputType>
     <PackageId>AspnetCore.WebApp</PackageId>
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>

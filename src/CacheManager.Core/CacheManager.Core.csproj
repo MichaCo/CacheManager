@@ -5,6 +5,7 @@
     <TargetFrameworks>net472;netstandard2.0;netstandard2.1;net80</TargetFrameworks>
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
     <PackageTags>Caching;Cache;CacheManager;Distributed Cache;Redis;</PackageTags>
+    <IsPackable>true</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>

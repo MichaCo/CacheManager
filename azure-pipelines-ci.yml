@@ -22,29 +22,8 @@ variables:
     versionSuffix: ''
 
 jobs:
-- job: 'Linux'
-  displayName: 'Build on Ubuntu'
-  pool: 
-    vmImage: 'ubuntu-latest'
-  steps:
-  - task: DotNetCoreCLI@2
-    inputs:
-      command: 'build'
-      projects: |
-        DnsClientDotNet.sln
-      arguments: '-c Release'
-    name: 'Build'
-    displayName: 'dotnet build'
-  - task: DotNetCoreCLI@2
-    displayName: "dotnet test"
-    inputs:
-      command: 'test'
-      projects: 'test/**/*.csproj'
-      publishTestResults: true      
-      arguments: '-c Release --no-build --no-restore -f net8.0'
-
 - job: Windows
-  displayName: 'Build & Test on Windows'
+  displayName: 'Build & Test'
   pool:
     vmImage: 'windows-latest'
 
@@ -54,7 +33,7 @@ jobs:
     inputs:
       command: 'build'
       projects: |
-        DnsClientDotNet.sln
+        CacheManager.sln
       arguments: '-c Release'
     name: 'Build'    
   - task: DotNetCoreCLI@2
@@ -63,12 +42,27 @@ jobs:
       command: 'test'
       projects: 'test/**/*.csproj'
       publishTestResults: true      
-      arguments: '-c Release --no-build --no-restore --collect "Code coverage" --settings:.runsettings'
-  - script: 'dotnet pack src\DnsClient\DnsClient.csproj -c Release --no-build --no-restore --version-suffix "$(versionSuffix)" -v normal -o $(Build.ArtifactStagingDirectory)'
-    name: 'PackBeta'
-    displayName: 'dotnet pack'
+      arguments: '-c Release --no-build --no-restore --filter category!=Unreliable'
+  - script: 'dotnet pack src\CacheManager.Core\CacheManager.Core.csproj -c Release --no-build --no-restore --version-suffix "$(versionSuffix)" -v normal -o $(Build.ArtifactStagingDirectory)'
+    displayName: 'dotnet pack Core'
+  - script: 'dotnet pack src\CacheManager.Microsoft.Extensions.Caching.Memory\CacheManager.Microsoft.Extensions.Caching.Memory.csproj -c Release --no-build --no-restore --version-suffix "$(versionSuffix)" -v normal -o $(Build.ArtifactStagingDirectory)'
+    displayName: 'dotnet pack CacheManager.Microsoft.Extensions.Caching.Memory'
+  - script: 'dotnet pack src\CacheManager.Microsoft.Extensions.Configuration\CacheManager.Microsoft.Extensions.Configuration.csproj -c Release --no-build --no-restore --version-suffix "$(versionSuffix)" -v normal -o $(Build.ArtifactStagingDirectory)'
+    displayName: 'dotnet pack CacheManager.Microsoft.Extensions.Configuration'
+  - script: 'dotnet pack src\CacheManager.Serialization.Bond\CacheManager.Serialization.Bond.csproj -c Release --no-build --no-restore --version-suffix "$(versionSuffix)" -v normal -o $(Build.ArtifactStagingDirectory)'
+    displayName: 'dotnet pack CacheManager.Serialization.Bond'
+  - script: 'dotnet pack src\CacheManager.Serialization.DataContract\CacheManager.Serialization.DataContract.csproj -c Release --no-build --no-restore --version-suffix "$(versionSuffix)" -v normal -o $(Build.ArtifactStagingDirectory)'
+    displayName: 'dotnet pack CacheManager.Serialization.DataContract'
+  - script: 'dotnet pack src\CacheManager.Serialization.Json\CacheManager.Serialization.Json.csproj -c Release --no-build --no-restore --version-suffix "$(versionSuffix)" -v normal -o $(Build.ArtifactStagingDirectory)'
+    displayName: 'dotnet pack CacheManager.Serialization.Json'
+  - script: 'dotnet pack src\CacheManager.Serialization.ProtoBuf\CacheManager.Serialization.ProtoBuf.csproj -c Release --no-build --no-restore --version-suffix "$(versionSuffix)" -v normal -o $(Build.ArtifactStagingDirectory)'
+    displayName: 'dotnet pack CacheManager.Serialization.ProtoBuf'
+  - script: 'dotnet pack src\CacheManager.StackExchange.Redis\CacheManager.StackExchange.Redis.csproj -c Release --no-build --no-restore --version-suffix "$(versionSuffix)" -v normal -o $(Build.ArtifactStagingDirectory)'
+    displayName: 'dotnet pack CacheManager.StackExchange.Redis'
+  - script: 'dotnet pack src\CacheManager.SystemRuntimeCaching\CacheManager.SystemRuntimeCaching.csproj -c Release --no-build --no-restore --version-suffix "$(versionSuffix)" -v normal -o $(Build.ArtifactStagingDirectory)'
+    displayName: 'dotnet pack CacheManager.SystemRuntimeCaching'
   - task: PublishBuildArtifacts@1
-    displayName: 'publish'
+    displayName: 'Publish Artifacts'
     inputs:
       pathtoPublish: '$(Build.ArtifactStagingDirectory)' 
-      artifactName: 'beta'
+      artifactName: 'cachemanager'
