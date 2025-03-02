@@ -63,7 +63,7 @@ namespace CacheManager.Redis
             RetryHelper.Retry(() => Subscribe(), configuration.RetryTimeout, configuration.MaxRetries, _logger);
 
             // adding additional timer based send message invoke (shouldn't do anything if there are no messages,
-            // but in really rare race conditions, it might happen messages do not get send if SendMEssages only get invoked through "NotifyXyz"
+            // but in really rare race conditions, it might happen messages do not get send if SendMessages only get invoked through "NotifyXyz"
             _timer = new Timer(SendMessages, true, 1000, 1000);
         }
 
@@ -232,7 +232,7 @@ namespace CacheManager.Redis
                                     // clearing up only after successfully sending. Basically retrying...
                                     _messages.Clear();
 
-                                    // reset log limmiter because we just send stuff
+                                    // reset log limiter because we just send stuff
                                     loggedLimitWarningOnce = false;
                                 }
                             }
