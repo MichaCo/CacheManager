@@ -745,6 +745,33 @@ namespace CacheManager.Tests
 
         #region get or add
 
+        // validates #268
+        [Fact]
+        public void CacheManager_GetOrAdd_Concurrent_SameKey()
+        {
+            var rnd = new Random();
+            var cache = CacheFactory.Build<object>(settings => settings
+                .WithMicrosoftMemoryCacheHandle());
+
+            CacheItem<object> GenerateValue(string key)
+            {
+                Thread.Sleep(400);
+                return new CacheItem<object>(key, $"{rnd.Next()} {DateTime.Now.ToLongTimeString()} : HALLO WORLD FOR " + key);
+            }
+
+            object v1 = null;
+            object v2 = null;
+
+            const string sameKey = "Test 1 ";
+
+            Parallel.Invoke(
+                () => { v1 = cache.GetOrAdd(sameKey, GenerateValue).Value; },
+                () => { v2 = cache.GetOrAdd(sameKey, GenerateValue).Value; }
+            );
+
+            Assert.True(v1 == v2); // FAILS
+        }
+
         [Fact]
         [ReplaceCulture]
         public void CacheManager_GetOrAdd_InvalidKey()

@@ -120,6 +120,8 @@ namespace CacheManager.Core
             return TryGetOrAddInternal(key, region, valueFactory, out item);
         }
 
+        private readonly object _tryAddLock = new object();
+
         private bool TryGetOrAddInternal(string key, string region, Func<string, string, CacheItem<TCacheValue>> valueFactory, out CacheItem<TCacheValue> item)
         {
             CacheItem<TCacheValue> newItem = null;
@@ -133,21 +135,24 @@ namespace CacheManager.Core
                     return true;
                 }
 
-                // changed logic to invoke the factory only once in case of retries
-                if (newItem == null)
+                lock (_tryAddLock)
                 {
-                    newItem = valueFactory(key, region);
-                }
+                    // changed logic to invoke the factory only once in case of retries
+                    if (newItem == null)
+                    {
+                        newItem = valueFactory(key, region);
+                    }
 
-                if (newItem == null)
-                {
-                    return false;
-                }
+                    if (newItem == null)
+                    {
+                        return false;
+                    }
 
-                if (AddInternal(newItem))
-                {
-                    item = newItem;
-                    return true;
+                    if (AddInternal(newItem))
+                    {
+                        item = newItem;
+                        return true;
+                    }
                 }
             }
             while (tries <= Configuration.MaxRetries);
@@ -168,21 +173,24 @@ namespace CacheManager.Core
                     return item;
                 }
 
-                // changed logic to invoke the factory only once in case of retries
-                if (newItem == null)
+                lock (_tryAddLock)
                 {
-                    newItem = valueFactory(key, region);
-                }
+                    // changed logic to invoke the factory only once in case of retries
+                    if (newItem == null)
+                    {
+                        newItem = valueFactory(key, region);
+                    }
 
-                // Throw explicit to me more consistent. Otherwise it would throw later eventually...
-                if (newItem == null)
-                {
-                    throw new InvalidOperationException("The CacheItem which should be added must not be null.");
-                }
+                    // Throw explicit to me more consistent. Otherwise it would throw later eventually...
+                    if (newItem == null)
+                    {
+                        throw new InvalidOperationException("The CacheItem which should be added must not be null.");
+                    }
 
-                if (AddInternal(newItem))
-                {
-                    return newItem;
+                    if (AddInternal(newItem))
+                    {
+                        return newItem;
+                    }
                 }
             }
             while (tries <= Configuration.MaxRetries);
