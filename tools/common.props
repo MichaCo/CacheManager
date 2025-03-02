@@ -2,7 +2,7 @@
   <Import Project="version.props" />
 
   <PropertyGroup>
-    <Copyright>Copyright (c) 2024 Michael Conrad</Copyright>
+    <Copyright>Copyright (c) 2025 Michael Conrad</Copyright>
     <Authors>MichaConrad</Authors>    
     <Product>CacheManager.NET</Product>
     

@@ -17,7 +17,7 @@ namespace CacheManager.Tests
     /// removes an item from all handles defined.
     /// </summary>
     [ExcludeFromCodeCoverage]
-    public class CacheManagerSimpleTests
+    public class CacheManagerSimpleTests : IClassFixture<RedisTestFixture>
     {
         private static object runLock = new object();
 

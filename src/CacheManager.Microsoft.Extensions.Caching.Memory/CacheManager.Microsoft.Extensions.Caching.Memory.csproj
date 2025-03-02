@@ -12,9 +12,9 @@
     <ProjectReference Include="..\CacheManager.Core\CacheManager.Core.csproj" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
-    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="6.0.3" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' != 'netstandard2.0' ">
-    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="8.0.1" />
   </ItemGroup>
 </Project>

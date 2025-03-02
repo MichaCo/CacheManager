@@ -27,4 +27,8 @@
     <ProjectReference Include="..\..\src\CacheManager.SystemRuntimeCaching\CacheManager.SystemRuntimeCaching.csproj" />
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Garnet" Version="1.0.57" />
+  </ItemGroup>
 </Project>

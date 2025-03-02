@@ -10,7 +10,7 @@ using Xunit;
 namespace CacheManager.Tests
 {
     [ExcludeFromCodeCoverage]
-    public class ThreadRandomReadWriteTestBase
+    public class ThreadRandomReadWriteTestBase : IClassFixture<RedisTestFixture>
     {
         [Theory]
         [Trait("category", "Unreliable")]

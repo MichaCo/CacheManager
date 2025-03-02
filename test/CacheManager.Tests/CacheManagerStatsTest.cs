@@ -11,7 +11,7 @@ using Xunit;
 namespace CacheManager.Tests
 {
     [ExcludeFromCodeCoverage]
-    public class CacheManagerStatsTest
+    public class CacheManagerStatsTest : IClassFixture<RedisTestFixture>
     {
         [Theory]
         [ClassData(typeof(TestCacheManagers))]

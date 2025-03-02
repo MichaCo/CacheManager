@@ -7,7 +7,6 @@
     using System.Threading.Tasks;
     using CacheManager.Core;
     using CacheManager.Core.Internal;
-    
     using CacheManager.Core.Utility;
     using FluentAssertions;
     using Microsoft.Extensions.Logging;
@@ -17,7 +16,7 @@
     using static TestHelper;
 
     [ExcludeFromCodeCoverage]
-    public class CacheManagerEventsTest
+    public class CacheManagerEventsTest : IClassFixture<RedisTestFixture>
     {
         private readonly ITestOutputHelper _testOutputHelper;
 
@@ -369,10 +368,11 @@
             }
         }
 
+#if NET8_0_OR_GREATER
         // exclusive inner class for parallel exec of this long running test
-        public class RedisSpecific : LongRunningEventTestBase
+        public class RedisSpecific : LongRunningEventTestBase, IClassFixture<RedisTestFixture>
         {
-            [Fact]
+            [Fact(Skip = "Garnet currently does not support keyspace notifications - cannot test...")]
             [Trait("category", "Redis")]
             [Trait("category", "Unreliable")]
             public async Task Events_Redis_ExpireTriggers()
@@ -394,7 +394,7 @@
                 result.Region.Should().Be(useRegion);
             }
 
-            [Fact]
+            [Fact(Skip = "Garnet currently does not support keyspace notifications - cannot test...")]
             [Trait("category", "Redis")]
             [Trait("category", "Unreliable")]
             public async Task Events_Redis_ExpireEvictsAbove()
@@ -418,6 +418,7 @@
                 result.Region.Should().BeNull();
             }
         }
+#endif
 
         [Theory]
         [ClassData(typeof(TestCacheManagers))]
@@ -533,7 +534,7 @@
             }
         }
 
-        [Fact]
+        [Fact(Skip = "Garnet currently does not support keyspace notifications - cannot test...")]
         [Trait("category", "Redis")]
         [Trait("category", "Unreliable")]
         public async Task Events_OnRemoveExternal_Redis_UpHandling()
@@ -588,7 +589,7 @@
             cache.CacheHandles.First().Get(key).Should().BeNull();
         }
 
-        [Fact]
+        [Fact(Skip = "Garnet currently does not support keyspace notifications - cannot test...")]
         [Trait("category", "Redis")]
         [Trait("category", "Unreliable")]
         public async Task Events_OnRemoveExternal_Redis_NoneHandling()
@@ -610,7 +611,7 @@
             var cache = new BaseCacheManager<int?>(config);
 
             await RetryWithCondition(
-                5,
+                1,
                 async () =>
                 {
                     key = Guid.NewGuid().ToString();

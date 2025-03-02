@@ -18,7 +18,7 @@
       "maxRetries": 1000,
       "name": "cachename",
       "retryTimeout": 100,
-      "updateMode": "Full",
+      "updateMode": "Up",
       "backplane": {
         "key": "redisConnection",
         "knownType": "Redis",

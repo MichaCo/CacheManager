@@ -16,6 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Garnet" Version="1.0.57" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="7.3.1" />
   </ItemGroup>
 </Project>

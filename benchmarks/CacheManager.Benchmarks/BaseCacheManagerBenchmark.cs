@@ -10,11 +10,11 @@ namespace CacheManager.Benchmarks
     {
         private static ICacheManagerConfiguration BaseConfig
             => new CacheConfigurationBuilder()
-            .WithMaxRetries(10)
-            .WithRetryTimeout(500)
-            .WithJsonSerializer()
-            .WithUpdateMode(CacheUpdateMode.Up)
-            .Build();
+                .WithMaxRetries(10)
+                .WithRetryTimeout(500)
+                .WithJsonSerializer()
+                .WithUpdateMode(CacheUpdateMode.Up)
+                .Build();
 
 
         protected ICacheManager<string> DictionaryCache = new BaseCacheManager<string>(BaseConfig.Builder.WithDictionaryHandle().Build());
@@ -22,7 +22,7 @@ namespace CacheManager.Benchmarks
         protected ICacheManager<string> RuntimeCache = new BaseCacheManager<string>(BaseConfig.Builder.WithSystemRuntimeCacheHandle().Build());
 
         protected ICacheManager<string> RedisCache = new BaseCacheManager<string>(
-                BaseConfig
+            BaseConfig
                 .Builder
                 .WithRedisConfiguration("redisKey", "localhost:6379,allowAdmin=true")
                 .WithRedisCacheHandle("redisKey")

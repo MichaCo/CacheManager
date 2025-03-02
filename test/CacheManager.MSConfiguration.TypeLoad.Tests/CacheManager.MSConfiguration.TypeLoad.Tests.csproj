@@ -6,6 +6,7 @@
     <AssemblyName>CacheManager.MSConfiguration.TypeLoad.Tests</AssemblyName>
     <PackageId>CacheManager.MSConfiguration.TypeLoad.Tests</PackageId>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
+    <NoWarn>$(NoWarn);CA2021</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

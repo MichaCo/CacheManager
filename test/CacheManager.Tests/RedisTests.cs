@@ -1,4 +1,6 @@
-﻿using System;
+﻿#if NET8_0_OR_GREATER
+
+using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
@@ -17,7 +19,7 @@ namespace CacheManager.Tests
     /// To run the redis tests, make sure a local redis server instance is running. See redis folder under tools.
     /// </summary>
     [ExcludeFromCodeCoverage]
-    public class RedisTests
+    public class RedisTests : IClassFixture<RedisTestFixture>
     {
         private enum CacheEvent
         {
@@ -729,7 +731,7 @@ namespace CacheManager.Tests
             cfg.ConnectionString.ToLower().Should().Contain("127.0.0.1:6379");
             cfg.ConnectionString.ToLower().Should().Contain("allowadmin=true");
             cfg.ConnectionString.ToLower().Should().Contain("ssl=false");
-            cfg.Database.Should().Be(42);
+            cfg.Database.Should().Be(0);
             cfg.StrictCompatibilityModeVersion.Should().Be("2.9");
         }
 
@@ -914,7 +916,7 @@ namespace CacheManager.Tests
                         config
                             .WithConnectionTimeout(10)
                             .WithAllowAdmin()
-                            .WithDatabase(7)
+                            //.WithDatabase(7)
                             .WithEndpoint("doesnotexist", 6379)
                             .WithPassword("mysupersecret")
                             .WithSsl();
@@ -943,7 +945,7 @@ namespace CacheManager.Tests
                 settings.WithRedisConfiguration("default", config =>
                 {
                     config.WithAllowAdmin()
-                        .WithDatabase(7)
+                        //.WithDatabase(7)
                         .WithEndpoint("127.0.0.1", 6379);
                 });
             }))
@@ -1001,7 +1003,7 @@ namespace CacheManager.Tests
                 settings.WithRedisConfiguration("default", config =>
                 {
                     config.WithAllowAdmin()
-                        .WithDatabase(8)
+                        //.WithDatabase(8)
                         .WithEndpoint("127.0.0.1", 6379);
                 });
             }))
@@ -1173,7 +1175,7 @@ namespace CacheManager.Tests
             // assert
             handle.Should().NotBeNull();
             count.Should().NotThrow();
-            redisConfig.Database.Should().Be(44);
+            redisConfig.Database.Should().Be(0);
             redisConfig.AllowAdmin.Should().BeTrue();
             redisConfig.ConnectionTimeout.Should().Be(11);
         }
@@ -1249,7 +1251,7 @@ namespace CacheManager.Tests
                     .WithRedisConfiguration(redisKey, config =>
                     {
                         config
-                            .WithDatabase(66)
+                            //.WithDatabase(66)
                             .WithEndpoint("127.0.0.1", 6379);
                     })
                     .WithRedisCacheHandle(redisKey, true);
@@ -1519,3 +1521,5 @@ namespace CacheManager.Tests
         }
     }
 }
+
+#endif

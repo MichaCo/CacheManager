@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Runtime.Serialization.Json;
 using CacheManager.Core;
 using CacheManager.Core.Internal;
@@ -22,11 +20,9 @@ using Xunit;
 namespace CacheManager.Tests
 {
     [ExcludeFromCodeCoverage]
-    public class SerializerTests
+    public class SerializerTests : IClassFixture<RedisTestFixture>
     {
-
-
-#if NET461
+#if NET481_OR_GREATER
 
         // Bug #327
         [Theory]
@@ -36,19 +32,16 @@ namespace CacheManager.Tests
         [InlineData(typeof(IList<string>), "System.Collections.Generic.IList`1[[System.String, System.Private.CoreLib, Version=5.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]], System.Private.CoreLib, Version=5.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e")]
         [InlineData(typeof(Dictionary<string, System.IO.TextWriter>), "System.Collections.Generic.Dictionary`2[[System.String, System.Private.CoreLib, Version=5.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.IO.TextWriter, System.Private.CoreLib, Version=5.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]], System.Private.CoreLib, Version=5.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e")]
         [InlineData(typeof(Dictionary<DateTime, System.Text.UTF8Encoding>), "System.Collections.Generic.Dictionary`2[[System.DateTime, System.Private.CoreLib, Version=5.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.Text.UTF8Encoding, System.Private.CoreLib, Version=5.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]], System.Private.CoreLib, Version=5.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e")]
-        // There are still types which will not work, like  HashSet, which cannot load without an assembly and is actually in "System.Core" in previous .NET versions...
-        // So this "fix" will only work for some common types...
-        //[InlineData(typeof(HashSet<List<ICollection<string>>>), "System.Collections.Generic.HashSet`1[[System.Collections.Generic.List`1[[System.Collections.Generic.ICollection`1[[System.String, System.Private.CoreLib, Version=5.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]], System.Private.CoreLib, Version=5.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]], System.Private.CoreLib, Version=5.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]], System.Private.CoreLib, Version=5.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e")]
         public void TypeCache_LoadBadAssembly(Type type, string typeString)
         {
             var result = TypeCache.GetType(typeString);
 
-
             Assert.Equal(type, result);
         }
+
 #endif
 
-#if NET5_0
+#if NET8_0_OR_GREATER
         [Theory]
         [InlineData(typeof(string), "System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
         [InlineData(typeof(int), "System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
@@ -250,9 +243,9 @@ namespace CacheManager.Tests
             result.Should().BeEquivalentTo(items);
         }
 
-#endregion newtonsoft json serializer
+        #endregion newtonsoft json serializer
 
-#region newtonsoft json with GZ serializer
+        #region newtonsoft json with GZ serializer
 
         [Fact]
         public void GzJsonSerializer_RespectJsonSerializerSettings()
@@ -437,9 +430,9 @@ namespace CacheManager.Tests
             result.Should().BeEquivalentTo(items);
         }
 
-#endregion newtonsoft json with GZ serializer
+        #endregion newtonsoft json with GZ serializer
 
-#region data contract serializer common
+        #region data contract serializer common
 
         [Fact]
         public void DataContractSerializer_RespectSerializerSettings()
@@ -526,9 +519,9 @@ namespace CacheManager.Tests
             cache.Configuration.SerializerTypeArguments.Length.Should().Be(1);
         }
 
-#endregion data contract serializer common
+        #endregion data contract serializer common
 
-#region data contract serializer
+        #region data contract serializer
 
         [Theory]
         [InlineData(true)]
@@ -651,15 +644,17 @@ namespace CacheManager.Tests
             result.Should().BeEquivalentTo(items);
         }
 
+#if NET8_0_OR_GREATER
         [Fact]
         public void DataContractSerializer_FullAddGet()
         {
             FullAddGetWithSerializer(Serializer.DataContract);
         }
+#endif
 
-#endregion data contract serializer
+        #endregion data contract serializer
 
-#region data contract serializer binary
+        #region data contract serializer binary
 
         [Theory]
         [InlineData(true)]
@@ -782,15 +777,17 @@ namespace CacheManager.Tests
             result.Should().BeEquivalentTo(items);
         }
 
+#if NET8_0_OR_GREATER
         [Fact]
         public void DataContractBinarySerializer_FullAddGet()
         {
             FullAddGetWithSerializer(Serializer.DataContractBinary);
         }
+#endif
 
-#endregion data contract serializer binary
+        #endregion data contract serializer binary
 
-#region data contract serializer json
+        #region data contract serializer json
 
         [Theory]
         [InlineData(true)]
@@ -928,15 +925,17 @@ namespace CacheManager.Tests
             result.Should().BeEquivalentTo(items);
         }
 
+#if NET8_0_OR_GREATER
         [Fact]
         public void DataContractJsonSerializer_FullAddGet()
         {
             FullAddGetWithSerializer(Serializer.DataContractJson);
         }
+#endif
 
-#endregion data contract serializer json
+        #endregion data contract serializer json
 
-#region data contract serializer gz json
+        #region data contract serializer gz json
 
         [Theory]
         [InlineData(true)]
@@ -1074,15 +1073,17 @@ namespace CacheManager.Tests
             result.Should().BeEquivalentTo(items);
         }
 
+#if NET8_0_OR_GREATER
         [Fact]
         public void DataContractGzJsonSerializer_FullAddGet()
         {
             FullAddGetWithSerializer(Serializer.DataContractGzJson);
         }
+#endif
 
-#endregion data contract serializer gz json
+        #endregion data contract serializer gz json
 
-#region protobuf serializer
+        #region protobuf serializer
 
         [Theory]
         [InlineData(true)]
@@ -1236,6 +1237,7 @@ namespace CacheManager.Tests
             result.Should().BeEquivalentTo(items);
         }
 
+#if NET8_0_OR_GREATER
         [Fact]
         public void ProtoBufSerializer_FullAddGet()
         {
@@ -1256,10 +1258,11 @@ namespace CacheManager.Tests
                 cache.Get<SerializerPoccoSerializable>(key).Should().BeEquivalentTo(pocco);
             }
         }
+#endif
 
-#endregion protobuf serializer
+        #endregion protobuf serializer
 
-#region Bond binary serializer
+        #region Bond binary serializer
 
         [Theory]
         [InlineData(true)]
@@ -1396,6 +1399,7 @@ namespace CacheManager.Tests
             pocco.Should().BeEquivalentTo(item.Value);
         }
 
+#if NET8_0_OR_GREATER
         [Fact]
         [Trait("category", "Redis")]
         public void BondBinarySerializer_FullAddGet()
@@ -1417,8 +1421,9 @@ namespace CacheManager.Tests
                 cache.Get<SerializerPoccoSerializable>(key).Should().BeEquivalentTo(pocco);
             }
         }
+#endif
 
-#endregion Bond binary serializer
+        #endregion Bond binary serializer
 
         [Theory]
         [ClassData(typeof(TestCacheManagers))]
@@ -1440,6 +1445,7 @@ namespace CacheManager.Tests
             }
         }
 
+#if NET8_0_OR_GREATER
         private void FullAddGetWithSerializer(Serializer serializer)
         {
             using (var cache = TestManagers.CreateRedisCache(serializer: serializer))
@@ -1459,6 +1465,7 @@ namespace CacheManager.Tests
                 cache.Get<SerializerPoccoSerializable>(key).Should().BeEquivalentTo(pocco);
             }
         }
+#endif
 
         private static class DataGenerator
         {

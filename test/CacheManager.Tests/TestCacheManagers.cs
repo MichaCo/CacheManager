@@ -21,7 +21,7 @@ namespace CacheManager.Tests
 #endif
             yield return new object[] { TestManagers.WithManyDictionaryHandles };
             yield return new object[] { TestManagers.WithOneDicCacheHandle };
-#if REDISENABLED
+#if NET8_0_OR_GREATER
 
             yield return new object[] { TestManagers.WithRedisCacheDataContract };
             yield return new object[] { TestManagers.WithRedisCacheDataContractBinary };
@@ -92,6 +92,7 @@ namespace CacheManager.Tests
                             .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1000))
                     .Build());
 
+#if NET8_0_OR_GREATER
         public static ICacheManager<object> WithRedisCacheBondBinary
         {
             get
@@ -245,6 +246,7 @@ namespace CacheManager.Tests
                 return CreateRedisAndDicCacheWithBackplane(database: _databaseCount, sharedRedisConfig: false, channelName: Guid.NewGuid().ToString(), useLua: false);
             }
         }
+#endif
 
 #if !MSBUILD
 
@@ -291,6 +293,7 @@ namespace CacheManager.Tests
                             .EnableStatistics()
                 .Build());
 
+#if NET8_0_OR_GREATER
         public static ICacheManager<object> CreateRedisAndDicCacheWithBackplane(int database = 0, bool sharedRedisConfig = true, string channelName = null, Serializer serializer = Serializer.Proto, bool useLua = true)
         {
             if (database > NumDatabases)
@@ -313,7 +316,7 @@ namespace CacheManager.Tests
                     {
                         config
                             .WithAllowAdmin()
-                            .WithDatabase(database)
+                            //.WithDatabase(database)
                             .WithEndpoint(RedisHost, RedisPort);
 
                         if (!useLua)
@@ -391,7 +394,7 @@ namespace CacheManager.Tests
                     .WithRedisConfiguration(redisKey, config =>
                     {
                         config
-                            .WithDatabase(database)
+                            //.WithDatabase(database)
                             .WithEndpoint(RedisHost, RedisPort);
 
                         if (!useLua)
@@ -423,7 +426,7 @@ namespace CacheManager.Tests
                     .WithRedisConfiguration(redisKey, config =>
                     {
                         config
-                            .WithDatabase(database)
+                            //.WithDatabase(database)
                             .WithEndpoint(RedisHost, RedisPort);
                     })
                     .WithRedisBackplane(redisKey)
@@ -433,6 +436,7 @@ namespace CacheManager.Tests
 
             return cache;
         }
+#endif
 
         private static string NewKey() => Guid.NewGuid().ToString();
     }

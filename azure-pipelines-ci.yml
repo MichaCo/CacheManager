@@ -1,0 +1,74 @@
+name: '$(Date:yyyyMMdd)$(Rev:.r)'
+
+trigger:
+- dev
+- master
+
+pr:
+  autoCancel: false
+  branches:
+    include:
+    - '*'
+
+# pool:
+#   vmImage: 'windows-latest'
+
+variables:
+  buildPlatform: 'Any CPU'
+  buildConfiguration: 'Release'
+  ${{ if not(eq(variables['Build.SourceBranch'], 'refs/heads/master')) }}:
+    versionSuffix: 'beta-$(Build.BuildNumber)'
+  ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/master') }}:
+    versionSuffix: ''
+
+jobs:
+- job: 'Linux'
+  displayName: 'Build on Ubuntu'
+  pool: 
+    vmImage: 'ubuntu-latest'
+  steps:
+  - task: DotNetCoreCLI@2
+    inputs:
+      command: 'build'
+      projects: |
+        DnsClientDotNet.sln
+      arguments: '-c Release'
+    name: 'Build'
+    displayName: 'dotnet build'
+  - task: DotNetCoreCLI@2
+    displayName: "dotnet test"
+    inputs:
+      command: 'test'
+      projects: 'test/**/*.csproj'
+      publishTestResults: true      
+      arguments: '-c Release --no-build --no-restore -f net8.0'
+
+- job: Windows
+  displayName: 'Build & Test on Windows'
+  pool:
+    vmImage: 'windows-latest'
+
+  steps:
+  - task: DotNetCoreCLI@2
+    displayName: 'dotnet build'
+    inputs:
+      command: 'build'
+      projects: |
+        DnsClientDotNet.sln
+      arguments: '-c Release'
+    name: 'Build'    
+  - task: DotNetCoreCLI@2
+    displayName: "dotnet test"
+    inputs:
+      command: 'test'
+      projects: 'test/**/*.csproj'
+      publishTestResults: true      
+      arguments: '-c Release --no-build --no-restore --collect "Code coverage" --settings:.runsettings'
+  - script: 'dotnet pack src\DnsClient\DnsClient.csproj -c Release --no-build --no-restore --version-suffix "$(versionSuffix)" -v normal -o $(Build.ArtifactStagingDirectory)'
+    name: 'PackBeta'
+    displayName: 'dotnet pack'
+  - task: PublishBuildArtifacts@1
+    displayName: 'publish'
+    inputs:
+      pathtoPublish: '$(Build.ArtifactStagingDirectory)' 
+      artifactName: 'beta'

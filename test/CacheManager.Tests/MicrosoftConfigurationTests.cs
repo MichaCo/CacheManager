@@ -11,7 +11,7 @@ using Xunit;
 namespace CacheManager.Tests
 {
     [ExcludeFromCodeCoverage]
-    public class MicrosoftConfigurationTests
+    public class MicrosoftConfigurationTests : IClassFixture<RedisTestFixture>
     {
         [Fact]
         public void Configuration_CacheManager_ComplexSingleManager()
@@ -582,7 +582,7 @@ namespace CacheManager.Tests
             act.Should().Throw<InvalidOperationException>().WithMessage("*The key property is required*");
         }
 
-#if REDISENABLED
+#if NET8_0_OR_GREATER
 
         [Fact]
         [Trait("category", "Redis")]

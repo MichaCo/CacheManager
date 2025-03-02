@@ -9,9 +9,9 @@
     using Xunit;
 
     [ExcludeFromCodeCoverage]
-    public class CacheManagerExpirationTest
+    public class CacheManagerExpirationTest : IClassFixture<RedisTestFixture>
     {
-        public class AllCaches
+        public class AllCaches : IClassFixture<RedisTestFixture>
         {
             [Trait("category", "Unreliable")]
             [Theory]
@@ -174,8 +174,8 @@
                 }
             }
         }
-
-        public class Redis
+#if NET8_0_OR_GREATER
+        public class Redis : IClassFixture<RedisTestFixture>
         {
             [Fact]
             [Trait("category", "Redis")]
@@ -278,6 +278,7 @@
                 }
             }
         }
+#endif
 
         public class ExpireTests
         {
@@ -519,7 +520,7 @@
             }
         }
 
-        public class RemoveExpiration
+        public class RemoveExpiration : IClassFixture<RedisTestFixture>
         {
             // Issue #9 - item still expires
             [Theory]
@@ -621,7 +622,7 @@
             }
         }
 
-        public class RemoveExpirationExplicit
+        public class RemoveExpirationExplicit : IClassFixture<RedisTestFixture>
         {
             [Theory]
             [ClassData(typeof(TestCacheManagers))]
@@ -686,7 +687,7 @@
             }
         }
 
-        public class ValidateExpire
+        public class ValidateExpire : IClassFixture<RedisTestFixture>
         {
             [Theory]
             [ClassData(typeof(TestCacheManagers))]
@@ -812,6 +813,7 @@
             }
         }
 
+#if NET8_0_OR_GREATER
         /* General expiration tests */
 
         /// <summary>
@@ -834,6 +836,7 @@
                 act.Should().Throw<ArgumentException>().WithMessage("*not supported*");
             }
         }
+#endif
 
         // Related to #136
         [Fact]
