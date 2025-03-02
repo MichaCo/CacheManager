@@ -311,7 +311,7 @@ namespace CacheManager.Core.Internal
                     return;
                 }
 
-                baseType = type.BaseType;
+                baseType = baseType.BaseType;
             }
 
             throw new InvalidOperationException(
