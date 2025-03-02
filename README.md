@@ -15,7 +15,7 @@ Master | [![Build Status](https://dev.azure.com/michaco/CacheManager/_apis/build
 
 ## CacheManager Nuget Packages
 
-| Package Name | FullFramework | .NET Standard | net8.0
+| Package Name | FullFramework | .NET Standard | net8.0 |
 | -------------- | :-------: | :-------: | 
 | [CacheManager.Core][Core.nuget] | 4.7.2 | 2.0 | net8.0 |
 | [CacheManager.Microsoft.Extensions.Caching.Memory][MSCache.nuget]  | - | 2.0 | net8.0 |
