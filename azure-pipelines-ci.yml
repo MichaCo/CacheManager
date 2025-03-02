@@ -47,8 +47,13 @@ jobs:
     displayName: "dotnet pack"
     inputs:
       command: 'pack'
+      configuration: Release
       projects: 'CacheManager.sln'   
-      arguments: '-c Release --no-build --no-restore --version-suffix "$(versionSuffix)" -v normal -o $(Build.ArtifactStagingDirectory)'
+      packagesToPack: 'src/**/*.csproj'
+      nobuild: true
+      verbosityPack: normal
+      outputDir: $(Build.ArtifactStagingDirectory)'
+      arguments: 'CacheManager.sln --version-suffix "$(versionSuffix)"'
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifacts'
     inputs:
