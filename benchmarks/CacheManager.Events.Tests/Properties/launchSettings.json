@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "CacheManager.Events.Tests": {
+      "commandName": "Project",
+      "commandLineArgs": "redisAndMemory -r 20 -j 10"
+    }
+  }
+}

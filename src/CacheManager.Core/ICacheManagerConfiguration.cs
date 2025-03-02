@@ -15,11 +15,11 @@ namespace CacheManager.Core
         IList<CacheHandleConfiguration> CacheHandleConfigurations { get; }
 
         /// <summary>
-        /// Gets a <see cref="ConfigurationBuilder"/> for the current <see cref="CacheManagerConfiguration"/> instance
+        /// Gets a <see cref="CacheConfigurationBuilder"/> for the current <see cref="CacheManagerConfiguration"/> instance
         /// to manipulate the configuration fluently.
         /// </summary>
-        /// <returns>The <see cref="ConfigurationBuilder"/>.</returns>
-        ConfigurationBuilder Builder { get; }
+        /// <returns>The <see cref="CacheConfigurationBuilder"/>.</returns>
+        CacheConfigurationBuilder Builder { get; }
     }
 
     /// <summary>
@@ -92,6 +92,10 @@ namespace CacheManager.Core
         /// Gets the number of milliseconds the cache should wait before it will retry an action.
         /// <para>Default is 100.</para>
         /// </summary>
+        /// <remarks>
+        /// This does not have any effect in synchronous context.
+        /// Will be brought back if CacheManager has async overloads.
+        /// </remarks>
         /// <value>The retry timeout.</value>
         int RetryTimeout { get; }
 

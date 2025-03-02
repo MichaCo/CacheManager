@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
-using CacheManager.Core.Logging;
+using Microsoft.Extensions.Logging;
+
 
 namespace CacheManager.Core
 {

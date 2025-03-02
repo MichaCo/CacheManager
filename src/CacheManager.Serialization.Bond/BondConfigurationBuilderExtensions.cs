@@ -1,5 +1,5 @@
-﻿using CacheManager.Serialization.Bond;
-using static CacheManager.Core.Utility.Guard;
+﻿using System;
+using CacheManager.Serialization.Bond;
 
 namespace CacheManager.Core
 {
@@ -17,7 +17,10 @@ namespace CacheManager.Core
         /// <returns>The builder instance.</returns>
         public static ConfigurationBuilderCachePart WithBondCompactBinarySerializer(this ConfigurationBuilderCachePart part, int defaultWriteBufferSize = 1024)
         {
-            NotNull(part, nameof(part));
+            if (part is null)
+            {
+                throw new ArgumentNullException(nameof(part));
+            }
 
             return part.WithSerializer(typeof(BondCompactBinaryCacheSerializer), defaultWriteBufferSize);
         }
@@ -31,7 +34,10 @@ namespace CacheManager.Core
         /// <returns>The builder instance.</returns>
         public static ConfigurationBuilderCachePart WithBondFastBinarySerializer(this ConfigurationBuilderCachePart part, int defaultWriteBufferSize = 1024)
         {
-            NotNull(part, nameof(part));
+            if (part is null)
+            {
+                throw new ArgumentNullException(nameof(part));
+            }
 
             return part.WithSerializer(typeof(BondFastBinaryCacheSerializer), defaultWriteBufferSize);
         }
@@ -44,7 +50,10 @@ namespace CacheManager.Core
         /// <returns>The builder instance.</returns>
         public static ConfigurationBuilderCachePart WithBondSimpleJsonSerializer(this ConfigurationBuilderCachePart part)
         {
-            NotNull(part, nameof(part));
+            if (part is null)
+            {
+                throw new ArgumentNullException(nameof(part));
+            }
 
             return part.WithSerializer(typeof(BondSimpleJsonCacheSerializer));
         }

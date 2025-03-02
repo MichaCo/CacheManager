@@ -3,14 +3,15 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using CacheManager.Core;
 using CacheManager.Core.Internal;
-using CacheManager.Core.Logging;
+
 using FluentAssertions;
+using Microsoft.Extensions.Logging;
 using Xunit;
 
 namespace CacheManager.Tests
 {
     [ExcludeFromCodeCoverage]
-    public class CacheManagerAdvancedUpdateTests
+    public class CacheManagerAdvancedUpdateTests : IClassFixture<RedisTestFixture>
     {
         [Theory]
         [ClassData(typeof(TestCacheManagers))]
@@ -289,7 +290,7 @@ namespace CacheManager.Tests
         public MockCacheHandle(CacheManagerConfiguration managerConfiguration, CacheHandleConfiguration configuration, ILoggerFactory loggerFactory)
             : base(managerConfiguration, configuration)
         {
-            this.Logger = loggerFactory.CreateLogger(this);
+            this.Logger = loggerFactory.CreateLogger(this.GetType());
             this.AddCall = () => true;
             this.PutCall = () => { };
             this.RemoveCall = () => { };

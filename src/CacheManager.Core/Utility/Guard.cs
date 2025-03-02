@@ -8,7 +8,7 @@ namespace CacheManager.Core.Utility
     /// <summary>
     /// Utility class to do <c>null</c> and other checks.
     /// </summary>
-    public static class Guard
+    internal static class Guard
     {
         /// <summary>
         /// Validates that <paramref name="value"/> is not <c>null</c> and otherwise throws an exception.
@@ -134,7 +134,6 @@ namespace CacheManager.Core.Utility
         /// <exception cref="InvalidOperationException">Thrown if <paramref name="value"/> is <c>null</c>.</exception>
         [DebuggerStepThrough]
         public static T EnsureNotNull<T>([ValidatedNotNull]T value, string message, params object[] args)
-            where T : class
         {
             if (value == null)
             {

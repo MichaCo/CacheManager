@@ -3,17 +3,16 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Runtime.Serialization.Json;
 using CacheManager.Core;
 using CacheManager.Core.Internal;
-using CacheManager.Core.Logging;
+
 using CacheManager.Serialization.Bond;
 using CacheManager.Serialization.DataContract;
 using CacheManager.Serialization.Json;
 using CacheManager.Serialization.ProtoBuf;
 using FluentAssertions;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using ProtoBuf;
 using Xunit;
@@ -21,148 +20,43 @@ using Xunit;
 namespace CacheManager.Tests
 {
     [ExcludeFromCodeCoverage]
-    public class SerializerTests
+    public class SerializerTests : IClassFixture<RedisTestFixture>
     {
-        #region binary serializer
+#if NET481_OR_GREATER
 
-#if !NETCOREAPP2
-
-        [Fact]
-        public void BinarySerializer_RespectBinarySerializerSettings()
-        {
-            var serializationSettings = new BinaryFormatter()
-            {
-                AssemblyFormat = FormatterAssemblyStyle.Simple,
-                FilterLevel = TypeFilterLevel.Low,
-                TypeFormat = FormatterTypeStyle.TypesWhenNeeded
-            };
-
-            var deserializationSettings = new BinaryFormatter()
-            {
-                AssemblyFormat = FormatterAssemblyStyle.Full,
-                FilterLevel = TypeFilterLevel.Full,
-                TypeFormat = FormatterTypeStyle.TypesAlways
-            };
-
-            var cache = CacheFactory.Build<string>(
-                p => p
-                    .WithBinarySerializer(serializationSettings, deserializationSettings)
-                    .WithHandle(typeof(SerializerTestCacheHandle)));
-
-            var handle = cache.CacheHandles.ElementAt(0) as SerializerTestCacheHandle;
-            var serializer = handle.Serializer as BinaryCacheSerializer;
-
-            serializer.SerializationFormatter.AssemblyFormat.Should().Be(FormatterAssemblyStyle.Simple);
-            serializer.SerializationFormatter.FilterLevel.Should().Be(TypeFilterLevel.Low);
-            serializer.SerializationFormatter.TypeFormat.Should().Be(FormatterTypeStyle.TypesWhenNeeded);
-            serializer.DeserializationFormatter.AssemblyFormat.Should().Be(FormatterAssemblyStyle.Full);
-            serializer.DeserializationFormatter.FilterLevel.Should().Be(TypeFilterLevel.Full);
-            serializer.DeserializationFormatter.TypeFormat.Should().Be(FormatterTypeStyle.TypesAlways);
-
-            cache.Configuration.SerializerTypeArguments.Length.Should().Be(2);
-        }
-
+        // Bug #327
         [Theory]
-        [InlineData(true)]
-        [InlineData(float.MaxValue)]
-        [InlineData(int.MaxValue)]
-        [InlineData(long.MaxValue)]
-        [InlineData("some string")]
-        [ReplaceCulture]
-        public void BinarySerializer_Primitives<T>(T value)
+        [InlineData(typeof(string), "System.String, System.Private.CoreLib, Version=5.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e")]
+        [InlineData(typeof(int), "System.Int32, System.Private.CoreLib, Version=5.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e")]
+        [InlineData(typeof(Guid), "System.Guid, System.Private.CoreLib, Version=5.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e")]
+        [InlineData(typeof(IList<string>), "System.Collections.Generic.IList`1[[System.String, System.Private.CoreLib, Version=5.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]], System.Private.CoreLib, Version=5.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e")]
+        [InlineData(typeof(Dictionary<string, System.IO.TextWriter>), "System.Collections.Generic.Dictionary`2[[System.String, System.Private.CoreLib, Version=5.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.IO.TextWriter, System.Private.CoreLib, Version=5.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]], System.Private.CoreLib, Version=5.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e")]
+        [InlineData(typeof(Dictionary<DateTime, System.Text.UTF8Encoding>), "System.Collections.Generic.Dictionary`2[[System.DateTime, System.Private.CoreLib, Version=5.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.Text.UTF8Encoding, System.Private.CoreLib, Version=5.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]], System.Private.CoreLib, Version=5.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e")]
+        public void TypeCache_LoadBadAssembly(Type type, string typeString)
         {
-            // arrange
-            var serializer = new BinaryCacheSerializer();
+            var result = TypeCache.GetType(typeString);
 
-            // act
-            var data = serializer.Serialize(value);
-            var result = serializer.Deserialize(data, typeof(T));
-
-            result.Should().Be(value);
-        }
-
-        [Fact]
-        public void BinarySerializer_Pocco()
-        {
-            // arrange
-            var serializer = new BinaryCacheSerializer();
-            var item = SerializerPoccoSerializable.Create();
-
-            // act
-            var data = serializer.Serialize(item);
-            var result = serializer.Deserialize(data, item.GetType());
-
-            result.Should().BeEquivalentTo(item);
-        }
-
-        [Fact]
-        public void BinarySerializer_CacheItemWithPocco()
-        {
-            // arrange
-            var serializer = new BinaryCacheSerializer();
-            var pocco = SerializerPoccoSerializable.Create();
-            var item = new CacheItem<SerializerPoccoSerializable>("key", "region", pocco, ExpirationMode.Absolute, TimeSpan.FromDays(1));
-
-            // act
-            var data = serializer.SerializeCacheItem(item);
-            var result = serializer.DeserializeCacheItem<SerializerPoccoSerializable>(data, pocco.GetType());
-
-            result.Should().BeEquivalentTo(item);
-        }
-
-        [Fact]
-        public void BinarySerializer_ObjectCacheItemWithPocco()
-        {
-            // arrange
-            var serializer = new BinaryCacheSerializer();
-            var pocco = SerializerPoccoSerializable.Create();
-            var item = new CacheItem<object>("key", "region", pocco, ExpirationMode.Absolute, TimeSpan.FromDays(1));
-
-            // act
-            var data = serializer.SerializeCacheItem(item);
-            var result = serializer.DeserializeCacheItem<object>(data, pocco.GetType());
-
-            result.Should().BeEquivalentTo(item);
-        }
-
-        [Fact]
-        public void BinarySerializer_CacheItemWithDerivedPocco()
-        {
-            // arrange
-            var serializer = new BinaryCacheSerializer();
-            var pocco = DerivedPocco.CreateDerived();
-            var item = new CacheItem<SerializerPoccoSerializable>("key", "region", pocco, ExpirationMode.Absolute, TimeSpan.FromDays(1));
-
-            // act
-            var data = serializer.SerializeCacheItem(item);
-            var result = serializer.DeserializeCacheItem<SerializerPoccoSerializable>(data, pocco.GetType());
-
-            result.Should().BeEquivalentTo(item);
-            pocco.Should().BeEquivalentTo(item.Value);
-        }
-
-        [Fact]
-        public void BinarySerializer_List()
-        {
-            // arrange
-            var serializer = new BinaryCacheSerializer();
-            var items = new List<SerializerPoccoSerializable>()
-            {
-                SerializerPoccoSerializable.Create(),
-                SerializerPoccoSerializable.Create(),
-                SerializerPoccoSerializable.Create()
-            };
-
-            // act
-            var data = serializer.Serialize(items);
-            var result = serializer.Deserialize(data, items.GetType());
-
-            result.Should().BeEquivalentTo(items);
+            Assert.Equal(type, result);
         }
 
 #endif
 
-        #endregion binary serializer
+#if NET8_0_OR_GREATER
+        [Theory]
+        [InlineData(typeof(string), "System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
+        [InlineData(typeof(int), "System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
+        [InlineData(typeof(Guid), "System.Guid, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
+        [InlineData(typeof(IList<string>), "System.Collections.Generic.IList`1[[System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
+        [InlineData(typeof(Dictionary<string, System.IO.TextWriter>), "System.Collections.Generic.Dictionary`2[[System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089],[System.IO.TextWriter, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
+        [InlineData(typeof(HashSet<List<ICollection<string>>>), "System.Collections.Generic.HashSet`1[[System.Collections.Generic.List`1[[System.Collections.Generic.ICollection`1[[System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]], System.Core, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
+        [InlineData(typeof(Dictionary<DateTime, System.Text.UTF8Encoding>), "System.Collections.Generic.Dictionary`2[[System.DateTime, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089],[System.Text.UTF8Encoding, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
+        public void TypeCache_LoadBadAssembly(Type type, string typeString)
+        {
+            var result = TypeCache.GetType(typeString);
+
+            Assert.Equal(type, result);
+        }
+#endif
 
         #region newtonsoft json serializer
 
@@ -750,11 +644,13 @@ namespace CacheManager.Tests
             result.Should().BeEquivalentTo(items);
         }
 
+#if NET8_0_OR_GREATER
         [Fact]
         public void DataContractSerializer_FullAddGet()
         {
             FullAddGetWithSerializer(Serializer.DataContract);
         }
+#endif
 
         #endregion data contract serializer
 
@@ -881,11 +777,13 @@ namespace CacheManager.Tests
             result.Should().BeEquivalentTo(items);
         }
 
+#if NET8_0_OR_GREATER
         [Fact]
         public void DataContractBinarySerializer_FullAddGet()
         {
             FullAddGetWithSerializer(Serializer.DataContractBinary);
         }
+#endif
 
         #endregion data contract serializer binary
 
@@ -1027,11 +925,13 @@ namespace CacheManager.Tests
             result.Should().BeEquivalentTo(items);
         }
 
+#if NET8_0_OR_GREATER
         [Fact]
         public void DataContractJsonSerializer_FullAddGet()
         {
             FullAddGetWithSerializer(Serializer.DataContractJson);
         }
+#endif
 
         #endregion data contract serializer json
 
@@ -1173,11 +1073,13 @@ namespace CacheManager.Tests
             result.Should().BeEquivalentTo(items);
         }
 
+#if NET8_0_OR_GREATER
         [Fact]
         public void DataContractGzJsonSerializer_FullAddGet()
         {
             FullAddGetWithSerializer(Serializer.DataContractGzJson);
         }
+#endif
 
         #endregion data contract serializer gz json
 
@@ -1335,6 +1237,7 @@ namespace CacheManager.Tests
             result.Should().BeEquivalentTo(items);
         }
 
+#if NET8_0_OR_GREATER
         [Fact]
         public void ProtoBufSerializer_FullAddGet()
         {
@@ -1355,6 +1258,7 @@ namespace CacheManager.Tests
                 cache.Get<SerializerPoccoSerializable>(key).Should().BeEquivalentTo(pocco);
             }
         }
+#endif
 
         #endregion protobuf serializer
 
@@ -1495,6 +1399,7 @@ namespace CacheManager.Tests
             pocco.Should().BeEquivalentTo(item.Value);
         }
 
+#if NET8_0_OR_GREATER
         [Fact]
         [Trait("category", "Redis")]
         public void BondBinarySerializer_FullAddGet()
@@ -1516,6 +1421,7 @@ namespace CacheManager.Tests
                 cache.Get<SerializerPoccoSerializable>(key).Should().BeEquivalentTo(pocco);
             }
         }
+#endif
 
         #endregion Bond binary serializer
 
@@ -1539,6 +1445,7 @@ namespace CacheManager.Tests
             }
         }
 
+#if NET8_0_OR_GREATER
         private void FullAddGetWithSerializer(Serializer serializer)
         {
             using (var cache = TestManagers.CreateRedisCache(serializer: serializer))
@@ -1558,6 +1465,7 @@ namespace CacheManager.Tests
                 cache.Get<SerializerPoccoSerializable>(key).Should().BeEquivalentTo(pocco);
             }
         }
+#endif
 
         private static class DataGenerator
         {
@@ -1588,13 +1496,7 @@ namespace CacheManager.Tests
                 }
             }
 
-            protected override ILogger Logger
-            {
-                get
-                {
-                    throw new NotImplementedException();
-                }
-            }
+            protected override ILogger Logger { get; }
 
             public override void Clear()
             {

@@ -37,36 +37,6 @@ namespace CacheManager.MSConfiguration.TypeLoad.Tests
         }
 
         [Fact]
-        public void Configuration_CacheHandle_Memcached_NotReferenced()
-        {
-            var data = new Dictionary<string, string>
-            {
-                {"cacheManagers:0:name", "name"},
-                {"cacheManagers:0:handles:0:knownType", "Memcached"},
-                {"cacheManagers:0:handles:0:key", "key"}
-            };
-
-            var config = GetConfiguration(data);
-            Action action = () => config.GetCacheConfiguration("name");
-            action.Should().Throw<InvalidOperationException>().WithMessage("*'Memcached' could not be loaded*");
-        }
-
-        [Fact]
-        public void Configuration_CacheHandle_Couchbase_NotReferenced()
-        {
-            var data = new Dictionary<string, string>
-            {
-                {"cacheManagers:0:name", "name"},
-                {"cacheManagers:0:handles:0:knownType", "Couchbase"},
-                {"cacheManagers:0:handles:0:key", "key"}
-            };
-
-            var config = GetConfiguration(data);
-            Action action = () => config.GetCacheConfiguration("name");
-            action.Should().Throw<InvalidOperationException>().WithMessage("*'Couchbase' could not be loaded*");
-        }
-
-        [Fact]
         public void Configuration_CacheHandle_SystemRuntime_NotReferenced()
         {
             var data = new Dictionary<string, string>
@@ -79,21 +49,6 @@ namespace CacheManager.MSConfiguration.TypeLoad.Tests
             var config = GetConfiguration(data);
             Action action = () => config.GetCacheConfiguration("name");
             action.Should().Throw<InvalidOperationException>().WithMessage("*'SystemRuntime' could not be loaded*");
-        }
-
-        [Fact]
-        public void Configuration_CacheHandle_Web_NotReferenced()
-        {
-            var data = new Dictionary<string, string>
-            {
-                {"cacheManagers:0:name", "name"},
-                {"cacheManagers:0:handles:0:knownType", "SystemWeb"},
-                {"cacheManagers:0:handles:0:key", "key"}
-            };
-
-            var config = GetConfiguration(data);
-            Action action = () => config.GetCacheConfiguration("name");
-            action.Should().Throw<InvalidOperationException>().WithMessage("*'SystemWeb' could not be loaded*");
         }
 
         [Fact]
@@ -186,25 +141,9 @@ namespace CacheManager.MSConfiguration.TypeLoad.Tests
             action.Should().Throw<InvalidOperationException>().WithMessage("*serializer type 'BondSimpleJson' could not be loaded*");
         }
 
-#if NETCOREAPP
-        [Fact]
-        public void Configuration_Serializer_BinaryInvalidOnCore()
-        {
-            var data = new Dictionary<string, string>
-            {
-                {"cacheManagers:0:name", "name"},
-                {"cacheManagers:0:handles:0:knownType", "Dictionary"},
-                {"cacheManagers:0:serializer:knownType", "Binary"},
-            };
-
-            Action act = () => GetConfiguration(data).GetCacheConfiguration("name");
-            act.Should().Throw<PlatformNotSupportedException>().WithMessage("*BinaryCacheSerializer is not available*");
-        }
-#endif
-
         private static IConfigurationRoot GetConfiguration(IDictionary<string, string> data)
         {
-            var configurationBuilder = new Microsoft.Extensions.Configuration.ConfigurationBuilder();
+            var configurationBuilder = new ConfigurationBuilder();
             configurationBuilder.AddInMemoryCollection(data);
             return configurationBuilder.Build();
         }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Reflection;
+using Microsoft.Extensions.Logging;
 using static CacheManager.Core.Utility.Guard;
 
 namespace CacheManager.Core
@@ -24,7 +25,6 @@ namespace CacheManager.Core
         ///    settings
         ///        .WithUpdateMode(CacheUpdateMode.Up)
         ///        .WithDictionaryHandle()
-        ///            .EnablePerformanceCounters()
         ///            .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(10));
         /// });
         ///
@@ -37,6 +37,7 @@ namespace CacheManager.Core
         /// The configuration. Use the settings element to configure the cache manager instance, add
         /// cache handles and also to configure the cache handles in a fluent way.
         /// </param>
+        /// <param name="loggerFactory">Optional logger factory.</param>
         /// <returns>The cache manager instance with cache item type being <c>System.Object</c>.</returns>
         /// <seealso cref="ICacheManager{TCacheValue}"/>
         /// <exception cref="System.ArgumentNullException">
@@ -45,8 +46,8 @@ namespace CacheManager.Core
         /// <exception cref="System.InvalidOperationException">
         /// Thrown on certain configuration errors related to the cache handles.
         /// </exception>
-        public static ICacheManager<object> Build(string cacheName, Action<ConfigurationBuilderCachePart> settings) =>
-            Build<object>(cacheName, settings);
+        public static ICacheManager<object> Build(string cacheName, Action<ConfigurationBuilderCachePart> settings, ILoggerFactory loggerFactory = null) =>
+            Build<object>(cacheName, settings, loggerFactory);
 
         /// <summary>
         /// <para>Instantiates a cache manager using the inline configuration defined by <paramref name="settings"/>.</para>
@@ -62,7 +63,6 @@ namespace CacheManager.Core
         ///    settings
         ///        .WithUpdateMode(CacheUpdateMode.Up)
         ///        .WithDictionaryHandle()
-        ///            .EnablePerformanceCounters()
         ///            .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(10));
         /// });
         ///
@@ -74,6 +74,7 @@ namespace CacheManager.Core
         /// The configuration. Use the settings element to configure the cache manager instance, add
         /// cache handles and also to configure the cache handles in a fluent way.
         /// </param>
+        /// <param name="loggerFactory">Optional logger factory.</param>
         /// <returns>The cache manager instance.</returns>
         /// <seealso cref="ICacheManager{TCacheValue}"/>
         /// <exception cref="System.ArgumentNullException">
@@ -82,8 +83,8 @@ namespace CacheManager.Core
         /// <exception cref="System.InvalidOperationException">
         /// Thrown on certain configuration errors related to the cache handles.
         /// </exception>
-        public static ICacheManager<object> Build(Action<ConfigurationBuilderCachePart> settings) =>
-            Build<object>(Guid.NewGuid().ToString("N"), settings);
+        public static ICacheManager<object> Build(Action<ConfigurationBuilderCachePart> settings, ILoggerFactory loggerFactory = null) =>
+            Build<object>(Guid.NewGuid().ToString("N"), settings, loggerFactory);
 
         /// <summary>
         /// <para>Instantiates a cache manager using the inline configuration defined by <paramref name="settings"/>.</para>
@@ -98,7 +99,6 @@ namespace CacheManager.Core
         ///    settings
         ///        .WithUpdateMode(CacheUpdateMode.Up)
         ///        .WithDictionaryHandle()
-        ///            .EnablePerformanceCounters()
         ///            .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(10));
         /// });
         ///
@@ -111,6 +111,7 @@ namespace CacheManager.Core
         /// The configuration. Use the settings element to configure the cache manager instance, add
         /// cache handles and also to configure the cache handles in a fluent way.
         /// </param>
+        /// <param name="loggerFactory">Optional logger factory.</param>
         /// <typeparam name="TCacheValue">The type of the cache item value.</typeparam>
         /// <returns>The cache manager instance with cache item type being <c>TCacheValue</c>.</returns>
         /// <seealso cref="ICacheManager{TCacheValue}"/>
@@ -120,14 +121,17 @@ namespace CacheManager.Core
         /// <exception cref="System.InvalidOperationException">
         /// Thrown on certain configuration errors related to the cache handles.
         /// </exception>
-        public static ICacheManager<TCacheValue> Build<TCacheValue>(string cacheName, Action<ConfigurationBuilderCachePart> settings)
+        public static ICacheManager<TCacheValue> Build<TCacheValue>(
+            string cacheName, 
+            Action<ConfigurationBuilderCachePart> settings,
+            ILoggerFactory loggerFactory = null)
         {
             NotNull(settings, nameof(settings));
 
             var part = new ConfigurationBuilderCachePart();
             settings(part);
             part.Configuration.Name = cacheName;
-            return new BaseCacheManager<TCacheValue>(part.Configuration);
+            return new BaseCacheManager<TCacheValue>(part.Configuration, loggerFactory);
         }
 
         /// <summary>
@@ -143,7 +147,6 @@ namespace CacheManager.Core
         ///    settings
         ///        .WithUpdateMode(CacheUpdateMode.Up)
         ///        .WithDictionaryHandle()
-        ///            .EnablePerformanceCounters()
         ///            .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(10));
         /// });
         ///
@@ -155,6 +158,7 @@ namespace CacheManager.Core
         /// The configuration. Use the settings element to configure the cache manager instance, add
         /// cache handles and also to configure the cache handles in a fluent way.
         /// </param>
+        /// <param name="loggerFactory">Optional logger factory.</param>
         /// <typeparam name="TCacheValue">The type of the cache item value.</typeparam>
         /// <returns>The cache manager instance with cache item type being <c>TCacheValue</c>.</returns>
         /// <seealso cref="ICacheManager{TCacheValue}"/>
@@ -164,8 +168,8 @@ namespace CacheManager.Core
         /// <exception cref="System.InvalidOperationException">
         /// Thrown on certain configuration errors related to the cache handles.
         /// </exception>
-        public static ICacheManager<TCacheValue> Build<TCacheValue>(Action<ConfigurationBuilderCachePart> settings)
-            => Build<TCacheValue>(Guid.NewGuid().ToString("N"), settings);
+        public static ICacheManager<TCacheValue> Build<TCacheValue>(Action<ConfigurationBuilderCachePart> settings, ILoggerFactory loggerFactory = null)
+            => Build<TCacheValue>(Guid.NewGuid().ToString("N"), settings, loggerFactory);
 
         /// <summary>
         /// Instantiates a cache manager using the given type and the inline configuration defined by <paramref name="settings"/>.
@@ -181,7 +185,6 @@ namespace CacheManager.Core
         ///    settings
         ///        .WithUpdateMode(CacheUpdateMode.Up)
         ///        .WithDictionaryHandle()
-        ///            .EnablePerformanceCounters()
         ///            .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(10));
         /// });
         ///
@@ -194,6 +197,7 @@ namespace CacheManager.Core
         /// The configuration. Use the settings element to configure the cache manager instance, add
         /// cache handles and also to configure the cache handles in a fluent way.
         /// </param>
+        /// <param name="loggerFactory">Optional logger factory.</param>
         /// <returns>The cache manager instance.</returns>
         /// <exception cref="System.ArgumentNullException">
         /// Thrown if the <paramref name="cacheName"/> or <paramref name="settings"/> is null.
@@ -201,14 +205,14 @@ namespace CacheManager.Core
         /// <exception cref="System.InvalidOperationException">
         /// Thrown on certain configuration errors related to the cache handles.
         /// </exception>
-        public static object Build(Type cacheValueType, string cacheName, Action<ConfigurationBuilderCachePart> settings)
+        public static object Build(Type cacheValueType, string cacheName, Action<ConfigurationBuilderCachePart> settings, ILoggerFactory loggerFactory = null)
         {
             NotNull(cacheValueType, nameof(cacheValueType));
 
             var factoryType = typeof(CacheFactory).GetTypeInfo();
             var buildMethod = factoryType.GetDeclaredMethods("Build").First(p => p.IsGenericMethod);
             var genericMethod = buildMethod.MakeGenericMethod(cacheValueType);
-            return genericMethod.Invoke(null, new object[] { cacheName, settings });
+            return genericMethod.Invoke(null, new object[] { cacheName, settings, loggerFactory });
         }
 
         /// <summary>
@@ -225,7 +229,6 @@ namespace CacheManager.Core
         ///    settings
         ///        .WithUpdateMode(CacheUpdateMode.Up)
         ///        .WithDictionaryHandle()
-        ///            .EnablePerformanceCounters()
         ///            .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(10));
         /// });
         ///
@@ -237,6 +240,7 @@ namespace CacheManager.Core
         /// The configuration. Use the settings element to configure the cache manager instance, add
         /// cache handles and also to configure the cache handles in a fluent way.
         /// </param>
+        /// <param name="loggerFactory">Optional logger factory.</param>
         /// <returns>The cache manager instance.</returns>
         /// <exception cref="System.ArgumentNullException">
         /// Thrown if <paramref name="settings"/> is null.
@@ -244,8 +248,8 @@ namespace CacheManager.Core
         /// <exception cref="System.InvalidOperationException">
         /// Thrown on certain configuration errors related to the cache handles.
         /// </exception>
-        public static object Build(Type cacheValueType, Action<ConfigurationBuilderCachePart> settings)
-            => Build(cacheValueType, Guid.NewGuid().ToString("N"), settings);
+        public static object Build(Type cacheValueType, Action<ConfigurationBuilderCachePart> settings, ILoggerFactory loggerFactory = null)
+            => Build(cacheValueType, Guid.NewGuid().ToString("N"), settings, loggerFactory);
 
         /// <summary>
         /// <para>Instantiates a cache manager from app.config or web.config.</para>
@@ -267,6 +271,7 @@ namespace CacheManager.Core
         /// <param name="cacheName">
         /// The name of the cache, must also match with the configured cache name.
         /// </param>
+        /// <param name="loggerFactory">Optional logger factory.</param>
         /// <typeparam name="TCacheValue">The type of the cache item value.</typeparam>
         /// <returns>The cache manager instance.</returns>
         /// <seealso cref="ICacheManager{TCacheValue}"/>
@@ -278,11 +283,11 @@ namespace CacheManager.Core
         /// Thrown if no cacheManager section is defined or on certain configuration errors related
         /// to the cache handles.
         /// </exception>
-        public static ICacheManager<TCacheValue> FromConfiguration<TCacheValue>(string cacheName)
+        public static ICacheManager<TCacheValue> FromConfiguration<TCacheValue>(string cacheName, ILoggerFactory loggerFactory = null)
         {
-            var cfg = ConfigurationBuilder.LoadConfiguration(cacheName);
+            var cfg = CacheConfigurationBuilder.LoadConfiguration(cacheName);
 
-            return CacheFactory.FromConfiguration<TCacheValue>(cacheName, cfg);
+            return CacheFactory.FromConfiguration<TCacheValue>(cacheName, cfg, loggerFactory);
         }
 
         /// <summary>
@@ -298,6 +303,7 @@ namespace CacheManager.Core
         /// <param name="cacheName">
         /// The name of the cache, must also match with the configured cache name.
         /// </param>
+        /// <param name="loggerFactory">Optional logger factory.</param>
         /// <returns>The cache manager instance.</returns>
         /// <exception cref="System.ArgumentNullException">
         /// Thrown if the <paramref name="cacheValueType"/> or <paramref name="cacheName"/> is null or an empty.
@@ -307,11 +313,11 @@ namespace CacheManager.Core
         /// Thrown if no cacheManager section is defined or on certain configuration errors related
         /// to the cache handles.
         /// </exception>
-        public static object FromConfiguration(Type cacheValueType, string cacheName)
+        public static object FromConfiguration(Type cacheValueType, string cacheName, ILoggerFactory loggerFactory = null)
         {
-            var cfg = ConfigurationBuilder.LoadConfiguration(cacheName);
+            var cfg = CacheConfigurationBuilder.LoadConfiguration(cacheName);
 
-            return CacheFactory.FromConfiguration(cacheValueType, cacheName, cfg);
+            return CacheFactory.FromConfiguration(cacheValueType, cacheName, cfg, loggerFactory);
         }
 
         /// <summary>
@@ -335,6 +341,7 @@ namespace CacheManager.Core
         /// <param name="sectionName">
         /// The cache manager section name.
         /// </param>
+        /// <param name="loggerFactory">Optional logger factory.</param>
         /// <typeparam name="TCacheValue">The type of the cache item value.</typeparam>
         /// <returns>The cache manager instance.</returns>
         /// <seealso cref="ICacheManager{TCacheValue}"/>
@@ -346,11 +353,11 @@ namespace CacheManager.Core
         /// Thrown if no cacheManager section is defined or on certain configuration errors related
         /// to the cache handles.
         /// </exception>
-        public static ICacheManager<TCacheValue> FromConfiguration<TCacheValue>(string cacheName, string sectionName)
+        public static ICacheManager<TCacheValue> FromConfiguration<TCacheValue>(string cacheName, string sectionName, ILoggerFactory loggerFactory = null)
         {
-            var cfg = ConfigurationBuilder.LoadConfiguration(sectionName, cacheName);
+            var cfg = CacheConfigurationBuilder.LoadConfiguration(sectionName, cacheName);
 
-            return CacheFactory.FromConfiguration<TCacheValue>(cacheName, cfg);
+            return CacheFactory.FromConfiguration<TCacheValue>(cacheName, cfg, loggerFactory);
         }
 
         /// <summary>
@@ -367,6 +374,7 @@ namespace CacheManager.Core
         /// <param name="sectionName">
         /// The cache manager section name.
         /// </param>
+        /// <param name="loggerFactory">Optional logger factory.</param>
         /// <returns>The cache manager instance.</returns>
         /// <exception cref="System.ArgumentNullException">
         /// Thrown if the <paramref name="cacheValueType"/>, <paramref name="cacheName"/> or <paramref name="sectionName"/>
@@ -377,11 +385,11 @@ namespace CacheManager.Core
         /// Thrown if no cacheManager section is defined or on certain configuration errors related
         /// to the cache handles.
         /// </exception>
-        public static object FromConfiguration(Type cacheValueType, string cacheName, string sectionName)
+        public static object FromConfiguration(Type cacheValueType, string cacheName, string sectionName, ILoggerFactory loggerFactory = null)
         {
-            var cfg = ConfigurationBuilder.LoadConfiguration(sectionName, cacheName);
+            var cfg = CacheConfigurationBuilder.LoadConfiguration(sectionName, cacheName);
 
-            return CacheFactory.FromConfiguration(cacheValueType, cacheName, cfg);
+            return CacheFactory.FromConfiguration(cacheValueType, cacheName, cfg, loggerFactory);
         }
 
         /// <summary>
@@ -391,21 +399,25 @@ namespace CacheManager.Core
         /// <param name="configuration">
         /// The configured which will be used to configure the cache manager instance.
         /// </param>
+        /// <param name="loggerFactory">Optional logger factory.</param>
         /// <typeparam name="TCacheValue">The type of the cache item value.</typeparam>
         /// <returns>The cache manager instance.</returns>
-        /// <see cref="ConfigurationBuilder"/>
+        /// <see cref="CacheConfigurationBuilder"/>
         /// <exception cref="System.ArgumentNullException">
         /// Thrown if the <paramref name="configuration"/> is null.
         /// </exception>
         /// <exception cref="System.InvalidOperationException">
         /// Thrown on certain configuration errors related to the cache handles.
         /// </exception>
-        public static ICacheManager<TCacheValue> FromConfiguration<TCacheValue>(string cacheName, ICacheManagerConfiguration configuration)
+        public static ICacheManager<TCacheValue> FromConfiguration<TCacheValue>(
+            string cacheName, 
+            ICacheManagerConfiguration configuration,
+            ILoggerFactory loggerFactory = null)
         {
             NotNull(configuration, nameof(configuration));
             var cfg = (CacheManagerConfiguration)configuration;
             cfg.Name = cacheName;
-            return new BaseCacheManager<TCacheValue>(cfg);
+            return new BaseCacheManager<TCacheValue>(cfg, loggerFactory);
         }
 
         /// <summary>
@@ -420,7 +432,6 @@ namespace CacheManager.Core
         /// {
         ///     settings.WithUpdateMode(CacheUpdateMode.Up)
         ///         .WithDictionaryCacheHandle<object>>()
-        ///             .EnablePerformanceCounters()
         ///             .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(10));
         /// });
         ///
@@ -432,17 +443,20 @@ namespace CacheManager.Core
         /// <param name="configuration">
         /// The configured which will be used to configure the cache manager instance.
         /// </param>
+        /// <param name="loggerFactory">Optional logger factory.</param>
         /// <typeparam name="TCacheValue">The type of the cache item value.</typeparam>
         /// <returns>The cache manager instance.</returns>
-        /// <see cref="ConfigurationBuilder"/>
+        /// <see cref="CacheConfigurationBuilder"/>
         /// <exception cref="System.ArgumentNullException">
         /// Thrown if the <paramref name="configuration"/> is null.
         /// </exception>
         /// <exception cref="System.InvalidOperationException">
         /// Thrown on certain configuration errors related to the cache handles.
         /// </exception>
-        public static ICacheManager<TCacheValue> FromConfiguration<TCacheValue>(ICacheManagerConfiguration configuration)
-            => FromConfiguration<TCacheValue>(Guid.NewGuid().ToString("N"), configuration);
+        public static ICacheManager<TCacheValue> FromConfiguration<TCacheValue>(
+            ICacheManagerConfiguration configuration, 
+            ILoggerFactory loggerFactory = null)
+            => FromConfiguration<TCacheValue>(Guid.NewGuid().ToString("N"), configuration, loggerFactory);
 
         /// <summary>
         /// Instantiates a cache manager using the given <paramref name="cacheValueType"/> and <paramref name="configuration"/>.
@@ -454,15 +468,20 @@ namespace CacheManager.Core
         /// <param name="configuration">
         /// The configured which will be used to configure the cache manager instance.
         /// </param>
+        /// <param name="loggerFactory">Optional logger factory.</param>
         /// <returns>The cache manager instance.</returns>
-        /// <see cref="ConfigurationBuilder"/>
+        /// <see cref="CacheConfigurationBuilder"/>
         /// <exception cref="System.ArgumentNullException">
         /// Thrown if the <c>cacheValueType</c>, <c>cacheName</c> or <c>configuration</c> is null.
         /// </exception>
         /// <exception cref="System.InvalidOperationException">
         /// Thrown on certain configuration errors related to the cache handles.
         /// </exception>
-        public static object FromConfiguration(Type cacheValueType, string cacheName, ICacheManagerConfiguration configuration)
+        public static object FromConfiguration(
+            Type cacheValueType, 
+            string cacheName, 
+            ICacheManagerConfiguration configuration, 
+            ILoggerFactory loggerFactory = null)
         {
             NotNull(cacheValueType, nameof(cacheValueType));
             NotNull(configuration, nameof(configuration));
@@ -471,7 +490,7 @@ namespace CacheManager.Core
             cfg.Name = cacheName;
 
             var type = typeof(BaseCacheManager<>).MakeGenericType(new[] { cacheValueType });
-            return Activator.CreateInstance(type, new object[] { cfg });
+            return Activator.CreateInstance(type, new object[] { cfg, loggerFactory });
         }
 
         /// <summary>
@@ -483,15 +502,19 @@ namespace CacheManager.Core
         /// <param name="configuration">
         /// The configured which will be used to configure the cache manager instance.
         /// </param>
+        /// <param name="loggerFactory">Optional logger factory.</param>
         /// <returns>The cache manager instance.</returns>
-        /// <see cref="ConfigurationBuilder"/>
+        /// <see cref="CacheConfigurationBuilder"/>
         /// <exception cref="System.ArgumentNullException">
         /// Thrown if the <paramref name="cacheValueType"/> or <paramref name="configuration"/> are null.
         /// </exception>
         /// <exception cref="System.InvalidOperationException">
         /// Thrown on certain configuration errors related to the cache handles.
         /// </exception>
-        public static object FromConfiguration(Type cacheValueType, ICacheManagerConfiguration configuration)
-            => FromConfiguration(cacheValueType, Guid.NewGuid().ToString("N"), configuration);
+        public static object FromConfiguration(
+            Type cacheValueType, 
+            ICacheManagerConfiguration configuration, 
+            ILoggerFactory loggerFactory = null)
+            => FromConfiguration(cacheValueType, Guid.NewGuid().ToString("N"), configuration, loggerFactory);
     }
 }

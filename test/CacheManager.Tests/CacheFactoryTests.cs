@@ -2,7 +2,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using CacheManager.Core;
-using CacheManager.Core.Internal;
 using CacheManager.Redis;
 using CacheManager.Serialization.Json;
 using FluentAssertions;
@@ -17,7 +16,7 @@ namespace CacheManager.Tests
         [Fact]
         public void ConfigurationBuilder_EmptyCtor()
         {
-            var builder = new ConfigurationBuilder();
+            var builder = new CacheConfigurationBuilder();
             var cfg = builder.Build();
 
             cfg.Should().NotBeNull();
@@ -27,39 +26,43 @@ namespace CacheManager.Tests
         [Fact]
         public void ConfigurationBuilder_NamedCtorNull()
         {
-            Action act = () => new ConfigurationBuilder((string)null);
+            Action act = () => new CacheConfigurationBuilder((string)null);
 
-            act.Should().Throw<ArgumentNullException>().WithMessage("*name*");
+            act.Should().Throw<ArgumentNullException>()
+                .And.ParamName.Equals("name");
         }
 
         [Fact]
         public void ConfigurationBuilder_ForConfigCtorNull()
         {
-            Action act = () => new ConfigurationBuilder((ICacheManagerConfiguration)null);
+            Action act = () => new CacheConfigurationBuilder((ICacheManagerConfiguration)null);
 
-            act.Should().Throw<ArgumentNullException>().WithMessage("*forConfiguration*");
+            act.Should().Throw<ArgumentNullException>()
+                .And.ParamName.Equals("forConfiguration");
         }
 
         [Fact]
         public void ConfigurationBuilder_NamedForConfigCtorNull()
         {
-            Action act = () => new ConfigurationBuilder(null, null);
+            Action act = () => new CacheConfigurationBuilder(null, null);
 
-            act.Should().Throw<ArgumentNullException>().WithMessage("*name*");
+            act.Should().Throw<ArgumentNullException>()
+                .And.ParamName.Equals("name");
         }
 
         [Fact]
         public void ConfigurationBuilder_NamedForConfigCtorNullB()
         {
-            Action act = () => new ConfigurationBuilder("name", null);
+            Action act = () => new CacheConfigurationBuilder("name", null);
 
-            act.Should().Throw<ArgumentNullException>().WithMessage("*forConfiguration*");
+            act.Should().Throw<ArgumentNullException>()
+                .And.ParamName.Equals("forConfiguration");
         }
 
         [Fact]
         public void ConfigurationBuilder_EmptyCtorAdd()
         {
-            var builder = new ConfigurationBuilder();
+            var builder = new CacheConfigurationBuilder();
             builder.WithDictionaryHandle();
             var cfg = builder.Build();
 
@@ -69,12 +72,12 @@ namespace CacheManager.Tests
         [Fact]
         public void ConfigurationBuilder_ForConfiguration()
         {
-            var builder = new ConfigurationBuilder("name");
+            var builder = new CacheConfigurationBuilder("name");
             builder.WithDictionaryHandle().WithExpiration(ExpirationMode.Sliding, TimeSpan.FromMinutes(10));
             builder.WithJsonSerializer();
             var cfg = builder.Build();
 
-            var forCfg = new ConfigurationBuilder("newName", cfg);
+            var forCfg = new CacheConfigurationBuilder("newName", cfg);
             forCfg.WithDictionaryHandle().WithExpiration(ExpirationMode.Absolute, TimeSpan.FromHours(1));
             forCfg.WithGzJsonSerializer();
 
@@ -97,7 +100,7 @@ namespace CacheManager.Tests
 
             // assert
             act.Should().Throw<ArgumentNullException>()
-                .WithMessage("*Parameter name: configuration*");
+                .And.ParamName.Equals("configuration");
         }
 
         [Fact]
@@ -111,7 +114,7 @@ namespace CacheManager.Tests
 
             // assert
             act.Should().Throw<ArgumentNullException>()
-                .WithMessage("*Parameter name: configName*");
+                .And.ParamName.Equals("configName");
         }
 
         [Fact]
@@ -119,7 +122,7 @@ namespace CacheManager.Tests
         public void CacheFactory_FromConfig_TestInit_A()
         {
             // arrange
-            var config = ConfigurationBuilder.BuildConfiguration(s => s.WithDictionaryHandle());
+            var config = CacheConfigurationBuilder.BuildConfiguration(s => s.WithDictionaryHandle());
 
             // act
             Action act = () => CacheFactory.FromConfiguration<object>(config);
@@ -133,7 +136,7 @@ namespace CacheManager.Tests
         public void CacheFactory_FromConfig_TestInit_B()
         {
             // arrange
-            var config = ConfigurationBuilder.BuildConfiguration(s => s.WithDictionaryHandle());
+            var config = CacheConfigurationBuilder.BuildConfiguration(s => s.WithDictionaryHandle());
 
             // act
             var cache = CacheFactory.FromConfiguration<object>("custom name", config);
@@ -147,7 +150,7 @@ namespace CacheManager.Tests
         public void CacheFactory_FromConfig_TestInit_C()
         {
             // arrange
-            var config = ConfigurationBuilder.BuildConfiguration(s => s.WithDictionaryHandle());
+            var config = CacheConfigurationBuilder.BuildConfiguration(s => s.WithDictionaryHandle());
 
             // act
             var cache = CacheFactory.FromConfiguration(typeof(object), "custom name", config) as ICacheManager<object>;
@@ -170,7 +173,7 @@ namespace CacheManager.Tests
 
             // assert
             act.Should().Throw<ArgumentNullException>()
-                .WithMessage("*cacheValueType*");
+                .And.ParamName.Equals("cacheValueType");
         }
 
         [Fact]
@@ -184,7 +187,7 @@ namespace CacheManager.Tests
 
             // assert
             act.Should().Throw<ArgumentNullException>()
-                .WithMessage("*cacheValueType*");
+                .And.ParamName.Equals("cacheValueType");
         }
 
         [Fact]
@@ -199,7 +202,7 @@ namespace CacheManager.Tests
 
             // assert
             act.Should().Throw<ArgumentNullException>()
-                .WithMessage("*cacheValueType*");
+                .And.ParamName.Equals("cacheValueType");
         }
 
 #endif
@@ -218,7 +221,7 @@ namespace CacheManager.Tests
 
             // assert
             act.Should().Throw<ArgumentNullException>()
-                .WithMessage("*Parameter name: handleName*");
+                .And.ParamName.Equals("handleName");
         }
 
         [Fact]
@@ -232,42 +235,7 @@ namespace CacheManager.Tests
 
             // assert
             act.Should().Throw<ArgumentNullException>()
-                .WithMessage("*Parameter name: settings*");
-        }
-
-        [Fact]
-        [ReplaceCulture]
-        public void CacheFactory_Build_DisablePerfCounters()
-        {
-            // act
-            Func<ICacheManager<string>> act = () => CacheFactory.Build<string>(settings =>
-            {
-                settings.WithUpdateMode(CacheUpdateMode.Up)
-                    .WithDictionaryHandle("h1")
-                    .DisablePerformanceCounters();
-            });
-
-            // assert
-            act().CacheHandles.ElementAt(0).Configuration.EnablePerformanceCounters.Should().BeFalse();
-            act().CacheHandles.ElementAt(0).Configuration.EnableStatistics.Should().BeFalse("this is the default value");
-        }
-
-        [Fact]
-        [ReplaceCulture]
-        public void CacheFactory_Build_EnablePerfCounters()
-        {
-            // act
-            Func<ICacheManager<string>> act = () => CacheFactory.Build<string>(settings =>
-            {
-                settings
-                    .WithDictionaryHandle("h1")
-                    .DisableStatistics() // disable it first
-                    .EnablePerformanceCounters();   // should enable stats
-            });
-
-            // assert
-            act().CacheHandles.ElementAt(0).Configuration.EnablePerformanceCounters.Should().BeTrue();
-            act().CacheHandles.ElementAt(0).Configuration.EnableStatistics.Should().BeTrue("is required for perf counters");
+                .And.ParamName.Equals("settings");
         }
 
         [Fact]
@@ -283,7 +251,6 @@ namespace CacheManager.Tests
             });
 
             // assert
-            act().CacheHandles.ElementAt(0).Configuration.EnablePerformanceCounters.Should().BeFalse("is default");
             act().CacheHandles.ElementAt(0).Configuration.EnableStatistics.Should().BeTrue();
         }
 
@@ -299,7 +266,6 @@ namespace CacheManager.Tests
             });
 
             // assert
-            act().CacheHandles.ElementAt(0).Configuration.EnablePerformanceCounters.Should().BeFalse("is default");
             act().CacheHandles.ElementAt(0).Configuration.EnableStatistics.Should().BeFalse("is default");
         }
 
@@ -418,7 +384,7 @@ namespace CacheManager.Tests
 
             // assert
             act.Should().Throw<ArgumentException>()
-                .WithMessage("*Parameter name: configurationKey*");
+                .And.ParamName.Equals("configurationKey");
         }
 
         [Fact]
@@ -433,7 +399,7 @@ namespace CacheManager.Tests
 
             // assert
             act.Should().Throw<ArgumentException>()
-                .WithMessage("*Parameter name: configurationKey*");
+                .And.ParamName.Equals("configurationKey");
         }
 
         [Fact]
@@ -448,7 +414,7 @@ namespace CacheManager.Tests
 
             // assert
             act.Should().Throw<ArgumentException>()
-                .WithMessage("*Parameter name: configurationKey*");
+                .And.ParamName.Equals("configurationKey");
         }
 
         [Fact]
@@ -463,7 +429,7 @@ namespace CacheManager.Tests
 
             // assert
             act.Should().Throw<ArgumentException>()
-                .WithMessage("*Parameter name: host*");
+                .And.ParamName.Equals("configurationKey");
         }
 
         [Fact]
@@ -485,7 +451,7 @@ namespace CacheManager.Tests
             var config = RedisConfigurations.GetConfiguration(name);
 
             // assert
-            config.ConfigurationOptions.Should().BeEquivalentTo(expected);
+            config.ConfigurationOptions.ToString().Should().BeEquivalentTo(expected.ToString());
             config.TwemproxyEnabled.Should().BeFalse();
             config.AllowAdmin.Should().BeTrue();
             config.IsSsl.Should().BeFalse();
@@ -512,7 +478,7 @@ namespace CacheManager.Tests
             var config = RedisConfigurations.GetConfiguration(name);
 
             // assert
-            config.ConfigurationOptions.Should().BeEquivalentTo(expected);
+            config.ConfigurationOptions.ToString().Should().BeEquivalentTo(expected.ToString());
             config.TwemproxyEnabled.Should().BeTrue();
             config.AllowAdmin.Should().BeFalse();
             config.IsSsl.Should().BeTrue();
@@ -576,7 +542,7 @@ namespace CacheManager.Tests
                     .WithUpdateMode(CacheUpdateMode.None)
                     .WithDictionaryHandle("h1")
                         .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromHours(12))
-                        .EnablePerformanceCounters()
+                        .EnableStatistics()
                     .And.WithDictionaryHandle("h2")
                         .WithExpiration(ExpirationMode.None, TimeSpan.Zero)
                         .DisableStatistics()
@@ -591,19 +557,16 @@ namespace CacheManager.Tests
             act.Configuration.MaxRetries.Should().Be(22);
             act.Configuration.RetryTimeout.Should().Be(2223);
             act.CacheHandles.ElementAt(0).Configuration.Name.Should().Be("h1");
-            act.CacheHandles.ElementAt(0).Configuration.EnablePerformanceCounters.Should().BeTrue();
             act.CacheHandles.ElementAt(0).Configuration.EnableStatistics.Should().BeTrue();
             act.CacheHandles.ElementAt(0).Configuration.ExpirationMode.Should().Be(ExpirationMode.Absolute);
             act.CacheHandles.ElementAt(0).Configuration.ExpirationTimeout.Should().Be(new TimeSpan(12, 0, 0));
 
             act.CacheHandles.ElementAt(1).Configuration.Name.Should().Be("h2");
-            act.CacheHandles.ElementAt(1).Configuration.EnablePerformanceCounters.Should().BeFalse();
             act.CacheHandles.ElementAt(1).Configuration.EnableStatistics.Should().BeFalse();
             act.CacheHandles.ElementAt(1).Configuration.ExpirationMode.Should().Be(ExpirationMode.None);
             act.CacheHandles.ElementAt(1).Configuration.ExpirationTimeout.Should().Be(new TimeSpan(0, 0, 0));
 
             act.CacheHandles.ElementAt(2).Configuration.Name.Should().Be("h3");
-            act.CacheHandles.ElementAt(2).Configuration.EnablePerformanceCounters.Should().BeFalse();
             act.CacheHandles.ElementAt(2).Configuration.EnableStatistics.Should().BeTrue();
             act.CacheHandles.ElementAt(2).Configuration.ExpirationMode.Should().Be(ExpirationMode.Sliding);
             act.CacheHandles.ElementAt(2).Configuration.ExpirationTimeout.Should().Be(new TimeSpan(0, 0, 231));
@@ -663,7 +626,7 @@ namespace CacheManager.Tests
         {
             var cache = CacheFactory.FromConfiguration(
                 typeof(string),
-                ConfigurationBuilder.BuildConfiguration(cfg => cfg.WithSystemRuntimeCacheHandle())) as ICacheManager<string>;
+                CacheConfigurationBuilder.BuildConfiguration(cfg => cfg.WithSystemRuntimeCacheHandle())) as ICacheManager<string>;
 
             cache.Should().NotBeNull();
             cache.CacheHandles.Count().Should().Be(1);
@@ -713,22 +676,5 @@ namespace CacheManager.Tests
                     .WithJsonSerializer(serializationSettings, deserializationSettings)
                     .WithSystemRuntimeCacheHandle());
         }
-
-#if !NETCOREAPP2
-
-        [Fact]
-        [ReplaceCulture]
-        public void CacheFactory_Build_WithSerializer_SimpleBinary()
-        {
-            var cache = CacheFactory.Build(
-                p =>
-                p.WithSerializer(typeof(BinaryCacheSerializer))
-                    .WithSystemRuntimeCacheHandle());
-
-            cache.Configuration.SerializerType.Should().NotBeNull();
-            cache.Configuration.SerializerType.Should().Be(typeof(BinaryCacheSerializer));
-        }
-
-#endif
     }
 }

@@ -1,7 +1,7 @@
-﻿using System.Runtime.Serialization;
+﻿using System;
+using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
 using CacheManager.Serialization.DataContract;
-using static CacheManager.Core.Utility.Guard;
 
 namespace CacheManager.Core
 {
@@ -18,7 +18,10 @@ namespace CacheManager.Core
         /// <returns>The builder instance.</returns>
         public static ConfigurationBuilderCachePart WithDataContractSerializer(this ConfigurationBuilderCachePart part, DataContractSerializerSettings serializerSettings = null)
         {
-            NotNull(part, nameof(part));
+            if (part is null)
+            {
+                throw new ArgumentNullException(nameof(part));
+            }
 
             if (serializerSettings == null)
             {
@@ -38,7 +41,10 @@ namespace CacheManager.Core
         /// <returns>The builder instance.</returns>
         public static ConfigurationBuilderCachePart WithDataContractJsonSerializer(this ConfigurationBuilderCachePart part, DataContractJsonSerializerSettings serializerSettings = null)
         {
-            NotNull(part, nameof(part));
+            if (part is null)
+            {
+                throw new ArgumentNullException(nameof(part));
+            }
 
             if (serializerSettings == null)
             {
@@ -58,7 +64,10 @@ namespace CacheManager.Core
         /// <returns>The builder instance.</returns>
         public static ConfigurationBuilderCachePart WithDataContractGzJsonSerializer(this ConfigurationBuilderCachePart part, DataContractJsonSerializerSettings serializerSettings = null)
         {
-            NotNull(part, nameof(part));
+            if (part is null)
+            {
+                throw new ArgumentNullException(nameof(part));
+            }
 
             if (serializerSettings == null)
             {
@@ -78,7 +87,10 @@ namespace CacheManager.Core
         /// <returns>The builder instance.</returns>
         public static ConfigurationBuilderCachePart WithDataContractBinarySerializer(this ConfigurationBuilderCachePart part, DataContractSerializerSettings serializerSettings = null)
         {
-            NotNull(part, nameof(part));
+            if (part is null)
+            {
+                throw new ArgumentNullException(nameof(part));
+            }
 
             if (serializerSettings == null)
             {

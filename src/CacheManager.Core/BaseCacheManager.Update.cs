@@ -1,7 +1,7 @@
 ﻿using System;
-using System.Linq;
+using System.Globalization;
 using CacheManager.Core.Internal;
-using CacheManager.Core.Logging;
+using Microsoft.Extensions.Logging;
 using static CacheManager.Core.Utility.Guard;
 
 namespace CacheManager.Core
@@ -97,7 +97,8 @@ namespace CacheManager.Core
             while (tries <= maxRetries);
 
             // exceeded max retries, failing the operation... (should not happen in 99,99% of the cases though, better throw?)
-            return default(TCacheValue);
+            throw new InvalidOperationException(
+                string.Format(CultureInfo.InvariantCulture, "Could not add or update the item {0} {1}.", item.Key, item.Region));
         }
 
         /// <inheritdoc />
@@ -144,8 +145,10 @@ namespace CacheManager.Core
             NotNull(updateValue, nameof(updateValue));
             Ensure(maxRetries >= 0, "Maximum number of retries must be greater than or equal to zero.");
 
-            var value = default(TCacheValue);
-            UpdateInternal(_cacheHandles, key, updateValue, maxRetries, true, out value);
+            if (!UpdateInternal(_cacheHandles, key, updateValue, maxRetries, true, out var value))
+            {
+                throw new InvalidOperationException($"Update failed for key '{key}'.");
+            }
 
             return value;
         }
@@ -158,8 +161,10 @@ namespace CacheManager.Core
             NotNull(updateValue, nameof(updateValue));
             Ensure(maxRetries >= 0, "Maximum number of retries must be greater than or equal to zero.");
 
-            var value = default(TCacheValue);
-            UpdateInternal(_cacheHandles, key, region, updateValue, maxRetries, true, out value);
+            if (!UpdateInternal(_cacheHandles, key, region, updateValue, maxRetries, true, out var value))
+            {
+                throw new InvalidOperationException($"Update failed for key '{region}:{key}'.");
+            }
 
             return value;
         }
@@ -235,7 +240,7 @@ namespace CacheManager.Core
             }
             else if (result.UpdateState == UpdateItemResultState.FactoryReturnedNull)
             {
-                Logger.LogWarn($"Update failed on '{region}:{key}' because value factory returned null.");
+                Logger.LogWarning($"Update failed on '{region}:{key}' because value factory returned null.");
 
                 if (throwOnFailure)
                 {
@@ -247,7 +252,7 @@ namespace CacheManager.Core
                 // if we had too many retries, this basically indicates an
                 // invalid state of the cache: The item is there, but we couldn't update it and
                 // it most likely has a different version
-                Logger.LogWarn($"Update failed on '{region}:{key}' because of too many retries.");
+                Logger.LogWarning($"Update failed on '{region}:{key}' because of too many retries.");
 
                 EvictFromOtherHandles(key, region, handleIndex);
 
@@ -261,7 +266,7 @@ namespace CacheManager.Core
                 // If update fails because item doesn't exist AND the current handle is backplane source or the lowest cache handle level,
                 // remove the item from other handles (if exists).
                 // Otherwise, if we do not exit here, calling update on the next handle might succeed and would return a misleading result.
-                Logger.LogInfo($"Update failed on '{region}:{key}' because the region/key did not exist.");
+                Logger.LogInformation($"Update failed on '{region}:{key}' because the region/key did not exist.");
 
                 EvictFromOtherHandles(key, region, handleIndex);
 

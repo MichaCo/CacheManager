@@ -230,7 +230,8 @@ namespace CacheManager.Tests
             Action act = () => new CacheItem<object>(key, value);
 
             // assert
-            act.Should().Throw<ArgumentException>().WithMessage("*Parameter name: key");
+            act.Should().Throw<ArgumentException>()
+                .And.ParamName.Equals("key");
         }
 
         [Fact]
@@ -245,7 +246,8 @@ namespace CacheManager.Tests
             Action act = () => new CacheItem<object>(key, value);
 
             // assert
-            act.Should().Throw<ArgumentNullException>().WithMessage("*Parameter name: key");
+            act.Should().Throw<ArgumentNullException>()
+                .And.ParamName.Equals("key");
         }
 
         [Fact]
@@ -260,7 +262,8 @@ namespace CacheManager.Tests
             Action act = () => new CacheItem<object>(key, value);
 
             // assert
-            act.Should().Throw<ArgumentException>().WithMessage("*Parameter name: key");
+            act.Should().Throw<ArgumentException>()
+                .And.ParamName.Equals("key");
         }
 
         [Fact]
@@ -275,7 +278,8 @@ namespace CacheManager.Tests
             Action act = () => new CacheItem<object>(key, value);
 
             // assert
-            act.Should().Throw<ArgumentException>().WithMessage("*cannot be null.\r\nParameter name: value");
+            act.Should().Throw<ArgumentException>()
+                .And.ParamName.Equals("value");
         }
 
         [Fact]
@@ -315,7 +319,8 @@ namespace CacheManager.Tests
             Action act = () => new CacheItem<object>(key, region, value);
 
             // assert
-            act.Should().Throw<ArgumentException>().WithMessage("*Parameter name: key");
+            act.Should().Throw<ArgumentException>()
+                .And.ParamName.Equals("key");
         }
 
         [Fact]
@@ -331,7 +336,8 @@ namespace CacheManager.Tests
             Action act = () => new CacheItem<object>(key, region, value);
 
             // assert
-            act.Should().Throw<ArgumentNullException>().WithMessage("*Parameter name: key");
+            act.Should().Throw<ArgumentNullException>()
+                .And.ParamName.Equals("key");
         }
 
         [Fact]
@@ -347,7 +353,8 @@ namespace CacheManager.Tests
             Action act = () => new CacheItem<object>(key, region, value);
 
             // assert
-            act.Should().Throw<ArgumentException>().WithMessage("*Parameter name: key");
+            act.Should().Throw<ArgumentException>()
+                .And.ParamName.Equals("key");
         }
 
         [Fact]
@@ -363,7 +370,8 @@ namespace CacheManager.Tests
             Action act = () => new CacheItem<object>(key, region, value);
 
             // assert
-            act.Should().Throw<ArgumentException>().WithMessage("*cannot be null.\r\nParameter name: value");
+            act.Should().Throw<ArgumentException>()
+                .And.ParamName.Equals("value");
         }
 
         [Fact]
@@ -380,7 +388,7 @@ namespace CacheManager.Tests
 
             // assert
             act.Should().Throw<ArgumentException>()
-                .WithMessage("*Parameter name: region");
+                .And.ParamName.Equals("region");
         }
 
         [Fact]
@@ -397,7 +405,7 @@ namespace CacheManager.Tests
 
             // assert
             act.Should().Throw<ArgumentNullException>()
-                .WithMessage("*Parameter name: region");
+                .And.ParamName.Equals("region");
         }
 
         [Fact]
@@ -414,7 +422,7 @@ namespace CacheManager.Tests
 
             // assert
             act.Should().Throw<ArgumentException>()
-                .WithMessage("*Parameter name: region");
+                .And.ParamName.Equals("region");
         }
 
         [Fact]
@@ -456,7 +464,8 @@ namespace CacheManager.Tests
             Action act = () => new CacheItem<object>(key, value, mode, timeout);
 
             // assert
-            act.Should().Throw<ArgumentException>().WithMessage("*Parameter name: key");
+            act.Should().Throw<ArgumentException>()
+                .And.ParamName.Equals("key");
         }
 
         [Fact]
@@ -473,7 +482,8 @@ namespace CacheManager.Tests
             Action act = () => new CacheItem<object>(key, value, mode, timeout);
 
             // assert
-            act.Should().Throw<ArgumentException>().WithMessage("*cannot be null.\r\nParameter name: key");
+            act.Should().Throw<ArgumentException>()
+                .And.ParamName.Equals("key");
         }
 
         [Fact]
@@ -490,7 +500,8 @@ namespace CacheManager.Tests
             Action act = () => new CacheItem<object>(key, value, mode, timeout);
 
             // assert
-            act.Should().Throw<ArgumentException>().WithMessage("*Parameter name: key");
+            act.Should().Throw<ArgumentException>()
+                .And.ParamName.Equals("key");
         }
 
         [Fact]
@@ -507,7 +518,8 @@ namespace CacheManager.Tests
             Action act = () => new CacheItem<object>(key, value, mode, timeout);
 
             // assert
-            act.Should().Throw<ArgumentException>().WithMessage("*cannot be null.\r\nParameter name: value");
+            act.Should().Throw<ArgumentException>()
+                .And.ParamName.Equals("value");
         }
 
         [Fact]
@@ -551,7 +563,8 @@ namespace CacheManager.Tests
             Action act = () => new CacheItem<object>(key, region, value, mode, timeout);
 
             // assert
-            act.Should().Throw<ArgumentException>().WithMessage("*Parameter name: key");
+            act.Should().Throw<ArgumentException>()
+                .And.ParamName.Equals("key");
         }
 
         [Fact]
@@ -569,7 +582,8 @@ namespace CacheManager.Tests
             Action act = () => new CacheItem<object>(key, region, value, mode, timeout);
 
             // assert
-            act.Should().Throw<ArgumentNullException>().WithMessage("*Parameter name: key");
+            act.Should().Throw<ArgumentNullException>()
+                .And.ParamName.Equals("key");
         }
 
         [Fact]
@@ -587,7 +601,8 @@ namespace CacheManager.Tests
             Action act = () => new CacheItem<object>(key, region, value, mode, timeout);
 
             // assert
-            act.Should().Throw<ArgumentException>().WithMessage("*Parameter name: key");
+            act.Should().Throw<ArgumentException>()
+                .And.ParamName.Equals("key");
         }
 
         [Fact]
@@ -605,7 +620,8 @@ namespace CacheManager.Tests
             Action act = () => new CacheItem<object>(key, region, value, mode, timeout);
 
             // assert
-            act.Should().Throw<ArgumentNullException>().WithMessage("*Parameter name: value");
+            act.Should().Throw<ArgumentNullException>()
+                .And.ParamName.Equals("value");
         }
 
         [Fact]
@@ -624,7 +640,7 @@ namespace CacheManager.Tests
 
             // assert
             act.Should().Throw<ArgumentException>()
-                .WithMessage("*Parameter name: region");
+                .And.ParamName.Equals("region");
         }
 
         [Fact]
@@ -643,7 +659,7 @@ namespace CacheManager.Tests
 
             // assert
             act.Should().Throw<ArgumentNullException>()
-                .WithMessage("*Parameter name: region");
+                .And.ParamName.Equals("region");
         }
 
         [Fact]
@@ -662,7 +678,7 @@ namespace CacheManager.Tests
 
             // assert
             act.Should().Throw<ArgumentException>()
-                .WithMessage("*Parameter name: region");
+                .And.ParamName.Equals("region");
         }
 
         [Fact]

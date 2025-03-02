@@ -14,7 +14,7 @@ namespace CacheManager.Tests
     /// removes an item from all handles defined.
     /// </summary>
     [ExcludeFromCodeCoverage]
-    public class CacheManagerRegionTests
+    public class CacheManagerRegionTests : IClassFixture<RedisTestFixture>
     {
         [Theory]
         [ClassData(typeof(TestCacheManagers))]

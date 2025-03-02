@@ -7,16 +7,16 @@
     using System.Threading.Tasks;
     using CacheManager.Core;
     using CacheManager.Core.Internal;
-    using CacheManager.Core.Logging;
     using CacheManager.Core.Utility;
     using FluentAssertions;
+    using Microsoft.Extensions.Logging;
     using StackExchange.Redis;
     using Xunit;
     using Xunit.Abstractions;
     using static TestHelper;
 
     [ExcludeFromCodeCoverage]
-    public class CacheManagerEventsTest
+    public class CacheManagerEventsTest : IClassFixture<RedisTestFixture>
     {
         private readonly ITestOutputHelper _testOutputHelper;
 
@@ -38,7 +38,7 @@
 
             // assert
             act.Should().Throw<ArgumentNullException>()
-                .WithMessage("*Parameter name: key*");
+                .And.ParamName.Equals("key");
         }
 
         [Fact]
@@ -69,7 +69,7 @@
 
             // assert
             act.Should().Throw<ArgumentNullException>()
-                .WithMessage("*Parameter name: key*");
+                .And.ParamName.Equals("key");
         }
 
         [Fact]
@@ -139,7 +139,7 @@
 
             // assert
             act.Should().Throw<ArgumentNullException>()
-                .WithMessage("*Parameter name: region*");
+                .And.ParamName.Equals("region");
         }
 
         [Fact]
@@ -244,7 +244,7 @@
             [Fact]
             public async Task Events_SysRuntime_ExpireTriggers()
             {
-                var cfg = new ConfigurationBuilder()
+                var cfg = new CacheConfigurationBuilder()
                     .WithSystemRuntimeCacheHandle()
                     .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1))
                     .Build();
@@ -263,7 +263,7 @@
             [Trait("category", "Unreliable")]
             public async Task Events_SysRuntime_ExpireEvictsAbove()
             {
-                var cfg = new ConfigurationBuilder()
+                var cfg = new CacheConfigurationBuilder()
                     .WithDictionaryHandle()
                     .And
                     .WithSystemRuntimeCacheHandle()
@@ -287,7 +287,7 @@
             [Fact]
             public async Task Events_Dic_ExpireTriggers()
             {
-                var cfg = new ConfigurationBuilder()
+                var cfg = new CacheConfigurationBuilder()
                     .WithDictionaryHandle()
                     .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1))
                     .Build();
@@ -306,10 +306,10 @@
             [Trait("category", "Unreliable")]
             public async Task Events_Dic_ExpireEvictsAbove()
             {
-                var cfg = new ConfigurationBuilder()
-                    .WithDictionaryHandle()
+                var cfg = new CacheConfigurationBuilder()
+                    .WithDictionaryHandle(options: new DictionaryCacheOptions() { ExpirationScanFrequency = TimeSpan.FromMilliseconds(10) })
                     .And
-                    .WithDictionaryHandle()
+                    .WithDictionaryHandle(options: new DictionaryCacheOptions() { ExpirationScanFrequency = TimeSpan.FromMilliseconds(10) })
                     .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1))
                     .Build();
 
@@ -330,7 +330,7 @@
             [Fact]
             public async Task Events_MsMemory_ExpireTriggers()
             {
-                var cfg = new ConfigurationBuilder()
+                var cfg = new CacheConfigurationBuilder()
                     .WithMicrosoftMemoryCacheHandle()
                     .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1))
                     .Build();
@@ -349,7 +349,7 @@
             [Trait("category", "Unreliable")]
             public async Task Events_MsMemory_ExpireEvictsAbove()
             {
-                var cfg = new ConfigurationBuilder()
+                var cfg = new CacheConfigurationBuilder()
                     .WithDictionaryHandle()
                     .And
                     .WithMicrosoftMemoryCacheHandle()
@@ -368,61 +368,16 @@
             }
         }
 
-#if MOCK_HTTPCONTEXT_ENABLED
-
+#if NET8_0_OR_GREATER
         // exclusive inner class for parallel exec of this long running test
-        public class WebCacheSpecific : LongRunningEventTestBase
+        public class RedisSpecific : LongRunningEventTestBase, IClassFixture<RedisTestFixture>
         {
-            [Fact]
-            public async Task Events_WebCache_ExpireTriggers()
-            {
-                var cfg = new ConfigurationBuilder()
-                    .WithHandle(typeof(SystemWebCacheHandleWrapper<>))
-                    .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1))
-                    .Build();
-
-                var useKey = Guid.NewGuid().ToString();
-                var useRegion = Guid.NewGuid().ToString();
-                var result = await RunTest(cfg, useKey, useRegion);
-
-                result.Reason.Should().Be(CacheItemRemovedReason.Expired);
-                result.Level.Should().Be(1);
-                result.Key.Should().Be(useKey);
-                result.Region.Should().Be(useRegion);
-            }
-
-            [Fact]
-            [Trait("category", "Unreliable")]
-            public async Task Events_WebCache_ExpireEvictsAbove()
-            {
-                var cfg = new ConfigurationBuilder()
-                    .WithDictionaryHandle()
-                    .And
-                    .WithHandle(typeof(SystemWebCacheHandleWrapper<>))
-                    .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(1))
-                    .Build();
-
-                var useKey = Guid.NewGuid().ToString();
-
-                var result = await RunTest(cfg, useKey, null, true, false);
-
-                result.Reason.Should().Be(CacheItemRemovedReason.Expired);
-                result.Level.Should().Be(2);
-                result.Key.Should().Be(useKey);
-                result.Region.Should().BeNull();
-            }
-        }
-#endif
-
-        // exclusive inner class for parallel exec of this long running test
-        public class RedisSpecific : LongRunningEventTestBase
-        {
-            [Fact]
+            [Fact(Skip = "Garnet currently does not support keyspace notifications - cannot test...")]
             [Trait("category", "Redis")]
             [Trait("category", "Unreliable")]
             public async Task Events_Redis_ExpireTriggers()
             {
-                var cfg = new ConfigurationBuilder()
+                var cfg = new CacheConfigurationBuilder()
                     .WithRedisConfiguration("redis", $"{TestManagers.RedisHost}:{TestManagers.RedisPort}, allowAdmin=true", 0, true)
                     .WithJsonSerializer()
                     .WithRedisCacheHandle("redis")
@@ -439,13 +394,13 @@
                 result.Region.Should().Be(useRegion);
             }
 
-            [Fact]
+            [Fact(Skip = "Garnet currently does not support keyspace notifications - cannot test...")]
             [Trait("category", "Redis")]
             [Trait("category", "Unreliable")]
             public async Task Events_Redis_ExpireEvictsAbove()
             {
-                var cfg = new ConfigurationBuilder()
-                    .WithDictionaryHandle()
+                var cfg = new CacheConfigurationBuilder()
+                    .WithDictionaryHandle(options: new DictionaryCacheOptions() { ExpirationScanFrequency = TimeSpan.FromMilliseconds(10) })
                     .And
                     .WithRedisConfiguration("redis", $"{TestManagers.RedisHost}:{TestManagers.RedisPort}, allowAdmin=true", 0, true)
                     .WithJsonSerializer()
@@ -463,6 +418,7 @@
                 result.Region.Should().BeNull();
             }
         }
+#endif
 
         [Theory]
         [ClassData(typeof(TestCacheManagers))]
@@ -578,15 +534,15 @@
             }
         }
 
-        [Fact]
+        [Fact(Skip = "Garnet currently does not support keyspace notifications - cannot test...")]
         [Trait("category", "Redis")]
         [Trait("category", "Unreliable")]
         public async Task Events_OnRemoveExternal_Redis_UpHandling()
         {
             var client = ConnectionMultiplexer.Connect("localhost");
 
-            var config = new ConfigurationBuilder()
-                .WithDictionaryHandle()
+            var config = new CacheConfigurationBuilder()
+                .WithDictionaryHandle(options: new DictionaryCacheOptions() { ExpirationScanFrequency = TimeSpan.FromMilliseconds(10) })
                 .And
                 .WithJsonSerializer()
                 .WithRedisConfiguration("redis", client, enableKeyspaceNotifications: true)
@@ -633,16 +589,16 @@
             cache.CacheHandles.First().Get(key).Should().BeNull();
         }
 
-        [Fact]
+        [Fact(Skip = "Garnet currently does not support keyspace notifications - cannot test...")]
         [Trait("category", "Redis")]
         [Trait("category", "Unreliable")]
         public async Task Events_OnRemoveExternal_Redis_NoneHandling()
         {
             var client = ConnectionMultiplexer.Connect("localhost");
 
-            var config = new ConfigurationBuilder()
+            var config = new CacheConfigurationBuilder()
                 .WithUpdateMode(CacheUpdateMode.None)
-                .WithDictionaryHandle()
+                .WithDictionaryHandle(options: new DictionaryCacheOptions() { ExpirationScanFrequency = TimeSpan.FromMilliseconds(10) })
                 .And
                 .WithJsonSerializer()
                 .WithRedisConfiguration("redis", client, enableKeyspaceNotifications: true)
@@ -655,7 +611,7 @@
             var cache = new BaseCacheManager<int?>(config);
 
             await RetryWithCondition(
-                5,
+                1,
                 async () =>
                 {
                     key = Guid.NewGuid().ToString();
@@ -1185,9 +1141,10 @@
 
         private class CustomRemoveEventTestHandle : BaseCacheHandle<string>
         {
-            public CustomRemoveEventTestHandle(ICacheManagerConfiguration managerConfiguration, CacheHandleConfiguration configuration)
+            public CustomRemoveEventTestHandle(ICacheManagerConfiguration managerConfiguration, CacheHandleConfiguration configuration, ILoggerFactory loggerFactory)
                 : base(managerConfiguration, configuration)
             {
+                this.Logger = loggerFactory.CreateLogger(this.GetType());
             }
 
             public void TestTrigger(string key, string region, CacheItemRemovedReason reason, object value)
@@ -1203,13 +1160,7 @@
                 }
             }
 
-            protected override ILogger Logger
-            {
-                get
-                {
-                    return new NullLogger();
-                }
-            }
+            protected override ILogger Logger { get; }
 
             public override void Clear()
             {

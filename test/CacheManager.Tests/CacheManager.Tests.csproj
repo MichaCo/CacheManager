@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFrameworks>
-      net461;netcoreapp2.1;
+      <!--net481-->;net8.0
     </TargetFrameworks>
     <Version>1.0.0</Version>
     <AssemblyName>CacheManager.Tests</AssemblyName>
@@ -11,8 +11,13 @@
     <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
     <PackageId>CacheManager.Tests</PackageId>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
+    <NoWarn>$(NoWarn);CA2021</NoWarn>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <!--<PlatformTarget>x64</PlatformTarget>-->
+  </PropertyGroup>
+  
   <ItemGroup>
     <None Update="app.config;Configuration\*.*;xunit.runner.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -21,14 +26,15 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="App.netstandard2.config">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    <None Update="testhost.x86.dll.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <DependentUpon>App.config</DependentUpon>
+    </None>
+    <None Update="testhost.dll.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <DependentUpon>App.config</DependentUpon>
     </None>
   </ItemGroup>
-  <Target Name="CopyCustomContent" AfterTargets="AfterBuild" Condition=" '$(TargetFramework)' == 'netcoreapp2.1' ">
-    <Copy SourceFiles="App.netstandard2.config" DestinationFiles="$(OutDir)\testhost.dll.config" />
-  </Target>
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\CacheManager.Serialization.DataContract\CacheManager.Serialization.DataContract.csproj" />
@@ -37,47 +43,35 @@
     <ProjectReference Include="..\..\src\CacheManager.Serialization.Json\CacheManager.Serialization.Json.csproj" />
     <ProjectReference Include="..\..\src\CacheManager.Serialization.ProtoBuf\CacheManager.Serialization.ProtoBuf.csproj" />
     <ProjectReference Include="..\..\src\CacheManager.Serialization.Bond\CacheManager.Serialization.Bond.csproj" />
-    <ProjectReference Include="..\..\src\CacheManager.Couchbase\CacheManager.Couchbase.csproj" />
     <ProjectReference Include="..\..\src\CacheManager.Microsoft.Extensions.Caching.Memory\CacheManager.Microsoft.Extensions.Caching.Memory.csproj" />
     <ProjectReference Include="..\..\src\CacheManager.Microsoft.Extensions.Configuration\CacheManager.Microsoft.Extensions.Configuration.csproj" />
-    <ProjectReference Include="..\..\src\CacheManager.Microsoft.Extensions.Logging\CacheManager.Microsoft.Extensions.Logging.csproj" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="2.1.1" />
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="2.1.1" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="2.1.1" />
-    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="2.1.1" />
-    <PackageReference Include="Microsoft.Extensions.Configuration" Version="2.1.1" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="2.1.1" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.1.1" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.9.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.9.4" />
+    <PackageReference Include="xunit.analyzers" Version="0.10.0" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.3">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="xunit" Version="2.4.1" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.1" />
+
     <PackageReference Include="FluentAssertions" Version="5.4.2" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net461' ">
-    <ProjectReference Include="..\..\src\CacheManager.Web\CacheManager.Web.csproj" />
-    <ProjectReference Include="..\..\src\CacheManager.Memcached\CacheManager.Memcached.csproj" />
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net8.0' ">
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Garnet" Version="1.0.57" />
+  </ItemGroup>
+  
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net481' ">
     <Reference Include="System.Web" />
     <Reference Include="System.Configuration" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />
-  </ItemGroup>
-
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'net461' ">
-    <DefineConstants>$(DefineConstants);REDISENABLED;MOCK_HTTPCONTEXT_ENABLED;</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.1' ">
-    <DefineConstants>$(DefineConstants);REDISENABLED;NETCOREAPP2;</DefineConstants>
-  </PropertyGroup>
-  <!--<PropertyGroup Condition=" '$(TargetFramework)' == 'net452' ">
-    <DefineConstants>$(DefineConstants);REDISENABLED;MOCK_HTTPCONTEXT_ENABLED;NO_APP_CONFIG;MEMCACHEDENABLED;COUCHBASEENABLED;</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp1.1' ">
-    <DefineConstants>$(DefineConstants);REDISENABLED;NETCOREAPP;COUCHBASEENABLED;</DefineConstants>
-  </PropertyGroup>-->
 </Project>

@@ -130,6 +130,25 @@ csharp_space_between_parentheses = false
 csharp_space_between_square_brackets = false
 
 # Xml project files
+
+# CA1305: Specify IFormatProvider
+dotnet_diagnostic.CA1305.severity = suggestion
+
+# CA1303: Do not pass literals as localized parameters
+dotnet_diagnostic.CA1303.severity = suggestion
+
+# CS8602: Dereference of a possibly null reference.
+dotnet_diagnostic.CS8602.severity = error
+
+# CA1716: Identifiers should not match keywords
+dotnet_diagnostic.CA1716.severity = silent
+
+# CA1825: Avoid zero-length array allocations.
+dotnet_diagnostic.CA1825.severity = silent
+
+# CA1028: Enum Storage should be Int32
+dotnet_diagnostic.CA1028.severity = silent
+
 [*.{csproj,vcxproj,vcxproj.filters,proj,nativeproj,locproj}]
 indent_size = 2
 

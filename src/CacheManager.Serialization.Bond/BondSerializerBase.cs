@@ -1,9 +1,8 @@
 ﻿using System;
-using System.Linq;
 using System.Text;
 using Bond.IO.Unsafe;
 using CacheManager.Core.Internal;
-using CacheManager.Core.Utility;
+using Microsoft.Extensions.ObjectPool;
 
 namespace CacheManager.Serialization.Bond
 {
@@ -28,8 +27,8 @@ namespace CacheManager.Serialization.Bond
         /// <param name="defaultBufferSize">The default buffer size.</param>
         public BondSerializerBase(int defaultBufferSize)
         {
-            OutputBufferPool = new ObjectPool<OutputBuffer>(new OutputBufferPoolPolicy(defaultBufferSize));
-            StringBuilderPool = new ObjectPool<StringBuilder>(new StringBuilderPoolPolicy(defaultBufferSize));
+            OutputBufferPool = new DefaultObjectPool<OutputBuffer>(new OutputBufferPoolPolicy(defaultBufferSize));
+            StringBuilderPool = new DefaultObjectPool<StringBuilder>(new StringBuilderPoolPolicy(defaultBufferSize));
         }
 
         /// <summary>
@@ -41,6 +40,7 @@ namespace CacheManager.Serialization.Bond
         /// <summary>
         /// Gets a pool handling <see cref="StringBuilder"/>s.
         /// </summary>
+        [CLSCompliant(false)]
         protected ObjectPool<StringBuilder> StringBuilderPool { get; }
 
         /// <inheritdoc/>
@@ -55,7 +55,7 @@ namespace CacheManager.Serialization.Bond
             return new BondCacheItem<TCacheValue>(properties, value);
         }
 
-        private class OutputBufferPoolPolicy : IObjectPoolPolicy<OutputBuffer>
+        private class OutputBufferPoolPolicy : IPooledObjectPolicy<OutputBuffer>
         {
             private readonly int _defaultBufferSize;
 
@@ -64,7 +64,7 @@ namespace CacheManager.Serialization.Bond
                 _defaultBufferSize = defaultBufferSize;
             }
 
-            public OutputBuffer CreateNew()
+            public OutputBuffer Create()
             {
                 return new OutputBuffer(_defaultBufferSize);
             }
@@ -81,7 +81,7 @@ namespace CacheManager.Serialization.Bond
             }
         }
 
-        private class StringBuilderPoolPolicy : IObjectPoolPolicy<StringBuilder>
+        private class StringBuilderPoolPolicy : IPooledObjectPolicy<StringBuilder>
         {
             private readonly int _defaultBufferSize;
 
@@ -90,7 +90,7 @@ namespace CacheManager.Serialization.Bond
                 _defaultBufferSize = defaultBufferSize;
             }
 
-            public StringBuilder CreateNew()
+            public StringBuilder Create()
             {
                 return new StringBuilder(_defaultBufferSize);
             }

@@ -1,6 +1,6 @@
-﻿using CacheManager.Serialization.Json;
+﻿using System;
+using CacheManager.Serialization.Json;
 using Newtonsoft.Json;
-using static CacheManager.Core.Utility.Guard;
 
 namespace CacheManager.Core
 {
@@ -16,7 +16,10 @@ namespace CacheManager.Core
         /// <returns>The builder instance.</returns>
         public static ConfigurationBuilderCachePart WithJsonSerializer(this ConfigurationBuilderCachePart part)
         {
-            NotNull(part, nameof(part));
+            if (part is null)
+            {
+                throw new ArgumentNullException(nameof(part));
+            }
 
             return part.WithSerializer(typeof(JsonCacheSerializer));
         }
@@ -30,7 +33,10 @@ namespace CacheManager.Core
         /// <returns>The builder instance.</returns>
         public static ConfigurationBuilderCachePart WithJsonSerializer(this ConfigurationBuilderCachePart part, JsonSerializerSettings serializationSettings, JsonSerializerSettings deserializationSettings)
         {
-            NotNull(part, nameof(part));
+            if (part is null)
+            {
+                throw new ArgumentNullException(nameof(part));
+            }
 
             return part.WithSerializer(typeof(JsonCacheSerializer), serializationSettings, deserializationSettings);
         }
@@ -42,7 +48,10 @@ namespace CacheManager.Core
         /// <returns>The builder instance.</returns>
         public static ConfigurationBuilderCachePart WithGzJsonSerializer(this ConfigurationBuilderCachePart part)
         {
-            NotNull(part, nameof(part));
+            if (part is null)
+            {
+                throw new ArgumentNullException(nameof(part));
+            }
 
             return part.WithSerializer(typeof(GzJsonCacheSerializer));
         }
@@ -56,7 +65,10 @@ namespace CacheManager.Core
         /// <returns>The builder instance.</returns>
         public static ConfigurationBuilderCachePart WithGzJsonSerializer(this ConfigurationBuilderCachePart part, JsonSerializerSettings serializationSettings, JsonSerializerSettings deserializationSettings)
         {
-            NotNull(part, nameof(part));
+            if (part is null)
+            {
+                throw new ArgumentNullException(nameof(part));
+            }
 
             return part.WithSerializer(typeof(GzJsonCacheSerializer), serializationSettings, deserializationSettings);
         }

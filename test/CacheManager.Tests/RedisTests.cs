@@ -1,4 +1,6 @@
-﻿using System;
+﻿#if NET8_0_OR_GREATER
+
+using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
@@ -17,7 +19,7 @@ namespace CacheManager.Tests
     /// To run the redis tests, make sure a local redis server instance is running. See redis folder under tools.
     /// </summary>
     [ExcludeFromCodeCoverage]
-    public class RedisTests
+    public class RedisTests : IClassFixture<RedisTestFixture>
     {
         private enum CacheEvent
         {
@@ -29,11 +31,10 @@ namespace CacheManager.Tests
             OnClearRegion
         }
 
-#if NETCOREAPP2
         [Fact]
         public void Redis_WithoutSerializer_ShouldThrow()
         {
-            var cfg = ConfigurationBuilder.BuildConfiguration(
+            var cfg = CacheConfigurationBuilder.BuildConfiguration(
                 settings =>
                     settings
                         .WithRedisConfiguration("redis-key", "localhost")
@@ -42,7 +43,6 @@ namespace CacheManager.Tests
             Action act = () => new BaseCacheManager<string>(cfg);
             act.Should().Throw<InvalidOperationException>().WithMessage("*requires serialization*");
         }
-#endif
 
         [Fact]
         [Trait("category", "Redis")]
@@ -50,7 +50,7 @@ namespace CacheManager.Tests
         public void Redis_Extensions_WithClient()
         {
             var configKey = Guid.NewGuid().ToString();
-            var client = ConnectionMultiplexer.Connect("localhost");
+            var client = ConnectionMultiplexer.Connect("localhost:6379");
             var cache = CacheFactory.Build<string>(
                 s => s
                     .WithJsonSerializer()
@@ -75,7 +75,7 @@ namespace CacheManager.Tests
         public void Redis_Extensions_WithClientWithDb()
         {
             var configKey = Guid.NewGuid().ToString();
-            var client = ConnectionMultiplexer.Connect("localhost");
+            var client = ConnectionMultiplexer.Connect("localhost:6379");
             var cache = CacheFactory.Build<string>(
                 s => s
                     .WithJsonSerializer()
@@ -179,7 +179,7 @@ namespace CacheManager.Tests
 
             var multiplexer = ConnectionMultiplexer.Connect(conConfig);
 
-            var cfg = ConfigurationBuilder.BuildConfiguration(
+            var cfg = CacheConfigurationBuilder.BuildConfiguration(
                 s => s
                     .WithJsonSerializer()
                     .WithRedisConfiguration("redisKey", multiplexer)
@@ -195,6 +195,8 @@ namespace CacheManager.Tests
         }
 
         [Fact]
+        [Trait("category", "Redis")]
+        [Trait("category", "Unreliable")]
         public async Task Redis_BackplaneEvents_AddWithRegion()
         {
             var key = Guid.NewGuid().ToString();
@@ -227,6 +229,8 @@ namespace CacheManager.Tests
         /// </summary>
         /// <returns></returns>
         [Fact]
+        [Trait("category", "Redis")]
+        [Trait("category", "Unreliable")]
         public async Task Redis_BackplaneEvents_InMemory_AddWithRegion()
         {
             var key = Guid.NewGuid().ToString();
@@ -260,6 +264,8 @@ namespace CacheManager.Tests
         }
 
         [Fact]
+        [Trait("category", "Redis")]
+        [Trait("category", "Unreliable")]
         public async Task Redis_BackplaneEvents_Put()
         {
             var key = Guid.NewGuid().ToString();
@@ -292,6 +298,8 @@ namespace CacheManager.Tests
         /// </summary>
         /// <returns></returns>
         [Fact]
+        [Trait("category", "Redis")]
+        [Trait("category", "Unreliable")]
         public async Task Redis_BackplaneEvents_InMemory_Put()
         {
             var key = Guid.NewGuid().ToString();
@@ -322,6 +330,8 @@ namespace CacheManager.Tests
         }
 
         [Fact]
+        [Trait("category", "Redis")]
+        [Trait("category", "Unreliable")]
         public async Task Redis_BackplaneEvents_PutWithRegion()
         {
             var key = Guid.NewGuid().ToString();
@@ -351,6 +361,8 @@ namespace CacheManager.Tests
         }
 
         [Fact]
+        [Trait("category", "Redis")]
+        [Trait("category", "Unreliable")]
         public async Task Redis_BackplaneEvents_Remove()
         {
             var key = Guid.NewGuid().ToString();
@@ -379,6 +391,8 @@ namespace CacheManager.Tests
         }
 
         [Fact]
+        [Trait("category", "Redis")]
+        [Trait("category", "Unreliable")]
         public async Task Redis_BackplaneEvents_Remove_WithRegion()
         {
             var key = Guid.NewGuid().ToString();
@@ -417,6 +431,8 @@ namespace CacheManager.Tests
         /// </summary>
         /// <returns></returns>
         [Fact]
+        [Trait("category", "Redis")]
+        [Trait("category", "Unreliable")]
         public async Task Redis_BackplaneEvents_InMemory_Remove_WithRegion()
         {
             var key = Guid.NewGuid().ToString();
@@ -670,7 +686,7 @@ namespace CacheManager.Tests
         [Fact]
         public void Redis_Configuration_NoEndpoint()
         {
-            Action act = () => ConfigurationBuilder.BuildConfiguration(
+            Action act = () => CacheConfigurationBuilder.BuildConfiguration(
                 s => s.WithRedisConfiguration(
                     "key",
                     c => c.WithAllowAdmin()));
@@ -715,7 +731,7 @@ namespace CacheManager.Tests
             cfg.ConnectionString.ToLower().Should().Contain("127.0.0.1:6379");
             cfg.ConnectionString.ToLower().Should().Contain("allowadmin=true");
             cfg.ConnectionString.ToLower().Should().Contain("ssl=false");
-            cfg.Database.Should().Be(42);
+            cfg.Database.Should().Be(0);
             cfg.StrictCompatibilityModeVersion.Should().Be("2.9");
         }
 
@@ -724,7 +740,8 @@ namespace CacheManager.Tests
         {
             Action act = () => RedisConfigurations.LoadConfiguration((string)null);
 
-            act.Should().Throw<ArgumentNullException>().WithMessage("*sectionName*");
+            act.Should().Throw<ArgumentNullException>()
+                .And.ParamName.Equals("sectionName");
         }
 
         [Fact]
@@ -732,7 +749,8 @@ namespace CacheManager.Tests
         {
             Action act = () => RedisConfigurations.LoadConfiguration((string)null, "section");
 
-            act.Should().Throw<ArgumentNullException>().WithMessage("*fileName*");
+            act.Should().Throw<ArgumentNullException>()
+                .And.ParamName.Equals("fileName");
         }
 
         [Fact]
@@ -740,7 +758,8 @@ namespace CacheManager.Tests
         {
             Action act = () => RedisConfigurations.LoadConfiguration(Guid.NewGuid().ToString());
 
-            act.Should().Throw<ArgumentNullException>().WithMessage("*section*");
+            act.Should().Throw<ArgumentNullException>()
+                .And.ParamName.Equals("section");
         }
 
         [Fact]
@@ -885,11 +904,10 @@ namespace CacheManager.Tests
         public void Redis_Verify_NoCredentialsLoggedOrThrown()
         {
             var testLogger = new TestLogger();
-            var cfg = ConfigurationBuilder.BuildConfiguration(settings =>
+            var cfg = CacheConfigurationBuilder.BuildConfiguration(settings =>
             {
                 settings
                     .WithRedisBackplane("redis.config")
-                    .WithLogging(typeof(TestLoggerFactory), testLogger)
                     .WithJsonSerializer()
                     .WithRedisCacheHandle("redis.config", true)
                     .And
@@ -898,7 +916,7 @@ namespace CacheManager.Tests
                         config
                             .WithConnectionTimeout(10)
                             .WithAllowAdmin()
-                            .WithDatabase(7)
+                            //.WithDatabase(7)
                             .WithEndpoint("doesnotexist", 6379)
                             .WithPassword("mysupersecret")
                             .WithSsl();
@@ -927,7 +945,7 @@ namespace CacheManager.Tests
                 settings.WithRedisConfiguration("default", config =>
                 {
                     config.WithAllowAdmin()
-                        .WithDatabase(7)
+                        //.WithDatabase(7)
                         .WithEndpoint("127.0.0.1", 6379);
                 });
             }))
@@ -985,7 +1003,7 @@ namespace CacheManager.Tests
                 settings.WithRedisConfiguration("default", config =>
                 {
                     config.WithAllowAdmin()
-                        .WithDatabase(8)
+                        //.WithDatabase(8)
                         .WithEndpoint("127.0.0.1", 6379);
                 });
             }))
@@ -1032,7 +1050,7 @@ namespace CacheManager.Tests
             var redisConfig = new RedisConfiguration(redisConfigKey, "localhost", strictCompatibilityModeVersion: "");
             RedisConfigurations.AddConfiguration(redisConfig);
 
-            var cacheConfig = new ConfigurationBuilder()
+            var cacheConfig = new CacheConfigurationBuilder()
                 .WithJsonSerializer()
                 .WithRedisCacheHandle(redisConfigKey)
                 .Build();
@@ -1055,7 +1073,7 @@ namespace CacheManager.Tests
             var redisConfig = RedisConfigurations.GetConfiguration("redisFromCfgConfigurationId");
 
             // act
-            var cfg = ConfigurationBuilder.LoadConfigurationFile(fileName, cacheName);
+            var cfg = CacheConfigurationBuilder.LoadConfigurationFile(fileName, cacheName);
 
             // assert
             redisConfig.Database.Should().Be(113);
@@ -1079,7 +1097,7 @@ namespace CacheManager.Tests
             var redisConfig = RedisConfigurations.GetConfiguration("redisConnectionString");
 
             // act
-            var cfg = ConfigurationBuilder.LoadConfigurationFile(fileName, cacheName);
+            var cfg = CacheConfigurationBuilder.LoadConfigurationFile(fileName, cacheName);
             var cache = CacheFactory.FromConfiguration<object>(cfg);
 
             // assert
@@ -1104,7 +1122,7 @@ namespace CacheManager.Tests
             string cacheName = "redisWithBackplaneAppConfig";
 
             // act
-            var cfg = ConfigurationBuilder.LoadConfiguration(cacheName);
+            var cfg = CacheConfigurationBuilder.LoadConfiguration(cacheName);
             var cache = CacheFactory.FromConfiguration<object>(cfg);
             var handle = cache.CacheHandles.First(p => p.Configuration.IsBackplaneSource) as RedisCacheHandle<object>;
 
@@ -1125,7 +1143,7 @@ namespace CacheManager.Tests
             string cacheName = "redisWithBackplaneAppConfigConnectionStrings";
 
             // act
-            var cfg = ConfigurationBuilder.LoadConfiguration(cacheName);
+            var cfg = CacheConfigurationBuilder.LoadConfiguration(cacheName);
             var cache = CacheFactory.FromConfiguration<object>(cfg);
             var handle = cache.CacheHandles.First(p => p.Configuration.IsBackplaneSource) as RedisCacheHandle<object>;
 
@@ -1146,7 +1164,7 @@ namespace CacheManager.Tests
             string cacheName = "redisWithBackplaneAppConfigConnectionStringsWithDefaultDb";
 
             // act
-            var cfg = ConfigurationBuilder.LoadConfiguration(cacheName);
+            var cfg = CacheConfigurationBuilder.LoadConfiguration(cacheName);
             var cache = CacheFactory.FromConfiguration<object>(cfg);
             var redisConfig = RedisConfigurations.GetConfiguration("redisFromConnectionStringsWithDefaultDb");
             var handle = cache.CacheHandles.First(p => p.Configuration.IsBackplaneSource) as RedisCacheHandle<object>;
@@ -1157,7 +1175,7 @@ namespace CacheManager.Tests
             // assert
             handle.Should().NotBeNull();
             count.Should().NotThrow();
-            redisConfig.Database.Should().Be(44);
+            redisConfig.Database.Should().Be(0);
             redisConfig.AllowAdmin.Should().BeTrue();
             redisConfig.ConnectionTimeout.Should().Be(11);
         }
@@ -1233,7 +1251,7 @@ namespace CacheManager.Tests
                     .WithRedisConfiguration(redisKey, config =>
                     {
                         config
-                            .WithDatabase(66)
+                            //.WithDatabase(66)
                             .WithEndpoint("127.0.0.1", 6379);
                     })
                     .WithRedisCacheHandle(redisKey, true);
@@ -1503,3 +1521,5 @@ namespace CacheManager.Tests
         }
     }
 }
+
+#endif

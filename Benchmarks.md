@@ -1,6 +1,8 @@
 
 ## Benchmarks
 
+TODO: needs update
+
 Benchmarks have been implemented with [BenchmarkDotNet](https://github.com/PerfDotNet/BenchmarkDotNet).
 
 All CacheManager instances used in the benchmarks have only one cache handle configured, either the Dictionary, System.Runtime or Redis handle.

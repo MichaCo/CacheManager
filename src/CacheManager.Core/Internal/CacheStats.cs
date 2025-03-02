@@ -20,14 +20,13 @@ namespace CacheManager.Core.Internal
     /// class is sealed.
     /// </remarks>
     /// <typeparam name="TCacheValue">Inherited object type of the owning cache handle.</typeparam>
-    public sealed class CacheStats<TCacheValue> : IDisposable
+    public sealed class CacheStats<TCacheValue>
     {
         private static readonly string _nullRegionKey = Guid.NewGuid().ToString();
         private readonly ConcurrentDictionary<string, CacheStatsCounter> _counters;
-        private readonly bool _isPerformanceCounterEnabled;
         private readonly bool _isStatsEnabled;
-        private readonly CachePerformanceCounters<TCacheValue> _performanceCounters;
 
+        // TODO: remove parameter.
         /// <summary>
         /// Initializes a new instance of the <see cref="CacheStats{TCacheValue}"/> class.
         /// </summary>
@@ -37,44 +36,17 @@ namespace CacheManager.Core.Internal
         /// If set to <c>true</c> the stats are enabled. Otherwise any statistics and performance
         /// counters will be disabled.
         /// </param>
-        /// <param name="enablePerformanceCounters">
-        /// If set to <c>true</c> performance counters and statistics will be enabled.
-        /// </param>
         /// <exception cref="System.ArgumentNullException">
         /// If cacheName or handleName are null.
         /// </exception>
-        public CacheStats(string cacheName, string handleName, bool enabled = true, bool enablePerformanceCounters = false)
+        public CacheStats(string cacheName, string handleName, bool enabled = true)
         {
             NotNullOrWhiteSpace(cacheName, nameof(cacheName));
             NotNullOrWhiteSpace(handleName, nameof(handleName));
 
             // if performance counters are enabled, stats must be enabled, too.
-            _isStatsEnabled = enablePerformanceCounters ? true : enabled;
-            _isPerformanceCounterEnabled = enablePerformanceCounters;
+            _isStatsEnabled = enabled;
             _counters = new ConcurrentDictionary<string, CacheStatsCounter>();
-
-            if (_isPerformanceCounterEnabled)
-            {
-                _performanceCounters = new CachePerformanceCounters<TCacheValue>(cacheName, handleName, this);
-            }
-        }
-
-        /// <summary>
-        /// Finalizes an instance of the <see cref="CacheStats{TCacheValue}"/> class.
-        /// </summary>
-        ~CacheStats()
-        {
-            Dispose(false);
-        }
-
-        /// <summary>
-        /// Performs application-defined tasks associated with freeing, releasing, or resetting
-        /// unmanaged resources.
-        /// </summary>
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
         }
 
         /// <summary>
@@ -211,8 +183,7 @@ namespace CacheManager.Core.Internal
             // clear needs a lock, otherwise we might mess up the overall counts
             foreach (var key in _counters.Keys)
             {
-                CacheStatsCounter counter = null;
-                if (_counters.TryGetValue(key, out counter))
+                if (_counters.TryGetValue(key, out var counter))
                 {
                     counter.Set(CacheStatsCounterType.Items, 0L);
                     counter.Increment(CacheStatsCounterType.ClearCalls);
@@ -365,23 +336,11 @@ namespace CacheManager.Core.Internal
             }
         }
 
-        private void Dispose(bool disposeManaged)
-        {
-            if (disposeManaged)
-            {
-                if (_isPerformanceCounterEnabled)
-                {
-                    _performanceCounters.Dispose();
-                }
-            }
-        }
-
         private CacheStatsCounter GetCounter(string key)
         {
             NotNullOrWhiteSpace(key, nameof(key));
 
-            CacheStatsCounter counter = null;
-            if (!_counters.TryGetValue(key, out counter))
+            if (!_counters.TryGetValue(key, out var counter))
             {
                 counter = new CacheStatsCounter();
                 if (_counters.TryAdd(key, counter))
@@ -399,7 +358,7 @@ namespace CacheManager.Core.Internal
         {
             yield return GetCounter(_nullRegionKey);
 
-            if (!string.IsNullOrWhiteSpace(region))
+            if (!string.IsNullOrEmpty(region))
             {
                 var counter = GetCounter(region);
                 if (counter != null)

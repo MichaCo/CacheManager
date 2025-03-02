@@ -1,8 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.IO.Compression;
-using System.Linq;
-using CacheManager.Core.Utility;
 using Newtonsoft.Json;
 
 namespace CacheManager.Serialization.Json
@@ -34,7 +32,11 @@ namespace CacheManager.Serialization.Json
         /// <inheritdoc/>
         public override object Deserialize(byte[] data, Type target)
         {
-            Guard.NotNull(data, nameof(data));
+            if (data is null)
+            {
+                throw new ArgumentNullException(nameof(data));
+            }
+
             var compressedData = Decompression(data);
 
             return base.Deserialize(compressedData, target);
@@ -43,7 +45,6 @@ namespace CacheManager.Serialization.Json
         /// <inheritdoc/>
         public override byte[] Serialize<T>(T value)
         {
-            Guard.NotNull(value, nameof(value));
             var data = base.Serialize<T>(value);
 
             return Compression(data);

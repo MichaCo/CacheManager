@@ -2,7 +2,7 @@
   <Import Project="..\..\tools\common.props" />
   <PropertyGroup>
     <Description>CacheManager extension package providing Microsoft Bond based serialization for distributed caches. CacheManager is an open source caching abstraction layer for .NET written in C#. It supports various cache providers and implements many advanced features.</Description>
-    <TargetFrameworks>netstandard2.0;net45</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net8.0</TargetFrameworks>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageTags>Caching;Cache;CacheManager;Serialization;Bond</PackageTags>
@@ -10,9 +10,15 @@
   <ItemGroup>
     <ProjectReference Include="..\CacheManager.Core\CacheManager.Core.csproj" />
   </ItemGroup>
-  <ItemGroup>
+  
+  <ItemGroup Condition=" '$(TargetFramework)' != 'net8.0' ">
+    <PackageReference Include="Bond.CSharp" Version="11.0.1" />
+    <PackageReference Include="Microsoft.Extensions.ObjectPool" Version="6.0.0" />
   </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="Bond.CSharp" Version="7.0.1" />
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net8.0' ">
+    <PackageReference Include="Bond.CSharp" Version="11.0.1" />
+    <PackageReference Include="Microsoft.Extensions.ObjectPool" Version="8.0.0" />
   </ItemGroup>
+
 </Project>

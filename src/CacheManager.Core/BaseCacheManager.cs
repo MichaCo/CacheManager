@@ -4,7 +4,7 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
 using CacheManager.Core.Internal;
-using CacheManager.Core.Logging;
+using Microsoft.Extensions.Logging;
 using static CacheManager.Core.Utility.Guard;
 
 namespace CacheManager.Core
@@ -18,6 +18,34 @@ namespace CacheManager.Core
     /// <typeparam name="TCacheValue">The type of the cache value.</typeparam>
     public partial class BaseCacheManager<TCacheValue> : BaseCache<TCacheValue>, ICacheManager<TCacheValue>, IDisposable
     {
+        private class NullLoggerFactory : ILoggerFactory
+        {
+            public void AddProvider(ILoggerProvider provider)
+            {
+            }
+
+            public ILogger CreateLogger(string categoryName)
+            {
+                return new NullLogger();
+            }
+
+            public void Dispose()
+            {
+            }
+        }
+
+        private class NullLogger : ILogger<BaseCacheManager<TCacheValue>>
+        {
+            public IDisposable BeginScope<TState>(TState state) => null;
+
+            public bool IsEnabled(LogLevel logLevel) => false;
+
+            public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
+            {
+                // do nothing;
+            }
+        }
+
         private readonly bool _logTrace = false;
         private readonly BaseCacheHandle<TCacheValue>[] _cacheHandles;
         private readonly CacheBackplane _cacheBackplane;
@@ -31,49 +59,35 @@ namespace CacheManager.Core
         /// <param name="configuration">
         /// The configuration which defines the structure and complexity of the cache manager.
         /// </param>
+        /// <param name="loggerFactory">Optional logger factory.</param>
         /// <exception cref="System.ArgumentNullException">
         /// When <paramref name="configuration"/> is null.
         /// </exception>
         /// <see cref="CacheFactory"/>
-        /// <see cref="ConfigurationBuilder"/>
+        /// <see cref="CacheConfigurationBuilder"/>
         /// <see cref="BaseCacheHandle{TCacheValue}"/>
-        public BaseCacheManager(ICacheManagerConfiguration configuration)
-            : this(configuration?.Name ?? Guid.NewGuid().ToString(), configuration)
+        public BaseCacheManager(ICacheManagerConfiguration configuration, ILoggerFactory loggerFactory = null)
+            : this(configuration?.Name ?? Guid.NewGuid().ToString(), configuration, loggerFactory ?? new NullLoggerFactory())
         {
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="BaseCacheManager{TCacheValue}"/> class
-        /// using the specified <paramref name="name"/> and <paramref name="configuration"/>.
-        /// </summary>
-        /// <param name="name">The cache name.</param>
-        /// <param name="configuration">
-        /// The configuration which defines the structure and complexity of the cache manager.
-        /// </param>
-        /// <exception cref="ArgumentNullException">
-        /// When <paramref name="name"/> or <paramref name="configuration"/> is null.
-        /// </exception>
-        /// <see cref="CacheFactory"/>
-        /// <see cref="ConfigurationBuilder"/>
-        /// <see cref="BaseCacheHandle{TCacheValue}"/>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2200:RethrowToPreserveStackDetails", Justification = "fine for now")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "nope")]
-        private BaseCacheManager(string name, ICacheManagerConfiguration configuration)
+        private BaseCacheManager(string name, ICacheManagerConfiguration configuration, ILoggerFactory loggerFactory)
         {
             NotNullOrWhiteSpace(name, nameof(name));
             NotNull(configuration, nameof(configuration));
+            NotNull(loggerFactory, nameof(loggerFactory));
 
             Name = name;
             Configuration = configuration;
-
-            var loggerFactory = CacheReflectionHelper.CreateLoggerFactory(configuration);
             var serializer = CacheReflectionHelper.CreateSerializer(configuration, loggerFactory);
 
-            Logger = loggerFactory.CreateLogger(this);
+            Logger = loggerFactory.CreateLogger(this.GetType());
 
             _logTrace = Logger.IsEnabled(LogLevel.Trace);
 
-            Logger.LogInfo("Cache manager: adding cache handles...");
+            Logger.LogInformation("Cache manager: adding cache handles...");
 
             try
             {

@@ -1,0 +1,37 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Description>CacheManager is an open source caching abstraction layer for .NET written in C#. It supports various cache providers and implements many advanced features.</Description>
+    <VersionPrefix>2.0.0</VersionPrefix>
+    <Authors>MichaConrad</Authors>
+    <TargetFramework>net8.0</TargetFramework>
+    <AssemblyName>CacheManager.Config.Tests</AssemblyName>
+    <OutputType>Exe</OutputType>
+    <AssemblyOriginatorKeyFile>../../tools/key.snk</AssemblyOriginatorKeyFile>
+    <SignAssembly>true</SignAssembly>
+    <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
+    <PackageId>CacheManager.Config.Tests</PackageId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Update="cache.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\CacheManager.Microsoft.Extensions.Caching.Memory\CacheManager.Microsoft.Extensions.Caching.Memory.csproj" />
+    <ProjectReference Include="..\..\src\CacheManager.Microsoft.Extensions.Configuration\CacheManager.Microsoft.Extensions.Configuration.csproj" />
+    <ProjectReference Include="..\..\src\CacheManager.Core\CacheManager.Core.csproj" />
+    <ProjectReference Include="..\..\src\CacheManager.Serialization.Json\CacheManager.Serialization.Json.csproj" />
+    <ProjectReference Include="..\..\src\CacheManager.Serialization.Bond\CacheManager.Serialization.Bond.csproj" />
+    <ProjectReference Include="..\..\src\CacheManager.Serialization.ProtoBuf\CacheManager.Serialization.ProtoBuf.csproj" />
+    <ProjectReference Include="..\..\src\CacheManager.StackExchange.Redis\CacheManager.StackExchange.Redis.csproj" />
+	  <ProjectReference Include="..\..\src\CacheManager.SystemRuntimeCaching\CacheManager.SystemRuntimeCaching.csproj" />
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Garnet" Version="1.0.57" />
+  </ItemGroup>
+</Project>

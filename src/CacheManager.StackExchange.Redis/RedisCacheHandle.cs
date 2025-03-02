@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Linq;
 using System.Text;
 using CacheManager.Core;
 using CacheManager.Core.Internal;
-using CacheManager.Core.Logging;
+using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
 using static CacheManager.Core.Utility.Guard;
 
@@ -29,18 +30,32 @@ namespace CacheManager.Redis
 
         private static readonly string _scriptAdd = $@"
 if redis.call('HSETNX', KEYS[1], '{HashFieldValue}', ARGV[1]) == 1 then
+    if ARGV[7] ~= nil then
+        if (redis.call('HMSET', ARGV[7], KEYS[1], 'regionKey')) then
+        else
+            return -2
+        end
+    end
+
     local result=redis.call('HMSET', KEYS[1], '{HashFieldType}', ARGV[2], '{HashFieldExpirationMode}', ARGV[3], '{HashFieldExpirationTimeout}', ARGV[4], '{HashFieldCreated}', ARGV[5], '{HashFieldVersion}', 1, '{HashFieldUsesDefaultExp}', ARGV[6])
     if ARGV[3] > '1' and ARGV[4] ~= '0' then
         redis.call('PEXPIRE', KEYS[1], ARGV[4])
     else
         redis.call('PERSIST', KEYS[1])
     end
-    return result
+    return 1
 else
     return nil
 end";
 
         private static readonly string _scriptPut = $@"
+if ARGV[7] ~= nil then
+    if (redis.call('HMSET', ARGV[7], KEYS[1], 'regionKey')) then
+    else
+        return -2
+    end
+end
+
 local result=redis.call('HMSET', KEYS[1], '{HashFieldValue}', ARGV[1], '{HashFieldType}', ARGV[2], '{HashFieldExpirationMode}', ARGV[3], '{HashFieldExpirationTimeout}', ARGV[4], '{HashFieldCreated}', ARGV[5], '{HashFieldUsesDefaultExp}', ARGV[6])
 redis.call('HINCRBY', KEYS[1], '{HashFieldVersion}', 1)
 if ARGV[3] > '1' and ARGV[4] ~= '0' then
@@ -48,7 +63,7 @@ if ARGV[3] > '1' and ARGV[4] ~= '0' then
 else
     redis.call('PERSIST', KEYS[1])
 end
-return result";
+return 1";
 
         // script should also update expire now. If sliding, update the sliding window
         private static readonly string _scriptUpdate = $@"
@@ -101,7 +116,7 @@ return result";
             NotNull(configuration, nameof(configuration));
             EnsureNotNull(serializer, "A serializer is required for the redis cache handle");
 
-            Logger = loggerFactory.CreateLogger(this);
+            Logger = loggerFactory.CreateLogger(this.GetType());
             _managerConfiguration = managerConfiguration;
             _valueConverter = new RedisValueConverter(serializer);
             _redisConfiguration = RedisConfigurations.GetConfiguration(configuration.Key);
@@ -123,13 +138,13 @@ return result";
                     {
                         if (!cfg.Value.Contains("E"))
                         {
-                            Logger.LogWarn("Server {0} is missing configuration value 'E' in notify-keyspace-events to enable keyevents.", cfg.Key);
+                            Logger.LogWarning("Server {0} is missing configuration value 'E' in notify-keyspace-events to enable keyevents.", cfg.Key);
                         }
 
                         if (!(cfg.Value.Contains("A") ||
                             (cfg.Value.Contains("x") && cfg.Value.Contains("e"))))
                         {
-                            Logger.LogWarn("Server {0} is missing configuration value 'A' or 'x' and 'e' in notify-keyspace-events to enable keyevents for expired and evicted keys.", cfg.Key);
+                            Logger.LogWarning("Server {0} is missing configuration value 'A' or 'x' and 'e' in notify-keyspace-events to enable keyevents for expired and evicted keys.", cfg.Key);
                         }
                     }
                 }
@@ -162,12 +177,12 @@ return result";
             {
                 if (_redisConfiguration.TwemproxyEnabled)
                 {
-                    Logger.LogWarn("'Count' cannot be calculated. Twemproxy mode is enabled which does not support accessing the servers collection.");
+                    Logger.LogWarning("'Count' cannot be calculated. Twemproxy mode is enabled which does not support accessing the servers collection.");
                     return 0;
                 }
 
                 var count = 0;
-                foreach (var server in Servers.Where(p => !p.IsSlave && p.IsConnected))
+                foreach (var server in Servers.Where(p => !p.IsReplica && p.IsConnected))
                 {
                     count += (int)server.DatabaseSize(_redisConfiguration.Database);
                 }
@@ -210,7 +225,7 @@ return result";
         {
             try
             {
-                foreach (var server in Servers.Where(p => !p.IsSlave))
+                foreach (var server in Servers.Where(p => !p.IsReplica))
                 {
                     Retry(() =>
                     {
@@ -497,7 +512,7 @@ return result";
                 }
                 else
                 {
-                    Logger.LogWarn("Expiration mode and timeout are set but are not valid '{0}', '{1}'.", expirationModeItem, timeoutItem);
+                    Logger.LogWarning("Expiration mode and timeout are set but are not valid '{0}', '{1}'.", expirationModeItem, timeoutItem);
                 }
             }
 
@@ -580,7 +595,7 @@ return result";
                     }
                     else
                     {
-                        Logger.LogWarn("Expiration mode and timeout are set but are not valid '{0}', '{1}'.", expirationModeItem, timeoutItem);
+                        Logger.LogWarning("Expiration mode and timeout are set but are not valid '{0}', '{1}'.", expirationModeItem, timeoutItem);
                     }
                 }
 
@@ -625,7 +640,7 @@ return result";
         /// with the new value. If the item doesn't exist, the item will be added to the cache.
         /// </summary>
         /// <param name="item">The <c>CacheItem</c> to be added to the cache.</param>
-        protected override void PutInternal(CacheItem<TCacheValue> item)
+        protected internal override void PutInternal(CacheItem<TCacheValue> item)
             => base.PutInternal(item);
 
         /// <summary>
@@ -677,22 +692,22 @@ return result";
         private void SubscribeKeyspaceNotifications()
         {
             _connection.Subscriber.Subscribe(
-                 $"__keyevent@{_redisConfiguration.Database}__:expired",
-                 (channel, key) =>
-                 {
-                     var tupple = ParseKey(key);
-                     if (Logger.IsEnabled(LogLevel.Debug))
-                     {
-                         Logger.LogDebug("Got expired event for key '{0}:{1}'", tupple.Item2, tupple.Item1);
-                     }
+                channel: RedisChannel.Literal($"__keyevent@{_redisConfiguration.Database}__:expired"),
+                handler: (channel, key) =>
+                {
+                    var tupple = ParseKey(key);
+                    if (Logger.IsEnabled(LogLevel.Debug))
+                    {
+                        Logger.LogDebug("Got expired event for key '{0}:{1}'", tupple.Item2, tupple.Item1);
+                    }
 
-                     // we cannot return the original value here because we don't have it
-                     TriggerCacheSpecificRemove(tupple.Item1, tupple.Item2, CacheItemRemovedReason.Expired, null);
-                 });
+                    // we cannot return the original value here because we don't have it
+                    TriggerCacheSpecificRemove(tupple.Item1, tupple.Item2, CacheItemRemovedReason.Expired, null);
+                });
 
             _connection.Subscriber.Subscribe(
-                $"__keyevent@{_redisConfiguration.Database}__:evicted",
-                (channel, key) =>
+                channel: RedisChannel.Literal($"__keyevent@{_redisConfiguration.Database}__:evicted"),
+                handler: (channel, key) =>
                 {
                     var tupple = ParseKey(key);
                     if (Logger.IsEnabled(LogLevel.Debug))
@@ -705,8 +720,8 @@ return result";
                 });
 
             _connection.Subscriber.Subscribe(
-                $"__keyevent@{_redisConfiguration.Database}__:del",
-                (channel, key) =>
+                channel: RedisChannel.Literal($"__keyevent@{_redisConfiguration.Database}__:del"),
+                handler: (channel, key) =>
                 {
                     var tupple = ParseKey(key);
                     if (Logger.IsEnabled(LogLevel.Debug))
@@ -851,7 +866,8 @@ return result";
                 (int)item.ExpirationMode,
                 (long)item.ExpirationTimeout.TotalMilliseconds,
                 item.CreatedUtc.Ticks,
-                item.UsesExpirationDefaults
+                item.UsesExpirationDefaults,
+                string.IsNullOrWhiteSpace(item.Region) ? string.Empty : item.Region
             };
 
             RedisResult result;
@@ -864,54 +880,32 @@ return result";
                 result = Eval(ScriptType.Put, fullKey, parameters, flags);
             }
 
-            if (result == null)
+            if (result.IsNull && flags.HasFlag(CommandFlags.FireAndForget))
             {
-                if (flags.HasFlag(CommandFlags.FireAndForget))
-                {
-                    if (!string.IsNullOrWhiteSpace(item.Region))
-                    {
-                        // setting region lookup key if region is being used
-                        _connection.Database.HashSet(item.Region, fullKey, "regionKey", When.Always, CommandFlags.FireAndForget);
-                    }
-
-                    // put runs via fire and forget, so we don't get a result back
-                    return true;
-                }
-
-                // should never happen, something went wrong with the script
-                throw new InvalidOperationException("Something went wrong adding an item, result must not be null.");
+                // fire and forget will not return a result.
+                return true;
             }
-            else
+
+            if (result.IsNull && when == When.NotExists)
             {
-                if (result.IsNull && when == When.NotExists)
+                // add failed because element exists already
+                if (Logger.IsEnabled(LogLevel.Debug))
                 {
-                    // add failed because element exists already
-                    if (Logger.IsEnabled(LogLevel.Debug))
-                    {
-                        Logger.LogDebug("DB {0} | Failed to add item [{1}] because it exists.", _connection.Database.Database, item.ToString());
-                    }
-
-                    return false;
+                    Logger.LogDebug("DB {0} | Failed to add item [{1}] because it exists.", _connection.Database.Database, item.ToString());
                 }
 
-                var resultValue = (RedisValue)result;
-
-                if (resultValue.HasValue && resultValue.ToString().Equals("OK", StringComparison.OrdinalIgnoreCase))
-                {
-                    // Added successfully:
-                    if (!string.IsNullOrWhiteSpace(item.Region))
-                    {
-                        // setting region lookup key if region is being used
-                        // we cannot do that within the lua because the region could be on another cluster node!
-                        _connection.Database.HashSet(item.Region, fullKey, "regionKey", When.Always, CommandFlags.FireAndForget);
-                    }
-
-                    return true;
-                }
-
-                Logger.LogWarn("DB {0} | Failed to set item [{1}]: {2}.", _connection.Database.Database, item.ToString(), resultValue.ToString());
                 return false;
             }
+
+            var resultValue = (RedisValue)result;
+
+            if (resultValue.HasValue && resultValue == 1)
+            {
+                return true;
+            }
+
+            Logger.LogWarning("DB {0} | Failed to set item [{1}]: {2}.", _connection.Database.Database, item.ToString(), resultValue.ToString());
+            return false;
         }
 
         private bool SetNoScript(CacheItem<TCacheValue> item, When when, bool sync = false)
@@ -1006,7 +1000,7 @@ return result";
             }
             catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.OrdinalIgnoreCase))
             {
-                Logger.LogInfo("Received NOSCRIPT from server. Reloading scripts...");
+                Logger.LogInformation("Received NOSCRIPT from server. Reloading scripts...");
                 LoadScripts();
 
                 // retry
@@ -1018,7 +1012,7 @@ return result";
         {
             lock (_lockObject)
             {
-                Logger.LogInfo("Loading scripts.");
+                Logger.LogInformation("Loading scripts.");
 
                 var putLua = LuaScript.Prepare(_scriptPut);
                 var addLua = LuaScript.Prepare(_scriptAdd);
