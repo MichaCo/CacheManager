@@ -32,6 +32,66 @@ namespace CacheManager.Tests
         }
 
         [Fact]
+        public void Redis_TwoServerSetup_ClearWorks()
+        {
+            using var server1 = RedisTestFixture.StartServer(7001);
+            using var server2 = RedisTestFixture.StartServer(7002);
+
+            var cache1 = new BaseCacheManager<string>(CacheConfigurationBuilder
+                .BuildConfiguration(a =>
+                {
+                    a.WithRedisCacheHandle("redis1");
+                    a.WithRedisConfiguration("redis1", c => c.WithEndpoint("localhost", 7001).WithAllowAdmin());
+                    a.WithJsonSerializer();
+                }));
+
+            var cache2 = new BaseCacheManager<string>(CacheConfigurationBuilder
+                .BuildConfiguration(a =>
+                {
+                    a.WithRedisCacheHandle("redis2");
+                    a.WithRedisConfiguration("redis2", c => c.WithEndpoint("localhost", 7002).WithAllowAdmin());
+                    a.WithJsonSerializer();
+                }));
+
+            var cacheBoth = new BaseCacheManager<string>(CacheConfigurationBuilder
+                .BuildConfiguration(a =>
+                {
+                    a.WithRedisCacheHandle("redis");
+                    a.WithJsonSerializer();
+                    a.WithRedisConfiguration("redis", c => c
+                        .WithEndpoint("localhost", 7001)
+                        .WithEndpoint("localhost", 7002)
+                        .WithAllowAdmin());
+                }));
+
+
+            var testKey = "testKey";
+            var value = Guid.NewGuid().ToString();
+            
+            cacheBoth.Add(testKey, value);
+
+            var exists1 = cache1.Exists(testKey);
+            var exists2 = cache2.Exists(testKey);
+
+            Assert.True(exists1 || exists2);
+
+            if (!exists1)
+            {
+                cache1[testKey] = "other value";
+            }
+            else
+            {
+                Assert.False(exists2);
+                cache2[testKey] = "other value";
+            }
+
+            cacheBoth.Clear();
+
+            Assert.False(cache1.Exists(testKey));
+            Assert.False(cache2.Exists(testKey));
+        }
+
+        [Fact]
         public void Redis_WithoutSerializer_ShouldThrow()
         {
             var cfg = CacheConfigurationBuilder.BuildConfiguration(

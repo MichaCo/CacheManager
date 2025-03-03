@@ -20,13 +20,13 @@ namespace CacheManager.Tests
 
         private static int InstanceCount = 0;
 
-        public static GarnetServer StartServer(ILoggerFactory loggerFactory = null)
+        public static GarnetServer StartServer(int port = 6379, ILoggerFactory loggerFactory = null)
         {
             var server = new GarnetServer(new GarnetServerOptions()
             {
                 EnableLua = true,
                 LuaOptions = new LuaOptions(LuaMemoryManagementMode.Native, string.Empty, TimeSpan.FromSeconds(20)),
-                EndPoint = new IPEndPoint(IPAddress.Loopback, 6379),
+                EndPoint = new IPEndPoint(IPAddress.Loopback, port),
             },
             loggerFactory: loggerFactory);
             try
