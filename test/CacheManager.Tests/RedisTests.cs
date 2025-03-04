@@ -32,6 +32,7 @@ namespace CacheManager.Tests
         }
 
         [Fact]
+        [Trait("category", "Redis")]
         public void Redis_TwoServerSetup_ClearWorks()
         {
             using var server1 = RedisTestFixture.StartServer(7001);
