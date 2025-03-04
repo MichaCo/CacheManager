@@ -66,7 +66,7 @@ namespace CacheManager.Tests
                 }));
 
 
-            var testKey = "testKey";
+            var testKey = Guid.NewGuid().ToString();
             var value = Guid.NewGuid().ToString();
             
             cacheBoth.Add(testKey, value);

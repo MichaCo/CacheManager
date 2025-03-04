@@ -51,6 +51,7 @@ namespace CacheManager.Tests
 
         public void Dispose()
         {
+            Task.Delay(5000).GetAwaiter().GetResult();
             var current = Interlocked.Decrement(ref InstanceCount);
 
             // Console.WriteLine($"Disposing... {current}");
