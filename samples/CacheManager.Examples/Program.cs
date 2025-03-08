@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using System.Net;
 using Garnet.server;
 using Garnet;
+using Microsoft.Extensions.Configuration;
 
 namespace CacheManager.Examples;
 
@@ -29,13 +30,22 @@ public class Program
     private static void Main()
     {
         using var server = StartServer();
-        EventsExample();
+
+        MostSimpleCacheManager();
+        MostSimpleCacheManagerB();
+        MostSimpleCacheManagerC();
         MostSimpleCacheManagerWithLogging();
+        RedisSample();
+        EventsExample();
+        EditExistingConfiguration();
         SimpleCustomBuildConfigurationUsingConfigBuilder();
         SimpleCustomBuildConfigurationUsingFactory();
         UpdateTest();
         UpdateCounterTest();
         LoggingSample();
+        MultiCacheEvictionWithoutRedisCacheHandle();
+        AppConfigLoadInstalledCacheCfg();
+        AppConfigLoadInstalledCacheCfgUsingDi();
     }
 
     private static void MostSimpleCacheManager()
@@ -125,6 +135,26 @@ public class Program
         cache.Add("key", "value");
     }
 
+
+    private static void AppConfigLoadInstalledCacheCfgUsingDi()
+    {
+        var configuration = new ConfigurationBuilder()
+            .AddJsonFile("cache.json")
+            .Build();
+        
+        var services = new ServiceCollection();
+        services.AddLogging(c => c.AddConsole().SetMinimumLevel(LogLevel.Trace));
+        services.AddOptions();
+        services.AddCacheManager();
+        services.AddCacheManagerConfiguration(configuration, "simpleMemoryCache");
+
+        var provider = services.BuildServiceProvider();
+
+        var cache = provider.GetRequiredService<ICacheManager<string>>();
+        
+        cache.Add("key", "value");
+    }
+
     private static void EventsExample()
     {
         var services = new ServiceCollection();
@@ -152,6 +182,7 @@ public class Program
             settings
                 .WithSystemRuntimeCacheHandle()
                 .And
+                .WithJsonSerializer()
                 .WithRedisConfiguration("redis", config =>
                 {
                     config.WithAllowAdmin()
@@ -162,6 +193,7 @@ public class Program
                 .WithRetryTimeout(100)
                 .WithRedisBackplane("redis")
                 .WithRedisCacheHandle("redis", true);
+
         },
         loggerFactory);
 
@@ -264,8 +296,7 @@ public class Program
                 .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(5))
             .And
             .WithRedisBackplane("redisConfig")
-            .WithRedisConfiguration("redisConfig", "localhost,allowadmin=true", enableKeyspaceNotifications: true)
-            //.WithMicrosoftLogging(new LoggerFactory().AddConsole(LogLevel.Debug))
+            .WithRedisConfiguration("redisConfig", "localhost,allowadmin=true", enableKeyspaceNotifications: true)            
             .Build();
 
         var cacheA = new BaseCacheManager<string>(config);

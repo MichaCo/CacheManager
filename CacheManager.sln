@@ -31,7 +31,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "apispec", "apispec", "{96C0
 		Documentation\apispec\CacheManager_Core_CacheFactory_Build_System_String_System_Action_CacheManager_Core_ConfigurationBuilderCachePart__.md = Documentation\apispec\CacheManager_Core_CacheFactory_Build_System_String_System_Action_CacheManager_Core_ConfigurationBuilderCachePart__.md
 		Documentation\apispec\CacheManager_Core_JsonConfigurationBuilderExtensions.md = Documentation\apispec\CacheManager_Core_JsonConfigurationBuilderExtensions.md
 		Documentation\apispec\CacheManager_Core_MicrosoftConfigurationExtensions.md = Documentation\apispec\CacheManager_Core_MicrosoftConfigurationExtensions.md
-		Documentation\apispec\CacheManager_Core_MicrosoftLoggingBuilderExtensions.md = Documentation\apispec\CacheManager_Core_MicrosoftLoggingBuilderExtensions.md
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CacheManager.Core", "src\CacheManager.Core\CacheManager.Core.csproj", "{C9B4E53B-15FC-42AF-9107-0C2E52E8680B}"

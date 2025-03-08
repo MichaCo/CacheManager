@@ -6,6 +6,7 @@
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
     <PackageTags>Caching;Cache;CacheManager;Distributed Cache;Redis;</PackageTags>
     <IsPackable>true</IsPackable>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>

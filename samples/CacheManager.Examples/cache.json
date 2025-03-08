@@ -1,0 +1,13 @@
+﻿{
+  "$schema": "http://cachemanager.michaco.net/schemas/cachemanager.json#",
+  "cacheManagers": [
+    {
+      "name": "simpleMemoryCache",
+      "handles": [
+        {
+          "knownType": "Dictionary"
+        }
+      ]
+    }
+  ]
+}
