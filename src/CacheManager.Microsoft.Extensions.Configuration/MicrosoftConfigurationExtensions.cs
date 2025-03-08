@@ -28,7 +28,6 @@ namespace Microsoft.Extensions.Configuration
         private const string TypeBondCompactBinarySerializer = "CacheManager.Serialization.Bond.BondCompactBinaryCacheSerializer, CacheManager.Serialization.Bond";
         private const string TypeBondFastBinarySerializer = "CacheManager.Serialization.Bond.BondFastBinaryCacheSerializer, CacheManager.Serialization.Bond";
         private const string TypeBondSimpleJsonSerializer = "CacheManager.Serialization.Bond.BondSimpleJsonCacheSerializer, CacheManager.Serialization.Bond";
-        private const string TypeMicrosoftLoggerFactory = "CacheManager.Logging.MicrosoftLoggerFactoryAdapter, CacheManager.Microsoft.Extensions.Logging";
         private const string TypeRedisBackplane = "CacheManager.Redis.RedisCacheBackplane, CacheManager.StackExchange.Redis";
         private const string TypeSystemRuntimeHandle = "CacheManager.SystemRuntimeCaching.MemoryCacheHandle`1, CacheManager.SystemRuntimeCaching";
         private const string TypeRedisHandle = "CacheManager.Redis.RedisCacheHandle`1, CacheManager.StackExchange.Redis";
@@ -404,7 +403,11 @@ namespace Microsoft.Extensions.Configuration
             switch (knownTypeName.ToLowerInvariant())
             {
                 case "microsoft":
-                    return Type.GetType(TypeMicrosoftLoggerFactory, true);
+                    throw new NotSupportedException(
+                        "This is a breaking change in V2.0. " +
+                        "This is not necessairy to configure anymore. " +
+                        "The Microsoft logging extensions are now natively integrated." +
+                        "BaseCacheManager's constructor allows for passing in the logger factory which also works automatically via DI.");
             }
 
             throw new InvalidOperationException(

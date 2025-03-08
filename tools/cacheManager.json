@@ -66,29 +66,6 @@
       },
       "additionalProperties": false
     },
-    "knownLoggerFactory": {
-      "type": "object",
-      "required": [ "knownType" ],
-      "properties": {
-        "knownType": {
-          "type": "string",
-          "enum": [ "Microsoft" ],
-          "description": "Choose one of the known logger factories instead of typing the full type name. The corresponding package for the logger factory must be installed."
-        }
-      },
-      "additionalProperties": false
-    },
-    "unknownLoggerFactory": {
-      "type": "object",
-      "required": [ "type" ],
-      "properties": {
-        "type": {
-          "type": "string",
-          "description": "The clr type of a logger factory which should be used by CacheManager to log events."
-        }
-      },
-      "additionalProperties": false
-    },
     "knownSerializer": {
       "type": "object",
       "required": [ "knownType" ],
@@ -227,21 +204,9 @@
             }
           ]
         },
-        "loggerFactory": {
-          "type": "object",
-          "description": "The logger factory configuration.",
-          "oneOf": [
-            {
-              "$ref": "#/definitions/knownLoggerFactory"
-            },
-            {
-              "$ref": "#/definitions/unknownLoggerFactory"
-            }
-          ]
-        },
         "serializer": {
           "type": "object",
-          "description": "The logger factory configuration.",
+          "description": "The serializer configuration.",
           "oneOf": [
             {
               "$ref": "#/definitions/knownSerializer"
