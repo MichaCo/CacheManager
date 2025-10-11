@@ -159,7 +159,11 @@ namespace CacheManager.Redis
 
                         if (!connection.IsConnected)
                         {
-                            connection.Dispose();
+                            try
+                            {
+                                connection.Dispose();
+                            }
+                            catch { /* ignore */ }
                             throw new InvalidOperationException($"Connection to '{RemoveCredentials(_connectionString)}' failed.");
                         }
 

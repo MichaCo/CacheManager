@@ -35,6 +35,7 @@ namespace CacheManager.Redis
         /// The list of <see cref="ServerEndPoint"/> s to be used to connect to Redis server.
         /// </param>
         /// <param name="database">The Redis database index.</param>
+        /// <param name="user">User for the redis server (for use with ACLs on redis 6 and above).</param>
         /// <param name="password">The password of the Redis server.</param>
         /// <param name="isSsl">If <c>true</c> instructs the cache to use SSL encryption.</param>
         /// <param name="sslHost">If specified, the connection will set the SSL host.</param>
@@ -53,6 +54,7 @@ namespace CacheManager.Redis
             string key,
             IList<ServerEndPoint> endpoints,
             int database = 0,
+            string user = null,
             string password = null,
             bool isSsl = false,
             string sslHost = null,
@@ -74,6 +76,7 @@ namespace CacheManager.Redis
             Database = database;
             Endpoints = endpoints;
             Password = password;
+            User = user;
             IsSsl = isSsl;
             SslHost = sslHost;
             ConnectionTimeout = connectionTimeout;
@@ -124,6 +127,7 @@ namespace CacheManager.Redis
                 AllowAdmin = AllowAdmin,
                 ConnectTimeout = ConnectionTimeout,
                 Password = Password,
+                User = User,
                 Ssl = IsSsl,
                 SslHost = SslHost,
                 ConnectRetry = 10,
@@ -187,6 +191,8 @@ namespace CacheManager.Redis
                 ConnectionTimeout = _configurationOptions.ConnectTimeout;
                 IsSsl = _configurationOptions.Ssl;
                 SslHost = _configurationOptions.SslHost;
+                User = _configurationOptions.User;
+                Password = _configurationOptions.Password;
 
                 // if default database is specified in the connection string, use that one, otherwise use explicit database setting.
                 // fixes #175
@@ -207,6 +213,14 @@ namespace CacheManager.Redis
         /// The password.
         /// </value>
         public string Password { get; set; }
+
+        /// <summary>
+        /// Gets or sets the user for the redis connection (for use with ACLs on redis 6 and above).
+        /// </summary>
+        /// <value>
+        /// The user.
+        /// </value>
+        public string User { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether to use SSL encryption.

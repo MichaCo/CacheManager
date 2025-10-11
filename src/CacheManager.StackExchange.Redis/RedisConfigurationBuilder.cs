@@ -21,6 +21,7 @@ namespace CacheManager.Redis
         private bool _enabledKeyspaceNotifications = false;
         private string _useVersion;
         private bool _useTwemproxy;
+        private string _user;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RedisConfigurationBuilder"/> class.
@@ -45,6 +46,7 @@ namespace CacheManager.Redis
                 endpoints: _endpoints,
                 database: _database,
                 password: _password,
+                user: _user,
                 isSsl: _isSsl,
                 sslHost: _sslHost,
                 connectionTimeout: _connectionTimeout,
@@ -146,6 +148,17 @@ namespace CacheManager.Redis
         public RedisConfigurationBuilder WithPassword(string serverPassword)
         {
             _password = serverPassword;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the user for the redis server (for use with ACLs on redis 6 and above).
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns></returns>
+        public RedisConfigurationBuilder WithUser(string user)
+        {
+            _user = user;
             return this;
         }
 
