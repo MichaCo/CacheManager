@@ -35,7 +35,7 @@ namespace CacheManager.Redis
         /// The list of <see cref="ServerEndPoint"/> s to be used to connect to Redis server.
         /// </param>
         /// <param name="database">The Redis database index.</param>
-        /// <param name="user">User for the redis server (for use with ACLs on redis 6 and above).</param>
+        /// <param name="user">User for the redis server (for use with ACLs on Redis 7.0 and above).</param>
         /// <param name="password">The password of the Redis server.</param>
         /// <param name="isSsl">If <c>true</c> instructs the cache to use SSL encryption.</param>
         /// <param name="sslHost">If specified, the connection will set the SSL host.</param>
