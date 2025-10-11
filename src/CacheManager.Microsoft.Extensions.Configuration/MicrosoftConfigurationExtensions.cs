@@ -405,7 +405,7 @@ namespace Microsoft.Extensions.Configuration
                 case "microsoft":
                     throw new NotSupportedException(
                         "This is a breaking change in V2.0. " +
-                        "This is not necessairy to configure anymore. " +
+                        "This is not necessary to configure anymore. " +
                         "The Microsoft logging extensions are now natively integrated." +
                         "BaseCacheManager's constructor allows for passing in the logger factory which also works automatically via DI.");
             }
