@@ -152,7 +152,7 @@ namespace CacheManager.Redis
         }
 
         /// <summary>
-        /// Sets the user for the redis server (for use with ACLs on redis 6 and above).
+        /// Sets the user for the redis server (for use with ACLs on Redis 7.0 and above).
         /// </summary>
         /// <param name="user"></param>
         /// <returns></returns>
