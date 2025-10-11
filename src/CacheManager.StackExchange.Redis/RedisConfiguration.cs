@@ -215,7 +215,7 @@ namespace CacheManager.Redis
         public string Password { get; set; }
 
         /// <summary>
-        /// Gets or sets the user for the redis connection (for use with ACLs on redis 6 and above).
+        /// Gets or sets the user for the redis connection (for use with ACLs on redis 7.0 and above).
         /// </summary>
         /// <value>
         /// The user.
