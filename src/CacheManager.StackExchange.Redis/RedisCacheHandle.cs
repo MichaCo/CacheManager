@@ -858,7 +858,7 @@ return result";
 
             ValidateExpirationTimeout(item);
 
-            // ARGV [1]: value, [2]: type, [3]: expirationMode, [4]: expirationTimeout(millis), [5]: created(ticks)
+            // ARGV [1]: value, [2]: type, [3]: expirationMode, [4]: expirationTimeout(millis), [5]: created(ticks), [6]: usesDefaultExpiration
             var parameters = new RedisValue[]
             {
                 value,
@@ -866,8 +866,7 @@ return result";
                 (int)item.ExpirationMode,
                 (long)item.ExpirationTimeout.TotalMilliseconds,
                 item.CreatedUtc.Ticks,
-                item.UsesExpirationDefaults,
-                string.IsNullOrWhiteSpace(item.Region) ? string.Empty : item.Region
+                item.UsesExpirationDefaults
             };
 
             RedisResult result;
