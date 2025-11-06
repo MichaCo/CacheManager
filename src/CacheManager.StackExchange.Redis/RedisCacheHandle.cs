@@ -30,8 +30,8 @@ namespace CacheManager.Redis
 
         private static readonly string _scriptAdd = $@"
 if redis.call('HSETNX', KEYS[1], '{HashFieldValue}', ARGV[1]) == 1 then
-    if ARGV[7] ~= nil then
-        if (redis.call('HMSET', ARGV[7], KEYS[1], 'regionKey')) then
+    if KEYS[2] ~= nil then
+        if (redis.call('HMSET', KEYS[2], KEYS[1], 'regionKey')) then
         else
             return -2
         end
@@ -49,8 +49,8 @@ else
 end";
 
         private static readonly string _scriptPut = $@"
-if ARGV[7] ~= nil then
-    if (redis.call('HMSET', ARGV[7], KEYS[1], 'regionKey')) then
+if KEYS[2] ~= nil then
+    if (redis.call('HMSET', KEYS[2], KEYS[1], 'regionKey')) then
     else
         return -2
     end
@@ -324,7 +324,7 @@ return result";
                     }
 
                     // resetting TTL on update, too
-                    var result = Eval(ScriptType.Update, fullKey, new[]
+                    var result = Eval(ScriptType.Update, fullKey, region, new[]
                     {
                         ToRedisValue(newValue),
                         version,
@@ -473,7 +473,7 @@ return result";
 
             var fullKey = GetKey(key, region);
 
-            var result = Retry(() => Eval(ScriptType.Get, fullKey));
+            var result = Retry(() => Eval(ScriptType.Get, fullKey, region));
             if (result == null || result.IsNull)
             {
                 // something went wrong. HMGET should return at least a null result for each requested field
@@ -873,11 +873,11 @@ return result";
             RedisResult result;
             if (when == When.NotExists)
             {
-                result = Eval(ScriptType.Add, fullKey, parameters, flags);
+                result = Eval(ScriptType.Add, fullKey, item.Region, parameters, flags);
             }
             else
             {
-                result = Eval(ScriptType.Put, fullKey, parameters, flags);
+                result = Eval(ScriptType.Put, fullKey, item.Region, parameters, flags);
             }
 
             if (result.IsNull && flags.HasFlag(CommandFlags.FireAndForget))
@@ -964,7 +964,7 @@ return result";
             });
         }
 
-        private RedisResult Eval(ScriptType scriptType, RedisKey redisKey, RedisValue[] values = null, CommandFlags flags = CommandFlags.None)
+        private RedisResult Eval(ScriptType scriptType, RedisKey redisKey, RedisKey regionKey, RedisValue[] values = null, CommandFlags flags = CommandFlags.None)
         {
             if (!_scriptsLoaded)
             {
@@ -989,13 +989,14 @@ return result";
 
             try
             {
+                var regionKeyPrep = string.IsNullOrWhiteSpace(regionKey) ? (RedisKey)string.Empty : regionKey;
                 if (_canPreloadScripts && script != null)
                 {
-                    return _connection.Database.ScriptEvaluate(script.Hash, new[] { redisKey }, values, flags);
+                    return _connection.Database.ScriptEvaluate(script.Hash, new[] { redisKey, regionKeyPrep }, values, flags);
                 }
                 else
                 {
-                    return _connection.Database.ScriptEvaluate(luaScript.ExecutableScript, new[] { redisKey }, values, flags);
+                    return _connection.Database.ScriptEvaluate(luaScript.ExecutableScript, new[] { redisKey, regionKeyPrep }, values, flags);
                 }
             }
             catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.OrdinalIgnoreCase))
