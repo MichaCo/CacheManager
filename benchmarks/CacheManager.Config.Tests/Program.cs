@@ -4,7 +4,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using CacheManager.Core;
 using Garnet;
-using Garnet.client;
 using Garnet.server;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -28,7 +27,7 @@ internal class Program
         return server;
     }
 
-    public static void Main(string[] args)
+    public static async Task Main(string[] args)
     {
         ThreadPool.SetMinThreads(100, 100);
 
@@ -61,7 +60,7 @@ internal class Program
 
             builder
                 .WithRedisCacheHandle("redis", true)
-                .WithExpiration(ExpirationMode.Sliding, TimeSpan.FromSeconds(60))
+                .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMinutes(60))
                 .DisableStatistics();
 
             builder.WithRedisBackplane("redis");
@@ -83,7 +82,20 @@ internal class Program
             builder.WithBondCompactBinarySerializer();
 
             var cacheA = new BaseCacheManager<string>(builder.Build());
+            var cacheB = new BaseCacheManager<string>(builder.Build());
             cacheA.Clear();
+
+            cacheA.Add("key", "value", "region");
+
+            var val = cacheA.Get("key", "region");
+
+            var val2 = cacheB.AddOrUpdate("key", "region", "added?", (v) => v + "updated");
+
+            await Task.Delay(100);
+
+            Console.WriteLine(cacheA.Get("key", "region"));
+
+            Console.ReadLine();
 
             for (var i = 0; i < iterations; i++)
             {

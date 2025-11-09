@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.Common;
 using System.Linq;
-using System.Text;
 using CacheManager.Core;
 using CacheManager.Core.Internal;
 using Microsoft.Extensions.Logging;
@@ -19,7 +17,6 @@ namespace CacheManager.Redis
     public class RedisCacheHandle<TCacheValue> : BaseCacheHandle<TCacheValue>
     {
         private static readonly TimeSpan MinimumExpirationTimeout = TimeSpan.FromMilliseconds(1);
-        private const string Base64Prefix = "base64\0";
         private const string HashFieldCreated = "created";
         private const string HashFieldExpirationMode = "expiration";
         private const string HashFieldExpirationTimeout = "timeout";
@@ -192,8 +189,6 @@ return result";
             }
         }
 
-#pragma warning disable CS3003 // Type is not CLS-compliant
-
         /// <summary>
         /// Gets the servers.
         /// </summary>
@@ -205,8 +200,6 @@ return result";
         /// </summary>
         /// <value>The server features.</value>
         public RedisFeatures Features => _connection.Features;
-
-#pragma warning restore CS3003 // Type is not CLS-compliant
 
         /// <summary>
         /// Gets a value indicating whether we can use the lua implementation instead of manual.
@@ -250,8 +243,10 @@ return result";
         {
             Retry(() =>
             {
+                RedisKey regionKey = GetRegionKey(region);
+
                 // we are storing all keys stored in the region in the hash for key=region
-                var hashKeys = _connection.Database.HashKeys(region);
+                var hashKeys = _connection.Database.HashKeys(regionKey);
 
                 if (hashKeys.Length > 0)
                 {
@@ -297,7 +292,6 @@ return result";
             }
 
             var tries = 0;
-            var fullKey = GetKey(key, region);
 
             return Retry(() =>
             {
@@ -305,7 +299,7 @@ return result";
                 {
                     tries++;
 
-                    var item = GetCacheItemAndVersion(key, region, out int version);
+                    var item = GetCacheItemAndVersion(key, region, out var version);
 
                     if (item == null)
                     {
@@ -324,13 +318,16 @@ return result";
                     }
 
                     // resetting TTL on update, too
-                    var result = Eval(ScriptType.Update, fullKey, region, new[]
-                    {
-                        ToRedisValue(newValue),
-                        version,
-                        (int)item.ExpirationMode,
-                        (long)item.ExpirationTimeout.TotalMilliseconds,
-                    });
+                    var result = Eval(
+                        item.Key,
+                        item.Region,
+                        ScriptType.Update,
+                        [
+                            ToRedisValue(newValue),
+                            version,
+                            (int)item.ExpirationMode,
+                            (long)item.ExpirationTimeout.TotalMilliseconds,
+                        ]);
 
                     if (result != null && !result.IsNull)
                     {
@@ -349,9 +346,14 @@ return result";
             });
         }
 
-#pragma warning disable SA1600
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
-
+        /// <summary>
+        /// Update implementation without using lua scripts.
+        /// </summary>
+        /// <param name="key">The key.</param>
+        /// <param name="region">The region.</param>
+        /// <param name="updateValue">The value function which should run to get a new value.</param>
+        /// <param name="maxRetries">Number of retries in case of collisions.</param>
+        /// <returns>The result.</returns>
         protected UpdateItemResult<TCacheValue> UpdateNoScript(string key, string region, Func<TCacheValue, TCacheValue> updateValue, int maxRetries)
         {
             var committed = false;
@@ -412,9 +414,6 @@ return result";
             });
         }
 
-#pragma warning restore CS1591
-#pragma warning restore SA1600
-
         /// <summary>
         /// Adds a value to the cache.
         /// <para>
@@ -471,13 +470,11 @@ return result";
                 return GetCacheItemInternalNoScript(key, region);
             }
 
-            var fullKey = GetKey(key, region);
-
-            var result = Retry(() => Eval(ScriptType.Get, fullKey, region));
+            var result = Retry(() => Eval(key, region, ScriptType.Get));
             if (result == null || result.IsNull)
             {
                 // something went wrong. HMGET should return at least a null result for each requested field
-                throw new InvalidOperationException("Error retrieving " + fullKey);
+                throw new InvalidOperationException("Error retrieving " + GetKey(key, region));
             }
 
             var values = (RedisValue[])result;
@@ -542,9 +539,12 @@ return result";
             return cacheItem;
         }
 
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
-#pragma warning disable SA1600
-
+        /// <summary>
+        /// Implementation of getting the cache item without using lua scripts.
+        /// </summary>
+        /// <param name="key">The key.</param>
+        /// <param name="region">The region.</param>
+        /// <returns>The cached item, or null if not found.</returns>
         protected CacheItem<TCacheValue> GetCacheItemInternalNoScript(string key, string region)
         {
             return Retry(() =>
@@ -632,9 +632,6 @@ return result";
             });
         }
 
-#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
-#pragma warning restore SA1600
-
         /// <summary>
         /// Puts the <paramref name="item"/> into the cache. If the item exists it will get updated
         /// with the new value. If the item doesn't exist, the item will be added to the cache.
@@ -660,8 +657,6 @@ return result";
         /// </returns>
         protected override bool RemoveInternal(string key) => RemoveInternal(key, null);
 
-#pragma warning disable CSE0003
-
         /// <summary>
         /// Removes a value from the cache for the specified key.
         /// </summary>
@@ -679,7 +674,7 @@ return result";
                 // clean up region
                 if (!string.IsNullOrWhiteSpace(region))
                 {
-                    _connection.Database.HashDelete(region, fullKey, CommandFlags.FireAndForget);
+                    _connection.Database.HashDelete(GetRegionKey(region), fullKey, CommandFlags.FireAndForget);
                 }
 
                 // remove key
@@ -695,78 +690,80 @@ return result";
                 channel: RedisChannel.Literal($"__keyevent@{_redisConfiguration.Database}__:expired"),
                 handler: (channel, key) =>
                 {
-                    var tupple = ParseKey(key);
+                    var (Key, Region) = ParseKey(key);
                     if (Logger.IsEnabled(LogLevel.Debug))
                     {
-                        Logger.LogDebug("Got expired event for key '{0}:{1}'", tupple.Item2, tupple.Item1);
+                        Logger.LogDebug("Got expired event for key '{0}:{1}'", Key, Region);
                     }
 
                     // we cannot return the original value here because we don't have it
-                    TriggerCacheSpecificRemove(tupple.Item1, tupple.Item2, CacheItemRemovedReason.Expired, null);
+                    TriggerCacheSpecificRemove(Key, Region, CacheItemRemovedReason.Expired, null);
                 });
 
             _connection.Subscriber.Subscribe(
                 channel: RedisChannel.Literal($"__keyevent@{_redisConfiguration.Database}__:evicted"),
                 handler: (channel, key) =>
                 {
-                    var tupple = ParseKey(key);
+                    var (Key, Region) = ParseKey(key);
                     if (Logger.IsEnabled(LogLevel.Debug))
                     {
-                        Logger.LogDebug("Got evicted event for key '{0}:{1}'", tupple.Item2, tupple.Item1);
+                        Logger.LogDebug("Got evicted event for key '{0}:{1}'", Region, Key);
                     }
 
                     // we cannot return the original value here because we don't have it
-                    TriggerCacheSpecificRemove(tupple.Item1, tupple.Item2, CacheItemRemovedReason.Evicted, null);
+                    TriggerCacheSpecificRemove(Key, Region, CacheItemRemovedReason.Evicted, null);
                 });
 
             _connection.Subscriber.Subscribe(
                 channel: RedisChannel.Literal($"__keyevent@{_redisConfiguration.Database}__:del"),
                 handler: (channel, key) =>
                 {
-                    var tupple = ParseKey(key);
+                    var (Key, Region) = ParseKey(key);
                     if (Logger.IsEnabled(LogLevel.Debug))
                     {
-                        Logger.LogDebug("Got del event for key '{0}:{1}'", tupple.Item2, tupple.Item1);
+                        Logger.LogDebug("Got del event for key '{0}:{1}'", Region, Key);
                     }
 
                     // we cannot return the original value here because we don't have it
-                    TriggerCacheSpecificRemove(tupple.Item1, tupple.Item2, CacheItemRemovedReason.ExternalDelete, null);
+                    TriggerCacheSpecificRemove(Key, Region, CacheItemRemovedReason.ExternalDelete, null);
                 });
         }
 
-#pragma warning restore CSE0003
-
-        private static Tuple<string, string> ParseKey(string value)
+        internal static (string Key, string Region) ParseKey(string value)
         {
-            if (value == null)
+            if (string.IsNullOrWhiteSpace(value))
             {
-                return Tuple.Create<string, string>(null, null);
+                return (null, null);
             }
 
-            var sepIndex = value.IndexOf(':');
-            var hasRegion = sepIndex > 0;
-            var key = value;
             string region = null;
+            var key = value;
 
-            if (hasRegion)
+            // checking if region is defined
+            if (value.StartsWith("{"))
             {
-                region = value.Substring(0, sepIndex);
-                key = value.Substring(sepIndex + 1);
+                // region is defined by {...}:key using hastagging {} for redis cluster support + ":" as separator.
+                var sepIndex = value.IndexOf("}:");
 
-                if (region.StartsWith(Base64Prefix))
+                // Validating region start
+                if (sepIndex < 0)
                 {
-                    region = region.Substring(Base64Prefix.Length);
-                    region = Encoding.UTF8.GetString(Convert.FromBase64String(region));
+                    throw new FormatException("Invalid key format, expected region to start with '{' and end with '}:'.");
                 }
+
+                // Starting on index 1, expecting starting with "{"
+                region = value.Substring(1, sepIndex - 1);
+
+                if (string.IsNullOrEmpty(region))
+                {
+                    throw new FormatException("Invalid key format, region name cannot be empty.");
+                }
+
+                // key starts after 2 chars  "}:"
+                key = value.Substring(sepIndex + 2);
             }
 
-            if (key.StartsWith(Base64Prefix))
-            {
-                key = key.Substring(Base64Prefix.Length);
-                key = Encoding.UTF8.GetString(Convert.FromBase64String(key));
-            }
-
-            return Tuple.Create(key, region);
+            return (key, region);
         }
 
         private static void ValidateExpirationTimeout(CacheItem<TCacheValue> item)
@@ -777,35 +774,38 @@ return result";
             }
         }
 
-        private string GetKey(string key, string region = null)
+        internal static string GetKey(string key, string region = null)
         {
             if (string.IsNullOrWhiteSpace(key))
             {
                 throw new ArgumentNullException(nameof(key));
             }
 
-            // for notifications, we have to get key and region back from the key stored in redis.
-            // in case the key and or region itself contains the separator, there would be no way to do so...
-            // So, only if that feature is enabled, we'll encode the key and/or region in that case
-            // and the ParseKey method will respect that, too, and decodes the key and/or region.
-            if (_redisConfiguration.KeyspaceNotificationsEnabled && key.Contains(":"))
-            {
-                key = Base64Prefix + Convert.ToBase64String(Encoding.UTF8.GetBytes(key));
-            }
-
-            var fullKey = key;
-
             if (!string.IsNullOrWhiteSpace(region))
             {
-                if (_redisConfiguration.KeyspaceNotificationsEnabled && region.Contains(":"))
+                if (key.Contains("{") || key.Contains("}"))
                 {
-                    region = Base64Prefix + Convert.ToBase64String(Encoding.UTF8.GetBytes(region));
+                    throw new ArgumentException("Key cannot contain '{' or '}'. These are reserved for region handling in redis keys.");
+                }
+                if (region.Contains("{") || region.Contains("}"))
+                {
+                    throw new ArgumentException("Region cannot contain '{' or '}'. These are reserved for region handling in redis keys.");
                 }
 
-                fullKey = string.Concat(region, ":", key);
+                return $"{GetRegionKey(region)}:{key}";
             }
 
-            return fullKey;
+            return key;
+        }
+
+        internal static string GetRegionKey(string region)
+        {
+            if (string.IsNullOrWhiteSpace(region))
+            {
+                return null;
+            }
+
+            return $"{{{region}}}";
         }
 
         private TCacheValue FromRedisValue(RedisValue value, string valueType)
@@ -851,7 +851,6 @@ return result";
                 return SetNoScript(item, when, sync);
             }
 
-            var fullKey = GetKey(item.Key, item.Region);
             var value = ToRedisValue(item.Value);
 
             var flags = sync ? CommandFlags.None : CommandFlags.FireAndForget;
@@ -872,11 +871,11 @@ return result";
             RedisResult result;
             if (when == When.NotExists)
             {
-                result = Eval(ScriptType.Add, fullKey, item.Region, parameters, flags);
+                result = Eval(item.Key, item.Region, ScriptType.Add, parameters, flags);
             }
             else
             {
-                result = Eval(ScriptType.Put, fullKey, item.Region, parameters, flags);
+                result = Eval(item.Key, item.Region, ScriptType.Put, parameters, flags);
             }
 
             if (result.IsNull && flags.HasFlag(CommandFlags.FireAndForget))
@@ -912,6 +911,8 @@ return result";
             return Retry(() =>
             {
                 var fullKey = GetKey(item.Key, item.Region);
+                var regionKey = GetRegionKey(item.Region);
+
                 var value = ToRedisValue(item.Value);
 
                 ValidateExpirationTimeout(item);
@@ -937,16 +938,13 @@ return result";
                     if (!string.IsNullOrWhiteSpace(item.Region))
                     {
                         // setting region lookup key if region is being used
-                        _connection.Database.HashSet(item.Region, fullKey, "regionKey", When.Always, CommandFlags.FireAndForget);
+                        _connection.Database.HashSet(regionKey, fullKey, "regionKey", When.Always, CommandFlags.FireAndForget);
                     }
 
                     // set the additional fields in case sliding expiration should be used in this
                     // case we have to store the expiration mode and timeout on the hash, too so
                     // that we can extend the expiration period every time we do a get
-                    if (metaValues != null)
-                    {
-                        _connection.Database.HashSet(fullKey, metaValues, flags);
-                    }
+                    _connection.Database.HashSet(fullKey, metaValues, flags);
 
                     if (item.ExpirationMode != ExpirationMode.None && item.ExpirationMode != ExpirationMode.Default)
                     {
@@ -963,7 +961,7 @@ return result";
             });
         }
 
-        private RedisResult Eval(ScriptType scriptType, RedisKey redisKey, RedisKey regionKey, RedisValue[] values = null, CommandFlags flags = CommandFlags.None)
+        private RedisResult Eval(string key, string region, ScriptType scriptType, RedisValue[] values = null, CommandFlags flags = CommandFlags.None)
         {
             if (!_scriptsLoaded)
             {
@@ -988,14 +986,18 @@ return result";
 
             try
             {
-                var regionKeyPrep = string.IsNullOrWhiteSpace(regionKey) ? (RedisKey)string.Empty : regionKey;
+                RedisKey fullKey = GetKey(key, region);
+                RedisKey regionKey = GetRegionKey(region);
+
+                RedisKey[] keys = region == null ? [fullKey] : [fullKey, regionKey];
+
                 if (_canPreloadScripts && script != null)
                 {
-                    return _connection.Database.ScriptEvaluate(script.Hash, new[] { redisKey, regionKeyPrep }, values, flags);
+                    return _connection.Database.ScriptEvaluate(script.Hash, keys, values, flags);
                 }
                 else
                 {
-                    return _connection.Database.ScriptEvaluate(luaScript.ExecutableScript, new[] { redisKey, regionKeyPrep }, values, flags);
+                    return _connection.Database.ScriptEvaluate(luaScript.ExecutableScript, keys, values, flags);
                 }
             }
             catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.OrdinalIgnoreCase))

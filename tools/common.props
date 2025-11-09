@@ -3,9 +3,9 @@
 
   <PropertyGroup>
     <Copyright>Copyright (c) 2025 Michael Conrad</Copyright>
-    <Authors>MichaConrad</Authors>    
+    <Authors>Michael Conrad</Authors>    
     <Product>CacheManager.NET</Product>
-    
+    <LangVersion>latest</LangVersion>    
     <PackageIcon>icon.png</PackageIcon>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>

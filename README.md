@@ -43,10 +43,7 @@ This has some limitations though and before you use Microsoft.Garnet in producti
 See https://github.com/microsoft/garnet for details.
 
 ## Beta Packages
-Beta versions of the CacheManager packages are getting pushed to https://www.myget.org/gallery/cachemanager on each build. 
-Add the following feed, if you want to play with the not yet released bits: 
-
-    https://www.myget.org/F/cachemanager/api/v3/index.json
+Beta versions of the CacheManager packages are getting pushed to https://www.myget.org/feed/Packages/dnsclient on each build. 
 
 To find which check-in created which build, use this [build history](https://ci.appveyor.com/project/MichaCo/cachemanager-ak9g3/history).
 

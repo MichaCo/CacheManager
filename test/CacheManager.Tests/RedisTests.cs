@@ -13,1575 +13,1642 @@ using StackExchange.Redis;
 using Xunit;
 using Xunit.Sdk;
 
-namespace CacheManager.Tests
+namespace CacheManager.Tests;
+
+/// <summary>
+/// To run the redis tests, make sure a local redis server instance is running. See redis folder under tools.
+/// </summary>
+[ExcludeFromCodeCoverage]
+public class RedisTests : IClassFixture<RedisTestFixture>
 {
-    /// <summary>
-    /// To run the redis tests, make sure a local redis server instance is running. See redis folder under tools.
-    /// </summary>
-    [ExcludeFromCodeCoverage]
-    public class RedisTests : IClassFixture<RedisTestFixture>
+    private enum CacheEvent
     {
-        private enum CacheEvent
+        OnAdd,
+        OnPut,
+        OnRemove,
+        OnUpdate,
+        OnClear,
+        OnClearRegion
+    }
+
+    [Fact]
+    public void GetKey_InvalidTokensInKey_Throws()
+    {
+        Action act = () => RedisCacheHandle<object>.GetKey("m{y}key", "myregion");
+        act.Should().Throw<ArgumentException>().WithMessage("Key cannot contain*");
+    }
+
+    [Fact]
+    public void GetKey_InvalidTokensInRegion_Throws()
+    {
+        Action act = () => RedisCacheHandle<object>.GetKey("mykey", "my{region}");
+        act.Should().Throw<ArgumentException>().WithMessage("Region cannot contain*");
+    }
+
+    [Fact]
+    public void GetKey_ValidKeyAndRegion_ReturnsCombinedKey()
+    {
+        var key = RedisCacheHandle<object>.GetKey("mykey", "myregion");
+        key.Should().Be("{myregion}:mykey");
+    }
+
+    [Fact]
+    public void GetKey_ValidKeyNoRegion_ReturnsKey()
+    {
+        var key = RedisCacheHandle<object>.GetKey("mykey");
+        key.Should().Be("mykey");
+    }
+
+    [Fact]
+    public void ParseKey_Null_ReturnsNulls()
+    {
+        var (key, region) = RedisCacheHandle<object>.ParseKey(null);
+        key.Should().BeNull();
+        region.Should().BeNull();
+    }
+
+    [Fact]
+    public void ParseKey_PlainKey_NoRegion()
+    {
+        var (key, region) = RedisCacheHandle<object>.ParseKey("plain-key");
+        key.Should().Be("plain-key");
+        region.Should().BeNull();
+    }
+
+    [Fact]
+    public void ParseKey_KeyWithRegion_ParsesRegionAndKey()
+    {
+        var (key, region) = RedisCacheHandle<object>.ParseKey("{my-region}:my-key");
+        region.Should().Be("my-region");
+        key.Should().Be("my-key");
+    }
+
+    [Fact]
+    public void ParseKey_InvalidFormatMissingColon_Throws()
+    {
+        Action act = () => RedisCacheHandle<object>.ParseKey("{my-region}my-key");
+        act.Should().Throw<FormatException>();
+    }
+
+    [Fact]
+    public void ParseKey_RegionOnly_Throws()
+    {
+        Action act = () => RedisCacheHandle<object>.ParseKey("{regionOnly}");
+        act.Should().Throw<FormatException>();
+    }
+
+    [Fact]
+    public void ParseKey_EmptyRegion_Throws()
+    {
+        Action act = () => RedisCacheHandle<object>.ParseKey("{}:key");
+        act.Should().Throw<FormatException>();
+    }
+
+    [Fact]
+    public void ParseKey_RegionWithSeparators_ParsesCorrectly()
+    {
+        var (key, region) = RedisCacheHandle<object>.ParseKey("{key:region:a}:key:bla");
+        region.Should().Be("key:region:a");
+        key.Should().Be("key:bla");
+    }
+
+    [Fact]
+    [Trait("category", "Redis")]
+    [Trait("category", "Unreliable")]
+    public void Redis_TwoServerSetup_ClearWorks()
+    {
+        using var server1 = RedisTestFixture.StartServer(7001);
+        using var server2 = RedisTestFixture.StartServer(7002);
+
+        var cache1 = new BaseCacheManager<string>(CacheConfigurationBuilder
+            .BuildConfiguration(a =>
+            {
+                a.WithRedisCacheHandle("redis1");
+                a.WithRedisConfiguration("redis1", c => c.WithEndpoint("localhost", 7001).WithAllowAdmin());
+                a.WithJsonSerializer();
+            }));
+
+        var cache2 = new BaseCacheManager<string>(CacheConfigurationBuilder
+            .BuildConfiguration(a =>
+            {
+                a.WithRedisCacheHandle("redis2");
+                a.WithRedisConfiguration("redis2", c => c.WithEndpoint("localhost", 7002).WithAllowAdmin());
+                a.WithJsonSerializer();
+            }));
+
+        var cacheBoth = new BaseCacheManager<string>(CacheConfigurationBuilder
+            .BuildConfiguration(a =>
+            {
+                a.WithRedisCacheHandle("redis");
+                a.WithJsonSerializer();
+                a.WithRedisConfiguration("redis", c => c
+                    .WithEndpoint("localhost", 7001)
+                    .WithEndpoint("localhost", 7002)
+                    .WithAllowAdmin());
+            }));
+
+        var testKey = Guid.NewGuid().ToString();
+        var value = Guid.NewGuid().ToString();
+
+        cacheBoth.Add(testKey, value);
+
+        var exists1 = cache1.Exists(testKey);
+        var exists2 = cache2.Exists(testKey);
+
+        Assert.True(exists1 || exists2);
+
+        if (!exists1)
         {
-            OnAdd,
-            OnPut,
-            OnRemove,
-            OnUpdate,
-            OnClear,
-            OnClearRegion
+            cache1[testKey] = "other value";
+        }
+        else
+        {
+            Assert.False(exists2);
+            cache2[testKey] = "other value";
         }
 
-        [Fact]
-        [Trait("category", "Redis")]
-        [Trait("category", "Unreliable")]
-        public void Redis_TwoServerSetup_ClearWorks()
-        {
-            using var server1 = RedisTestFixture.StartServer(7001);
-            using var server2 = RedisTestFixture.StartServer(7002);
+        cacheBoth.Clear();
 
-            var cache1 = new BaseCacheManager<string>(CacheConfigurationBuilder
-                .BuildConfiguration(a =>
-                {
-                    a.WithRedisCacheHandle("redis1");
-                    a.WithRedisConfiguration("redis1", c => c.WithEndpoint("localhost", 7001).WithAllowAdmin());
-                    a.WithJsonSerializer();
-                }));
+        Assert.False(cache1.Exists(testKey));
+        Assert.False(cache2.Exists(testKey));
+    }
 
-            var cache2 = new BaseCacheManager<string>(CacheConfigurationBuilder
-                .BuildConfiguration(a =>
-                {
-                    a.WithRedisCacheHandle("redis2");
-                    a.WithRedisConfiguration("redis2", c => c.WithEndpoint("localhost", 7002).WithAllowAdmin());
-                    a.WithJsonSerializer();
-                }));
+    [Fact]
+    public void Redis_WithoutSerializer_ShouldThrow()
+    {
+        var cfg = CacheConfigurationBuilder.BuildConfiguration(
+            settings =>
+                settings
+                    .WithRedisConfiguration("redis-key", "localhost")
+                    .WithRedisCacheHandle("redis-key")) as CacheManagerConfiguration;
 
-            var cacheBoth = new BaseCacheManager<string>(CacheConfigurationBuilder
-                .BuildConfiguration(a =>
-                {
-                    a.WithRedisCacheHandle("redis");
-                    a.WithJsonSerializer();
-                    a.WithRedisConfiguration("redis", c => c
-                        .WithEndpoint("localhost", 7001)
-                        .WithEndpoint("localhost", 7002)
-                        .WithAllowAdmin());
-                }));
+        Action act = () => new BaseCacheManager<string>(cfg);
+        act.Should().Throw<InvalidOperationException>().WithMessage("*requires serialization*");
+    }
 
+    [Fact]
+    [Trait("category", "Redis")]
+    [Trait("category", "Unreliable")]
+    public void Redis_Extensions_WithClient()
+    {
+        var configKey = Guid.NewGuid().ToString();
+        var client = ConnectionMultiplexer.Connect("localhost:6379");
+        var cache = CacheFactory.Build<string>(
+            s => s
+                .WithJsonSerializer()
+                .WithRedisConfiguration(configKey, client)
+                .WithRedisCacheHandle(configKey));
 
-            var testKey = Guid.NewGuid().ToString();
-            var value = Guid.NewGuid().ToString();
-            
-            cacheBoth.Add(testKey, value);
+        var handle = cache.CacheHandles.OfType<RedisCacheHandle<string>>().First();
+        var cfg = RedisConfigurations.GetConfiguration(configKey);
 
-            var exists1 = cache1.Exists(testKey);
-            var exists2 = cache2.Exists(testKey);
+        Assert.Equal(configKey, handle.Configuration.Name);
+        Assert.Equal(0, cfg.Database);
+        Assert.Equal("localhost:6379", cfg.ConnectionString);
 
-            Assert.True(exists1 || exists2);
+        // cleanup
+        RedisConnectionManager.RemoveConnection(client.Configuration);
+        client.Dispose();
+    }
 
-            if (!exists1)
+    [Fact]
+    [Trait("category", "Redis")]
+    [Trait("category", "Unreliable")]
+    public void Redis_Extensions_WithClientWithDb()
+    {
+        var configKey = Guid.NewGuid().ToString();
+        var client = ConnectionMultiplexer.Connect("localhost:6379");
+        var cache = CacheFactory.Build<string>(
+            s => s
+                .WithJsonSerializer()
+                .WithRedisConfiguration(configKey, client, 23)
+                .WithRedisCacheHandle(configKey));
+
+        var handle = cache.CacheHandles.OfType<RedisCacheHandle<string>>().First();
+        var cfg = RedisConfigurations.GetConfiguration(configKey);
+
+        Assert.Equal(configKey, handle.Configuration.Name);
+        Assert.Equal(23, cfg.Database);
+        Assert.Equal("localhost:6379", cfg.ConnectionString);
+
+        // cleanup
+        RedisConnectionManager.RemoveConnection(client.Configuration);
+        client.Dispose();
+    }
+
+    [Fact]
+    [Trait("category", "Redis")]
+    public async Task Redis_BackplaneEvents_Add()
+    {
+        var key = Guid.NewGuid().ToString();
+
+        await TestBackplaneEventDistributed<CacheActionEventArgs>(
+            CacheEvent.OnAdd,
+            (cacheA) =>
             {
-                cache1[testKey] = "other value";
+                cacheA.Add(key, key);
+            },
+            (cacheA, args) =>
+            {
+                args.Key.Should().Be(key);
+                args.Region.Should().BeNull();
+                args.Origin.Should().Be(CacheActionEventArgOrigin.Local);
+                cacheA[key].Should().Be(key);
+            },
+            (cacheB, args) =>
+            {
+                args.Key.Should().Be(key);
+                args.Region.Should().BeNull();
+                args.Origin.Should().Be(CacheActionEventArgOrigin.Remote);
+                cacheB[key].Should().Be(key);
+            });
+    }
+
+    [Fact]
+    [Trait("category", "Redis")]
+    public async Task Redis_ValidateVersion_AddPutGetUpdate()
+    {
+        var configKey = Guid.NewGuid().ToString();
+        var multi = ConnectionMultiplexer.Connect("localhost");
+        var cache = CacheFactory.Build<Poco>(
+            s => s
+                .WithRedisConfiguration(configKey, multi)
+                .WithBondCompactBinarySerializer()
+                .WithRedisCacheHandle(configKey));
+
+        // don't keep it and also dispose it later (seems appveyor doesn't like too many open connections)
+        RedisConnectionManager.RemoveConnection(multi.Configuration);
+
+        // act/assert
+        using (multi)
+        using (cache)
+        {
+            var key = Guid.NewGuid().ToString();
+            var value = new Poco() { Id = 23, Something = "§asdad" };
+            cache.Add(key, value);
+            await Task.Delay(10);
+
+            var version = (int)multi.GetDatabase(0).HashGet(key, "version");
+            version.Should().Be(1);
+
+            cache.Put(key, value);
+            await Task.Delay(10);
+
+            version = (int)multi.GetDatabase(0).HashGet(key, "version");
+            version.Should().Be(2);
+
+            cache.Update(key, r => { r.Something = "new text"; return r; });
+            await Task.Delay(10);
+
+            version = (int)multi.GetDatabase(0).HashGet(key, "version");
+            version.Should().Be(3);
+            cache.Get(key).Something.Should().Be("new text");
+        }
+    }
+
+    [Fact]
+    [Trait("category", "Redis")]
+    [Trait("category", "Unreliable")]
+    public void Redis_UseExistingConnection()
+    {
+        var conConfig = new ConfigurationOptions()
+        {
+            ConnectTimeout = 10000,
+            AbortOnConnectFail = false,
+            ConnectRetry = 10
+        };
+        conConfig.EndPoints.Add("localhost:6379");
+
+        var multiplexer = ConnectionMultiplexer.Connect(conConfig);
+
+        var cfg = CacheConfigurationBuilder.BuildConfiguration(
+            s => s
+                .WithJsonSerializer()
+                .WithRedisConfiguration("redisKey", multiplexer)
+                .WithRedisCacheHandle("redisKey"));
+
+        RedisConnectionManager.RemoveConnection(multiplexer.Configuration);
+
+        using (multiplexer)
+        using (var cache = new BaseCacheManager<long>(cfg))
+        {
+            cache.Add(Guid.NewGuid().ToString(), 12345);
+        }
+    }
+
+    [Fact]
+    [Trait("category", "Redis")]
+    [Trait("category", "Unreliable")]
+    public async Task Redis_BackplaneEvents_AddWithRegion()
+    {
+        var key = Guid.NewGuid().ToString();
+        var region = Guid.NewGuid().ToString();
+
+        await TestBackplaneEventDistributed<CacheActionEventArgs>(
+            CacheEvent.OnAdd,
+            (cacheA) =>
+            {
+                cacheA.Add(key, key, region);
+            },
+            (cacheA, args) =>
+            {
+                args.Key.Should().Be(key);
+                args.Region.Should().Be(region);
+                args.Origin.Should().Be(CacheActionEventArgOrigin.Local);
+                cacheA[key, region].Should().Be(key);
+            },
+            (cacheB, args) =>
+            {
+                args.Key.Should().Be(key);
+                args.Region.Should().Be(region);
+                args.Origin.Should().Be(CacheActionEventArgOrigin.Remote);
+                cacheB[key, region].Should().Be(key);
+            });
+    }
+
+    /// <summary>
+    /// Testing in memory cache only with backplane through redis (not using Redis as cache at all)
+    /// </summary>
+    /// <returns></returns>
+    [Fact]
+    [Trait("category", "Redis")]
+    [Trait("category", "Unreliable")]
+    public async Task Redis_BackplaneEvents_InMemory_AddWithRegion()
+    {
+        var key = Guid.NewGuid().ToString();
+        var region = Guid.NewGuid().ToString();
+
+        await TestBackplaneEventInMemory<CacheActionEventArgs>(
+            CacheEvent.OnAdd,
+            (cacheA, cacheB) =>
+            {
+                // in memory is not distributed, adding only to CacheA the event triggered on cache B does trigger but cacheB doesn't have the item.
+                cacheB.Add(key, key, region);
+                cacheA.Add(key, key, region);
+            },
+            (cacheA, args) =>
+            {
+                args.Key.Should().Be(key);
+                args.Region.Should().Be(region);
+
+                // cannot test origin as there might be two events triggered, one local one remote
+                cacheA[key, region].Should().Be(key);
+            },
+            (cacheB, args) =>
+            {
+                args.Key.Should().Be(key);
+                args.Region.Should().Be(region);
+
+                // cannot test origin as there might be two events triggered, one local one remote
+                cacheB[key, region].Should().Be(key);
+            },
+            expectedRemoteTriggers: 2);
+    }
+
+    [Fact]
+    [Trait("category", "Redis")]
+    [Trait("category", "Unreliable")]
+    public async Task Redis_BackplaneEvents_Put()
+    {
+        var key = Guid.NewGuid().ToString();
+
+        await TestBackplaneEventDistributed<CacheActionEventArgs>(
+            CacheEvent.OnPut,
+            (cacheA) =>
+            {
+                cacheA.Add(key, key);
+                cacheA.Put(key, "new val");
+            },
+            (cacheA, args) =>
+            {
+                args.Key.Should().Be(key);
+                args.Region.Should().BeNull();
+                args.Origin.Should().Be(CacheActionEventArgOrigin.Local);
+                cacheA[key].Should().Be("new val");
+            },
+            (cacheB, args) =>
+            {
+                args.Key.Should().Be(key);
+                args.Region.Should().BeNull();
+                args.Origin.Should().Be(CacheActionEventArgOrigin.Remote);
+                cacheB[key].Should().Be("new val");
+            });
+    }
+
+    /// <summary>
+    /// Testing in memory cache only with backplane through redis (not using Redis as cache at all)
+    /// </summary>
+    /// <returns></returns>
+    [Fact]
+    [Trait("category", "Redis")]
+    [Trait("category", "Unreliable")]
+    public async Task Redis_BackplaneEvents_InMemory_Put()
+    {
+        var key = Guid.NewGuid().ToString();
+
+        await TestBackplaneEventInMemory<CacheActionEventArgs>(
+            CacheEvent.OnPut,
+            (cacheA, cacheB) =>
+            {
+                // in memory is not distributed, adding only to CacheA the event triggered on cache B does trigger but cacheB doesn't have the item.
+                cacheA.Add(key, key);
+                cacheA.Put(key, "new val");
+            },
+            (cacheA, args) =>
+            {
+                args.Key.Should().Be(key);
+                args.Region.Should().BeNull();
+                args.Origin.Should().Be(CacheActionEventArgOrigin.Local);
+                cacheA[key].Should().Be("new val");
+            },
+            (cacheB, args) =>
+            {
+                args.Key.Should().Be(key);
+                args.Region.Should().BeNull();
+                args.Origin.Should().Be(CacheActionEventArgOrigin.Remote);
+                cacheB[key].Should().Be(null);
+            },
+            expectedRemoteTriggers: 1);
+    }
+
+    [Fact]
+    [Trait("category", "Redis")]
+    [Trait("category", "Unreliable")]
+    public async Task Redis_BackplaneEvents_PutWithRegion()
+    {
+        var key = Guid.NewGuid().ToString();
+        var region = Guid.NewGuid().ToString();
+
+        await TestBackplaneEventDistributed<CacheActionEventArgs>(
+            CacheEvent.OnPut,
+            (cacheA) =>
+            {
+                cacheA.Add(key, key, region);
+                cacheA.Put(key, "new val", region);
+            },
+            (cacheA, args) =>
+            {
+                args.Key.Should().Be(key);
+                args.Region.Should().Be(region);
+                args.Origin.Should().Be(CacheActionEventArgOrigin.Local);
+                cacheA[key, region].Should().Be("new val");
+            },
+            (cacheB, args) =>
+            {
+                args.Key.Should().Be(key);
+                args.Region.Should().Be(region);
+                args.Origin.Should().Be(CacheActionEventArgOrigin.Remote);
+                cacheB[key, region].Should().Be("new val");
+            });
+    }
+
+    [Fact]
+    [Trait("category", "Redis")]
+    [Trait("category", "Unreliable")]
+    public async Task Redis_BackplaneEvents_Remove()
+    {
+        var key = Guid.NewGuid().ToString();
+
+        await TestBackplaneEventDistributed<CacheActionEventArgs>(
+            CacheEvent.OnRemove,
+            (cacheA) =>
+            {
+                cacheA.Add(key, key).Should().BeTrue();
+                cacheA.Remove(key).Should().BeTrue();
+            },
+            (cacheA, args) =>
+            {
+                args.Key.Should().Be(key);
+                args.Region.Should().BeNull();
+                args.Origin.Should().Be(CacheActionEventArgOrigin.Local);
+                cacheA[key].Should().BeNull();
+            },
+            (cacheB, args) =>
+            {
+                args.Key.Should().Be(key);
+                args.Region.Should().BeNull();
+                args.Origin.Should().Be(CacheActionEventArgOrigin.Remote);
+                cacheB[key].Should().BeNull();
+            });
+    }
+
+    [Fact]
+    [Trait("category", "Redis")]
+    [Trait("category", "Unreliable")]
+    public async Task Redis_BackplaneEvents_Remove_WithRegion()
+    {
+        var key = Guid.NewGuid().ToString();
+        var region = Guid.NewGuid().ToString();
+
+        await TestBackplaneEventDistributed<CacheActionEventArgs>(
+            CacheEvent.OnRemove,
+            (cacheA) =>
+            {
+                cacheA.Add(key, key).Should().BeTrue();
+                cacheA.Add(key, key, region).Should().BeTrue();
+                cacheA.Remove(key, region).Should().BeTrue();
+            },
+            (cacheA, args) =>
+            {
+                args.Key.Should().Be(key);
+                args.Region.Should().Be(region);
+                args.Origin.Should().Be(CacheActionEventArgOrigin.Local);
+                cacheA[key].Should().NotBeNull();
+                cacheA[key, region].Should().BeNull();
+            },
+            (cacheB, args) =>
+            {
+                args.Key.Should().Be(key);
+                args.Region.Should().Be(region);
+                args.Origin.Should().Be(CacheActionEventArgOrigin.Remote);
+                cacheB[key].Should().NotBeNull();
+                cacheB[key, region].Should().BeNull();
+            });
+    }
+
+    /// <summary>
+    /// Testing in memory cache only with backplane through redis (not using Redis as cache at all)
+    /// This test in particular tests that a second in memory cache gets keys evicted if the same key
+    /// got removed by another cache (both caches connected through the backplane)
+    /// </summary>
+    /// <returns></returns>
+    [Fact]
+    [Trait("category", "Redis")]
+    [Trait("category", "Unreliable")]
+    public async Task Redis_BackplaneEvents_InMemory_Remove_WithRegion()
+    {
+        var key = Guid.NewGuid().ToString();
+        var region = Guid.NewGuid().ToString();
+
+        await TestBackplaneEventInMemory<CacheActionEventArgs>(
+            CacheEvent.OnRemove,
+            (cacheA, cacheB) =>
+            {
+                cacheA.Add(key, key).Should().BeTrue();
+                cacheA.Add(key, key, region).Should().BeTrue();
+
+                // adding to cache B, too, as we don't have a distributed cache
+                cacheB.Add(key, key, region).Should().BeTrue();
+
+                // remove from A only, should also remove it from B via backplane
+                cacheA.Remove(key, region).Should().BeTrue();
+            },
+            (cacheA, args) =>
+            {
+                args.Key.Should().Be(key);
+                args.Region.Should().Be(region);
+                args.Origin.Should().Be(CacheActionEventArgOrigin.Local);
+                cacheA[key].Should().NotBeNull();
+                cacheA[key, region].Should().BeNull();
+            },
+            (cacheB, args) =>
+            {
+                args.Key.Should().Be(key);
+                args.Region.Should().Be(region);
+                args.Origin.Should().Be(CacheActionEventArgOrigin.Remote);
+                cacheB[key, region].Should().BeNull();
+            },
+            expectedRemoteTriggers: 1);
+    }
+
+    [Fact]
+    public async Task Redis_BackplaneEvents_Update()
+    {
+        var key = Guid.NewGuid().ToString();
+        var newValue = "new value";
+
+        await TestBackplaneEventDistributed<CacheActionEventArgs>(
+            CacheEvent.OnUpdate,
+            (cacheA) =>
+            {
+                cacheA.Add(key, key);
+                cacheA.Update(key, v => newValue).Should().Be(newValue);
+            },
+            (cacheA, args) =>
+            {
+                args.Key.Should().Be(key);
+                args.Region.Should().BeNull();
+                args.Origin.Should().Be(CacheActionEventArgOrigin.Local);
+                cacheA[key].Should().Be(newValue);
+            },
+            (cacheB, args) =>
+            {
+                args.Key.Should().Be(key);
+                args.Region.Should().BeNull();
+                args.Origin.Should().Be(CacheActionEventArgOrigin.Remote);
+                cacheB[key].Should().Be(newValue);
+            });
+    }
+
+    [Fact]
+    public async Task Redis_BackplaneEvents_Update_WithRegion()
+    {
+        var key = Guid.NewGuid().ToString();
+        var region = Guid.NewGuid().ToString();
+        var newValue = "new value";
+
+        await TestBackplaneEventDistributed<CacheActionEventArgs>(
+            CacheEvent.OnUpdate,
+            (cacheA) =>
+            {
+                cacheA.Add(key, key, region);
+                cacheA.Update(key, region, v => newValue).Should().Be(newValue);
+            },
+            (cacheA, args) =>
+            {
+                args.Key.Should().Be(key);
+                args.Region.Should().Be(region);
+                args.Origin.Should().Be(CacheActionEventArgOrigin.Local);
+                cacheA[key, region].Should().Be(newValue);
+            },
+            (cacheB, args) =>
+            {
+                args.Key.Should().Be(key);
+                args.Region.Should().Be(region);
+                args.Origin.Should().Be(CacheActionEventArgOrigin.Remote);
+                cacheB[key, region].Should().Be(newValue);
+            });
+    }
+
+    /// <summary>
+    /// Testing in memory cache only with backplane through redis (not using Redis as cache at all)
+    /// This test in particular tests on update, add or put, the key in cacheB does not change or get evicted.
+    /// To remove the key in all in memory cache instances, Remove must be used!
+    /// </summary>
+    /// <returns></returns>
+    [Fact]
+    public async Task Redis_BackplaneEvents_InMemory_Update_WithRegion()
+    {
+        var key = Guid.NewGuid().ToString();
+        var region = Guid.NewGuid().ToString();
+        var newValue = "new value";
+
+        await TestBackplaneEventInMemory<CacheActionEventArgs>(
+            CacheEvent.OnUpdate,
+            (cacheA, cacheB) =>
+            {
+                cacheA.Add(key, key, region);
+
+                // adding to cache B, too, as we don't have a distributed cache
+                cacheB.Add(key, key, region).Should().BeTrue();
+
+                // the update should evict the key from cache B
+                cacheA.Update(key, region, v => newValue).Should().Be(newValue);
+            },
+            (cacheA, args) =>
+            {
+                args.Key.Should().Be(key);
+                args.Region.Should().Be(region);
+                args.Origin.Should().Be(CacheActionEventArgOrigin.Local);
+                cacheA[key, region].Should().Be(newValue);
+            },
+            (cacheB, args) =>
+            {
+                args.Key.Should().Be(key);
+                args.Region.Should().Be(region);
+                args.Origin.Should().Be(CacheActionEventArgOrigin.Remote);
+
+                // important to note, the key in cacheB has never been updated or removed, so it should still be the "old" value!
+                cacheB[key, region].Should().Be(key);
+            },
+            expectedRemoteTriggers: 1);
+    }
+
+    [Fact]
+    public async Task Redis_BackplaneEvents_Clear()
+    {
+        var key = Guid.NewGuid().ToString();
+
+        await TestBackplaneEventDistributed<CacheClearEventArgs>(
+            CacheEvent.OnClear,
+            (cacheA) =>
+            {
+                cacheA.Add(key, key);
+                cacheA.Clear();
+            },
+            (cacheA, args) =>
+            {
+                args.Origin.Should().Be(CacheActionEventArgOrigin.Local);
+                cacheA.Get(key).Should().BeNull();
+            },
+            (cacheB, args) =>
+            {
+                args.Origin.Should().Be(CacheActionEventArgOrigin.Remote);
+                cacheB.Get(key).Should().BeNull();
+            });
+    }
+
+    [Fact]
+    public async Task Redis_BackplaneEvents_InMemory_Clear()
+    {
+        var key = Guid.NewGuid().ToString();
+
+        await TestBackplaneEventInMemory<CacheClearEventArgs>(
+            CacheEvent.OnClear,
+            (cacheA, cacheB) =>
+            {
+                cacheA.Add(key, key);
+                cacheB.Add(key, key);
+                cacheA.Clear();
+            },
+            (cacheA, args) =>
+            {
+                args.Origin.Should().Be(CacheActionEventArgOrigin.Local);
+                cacheA.Get(key).Should().BeNull();
+            },
+            (cacheB, args) =>
+            {
+                args.Origin.Should().Be(CacheActionEventArgOrigin.Remote);
+                cacheB.Get(key).Should().BeNull();
+            },
+            expectedRemoteTriggers: 1);
+    }
+
+    [Fact]
+    public async Task Redis_BackplaneEvents_ClearRegion()
+    {
+        var key = Guid.NewGuid().ToString();
+        var region = Guid.NewGuid().ToString();
+
+        await TestBackplaneEventDistributed<CacheClearRegionEventArgs>(
+            CacheEvent.OnClearRegion,
+            (cacheA) =>
+            {
+                cacheA.Add(key, key);
+                cacheA.Add(key, key, region);
+                cacheA.ClearRegion(region);
+            },
+            (cacheA, args) =>
+            {
+                args.Origin.Should().Be(CacheActionEventArgOrigin.Local);
+                cacheA.Get(key).Should().NotBeNull();
+                cacheA.Get(key, region).Should().BeNull();
+            },
+            (cacheB, args) =>
+            {
+                args.Origin.Should().Be(CacheActionEventArgOrigin.Remote);
+                cacheB.Get(key).Should().NotBeNull();
+                cacheB.Get(key, region).Should().BeNull();
+            });
+    }
+
+    [Fact]
+    public async Task Redis_BackplaneEvents_InMemory_ClearRegion()
+    {
+        var key = Guid.NewGuid().ToString();
+        var region = Guid.NewGuid().ToString();
+
+        await TestBackplaneEventInMemory<CacheClearRegionEventArgs>(
+            CacheEvent.OnClearRegion,
+            (cacheA, cacheB) =>
+            {
+                cacheA.Add(key, key);
+                cacheA.Add(key, key, region);
+
+                cacheB.Add(key, key);
+                cacheB.Add(key, key, region);
+
+                cacheA.ClearRegion(region);
+            },
+            (cacheA, args) =>
+            {
+                args.Origin.Should().Be(CacheActionEventArgOrigin.Local);
+                cacheA.Get(key).Should().NotBeNull();
+                cacheA.Get(key, region).Should().BeNull();
+            },
+            (cacheB, args) =>
+            {
+                args.Origin.Should().Be(CacheActionEventArgOrigin.Remote);
+                cacheB.Get(key).Should().NotBeNull();
+                cacheB.Get(key, region).Should().BeNull();
+            },
+            expectedRemoteTriggers: 1);
+    }
+
+    [Fact]
+    public void Redis_Configuration_NoEndpoint()
+    {
+        Action act = () => CacheConfigurationBuilder.BuildConfiguration(
+            s => s.WithRedisConfiguration(
+                "key",
+                c => c.WithAllowAdmin()));
+
+        act.Should().Throw<InvalidOperationException>().WithMessage("*endpoints*");
+    }
+
+#if !NO_APP_CONFIG
+
+    [Fact]
+    [Trait("category", "NotOnMono")]
+    public void Redis_Configurations_LoadStandard()
+    {
+        RedisConfigurations.LoadConfiguration();
+    }
+
+#endif
+
+    [Fact]
+    [Trait("category", "NotOnMono")]
+    public void Redis_Configurations_LoadWithConnectionString()
+    {
+        string fileName = TestConfigurationHelper.GetCfgFileName(@"/Configuration/configuration.valid.allFeatures.config");
+
+        RedisConfigurations.LoadConfiguration(fileName, RedisConfigurationSection.DefaultSectionName);
+        var cfg = RedisConfigurations.GetConfiguration("redisConnectionString");
+        cfg.ConnectionString.ToLower().Should().Contain("127.0.0.1:6379");//,allowAdmin = true,ssl = false");
+        cfg.ConnectionString.ToLower().Should().Contain("allowadmin=true");
+        cfg.ConnectionString.ToLower().Should().Contain("ssl=false");
+        cfg.Database.Should().Be(131);
+        cfg.StrictCompatibilityModeVersion.Should().Be("2.9");
+    }
+
+    [Fact]
+    [Trait("category", "NotOnMono")]
+    public void Redis_Configurations_LoadWConnectionString_WithDefaultDb()
+    {
+        string fileName = TestConfigurationHelper.GetCfgFileName(@"/Configuration/configuration.valid.allFeatures.config");
+
+        RedisConfigurations.LoadConfiguration(fileName, RedisConfigurationSection.DefaultSectionName);
+        var cfg = RedisConfigurations.GetConfiguration("redisConnectionStringWithDefaultDb");
+        cfg.ConnectionString.ToLower().Should().Contain("127.0.0.1:6379");
+        cfg.ConnectionString.ToLower().Should().Contain("allowadmin=true");
+        cfg.ConnectionString.ToLower().Should().Contain("ssl=false");
+        cfg.Database.Should().Be(0);
+        cfg.StrictCompatibilityModeVersion.Should().Be("2.9");
+    }
+
+    [Fact]
+    public void Redis_Configurations_LoadSection_InvalidSectionName()
+    {
+        Action act = () => RedisConfigurations.LoadConfiguration((string)null);
+
+        act.Should().Throw<ArgumentNullException>()
+            .And.ParamName.Equals("sectionName");
+    }
+
+    [Fact]
+    public void Redis_Configurations_LoadSection_InvalidFileName()
+    {
+        Action act = () => RedisConfigurations.LoadConfiguration((string)null, "section");
+
+        act.Should().Throw<ArgumentNullException>()
+            .And.ParamName.Equals("fileName");
+    }
+
+    [Fact]
+    public void Redis_Configurations_LoadSection_SectionDoesNotExist()
+    {
+        Action act = () => RedisConfigurations.LoadConfiguration(Guid.NewGuid().ToString());
+
+        act.Should().Throw<ArgumentNullException>()
+            .And.ParamName.Equals("section");
+    }
+
+    [Fact]
+    [Trait("category", "Redis")]
+    [Trait("category", "Unreliable")]
+    public async Task Redis_Multiple_PubSub_Change()
+    {
+        // arrange
+        var channelName = Guid.NewGuid().ToString();
+        var item = new CacheItem<object>(Guid.NewGuid().ToString(), "something");
+
+        // act/assert
+        await RunMultipleCaches(
+            async (cacheA, cacheB) =>
+            {
+                cacheA.Put(item);
+                cacheA.Get(item.Key).Should().Be("something");
+                await Task.Delay(10);
+                var value = cacheB.Get(item.Key);
+                value.Should().Be(item.Value, cacheB.ToString());
+                cacheB.Put(item.Key, "new value");
+            },
+            async (cache) =>
+            {
+                int tries = 0;
+                object value = null;
+                do
+                {
+                    tries++;
+                    await Task.Delay(100);
+                    value = cache.Get(item.Key);
+                }
+                while (value.ToString() != "new value" && tries < 10);
+
+                value.Should().Be("new value", cache.ToString());
+            },
+            1,
+            TestManagers.CreateRedisAndDicCacheWithBackplane(50, true, channelName, Serializer.Json),
+            TestManagers.CreateRedisAndDicCacheWithBackplane(50, true, channelName, Serializer.Json),
+            TestManagers.CreateRedisCache(50, false, Serializer.Json),
+            TestManagers.CreateRedisAndDicCacheWithBackplane(50, true, channelName, Serializer.Json));
+    }
+
+    [Fact(Skip = "needs clear")]
+    [Trait("category", "Redis")]
+    public async Task Redis_Multiple_PubSub_Clear()
+    {
+        // arrange
+        var item = new CacheItem<object>(Guid.NewGuid().ToString(), "something");
+        var channelName = Guid.NewGuid().ToString();
+
+        // act/assert
+        await RedisTests.RunMultipleCaches(
+            async (cacheA, cacheB) =>
+            {
+                cacheA.Add(item);
+                cacheB.Get(item.Key).Should().Be(item.Value);
+                cacheB.Clear();
+                await Task.Delay(0);
+            },
+            async (cache) =>
+            {
+                cache.Get(item.Key).Should().BeNull();
+                await Task.Delay(0);
+            },
+            2,
+            TestManagers.CreateRedisAndDicCacheWithBackplane(51, true, channelName),
+            TestManagers.CreateRedisAndDicCacheWithBackplane(51, true, channelName),
+            TestManagers.CreateRedisCache(51),
+            TestManagers.CreateRedisAndDicCacheWithBackplane(51, true, channelName));
+    }
+
+    [Fact]
+    [Trait("category", "Redis")]
+    public async Task Redis_Multiple_PubSub_ClearRegion()
+    {
+        // arrange
+        var item = new CacheItem<object>(Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), "something");
+        var channelName = Guid.NewGuid().ToString();
+
+        // act/assert
+        await RedisTests.RunMultipleCaches(
+            async (cacheA, cacheB) =>
+            {
+                cacheA.Add(item);
+                cacheB.Get(item.Key, item.Region).Should().Be(item.Value);
+                cacheB.ClearRegion(item.Region);
+                await Task.Delay(0);
+            },
+            async (cache) =>
+            {
+                cache.Get(item.Key, item.Region).Should().BeNull();
+                await Task.Delay(0);
+            },
+            2,
+            TestManagers.CreateRedisCache(5),
+            TestManagers.CreateRedisCache(5),
+            TestManagers.CreateRedisCache(5),
+            TestManagers.CreateRedisCache(5));
+    }
+
+    [Fact]
+    [Trait("category", "Redis")]
+    [Trait("category", "Unreliable")]
+    public async Task Redis_Multiple_PubSub_Remove()
+    {
+        // arrange
+        var item = new CacheItem<object>(Guid.NewGuid().ToString(), "something");
+        var channelName = Guid.NewGuid().ToString();
+
+        // act/assert
+        await RedisTests.RunMultipleCaches(
+            async (cacheA, cacheB) =>
+            {
+                cacheA.Add(item);
+                cacheB.Get(item.Key).Should().Be(item.Value);
+                cacheB.Remove(item.Key);
+                await Task.Delay(10);
+            },
+            async (cache) =>
+            {
+                int tries = 0;
+                object value = null;
+                do
+                {
+                    tries++;
+                    await Task.Delay(100);
+                    value = cache.GetCacheItem(item.Key);
+                }
+                while (value != null && tries < 50);
+
+                value.Should().BeNull();
+            },
+            1,
+            TestManagers.CreateRedisAndDicCacheWithBackplane(6, true, channelName),
+            TestManagers.CreateRedisAndDicCacheWithBackplane(6, true, channelName),
+            TestManagers.CreateRedisCache(6),
+            TestManagers.CreateRedisAndDicCacheWithBackplane(6, true, channelName));
+    }
+
+    [Fact]
+    public void Redis_Verify_NoCredentialsLoggedOrThrown()
+    {
+        var testLogger = new TestLogger();
+        var cfg = CacheConfigurationBuilder.BuildConfiguration(settings =>
+        {
+            settings
+                .WithRedisBackplane("redis.config")
+                .WithJsonSerializer()
+                .WithRedisCacheHandle("redis.config", true)
+                .And
+                .WithRedisConfiguration("redis.config", config =>
+                {
+                    config
+                        .WithConnectionTimeout(10)
+                        .WithAllowAdmin()
+                        //.WithDatabase(7)
+                        .WithEndpoint("doesnotexist", 6379)
+                        .WithPassword("mysupersecret")
+                        .WithSsl();
+                });
+        });
+
+        Action act = () => new BaseCacheManager<string>(cfg).Put("key", "value");
+
+        act.Should().Throw<InvalidOperationException>().WithMessage("*password=***");
+
+        testLogger.LogMessages.Any(p => p.Message.ToString().Contains("mysupersecret")).Should().BeFalse();
+    }
+
+    [Fact]
+    [Trait("category", "Redis")]
+    [Trait("category", "Unreliable")]
+    public async Task Redis_NoRaceCondition_WithUpdate()
+    {
+        using (var cache = CacheFactory.Build<RaceConditionTestElement>(settings =>
+        {
+            settings.WithMaxRetries(1);
+            settings.WithUpdateMode(CacheUpdateMode.Up)
+                .WithJsonSerializer()
+                .WithRedisCacheHandle("default")
+                .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMinutes(20));
+            settings.WithRedisConfiguration("default", config =>
+            {
+                config.WithAllowAdmin()
+                    //.WithDatabase(7)
+                    .WithEndpoint("127.0.0.1", 6379);
+            });
+        }))
+        {
+            var key = Guid.NewGuid().ToString();
+            cache.Remove(key);
+            cache.Add(key, new RaceConditionTestElement() { Counter = 0 });
+            int numThreads = 5;
+            int iterations = 10;
+            int numInnerIterations = 10;
+            int countCasModifyCalls = 0;
+
+            // act
+            await ThreadTestHelper.RunAsync(
+                async () =>
+                {
+                    for (var i = 0; i < numInnerIterations; i++)
+                    {
+                        cache.Update(
+                            key,
+                            (value) =>
+                            {
+                                value.Counter++;
+                                Interlocked.Increment(ref countCasModifyCalls);
+                                return value;
+                            },
+                            int.MaxValue);
+
+                        await Task.Delay(0);
+                    }
+                },
+                numThreads,
+                iterations);
+
+            // assert
+            await Task.Delay(100);
+            var result = cache.Get(key);
+            result.Should().NotBeNull();
+            result.Counter.Should().Be(numThreads * numInnerIterations * iterations, "counter should be exactly the expected value");
+            countCasModifyCalls.Should().BeGreaterThan((int)result.Counter, "we expect many version collisions, so cas calls should be way higher then the count result");
+        }
+    }
+
+    [Fact]
+    [Trait("category", "Redis")]
+    [Trait("category", "Unreliable")]
+    public async Task Redis_RaceCondition_WithoutUpdate()
+    {
+        using (var cache = CacheFactory.Build<RaceConditionTestElement>(settings =>
+        {
+            settings.WithUpdateMode(CacheUpdateMode.Up)
+                .WithJsonSerializer()
+                .WithRedisCacheHandle("default")
+                .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMinutes(20));
+            settings.WithRedisConfiguration("default", config =>
+            {
+                config.WithAllowAdmin()
+                    //.WithDatabase(8)
+                    .WithEndpoint("127.0.0.1", 6379);
+            });
+        }))
+        {
+            var key = Guid.NewGuid().ToString();
+            cache.Add(key, new RaceConditionTestElement() { Counter = 0 });
+            int numThreads = 5;
+            int iterations = 10;
+            int numInnerIterations = 10;
+
+            // act
+            await ThreadTestHelper.RunAsync(
+                async () =>
+                {
+                    for (int i = 0; i < numInnerIterations; i++)
+                    {
+                        var val = cache.Get(key);
+                        val.Should().NotBeNull();
+                        val.Counter++;
+
+                        cache.Put(key, val);
+                        await Task.Delay(1);
+                    }
+                },
+                numThreads,
+                iterations);
+
+            // assert
+            await Task.Delay(10);
+            var result = cache.Get(key);
+            result.Should().NotBeNull();
+            result.Counter.Should().NotBe(numThreads * numInnerIterations * iterations);
+        }
+    }
+
+    /// <summary>
+    /// See #165, version string can be empty is e.g. it comes from app/web.config.
+    /// </summary>
+    [Fact]
+    [Trait("category", "Redis")]
+    public void Redis_StrictMode_EmptyString_DoesnTThrow()
+    {
+        var redisConfigKey = Guid.NewGuid().ToString();
+        var redisConfig = new RedisConfiguration(redisConfigKey, "localhost", strictCompatibilityModeVersion: "");
+        RedisConfigurations.AddConfiguration(redisConfig);
+
+        var cacheConfig = new CacheConfigurationBuilder()
+            .WithJsonSerializer()
+            .WithRedisCacheHandle(redisConfigKey)
+            .Build();
+
+        Action act = () => new BaseCacheManager<object>(cacheConfig);
+
+        act.Should().NotThrow();
+    }
+
+    [Fact]
+    [Trait("category", "Redis")]
+    public void Redis_Valid_CfgFile_LoadWithRedisBackplane()
+    {
+        // arrange
+        string fileName = TestConfigurationHelper.GetCfgFileName(@"/Configuration/configuration.valid.allFeatures.config");
+        string cacheName = "redisConfigFromConfig";
+
+        // have to load the configuration manually because the file is not available to the default ConfigurtaionManager
+        RedisConfigurations.LoadConfiguration(fileName, RedisConfigurationSection.DefaultSectionName);
+        var redisConfig = RedisConfigurations.GetConfiguration("redisFromCfgConfigurationId");
+
+        // act
+        var cfg = CacheConfigurationBuilder.LoadConfigurationFile(fileName, cacheName);
+
+        // assert
+        redisConfig.Database.Should().Be(113);
+        redisConfig.ConnectionTimeout.Should().Be(1200);
+        redisConfig.AllowAdmin.Should().BeTrue();
+        redisConfig.KeyspaceNotificationsEnabled.Should().BeTrue();
+        redisConfig.TwemproxyEnabled.Should().BeTrue();
+        redisConfig.StrictCompatibilityModeVersion.Should().Be("2.7");
+    }
+
+    [Fact]
+    [Trait("category", "Redis")]
+    public void Redis_Valid_CfgFile_LoadWithConnectionString()
+    {
+        // arrange
+        string fileName = TestConfigurationHelper.GetCfgFileName(@"/Configuration/configuration.valid.allFeatures.config");
+        string cacheName = "redisConfigFromConnectionString";
+
+        // have to load the configuration manually because the file is not available to the default ConfigurtaionManager
+        RedisConfigurations.LoadConfiguration(fileName, RedisConfigurationSection.DefaultSectionName);
+        var redisConfig = RedisConfigurations.GetConfiguration("redisConnectionString");
+
+        // act
+        var cfg = CacheConfigurationBuilder.LoadConfigurationFile(fileName, cacheName);
+        var cache = CacheFactory.FromConfiguration<object>(cfg);
+
+        // assert
+        cache.CacheHandles.Any(p => p.Configuration.IsBackplaneSource).Should().BeTrue();
+
+        // database is the only option apart from key and connection string which must be set, database will not be set through connection string
+        // to define which database should actually be used...
+        redisConfig.Database.Should().Be(131);
+        redisConfig.StrictCompatibilityModeVersion.Should().Be("2.9");
+        redisConfig.AllowAdmin.Should().BeTrue();
+    }
+
+#if !NO_APP_CONFIG
+
+    [Fact]
+    [Trait("category", "Redis")]
+    public void Redis_LoadWithRedisBackplane_FromAppConfig()
+    {
+        // RedisConfigurations should load this from default section from app.config
+
+        // arrange
+        string cacheName = "redisWithBackplaneAppConfig";
+
+        // act
+        var cfg = CacheConfigurationBuilder.LoadConfiguration(cacheName);
+        var cache = CacheFactory.FromConfiguration<object>(cfg);
+        var handle = cache.CacheHandles.First(p => p.Configuration.IsBackplaneSource) as RedisCacheHandle<object>;
+
+        // test running something on the redis handle, Count should be enough to test the connection
+        Action count = () => { var x = handle.Count; };
+
+        // assert
+        handle.Should().NotBeNull();
+        count.Should().NotThrow();
+    }
+
+    [Fact]
+    [Trait("category", "Redis")]
+    public void Redis_LoadWithRedisBackplane_FromAppConfigConnectionStrings()
+    {
+        // RedisConfigurations should load this from AppSettings from app.config
+        // arrange
+        string cacheName = "redisWithBackplaneAppConfigConnectionStrings";
+
+        // act
+        var cfg = CacheConfigurationBuilder.LoadConfiguration(cacheName);
+        var cache = CacheFactory.FromConfiguration<object>(cfg);
+        var handle = cache.CacheHandles.First(p => p.Configuration.IsBackplaneSource) as RedisCacheHandle<object>;
+
+        // test running something on the redis handle, Count should be enough to test the connection
+        Action count = () => { var x = handle.Count; };
+
+        // assert
+        handle.Should().NotBeNull();
+        count.Should().NotThrow();
+    }
+
+    [Fact]
+    [Trait("category", "Redis")]
+    public void Redis_LoadWithRedisBackplane_FromAppConfigConnectionStrings_WithDefaultDb()
+    {
+        // RedisConfigurations should load this from AppSettings from app.config
+        // arrange
+        string cacheName = "redisWithBackplaneAppConfigConnectionStringsWithDefaultDb";
+
+        // act
+        var cfg = CacheConfigurationBuilder.LoadConfiguration(cacheName);
+        var cache = CacheFactory.FromConfiguration<object>(cfg);
+        var redisConfig = RedisConfigurations.GetConfiguration("redisFromConnectionStringsWithDefaultDb");
+        var handle = cache.CacheHandles.First(p => p.Configuration.IsBackplaneSource) as RedisCacheHandle<object>;
+
+        // test running something on the redis handle, Count should be enough to test the connection
+        Action count = () => { var x = handle.Count; };
+
+        // assert
+        handle.Should().NotBeNull();
+        count.Should().NotThrow();
+        redisConfig.Database.Should().Be(0);
+        redisConfig.AllowAdmin.Should().BeTrue();
+        redisConfig.ConnectionTimeout.Should().Be(11);
+    }
+
+#endif
+
+    [Fact]
+    [Trait("category", "Redis")]
+    public void Redis_ValueConverter_CacheTypeConversion_Poco()
+    {
+        var cache = TestManagers.CreateRedisCache<Poco>(17, false, Serializer.Json);
+
+        // act/assert
+        using (cache)
+        {
+            var key = Guid.NewGuid().ToString();
+            var value = new Poco() { Id = 23, Something = "§asdad" };
+            cache.Add(key, value);
+            var result = (Poco)cache.Get(key);
+            value.Should().BeEquivalentTo(result);
+        }
+    }
+
+    [Fact]
+    [Trait("category", "Redis")]
+    public void Redis_ValueConverter_Poco_Update()
+    {
+        var cache = TestManagers.CreateRedisCache(17, false, Serializer.Json);
+
+        // act/assert
+        using (cache)
+        {
+            var key = Guid.NewGuid().ToString();
+            var region = Guid.NewGuid().ToString();
+            var value = new Poco() { Id = 23, Something = "§asdad" };
+            cache.Add(key, value, region);
+
+            var newValue = new Poco() { Id = 24, Something = "%!else$&" };
+            object resultValue = null;
+            Func<bool> act = () => cache.TryUpdate(key, region, (o) => newValue, out resultValue);
+
+            act().Should().BeTrue();
+            newValue.Should().BeEquivalentTo(resultValue);
+        }
+    }
+
+    [Theory]
+    [Trait("category", "Redis")]
+    [InlineData(byte.MaxValue)]
+    [InlineData(new byte[] { 0, 1, 2, 3, 4 })]
+    [InlineData("some string")]
+    [InlineData(int.MaxValue)]
+    [InlineData(uint.MaxValue)]
+    [InlineData(short.MaxValue)]
+    [InlineData(ushort.MaxValue)]
+    [InlineData(float.MaxValue)]
+    [InlineData(double.MaxValue)]
+    [InlineData(true)]
+    [InlineData(false)]
+    [InlineData(long.MaxValue)]
+    [InlineData(ulong.MaxValue)]
+    [InlineData((ulong)int.MaxValue)]
+    [InlineData((ulong)long.MaxValue)]
+    [InlineData(char.MinValue)]
+    [InlineData(char.MaxValue)]
+    public void Redis_ValueConverter_ValidateValuesTypesNotUsingSerializer<T>(T value)
+    {
+        var redisKey = Guid.NewGuid().ToString();
+        var cache = CacheFactory.Build<object>(settings =>
+        {
+            settings
+                .WithSerializer(typeof(FakeTestSerializer))
+                .WithRedisConfiguration(redisKey, config =>
+                {
+                    config
+                        //.WithDatabase(66)
+                        .WithEndpoint("127.0.0.1", 6379);
+                })
+                .WithRedisCacheHandle(redisKey, true);
+        });
+
+        var key = Guid.NewGuid().ToString();
+
+        cache.Add(key, value);
+        var val = cache[key];
+        val.Should().BeEquivalentTo(value);
+        val.GetType().Should().Be(value.GetType());
+    }
+
+    private static async Task RunMultipleCaches<TCache>(
+        Func<TCache, TCache, Task> stepA,
+        Func<TCache, Task> stepB,
+        int iterations,
+        params TCache[] caches)
+        where TCache : ICacheManager<object>
+    {
+        for (int i = 0; i < iterations; i++)
+        {
+            await Task.Delay(10);
+
+            if (caches.Length == 1)
+            {
+                await stepA(caches[0], caches[0]);
             }
             else
             {
-                Assert.False(exists2);
-                cache2[testKey] = "other value";
+                await stepA(caches[0], caches[1]);
             }
 
-            cacheBoth.Clear();
-
-            Assert.False(cache1.Exists(testKey));
-            Assert.False(cache2.Exists(testKey));
-        }
-
-        [Fact]
-        public void Redis_WithoutSerializer_ShouldThrow()
-        {
-            var cfg = CacheConfigurationBuilder.BuildConfiguration(
-                settings =>
-                    settings
-                        .WithRedisConfiguration("redis-key", "localhost")
-                        .WithRedisCacheHandle("redis-key")) as CacheManagerConfiguration;
-
-            Action act = () => new BaseCacheManager<string>(cfg);
-            act.Should().Throw<InvalidOperationException>().WithMessage("*requires serialization*");
-        }
-
-        [Fact]
-        [Trait("category", "Redis")]
-        [Trait("category", "Unreliable")]
-        public void Redis_Extensions_WithClient()
-        {
-            var configKey = Guid.NewGuid().ToString();
-            var client = ConnectionMultiplexer.Connect("localhost:6379");
-            var cache = CacheFactory.Build<string>(
-                s => s
-                    .WithJsonSerializer()
-                    .WithRedisConfiguration(configKey, client)
-                    .WithRedisCacheHandle(configKey));
-
-            var handle = cache.CacheHandles.OfType<RedisCacheHandle<string>>().First();
-            var cfg = RedisConfigurations.GetConfiguration(configKey);
-
-            Assert.Equal(handle.Configuration.Name, configKey);
-            Assert.Equal(0, cfg.Database);
-            Assert.Equal("localhost:6379", cfg.ConnectionString);
-
-            // cleanup
-            RedisConnectionManager.RemoveConnection(client.Configuration);
-            client.Dispose();
-        }
-
-        [Fact]
-        [Trait("category", "Redis")]
-        [Trait("category", "Unreliable")]
-        public void Redis_Extensions_WithClientWithDb()
-        {
-            var configKey = Guid.NewGuid().ToString();
-            var client = ConnectionMultiplexer.Connect("localhost:6379");
-            var cache = CacheFactory.Build<string>(
-                s => s
-                    .WithJsonSerializer()
-                    .WithRedisConfiguration(configKey, client, 23)
-                    .WithRedisCacheHandle(configKey));
-
-            var handle = cache.CacheHandles.OfType<RedisCacheHandle<string>>().First();
-            var cfg = RedisConfigurations.GetConfiguration(configKey);
-
-            Assert.Equal(handle.Configuration.Name, configKey);
-            Assert.Equal(23, cfg.Database);
-            Assert.Equal("localhost:6379", cfg.ConnectionString);
-
-            // cleanup
-            RedisConnectionManager.RemoveConnection(client.Configuration);
-            client.Dispose();
-        }
-
-        [Fact]
-        [Trait("category", "Redis")]
-        public async Task Redis_BackplaneEvents_Add()
-        {
-            var key = Guid.NewGuid().ToString();
-
-            await TestBackplaneEventDistributed<CacheActionEventArgs>(
-                CacheEvent.OnAdd,
-                (cacheA) =>
-                {
-                    cacheA.Add(key, key);
-                },
-                (cacheA, args) =>
-                {
-                    args.Key.Should().Be(key);
-                    args.Region.Should().BeNull();
-                    args.Origin.Should().Be(CacheActionEventArgOrigin.Local);
-                    cacheA[key].Should().Be(key);
-                },
-                (cacheB, args) =>
-                {
-                    args.Key.Should().Be(key);
-                    args.Region.Should().BeNull();
-                    args.Origin.Should().Be(CacheActionEventArgOrigin.Remote);
-                    cacheB[key].Should().Be(key);
-                });
-        }
-
-        [Fact]
-        [Trait("category", "Redis")]
-        public async Task Redis_ValidateVersion_AddPutGetUpdate()
-        {
-            var configKey = Guid.NewGuid().ToString();
-            var multi = ConnectionMultiplexer.Connect("localhost");
-            var cache = CacheFactory.Build<Poco>(
-                s => s
-                    .WithRedisConfiguration(configKey, multi)
-                    .WithBondCompactBinarySerializer()
-                    .WithRedisCacheHandle(configKey));
-
-            // don't keep it and also dispose it later (seems appveyor doesn't like too many open connections)
-            RedisConnectionManager.RemoveConnection(multi.Configuration);
-
-            // act/assert
-            using (multi)
-            using (cache)
-            {
-                var key = Guid.NewGuid().ToString();
-                var value = new Poco() { Id = 23, Something = "§asdad" };
-                cache.Add(key, value);
-                await Task.Delay(10);
-
-                var version = (int)multi.GetDatabase(0).HashGet(key, "version");
-                version.Should().Be(1);
-
-                cache.Put(key, value);
-                await Task.Delay(10);
-
-                version = (int)multi.GetDatabase(0).HashGet(key, "version");
-                version.Should().Be(2);
-
-                cache.Update(key, r => { r.Something = "new text"; return r; });
-                await Task.Delay(10);
-
-                version = (int)multi.GetDatabase(0).HashGet(key, "version");
-                version.Should().Be(3);
-                cache.Get(key).Something.Should().Be("new text");
-            }
-        }
-
-        [Fact]
-        [Trait("category", "Redis")]
-        [Trait("category", "Unreliable")]
-        public void Redis_UseExistingConnection()
-        {
-            var conConfig = new ConfigurationOptions()
-            {
-                ConnectTimeout = 10000,
-                AbortOnConnectFail = false,
-                ConnectRetry = 10
-            };
-            conConfig.EndPoints.Add("localhost:6379");
-
-            var multiplexer = ConnectionMultiplexer.Connect(conConfig);
-
-            var cfg = CacheConfigurationBuilder.BuildConfiguration(
-                s => s
-                    .WithJsonSerializer()
-                    .WithRedisConfiguration("redisKey", multiplexer)
-                    .WithRedisCacheHandle("redisKey"));
-
-            RedisConnectionManager.RemoveConnection(multiplexer.Configuration);
-
-            using (multiplexer)
-            using (var cache = new BaseCacheManager<long>(cfg))
-            {
-                cache.Add(Guid.NewGuid().ToString(), 12345);
-            }
-        }
-
-        [Fact]
-        [Trait("category", "Redis")]
-        [Trait("category", "Unreliable")]
-        public async Task Redis_BackplaneEvents_AddWithRegion()
-        {
-            var key = Guid.NewGuid().ToString();
-            var region = Guid.NewGuid().ToString();
-
-            await TestBackplaneEventDistributed<CacheActionEventArgs>(
-                CacheEvent.OnAdd,
-                (cacheA) =>
-                {
-                    cacheA.Add(key, key, region);
-                },
-                (cacheA, args) =>
-                {
-                    args.Key.Should().Be(key);
-                    args.Region.Should().Be(region);
-                    args.Origin.Should().Be(CacheActionEventArgOrigin.Local);
-                    cacheA[key, region].Should().Be(key);
-                },
-                (cacheB, args) =>
-                {
-                    args.Key.Should().Be(key);
-                    args.Region.Should().Be(region);
-                    args.Origin.Should().Be(CacheActionEventArgOrigin.Remote);
-                    cacheB[key, region].Should().Be(key);
-                });
-        }
-
-        /// <summary>
-        /// Testing in memory cache only with backplane through redis (not using Redis as cache at all)
-        /// </summary>
-        /// <returns></returns>
-        [Fact]
-        [Trait("category", "Redis")]
-        [Trait("category", "Unreliable")]
-        public async Task Redis_BackplaneEvents_InMemory_AddWithRegion()
-        {
-            var key = Guid.NewGuid().ToString();
-            var region = Guid.NewGuid().ToString();
-
-            await TestBackplaneEventInMemory<CacheActionEventArgs>(
-                CacheEvent.OnAdd,
-                (cacheA, cacheB) =>
-                {
-                    // in memory is not distributed, adding only to CacheA the event triggered on cache B does trigger but cacheB doesn't have the item.
-                    cacheB.Add(key, key, region);
-                    cacheA.Add(key, key, region);
-                },
-                (cacheA, args) =>
-                {
-                    args.Key.Should().Be(key);
-                    args.Region.Should().Be(region);
-
-                    // cannot test origin as there might be two events triggered, one local one remote
-                    cacheA[key, region].Should().Be(key);
-                },
-                (cacheB, args) =>
-                {
-                    args.Key.Should().Be(key);
-                    args.Region.Should().Be(region);
-
-                    // cannot test origin as there might be two events triggered, one local one remote
-                    cacheB[key, region].Should().Be(key);
-                },
-                expectedRemoteTriggers: 2);
-        }
-
-        [Fact]
-        [Trait("category", "Redis")]
-        [Trait("category", "Unreliable")]
-        public async Task Redis_BackplaneEvents_Put()
-        {
-            var key = Guid.NewGuid().ToString();
-
-            await TestBackplaneEventDistributed<CacheActionEventArgs>(
-                CacheEvent.OnPut,
-                (cacheA) =>
-                {
-                    cacheA.Add(key, key);
-                    cacheA.Put(key, "new val");
-                },
-                (cacheA, args) =>
-                {
-                    args.Key.Should().Be(key);
-                    args.Region.Should().BeNull();
-                    args.Origin.Should().Be(CacheActionEventArgOrigin.Local);
-                    cacheA[key].Should().Be("new val");
-                },
-                (cacheB, args) =>
-                {
-                    args.Key.Should().Be(key);
-                    args.Region.Should().BeNull();
-                    args.Origin.Should().Be(CacheActionEventArgOrigin.Remote);
-                    cacheB[key].Should().Be("new val");
-                });
-        }
-
-        /// <summary>
-        /// Testing in memory cache only with backplane through redis (not using Redis as cache at all)
-        /// </summary>
-        /// <returns></returns>
-        [Fact]
-        [Trait("category", "Redis")]
-        [Trait("category", "Unreliable")]
-        public async Task Redis_BackplaneEvents_InMemory_Put()
-        {
-            var key = Guid.NewGuid().ToString();
-
-            await TestBackplaneEventInMemory<CacheActionEventArgs>(
-                CacheEvent.OnPut,
-                (cacheA, cacheB) =>
-                {
-                    // in memory is not distributed, adding only to CacheA the event triggered on cache B does trigger but cacheB doesn't have the item.
-                    cacheA.Add(key, key);
-                    cacheA.Put(key, "new val");
-                },
-                (cacheA, args) =>
-                {
-                    args.Key.Should().Be(key);
-                    args.Region.Should().BeNull();
-                    args.Origin.Should().Be(CacheActionEventArgOrigin.Local);
-                    cacheA[key].Should().Be("new val");
-                },
-                (cacheB, args) =>
-                {
-                    args.Key.Should().Be(key);
-                    args.Region.Should().BeNull();
-                    args.Origin.Should().Be(CacheActionEventArgOrigin.Remote);
-                    cacheB[key].Should().Be(null);
-                },
-                expectedRemoteTriggers: 1);
-        }
-
-        [Fact]
-        [Trait("category", "Redis")]
-        [Trait("category", "Unreliable")]
-        public async Task Redis_BackplaneEvents_PutWithRegion()
-        {
-            var key = Guid.NewGuid().ToString();
-            var region = Guid.NewGuid().ToString();
-
-            await TestBackplaneEventDistributed<CacheActionEventArgs>(
-                CacheEvent.OnPut,
-                (cacheA) =>
-                {
-                    cacheA.Add(key, key, region);
-                    cacheA.Put(key, "new val", region);
-                },
-                (cacheA, args) =>
-                {
-                    args.Key.Should().Be(key);
-                    args.Region.Should().Be(region);
-                    args.Origin.Should().Be(CacheActionEventArgOrigin.Local);
-                    cacheA[key, region].Should().Be("new val");
-                },
-                (cacheB, args) =>
-                {
-                    args.Key.Should().Be(key);
-                    args.Region.Should().Be(region);
-                    args.Origin.Should().Be(CacheActionEventArgOrigin.Remote);
-                    cacheB[key, region].Should().Be("new val");
-                });
-        }
-
-        [Fact]
-        [Trait("category", "Redis")]
-        [Trait("category", "Unreliable")]
-        public async Task Redis_BackplaneEvents_Remove()
-        {
-            var key = Guid.NewGuid().ToString();
-
-            await TestBackplaneEventDistributed<CacheActionEventArgs>(
-                CacheEvent.OnRemove,
-                (cacheA) =>
-                {
-                    cacheA.Add(key, key).Should().BeTrue();
-                    cacheA.Remove(key).Should().BeTrue();
-                },
-                (cacheA, args) =>
-                {
-                    args.Key.Should().Be(key);
-                    args.Region.Should().BeNull();
-                    args.Origin.Should().Be(CacheActionEventArgOrigin.Local);
-                    cacheA[key].Should().BeNull();
-                },
-                (cacheB, args) =>
-                {
-                    args.Key.Should().Be(key);
-                    args.Region.Should().BeNull();
-                    args.Origin.Should().Be(CacheActionEventArgOrigin.Remote);
-                    cacheB[key].Should().BeNull();
-                });
-        }
-
-        [Fact]
-        [Trait("category", "Redis")]
-        [Trait("category", "Unreliable")]
-        public async Task Redis_BackplaneEvents_Remove_WithRegion()
-        {
-            var key = Guid.NewGuid().ToString();
-            var region = Guid.NewGuid().ToString();
-
-            await TestBackplaneEventDistributed<CacheActionEventArgs>(
-                CacheEvent.OnRemove,
-                (cacheA) =>
-                {
-                    cacheA.Add(key, key).Should().BeTrue();
-                    cacheA.Add(key, key, region).Should().BeTrue();
-                    cacheA.Remove(key, region).Should().BeTrue();
-                },
-                (cacheA, args) =>
-                {
-                    args.Key.Should().Be(key);
-                    args.Region.Should().Be(region);
-                    args.Origin.Should().Be(CacheActionEventArgOrigin.Local);
-                    cacheA[key].Should().NotBeNull();
-                    cacheA[key, region].Should().BeNull();
-                },
-                (cacheB, args) =>
-                {
-                    args.Key.Should().Be(key);
-                    args.Region.Should().Be(region);
-                    args.Origin.Should().Be(CacheActionEventArgOrigin.Remote);
-                    cacheB[key].Should().NotBeNull();
-                    cacheB[key, region].Should().BeNull();
-                });
-        }
-
-        /// <summary>
-        /// Testing in memory cache only with backplane through redis (not using Redis as cache at all)
-        /// This test in particular tests that a second in memory cache gets keys evicted if the same key
-        /// got removed by another cache (both caches connected through the backplane)
-        /// </summary>
-        /// <returns></returns>
-        [Fact]
-        [Trait("category", "Redis")]
-        [Trait("category", "Unreliable")]
-        public async Task Redis_BackplaneEvents_InMemory_Remove_WithRegion()
-        {
-            var key = Guid.NewGuid().ToString();
-            var region = Guid.NewGuid().ToString();
-
-            await TestBackplaneEventInMemory<CacheActionEventArgs>(
-                CacheEvent.OnRemove,
-                (cacheA, cacheB) =>
-                {
-                    cacheA.Add(key, key).Should().BeTrue();
-                    cacheA.Add(key, key, region).Should().BeTrue();
-
-                    // adding to cache B, too, as we don't have a distributed cache
-                    cacheB.Add(key, key, region).Should().BeTrue();
-
-                    // remove from A only, should also remove it from B via backplane
-                    cacheA.Remove(key, region).Should().BeTrue();
-                },
-                (cacheA, args) =>
-                {
-                    args.Key.Should().Be(key);
-                    args.Region.Should().Be(region);
-                    args.Origin.Should().Be(CacheActionEventArgOrigin.Local);
-                    cacheA[key].Should().NotBeNull();
-                    cacheA[key, region].Should().BeNull();
-                },
-                (cacheB, args) =>
-                {
-                    args.Key.Should().Be(key);
-                    args.Region.Should().Be(region);
-                    args.Origin.Should().Be(CacheActionEventArgOrigin.Remote);
-                    cacheB[key, region].Should().BeNull();
-                },
-                expectedRemoteTriggers: 1);
-        }
-
-        [Fact]
-        public async Task Redis_BackplaneEvents_Update()
-        {
-            var key = Guid.NewGuid().ToString();
-            var newValue = "new value";
-
-            await TestBackplaneEventDistributed<CacheActionEventArgs>(
-                CacheEvent.OnUpdate,
-                (cacheA) =>
-                {
-                    cacheA.Add(key, key);
-                    cacheA.Update(key, v => newValue).Should().Be(newValue);
-                },
-                (cacheA, args) =>
-                {
-                    args.Key.Should().Be(key);
-                    args.Region.Should().BeNull();
-                    args.Origin.Should().Be(CacheActionEventArgOrigin.Local);
-                    cacheA[key].Should().Be(newValue);
-                },
-                (cacheB, args) =>
-                {
-                    args.Key.Should().Be(key);
-                    args.Region.Should().BeNull();
-                    args.Origin.Should().Be(CacheActionEventArgOrigin.Remote);
-                    cacheB[key].Should().Be(newValue);
-                });
-        }
-
-        [Fact]
-        public async Task Redis_BackplaneEvents_Update_WithgRegion()
-        {
-            var key = Guid.NewGuid().ToString();
-            var region = Guid.NewGuid().ToString();
-            var newValue = "new value";
-
-            await TestBackplaneEventDistributed<CacheActionEventArgs>(
-                CacheEvent.OnUpdate,
-                (cacheA) =>
-                {
-                    cacheA.Add(key, key, region);
-                    cacheA.Update(key, region, v => newValue).Should().Be(newValue);
-                },
-                (cacheA, args) =>
-                {
-                    args.Key.Should().Be(key);
-                    args.Region.Should().Be(region);
-                    args.Origin.Should().Be(CacheActionEventArgOrigin.Local);
-                    cacheA[key, region].Should().Be(newValue);
-                },
-                (cacheB, args) =>
-                {
-                    args.Key.Should().Be(key);
-                    args.Region.Should().Be(region);
-                    args.Origin.Should().Be(CacheActionEventArgOrigin.Remote);
-                    cacheB[key, region].Should().Be(newValue);
-                });
-        }
-
-        /// <summary>
-        /// Testing in memory cache only with backplane through redis (not using Redis as cache at all)
-        /// This test in particular tests on update, add or put, the key in cacheB does not change or get evicted.
-        /// To remove the key in all in memory cache instances, Remove must be used!
-        /// </summary>
-        /// <returns></returns>
-        [Fact]
-        public async Task Redis_BackplaneEvents_InMemory_Update_WithRegion()
-        {
-            var key = Guid.NewGuid().ToString();
-            var region = Guid.NewGuid().ToString();
-            var newValue = "new value";
-
-            await TestBackplaneEventInMemory<CacheActionEventArgs>(
-                CacheEvent.OnUpdate,
-                (cacheA, cacheB) =>
-                {
-                    cacheA.Add(key, key, region);
-
-                    // adding to cache B, too, as we don't have a distributed cache
-                    cacheB.Add(key, key, region).Should().BeTrue();
-
-                    // the update should evict the key from cache B
-                    cacheA.Update(key, region, v => newValue).Should().Be(newValue);
-                },
-                (cacheA, args) =>
-                {
-                    args.Key.Should().Be(key);
-                    args.Region.Should().Be(region);
-                    args.Origin.Should().Be(CacheActionEventArgOrigin.Local);
-                    cacheA[key, region].Should().Be(newValue);
-                },
-                (cacheB, args) =>
-                {
-                    args.Key.Should().Be(key);
-                    args.Region.Should().Be(region);
-                    args.Origin.Should().Be(CacheActionEventArgOrigin.Remote);
-
-                    // important to note, the key in cacheB has never been updated or removed, so it should still be the "old" value!
-                    cacheB[key, region].Should().Be(key);
-                },
-                expectedRemoteTriggers: 1);
-        }
-
-        [Fact]
-        public async Task Redis_BackplaneEvents_Clear()
-        {
-            var key = Guid.NewGuid().ToString();
-
-            await TestBackplaneEventDistributed<CacheClearEventArgs>(
-                CacheEvent.OnClear,
-                (cacheA) =>
-                {
-                    cacheA.Add(key, key);
-                    cacheA.Clear();
-                },
-                (cacheA, args) =>
-                {
-                    args.Origin.Should().Be(CacheActionEventArgOrigin.Local);
-                    cacheA.Get(key).Should().BeNull();
-                },
-                (cacheB, args) =>
-                {
-                    args.Origin.Should().Be(CacheActionEventArgOrigin.Remote);
-                    cacheB.Get(key).Should().BeNull();
-                });
-        }
-
-        [Fact]
-        public async Task Redis_BackplaneEvents_InMemory_Clear()
-        {
-            var key = Guid.NewGuid().ToString();
-
-            await TestBackplaneEventInMemory<CacheClearEventArgs>(
-                CacheEvent.OnClear,
-                (cacheA, cacheB) =>
-                {
-                    cacheA.Add(key, key);
-                    cacheB.Add(key, key);
-                    cacheA.Clear();
-                },
-                (cacheA, args) =>
-                {
-                    args.Origin.Should().Be(CacheActionEventArgOrigin.Local);
-                    cacheA.Get(key).Should().BeNull();
-                },
-                (cacheB, args) =>
-                {
-                    args.Origin.Should().Be(CacheActionEventArgOrigin.Remote);
-                    cacheB.Get(key).Should().BeNull();
-                },
-                expectedRemoteTriggers: 1);
-        }
-
-        [Fact]
-        public async Task Redis_BackplaneEvents_ClearRegion()
-        {
-            var key = Guid.NewGuid().ToString();
-            var region = Guid.NewGuid().ToString();
-
-            await TestBackplaneEventDistributed<CacheClearRegionEventArgs>(
-                CacheEvent.OnClearRegion,
-                (cacheA) =>
-                {
-                    cacheA.Add(key, key);
-                    cacheA.Add(key, key, region);
-                    cacheA.ClearRegion(region);
-                },
-                (cacheA, args) =>
-                {
-                    args.Origin.Should().Be(CacheActionEventArgOrigin.Local);
-                    cacheA.Get(key).Should().NotBeNull();
-                    cacheA.Get(key, region).Should().BeNull();
-                },
-                (cacheB, args) =>
-                {
-                    args.Origin.Should().Be(CacheActionEventArgOrigin.Remote);
-                    cacheB.Get(key).Should().NotBeNull();
-                    cacheB.Get(key, region).Should().BeNull();
-                });
-        }
-
-        [Fact]
-        public async Task Redis_BackplaneEvents_InMemory_ClearRegion()
-        {
-            var key = Guid.NewGuid().ToString();
-            var region = Guid.NewGuid().ToString();
-
-            await TestBackplaneEventInMemory<CacheClearRegionEventArgs>(
-                CacheEvent.OnClearRegion,
-                (cacheA, cacheB) =>
-                {
-                    cacheA.Add(key, key);
-                    cacheA.Add(key, key, region);
-
-                    cacheB.Add(key, key);
-                    cacheB.Add(key, key, region);
-
-                    cacheA.ClearRegion(region);
-                },
-                (cacheA, args) =>
-                {
-                    args.Origin.Should().Be(CacheActionEventArgOrigin.Local);
-                    cacheA.Get(key).Should().NotBeNull();
-                    cacheA.Get(key, region).Should().BeNull();
-                },
-                (cacheB, args) =>
-                {
-                    args.Origin.Should().Be(CacheActionEventArgOrigin.Remote);
-                    cacheB.Get(key).Should().NotBeNull();
-                    cacheB.Get(key, region).Should().BeNull();
-                },
-                expectedRemoteTriggers: 1);
-        }
-
-        [Fact]
-        public void Redis_Configuration_NoEndpoint()
-        {
-            Action act = () => CacheConfigurationBuilder.BuildConfiguration(
-                s => s.WithRedisConfiguration(
-                    "key",
-                    c => c.WithAllowAdmin()));
-
-            act.Should().Throw<InvalidOperationException>().WithMessage("*endpoints*");
-        }
-
-#if !NO_APP_CONFIG
-
-        [Fact]
-        [Trait("category", "NotOnMono")]
-        public void Redis_Configurations_LoadStandard()
-        {
-            RedisConfigurations.LoadConfiguration();
-        }
-
-#endif
-
-        [Fact]
-        [Trait("category", "NotOnMono")]
-        public void Redis_Configurations_LoadWithConnectionString()
-        {
-            string fileName = TestConfigurationHelper.GetCfgFileName(@"/Configuration/configuration.valid.allFeatures.config");
-
-            RedisConfigurations.LoadConfiguration(fileName, RedisConfigurationSection.DefaultSectionName);
-            var cfg = RedisConfigurations.GetConfiguration("redisConnectionString");
-            cfg.ConnectionString.ToLower().Should().Contain("127.0.0.1:6379");//,allowAdmin = true,ssl = false");
-            cfg.ConnectionString.ToLower().Should().Contain("allowadmin=true");
-            cfg.ConnectionString.ToLower().Should().Contain("ssl=false");
-            cfg.Database.Should().Be(131);
-            cfg.StrictCompatibilityModeVersion.Should().Be("2.9");
-        }
-
-        [Fact]
-        [Trait("category", "NotOnMono")]
-        public void Redis_Configurations_LoadWConnectionString_WithDefaultDb()
-        {
-            string fileName = TestConfigurationHelper.GetCfgFileName(@"/Configuration/configuration.valid.allFeatures.config");
-
-            RedisConfigurations.LoadConfiguration(fileName, RedisConfigurationSection.DefaultSectionName);
-            var cfg = RedisConfigurations.GetConfiguration("redisConnectionStringWithDefaultDb");
-            cfg.ConnectionString.ToLower().Should().Contain("127.0.0.1:6379");
-            cfg.ConnectionString.ToLower().Should().Contain("allowadmin=true");
-            cfg.ConnectionString.ToLower().Should().Contain("ssl=false");
-            cfg.Database.Should().Be(0);
-            cfg.StrictCompatibilityModeVersion.Should().Be("2.9");
-        }
-
-        [Fact]
-        public void Redis_Configurations_LoadSection_InvalidSectionName()
-        {
-            Action act = () => RedisConfigurations.LoadConfiguration((string)null);
-
-            act.Should().Throw<ArgumentNullException>()
-                .And.ParamName.Equals("sectionName");
-        }
-
-        [Fact]
-        public void Redis_Configurations_LoadSection_InvalidFileName()
-        {
-            Action act = () => RedisConfigurations.LoadConfiguration((string)null, "section");
-
-            act.Should().Throw<ArgumentNullException>()
-                .And.ParamName.Equals("fileName");
-        }
-
-        [Fact]
-        public void Redis_Configurations_LoadSection_SectionDoesNotExist()
-        {
-            Action act = () => RedisConfigurations.LoadConfiguration(Guid.NewGuid().ToString());
-
-            act.Should().Throw<ArgumentNullException>()
-                .And.ParamName.Equals("section");
-        }
-
-        [Fact]
-        [Trait("category", "Redis")]
-        [Trait("category", "Unreliable")]
-        public async Task Redis_Multiple_PubSub_Change()
-        {
-            // arrange
-            var channelName = Guid.NewGuid().ToString();
-            var item = new CacheItem<object>(Guid.NewGuid().ToString(), "something");
-
-            // act/assert
-            await RunMultipleCaches(
-                async (cacheA, cacheB) =>
-                {
-                    cacheA.Put(item);
-                    cacheA.Get(item.Key).Should().Be("something");
-                    await Task.Delay(10);
-                    var value = cacheB.Get(item.Key);
-                    value.Should().Be(item.Value, cacheB.ToString());
-                    cacheB.Put(item.Key, "new value");
-                },
-                async (cache) =>
-                {
-                    int tries = 0;
-                    object value = null;
-                    do
-                    {
-                        tries++;
-                        await Task.Delay(100);
-                        value = cache.Get(item.Key);
-                    }
-                    while (value.ToString() != "new value" && tries < 10);
-
-                    value.Should().Be("new value", cache.ToString());
-                },
-                1,
-                TestManagers.CreateRedisAndDicCacheWithBackplane(50, true, channelName, Serializer.Json),
-                TestManagers.CreateRedisAndDicCacheWithBackplane(50, true, channelName, Serializer.Json),
-                TestManagers.CreateRedisCache(50, false, Serializer.Json),
-                TestManagers.CreateRedisAndDicCacheWithBackplane(50, true, channelName, Serializer.Json));
-        }
-
-        [Fact(Skip = "needs clear")]
-        [Trait("category", "Redis")]
-        public async Task Redis_Multiple_PubSub_Clear()
-        {
-            // arrange
-            var item = new CacheItem<object>(Guid.NewGuid().ToString(), "something");
-            var channelName = Guid.NewGuid().ToString();
-
-            // act/assert
-            await RedisTests.RunMultipleCaches(
-                async (cacheA, cacheB) =>
-                {
-                    cacheA.Add(item);
-                    cacheB.Get(item.Key).Should().Be(item.Value);
-                    cacheB.Clear();
-                    await Task.Delay(0);
-                },
-                async (cache) =>
-                {
-                    cache.Get(item.Key).Should().BeNull();
-                    await Task.Delay(0);
-                },
-                2,
-                TestManagers.CreateRedisAndDicCacheWithBackplane(51, true, channelName),
-                TestManagers.CreateRedisAndDicCacheWithBackplane(51, true, channelName),
-                TestManagers.CreateRedisCache(51),
-                TestManagers.CreateRedisAndDicCacheWithBackplane(51, true, channelName));
-        }
-
-        [Fact]
-        [Trait("category", "Redis")]
-        public async Task Redis_Multiple_PubSub_ClearRegion()
-        {
-            // arrange
-            var item = new CacheItem<object>(Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), "something");
-            var channelName = Guid.NewGuid().ToString();
-
-            // act/assert
-            await RedisTests.RunMultipleCaches(
-                async (cacheA, cacheB) =>
-                {
-                    cacheA.Add(item);
-                    cacheB.Get(item.Key, item.Region).Should().Be(item.Value);
-                    cacheB.ClearRegion(item.Region);
-                    await Task.Delay(0);
-                },
-                async (cache) =>
-                {
-                    cache.Get(item.Key, item.Region).Should().BeNull();
-                    await Task.Delay(0);
-                },
-                2,
-                TestManagers.CreateRedisCache(5),
-                TestManagers.CreateRedisCache(5),
-                TestManagers.CreateRedisCache(5),
-                TestManagers.CreateRedisCache(5));
-        }
-
-        [Fact]
-        [Trait("category", "Redis")]
-        [Trait("category", "Unreliable")]
-        public async Task Redis_Multiple_PubSub_Remove()
-        {
-            // arrange
-            var item = new CacheItem<object>(Guid.NewGuid().ToString(), "something");
-            var channelName = Guid.NewGuid().ToString();
-
-            // act/assert
-            await RedisTests.RunMultipleCaches(
-                async (cacheA, cacheB) =>
-                {
-                    cacheA.Add(item);
-                    cacheB.Get(item.Key).Should().Be(item.Value);
-                    cacheB.Remove(item.Key);
-                    await Task.Delay(10);
-                },
-                async (cache) =>
-                {
-                    int tries = 0;
-                    object value = null;
-                    do
-                    {
-                        tries++;
-                        await Task.Delay(100);
-                        value = cache.GetCacheItem(item.Key);
-                    }
-                    while (value != null && tries < 50);
-
-                    value.Should().BeNull();
-                },
-                1,
-                TestManagers.CreateRedisAndDicCacheWithBackplane(6, true, channelName),
-                TestManagers.CreateRedisAndDicCacheWithBackplane(6, true, channelName),
-                TestManagers.CreateRedisCache(6),
-                TestManagers.CreateRedisAndDicCacheWithBackplane(6, true, channelName));
-        }
-
-        [Fact]
-        public void Redis_Verify_NoCredentialsLoggedOrThrown()
-        {
-            var testLogger = new TestLogger();
-            var cfg = CacheConfigurationBuilder.BuildConfiguration(settings =>
-            {
-                settings
-                    .WithRedisBackplane("redis.config")
-                    .WithJsonSerializer()
-                    .WithRedisCacheHandle("redis.config", true)
-                    .And
-                    .WithRedisConfiguration("redis.config", config =>
-                    {
-                        config
-                            .WithConnectionTimeout(10)
-                            .WithAllowAdmin()
-                            //.WithDatabase(7)
-                            .WithEndpoint("doesnotexist", 6379)
-                            .WithPassword("mysupersecret")
-                            .WithSsl();
-                    });
-            });
-
-            Action act = () => new BaseCacheManager<string>(cfg).Put("key", "value");
-
-            act.Should().Throw<InvalidOperationException>().WithMessage("*password=***");
-
-            testLogger.LogMessages.Any(p => p.Message.ToString().Contains("mysupersecret")).Should().BeFalse();
-        }
-
-        [Fact]
-        [Trait("category", "Redis")]
-        [Trait("category", "Unreliable")]
-        public async Task Redis_NoRaceCondition_WithUpdate()
-        {
-            using (var cache = CacheFactory.Build<RaceConditionTestElement>(settings =>
-            {
-                settings.WithMaxRetries(1);
-                settings.WithUpdateMode(CacheUpdateMode.Up)
-                    .WithJsonSerializer()
-                    .WithRedisCacheHandle("default")
-                    .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMinutes(20));
-                settings.WithRedisConfiguration("default", config =>
-                {
-                    config.WithAllowAdmin()
-                        //.WithDatabase(7)
-                        .WithEndpoint("127.0.0.1", 6379);
-                });
-            }))
-            {
-                var key = Guid.NewGuid().ToString();
-                cache.Remove(key);
-                cache.Add(key, new RaceConditionTestElement() { Counter = 0 });
-                int numThreads = 5;
-                int iterations = 10;
-                int numInnerIterations = 10;
-                int countCasModifyCalls = 0;
-
-                // act
-                await ThreadTestHelper.RunAsync(
-                    async () =>
-                    {
-                        for (var i = 0; i < numInnerIterations; i++)
-                        {
-                            cache.Update(
-                                key,
-                                (value) =>
-                                {
-                                    value.Counter++;
-                                    Interlocked.Increment(ref countCasModifyCalls);
-                                    return value;
-                                },
-                                int.MaxValue);
-
-                            await Task.Delay(0);
-                        }
-                    },
-                    numThreads,
-                    iterations);
-
-                // assert
-                await Task.Delay(100);
-                var result = cache.Get(key);
-                result.Should().NotBeNull();
-                result.Counter.Should().Be(numThreads * numInnerIterations * iterations, "counter should be exactly the expected value");
-                countCasModifyCalls.Should().BeGreaterThan((int)result.Counter, "we expect many version collisions, so cas calls should be way higher then the count result");
-            }
-        }
-
-        [Fact]
-        [Trait("category", "Redis")]
-        [Trait("category", "Unreliable")]
-        public async Task Redis_RaceCondition_WithoutUpdate()
-        {
-            using (var cache = CacheFactory.Build<RaceConditionTestElement>(settings =>
-            {
-                settings.WithUpdateMode(CacheUpdateMode.Up)
-                    .WithJsonSerializer()
-                    .WithRedisCacheHandle("default")
-                    .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMinutes(20));
-                settings.WithRedisConfiguration("default", config =>
-                {
-                    config.WithAllowAdmin()
-                        //.WithDatabase(8)
-                        .WithEndpoint("127.0.0.1", 6379);
-                });
-            }))
-            {
-                var key = Guid.NewGuid().ToString();
-                cache.Add(key, new RaceConditionTestElement() { Counter = 0 });
-                int numThreads = 5;
-                int iterations = 10;
-                int numInnerIterations = 10;
-
-                // act
-                await ThreadTestHelper.RunAsync(
-                    async () =>
-                    {
-                        for (int i = 0; i < numInnerIterations; i++)
-                        {
-                            var val = cache.Get(key);
-                            val.Should().NotBeNull();
-                            val.Counter++;
-
-                            cache.Put(key, val);
-                            await Task.Delay(1);
-                        }
-                    },
-                    numThreads,
-                    iterations);
-
-                // assert
-                await Task.Delay(10);
-                var result = cache.Get(key);
-                result.Should().NotBeNull();
-                result.Counter.Should().NotBe(numThreads * numInnerIterations * iterations);
-            }
-        }
-
-        /// <summary>
-        /// See #165, version string can be empty is e.g. it comes from app/web.config.
-        /// </summary>
-        [Fact]
-        [Trait("category", "Redis")]
-        public void Redis_StrictMode_EmptyString_DoesnTThrow()
-        {
-            var redisConfigKey = Guid.NewGuid().ToString();
-            var redisConfig = new RedisConfiguration(redisConfigKey, "localhost", strictCompatibilityModeVersion: "");
-            RedisConfigurations.AddConfiguration(redisConfig);
-
-            var cacheConfig = new CacheConfigurationBuilder()
-                .WithJsonSerializer()
-                .WithRedisCacheHandle(redisConfigKey)
-                .Build();
-
-            Action act = () => new BaseCacheManager<object>(cacheConfig);
-
-            act.Should().NotThrow();
-        }
-
-        [Fact]
-        [Trait("category", "Redis")]
-        public void Redis_Valid_CfgFile_LoadWithRedisBackplane()
-        {
-            // arrange
-            string fileName = TestConfigurationHelper.GetCfgFileName(@"/Configuration/configuration.valid.allFeatures.config");
-            string cacheName = "redisConfigFromConfig";
-
-            // have to load the configuration manually because the file is not available to the default ConfigurtaionManager
-            RedisConfigurations.LoadConfiguration(fileName, RedisConfigurationSection.DefaultSectionName);
-            var redisConfig = RedisConfigurations.GetConfiguration("redisFromCfgConfigurationId");
-
-            // act
-            var cfg = CacheConfigurationBuilder.LoadConfigurationFile(fileName, cacheName);
-
-            // assert
-            redisConfig.Database.Should().Be(113);
-            redisConfig.ConnectionTimeout.Should().Be(1200);
-            redisConfig.AllowAdmin.Should().BeTrue();
-            redisConfig.KeyspaceNotificationsEnabled.Should().BeTrue();
-            redisConfig.TwemproxyEnabled.Should().BeTrue();
-            redisConfig.StrictCompatibilityModeVersion.Should().Be("2.7");
-        }
-
-        [Fact]
-        [Trait("category", "Redis")]
-        public void Redis_Valid_CfgFile_LoadWithConnectionString()
-        {
-            // arrange
-            string fileName = TestConfigurationHelper.GetCfgFileName(@"/Configuration/configuration.valid.allFeatures.config");
-            string cacheName = "redisConfigFromConnectionString";
-
-            // have to load the configuration manually because the file is not available to the default ConfigurtaionManager
-            RedisConfigurations.LoadConfiguration(fileName, RedisConfigurationSection.DefaultSectionName);
-            var redisConfig = RedisConfigurations.GetConfiguration("redisConnectionString");
-
-            // act
-            var cfg = CacheConfigurationBuilder.LoadConfigurationFile(fileName, cacheName);
-            var cache = CacheFactory.FromConfiguration<object>(cfg);
-
-            // assert
-            cache.CacheHandles.Any(p => p.Configuration.IsBackplaneSource).Should().BeTrue();
-
-            // database is the only option apart from key and connection string which must be set, database will not be set through connection string
-            // to define which database should actually be used...
-            redisConfig.Database.Should().Be(131);
-            redisConfig.StrictCompatibilityModeVersion.Should().Be("2.9");
-            redisConfig.AllowAdmin.Should().BeTrue();
-        }
-
-#if !NO_APP_CONFIG
-
-        [Fact]
-        [Trait("category", "Redis")]
-        public void Redis_LoadWithRedisBackplane_FromAppConfig()
-        {
-            // RedisConfigurations should load this from default section from app.config
-
-            // arrange
-            string cacheName = "redisWithBackplaneAppConfig";
-
-            // act
-            var cfg = CacheConfigurationBuilder.LoadConfiguration(cacheName);
-            var cache = CacheFactory.FromConfiguration<object>(cfg);
-            var handle = cache.CacheHandles.First(p => p.Configuration.IsBackplaneSource) as RedisCacheHandle<object>;
-
-            // test running something on the redis handle, Count should be enough to test the connection
-            Action count = () => { var x = handle.Count; };
-
-            // assert
-            handle.Should().NotBeNull();
-            count.Should().NotThrow();
-        }
-
-        [Fact]
-        [Trait("category", "Redis")]
-        public void Redis_LoadWithRedisBackplane_FromAppConfigConnectionStrings()
-        {
-            // RedisConfigurations should load this from AppSettings from app.config
-            // arrange
-            string cacheName = "redisWithBackplaneAppConfigConnectionStrings";
-
-            // act
-            var cfg = CacheConfigurationBuilder.LoadConfiguration(cacheName);
-            var cache = CacheFactory.FromConfiguration<object>(cfg);
-            var handle = cache.CacheHandles.First(p => p.Configuration.IsBackplaneSource) as RedisCacheHandle<object>;
-
-            // test running something on the redis handle, Count should be enough to test the connection
-            Action count = () => { var x = handle.Count; };
-
-            // assert
-            handle.Should().NotBeNull();
-            count.Should().NotThrow();
-        }
-
-        [Fact]
-        [Trait("category", "Redis")]
-        public void Redis_LoadWithRedisBackplane_FromAppConfigConnectionStrings_WithDefaultDb()
-        {
-            // RedisConfigurations should load this from AppSettings from app.config
-            // arrange
-            string cacheName = "redisWithBackplaneAppConfigConnectionStringsWithDefaultDb";
-
-            // act
-            var cfg = CacheConfigurationBuilder.LoadConfiguration(cacheName);
-            var cache = CacheFactory.FromConfiguration<object>(cfg);
-            var redisConfig = RedisConfigurations.GetConfiguration("redisFromConnectionStringsWithDefaultDb");
-            var handle = cache.CacheHandles.First(p => p.Configuration.IsBackplaneSource) as RedisCacheHandle<object>;
-
-            // test running something on the redis handle, Count should be enough to test the connection
-            Action count = () => { var x = handle.Count; };
-
-            // assert
-            handle.Should().NotBeNull();
-            count.Should().NotThrow();
-            redisConfig.Database.Should().Be(0);
-            redisConfig.AllowAdmin.Should().BeTrue();
-            redisConfig.ConnectionTimeout.Should().Be(11);
-        }
-
-#endif
-
-        [Fact]
-        [Trait("category", "Redis")]
-        public void Redis_ValueConverter_CacheTypeConversion_Poco()
-        {
-            var cache = TestManagers.CreateRedisCache<Poco>(17, false, Serializer.Json);
-
-            // act/assert
-            using (cache)
-            {
-                var key = Guid.NewGuid().ToString();
-                var value = new Poco() { Id = 23, Something = "§asdad" };
-                cache.Add(key, value);
-                var result = (Poco)cache.Get(key);
-                value.Should().BeEquivalentTo(result);
-            }
-        }
-
-        [Fact]
-        [Trait("category", "Redis")]
-        public void Redis_ValueConverter_Poco_Update()
-        {
-            var cache = TestManagers.CreateRedisCache(17, false, Serializer.Json);
-
-            // act/assert
-            using (cache)
-            {
-                var key = Guid.NewGuid().ToString();
-                var region = Guid.NewGuid().ToString();
-                var value = new Poco() { Id = 23, Something = "§asdad" };
-                cache.Add(key, value, region);
-
-                var newValue = new Poco() { Id = 24, Something = "%!else$&" };
-                object resultValue = null;
-                Func<bool> act = () => cache.TryUpdate(key, region, (o) => newValue, out resultValue);
-
-                act().Should().BeTrue();
-                newValue.Should().BeEquivalentTo(resultValue);
-            }
-        }
-
-        [Theory]
-        [Trait("category", "Redis")]
-        [InlineData(byte.MaxValue)]
-        [InlineData(new byte[] { 0, 1, 2, 3, 4 })]
-        [InlineData("some string")]
-        [InlineData(int.MaxValue)]
-        [InlineData(uint.MaxValue)]
-        [InlineData(short.MaxValue)]
-        [InlineData(ushort.MaxValue)]
-        [InlineData(float.MaxValue)]
-        [InlineData(double.MaxValue)]
-        [InlineData(true)]
-        [InlineData(false)]
-        [InlineData(long.MaxValue)]
-        [InlineData(ulong.MaxValue)]
-        [InlineData((ulong)int.MaxValue)]
-        [InlineData((ulong)long.MaxValue)]
-        [InlineData(char.MinValue)]
-        [InlineData(char.MaxValue)]
-        public void Redis_ValueConverter_ValidateValuesTypesNotUsingSerializer<T>(T value)
-        {
-            var redisKey = Guid.NewGuid().ToString();
-            var cache = CacheFactory.Build<object>(settings =>
-            {
-                settings
-                    .WithSerializer(typeof(FakeTestSerializer))
-                    .WithRedisConfiguration(redisKey, config =>
-                    {
-                        config
-                            //.WithDatabase(66)
-                            .WithEndpoint("127.0.0.1", 6379);
-                    })
-                    .WithRedisCacheHandle(redisKey, true);
-            });
-
-            var key = Guid.NewGuid().ToString();
-
-            cache.Add(key, value);
-            var val = cache[key];
-            val.Should().BeEquivalentTo(value);
-            val.GetType().Should().Be(value.GetType());
-        }
-
-        private static async Task RunMultipleCaches<TCache>(
-            Func<TCache, TCache, Task> stepA,
-            Func<TCache, Task> stepB,
-            int iterations,
-            params TCache[] caches)
-            where TCache : ICacheManager<object>
-        {
-            for (int i = 0; i < iterations; i++)
-            {
-                await Task.Delay(10);
-
-                if (caches.Length == 1)
-                {
-                    await stepA(caches[0], caches[0]);
-                }
-                else
-                {
-                    await stepA(caches[0], caches[1]);
-                }
-
-                await Task.Delay(100);
-
-                foreach (var cache in caches)
-                {
-                    await stepB(cache);
-                }
-            }
+            await Task.Delay(100);
 
             foreach (var cache in caches)
             {
-                cache.Dispose();
+                await stepB(cache);
             }
         }
 
-        private static Task TestBackplaneEventDistributed<TEventArgs>(CacheEvent cacheEvent,
-            Action<ICacheManager<object>> arrange,
-            Action<ICacheManager<object>, TEventArgs> assertLocal,
-            Action<ICacheManager<object>, TEventArgs> assertRemote)
-            where TEventArgs : EventArgs
+        foreach (var cache in caches)
         {
-            var channelName = Guid.NewGuid().ToString();
-            var cacheA = TestManagers.CreateRedisAndDicCacheWithBackplane(1, false, channelName);
-            var cacheB = TestManagers.CreateRedisAndDicCacheWithBackplane(1, false, channelName);
+            cache.Dispose();
+        }
+    }
 
-            return TestBackplaneEventRunner(cacheA, cacheB, cacheEvent, arrange, assertLocal, assertRemote, 1);
+    private static Task TestBackplaneEventDistributed<TEventArgs>(CacheEvent cacheEvent,
+        Action<ICacheManager<object>> arrange,
+        Action<ICacheManager<object>, TEventArgs> assertLocal,
+        Action<ICacheManager<object>, TEventArgs> assertRemote)
+        where TEventArgs : EventArgs
+    {
+        var channelName = Guid.NewGuid().ToString();
+        var cacheA = TestManagers.CreateRedisAndDicCacheWithBackplane(1, false, channelName);
+        var cacheB = TestManagers.CreateRedisAndDicCacheWithBackplane(1, false, channelName);
+
+        return TestBackplaneEventRunner(cacheA, cacheB, cacheEvent, arrange, assertLocal, assertRemote, 1);
+    }
+
+    private static Task TestBackplaneEventInMemory<TEventArgs>(CacheEvent cacheEvent,
+        Action<ICacheManager<object>, ICacheManager<object>> arrange,
+        Action<ICacheManager<object>, TEventArgs> assertLocal,
+        Action<ICacheManager<object>, TEventArgs> assertRemote,
+        int expectedRemoteTriggers)
+        where TEventArgs : EventArgs
+    {
+        var channelName = Guid.NewGuid().ToString();
+        var cacheA = TestManagers.CreateDicCacheWithBackplane(false, channelName);
+        var cacheB = TestManagers.CreateDicCacheWithBackplane(false, channelName);
+
+        return TestBackplaneEventRunner(cacheA, cacheB, cacheEvent, (a) => arrange(cacheA, cacheB), assertLocal, assertRemote, expectedRemoteTriggers);
+    }
+
+    private static async Task TestBackplaneEventRunner<TEventArgs>(
+        ICacheManager<object> cacheA,
+        ICacheManager<object> cacheB,
+        CacheEvent cacheEvent,
+        Action<ICacheManager<object>> arrange,
+        Action<ICacheManager<object>, TEventArgs> assertLocal,
+        Action<ICacheManager<object>, TEventArgs> assertRemote,
+        int expectedRemoteTriggers)
+        where TEventArgs : EventArgs
+    {
+        var eventTriggeredLocal = 0;
+        var eventTriggeredRemote = 0;
+        Exception lastError = null;
+
+        Action<EventArgs> testLocal = (args) =>
+        {
+            try
+            {
+                assertLocal(cacheA, (TEventArgs)args);
+
+                Interlocked.Increment(ref eventTriggeredLocal);
+            }
+            catch (Exception ex)
+            {
+                lastError = ex;
+                throw;
+            }
+        };
+
+        Action<EventArgs> testRemote = (args) =>
+        {
+            try
+            {
+                assertRemote(cacheB, (TEventArgs)args);
+
+                Interlocked.Increment(ref eventTriggeredRemote);
+            }
+            catch (Exception ex)
+            {
+                lastError = ex;
+                throw;
+            }
+        };
+
+        switch (cacheEvent)
+        {
+            case CacheEvent.OnAdd:
+                cacheA.OnAdd += (ev, args) =>
+                {
+                    testLocal(args);
+                };
+
+                cacheB.OnAdd += (ev, args) =>
+                {
+                    testRemote(args);
+                };
+                break;
+
+            case CacheEvent.OnClear:
+                cacheA.OnClear += (ev, args) =>
+                {
+                    testLocal(args);
+                };
+
+                cacheB.OnClear += (ev, args) =>
+                {
+                    testRemote(args);
+                };
+                break;
+
+            case CacheEvent.OnClearRegion:
+                cacheA.OnClearRegion += (ev, args) =>
+                {
+                    testLocal(args);
+                };
+
+                cacheB.OnClearRegion += (ev, args) =>
+                {
+                    testRemote(args);
+                };
+                break;
+
+            case CacheEvent.OnPut:
+                cacheA.OnPut += (ev, args) =>
+                {
+                    testLocal(args);
+                };
+
+                cacheB.OnPut += (ev, args) =>
+                {
+                    testRemote(args);
+                };
+                break;
+
+            case CacheEvent.OnRemove:
+                cacheA.OnRemove += (ev, args) =>
+                {
+                    testLocal(args);
+                };
+
+                cacheB.OnRemove += (ev, args) =>
+                {
+                    testRemote(args);
+                };
+                break;
+
+            case CacheEvent.OnUpdate:
+                cacheA.OnUpdate += (ev, args) =>
+                {
+                    testLocal(args);
+                };
+
+                cacheB.OnUpdate += (ev, args) =>
+                {
+                    testRemote(args);
+                };
+                break;
         }
 
-        private static Task TestBackplaneEventInMemory<TEventArgs>(CacheEvent cacheEvent,
-            Action<ICacheManager<object>, ICacheManager<object>> arrange,
-            Action<ICacheManager<object>, TEventArgs> assertLocal,
-            Action<ICacheManager<object>, TEventArgs> assertRemote,
-            int expectedRemoteTriggers)
-            where TEventArgs : EventArgs
+        arrange(cacheA);
+
+        Func<int, Func<bool>, Task<bool>> waitForIt = async (tries, act) =>
         {
-            var channelName = Guid.NewGuid().ToString();
-            var cacheA = TestManagers.CreateDicCacheWithBackplane(false, channelName);
-            var cacheB = TestManagers.CreateDicCacheWithBackplane(false, channelName);
-
-            return TestBackplaneEventRunner(cacheA, cacheB, cacheEvent, (a) => arrange(cacheA, cacheB), assertLocal, assertRemote, expectedRemoteTriggers);
-        }
-
-        private static async Task TestBackplaneEventRunner<TEventArgs>(
-            ICacheManager<object> cacheA,
-            ICacheManager<object> cacheB,
-            CacheEvent cacheEvent,
-            Action<ICacheManager<object>> arrange,
-            Action<ICacheManager<object>, TEventArgs> assertLocal,
-            Action<ICacheManager<object>, TEventArgs> assertRemote,
-            int expectedRemoteTriggers)
-            where TEventArgs : EventArgs
-        {
-            var eventTriggeredLocal = 0;
-            var eventTriggeredRemote = 0;
-            Exception lastError = null;
-
-            Action<EventArgs> testLocal = (args) =>
+            var i = 0;
+            var result = false;
+            while (!result && i < tries)
             {
-                try
+                i++;
+                result = act();
+                if (result)
                 {
-                    assertLocal(cacheA, (TEventArgs)args);
-
-                    Interlocked.Increment(ref eventTriggeredLocal);
+                    return true;
                 }
-                catch (Exception ex)
-                {
-                    lastError = ex;
-                    throw;
-                }
-            };
 
-            Action<EventArgs> testRemote = (args) =>
-            {
-                try
-                {
-                    assertRemote(cacheB, (TEventArgs)args);
-
-                    Interlocked.Increment(ref eventTriggeredRemote);
-                }
-                catch (Exception ex)
-                {
-                    lastError = ex;
-                    throw;
-                }
-            };
-
-            switch (cacheEvent)
-            {
-                case CacheEvent.OnAdd:
-                    cacheA.OnAdd += (ev, args) =>
-                    {
-                        testLocal(args);
-                    };
-
-                    cacheB.OnAdd += (ev, args) =>
-                    {
-                        testRemote(args);
-                    };
-                    break;
-
-                case CacheEvent.OnClear:
-                    cacheA.OnClear += (ev, args) =>
-                    {
-                        testLocal(args);
-                    };
-
-                    cacheB.OnClear += (ev, args) =>
-                    {
-                        testRemote(args);
-                    };
-                    break;
-
-                case CacheEvent.OnClearRegion:
-                    cacheA.OnClearRegion += (ev, args) =>
-                    {
-                        testLocal(args);
-                    };
-
-                    cacheB.OnClearRegion += (ev, args) =>
-                    {
-                        testRemote(args);
-                    };
-                    break;
-
-                case CacheEvent.OnPut:
-                    cacheA.OnPut += (ev, args) =>
-                    {
-                        testLocal(args);
-                    };
-
-                    cacheB.OnPut += (ev, args) =>
-                    {
-                        testRemote(args);
-                    };
-                    break;
-
-                case CacheEvent.OnRemove:
-                    cacheA.OnRemove += (ev, args) =>
-                    {
-                        testLocal(args);
-                    };
-
-                    cacheB.OnRemove += (ev, args) =>
-                    {
-                        testRemote(args);
-                    };
-                    break;
-
-                case CacheEvent.OnUpdate:
-                    cacheA.OnUpdate += (ev, args) =>
-                    {
-                        testLocal(args);
-                    };
-
-                    cacheB.OnUpdate += (ev, args) =>
-                    {
-                        testRemote(args);
-                    };
-                    break;
+                await Task.Delay(10);
             }
 
-            arrange(cacheA);
+            return false;
+        };
 
-            Func<int, Func<bool>, Task<bool>> waitForIt = async (tries, act) =>
+        Func<Exception, string> formatError = (err) =>
+        {
+            if (err is XunitException xunitError)
             {
-                var i = 0;
-                var result = false;
-                while (!result && i < tries)
-                {
-                    i++;
-                    result = act();
-                    if (result)
-                    {
-                        return true;
-                    }
+                return xunitError.Message;
+            }
 
-                    await Task.Delay(10);
-                }
+            return err?.ToString();
+        };
 
-                return false;
-            };
-
-            Func<Exception, string> formatError = (err) =>
-            {
-                if (err is XunitException xunitError)
-                {
-                    return xunitError.Message;
-                }
-
-                return err?.ToString();
-            };
-
-            var triggerResult = await waitForIt(100, () => eventTriggeredRemote == expectedRemoteTriggers);
-            lastError.Should().BeNull(formatError(lastError));
-            triggerResult.Should().BeTrue("Event should get triggered through the backplane.");
-            eventTriggeredLocal.Should().Be(expectedRemoteTriggers, "Local cache event should be triggered one time");
-        }
+        var triggerResult = await waitForIt(100, () => eventTriggeredRemote == expectedRemoteTriggers);
+        lastError.Should().BeNull(formatError(lastError));
+        triggerResult.Should().BeTrue("Event should get triggered through the backplane.");
+        eventTriggeredLocal.Should().Be(expectedRemoteTriggers, "Local cache event should be triggered one time");
     }
+}
 
-    [Serializable]
-    [ExcludeFromCodeCoverage]
-    [Bond.Schema]
-    internal class Poco
-    {
-        [Bond.Id(1)]
-        [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "For testing only")]
-        public int Id { get; set; }
+[Serializable]
+[ExcludeFromCodeCoverage]
+[Bond.Schema]
+internal class Poco
+{
+    [Bond.Id(1)]
+    [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "For testing only")]
+    public int Id { get; set; }
 
-        [Bond.Id(2)]
-        [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "For testing only")]
-        public string Something { get; set; }
-    }
+    [Bond.Id(2)]
+    [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "For testing only")]
+    public string Something { get; set; }
+}
 
-    [ExcludeFromCodeCoverage]
-    internal class FakeTestSerializer : ICacheSerializer
-    {
-        public object Deserialize(byte[] data, Type target)
-        {
-            throw new NotImplementedException();
-        }
+[ExcludeFromCodeCoverage]
+internal class FakeTestSerializer : ICacheSerializer
+{
+    public object Deserialize(byte[] data, Type target) => throw new NotImplementedException();
 
-        public CacheItem<T> DeserializeCacheItem<T>(byte[] value, Type valueType)
-        {
-            throw new NotImplementedException();
-        }
+    public CacheItem<T> DeserializeCacheItem<T>(byte[] value, Type valueType) => throw new NotImplementedException();
 
-        public byte[] Serialize<T>(T value)
-        {
-            throw new NotImplementedException();
-        }
+    public byte[] Serialize<T>(T value) => throw new NotImplementedException();
 
-        public byte[] SerializeCacheItem<T>(CacheItem<T> value)
-        {
-            throw new NotImplementedException();
-        }
-    }
+    public byte[] SerializeCacheItem<T>(CacheItem<T> value) => throw new NotImplementedException();
 }
 
 #endif
