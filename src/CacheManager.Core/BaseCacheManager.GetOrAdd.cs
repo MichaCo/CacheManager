@@ -141,11 +141,11 @@ namespace CacheManager.Core
                     if (newItem == null)
                     {
                         newItem = valueFactory(key, region);
-                    }
 
-                    if (newItem == null)
-                    {
-                        return false;
+                        if (newItem == null)
+                        {
+                            return false;
+                        }
                     }
 
                     if (AddInternal(newItem))
@@ -179,12 +179,12 @@ namespace CacheManager.Core
                     if (newItem == null)
                     {
                         newItem = valueFactory(key, region);
-                    }
 
-                    // Throw explicit to me more consistent. Otherwise it would throw later eventually...
-                    if (newItem == null)
-                    {
-                        throw new InvalidOperationException("The CacheItem which should be added must not be null.");
+                        // Throw explicit to me more consistent. Otherwise it would throw later eventually...
+                        if (newItem == null)
+                        {
+                            throw new InvalidOperationException("The CacheItem which should be added must not be null.");
+                        }
                     }
 
                     if (AddInternal(newItem))
