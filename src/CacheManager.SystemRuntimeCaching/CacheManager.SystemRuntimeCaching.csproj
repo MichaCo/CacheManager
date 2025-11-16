@@ -2,7 +2,7 @@
   <Import Project="..\..\tools\common.props" />
   <PropertyGroup>
     <Description>CacheManager extension package which adds System.Runtime.Caching.MemoryCache as an option for a local in-memory cache layer. CacheManager is an open source caching abstraction layer for .NET written in C#. It supports various cache providers and implements many advanced features.</Description>
-    <TargetFrameworks>net472;netstandard2.0;net8.0</TargetFrameworks>
+    <TargetFrameworks>net472;netstandard2.0;net8.0;net9.0</TargetFrameworks>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageTags>Caching;Cache;CacheManager;Distributed Cache;StackExchange Redis;Azure AppFabric;Memcached</PackageTags>

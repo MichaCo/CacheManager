@@ -15,17 +15,17 @@ Master | [![Build Status](https://dev.azure.com/michaco/CacheManager/_apis/build
 
 ## CacheManager Nuget Packages
 
-| Package Name | FullFramework | .NET Standard | net8.0 |
-| -------------- | :-------: | :-------: | :-------: | 
-| [CacheManager.Core][Core.nuget] | 4.7.2 | 2.0 | net8.0 |
-| [CacheManager.Microsoft.Extensions.Caching.Memory][MSCache.nuget]  | - | 2.0 | net8.0 |
-| [CacheManager.Microsoft.Extensions.Configuration][Configuration.nuget]  | - | 2.0 | net8.0 |
-| [CacheManager.Serialization.Bond][Bond.nuget]  | - | 2.0 | net8.0 |
-| [CacheManager.Serialization.DataContract][DataContract.nuget]  | - | 2.0 | net8.0 |
-| [CacheManager.Serialization.Json][Json.nuget]  | - | 2.0 | net8.0 |
-| [CacheManager.Serialization.ProtoBuf][ProtoBuf.nuget]  | - | 2.0 | net8.0 |
-| [CacheManager.StackExchange.Redis][Redis.nuget] | 4.7.2 | 2.0 | net8.0 |
-| [CacheManager.SystemRuntimeCaching][SystemRuntimeCaching.nuget]  | 4.7.2 | 2.0 | net8.0 |
+| Package Name | FullFramework | .NET Standard | net8.0 | net9.0 |
+| -------------- | :-------: | :-------: | :-------: | :-------: | 
+| [CacheManager.Core][Core.nuget] | 4.7.2 | 2.0 | net8.0 | net9.0 |
+| [CacheManager.Microsoft.Extensions.Caching.Memory][MSCache.nuget]  | - | 2.0 | net8.0 | net9.0 |
+| [CacheManager.Microsoft.Extensions.Configuration][Configuration.nuget]  | - | 2.0 | net8.0 | net9.0 |
+| [CacheManager.Serialization.Bond][Bond.nuget]  | - | 2.0 | net8.0 | net9.0 |
+| [CacheManager.Serialization.DataContract][DataContract.nuget]  | - | 2.0 | net8.0 | net9.0 |
+| [CacheManager.Serialization.Json][Json.nuget]  | - | 2.0 | net8.0 | net9.0 |
+| [CacheManager.Serialization.ProtoBuf][ProtoBuf.nuget]  | - | 2.0 | net8.0 | net9.0 |
+| [CacheManager.StackExchange.Redis][Redis.nuget] | 4.7.2 | 2.0 | net8.0 | net9.0 |
+| [CacheManager.SystemRuntimeCaching][SystemRuntimeCaching.nuget]  | 4.7.2 | 2.0 | net8.0 | net9.0 |
 
 ## Version 2.0 Breaking Changes
 

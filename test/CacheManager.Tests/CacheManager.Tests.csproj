@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFrameworks>
-      <!--net481-->;net8.0
+      <!--net481-->;net9.0
     </TargetFrameworks>
     <Version>1.0.0</Version>
     <AssemblyName>CacheManager.Tests</AssemblyName>

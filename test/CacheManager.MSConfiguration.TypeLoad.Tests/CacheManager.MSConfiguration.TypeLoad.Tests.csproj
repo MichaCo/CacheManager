@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <Description>CacheManager.MSConfiguration.TypeLoad.Tests Class Library</Description>
-    <TargetFrameworks>net8.0</TargetFrameworks>
+    <TargetFrameworks>net9.0</TargetFrameworks>
     <AssemblyName>CacheManager.MSConfiguration.TypeLoad.Tests</AssemblyName>
     <PackageId>CacheManager.MSConfiguration.TypeLoad.Tests</PackageId>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>

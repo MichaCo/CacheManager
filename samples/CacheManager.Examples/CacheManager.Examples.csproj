@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Description>CacheManager.Examples Console Application</Description>
     <Authors>MICHA</Authors>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
     <AssemblyName>CacheManager.Examples</AssemblyName>
     <OutputType>Exe</OutputType>
     <PackageId>CacheManager.Examples</PackageId>

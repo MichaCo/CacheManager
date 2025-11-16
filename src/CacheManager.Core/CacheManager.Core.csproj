@@ -2,7 +2,7 @@
   <Import Project="..\..\tools\common.props" />
   <PropertyGroup>
     <Description>CacheManager is an open source caching abstraction layer for .NET written in C#. It supports various cache providers and implements many advanced features. The Core library contains all base interfaces and tools. You should install at least one other CacheManager package to get cache handle implementations.</Description>
-    <TargetFrameworks>net472;netstandard2.0;netstandard2.1;net80;net90</TargetFrameworks>
+    <TargetFrameworks>net472;netstandard2.0;netstandard2.1;net8.0;net9.0</TargetFrameworks>
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
     <PackageTags>Caching;Cache;CacheManager;Distributed Cache;Redis;</PackageTags>
     <IsPackable>true</IsPackable>
