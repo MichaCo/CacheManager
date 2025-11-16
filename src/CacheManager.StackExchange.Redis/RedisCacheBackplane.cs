@@ -34,7 +34,7 @@ namespace CacheManager.Redis
         private readonly RedisConnectionManager _connection;
         private readonly Timer _timer;
         private HashSet<BackplaneMessage> _messages = new HashSet<BackplaneMessage>();
-        private object _messageLock = new object();
+        private Lock _messageLock = LockFactory.Create();
         private int _skippedMessages = 0;
         private bool _sending = false;
         private CancellationTokenSource _source = new CancellationTokenSource();

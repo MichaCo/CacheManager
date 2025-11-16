@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.Extensions.Logging;
@@ -13,7 +12,7 @@ namespace CacheManager.Redis
     internal class RedisConnectionManager
     {
         private static IDictionary<string, IConnectionMultiplexer> _connections = new Dictionary<string, IConnectionMultiplexer>();
-        private static object _connectLock = new object();
+        private static readonly Lock _connectLock = LockFactory.Create();
 
         private readonly ILogger _logger;
         private readonly string _connectionString;

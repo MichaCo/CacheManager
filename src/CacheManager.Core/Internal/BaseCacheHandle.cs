@@ -1,4 +1,5 @@
 ﻿using System;
+using AsyncKeyedLock;
 using Microsoft.Extensions.Logging;
 using static CacheManager.Core.Utility.Guard;
 
@@ -13,7 +14,7 @@ namespace CacheManager.Core.Internal
     /// <typeparam name="TCacheValue">The type of the cache value.</typeparam>
     public abstract class BaseCacheHandle<TCacheValue> : BaseCache<TCacheValue>
     {
-        private readonly object _updateLock = new object();
+        private readonly AsyncKeyedLocker<string> _updateLock = new();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BaseCacheHandle{TCacheValue}"/> class.
@@ -101,7 +102,7 @@ namespace CacheManager.Core.Internal
             NotNull(updateValue, nameof(updateValue));
             CheckDisposed();
 
-            lock (_updateLock)
+            using (_updateLock.Lock(key))
             {
                 var original = GetCacheItem(key);
                 if (original == null)
@@ -155,7 +156,7 @@ namespace CacheManager.Core.Internal
             NotNull(updateValue, nameof(updateValue));
             CheckDisposed();
 
-            lock (_updateLock)
+            using (_updateLock.Lock(key))
             {
                 var original = GetCacheItem(key, region);
                 if (original == null)

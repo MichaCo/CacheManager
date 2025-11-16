@@ -2,13 +2,16 @@
   <Import Project="..\..\tools\common.props" />
   <PropertyGroup>
     <Description>CacheManager extension package which adds support for Redis as a distributed cache layer. CacheManager is an open source caching abstraction layer for .NET written in C#. It supports various cache providers and implements many advanced features.</Description>
-    <TargetFrameworks>net472;netstandard2.0;net80</TargetFrameworks>
+    <TargetFrameworks>net472;netstandard2.0;net80;net90</TargetFrameworks>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageTags>Caching;Cache;CacheManager;Distributed Cache;StackExchange Redis;Azure AppFabric;Memcached</PackageTags>
     <IsPackable>true</IsPackable>
   </PropertyGroup>
   <ItemGroup>
+    <Using Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net9.0'))" Alias="Lock" Include="System.Threading.Lock" />
+    <Using Condition="!$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net9.0'))" Alias="Lock" Include="Backport.System.Threading.Lock" />
+    <Using Alias="LockFactory" Include="Backport.System.Threading.LockFactory" />
     <PackageReference Include="StackExchange.Redis" Version="2.8.24" />
   </ItemGroup>
   <ItemGroup>

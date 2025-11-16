@@ -1,12 +1,12 @@
 ﻿using System;
-using System.Linq;
+using AsyncKeyedLock;
 using static CacheManager.Core.Utility.Guard;
 
 namespace CacheManager.Core
 {
     public partial class BaseCacheManager<TCacheValue>
     {
-        private readonly object _tryAddLock = new object();
+        private readonly AsyncKeyedLocker<string> _tryAddLock = new();
 
         /// <inheritdoc />
         public virtual TCacheValue GetOrAdd(string key, TCacheValue value)
@@ -135,7 +135,7 @@ namespace CacheManager.Core
                     return true;
                 }
 
-                lock (_tryAddLock)
+                using (_tryAddLock.Lock(key))
                 {
                     // changed logic to invoke the factory only once in case of retries
                     if (newItem == null)
@@ -173,7 +173,7 @@ namespace CacheManager.Core
                     return item;
                 }
 
-                lock (_tryAddLock)
+                using (_tryAddLock.Lock(key))
                 {
                     // changed logic to invoke the factory only once in case of retries
                     if (newItem == null)

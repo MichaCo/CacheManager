@@ -18,7 +18,7 @@ namespace CacheManager.Redis
     public static class RedisConfigurations
     {
         private static Dictionary<string, RedisConfiguration> _config = null;
-        private static object _configLock = new object();
+        private static readonly Lock _configLock = LockFactory.Create();
 
         private static Dictionary<string, RedisConfiguration> Configurations
         {

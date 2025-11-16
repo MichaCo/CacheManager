@@ -96,7 +96,7 @@ return result";
         // flag if scripts are initially loaded to the server
         private bool _scriptsLoaded = false;
 
-        private object _lockObject = new object();
+        private readonly Lock _lockObject = LockFactory.Create();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RedisCacheHandle{TCacheValue}"/> class.

@@ -11,7 +11,7 @@ namespace CacheManager.Core.Internal
     public static class TypeCache
     {
         private static readonly Dictionary<string, Type> _types = new Dictionary<string, Type>();
-        private static readonly object _typesLock = new object();
+        private static readonly Lock _typesLock = LockFactory.Create();
         private static List<Func<string, Type>> _resolvers = new List<Func<string, Type>>();
 
         /// <summary>
