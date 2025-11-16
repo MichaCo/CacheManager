@@ -340,7 +340,7 @@ return result";
 
                     Logger.LogDebug("Update of {0} {1} failed with version conflict, retrying {2}/{3}", key, region, tries, maxRetries);
                 }
-                while (tries <= maxRetries);
+                while (tries < maxRetries);
 
                 return UpdateItemResult.ForTooManyRetries<TCacheValue>(tries);
             });

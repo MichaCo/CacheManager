@@ -191,7 +191,7 @@ namespace CacheManager.Core
                     }
                 }
             }
-            while (tries < Configuration.MaxRetries);
+            while (++tries < Configuration.MaxRetries);
 
             // should usually never occur, but could if e.g. max retries is 1 and an item gets added between the get and add.
             // pretty unusual, so keep the max tries at least around 50
