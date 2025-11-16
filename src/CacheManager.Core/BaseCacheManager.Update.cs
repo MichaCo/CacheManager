@@ -49,8 +49,6 @@ namespace CacheManager.Core
             var tries = 0;
             do
             {
-                tries++;
-
                 if (AddInternal(item))
                 {
                     if (_logTrace)
@@ -94,7 +92,7 @@ namespace CacheManager.Core
                         Configuration.MaxRetries);
                 }
             }
-            while (tries <= maxRetries);
+            while (++tries < maxRetries);
 
             // exceeded max retries, failing the operation... (should not happen in 99,99% of the cases though, better throw?)
             throw new InvalidOperationException(
