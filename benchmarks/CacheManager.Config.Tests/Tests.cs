@@ -76,7 +76,7 @@ namespace CacheManager.Config.Tests
         public static async Task PumpData(ICacheManager<string> cache, int runForSeconds = 300)
         {
             var source = new CancellationTokenSource(TimeSpan.FromSeconds(runForSeconds));
-            var maxItems = 500000;
+            var maxItems = 1000;
             var numReaders = 10;
             var puts = 0;
             var hits = 0;
@@ -92,14 +92,19 @@ namespace CacheManager.Config.Tests
                         try
                         {
                             count++;
-                            cache.Put("key" + count, Guid.NewGuid().ToString());
+                            cache.Put("key" + count, Guid.NewGuid().ToString(), "_region");
 
                             Interlocked.Increment(ref puts);
+
+                            if (count % 100 == 0)
+                            {
+                                cache.Remove("key" + count, "_region");
+                            }
 
                             if (count == maxItems)
                             {
                                 count = 0;
-                                cache.Clear();
+                                // cache.ClearRegion("_region");
                                 Interlocked.Increment(ref putIterations);
                             }
                         }
@@ -142,7 +147,7 @@ namespace CacheManager.Config.Tests
                 {
                     try
                     {
-                        var value = cache.Get("key" + rnd.Next(0, maxItems));
+                        var value = cache.Get("key" + rnd.Next(0, maxItems), "_region");
                         if (value == null)
                         {
                             Interlocked.Increment(ref misses);

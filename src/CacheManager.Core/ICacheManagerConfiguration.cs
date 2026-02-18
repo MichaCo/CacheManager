@@ -77,7 +77,7 @@ namespace CacheManager.Core
 
         /// <summary>
         /// Gets the limit of the number of retry operations per action.
-        /// <para>Default is 50.</para>
+        /// <para>Default is 10.</para>
         /// </summary>
         /// <value>The maximum retries.</value>
         int MaxRetries { get; }

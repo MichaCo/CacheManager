@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Threading;
 using CacheManager.Core;
 using CacheManager.Core.Internal;
 
@@ -11,8 +12,89 @@ using Xunit;
 namespace CacheManager.Tests
 {
     [ExcludeFromCodeCoverage]
-    public class CacheManagerAdvancedUpdateTests : IClassFixture<RedisTestFixture>
+    public class SyntheticCacheHandleTests : IClassFixture<RedisTestFixture>
     {
+        [Fact]
+        public void TryGetOrAdd_Retry_Test()
+        {
+            // test that configuring x retries does exactly that many retries.
+            var countCalls = 0;
+            var cache = CacheFactory.Build<string>(settings =>
+            {
+                settings.WithHandle(typeof(MockCacheHandle<>));
+                settings.WithMaxRetries(5);
+            });
+
+            var handle = cache.CacheHandles.ElementAt(0) as MockCacheHandle<string>;
+
+            handle.GetCallValue = null; // always fail to trigger retry;
+
+            handle.AddCall = () =>
+            {
+                Interlocked.Increment(ref countCalls);
+                return false; // always fail to trigger retry;
+            };
+
+            cache.TryGetOrAdd("key", old => old + "new", out string newValue);
+
+            // Expecting one normal exec + retries
+            Assert.Equal(6, countCalls);
+        }
+
+        [Fact]
+        public void GetOrAdd_Retry_Test()
+        {
+            // test that configuring x retries does exactly that many retries.
+            var countCalls = 0;
+            var cache = CacheFactory.Build<string>(settings =>
+            {
+                settings.WithHandle(typeof(MockCacheHandle<>));
+                settings.WithMaxRetries(5);
+            });
+
+            var handle = cache.CacheHandles.ElementAt(0) as MockCacheHandle<string>;
+
+            handle.GetCallValue = null; // always fail to trigger retry;
+
+            handle.AddCall = () =>
+            {
+                Interlocked.Increment(ref countCalls);
+                return false; // always fail to trigger retry;
+            };
+
+            Assert.Throws<InvalidOperationException>(() => cache.GetOrAdd("key", old => old + "new"));
+
+            // Expecting one normal exec + retries
+            Assert.Equal(6, countCalls);
+        }
+
+        [Fact]
+        public void AddOrUpdate_Retry_Test()
+        {
+            // test that configuring x retries does exactly that many retries.
+            var countCalls = 0;
+            var cache = CacheFactory.Build<string>(settings =>
+            {
+                settings.WithHandle(typeof(MockCacheHandle<>));
+                settings.WithMaxRetries(5);
+            });
+
+            var handle = cache.CacheHandles.ElementAt(0) as MockCacheHandle<string>;
+
+            handle.GetCallValue = null; // always fail to trigger retry;
+            handle.UpdateValue = UpdateItemResult.ForFactoryReturnedNull<string>();
+            handle.AddCall = () =>
+            {
+                Interlocked.Increment(ref countCalls);
+                return false; // always fail to trigger retry;
+            };
+
+            Assert.Throws<InvalidOperationException>(() => cache.AddOrUpdate("key", "addValue", old => old + "new"));
+
+            // Expecting one normal exec + retries
+            Assert.Equal(6, countCalls);
+        }
+
         [Theory]
         [ClassData(typeof(TestCacheManagers))]
         public void Update_ThrowsIf_FactoryReturnsNull(ICacheManager<object> cache)

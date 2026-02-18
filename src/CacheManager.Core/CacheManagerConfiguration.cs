@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace CacheManager.Core
 {
@@ -42,10 +41,10 @@ namespace CacheManager.Core
 
         /// <summary>
         /// Gets or sets the limit of the number of retry operations per action.
-        /// <para>Default is 50.</para>
+        /// <para>Default is 10.</para>
         /// </summary>
         /// <value>The maximum retries.</value>
-        public int MaxRetries { get; set; } = 50;
+        public int MaxRetries { get; set; } = 10;
 
         /// <summary>
         /// Gets or sets the number of milliseconds the cache should wait before it will retry an action.

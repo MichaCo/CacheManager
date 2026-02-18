@@ -7,6 +7,7 @@ using Garnet;
 using Garnet.server;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Configuration;
 
 namespace CacheManager.Config.Tests;
 
@@ -34,7 +35,15 @@ internal class Program
         var iterations = 100;
         try
         {
+            var configuration = new ConfigurationBuilder()
+                .AddJsonFile("cache.json")
+                .Build();
+
+
             var services = new ServiceCollection();
+
+            services.AddCacheManager();
+            services.AddCacheManagerConfiguration(configuration, c => c.WithJsonSerializer());
 
             services.AddLogging(c =>
             {
@@ -47,49 +56,51 @@ internal class Program
 
             using var server = StartServer(loggerFactory);
 
-            var builder = new Core.CacheConfigurationBuilder("myCache");
+            var cacheA = provider.GetRequiredService<ICacheManager<string>>();
 
-            builder
-                .WithRetryTimeout(500)
-                .WithMaxRetries(3);
+            //var builder = new Core.CacheConfigurationBuilder("myCache");
 
-            builder
-                .WithDictionaryHandle()
-                .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(20))
-                .DisableStatistics();
+            //builder
+            //    .WithRetryTimeout(500)
+            //    .WithMaxRetries(3);
 
-            builder
-                .WithRedisCacheHandle("redis", true)
-                .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMinutes(60))
-                .DisableStatistics();
+            //builder
+            //    .WithDictionaryHandle()
+            //    .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromSeconds(20))
+            //    .DisableStatistics();
 
-            builder.WithRedisBackplane("redis");
+            //builder
+            //    .WithRedisCacheHandle("redis", true)
+            //    .WithExpiration(ExpirationMode.Absolute, TimeSpan.FromMinutes(60))
+            //    .DisableStatistics();
 
-            builder.WithRedisConfiguration("redis", config =>
-            {
-                config
-                    //.UseTwemproxy()
-                    //.UseCompatibilityMode("2.4")
-                    .WithAllowAdmin()
-                    .WithDatabase(0)
-                    .WithConnectionTimeout(5000)
-                    .EnableKeyspaceEvents()
-                    .WithEndpoint("127.0.0.1", 6379);
-            });
+            //builder.WithRedisBackplane("redis");
+
+            //builder.WithRedisConfiguration("redis", config =>
+            //{
+            //    config
+            //        //.UseTwemproxy()
+            //        //.UseCompatibilityMode("2.4")
+            //        .WithAllowAdmin()
+            //        .WithDatabase(0)
+            //        .WithConnectionTimeout(5000)
+            //        .EnableKeyspaceEvents()
+            //        .WithEndpoint("127.0.0.1", 6379);
+            //});
 
             //builder.WithRedisConfiguration("redis", "localhost:22121");
 
-            builder.WithBondCompactBinarySerializer();
+            //builder.WithBondCompactBinarySerializer();
 
-            var cacheA = new BaseCacheManager<string>(builder.Build());
-            var cacheB = new BaseCacheManager<string>(builder.Build());
+            //var cacheA = new BaseCacheManager<string>(builder.Build());
+            //var cacheB = new BaseCacheManager<string>(builder.Build());
             cacheA.Clear();
 
             cacheA.Add("key", "value", "region");
 
             var val = cacheA.Get("key", "region");
 
-            var val2 = cacheB.AddOrUpdate("key", "region", "added?", (v) => v + "updated");
+            //var val2 = cacheB.AddOrUpdate("key", "region", "added?", (v) => v + "updated");
 
             await Task.Delay(100);
 

@@ -148,7 +148,7 @@ namespace CacheManager.Tests
             cache.Configuration.LoggerFactoryType.Should().BeNull();
             cache.Configuration.BackplaneType.Should().BeNull();
             cache.Configuration.RetryTimeout.Should().Be(100);
-            cache.Configuration.MaxRetries.Should().Be(50);
+            cache.Configuration.MaxRetries.Should().Be(10);
             cache.CacheHandles.Count().Should().Be(1);
             AssertCacheHandleConfig(cache.CacheHandles.ElementAt(0), "defaultsHandle", ExpirationMode.None, TimeSpan.Zero);
         }

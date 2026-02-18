@@ -2,50 +2,40 @@
   "$schema": "http://cachemanager.michaco.net/schemas/cachemanager.json#",
   "redis": [
     {
-      "key": "redisConnection",      
-      "endpoints": [
-        {
-          "host": "localhost",
-          "port": 6379
-        }
-      ],
-      "allowAdmin": true,
-      "database": 11
+      "key": "redisConnection",
+      "connectionString": "localhost:6379,defaultDatabase=0,allowAdmin=true,abortConnect=false,connectRetry=5,connectTimeout=15000"
     }
   ],
   "cacheManagers": [
     {
       "maxRetries": 1000,
-      "name": "cachename",
+      "name": "default",
       "retryTimeout": 100,
       "updateMode": "Up",
       "backplane": {
         "key": "redisConnection",
         "knownType": "Redis",
-        "channelName": "test"
-      },
-      "loggerFactory": {
-        "knownType": "Microsoft"
-      },
-      "serializer": {
-        "knownType": "Json"
+        "channelName": "default"
       },
       "handles": [
-        //{
-        //  "knownType": "Dictionary",
-        //  "enablePerformanceCounters": true,
-        //  "enableStatistics": true,
-        //  "expirationMode": "Absolute",
-        //  "expirationTimeout": "0:0:23",
-        //  "isBackplaneSource": false,
-        //  "name": "sys cache"
-        //},
+        {
+          "knownType": "Dictionary",
+          "enablePerformanceCounters": false,
+          "enableStatistics": false,
+          "expirationMode": "Absolute",
+          // 1 minute
+          "expirationTimeout": "0:1:00",
+          "isBackplaneSource": false,
+          "name": "memory"
+        },
         {
           "knownType": "Redis",
           "key": "redisConnection",
           "isBackplaneSource": true,
           "expirationMode": "Sliding",
-          "expirationTimeout": "00:10:00"
+          // 10 minutes
+          "expirationTimeout": "0.00:10:00",
+          "name": "redis"
         }
       ]
     }

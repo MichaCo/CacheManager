@@ -260,7 +260,7 @@ namespace CacheManager.Core
             var cfg = new CacheManagerConfiguration()
             {
                 UpdateMode = managerCfg.UpdateMode,
-                MaxRetries = maxRetries ?? 50,
+                MaxRetries = maxRetries ?? 10,
                 RetryTimeout = retryTimeout ?? 100
             };
 
@@ -651,7 +651,7 @@ namespace CacheManager.Core
 
         /// <summary>
         /// Sets the maximum number of retries per action.
-        /// <para>Default is 50.</para>
+        /// <para>Default is 10.</para>
         /// <para>
         /// Not every cache handle implements this, usually only distributed caches will use it.
         /// </para>
