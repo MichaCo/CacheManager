@@ -9,6 +9,7 @@ using CacheManager.Core;
 using CacheManager.Core.Internal;
 using CacheManager.Redis;
 using FluentAssertions;
+using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
 using Xunit;
 using Xunit.Sdk;
@@ -171,6 +172,93 @@ public class RedisTests : IClassFixture<RedisTestFixture>
 
         Assert.False(cache1.Exists(testKey));
         Assert.False(cache2.Exists(testKey));
+    }
+
+    [Fact]
+    [Trait("category", "Redis")]
+    public async Task Redis_ConcurrentReadDuringScriptReload_WaitsForReload()
+    {
+        using var server = RedisTestFixture.StartServer(7003);
+        using var client = ConnectionMultiplexer.Connect("localhost:7003,allowAdmin=true");
+        using var releaseReload = new ManualResetEventSlim();
+        var reloadEntered = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var secondReaderStarted = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var secondScriptEvaluation = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var loadCount = 0;
+        var missingScriptCount = 0;
+        using var loggerFactory = LoggerFactory.Create(builder => builder.AddProvider(new CallbackLoggerProvider(message =>
+        {
+            if (message == "Loading scripts." && Interlocked.Increment(ref loadCount) == 2)
+            {
+                reloadEntered.SetResult(true);
+                if (!releaseReload.Wait(TimeSpan.FromSeconds(30)))
+                {
+                    throw new TimeoutException("The test did not release the paused script reload.");
+                }
+            }
+
+            if (message == "Received NOSCRIPT from server. Reloading scripts..."
+                && Interlocked.Increment(ref missingScriptCount) == 2)
+            {
+                secondScriptEvaluation.SetResult(true);
+            }
+        })));
+        var configKey = Guid.NewGuid().ToString();
+        using var cache = CacheFactory.Build<string>(settings => settings
+            .WithJsonSerializer()
+            .WithRedisConfiguration(configKey, client)
+            .WithRedisCacheHandle(configKey), loggerFactory);
+        var key = Guid.NewGuid().ToString();
+        var value = Guid.NewGuid().ToString();
+        cache.Add(key, value);
+        client.GetServer("localhost", 7003).ScriptFlush();
+        var reloadingRead = Task.Factory.StartNew(() => cache.Get(key), CancellationToken.None,
+            TaskCreationOptions.LongRunning, TaskScheduler.Default);
+        Task<string> concurrentRead = Task.FromResult(value);
+        bool evaluatedDuringReload;
+
+        try
+        {
+            await reloadEntered.Task.WaitAsync(TimeSpan.FromSeconds(10));
+            concurrentRead = Task.Factory.StartNew(() =>
+            {
+                secondReaderStarted.SetResult(true);
+                return cache.Get(key);
+            }, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+            await secondReaderStarted.Task.WaitAsync(TimeSpan.FromSeconds(10));
+            await Task.WhenAny(secondScriptEvaluation.Task, Task.Delay(TimeSpan.FromSeconds(5)));
+            evaluatedDuringReload = secondScriptEvaluation.Task.IsCompleted;
+        }
+        finally
+        {
+            releaseReload.Set();
+            await Task.WhenAll(reloadingRead, concurrentRead).WaitAsync(TimeSpan.FromSeconds(10));
+        }
+
+        evaluatedDuringReload.Should().BeFalse("script lookup must wait for the active reload lock before evaluating a script");
+    }
+
+    private sealed class CallbackLoggerProvider : ILoggerProvider, ILogger
+    {
+        private readonly Action<string> _onMessage;
+
+        public CallbackLoggerProvider(Action<string> onMessage)
+        {
+            _onMessage = onMessage;
+        }
+
+        public ILogger CreateLogger(string categoryName) => this;
+
+        public IDisposable BeginScope<TState>(TState state) => null;
+
+        public bool IsEnabled(LogLevel logLevel) => true;
+
+        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
+            => _onMessage(formatter(state, exception));
+
+        public void Dispose()
+        {
+        }
     }
 
     [Fact]

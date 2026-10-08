@@ -963,25 +963,27 @@ return result";
 
         private RedisResult Eval(string key, string region, ScriptType scriptType, RedisValue[] values = null, CommandFlags flags = CommandFlags.None)
         {
-            if (!_scriptsLoaded)
-            {
-                lock (_lockObject)
-                {
-                    if (!_scriptsLoaded)
-                    {
-                        LoadScripts();
-                        _scriptsLoaded = true;
-                    }
-                }
-            }
-
             LoadedLuaScript script = null;
-            if (!_luaScripts.TryGetValue(scriptType, out LuaScript luaScript)
-                || (_canPreloadScripts && !_shaScripts.TryGetValue(scriptType, out script)))
+            LuaScript luaScript;
+            lock (_lockObject)
             {
-                Logger.LogCritical("Something is wrong with the Lua scripts. Seem to be not loaded.");
-                _scriptsLoaded = false;
-                throw new InvalidOperationException("Something is wrong with the Lua scripts. Seem to be not loaded.");
+                if (!_scriptsLoaded)
+                {
+                    LoadScripts();
+                    _scriptsLoaded = true;
+                }
+
+                if (!_luaScripts.TryGetValue(scriptType, out luaScript))
+                {
+                    Logger.LogCritical("Something is wrong with the Lua scripts. Seem to be not loaded.");
+                    _scriptsLoaded = false;
+                    throw new InvalidOperationException("Something is wrong with the Lua scripts. Seem to be not loaded.");
+                }
+
+                if (_canPreloadScripts)
+                {
+                    _shaScripts.TryGetValue(scriptType, out script);
+                }
             }
 
             try
@@ -991,7 +993,7 @@ return result";
 
                 RedisKey[] keys = region == null ? [fullKey] : [fullKey, regionKey];
 
-                if (_canPreloadScripts && script != null)
+                if (script != null)
                 {
                     return _connection.Database.ScriptEvaluate(script.Hash, keys, values, flags);
                 }
@@ -1025,6 +1027,7 @@ return result";
                 _luaScripts.Add(ScriptType.Put, putLua);
                 _luaScripts.Add(ScriptType.Update, updateLua);
                 _luaScripts.Add(ScriptType.Get, getLua);
+                _shaScripts.Clear();
 
                 // servers feature might be disabled
                 if (_canPreloadScripts)
