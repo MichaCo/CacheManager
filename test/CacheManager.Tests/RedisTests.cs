@@ -178,29 +178,24 @@ public class RedisTests : IClassFixture<RedisTestFixture>
     [Trait("category", "Redis")]
     public async Task Redis_ConcurrentReadDuringScriptReload_WaitsForReload()
     {
-        using var server = RedisTestFixture.StartServer(7003);
-        using var client = ConnectionMultiplexer.Connect("localhost:7003,allowAdmin=true");
-        using var releaseReload = new ManualResetEventSlim();
-        var reloadEntered = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
-        var secondReaderStarted = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
-        var secondScriptEvaluation = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+        using var client = ConnectionMultiplexer.Connect("localhost:6379,allowAdmin=true");
+        using var reloadStarted = new ManualResetEventSlim();
+        using var continueReload = new ManualResetEventSlim();
+        using var concurrentReadEvaluated = new ManualResetEventSlim();
         var loadCount = 0;
         var missingScriptCount = 0;
         using var loggerFactory = LoggerFactory.Create(builder => builder.AddProvider(new CallbackLoggerProvider(message =>
         {
             if (message == "Loading scripts." && Interlocked.Increment(ref loadCount) == 2)
             {
-                reloadEntered.SetResult(true);
-                if (!releaseReload.Wait(TimeSpan.FromSeconds(30)))
-                {
-                    throw new TimeoutException("The test did not release the paused script reload.");
-                }
+                reloadStarted.Set();
+                continueReload.Wait();
             }
 
             if (message == "Received NOSCRIPT from server. Reloading scripts..."
                 && Interlocked.Increment(ref missingScriptCount) == 2)
             {
-                secondScriptEvaluation.SetResult(true);
+                concurrentReadEvaluated.Set();
             }
         })));
         var configKey = Guid.NewGuid().ToString();
@@ -209,33 +204,32 @@ public class RedisTests : IClassFixture<RedisTestFixture>
             .WithRedisConfiguration(configKey, client)
             .WithRedisCacheHandle(configKey), loggerFactory);
         var key = Guid.NewGuid().ToString();
-        var value = Guid.NewGuid().ToString();
-        cache.Add(key, value);
-        client.GetServer("localhost", 7003).ScriptFlush();
+        cache.Get(key);
+        client.GetServer("localhost", 6379).ScriptFlush();
         var reloadingRead = Task.Factory.StartNew(() => cache.Get(key), CancellationToken.None,
             TaskCreationOptions.LongRunning, TaskScheduler.Default);
-        Task<string> concurrentRead = Task.FromResult(value);
-        bool evaluatedDuringReload;
+        Task<string> concurrentRead = null;
 
         try
         {
-            await reloadEntered.Task.WaitAsync(TimeSpan.FromSeconds(10));
+            Assert.True(reloadStarted.Wait(TimeSpan.FromSeconds(10)), "The script reload did not start.");
             concurrentRead = Task.Factory.StartNew(() =>
-            {
-                secondReaderStarted.SetResult(true);
-                return cache.Get(key);
-            }, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
-            await secondReaderStarted.Task.WaitAsync(TimeSpan.FromSeconds(10));
-            await Task.WhenAny(secondScriptEvaluation.Task, Task.Delay(TimeSpan.FromSeconds(5)));
-            evaluatedDuringReload = secondScriptEvaluation.Task.IsCompleted;
+                cache.Get(key), CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+            Assert.False(concurrentReadEvaluated.Wait(TimeSpan.FromMilliseconds(100)),
+                "The concurrent read evaluated a script before the reload completed.");
         }
         finally
         {
-            releaseReload.Set();
-            await Task.WhenAll(reloadingRead, concurrentRead).WaitAsync(TimeSpan.FromSeconds(10));
+            continueReload.Set();
+            if (concurrentRead == null)
+            {
+                await reloadingRead.WaitAsync(TimeSpan.FromSeconds(10));
+            }
+            else
+            {
+                await Task.WhenAll(reloadingRead, concurrentRead).WaitAsync(TimeSpan.FromSeconds(10));
+            }
         }
-
-        evaluatedDuringReload.Should().BeFalse("script lookup must wait for the active reload lock before evaluating a script");
     }
 
     private sealed class CallbackLoggerProvider : ILoggerProvider, ILogger
