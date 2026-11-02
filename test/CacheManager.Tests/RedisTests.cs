@@ -9,6 +9,7 @@ using CacheManager.Core;
 using CacheManager.Core.Internal;
 using CacheManager.Redis;
 using FluentAssertions;
+using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
 using Xunit;
 using Xunit.Sdk;
@@ -171,6 +172,87 @@ public class RedisTests : IClassFixture<RedisTestFixture>
 
         Assert.False(cache1.Exists(testKey));
         Assert.False(cache2.Exists(testKey));
+    }
+
+    [Fact]
+    [Trait("category", "Redis")]
+    public async Task Redis_ConcurrentReadDuringScriptReload_WaitsForReload()
+    {
+        using var client = ConnectionMultiplexer.Connect("localhost:6379,allowAdmin=true");
+        using var reloadStarted = new ManualResetEventSlim();
+        using var continueReload = new ManualResetEventSlim();
+        using var concurrentReadEvaluated = new ManualResetEventSlim();
+        var loadCount = 0;
+        var missingScriptCount = 0;
+        using var loggerFactory = LoggerFactory.Create(builder => builder.AddProvider(new CallbackLoggerProvider(message =>
+        {
+            if (message == "Loading scripts." && Interlocked.Increment(ref loadCount) == 2)
+            {
+                reloadStarted.Set();
+                continueReload.Wait();
+            }
+
+            if (message == "Received NOSCRIPT from server. Reloading scripts..."
+                && Interlocked.Increment(ref missingScriptCount) == 2)
+            {
+                concurrentReadEvaluated.Set();
+            }
+        })));
+        var configKey = Guid.NewGuid().ToString();
+        using var cache = CacheFactory.Build<string>(settings => settings
+            .WithJsonSerializer()
+            .WithRedisConfiguration(configKey, client)
+            .WithRedisCacheHandle(configKey), loggerFactory);
+        var key = Guid.NewGuid().ToString();
+        cache.Get(key);
+        client.GetServer("localhost", 6379).ScriptFlush();
+        var reloadingRead = Task.Factory.StartNew(() => cache.Get(key), CancellationToken.None,
+            TaskCreationOptions.LongRunning, TaskScheduler.Default);
+        Task<string> concurrentRead = null;
+
+        try
+        {
+            Assert.True(reloadStarted.Wait(TimeSpan.FromSeconds(10)), "The script reload did not start.");
+            concurrentRead = Task.Factory.StartNew(() =>
+                cache.Get(key), CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+            Assert.False(concurrentReadEvaluated.Wait(TimeSpan.FromMilliseconds(100)),
+                "The concurrent read evaluated a script before the reload completed.");
+        }
+        finally
+        {
+            continueReload.Set();
+            if (concurrentRead == null)
+            {
+                await reloadingRead.WaitAsync(TimeSpan.FromSeconds(10));
+            }
+            else
+            {
+                await Task.WhenAll(reloadingRead, concurrentRead).WaitAsync(TimeSpan.FromSeconds(10));
+            }
+        }
+    }
+
+    private sealed class CallbackLoggerProvider : ILoggerProvider, ILogger
+    {
+        private readonly Action<string> _onMessage;
+
+        public CallbackLoggerProvider(Action<string> onMessage)
+        {
+            _onMessage = onMessage;
+        }
+
+        public ILogger CreateLogger(string categoryName) => this;
+
+        public IDisposable BeginScope<TState>(TState state) => null;
+
+        public bool IsEnabled(LogLevel logLevel) => true;
+
+        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
+            => _onMessage(formatter(state, exception));
+
+        public void Dispose()
+        {
+        }
     }
 
     [Fact]
